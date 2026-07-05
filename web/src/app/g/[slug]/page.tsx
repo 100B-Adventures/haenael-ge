@@ -1,7 +1,7 @@
 // g/[slug]/page.tsx — ② 친구 목표페이지 (공유 링크 타깃, 비로그인 SSR)
 // URL: /g/{slug} · goal_public 뷰 (금액 필드 부재) · RLS anon SELECT 허용.
 // DESIGN.md: GoalCard + CheerCount + Wordmap + 결제 CTA(자리만·비활성, 슬라이스 #5 연결).
-// 슬라이스 #4 실구현.
+// 슬라이스 #4 실구현. 슬라이스 #10: ReportButton 추가.
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,6 +10,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { GoalCard } from "@/components/goal/GoalCard";
 import { CheerCount } from "@/components/goal/CheerCount";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
+import { ReportButton } from "@/components/common/ReportButton";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -133,6 +134,15 @@ export default async function GoalPublicPage({ params }: Props) {
 
         {/* 최근 응원자 리스트 (있으면) — 슬라이스 #4 범위: 더미 없음, 실 데이터만 */}
         {/* 슬라이스 #5(결제) 완료 후 cheer SELECT RLS 조회 연결 */}
+
+        {/* 신고 버튼 (F7 — 게스트/비로그인 모두 가능) */}
+        <div className="mt-1 flex justify-end">
+          <ReportButton
+            targetType="GOAL"
+            targetId={goal.id!}
+            variant="text"
+          />
+        </div>
       </div>
 
       {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}

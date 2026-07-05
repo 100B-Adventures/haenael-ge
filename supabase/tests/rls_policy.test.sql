@@ -6,7 +6,7 @@
 
 BEGIN;
 
-SELECT plan(20);
+SELECT plan(27);
 
 -- =========================================================================
 -- 픽스처 설정 (postgres = superuser, RLS bypass)
@@ -310,6 +310,127 @@ SELECT is(
    WHERE member_id = 'aaaaaaaa-0000-0000-0000-000000000001'),
   200,
   '트리거: clover_ledger INSERT 후 clover_balance 동기화됨'
+);
+
+-- =========================================================================
+-- 완료
+-- =========================================================================
+
+-- =========================================================================
+-- 슬라이스 #10: 신고(report) RLS — INSERT 허용·SELECT 차단
+-- =========================================================================
+
+-- report INSERT: anon 가능 (report_insert_any 정책)
+SET LOCAL ROLE anon;
+
+SELECT lives_ok(
+  $$INSERT INTO report (target_type, target_id, reason)
+    VALUES ('GOAL', 1, 'anon 신고 테스트')$$,
+  '#10-R1a: anon은 report에 INSERT 가능 (report_insert_any 정책)'
+);
+
+RESET ROLE;
+
+-- report INSERT: authenticated 가능
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"aaaaaaaa-0000-0000-0000-000000000001","iss":"supabase-demo"}',
+  true
+);
+
+SELECT lives_ok(
+  $$INSERT INTO report (target_type, target_id, reason, reporter_ref)
+    VALUES ('CHEER', 1, '인증 유저 신고 테스트', 'aaaaaaaa-0000-0000-0000-000000000001')$$,
+  '#10-R1b: authenticated는 report에 INSERT 가능'
+);
+
+RESET ROLE;
+
+-- report SELECT: anon 불가 (정책 없음 = 차단)
+SET LOCAL ROLE anon;
+
+SELECT throws_ok(
+  $$SELECT * FROM report$$,
+  '42501',
+  NULL,
+  '#10-R1c: anon은 report SELECT 불가 (운영자 전용)'
+);
+
+RESET ROLE;
+
+-- report SELECT: authenticated 불가 (정책 없음 = 차단)
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"aaaaaaaa-0000-0000-0000-000000000001","iss":"supabase-demo"}',
+  true
+);
+
+SELECT throws_ok(
+  $$SELECT * FROM report$$,
+  '42501',
+  NULL,
+  '#10-R1d: authenticated는 report SELECT 불가 (service_role 전용)'
+);
+
+RESET ROLE;
+
+-- =========================================================================
+-- 슬라이스 #10: cheer soft-delete → get_wordmap 제외 검증
+-- =========================================================================
+
+-- goal 픽스처에서 goal-a-live의 id를 확인해 cheer 삽입
+-- cheer.payment_id NOT NULL → payment 픽스처 먼저 삽입 (postgres=service_role)
+DO $$
+DECLARE
+  v_goal_id   bigint;
+  v_payment1  bigint;
+  v_payment2  bigint;
+BEGIN
+  SELECT id INTO v_goal_id FROM goal WHERE slug = 'goal-a-live' LIMIT 1;
+
+  -- payment 픽스처 2건 (서비스롤 직접 삽입)
+  INSERT INTO payment (order_id, amount_krw, status, pg_customer_key)
+  VALUES ('test-order-del-001', 5000, 'DONE', 'ANONYMOUS')
+  RETURNING id INTO v_payment1;
+
+  INSERT INTO payment (order_id, amount_krw, status, pg_customer_key)
+  VALUES ('test-order-live-001', 5000, 'DONE', 'ANONYMOUS')
+  RETURNING id INTO v_payment2;
+
+  -- 삭제된 cheer (message 있음, deleted_at 설정)
+  INSERT INTO cheer (goal_id, payment_id, is_anonymous, clover_amount, status, message, deleted_at)
+  VALUES (v_goal_id, v_payment1, false, 1, 'CONFIRMED', '삭제된응원메시지', now());
+
+  -- 살아있는 cheer (message 있음)
+  INSERT INTO cheer (goal_id, payment_id, is_anonymous, clover_amount, status, message, deleted_at)
+  VALUES (v_goal_id, v_payment2, false, 1, 'CONFIRMED', '살아있는응원메시지', NULL);
+END $$;
+
+-- get_wordmap RPC: 삭제된 cheer 메시지 제외 확인
+SELECT is(
+  (SELECT count(*)::integer
+   FROM get_wordmap((SELECT id FROM goal WHERE slug = 'goal-a-live' LIMIT 1))
+   WHERE word = '삭제된응원메시지'),
+  0,
+  '#10-SD1: soft-deleted cheer 메시지는 get_wordmap에서 제외됨'
+);
+
+-- get_wordmap RPC: 살아있는 cheer 메시지 포함 확인
+SELECT is(
+  (SELECT count(*)::integer
+   FROM get_wordmap((SELECT id FROM goal WHERE slug = 'goal-a-live' LIMIT 1))
+   WHERE word = '살아있는응원메시지'),
+  1,
+  '#10-SD2: 활성 cheer 메시지는 get_wordmap에 포함됨'
+);
+
+-- goal soft-delete 후 goal_public 제외 (이미 goal-a-deleted로 검증됨, 추가 확인)
+SELECT is(
+  (SELECT count(*)::integer FROM goal_public WHERE slug = 'goal-a-deleted'),
+  0,
+  '#10-SD3: soft-deleted goal은 goal_public에서 제외됨 (기존 케이스 재확인)'
 );
 
 -- =========================================================================

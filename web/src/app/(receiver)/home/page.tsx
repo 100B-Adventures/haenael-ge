@@ -3,12 +3,14 @@
 // DESIGN.md §6 금액 3층 b: 클로버 개수(🍀 N개)만, ₩ 환산 X.
 // wireframe: docs/WIREFRAMES/receiver-home.html + wordmap-share.html (1. 내 목표 홈).
 // 단일 CTA: "워드맵 보기" → /wordmap/{goalId}.
+// 슬라이스 #10: NotificationBadge 통합.
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import { CheerCount } from "@/components/goal/CheerCount";
+import { NotificationBadge } from "@/components/common/NotificationBadge";
 
 // ─── 응원자 행 ─────────────────────────────────────────────────────────────────
 
@@ -145,14 +147,7 @@ export default async function ReceiverHomePage() {
           >
             해낼게<span style={{ color: "#1F9E5A" }}>.</span>
           </p>
-          <button
-            type="button"
-            aria-label="알림"
-            data-testid="notification-bell"
-            style={{ fontSize: 18 }}
-          >
-            🔔
-          </button>
+          <NotificationBadge />
         </div>
 
         {/* 목표 제목 */}
