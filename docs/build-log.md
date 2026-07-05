@@ -320,3 +320,103 @@ Route: / ○ Static, /g/[slug] ƒ Dynamic, /onboarding ƒ Dynamic
 - 인스타 스토리 링크 스티커
 
 ---
+
+## 슬라이스 #9 — 워드맵 풀뷰 + 공유(확산 고리) (완료 2026-07-06)
+
+### 무엇을 세웠나
+
+| 레이어 | 파일 | 내용 |
+|---|---|---|
+| Migration | `supabase/migrations/20260706000000_wordmap_storage.sql` | `wordmap-images` Storage 버킷 + service_role upload/update + 공개 select 정책 |
+| EF | `supabase/functions/wordmap-render/index.ts` | G6: 소유자 인증→get_wordmap RPC→SVG 생성(800×500, 16위치 word cloud)→Storage upsert→wordmap_render_cache 갱신→imageUrl 반환 |
+| Component | `web/src/components/goal/WordmapShareIcons.tsx` | 아이콘 3종(이미지 저장·인스타 공유·링크 복사). S1: share_event INSERT(IMAGE/STORY/LINK). SVG→PNG Canvas 변환. Web Share API 폴백. Toast 내장. |
+| Test | `web/src/components/goal/__tests__/WordmapShareIcons.test.tsx` | 8 vitest 케이스 |
+| Page | `web/src/app/(receiver)/wordmap/[goalId]/page.tsx` | 소유자 인증→goal G3→get_wordmap G5→cheer count→WordmapFullView+WordmapShareIcons 렌더 |
+| Page | `web/src/app/(receiver)/home/page.tsx` | 소유자 인증→goal G3→clover balance K1(🍀개수만, ₩ X)→cheer 목록(이름/익명, 금액 X)→워드맵 미니 프리뷰→"워드맵 보기" 단일 CTA |
+| E2E | `web/e2e/wordmap-share.spec.ts` | 비인증 /home redirect, 비인증 /wordmap/* redirect, 실 DB(E2E_GOAL_ID 조건부) |
+
+### 금액 3층 준수 증거
+- 받는사람 홈(`/home`): 🍀 N개 표시, ₩ 없음. 환전 버튼 disabled(슬라이스 #8).
+- 워드맵 풀뷰: cheer count만, 금액 0건.
+- `WordmapShareIcons` vitest: 금액 비노출 어설션 GREEN.
+
+### 검증 증거 (§3 직접 관찰)
+
+#### supabase db push + pgTAP
+```
+Applying migration 20260706000000_wordmap_storage.sql... Finished.
+/supabase/tests/rls_policy.test.sql .. ok
+Files=1, Tests=20,  Result: PASS
+```
+
+#### EF smoke (wordmap-render)
+```
+OPTIONS  → HTTP 204 (CORS) ✅
+POST {}  → HTTP 401 {"error":{"code":"unauthorized"}} ✅
+```
+
+#### Next.js build
+```
+▲ Next.js 16.2.10 (Turbopack)
+✓ Compiled successfully in 5.1s
+✓ Generating static pages using 15 workers (13/13)
+Route: /home ƒ Dynamic, /wordmap/[goalId] ƒ Dynamic
+TypeScript 오류 0건, 빌드 PASS
+```
+
+#### vitest 46 PASS
+```
+✓ src/lib/utils/__tests__/draft.test.ts (4)
+✓ src/components/goal/__tests__/CheerCount.test.tsx (4)
+✓ src/components/goal/__tests__/Wordmap.test.tsx (5)
+✓ src/components/goal/__tests__/GoalCard.test.tsx (14)
+✓ src/components/auth/__tests__/LoginSheet.test.tsx (11)
+✓ src/components/goal/__tests__/WordmapShareIcons.test.tsx (8)
+Tests: 46 passed, Duration: ~4.5s
+```
+
+#### E2E Playwright (wordmap-share.spec.ts)
+```
+✓ 비인증 /home → / redirect
+✓ 비인증 /wordmap/1 → / redirect
+✓ goal page: 역할전환 링크 항상 노출
+✓ home: 비인증 접근 → / redirect
+- 2 skipped (E2E_GOAL_ID 미설정, 조건부 정상)
+4 passed, 2 skipped (9.0s)
+```
+
+### 게이트 체크
+
+| 게이트 | 상태 |
+|---|---|
+| web/ Next.js build PASS | ✅ |
+| TypeScript 오류 0건 | ✅ |
+| vitest 46 PASS (+8 신규) | ✅ |
+| E2E 4 PASS (2 skip — 조건부 정상) | ✅ |
+| pgTAP 20 GREEN | ✅ |
+| wordmap_render_cache INSERT RLS (service_role EF) | ✅ |
+| share_event INSERT RLS (authenticated 소유자) | ✅ |
+| 금액 3층 b 준수 (🍀 개수만, ₩ X) | ✅ |
+| 시크릿 실값 git 없음 | ✅ |
+| @postagi/* import 없음 | ✅ |
+| 포트 충돌 없음 | ✅ |
+
+### 포트/URL
+
+| 서비스 | URL |
+|---|---|
+| web dev | http://localhost:3001 |
+| 받는사람 홈 | http://localhost:3001/home |
+| 워드맵 풀뷰 | http://localhost:3001/wordmap/{goalId} |
+| EF wordmap-render | http://127.0.0.1:54321/functions/v1/wordmap-render |
+
+### ⛔ 회수 필요
+1. **실 카카오 로그인 후 E2E 전구간 검증**: `E2E_GOAL_ID` 세팅 후 wordmap-share.spec.ts 조건부 테스트 재실행 필요. 실 카카오 키 없어 세션 주입 불가 → 슬라이스 #3 ⛔와 동일.
+2. **wordmap-images 버킷 RLS 확인**: 로컬 Storage API에서 service_role 업로드 실 확인 필요(EF 실구동 시 카카오 세션 필요).
+
+### 다음 슬라이스 (#10)
+- EF `notify` (카카오 알림톡 + INAPP 폴백)
+- EF `report` (신고 접수)
+- NotificationBadge, ReportButton 컴포넌트
+
+---
