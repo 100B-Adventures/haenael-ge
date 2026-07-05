@@ -152,3 +152,96 @@ Result: PASS
 | 시크릿 실값 git 없음 | ✅ |
 
 ---
+
+## 슬라이스 #3 — Auth (카카오 로그인) (완료 2026-07-06)
+
+### 범위
+- `supabase/functions/_shared/oauth-kakao.ts` — 카카오 OAuth 어댑터 실구현 (exchangeKakaoCode·getKakaoUserInfo·normalizeKakaoUser)
+- `supabase/functions/auth-kakao/index.ts` — EF 실구현 (code→token→user→Auth upsert→member upsert→generateLink)
+- `supabase/functions/auth-kakao/index.test.ts` — Deno 단위 테스트 (normalizeKakaoUser·KakaoAuthError)
+- `supabase/migrations/20260705170046_service_role_grants.sql` — service_role 테이블 GRANT 패치
+- `web/src/app/auth/kakao/callback/route.ts` — Route Handler 실구현 (code→EF invoke→verifyOtp→세션→redirect)
+- `web/src/lib/supabase/route-handler.ts` — Route Handler용 Supabase 클라이언트 (response.cookies 바인딩)
+- `web/src/components/auth/LoginSheet.tsx` — write-first 바텀시트 (카카오 primary·구글·애플·draft 보존 안내)
+- `web/src/components/auth/index.ts` — barrel export
+- `web/vitest.config.ts` + `web/src/test/setup.ts` — vitest + RTL 설정
+- `web/src/components/auth/__tests__/LoginSheet.test.tsx` — 11 케이스 vitest
+
+### 검증 결과 (§3 직접 관찰)
+
+#### web/ Next.js build + TypeScript
+```
+▲ Next.js 16.2.10 (Turbopack)
+✓ Compiled successfully in 4.6s
+Finished TypeScript in 6.6s
+TypeScript 오류 0건, 빌드 PASS
+```
+
+#### vitest — LoginSheet 11케이스
+```
+Tests  11 passed (11)
+Duration  4.26s — warning 없음 PASS
+```
+테스트 커버리지:
+- open=false 미렌더링 / open=true 렌더링
+- 카카오·구글·애플 버튼 존재
+- goalTitle 표시 (draft 안심)
+- 오버레이·ESC 닫기 (onClose 호출)
+- 카카오 클릭 → Kakao OAuth URL (client_id·callback·state 포함)
+- 약관/개인정보 링크
+
+#### EF auth-kakao smoke test (supabase functions serve)
+```
+OPTIONS preflight → HTTP 204 (CORS) ✅
+GET         → HTTP 405 {"error":{"code":"method_not_allowed"}} ✅
+POST {}     → HTTP 503 {"error":{"code":"missing_env","message":"KAKAO_CLIENT_ID..."}} ✅
+```
+
+#### pgTAP 실검증 (20케이스 — 신규 마이그레이션 후)
+```
+Files=1, Tests=20, Result: PASS
+```
+
+#### RLS 세션 게이팅 — 로그인 유저만 자기 데이터 접근 (직접 관찰)
+```
+1. service_role: auth user 생성 → user_id 발급 ✅
+2. service_role: member INSERT → HTTP 201 ✅ (grants 패치 적용)
+3. magiclink generateLink → hashed_token ✅
+4. verifyOtp → access_token 발급 ✅
+5. 자기 세션: member SELECT → 1행 [자기 데이터] ✅
+6. anon: member SELECT → HTTP 403 {"code":"42501","message":"permission denied"} ✅
+```
+
+### 게이트 체크
+
+| 게이트 | 상태 |
+|---|---|
+| web/ Next.js build PASS (TypeScript 0건) | ✅ |
+| vitest 11케이스 PASS | ✅ |
+| EF smoke test (405/204/503) | ✅ |
+| pgTAP 20케이스 GREEN (신규 마이그레이션 후) | ✅ |
+| RLS 세션 게이팅 직접 관찰 | ✅ |
+| service_role GRANT 패치 (INSERT on member) | ✅ |
+| 시크릿 실값 git 없음 (env placeholder만) | ✅ |
+| @postagi/* import 없음 | ✅ |
+| 포트 충돌 없음 | ✅ |
+
+### ⛔ 회수 필요 (카카오 실키 — 회장 액션)
+
+1. **카카오 디벨로퍼 앱 생성 필수**: [developers.kakao.com](https://developers.kakao.com) → 앱 생성
+   - **REST API 키** → `NEXT_PUBLIC_KAKAO_REST_API_KEY` (web/.env.local)
+   - **REST API 키** → `KAKAO_CLIENT_ID` (Edge Function secret: `supabase secrets set KAKAO_CLIENT_ID=...`)
+   - **앱 시크릿 키** → `KAKAO_CLIENT_SECRET` (Edge Function secret: `supabase secrets set KAKAO_CLIENT_SECRET=...`)
+2. **카카오 로그인 redirect URI 등록**: `https://{your-domain}/auth/kakao/callback` (+ 로컬: `http://localhost:3000/auth/kakao/callback`)
+3. **동의항목 설정**: 닉네임, 프로필사진, 카카오계정(이메일) 선택 동의
+4. **실 E2E 검증**: 실 키 설정 후 → 브라우저에서 카카오 로그인 → member 행 생성 → 세션 쿠키 확인 → `/home` 리다이렉트
+
+> 미검증 항목: 실 카카오 로그인 E2E (키 없이 불가). 키 발급 후 위 4번 직접 확인 필요.
+
+### 다음 슬라이스 (#4)
+- OnboardingGoalForm (write-first: 목표쓰기 → 저장 시 LoginSheet)
+- ShareLinkCard (내 링크 받기)
+- 랜딩 파이널 (WIREFRAMES/01-landing.md)
+- goal INSERT G1 + RLS
+
+---
