@@ -49,38 +49,65 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* ─── DESIGN.md 토큰 (single source of truth) ─── */
+  /* surface */
+  --background:   #FBFAF7;   /* warm paper bg  */
+  --foreground:   #16140F;   /* --ink           */
+  --card:         #FFFFFF;   /* --surface       */
+  --card-foreground: #16140F;
+  --popover:      #FFFFFF;
+  --popover-foreground: #16140F;
+
+  /* brand — clover green */
+  --primary:      #1B8A4F;   /* --clover        */
+  --primary-foreground: #FFFFFF;
+
+  /* secondary / muted / accent → warm tint */
+  --secondary:    #F4EFE6;   /* --warm          */
+  --secondary-foreground: #16140F;
+  --muted:        #F4EFE6;   /* --warm          */
+  --muted-foreground: #6F6A60; /* --muted text   */
+  --accent:       #E7F4EC;   /* --clover-soft   */
+  --accent-foreground: #14613A; /* --clover-ink  */
+
+  /* state */
+  --destructive:  #D9483B;   /* --danger        */
+
+  /* border / input */
+  --border:       #E8E4DC;   /* --line          */
+  --input:        #E8E4DC;
+  --ring:         #1B8A4F;   /* clover for focus ring */
+
+  /* radius — DESIGN.md §3.4: sm=12 md=14 lg=20 full */
+  --radius: 0.875rem;        /* 14px = md base  */
+
+  /* DESIGN.md custom vars (direct access in inline styles) */
+  --clover:        #1B8A4F;
+  --clover-bright: #1F9E5A;
+  --clover-soft:   #E7F4EC;
+  --clover-ink:    #14613A;
+  --warm:          #F4EFE6;
+  --ink:           #16140F;
+  --muted-color:   #6F6A60;
+  --faint:         #9C968B;
+  --line:          #E8E4DC;
+  --danger:        #D9483B;
+  --danger-soft:   #FBEAE7;
+
+  /* chart/sidebar (shadcn internal, not used in product UI) */
+  --chart-1: #1B8A4F;
+  --chart-2: #1F9E5A;
+  --chart-3: #E7F4EC;
+  --chart-4: #F4EFE6;
+  --chart-5: #6F6A60;
+  --sidebar: #FBFAF7;
+  --sidebar-foreground: #16140F;
+  --sidebar-primary: #1B8A4F;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F4EFE6;
+  --sidebar-accent-foreground: #16140F;
+  --sidebar-border: #E8E4DC;
+  --sidebar-ring: #1B8A4F;
 }
 
 .dark {

@@ -245,3 +245,78 @@ Files=1, Tests=20, Result: PASS
 - goal INSERT G1 + RLS
 
 ---
+
+## 슬라이스 #4 — 목표 작성 + 목표 페이지 + read 플로우 (완료 2026-07-06)
+
+### 무엇을 세웠나
+
+| 레이어 | 파일 | 내용 |
+|---|---|---|
+| CSS 토큰 | `web/src/app/globals.css` | DESIGN.md 토큰 전체 적용(clover green·warm paper·ink·muted·faint·line·danger) — shadcn CSS var 매핑 |
+| Draft util | `web/src/lib/utils/draft.ts` | 필드명 DB 정합(reason·due_date). savePendingSlug/loadPendingSlug 추가 |
+| Component | `web/src/components/goal/DdayChip.tsx` | D-{n}/D-day/D+{n} 뱃지 + StatusChip(ACTIVE·CLOSED·DELETED) |
+| Component | `web/src/components/goal/GoalCard.tsx` | 아바타·이름·목표제목·D-day·StatusChip·WHY 섹션. 금액 절대 비노출 |
+| Component | `web/src/components/goal/CheerCount.tsx` | "N명이 조용히 응원했어요" (금액 3층 a 준수). AvatarStack |
+| Component | `web/src/components/goal/Wordmap.tsx` | get_wordmap RPC 데이터 → 결정론적 위치 배열·size tier(s1/s2/s3). empty 상태 내장 |
+| Component | `web/src/components/goal/ShareLinkCard.tsx` | 링크 복사(clipboard API+fallback)·인스타 가이드·내 목표 바로가기 |
+| Component | `web/src/components/receiver/OnboardingGoalForm.tsx` | write-first 완전 구현: 폼→draft→LoginSheet→자동저장→ShareLinkCard. Zustand 연동 |
+| Page | `web/src/app/page.tsx` | landing-final.html 진실원 반영. 워드맵 프리뷰·궁금증 갭·3스텝·primary CTA |
+| Page | `web/src/app/(receiver)/onboarding/page.tsx` | 서버 컴포넌트: getUser → OnboardingGoalForm(initialUser) |
+| Page | `web/src/app/g/[slug]/page.tsx` | SSR: goal_public 뷰 + get_wordmap RPC. GoalCard+CheerCount+Wordmap+disabled CTA("곧") |
+| Page | `web/src/app/g/[slug]/not-found.tsx` | 404: 친절한 안내 + "내 목표 만들기" CTA |
+| Playwright | `web/playwright.config.ts` + `web/e2e/goal-flow.spec.ts` | E2E 10 happy + 4 skipped(E2E_GOAL_SLUG 필요) |
+
+### 검증 — 실기동 증거 (§3 직접 관찰)
+
+#### vitest 38 PASS
+```
+✓ src/lib/utils/__tests__/draft.test.ts (4)
+✓ src/components/goal/__tests__/CheerCount.test.tsx (4)
+✓ src/components/goal/__tests__/Wordmap.test.tsx (5)
+✓ src/components/goal/__tests__/GoalCard.test.tsx (14)
+✓ src/components/auth/__tests__/LoginSheet.test.tsx (11)
+Tests: 38 passed, Duration: ~4s
+```
+
+#### tsc --noEmit: PASS (오류 0)
+
+#### next build: PASS
+```
+✓ Compiled successfully in 5.2s
+✓ Generating static pages (13/13) in 606ms
+Route: / ○ Static, /g/[slug] ƒ Dynamic, /onboarding ƒ Dynamic
+```
+
+#### Playwright E2E (로컬 dev 서버 + Supabase local, E2E_GOAL_SLUG=7druulwd)
+```
+14 passed (14.7s)
+- landing: CTA 렌더·클릭→onboarding
+- onboarding: 폼 렌더·빈title 에러·에러해소·미인증LoginSheet·ESC닫기
+- goal page: not-found·홈링크
+- goal page(실DB): 비로그인열람·금액비노출·CTA비활성("곧")·role-transition
+```
+
+#### 브라우저 직접 관찰 (§3 실증거)
+- `localhost:3001/` — 랜딩: 해낼게. 브랜드·워드맵 프리뷰·시작하기 CTA RENDERED
+- `localhost:3001/onboarding` — 폼: 목표입력·날짜·이유·저장버튼 RENDERED
+- `localhost:3001/g/7druulwd` — 목표페이지: GoalCard("편입 평점 4.0 해낼게")·D-179·WHY·워드맵 empty("아직 아무도 없어요")·비활성 CTA("조용히 밀어줄게"+"곧") RENDERED
+
+#### 금액 3층 규칙 준수 검증
+- ② 페이지 텍스트에 ₩·원화금액·클로버개수 없음 (E2E 자동검증 PASS)
+- goal_public 뷰: cheer_count 필드만 (₩ 컬럼 부재)
+
+### 포트/URL
+| 서비스 | URL |
+|---|---|
+| web dev | http://localhost:3001 |
+| 목표 페이지 | http://localhost:3001/g/{slug} |
+| 온보딩 | http://localhost:3001/onboarding |
+| Supabase API | http://127.0.0.1:54321 |
+| Supabase Studio | http://127.0.0.1:54323 |
+
+### 다음 슬라이스 (#9)
+- wordmap/share 공유 확산 고리
+- 워드맵 공유 이미지 생성 (EF `wordmap-render`)
+- 인스타 스토리 링크 스티커
+
+---
