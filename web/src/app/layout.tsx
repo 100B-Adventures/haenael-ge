@@ -1,0 +1,45 @@
+// layout.tsx — 루트 레이아웃: Pretendard·Toaster(Sonner)
+// folder-structure.md: "루트: Pretendard·토큰·Toaster(Sonner)"
+
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import { Toaster } from "sonner";
+import "./globals.css";
+
+// Pretendard Variable — 한국어 웹 표준 가변 폰트
+// 소스: npm pretendard → public/fonts/PretendardVariable.woff2
+const pretendard = localFont({
+  src: "../../public/fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  weight: "100 900",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "해낼게 — 응원은 돈으로 하는 겁니다",
+  description:
+    "친구의 목표에 조용히 클로버로 응원하세요. 응원이 쌓이면 예쁜 워드맵이 됩니다.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app",
+  ),
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    siteName: "해낼게",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]">
+        {children}
+        <Toaster richColors position="top-center" />
+      </body>
+    </html>
+  );
+}
