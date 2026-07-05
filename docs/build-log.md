@@ -73,3 +73,82 @@ TypeScript 오류 0건, 빌드 PASS.
 - pgTAP RLS 정책 실검증
 
 ---
+
+## 슬라이스 #2 — Migration + RLS + pgTAP (완료 2026-07-06)
+
+### 범위
+- `supabase/migrations/20260705163137_init_schema.sql` — 14테이블 스키마 + 뷰 + 트리거 + RLS + 인덱스
+- `supabase/tests/rls_policy.test.sql` — pgTAP 20케이스 RLS 실검증
+- `web/src/lib/supabase/database.types.ts` — 타입 재생성 (851줄)
+
+### 생성 테이블 (14개)
+
+| # | 테이블 | 역할 | 핵심 |
+|---|---|---|---|
+| 1 | `member` | 주인공 계정 | auth.users 1:1 FK, ci=bytea 암호화 |
+| 2 | `goal` | 목표 액자 | slug UNIQUE, deleted_at soft-delete |
+| 3 | `payment` | 토스 결제 | order_id UNIQUE(멱등키), service_role만 write |
+| 4 | `cheer` | 응원 1건 | deleted_at soft-delete, message=워드맵 소스 |
+| 5 | `payment_log` | 결제 상태전이 | append-only 감사 로그 |
+| 6 | `clover_ledger` | 클로버 원장 | append-only, source of truth, service_role만 write |
+| 7 | `clover_balance` | 잔액 캐시 | 트리거로 clover_ledger 동기화 |
+| 8 | `cashout_request` | 환전 요청 | ₩ 금액은 여기만(3층 c), account_no_enc=bytea |
+| 9 | `kyc_verification` | PASS 본인인증 | ci/di=bytea, is_adult 환전 게이트 |
+| 10 | `risk_event` | 이상거래 | ACCEPTED-RISK MVP 미사용, 스키마만 |
+| 11 | `share_event` | 재공유 analytics | channel CHECK(IMAGE/STORY/LINK) |
+| 12 | `wordmap_render_cache` | 이미지 캐시 | Storage URL |
+| 13 | `notification` | 알림 | ALIMTALK+INAPP, 실패시 폴백 |
+| 14 | `report` | 신고 | INSERT 개방(게스트), SELECT=service_role 전용 |
+
+### 생성 뷰·함수·트리거
+
+| 객체 | 역할 |
+|---|---|
+| `goal_public` (VIEW) | 금액 3층 a: ₩·clover_count 컬럼 없음, deleted_at IS NULL 필터 |
+| `get_wordmap(bigint)` (RPC) | G5 워드맵 집계, SECURITY DEFINER |
+| `generate_goal_slug()` (트리거) | goal.slug 자동 생성(gen_random_bytes) |
+| `sync_clover_balance()` (트리거) | clover_ledger INSERT 시 clover_balance 동기화 |
+
+### pgTAP 실검증 결과
+
+```
+supabase test db
+/supabase/tests/rls_policy.test.sql .. ok
+All tests successful.
+Files=1, Tests=20,  0 wallclock secs
+Result: PASS
+```
+
+| 케이스 | test-plan | 결과 |
+|---|---|---|
+| goal_public에 amount_krw/clover_count/gross_krw/fee_krw/net_krw 없음 (5건) | SEC-2 금액 3층 a | GREEN |
+| goal_public에 cheer_count 있음 | SEC-2 | GREEN |
+| deleted_at 있는 목표 goal_public 제외 | Soft-delete | GREEN |
+| 활성 목표 goal_public 조회됨 | — | GREEN |
+| anon은 payment INSERT 불가 (42501) | SEC-3 | GREEN |
+| authenticated는 clover_ledger INSERT 불가 (42501) | SEC-3 원장 변조 불가 | GREEN |
+| authenticated는 payment INSERT 불가 (42501) | SEC-3 | GREEN |
+| 사용자A는 사용자B의 clover_balance 조회 불가 (0행) | SEC-4 | GREEN |
+| 사용자A는 자신의 clover_balance 조회 가능 (1행) | — | GREEN |
+| 사용자A는 사용자B의 cashout_request 조회 불가 (0행) | SEC-4 | GREEN |
+| 사용자A는 사용자B의 goal 직접조회 불가 (0행) | SEC-4 | GREEN |
+| 사용자A는 자신의 활성 goal 조회 가능 (1행) | — | GREEN |
+| anon은 clover_balance SELECT 불가 (42501) | SEC-1 | GREEN |
+| anon은 cashout_request SELECT 불가 (42501) | SEC-1 | GREEN |
+| anon은 goal_public 활성 목표 조회 가능 | — | GREEN |
+| clover_ledger INSERT 시 clover_balance 트리거 동기화 | — | GREEN |
+
+### 게이트 체크
+
+| 게이트 | 상태 |
+|---|---|
+| supabase db push PASS | ✅ |
+| pgTAP 20케이스 GREEN (실 Postgres, mock 없음) | ✅ |
+| ERD 1:1 (14테이블) | ✅ |
+| RLS 금액 3층 강제 (뷰 + 정책) | ✅ |
+| clover_ledger/payment INSERT 정책 없음(service_role EF 전용) | ✅ |
+| soft-delete deleted_at 반영 | ✅ |
+| web/ TypeScript 오류 0건 | ✅ |
+| 시크릿 실값 git 없음 | ✅ |
+
+---
