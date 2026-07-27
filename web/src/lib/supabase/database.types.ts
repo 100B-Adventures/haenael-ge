@@ -102,8 +102,9 @@ export type Database = {
           goal_id: number
           id: number
           is_anonymous: boolean
+          is_welcome: boolean
           message: string | null
-          payment_id: number
+          payment_id: number | null
           status: Database["public"]["Enums"]["cheer_status_enum"]
           supporter_ci: string | null
         }
@@ -115,8 +116,9 @@ export type Database = {
           goal_id: number
           id?: never
           is_anonymous?: boolean
+          is_welcome?: boolean
           message?: string | null
-          payment_id: number
+          payment_id?: number | null
           status?: Database["public"]["Enums"]["cheer_status_enum"]
           supporter_ci?: string | null
         }
@@ -128,8 +130,9 @@ export type Database = {
           goal_id?: number
           id?: never
           is_anonymous?: boolean
+          is_welcome?: boolean
           message?: string | null
-          payment_id?: number
+          payment_id?: number | null
           status?: Database["public"]["Enums"]["cheer_status_enum"]
           supporter_ci?: string | null
         }
@@ -315,6 +318,54 @@ export type Database = {
           },
         ]
       }
+      lead: {
+        Row: {
+          campaign: string | null
+          consented_at: string
+          content: string | null
+          created_at: string
+          email: string | null
+          id: number
+          instagram_handle: string | null
+          landing_path: string | null
+          medium: string | null
+          referrer: string | null
+          source: string
+          status: string
+          submitter_hash: string | null
+        }
+        Insert: {
+          campaign?: string | null
+          consented_at: string
+          content?: string | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          instagram_handle?: string | null
+          landing_path?: string | null
+          medium?: string | null
+          referrer?: string | null
+          source?: string
+          status?: string
+          submitter_hash?: string | null
+        }
+        Update: {
+          campaign?: string | null
+          consented_at?: string
+          content?: string | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          instagram_handle?: string | null
+          landing_path?: string | null
+          medium?: string | null
+          referrer?: string | null
+          source?: string
+          status?: string
+          submitter_hash?: string | null
+        }
+        Relationships: []
+      }
       member: {
         Row: {
           birth_date: string | null
@@ -399,40 +450,52 @@ export type Database = {
         Row: {
           amount_krw: number
           approved_at: string | null
+          cancel_reconcile_required_at: string | null
           created_at: string
           id: number
           method: string | null
           order_id: string
+          partial_cancel_reviewed_at: string | null
           payment_key: string | null
           pg_customer_key: string
           raw_response: Json | null
           receipt_url: string | null
+          request_fingerprint: Json | null
+          request_key: string | null
           status: Database["public"]["Enums"]["payment_status_enum"]
         }
         Insert: {
           amount_krw: number
           approved_at?: string | null
+          cancel_reconcile_required_at?: string | null
           created_at?: string
           id?: never
           method?: string | null
           order_id: string
+          partial_cancel_reviewed_at?: string | null
           payment_key?: string | null
           pg_customer_key?: string
           raw_response?: Json | null
           receipt_url?: string | null
+          request_fingerprint?: Json | null
+          request_key?: string | null
           status?: Database["public"]["Enums"]["payment_status_enum"]
         }
         Update: {
           amount_krw?: number
           approved_at?: string | null
+          cancel_reconcile_required_at?: string | null
           created_at?: string
           id?: never
           method?: string | null
           order_id?: string
+          partial_cancel_reviewed_at?: string | null
           payment_key?: string | null
           pg_customer_key?: string
           raw_response?: Json | null
           receipt_url?: string | null
+          request_fingerprint?: Json | null
+          request_key?: string | null
           status?: Database["public"]["Enums"]["payment_status_enum"]
         }
         Relationships: []
@@ -656,6 +719,72 @@ export type Database = {
       }
     }
     Functions: {
+      capture_lead: {
+        Args: {
+          p_campaign: string
+          p_consented_at: string
+          p_content: string
+          p_email: string
+          p_instagram_handle: string
+          p_landing_path: string
+          p_medium: string
+          p_referrer: string
+          p_source: string
+          p_submitter_hash: string
+        }
+        Returns: {
+          is_duplicate: boolean
+          lead_id: number
+        }[]
+      }
+      clover_eligibility: {
+        Args: { p_member_id: string }
+        Returns: {
+          min_cashout_clover: number
+          payable_amount: number
+          reached_threshold: boolean
+          total_balance: number
+          welcome_amount: number
+        }[]
+      }
+      confirm_cheer_payment: {
+        Args: {
+          p_amount_krw: number
+          p_approved_at: string
+          p_method: string
+          p_order_id: string
+          p_payment_key: string
+          p_raw_response: Json
+          p_receipt_url: string
+        }
+        Returns: {
+          cheer_id: number
+          display_name: string
+          goal_title: string
+          member_id: string
+          payment_id: number
+        }[]
+      }
+      create_cheer_order: {
+        Args: {
+          p_amount_krw: number
+          p_clover_amount: number
+          p_display_name: string
+          p_goal_id: number
+          p_is_anonymous: boolean
+          p_message: string
+          p_order_id: string
+          p_pg_customer_key: string
+          p_request_key?: string
+        }
+        Returns: {
+          cheer_id: number
+          is_replay: boolean
+          order_id: string
+          payment_id: number
+        }[]
+      }
+      expire_stale_cheer_payments: { Args: never; Returns: number }
       get_wordmap: {
         Args: { p_goal_id: number }
         Returns: {
@@ -663,6 +792,53 @@ export type Database = {
           word_count: number
         }[]
       }
+      update_goal: {
+        Args: {
+          p_due_date: string
+          p_goal_id: number
+          p_reason: string | null
+          p_title: string
+        }
+        Returns: Database["public"]["Tables"]["goal"]["Row"]
+      }
+      min_cashout_clover: { Args: never; Returns: number }
+      reconcile_canceled_payment: {
+        Args: {
+          p_amount_krw: number
+          p_detail: Json
+          p_order_id: string
+          p_payment_key: string
+        }
+        Returns: {
+          idempotent: boolean
+          payment_id: number
+          payment_status: Database["public"]["Enums"]["payment_status_enum"]
+          review_required: boolean
+        }[]
+      }
+      record_partial_cancel_review: {
+        Args: {
+          p_amount_krw: number
+          p_detail: Json
+          p_order_id: string
+          p_payment_key: string
+        }
+        Returns: boolean
+      }
+      record_payment_compensation: {
+        Args: {
+          p_amount_krw: number
+          p_detail: Json
+          p_order_id: string
+          p_payment_key: string
+          p_target_status: Database["public"]["Enums"]["payment_status_enum"]
+        }
+        Returns: {
+          payment_id: number
+          status: Database["public"]["Enums"]["payment_status_enum"]
+        }[]
+      }
+      welcome_clover_amount: { Args: never; Returns: number }
     }
     Enums: {
       alimtalk_status_enum: "SENT" | "FAILED"
@@ -674,18 +850,19 @@ export type Database = {
         | "PAID"
         | "REJECTED"
         | "FAILED"
-      cheer_status_enum: "PENDING" | "CONFIRMED" | "REFUNDED"
+      cheer_status_enum: "PENDING" | "CONFIRMED" | "REFUNDED" | "EXPIRED"
       clover_entry_type_enum:
         | "EARN"
         | "CASHOUT_HOLD"
         | "CASHOUT_SETTLED"
         | "CASHOUT_REVERSAL"
         | "REFUND_REVERSAL"
+        | "WELCOME_GRANT"
       goal_status_enum: "ACTIVE" | "CLOSED" | "DELETED"
       kyc_status_enum: "NONE" | "VERIFIED"
       notification_channel_enum: "ALIMTALK" | "INAPP"
       notification_type_enum: "CHEER_RECEIVED"
-      payment_status_enum: "READY" | "DONE" | "CANCELED" | "FAILED"
+      payment_status_enum: "READY" | "DONE" | "CANCELED" | "FAILED" | "EXPIRED"
       report_status_enum: "OPEN" | "RESOLVED_DELETED" | "DISMISSED"
       report_target_type_enum: "GOAL" | "CHEER"
       risk_flag_enum: "CLEAR" | "REVIEW" | "BLOCKED"
@@ -829,23 +1006,23 @@ export const Constants = {
         "REJECTED",
         "FAILED",
       ],
-      cheer_status_enum: ["PENDING", "CONFIRMED", "REFUNDED"],
+      cheer_status_enum: ["PENDING", "CONFIRMED", "REFUNDED", "EXPIRED"],
       clover_entry_type_enum: [
         "EARN",
         "CASHOUT_HOLD",
         "CASHOUT_SETTLED",
         "CASHOUT_REVERSAL",
         "REFUND_REVERSAL",
+        "WELCOME_GRANT",
       ],
       goal_status_enum: ["ACTIVE", "CLOSED", "DELETED"],
       kyc_status_enum: ["NONE", "VERIFIED"],
       notification_channel_enum: ["ALIMTALK", "INAPP"],
       notification_type_enum: ["CHEER_RECEIVED"],
-      payment_status_enum: ["READY", "DONE", "CANCELED", "FAILED"],
+      payment_status_enum: ["READY", "DONE", "CANCELED", "FAILED", "EXPIRED"],
       report_status_enum: ["OPEN", "RESOLVED_DELETED", "DISMISSED"],
       report_target_type_enum: ["GOAL", "CHEER"],
       risk_flag_enum: ["CLEAR", "REVIEW", "BLOCKED"],
     },
   },
 } as const
-

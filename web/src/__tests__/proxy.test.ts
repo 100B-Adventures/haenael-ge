@@ -1,0 +1,59 @@
+// proxy.test.ts — canonical 도메인 리다이렉트 회귀 테스트
+// 근본원인 회귀 방지: web-two-theta-bmil2ljwdg.vercel.app 등 non-canonical
+// production 별칭에서 /auth/kakao/start 를 열면 canonical로 308 되어야
+// nonce 쿠키가 canonical에 세팅되고 콜백(canonical)과 일치한다.
+
+import { describe, it, expect } from "vitest";
+import { NextRequest } from "next/server";
+import { proxy } from "../proxy";
+
+function req(host: string, path: string) {
+  return new NextRequest(new URL(path, `https://${host}`));
+}
+
+describe("proxy — canonical 도메인 강제", () => {
+  it("알려진 레거시 production 별칭 호스트는 canonical로 308 리다이렉트", () => {
+    const res = proxy(req("web-two-theta-bmil2ljwdg.vercel.app", "/auth/kakao/start?redirect=/onboarding"));
+    expect(res.status).toBe(308);
+    const location = res.headers.get("location");
+    expect(location).toBe("https://haenael-ge.vercel.app/auth/kakao/start?redirect=/onboarding");
+  });
+
+  it("haenaelge.vercel.app 레거시 별칭도 canonical로 308 리다이렉트", () => {
+    const res = proxy(req("haenaelge.vercel.app", "/"));
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe("https://haenael-ge.vercel.app/");
+  });
+
+  it("canonical 호스트 자체는 리다이렉트 없이 통과 (2xx, location 없음)", () => {
+    const res = proxy(req("haenael-ge.vercel.app", "/auth/kakao/callback?code=abc&state=xyz"));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("localhost는 리다이렉트 없이 통과 (로컬 개발 보존)", () => {
+    const res = proxy(req("localhost", "/onboarding"));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("127.0.0.1도 리다이렉트 없이 통과", () => {
+    const res = proxy(req("127.0.0.1", "/"));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("알려지지 않은 Vercel preview 해시 도메인은 통과 (preview 배포 파괴 방지)", () => {
+    const res = proxy(req("web-abc123xyz-sjteam.vercel.app", "/onboarding"));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("git-branch preview 도메인도 통과", () => {
+    const res = proxy(req("web-git-feature-foo-sjteam.vercel.app", "/onboarding"));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("query string까지 정확히 보존해 리다이렉트", () => {
+    const res = proxy(req("haenaelge.vercel.app", "/g/my-goal?utm_source=kakao&x=1"));
+    expect(res.headers.get("location")).toBe(
+      "https://haenael-ge.vercel.app/g/my-goal?utm_source=kakao&x=1",
+    );
+  });
+});

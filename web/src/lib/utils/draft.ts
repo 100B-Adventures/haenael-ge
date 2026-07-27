@@ -4,6 +4,7 @@
 
 const DRAFT_KEY = "haenael_goal_draft";
 const SAVED_SLUG_KEY = "haenael_saved_slug";
+const SAVE_INTENT_KEY = "haenael_save_intent";
 
 export interface GoalDraft {
   /** "○○ 해낼게" 목표 제목 (suffix 없이 저장) */
@@ -51,4 +52,27 @@ export function loadPendingSlug(): string | null {
 export function clearPendingSlug(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(SAVED_SLUG_KEY);
+}
+
+/**
+ * 저장 의도(save intent) 마킹 — "로그인 이후에만 링크 발급" (회장 2026-07-19).
+ *
+ * 사용자가 "저장하고 내 링크 받기" 버튼을 실제로 눌렀을 때만 세팅한다.
+ * 로그인 후 onboarding으로 복귀했을 때, 이 플래그가 있는 draft만
+ * 자동 커밋(1회) 대상이 된다. 세션만 살아있고(재방문 등) 버튼을 누른 적
+ * 없으면 이 플래그가 없으므로 자동저장되지 않는다 — 핵심 회귀 방지.
+ */
+export function saveSaveIntent(): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(SAVE_INTENT_KEY, "1");
+}
+
+export function hasSaveIntent(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(SAVE_INTENT_KEY) === "1";
+}
+
+export function clearSaveIntent(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(SAVE_INTENT_KEY);
 }
