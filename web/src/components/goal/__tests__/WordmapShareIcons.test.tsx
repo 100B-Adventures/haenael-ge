@@ -4,6 +4,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { WordmapShareIcons } from "../WordmapShareIcons";
 
+const mockTrackEvent = vi.fn();
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}));
+
 // ── Supabase 클라이언트 모킹 ──────────────────────────────────────────────────
 const mockGetSession = vi.fn();
 const mockInsert = vi.fn().mockResolvedValue({ error: null });
@@ -129,6 +134,16 @@ describe("WordmapShareIcons", () => {
       expect(mockInsert).toHaveBeenCalledWith(
         expect.objectContaining({ goal_id: 1, channel: "LINK" }),
       );
+    });
+  });
+
+  it("링크 복사 → wordmap_shared + share_link_copied GA4 이벤트 배선", async () => {
+    render(<WordmapShareIcons {...DEFAULT_PROPS} />);
+    fireEvent.click(screen.getByTestId("share-copy-link"));
+
+    await waitFor(() => {
+      expect(mockTrackEvent).toHaveBeenCalledWith("wordmap_shared", { method: "link", goal_id: "1" });
+      expect(mockTrackEvent).toHaveBeenCalledWith("share_link_copied", { source: "wordmap_share_icons" });
     });
   });
 

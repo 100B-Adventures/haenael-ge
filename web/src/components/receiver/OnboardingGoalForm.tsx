@@ -9,6 +9,7 @@
 //  로그인 후 복귀: 마운트 시 user 있고 draft 있으면 → auto-save
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { LoginSheet } from "@/components/auth";
 import { ShareLinkCard } from "@/components/goal/ShareLinkCard";
@@ -19,8 +20,12 @@ import {
   savePendingSlug,
   loadPendingSlug,
   clearPendingSlug,
+  saveSaveIntent,
+  hasSaveIntent,
+  clearSaveIntent,
 } from "@/lib/utils/draft";
 import { createClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 interface OnboardingGoalFormProps {
   /** 서버에서 전달한 초기 유저 (null = 미인증) */
@@ -63,12 +68,31 @@ function defaultDueDate(): string {
 }
 
 // ─── DB insert ───────────────────────────────────────────────────────────────
+//
+// 회장 결정 A (2026-07-20): 1계정 1목표(활성) 강제. DB엔 partial unique index
+// goal_one_active_per_member(member_id) WHERE status != 'DELETED' 가 정본이지만,
+// insert 시도 후 23505 에러로 알리는 건 UX가 나쁘다(원인이 안 보임) — 저장 전
+// SELECT로 기존 활성 목표를 먼저 확인해 "already-has-goal"로 조기 반환한다.
+// 동시요청 레이스는 DB 유니크 인덱스가 최종 방어선(앱레벨은 UX 최적화용).
 
 async function saveGoalToDB(
   values: FormValues,
   userId: string,
-): Promise<{ slug: string } | { error: string }> {
+): Promise<{ slug: string } | { error: string } | { alreadyHasGoal: true }> {
   const supabase = createClient();
+
+  const { data: existing } = await supabase
+    .from("goal")
+    .select("id")
+    .eq("member_id", userId)
+    .neq("status", "DELETED")
+    .is("deleted_at", null)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    return { alreadyHasGoal: true };
+  }
+
   const title = `${values.title.trim()} 해낼게`;
   const { data, error } = await supabase
     .from("goal")
@@ -82,6 +106,10 @@ async function saveGoalToDB(
     .single();
 
   if (error) {
+    // 23505 = unique_violation. DB 인덱스가 레이스를 막은 경우도 "이미 목표 있음"으로 처리.
+    if (error.code === "23505") {
+      return { alreadyHasGoal: true };
+    }
     console.error("[OnboardingGoalForm] insert error:", error);
     return { error: error.message };
   }
@@ -91,6 +119,7 @@ async function saveGoalToDB(
 // ─── 컴포넌트 ─────────────────────────────────────────────────────────────────
 
 export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(initialUser);
   const [values, setValues] = useState<FormValues>({
     title: "",
@@ -122,8 +151,10 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         due_date: draft.due_date || defaultDueDate(),
       });
 
-      // 로그인 상태이면 자동저장
-      if (user && !autoSaveDone) {
+      // 링크는 로그인 이후에만 발급(회장 2026-07-19): 세션(user)만으로는 자동
+      // 커밋하지 않는다 — "저장하고 내 링크 받기" 버튼을 실제로 눌렀던 draft
+      // (hasSaveIntent)만, 로그인 후 복귀 시 1회 자동 커밋한다.
+      if (user && !autoSaveDone && hasSaveIntent()) {
         setAutoSaveDone(true);
         setIsSaving(true);
         saveGoalToDB(
@@ -131,12 +162,17 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           user.id,
         ).then((result) => {
           setIsSaving(false);
-          if ("error" in result) {
+          clearSaveIntent();
+          if ("alreadyHasGoal" in result) {
+            clearDraft();
+            router.replace("/me");
+          } else if ("error" in result) {
             setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
           } else {
             clearDraft();
             savePendingSlug(result.slug);
             setSavedSlug(result.slug);
+            trackEvent("goal_created", { source: "oauth_return" });
           }
         });
       }
@@ -178,23 +214,32 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     }
 
     if (!user) {
-      // 미인증 → draft 저장 후 LoginSheet
+      // 미인증 → 저장 "의도"가 있었음을 마킹 + draft 저장 후 LoginSheet.
+      // 이 플래그가 있어야만 로그인 후 복귀 시 자동 커밋된다(§ 마운트 effect).
+      saveSaveIntent();
       saveDraft({ title: values.title, reason: values.reason, due_date: values.due_date });
       setShowLoginSheet(true);
       return;
     }
 
-    // 인증 상태 → DB 저장
+    // 인증 상태 → 버튼 클릭 = 명시적 저장 의도. 즉시 DB 저장(정상 플로우).
     setIsSaving(true);
     setSaveError(null);
     const result = await saveGoalToDB(values, user.id);
     setIsSaving(false);
 
-    if ("error" in result) {
+    if ("alreadyHasGoal" in result) {
+      // 회장 결정 A: 이미 활성 목표가 있으면 재저장 대신 /me로 유도(dead-end 0).
+      clearDraft();
+      clearSaveIntent();
+      router.replace("/me");
+    } else if ("error" in result) {
       setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
     } else {
       clearDraft();
+      clearSaveIntent();
       setSavedSlug(result.slug);
+      trackEvent("goal_created", { source: "onboarding" });
     }
   };
 

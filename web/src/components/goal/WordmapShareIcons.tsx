@@ -7,6 +7,7 @@
 
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 export interface WordmapShareIconsProps {
   goalId: number;
@@ -137,6 +138,7 @@ export function WordmapShareIcons({
       URL.revokeObjectURL(url);
 
       await recordShare("IMAGE");
+      trackEvent("wordmap_shared", { method: "image", goal_id: String(goalId) });
       showToast("이미지를 저장했어요. 스토리에 올려보세요.");
     } finally {
       setLoading(null);
@@ -187,6 +189,7 @@ export function WordmapShareIcons({
       }
 
       await recordShare("STORY");
+      trackEvent("wordmap_shared", { method: "instagram", goal_id: String(goalId) });
     } finally {
       setLoading(null);
     }
@@ -198,6 +201,8 @@ export function WordmapShareIcons({
     try {
       await navigator.clipboard.writeText(url);
       await recordShare("LINK");
+      trackEvent("wordmap_shared", { method: "link", goal_id: String(goalId) });
+      trackEvent("share_link_copied", { source: "wordmap_share_icons" });
       showToast("링크가 복사됐어요.");
     } catch {
       showToast("복사에 실패했어요. URL을 직접 복사해주세요.");

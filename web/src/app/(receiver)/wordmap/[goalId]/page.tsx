@@ -8,6 +8,7 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { WordmapShareIcons } from "@/components/goal/WordmapShareIcons";
+import { WordmapViewTracker } from "@/components/goal/WordmapViewTracker";
 
 type Props = { params: Promise<{ goalId: string }> };
 
@@ -71,10 +72,11 @@ export default async function WordmapFullViewPage({ params }: Props) {
       style={{ background: "#FBFAF7" }}
       data-testid="wordmap-fullview-page"
     >
+      <WordmapViewTracker goalId={goalIdNum} />
       {/* 헤더 */}
       <div className="flex items-center justify-between px-[22px] pt-10 pb-3">
         <Link
-          href="/home"
+          href="/me"
           aria-label="뒤로"
           data-testid="back-button"
           className="flex items-center justify-center w-10 h-10 -ml-2"

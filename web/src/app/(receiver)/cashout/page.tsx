@@ -36,39 +36,13 @@ export default async function CashoutPage() {
   const payableAmount = eligibility?.payable_amount ?? 0;
   const minCashoutClover = eligibility?.min_cashout_clover ?? 30;
   const reachedThreshold = eligibility?.reached_threshold ?? false;
+  const remaining = Math.max(minCashoutClover - totalBalance, 0);
 
   const cashoutEnabled = process.env.NEXT_PUBLIC_CASHOUT_ENABLED === "true";
 
   const grossKrw = payableAmount * KRW_PER_CLOVER;
   const withholdingKrw = Math.floor(grossKrw * WITHHOLDING_RATE);
   const netKrwPreview = grossKrw - withholdingKrw;
-
-  // 아직 임계(30클로버=웰컴 포함)에 도달하지 못한 경우
-  if (!reachedThreshold) {
-    const remaining = Math.max(minCashoutClover - totalBalance, 0);
-    return (
-      <main
-        className="flex min-h-svh flex-col items-center justify-center bg-[#FBFAF7] px-6 text-center"
-        data-testid="cashout-below-threshold-page"
-      >
-        <span className="mb-4 text-[32px]" aria-hidden="true">🍀</span>
-        <h1 className="text-xl font-black text-[#16140F]">
-          조금만 더 모으면 환전할 수 있어요
-        </h1>
-        <p className="mt-3 max-w-sm text-sm leading-6 text-[#6F6A60]">
-          지금 🍀 {totalBalance}개(웰컴 포함) · 최소 환전 {minCashoutClover}개까지{" "}
-          <strong style={{ color: "#14613A" }}>{remaining}개</strong> 남았어요.
-        </p>
-        <Link
-          href="/home"
-          className="mt-6 inline-block rounded-[14px] px-6 py-3 text-sm font-semibold text-white"
-          style={{ background: "#1B8A4F" }}
-        >
-          홈으로 돌아가기
-        </Link>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-svh bg-[#FBFAF7] px-[22px] py-10" data-testid="cashout-page">
@@ -82,6 +56,24 @@ export default async function CashoutPage() {
         >
           환전 전에 정직하게 보여드릴게요
         </h1>
+
+        {!reachedThreshold && (
+          <div
+            className="mb-4 rounded-[14px] px-4 py-3"
+            style={{ background: "#F4EFE6", border: "1px solid #E8E4DC" }}
+            data-testid="cashout-below-threshold-banner"
+            role="status"
+          >
+            <p className="text-[13.5px] font-bold" style={{ color: "#16140F" }}>
+              조금만 더 모으면 환전할 수 있어요
+            </p>
+            <p className="mt-1 text-[11.5px] leading-relaxed" style={{ color: "#6F6A60" }}>
+              지금 🍀 {totalBalance}개(웰컴 포함) · 최소 환전 {minCashoutClover}개까지{" "}
+              <strong style={{ color: "#14613A" }}>{remaining}개</strong> 남았어요.
+              아래에서 친구 응원분과 예상 실수령액을 미리 확인할 수 있어요.
+            </p>
+          </div>
+        )}
 
         {/* 분해표 — 친구 응원분 / 웰컴(제외) */}
         <div
@@ -176,7 +168,7 @@ export default async function CashoutPage() {
         </div>
 
         {/* 확정 CTA — kill switch 게이트 */}
-        {cashoutEnabled ? (
+        {cashoutEnabled && reachedThreshold ? (
           <button
             type="button"
             className="w-full rounded-[15px] py-4 text-[15.5px] font-extrabold text-white"
@@ -202,7 +194,7 @@ export default async function CashoutPage() {
         )}
 
         <Link
-          href="/home"
+          href="/me"
           className="mt-4 block text-center text-[12px] font-semibold"
           style={{ color: "#9C968B" }}
         >

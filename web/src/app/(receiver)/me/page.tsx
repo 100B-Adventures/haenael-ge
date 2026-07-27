@@ -1,4 +1,4 @@
-// (receiver)/home/page.tsx — 받는사람 홈
+// (receiver)/me/page.tsx — 받는사람 내 페이지
 // 슬라이스 #9 실구현. 인증 필수.
 // DESIGN.md §6 금액 3층 b: 클로버 개수(🍀 N개)만, ₩ 환산 X.
 // wireframe: docs/WIREFRAMES/receiver-home.html + wordmap-share.html (1. 내 목표 홈).
@@ -11,17 +11,50 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import { CheerCount } from "@/components/goal/CheerCount";
 import { NotificationBadge } from "@/components/common/NotificationBadge";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import { HomeSeenTracker } from "@/components/goal/HomeSeenTracker";
+import { MyLinkCard } from "@/components/goal/MyLinkCard";
+import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
+import { krwFromClover } from "@/lib/clover";
 
 // ─── 응원자 행 ─────────────────────────────────────────────────────────────────
+// DESIGN.md §6-(b′)(2026-07-19 회장 결정 B): 본인 한정 개별 클로버 개수 노출.
+// Discreet 유지 장치: 시간순 고정(정렬/랭킹 X) · ₩ 환산 병기 X · 익명도 개수는 표시.
+
+export function formatCheerRelativeTime(createdAt: string, now = Date.now()) {
+  const createdTime = new Date(createdAt).getTime();
+  if (!Number.isFinite(createdTime)) return "날짜 미상";
+
+  const elapsedMs = Math.max(0, now - createdTime);
+  const minutes = Math.floor(elapsedMs / 60_000);
+  if (minutes < 1) return "방금 전";
+  if (minutes < 60) return `${minutes}분 전`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}시간 전`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}일 전`;
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).format(new Date(createdTime));
+}
 
 function CheerItem({
   displayName,
   isAnonymous,
   message,
+  cloverAmount,
+  createdAt,
 }: {
   displayName: string | null;
   isAnonymous: boolean;
   message: string | null;
+  cloverAmount: number;
+  createdAt: string;
 }) {
   const name = isAnonymous || !displayName ? "익명의 누군가" : displayName;
   const initial = isAnonymous || !displayName ? "?" : displayName[0];
@@ -48,6 +81,14 @@ function CheerItem({
         <p className="font-semibold" style={{ fontSize: 12.5, color: "#16140F" }}>
           {name}
         </p>
+        <time
+          dateTime={createdAt}
+          className="mt-0.5 block"
+          style={{ fontSize: 10.5, color: "#9C968B" }}
+          data-testid="cheer-item-relative-time"
+        >
+          {formatCheerRelativeTime(createdAt)}
+        </time>
         {message && (
           <p
             className="mt-0.5 truncate"
@@ -57,7 +98,30 @@ function CheerItem({
           </p>
         )}
       </div>
-      {/* 금액 절대 비노출 (DESIGN.md §6 금액 3층 b) */}
+
+      {/* 개별 클로버 개수 (본인만 볼 수 있는 이 화면 한정, ₩ 환산 없음) */}
+      <div
+        className="flex min-w-[58px] flex-shrink-0 flex-col items-end gap-0.5 text-right"
+        role="group"
+        aria-label={`클로버 ${cloverAmount}개, 나만 보임`}
+      >
+        <span
+          className="font-bold"
+          style={{ fontSize: 11.5, color: "#14613A" }}
+          data-testid="cheer-item-amount"
+          aria-hidden="true"
+        >
+          🍀 {cloverAmount}
+        </span>
+        <span
+          className="font-medium"
+          style={{ fontSize: 10.5, color: "#6F6A60" }}
+          data-testid="cheer-item-privacy-label"
+          aria-hidden="true"
+        >
+          나만 보임
+        </span>
+      </div>
     </div>
   );
 }
@@ -82,6 +146,7 @@ export default async function ReceiverHomePage() {
     .select("id, slug, title, reason, due_date, status")
     .eq("member_id", user.id)
     .neq("status", "DELETED")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(1);
 
@@ -92,7 +157,7 @@ export default async function ReceiverHomePage() {
     redirect("/onboarding");
   }
 
-  // K1: 클로버 잔액 (개수만)
+  // K1: 클로버 잔액 (개수 — 주표기) + 웰컴 클로버 성장훅(2026-07-18): 원화 등가는 보조표기만.
   const { data: balance } = await supabase
     .from("clover_balance")
     .select("clover_count")
@@ -101,14 +166,25 @@ export default async function ReceiverHomePage() {
 
   const cloverCount = balance?.clover_count ?? 0;
 
+  // 환전 도달판정(웰컴 포함) — 환전 버튼 활성 여부 판단에만 사용, 지급액 계산은 cashout 화면 전담.
+  const { data: eligibilityRaw } = await supabase.rpc("clover_eligibility", {
+    p_member_id: user.id,
+  });
+  const eligibility = Array.isArray(eligibilityRaw) ? eligibilityRaw[0] : eligibilityRaw;
+  const reachedThreshold = eligibility?.reached_threshold ?? false;
+  const krwEquivalent = krwFromClover(cloverCount); // 1클로버=1,000원 등가(고정 환산 표기, 실제 환전액 보증 아님)
+
   // cheer_select_goal_owner: 응원 목록 (CONFIRMED + not deleted, 최근 8개)
+  // DESIGN.md §6-(b′): 본인 한정 clover_amount 노출. goal.id는 위에서 member_id=user.id로
+  // 스코프된 본인 목표이고, RLS cheer_select_goal_owner도 goal.member_id=auth.uid()만 허용 —
+  // 이중 스코프로 남의 목표 cheer 금액이 섞일 수 없다.
   const { data: cheers } = await supabase
     .from("cheer")
-    .select("id, display_name, is_anonymous, message, created_at")
+    .select("id, display_name, is_anonymous, message, clover_amount, created_at")
     .eq("goal_id", goal.id)
     .eq("status", "CONFIRMED")
     .is("deleted_at", null)
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: false }) // 🔒 시간순 고정 — 금액순 정렬/랭킹 금지
     .limit(8);
 
   const cheerCount = cheers?.length ?? 0;
@@ -138,6 +214,7 @@ export default async function ReceiverHomePage() {
       style={{ background: "#FBFAF7" }}
       data-testid="receiver-home-page"
     >
+      <HomeSeenTracker />
       <div className="px-[22px] pt-10">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-5">
@@ -147,7 +224,10 @@ export default async function ReceiverHomePage() {
           >
             해낼게<span style={{ color: "#1F9E5A" }}>.</span>
           </p>
-          <NotificationBadge />
+          <div className="flex items-center gap-3">
+            <NotificationBadge />
+            <LogoutButton />
+          </div>
         </div>
 
         {/* 목표 제목 */}
@@ -170,6 +250,17 @@ export default async function ReceiverHomePage() {
             )}
           </div>
         )}
+
+        <GoalEditSheet
+          goalId={goal.id}
+          initialTitle={cleanTitle}
+          initialReason={goal.reason}
+          initialDueDate={goal.due_date}
+          editable={goal.status === "ACTIVE"}
+        />
+
+        {/* 내 응원 링크 재접근 (user-flow.md §1.3 갭3, 2026-07-20) */}
+        <MyLinkCard slug={goal.slug} />
 
         {/* 클로버 잔액 — 🍀 개수만 (DESIGN.md §6 금액 3층 b) */}
         <div
@@ -194,22 +285,31 @@ export default async function ReceiverHomePage() {
                 개
               </small>
             </p>
+            {/* 원화 등가 보조표기(2026-07-18 회장·컨트롤러 확정, DESIGN.md §6 개정) —
+                크기·색으로 개수가 여전히 주(主), 이 값은 고정환산 참고치이지 실제 환전액 보증 아님. */}
+            <p
+              className="mt-0.5"
+              style={{ fontSize: 10.5, color: "#9C968B" }}
+              data-testid="clover-krw-equivalent"
+            >
+              ≈{krwEquivalent.toLocaleString("ko-KR")}원 상당
+            </p>
           </div>
-          {/* 환전 버튼 자리 — 슬라이스 #8에서 활성화 */}
-          <button
-            type="button"
-            disabled
-            className="rounded-[10px] px-3 py-2 font-bold text-white"
+          {/* 환전 버튼 — 도달판정(웰컴 포함) 기준. 실제 환전 EF는 kill switch(CASHOUT_ENABLED)로 별도 게이트. */}
+          <Link
+            href="/cashout"
+            className="rounded-[10px] px-3 py-2 font-bold text-white text-center"
             style={{
               background: "#1B8A4F",
               fontSize: 12,
-              opacity: 0.45,
-              cursor: "not-allowed",
+              opacity: reachedThreshold ? 1 : 0.45,
+              pointerEvents: reachedThreshold ? "auto" : "none",
             }}
-            data-testid="cashout-button-disabled"
+            data-testid={reachedThreshold ? "cashout-button-enabled" : "cashout-button-disabled"}
+            aria-disabled={!reachedThreshold}
           >
             환전
-          </button>
+          </Link>
         </div>
 
         {/* 응원자 수 */}
@@ -240,7 +340,7 @@ export default async function ReceiverHomePage() {
           </div>
         )}
 
-        {/* 응원자 목록 (이름/익명, 금액 X) */}
+        {/* 응원자 목록 (이름/익명 + 본인 한정 클로버 개수, ₩ 환산 X) */}
         {cheers && cheers.length > 0 && (
           <div className="mb-4">
             <p
@@ -255,6 +355,8 @@ export default async function ReceiverHomePage() {
                 displayName={c.display_name}
                 isAnonymous={c.is_anonymous}
                 message={c.message}
+                cloverAmount={c.clover_amount}
+                createdAt={c.created_at}
               />
             ))}
           </div>

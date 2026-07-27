@@ -14,43 +14,54 @@ export interface WordmapProps {
   ownerName?: string;
 }
 
-// ─── 결정론적 위치 계산 (hydration mismatch 방지) ────────────────────────────
-// 단어 인덱스 기반 사전 정의 위치셋. 유기적 배치.
-const POSITIONS: Array<{ left: string; top: string; rotate?: string }> = [
-  { left: "30%", top: "14%", rotate: "0deg" },
-  { left: "8%",  top: "34%", rotate: "-5deg" },
-  { left: "50%", top: "40%", rotate: "0deg" },
-  { left: "14%", top: "58%", rotate: "3deg" },
-  { left: "60%", top: "64%", rotate: "4deg" },
-  { left: "40%", top: "76%", rotate: "0deg" },
-  { left: "6%",  top: "80%", rotate: "-3deg" },
-  { left: "72%", top: "22%", rotate: "-2deg" },
-  { left: "55%", top: "18%", rotate: "2deg" },
-  { left: "20%", top: "20%", rotate: "-4deg" },
-  { left: "68%", top: "50%", rotate: "3deg" },
-  { left: "35%", top: "55%", rotate: "-2deg" },
-];
+type SizeTier = "s1" | "s2" | "s3";
 
-// 사이즈 티어: word_count에 따라 s1/s2/s3
-function getSizeTier(count: number, maxCount: number): "s1" | "s2" | "s3" {
-  const ratio = maxCount > 0 ? count / maxCount : 0;
-  if (ratio >= 0.6) return "s3";
-  if (ratio >= 0.3) return "s2";
+interface NormalizedWordmapWord extends WordmapWord {
+  firstIndex: number;
+}
+
+function normalizeWords(words: WordmapWord[]): NormalizedWordmapWord[] {
+  const merged = new Map<string, NormalizedWordmapWord>();
+
+  words.forEach((item, index) => {
+    const word = item.word.normalize("NFC").trim().replace(/\s+/gu, " ");
+    if (!word) return;
+
+    const count = Number.isFinite(item.word_count) ? item.word_count : 0;
+    const existing = merged.get(word);
+    if (existing) {
+      existing.word_count += count;
+      return;
+    }
+
+    merged.set(word, { word, word_count: count, firstIndex: index });
+  });
+
+  return Array.from(merged.values()).sort(
+    (a, b) => b.word_count - a.word_count || a.firstIndex - b.firstIndex,
+  );
+}
+
+function getSizeTier(
+  count: number,
+  minCount: number,
+  maxCount: number,
+  wordCount: number,
+): SizeTier {
+  if (wordCount === 1) return "s3";
+  if (maxCount === minCount) return "s2";
+
+  const ratio = (count - minCount) / (maxCount - minCount);
+  if (ratio >= 0.67) return "s3";
+  if (ratio >= 0.34) return "s2";
   return "s1";
 }
 
-const TIER_STYLE: Record<"s1" | "s2" | "s3", React.CSSProperties> = {
+const TIER_STYLE: Record<SizeTier, React.CSSProperties> = {
   s1: { color: "#8bb79f", fontWeight: 600, fontSize: 14 },
   s2: { color: "#57a178", fontWeight: 700, fontSize: 18 },
-  s3: { color: "#1a8150", fontWeight: 800, fontSize: 28 },
+  s3: { color: "#1a8150", fontWeight: 800, fontSize: 24 },
 };
-
-// 응원 수에 따라 폰트 크기 스케일 보정 (최대 단어 35px)
-function getFontSize(count: number, maxCount: number, tier: "s1" | "s2" | "s3"): number {
-  const ratio = maxCount > 0 ? count / maxCount : 0;
-  const base = TIER_STYLE[tier].fontSize as number;
-  return Math.round(base * (0.7 + ratio * 0.3));
-}
 
 // ─── Empty 상태 ───────────────────────────────────────────────────────────────
 
@@ -92,42 +103,49 @@ function EmptyWordmap({ ownerName }: { ownerName?: string }) {
 // ─── 워드맵 본체 ──────────────────────────────────────────────────────────────
 
 export function Wordmap({ words, ownerName }: WordmapProps) {
-  if (words.length === 0) {
+  const normalizedWords = normalizeWords(words);
+
+  if (normalizedWords.length === 0) {
     return <EmptyWordmap ownerName={ownerName} />;
   }
 
-  const maxCount = Math.max(...words.map((w) => w.word_count));
-  // 최대 12개 단어만 (공간 제한)
-  const visibleWords = words.slice(0, 12);
+  const counts = normalizedWords.map((item) => item.word_count);
+  const minCount = Math.min(...counts);
+  const maxCount = Math.max(...counts);
+  const visibleWords = normalizedWords.slice(0, 12);
 
   return (
     <div
-      className="relative rounded-[18px] overflow-hidden"
+      className="flex min-h-[200px] w-full flex-wrap content-center justify-center gap-x-3 gap-y-2.5 rounded-[18px] px-4 py-5"
       style={{
-        height: 200,
         // DESIGN.md §5-5 예외: clover 계열 옅은 radial (장식적 남발 아님)
         background:
           "radial-gradient(90% 90% at 50% 45%, #E7F4EC, #EEF6F0 72%, transparent)",
       }}
       data-testid="wordmap"
-      aria-label={`응원 메시지 워드맵 (${words.length}개)`}
+      role="group"
+      aria-label={`응원 메시지 워드맵, 전체 ${normalizedWords.length}개 중 ${visibleWords.length}개 표시`}
     >
-      {visibleWords.map((item, i) => {
-        const pos = POSITIONS[i % POSITIONS.length];
-        const tier = getSizeTier(item.word_count, maxCount);
-        const fontSize = getFontSize(item.word_count, maxCount, tier);
+      {visibleWords.map((item) => {
+        const tier = getSizeTier(
+          item.word_count,
+          minCount,
+          maxCount,
+          normalizedWords.length,
+        );
 
         return (
           <span
-            key={`${item.word}-${i}`}
-            className="absolute whitespace-nowrap select-none"
+            key={item.word}
+            className="inline-flex min-w-0 max-w-full select-none whitespace-normal text-center"
             style={{
-              left: pos.left,
-              top: pos.top,
-              transform: pos.rotate ? `rotate(${pos.rotate})` : undefined,
-              fontSize,
+              maxInlineSize: "100%",
+              minInlineSize: 0,
+              overflowWrap: "anywhere",
+              lineHeight: 1.35,
               ...TIER_STYLE[tier],
             }}
+            data-wordmap-tier={tier}
           >
             {item.word}
           </span>

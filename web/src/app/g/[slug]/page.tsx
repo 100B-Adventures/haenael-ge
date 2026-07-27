@@ -1,7 +1,7 @@
 // g/[slug]/page.tsx — ② 친구 목표페이지 (공유 링크 타깃, 비로그인 SSR)
 // URL: /g/{slug} · goal_public 뷰 (금액 필드 부재) · RLS anon SELECT 허용.
-// DESIGN.md: GoalCard + CheerCount + Wordmap + 결제 CTA(자리만·비활성, 슬라이스 #5 연결).
-// 슬라이스 #4 실구현. 슬라이스 #10: ReportButton 추가.
+// DESIGN.md: GoalCard + CheerCount + Wordmap + Toss test payment CTA.
+// 슬라이스 #4 실구현. B2 테스트 결제 CTA + 슬라이스 #10 ReportButton 추가.
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -11,6 +11,8 @@ import { GoalCard } from "@/components/goal/GoalCard";
 import { CheerCount } from "@/components/goal/CheerCount";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { ReportButton } from "@/components/common/ReportButton";
+import { CheerPaymentButton } from "@/components/goal/CheerPaymentButton";
+import { OwnerBar } from "@/components/goal/OwnerBar";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -95,6 +97,44 @@ export default async function GoalPublicPage({ params }: Props) {
 
   const cheerCount = goal.cheer_count ?? 0;
 
+  // ─── owner bar 판정 (user-flow.md §1.3 (b) — 2026-07-19) ──────────────────
+  // goal 테이블(RLS goal_select_own: auth.uid()=member_id)로 재조회 —
+  // RLS가 "본인 것만" 자동 필터하므로 타인/비로그인은 항상 data=null → isOwner=false.
+  // ★ 제3자·비로그인에게 이 블록의 존재/응원 개수/금액이 절대 노출되지 않는다(아래 CoVe 참조).
+  let isOwner = false;
+  let ownerCheerCreatedAts: string[] = [];
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: ownGoal } = await supabase
+      .from("goal")
+      .select("id")
+      .eq("slug", slug)
+      .eq("member_id", user.id) // RLS와 이중 스코프(방어적 심층방어) — 남의 goal_id로 절대 안 넘어감
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (ownGoal) {
+      isOwner = true;
+
+      // cheer_select_goal_owner RLS: goal.member_id = auth.uid()인 경우만 전체 SELECT 허용.
+      // 여기서도 goal_id를 ownGoal.id(=본인 소유 확인된 id)로만 스코프해 이중 안전.
+      const { data: cheersForOwner } = await supabase
+        .from("cheer")
+        .select("created_at")
+        .eq("goal_id", ownGoal.id)
+        .eq("status", "CONFIRMED")
+        .is("deleted_at", null);
+
+      ownerCheerCreatedAts = (cheersForOwner ?? []).map(
+        (c) => c.created_at as string,
+      );
+    }
+  }
+
   // 목표 제목에서 "해낼게" suffix 제거 (GoalCard가 다시 붙임)
   const rawTitle = (goal.title ?? "").replace(/\s*해낼게\s*$/, "").trim();
 
@@ -114,6 +154,28 @@ export default async function GoalPublicPage({ params }: Props) {
           해낼게<span style={{ color: "#1F9E5A" }}>.</span>
         </p>
 
+        {/* owner bar — 본인 세션 열람 시에만 렌더(위에서 이미 판정 완료) */}
+        {isOwner && <OwnerBar cheerCreatedAts={ownerCheerCreatedAts} />}
+
+        {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
+        {!user && (
+          <p
+            className="text-center mb-3"
+            style={{ fontSize: 10.5, color: "#9C968B" }}
+            data-testid="relogin-hint"
+          >
+            내 목표가 있으신가요?{" "}
+            <Link
+              href="/auth/kakao/start?redirect=/me"
+              className="font-semibold underline underline-offset-2"
+              style={{ color: "#6F6A60" }}
+              data-testid="relogin-link"
+            >
+              카카오로 로그인
+            </Link>
+          </p>
+        )}
+
         {/* GoalCard */}
         <GoalCard
           title={rawTitle}
@@ -132,8 +194,7 @@ export default async function GoalPublicPage({ params }: Props) {
           <Wordmap words={words} />
         </div>
 
-        {/* 최근 응원자 리스트 (있으면) — 슬라이스 #4 범위: 더미 없음, 실 데이터만 */}
-        {/* 슬라이스 #5(결제) 완료 후 cheer SELECT RLS 조회 연결 */}
+        {/* 최근 응원자 리스트는 공개 RLS/정렬 정책 확정 후 연결 */}
 
         {/* 신고 버튼 (F7 — 게스트/비로그인 모두 가능) */}
         <div className="mt-1 flex justify-end">
@@ -155,36 +216,7 @@ export default async function GoalPublicPage({ params }: Props) {
             "linear-gradient(180deg, rgba(251,250,247,0) 0%, #FBFAF7 34%)",
         }}
       >
-        {/* 결제 CTA: 슬라이스 #5 전까지 비활성 (자리 확보) */}
-        <button
-          type="button"
-          disabled
-          className="w-full flex items-center justify-center gap-2 rounded-[16px] font-extrabold"
-          style={{
-            padding: "17px",
-            fontSize: 16,
-            background: "#A8D0BC", // clover 비활성 (투명도 처리 대신 옅은 그린)
-            color: "#fff",
-            letterSpacing: "-0.2px",
-            cursor: "not-allowed",
-            opacity: 0.7,
-          }}
-          data-testid="cheer-cta-disabled"
-          aria-label="결제 기능 준비 중"
-          title="결제 기능은 곧 오픈해요"
-        >
-          {/* 클로버 아이콘 */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-            <path d="M12 12c-1.2-3.6-6-4.8-7.2-1.2s2.4 6 7.2 1.2zm0 0c1.2-3.6 6-4.8 7.2-1.2s-2.4 6-7.2 1.2zm0 0c-3.6 1.2-4.8 6-1.2 7.2s6-2.4 1.2-7.2zm0 0c3.6 1.2 4.8 6 1.2 7.2s-6-2.4-1.2-7.2z" />
-          </svg>
-          조용히 밀어줄게{" "}
-          <span
-            className="ml-1 text-[11px] font-semibold rounded-full px-2 py-0.5"
-            style={{ background: "rgba(255,255,255,0.3)", letterSpacing: "0.1px" }}
-          >
-            곧
-          </span>
-        </button>
+        <CheerPaymentButton goalId={goal.id!} goalTitle={rawTitle} goalSlug={slug} />
 
         {/* role-transition: "나도 해낼게 만들래" */}
         <Link

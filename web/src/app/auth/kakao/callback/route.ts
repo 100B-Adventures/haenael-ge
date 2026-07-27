@@ -8,7 +8,7 @@
 //   ↓
 //   supabase.auth.verifyOtp({ token_hash, type: 'email' }) → 세션 쿠키 세팅
 //   ↓
-//   redirect → state 또는 /home
+//   redirect → state 또는 /me
 //
 // state 파라미터: LoginSheet 에서 로그인 후 돌아올 경로를 인코딩 (e.g., '/onboarding')
 //
@@ -16,16 +16,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@/lib/supabase/route-handler";
-
-// 허용된 리다이렉트 경로 (open-redirect 방지)
-function isSafeRedirectPath(path: unknown): path is string {
-  return (
-    typeof path === "string" &&
-    path.startsWith("/") &&
-    !path.startsWith("//") &&
-    !path.includes(":")
-  );
-}
+import {
+  KAKAO_OAUTH_NONCE_COOKIE,
+  parseOAuthState,
+  timingSafeEqualString,
+} from "@/lib/auth/kakao-state";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -34,16 +29,37 @@ export async function GET(request: NextRequest) {
   const errorDescription = url.searchParams.get("error_description");
   const state = url.searchParams.get("state");
 
-  // open-redirect 방지: state 는 /로 시작하는 내부 경로만
-  const redirectTo = isSafeRedirectPath(state) ? state : "/home";
+  // 보안 결함1 수정 (로그인 CSRF/세션 고정): state = nonce.path 로 파싱하고
+  // httpOnly 쿠키의 nonce와 상수시간 비교로 대조한다. 대조 후(성공/실패
+  // 무관) 쿠키는 항상 삭제한다 — 재사용 방지.
+  const cookieNonce = request.cookies.get(KAKAO_OAUTH_NONCE_COOKIE)?.value;
+  const parsedState = parseOAuthState(state);
+
+  const nonceValid =
+    !!cookieNonce &&
+    !!parsedState &&
+    timingSafeEqualString(cookieNonce, parsedState.nonce);
+
+  if (!nonceValid) {
+    console.warn("[auth/kakao/callback] state nonce 불일치 — CSRF/재사용 의심");
+    const invalidStateResponse = NextResponse.redirect(
+      new URL("/?auth_error=invalid_state", request.url),
+    );
+    invalidStateResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    return invalidStateResponse;
+  }
+
+  const redirectTo = parsedState.redirectPath;
 
   // 카카오가 에러를 반환한 경우 (예: 사용자 취소)
   if (error || !code) {
     const reason = error === "access_denied" ? "cancelled" : "kakao_failed";
     console.warn(`[auth/kakao/callback] Kakao error: ${error} — ${errorDescription}`);
-    return NextResponse.redirect(
+    const errResponse = NextResponse.redirect(
       new URL(`/?auth_error=${reason}`, request.url),
     );
+    errResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    return errResponse;
   }
 
   // ─── EF auth-kakao 호출 ───────────────────────────────────────────────────
@@ -54,7 +70,9 @@ export async function GET(request: NextRequest) {
 
   if (!supabaseUrl || !anonKey || !appUrl) {
     console.error("[auth/kakao/callback] missing env vars");
-    return NextResponse.redirect(new URL("/?auth_error=config_error", request.url));
+    const response = NextResponse.redirect(new URL("/?auth_error=config_error", request.url));
+    response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    return response;
   }
 
   const callbackUri = `${appUrl}/auth/kakao/callback`;
@@ -77,22 +95,28 @@ export async function GET(request: NextRequest) {
     if (!efResponse.ok) {
       const errCode = efData?.error?.code ?? "ef_error";
       console.error(`[auth/kakao/callback] EF error (${efResponse.status}):`, efData);
-      return NextResponse.redirect(
+      const response = NextResponse.redirect(
         new URL(`/?auth_error=${errCode}`, request.url),
       );
+      response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+      return response;
     }
   } catch (networkErr) {
     console.error("[auth/kakao/callback] EF network error:", networkErr);
-    return NextResponse.redirect(
+    const response = NextResponse.redirect(
       new URL("/?auth_error=ef_network_error", request.url),
     );
+    response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    return response;
   }
 
   if (!efData?.hashed_token || !efData?.type) {
     console.error("[auth/kakao/callback] EF missing hashed_token:", efData);
-    return NextResponse.redirect(
+    const response = NextResponse.redirect(
       new URL("/?auth_error=missing_token", request.url),
     );
+    response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    return response;
   }
 
   // ─── Supabase 세션 확립 ───────────────────────────────────────────────────
@@ -113,10 +137,15 @@ export async function GET(request: NextRequest) {
 
   if (verifyError) {
     console.error("[auth/kakao/callback] verifyOtp error:", verifyError);
-    return NextResponse.redirect(
+    const response = NextResponse.redirect(
       new URL("/?auth_error=session_failed", request.url),
     );
+    response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    return response;
   }
+
+  // nonce는 1회용 — 성공 경로에서도 삭제(재사용 방지)
+  successResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
 
   // 세션 쿠키가 successResponse.cookies 에 세팅된 상태로 리다이렉트
   return successResponse;

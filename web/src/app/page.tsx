@@ -9,6 +9,8 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "해낼게 — 응원은 돈으로 하는 겁니다",
@@ -112,13 +114,35 @@ function WordmapPreview() {
         className="text-center mt-3 font-semibold"
         style={{ fontSize: 11.5, color: "#6F6A60" }}
       >
-        친구들이 🍀 클로버로 남긴 응원이에요 · 모이면 환전
+        친구들이 🍀 클로버로 남긴 응원이에요
       </p>
     </div>
   );
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // user-flow.md §1.3 (a) 세션 라우팅: 세션 有 + 본인 goal 有 → /me 리다이렉트(재방문 편의).
+  // 비로그인은 SSR·OG 무변경 — 아래에서 return하지 않고 그대로 통과.
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    // goal_select_own RLS(auth.uid()=member_id)로 자동 스코프 — 남의 goal은 절대 안 걸림.
+    const { data: goals } = await supabase
+      .from("goal")
+      .select("id")
+      .eq("member_id", user.id)
+      .neq("status", "DELETED")
+      .is("deleted_at", null)
+      .limit(1);
+
+    if (goals && goals.length > 0) {
+      redirect("/me"); // goal 있는 세션만 이동 — 무한루프 없음(/me는 goal 없을 때만 /onboarding으로 감)
+    }
+  }
+
   return (
     <main
       className="flex flex-col min-h-svh px-[22px]"
@@ -129,15 +153,18 @@ export default function LandingPage() {
           "radial-gradient(120% 60% at 50% 6%, rgba(31,158,90,.05), transparent 60%)",
       }}
     >
-      {/* BrandMark */}
+      {/* BrandMark — 클릭 시 홈(로그인 상태면 /me, 비로그인이면 랜딩 자기 자신) */}
       <div className="pt-14 pb-0">
-        <p
-          className="font-extrabold"
+        <Link
+          href={user ? "/me" : "/"}
+          className="inline-block font-extrabold transition-opacity active:opacity-70"
           style={{ fontSize: 13, letterSpacing: "-0.2px", color: "#16140F" }}
+          data-testid="brand-logo-link"
+          aria-label="해낼게 홈으로"
         >
           해낼게
           <span style={{ color: "#1F9E5A" }}>.</span>
-        </p>
+        </Link>
       </div>
 
       {/* Hero */}
@@ -193,10 +220,7 @@ export default function LandingPage() {
             <strong style={{ color: "#14613A", fontWeight: 700 }}>🍀로 응원</strong>
           </span>
           <span style={{ opacity: 0.45 }}>›</span>
-          <span>
-            모이면{" "}
-            <strong style={{ color: "#14613A", fontWeight: 700 }}>환전</strong>
-          </span>
+          <span><strong style={{ color: "#14613A", fontWeight: 700 }}>응원이 쌓여요</strong></span>
         </div>
 
         {/* Primary CTA */}
@@ -235,6 +259,31 @@ export default function LandingPage() {
         >
           어떻게 쓰는 건가요?
         </Link>
+
+        {/* 재로그인 진입 (user-flow.md §1.3 갭2) — 주 CTA와 시각적으로 구분되되
+            "로그인"임을 명확히 읽히게: 라벨(muted)+동사(강조 underline)로 분리 */}
+        <p
+          className="w-full text-center"
+          style={{
+            fontSize: 12.5,
+            color: "#9C968B",
+            padding: "10px 6px 4px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+          }}
+        >
+          <span>이미 계정이 있으신가요?</span>
+          <Link
+            href="/auth/kakao/start?redirect=/me"
+            className="font-bold underline underline-offset-2 transition-opacity active:opacity-70"
+            style={{ color: "#14613A" }}
+            data-testid="landing-relogin-link"
+          >
+            로그인
+          </Link>
+        </p>
       </div>
     </main>
   );

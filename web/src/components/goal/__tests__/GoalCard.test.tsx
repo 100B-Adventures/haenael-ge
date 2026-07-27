@@ -2,7 +2,7 @@
 // vitest + React Testing Library
 
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { GoalCard } from "../GoalCard";
 import { DdayChip, StatusChip } from "../DdayChip";
 
@@ -82,11 +82,51 @@ describe("GoalCard", () => {
     expect(screen.getByText("민지")).toBeInTheDocument();
   });
 
-  it("닉네임 없으면 '익명' 표시", () => {
+  it("프로필 데이터가 없으면 클로버와 '해낼게 사용자'를 표시하고 물음표·익명을 숨긴다", () => {
     render(
       <GoalCard title="목표" reason={null} dueDate={dueDate} status="ACTIVE" />,
     );
-    expect(screen.getByText("익명")).toBeInTheDocument();
+    expect(screen.getByTestId("goal-owner-avatar-clover")).toBeInTheDocument();
+    expect(screen.getByText("해낼게 사용자")).toBeInTheDocument();
+    expect(screen.queryByText("?")).not.toBeInTheDocument();
+    expect(screen.queryByText("익명")).not.toBeInTheDocument();
+  });
+
+  it("닉네임은 공백을 제거하고 첫 사용자 인식 문자를 이니셜로 표시한다", () => {
+    render(
+      <GoalCard
+        title="목표"
+        reason={null}
+        dueDate={dueDate}
+        status="ACTIVE"
+        nickname="  민지  "
+      />,
+    );
+    expect(screen.getByTestId("goal-owner-avatar")).toHaveTextContent("민");
+    expect(screen.getByText("민지")).toBeInTheDocument();
+  });
+
+  it("프로필 이미지는 56×56 cover로 표시하고 로드 실패 시 닉네임 이니셜로 폴백한다", () => {
+    render(
+      <GoalCard
+        title="목표"
+        reason={null}
+        dueDate={dueDate}
+        status="ACTIVE"
+        nickname="도경"
+        profileImageUrl="https://example.com/broken-profile.jpg"
+      />,
+    );
+
+    const image = screen.getByTestId("goal-owner-avatar-image");
+    expect(image).toHaveAttribute("width", "56");
+    expect(image).toHaveAttribute("height", "56");
+    expect(image).toHaveClass("object-cover");
+
+    fireEvent.error(image);
+
+    expect(screen.queryByTestId("goal-owner-avatar-image")).not.toBeInTheDocument();
+    expect(screen.getByTestId("goal-owner-avatar")).toHaveTextContent("도");
   });
 
   it("reason이 있으면 WHY 섹션 렌더", () => {

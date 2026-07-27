@@ -1,0 +1,167 @@
+// (receiver)/me/page.test.tsx — 개별 클로버 개수(🍀 N) 노출 + 익명도 노출 검증.
+
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+
+vi.mock("@/lib/supabase/server", () => ({
+  createServerSupabaseClient: vi.fn(),
+}));
+vi.mock("@/lib/supabase/client", () => ({
+  createClient: () => ({
+    from: () => ({
+      select: () => ({
+        order: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }),
+      }),
+    }),
+  }),
+}));
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(() => {
+    throw new Error("NEXT_REDIRECT");
+  }),
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+function chainable<T>(result: T) {
+  const obj: Record<string, unknown> & PromiseLike<T> = {
+    select: () => obj,
+    eq: () => obj,
+    neq: () => obj,
+    is: () => obj,
+    order: () => obj,
+    limit: () => obj,
+    single: () => Promise.resolve(result),
+    maybeSingle: () => Promise.resolve(result),
+    then: (resolve: (v: T) => unknown) => Promise.resolve(result).then(resolve),
+  } as unknown as Record<string, unknown> & PromiseLike<T>;
+  return obj;
+}
+
+const GOAL_ROW = {
+  id: 1,
+  slug: "dogyeong",
+  title: "다이어트 해낼게",
+  reason: "건강해지려고",
+  due_date: "2026-12-31",
+  status: "ACTIVE",
+};
+
+function buildSupabase(cheers: Array<Record<string, unknown>>) {
+  return {
+    auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "owner-uid" } } }) },
+    rpc: vi.fn().mockImplementation((fn: string) => {
+      if (fn === "clover_eligibility") {
+        return Promise.resolve({ data: [{ reached_threshold: false }], error: null });
+      }
+      return Promise.resolve({ data: [], error: null });
+    }),
+    from: vi.fn((table: string) => {
+      if (table === "goal") return chainable({ data: [GOAL_ROW], error: null });
+      if (table === "clover_balance") return chainable({ data: { clover_count: 5 }, error: null });
+      if (table === "cheer") return chainable({ data: cheers, error: null });
+      throw new Error(`unexpected table: ${table}`);
+    }),
+  };
+}
+
+describe("/me 응원 목록 — 개별 클로버 개수", () => {
+  beforeEach(() => {
+    vi.mocked(createServerSupabaseClient).mockReset();
+  });
+
+  it(
+    "응원마다 clover_amount(🍀 N)와 '나만 보임'을 인접해 노출한다",
+    async () => {
+      // 전체 스위트 병렬 실행에서는 첫 Next.js 서버 컴포넌트 import가 5초를 넘길 수 있다.
+      vi.mocked(createServerSupabaseClient).mockResolvedValue(
+        buildSupabase([
+          {
+            id: 1,
+            display_name: "민지",
+            is_anonymous: false,
+            message: "화이팅",
+            clover_amount: 5,
+            created_at: new Date(Date.now() - 125 * 60_000).toISOString(),
+          },
+        ]) as never,
+      );
+
+      const { default: ReceiverHomePage } = await import("../page");
+      const element = await ReceiverHomePage();
+      render(element);
+
+      expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 5");
+      expect(screen.getByTestId("cheer-item-privacy-label")).toHaveTextContent("나만 보임");
+      expect(
+        screen.getByRole("group", { name: "클로버 5개, 나만 보임" }),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("cheer-item-relative-time")).toHaveTextContent(
+        "2시간 전",
+      );
+    },
+    15000,
+  );
+
+  it("익명 응원도 개수와 '나만 보임'은 표시한다(익명=신원 은닉, 수입 은닉 아님)", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([
+        {
+          id: 2,
+          display_name: null,
+          is_anonymous: true,
+          message: null,
+          clover_amount: 3,
+          created_at: new Date().toISOString(),
+        },
+      ]) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    const element = await ReceiverHomePage();
+    render(element);
+
+    expect(screen.getByText("익명의 누군가")).toBeInTheDocument();
+    expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 3");
+    expect(screen.getByTestId("cheer-item-privacy-label")).toHaveTextContent("나만 보임");
+  });
+
+  it("응원이 없으면 개별 프라이버시 라벨을 만들지 않는다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([]) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    const element = await ReceiverHomePage();
+    render(element);
+
+    expect(screen.queryByTestId("cheer-item-privacy-label")).not.toBeInTheDocument();
+  });
+
+  it("갭C(2026-07-20): 내 응원 링크 복사 카드가 /me에 항상 렌더된다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([]) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    const element = await ReceiverHomePage();
+    render(element);
+
+    expect(screen.getByTestId("my-link-card")).toBeInTheDocument();
+    expect(screen.getByTestId("my-link-url")).toHaveTextContent("/g/dogyeong");
+    expect(screen.getByTestId("my-link-copy-button")).toBeInTheDocument();
+  });
+
+  it("목표의 why를 내 페이지에서 조회하고 편집 시트를 열 수 있다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([]) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    expect(screen.getByTestId("goal-reason")).toHaveTextContent("건강해지려고");
+    expect(screen.getByTestId("open-goal-edit-sheet")).toBeInTheDocument();
+  });
+});

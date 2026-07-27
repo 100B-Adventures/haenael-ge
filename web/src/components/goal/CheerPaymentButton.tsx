@@ -148,15 +148,10 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
       trackEvent("cheer_started", { goal_id: String(goalId), amount: order.amountKrw, currency: "KRW" });
       const tossPayments = await loadTossPayments(clientKey);
       const payment = tossPayments.payment({ customerKey: order.customerKey });
-      // 통합결제창은 method 없이 호출한다. 로컬 래퍼의 CARD 전용 타입은 이 호출부에서만 좁혀 우회한다.
-      const integratedPayment = payment as unknown as {
-        requestPayment(
-          request: Omit<Parameters<typeof payment.requestPayment>[0], "method">,
-        ): Promise<void>;
-      };
       const appUrl = getAppUrl();
 
-      await integratedPayment.requestPayment({
+      await payment.requestPayment({
+        method: "CARD",
         amount: { value: order.amountKrw, currency: "KRW" },
         orderId: order.orderId,
         orderName: order.orderName,

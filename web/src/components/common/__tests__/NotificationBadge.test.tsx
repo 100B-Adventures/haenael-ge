@@ -11,6 +11,7 @@ const mockOrder = vi.fn();
 const mockLimit = vi.fn();
 const mockUpdate = vi.fn();
 const mockIn = vi.fn();
+const mockEq = vi.fn();
 
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
@@ -26,6 +27,12 @@ vi.mock("@/lib/supabase/client", () => ({
   }),
 }));
 
+// 알림 클릭 라우팅(2026-07-21) 검증용 — next/navigation useRouter 모킹.
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
 
@@ -37,6 +44,7 @@ beforeEach(() => {
   });
   mockUpdate.mockReturnValue({
     in: mockIn.mockResolvedValue({ error: null }),
+    eq: mockEq.mockResolvedValue({ error: null }),
   });
 });
 
@@ -174,6 +182,42 @@ describe("NotificationBadge", () => {
     fireEvent.click(screen.getByTestId("notification-badge-button"));
     await waitFor(() => {
       expect(screen.getAllByTestId("notification-item").length).toBe(1);
+    });
+  });
+
+  // 2026-07-21 회장 지시: 알림 클릭 → 해당 링크(받는사람 홈)로 라우팅.
+  it("알림 클릭 시 /me로 라우팅한다", async () => {
+    const fakeNotifs = [
+      {
+        id: 1,
+        member_id: "uuid-1",
+        type: "CHEER_RECEIVED",
+        channel: "INAPP",
+        alimtalk_status: null,
+        read: false,
+        created_at: new Date().toISOString(),
+      },
+    ];
+    mockSelect.mockReturnValue({
+      order: mockOrder.mockReturnValue({
+        limit: mockLimit.mockResolvedValue({ data: fakeNotifs, error: null }),
+      }),
+    });
+
+    render(<NotificationBadge />);
+    await waitFor(() => {
+      expect(screen.getByTestId("notification-badge-button")).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByTestId("notification-badge-button"));
+    await waitFor(() => {
+      expect(screen.getAllByTestId("notification-item").length).toBe(1);
+    });
+
+    fireEvent.click(screen.getAllByTestId("notification-item")[0]);
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/me");
     });
   });
 });

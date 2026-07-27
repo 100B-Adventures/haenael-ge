@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 
 export interface ShareLinkCardProps {
   slug: string;
@@ -26,6 +27,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
     try {
       await navigator.clipboard.writeText(fullUrl);
       setCopied(true);
+      trackEvent("share_link_copied", { source: "share_link_card" });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard API 미지원 fallback
@@ -38,6 +40,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
       document.execCommand("copy");
       document.body.removeChild(el);
       setCopied(true);
+      trackEvent("share_link_copied", { source: "share_link_card" });
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -54,6 +57,20 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
         </p>
         <p className="text-[13px] leading-relaxed" style={{ color: "#6F6A60" }}>
           이제 이 링크를 인스타 바이오에 걸면 끝이에요.
+        </p>
+      </div>
+
+      {/* 웰컴 클로버 안내 — 목표 생성 시 시스템이 자동으로 웰컴 응원(클로버 3개)을 보냄 */}
+      <div
+        className="flex items-center gap-2.5 rounded-[12px] px-4 py-3 mb-4"
+        style={{ background: "#E7F4EC" }}
+        data-testid="welcome-clover-banner"
+      >
+        <span className="text-[18px]" aria-hidden="true">🍀</span>
+        <p className="text-[12.5px] leading-snug" style={{ color: "#14613A" }}>
+          <strong>해낼게 팀이 먼저 웰컴 클로버 3개를 보냈어요.</strong>
+          <br />
+          <span style={{ color: "#3d7a5a" }}>다음 응원은 곧 친구들 차례예요.</span>
         </p>
       </div>
 

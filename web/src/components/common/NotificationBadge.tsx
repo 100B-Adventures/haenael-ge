@@ -5,6 +5,7 @@
 // 카카오 알림톡은 백그라운드에서 발송, 인앱은 여기서 표시.
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -22,6 +23,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
+  const router = useRouter();
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -63,6 +65,32 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
       return "조용한 응원이 도착했어요 🍀";
     }
     return "새 알림이 있어요";
+  }
+
+  // 알림 타입 → 라우팅 대상. notification 테이블엔 target/link 컬럼이 없고(스키마
+  // 20260705163137_init_schema.sql notification 정의 참조) 현재 유일 타입인
+  // CHEER_RECEIVED는 받는사람(goal 소유자) 전용 알림 — 소유자의 활성 목표는 항상 1개
+  // (goal_one_active_per_member 제약)라 goalId 없이도 /me로 결정 라우팅 가능하다.
+  // 타입이 늘면 이 스위치에 분기만 추가하면 됨.
+  function notifTarget(n: NotificationRow): string {
+    switch (n.type) {
+      case "CHEER_RECEIVED":
+        return "/me";
+      default:
+        return "/me";
+    }
+  }
+
+  // 알림 클릭: 해당 항목만 읽음 처리 후 대상 링크로 이동, 드롭다운 닫기.
+  async function handleNotificationClick(n: NotificationRow) {
+    if (!n.read) {
+      await supabase.from("notification").update({ read: true }).eq("id", n.id);
+      setNotifications((prev) =>
+        prev.map((item) => (item.id === n.id ? { ...item, read: true } : item)),
+      );
+    }
+    setOpen(false);
+    router.push(notifTarget(n));
   }
 
   // 발송 채널 뱃지
@@ -170,12 +198,21 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
                 {notifications.map((n) => (
                   <li
                     key={n.id}
-                    className="flex items-start gap-3 px-4 py-3"
+                    role="button"
+                    tabIndex={0}
+                    className="flex cursor-pointer items-start gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset"
                     style={{
                       borderBottom: "1px solid #F0EDE8",
                       background: n.read ? "transparent" : "#F2F8F4",
                     }}
                     data-testid="notification-item"
+                    onClick={() => handleNotificationClick(n)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleNotificationClick(n);
+                      }
+                    }}
                   >
                     <span className="mt-0.5 text-[18px]" aria-hidden="true">
                       🍀

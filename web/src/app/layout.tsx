@@ -4,6 +4,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { Footer } from "@/components/common/Footer";
 import "./globals.css";
 
 // Pretendard Variable — 한국어 웹 표준 가변 폰트
@@ -37,7 +39,9 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]">
-        {children}
+        <GoogleAnalytics />
+        <div className="flex-1 flex flex-col">{children}</div>
+        <Footer />
         <Toaster richColors position="top-center" />
       </body>
     </html>

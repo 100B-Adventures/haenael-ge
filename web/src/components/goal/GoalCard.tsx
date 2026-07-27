@@ -1,7 +1,11 @@
+"use client";
+
 // components/goal/GoalCard.tsx — 목표 카드 (② 친구 페이지 핵심 컴포넌트)
 // DESIGN.md: avatar·이름·"○○ 해낼게"·D-day·왜. 금액 절대 비노출.
 // 와이어프레임: goal-page.html #default 상태.
 
+import { useState } from "react";
+import { Clover } from "lucide-react";
 import { DdayChip, StatusChip } from "./DdayChip";
 
 export interface GoalCardProps {
@@ -9,38 +13,75 @@ export interface GoalCardProps {
   reason: string | null;  // 왜(이유)
   dueDate: string;        // ISO date
   status: "ACTIVE" | "CLOSED" | "DELETED";
-  /** 닉네임 (있으면 표시, 없으면 "익명") */
+  /** 목표 소유자 닉네임 */
   nickname?: string | null;
+  /** 목표 소유자 프로필 이미지. 공개 조회 계약이 연결되기 전에는 클로버/이니셜 폴백. */
+  profileImageUrl?: string | null;
 }
 
-// 아바타 자리 (프로필 이미지 없는 MVP: 이니셜 원형)
-function AvatarPlaceholder({ nickname }: { nickname?: string | null }) {
-  const initial = nickname?.[0] ?? "?";
+function OwnerAvatar({
+  nickname,
+  profileImageUrl,
+}: {
+  nickname: string | null;
+  profileImageUrl?: string | null;
+}) {
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const showImage = Boolean(profileImageUrl && failedImageUrl !== profileImageUrl);
+  const initial = nickname ? Array.from(nickname)[0] : null;
+
   return (
     <div
       className="flex-shrink-0 flex items-center justify-center rounded-full text-base font-bold"
       style={{
         width: 56,
         height: 56,
-        background: "linear-gradient(135deg, #cfe9da, #a9d8bf)",
+        background: "#E7F4EC",
         boxShadow: "0 0 0 3px #fff, 0 0 0 4px #E7F4EC",
         color: "#14613A", // --clover-ink
+        overflow: "hidden",
       }}
       aria-hidden="true"
+      data-testid="goal-owner-avatar"
     >
-      {initial}
+      {showImage ? (
+        <img
+          src={profileImageUrl ?? undefined}
+          alt=""
+          width={56}
+          height={56}
+          className="h-full w-full object-cover"
+          onError={() => setFailedImageUrl(profileImageUrl ?? null)}
+          data-testid="goal-owner-avatar-image"
+        />
+      ) : initial ? (
+        initial
+      ) : (
+        <Clover size={24} strokeWidth={1.8} data-testid="goal-owner-avatar-clover" />
+      )}
     </div>
   );
 }
 
-export function GoalCard({ title, reason, dueDate, status, nickname }: GoalCardProps) {
-  const displayName = nickname ?? "익명";
+export function GoalCard({
+  title,
+  reason,
+  dueDate,
+  status,
+  nickname,
+  profileImageUrl,
+}: GoalCardProps) {
+  const normalizedNickname = nickname?.trim() || null;
+  const displayName = normalizedNickname ?? "해낼게 사용자";
 
   return (
     <article className="w-full" data-testid="goal-card">
       {/* 헤더: 아바타 + 이름 */}
       <div className="flex items-center gap-3 mb-4">
-        <AvatarPlaceholder nickname={nickname} />
+        <OwnerAvatar
+          nickname={normalizedNickname}
+          profileImageUrl={profileImageUrl}
+        />
         <div>
           <p
             className="text-[15px] font-extrabold leading-snug"

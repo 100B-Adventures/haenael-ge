@@ -10,8 +10,14 @@
 //   - localStorage draft는 Zustand store가 관리 (이 컴포넌트에서 읽기만)
 //
 // 로그인 후 리다이렉트: state 파라미터로 /onboarding 전달 → draft 복원 후 저장
+//
+// 회장 결정 (2026-07-19): 로그인을 카카오 단일로 통일. 구글/애플 버튼은
+// UI에서 숨기되(SHOW_SOCIAL_LOGIN=false), signInWithOAuth 로직·/auth/callback
+// route·테스트는 그대로 보존한다 (나중 앱 출시 시 부활 예정 — 삭제 금지).
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { isSafeRedirectPath } from "@/lib/auth/redirect-path";
 // useAppStore: draft 상태 읽기 용도 (이 컴포넌트에서 직접 사용하진 않으나 향후 확장점)
 // import { useAppStore } from "@/store";
 
@@ -28,22 +34,45 @@ export interface LoginSheetProps {
   redirectAfterLogin?: string;
 }
 
-// ─── 카카오 OAuth URL 생성 ────────────────────────────────────────────────────
+// ─── 카카오 OAuth 시작 URL 생성 ────────────────────────────────────────────────
+//
+// 보안 결함 수정 (Codex 2nd-pass 결함1 — 로그인 CSRF/세션 고정):
+// 카카오 인가 URL을 클라이언트에서 직접 만들지 않고, 서버 라우트
+// /auth/kakao/start 를 경유한다. 그 라우트가 암호학적 nonce를 생성해
+// httpOnly 쿠키에 저장하고 state에 실어 카카오로 리다이렉트한다.
+// callback은 쿠키의 nonce와 state의 nonce를 대조(CSRF 방지).
 
-function buildKakaoOAuthUrl(appUrl: string, redirectAfterLogin: string): string {
-  const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY ?? "";
-  const callbackUri = encodeURIComponent(`${appUrl}/auth/kakao/callback`);
-  // state: 로그인 후 돌아올 경로. 서버에서 검증(내부 경로만 허용).
-  const state = encodeURIComponent(redirectAfterLogin);
+function buildKakaoStartUrl(redirectAfterLogin: string): string {
+  return `/auth/kakao/start?redirect=${encodeURIComponent(redirectAfterLogin)}`;
+}
+
+// ─── 구글/애플 OAuth (Supabase 네이티브) ────────────────────────────────────
+//
+// api-contract A1b: supabase.auth.signInWithOAuth(google/apple) — 카카오와 달리
+// 커스텀 EF 없이 Supabase Auth가 provider 왕복을 전담한다. 클라이언트가
+// 직접 signInWithOAuth를 호출하고, redirectTo로 /auth/callback(신규,
+// exchangeCodeForSession 처리)을 지정해 세션을 확립한다.
+
+/** redirectAfterLogin(내부 경로)을 /auth/callback?next=... 절대 URL로 인코딩 */
+export function buildOAuthRedirectTo(origin: string, redirectAfterLogin: string): string {
+  const nextPath = isSafeRedirectPath(redirectAfterLogin) ? redirectAfterLogin : "/onboarding";
+  return `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+}
+
+/** provider(google/apple) 미설정/실패 시 사용자에게 보여줄 친절한 메시지(카카오 방어 패턴 재사용) */
+function describeOAuthError(providerLabel: string, message?: string): string {
   return (
-    `https://kauth.kakao.com/oauth/authorize` +
-    `?client_id=${kakaoClientId}` +
-    `&redirect_uri=${callbackUri}` +
-    `&response_type=code` +
-    `&scope=profile_nickname,profile_image,account_email` +
-    `&state=${state}`
+    `${providerLabel} 로그인을 지금은 이용할 수 없어요.\n` +
+    `(${message ?? "provider 설정을 확인해주세요"})`
   );
 }
+
+// ─── 소셜 로그인 노출 플래그 ───────────────────────────────────────────────────
+//
+// false = 구글/애플 버튼 숨김(카카오 단일 UX). 코드는 보존 — 이 플래그만 true로
+// 되돌리면 즉시 복원된다. 관련 컴포넌트(GoogleLoginButton/AppleLoginButton)는
+// 아래에서 계속 정의되며 eslint no-unused-vars 방지를 위해 여전히 참조된다.
+const SHOW_SOCIAL_LOGIN = false;
 
 // ─── 컴포넌트 ─────────────────────────────────────────────────────────────────
 
@@ -54,10 +83,6 @@ export function LoginSheet({
   redirectAfterLogin = "/onboarding",
 }: LoginSheetProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const appUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : (process.env.NEXT_PUBLIC_APP_URL ?? "");
 
   // ESC 키로 닫기
   useEffect(() => {
@@ -93,7 +118,7 @@ export function LoginSheet({
       );
       return;
     }
-    window.location.href = buildKakaoOAuthUrl(appUrl, redirectAfterLogin);
+    window.location.href = buildKakaoStartUrl(redirectAfterLogin);
   };
 
   // 배경 클릭으로 닫기
@@ -194,21 +219,27 @@ export function LoginSheet({
               <span>카카오로 계속하기</span>
             </button>
 
-            {/* 구분선 */}
-            <div
-              className="flex items-center gap-3"
-              style={{ color: "#9C968B" }} // --faint
-            >
-              <div className="flex-1 h-px" style={{ backgroundColor: "#E8E4DC" }} />
-              <span className="text-xs">또는</span>
-              <div className="flex-1 h-px" style={{ backgroundColor: "#E8E4DC" }} />
-            </div>
+            {/* 구글/애플 — 회장 결정(2026-07-19)으로 카카오 단일 통일, 숨김.
+                코드는 보존(SHOW_SOCIAL_LOGIN=false) — 앱 출시 시 부활 예정. */}
+            {SHOW_SOCIAL_LOGIN && (
+              <>
+                {/* 구분선 */}
+                <div
+                  className="flex items-center gap-3"
+                  style={{ color: "#9C968B" }} // --faint
+                >
+                  <div className="flex-1 h-px" style={{ backgroundColor: "#E8E4DC" }} />
+                  <span className="text-xs">또는</span>
+                  <div className="flex-1 h-px" style={{ backgroundColor: "#E8E4DC" }} />
+                </div>
 
-            {/* 구글 — secondary */}
-            <GoogleLoginButton redirectAfterLogin={redirectAfterLogin} />
+                {/* 구글 — secondary */}
+                <GoogleLoginButton redirectAfterLogin={redirectAfterLogin} />
 
-            {/* 애플 — secondary (iOS Safari 등) */}
-            <AppleLoginButton redirectAfterLogin={redirectAfterLogin} />
+                {/* 애플 — secondary (iOS Safari 등) */}
+                <AppleLoginButton redirectAfterLogin={redirectAfterLogin} />
+              </>
+            )}
           </div>
 
           {/* 약관 고지 */}
@@ -263,19 +294,43 @@ function KakaoIcon() {
   );
 }
 
-function GoogleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: string }) {
-  const handleGoogleLogin = () => {
-    // 구글은 Supabase 네이티브 OAuth
-    // 클라이언트 컴포넌트이므로 supabase client가 필요
-    // slice #3에서는 버튼 UI만 — 실 연결은 Supabase Auth 세션이 있는 컨텍스트에서
-    alert("구글 로그인은 Supabase OAuth로 구현됩니다. (슬라이스 #4 연결 예정)");
+// export: 카카오 단일 통일로 렌더에서는 숨겨졌지만(SHOW_SOCIAL_LOGIN),
+// 로직 자체는 보존 — 테스트가 이 컴포넌트를 직접 렌더해 회귀를 검증한다.
+export function GoogleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: string }) {
+  const [pending, setPending] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      const supabase = createClient();
+      const redirectTo = buildOAuthRedirectTo(window.location.origin, redirectAfterLogin);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+
+      if (error) {
+        // 프로젝트에서 Google provider가 비활성화된 경우 등 — 카카오 방어 패턴과 동일하게
+        // raw 에러를 그대로 노출하지 않고 친절한 메시지로 대체.
+        console.warn("[LoginSheet] Google signInWithOAuth error:", error);
+        alert(describeOAuthError("Google", error.message));
+        setPending(false);
+      }
+      // 성공 시 이 지점부터 전체 페이지 리다이렉트가 일어나므로 setPending(false) 불필요
+    } catch (err) {
+      console.error("[LoginSheet] Google 로그인 예외:", err);
+      alert(describeOAuthError("Google"));
+      setPending(false);
+    }
   };
 
   return (
     <button
       type="button"
       onClick={handleGoogleLogin}
-      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80"
+      disabled={pending}
+      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80 disabled:opacity-60"
       style={{
         height: 48,
         borderRadius: 14,
@@ -292,16 +347,40 @@ function GoogleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: string 
   );
 }
 
-function AppleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: string }) {
-  const handleAppleLogin = () => {
-    alert("애플 로그인은 Supabase OAuth로 구현됩니다. (슬라이스 #4 연결 예정)");
+export function AppleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: string }) {
+  const [pending, setPending] = useState(false);
+
+  const handleAppleLogin = async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      const supabase = createClient();
+      const redirectTo = buildOAuthRedirectTo(window.location.origin, redirectAfterLogin);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "apple",
+        options: { redirectTo },
+      });
+
+      if (error) {
+        // Apple은 Supabase 프로젝트 + Apple Developer(Services ID·Team ID·Key) 설정이
+        // 별도 필요 — 미설정 시 Supabase가 반환하는 에러를 그대로 방어 처리.
+        console.warn("[LoginSheet] Apple signInWithOAuth error:", error);
+        alert(describeOAuthError("Apple", error.message));
+        setPending(false);
+      }
+    } catch (err) {
+      console.error("[LoginSheet] Apple 로그인 예외:", err);
+      alert(describeOAuthError("Apple"));
+      setPending(false);
+    }
   };
 
   return (
     <button
       type="button"
       onClick={handleAppleLogin}
-      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80"
+      disabled={pending}
+      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80 disabled:opacity-60"
       style={{
         height: 48,
         borderRadius: 14,
