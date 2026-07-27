@@ -22,6 +22,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import {
   exchangeKakaoCode,
   getKakaoUserInfo,
+  isSyntheticKakaoEmail,
   KakaoAuthError,
   normalizeKakaoUser,
 } from "../_shared/oauth-kakao.ts";
@@ -177,11 +178,26 @@ Deno.serve(async (req: Request) => {
         });
 
       if (createError || !newUserData.user) {
-        // email 충돌(synthetic email 포함) — 재조회
-        if (
+        // email 충돌 — 기존 Auth 유저가 이미 이 이메일을 쓰고 있음
+        const isConflict =
           createError?.message?.includes("already been registered") ||
-          createError?.status === 422
-        ) {
+          createError?.status === 422;
+
+        if (isConflict) {
+          // 보안 결함3 수정: real(카카오 검증) 이메일 충돌은 소유권 증명 없이
+          // 자동연결하지 않는다. synthetic 이메일(`kakao_{id}@kakao.haenael.app`,
+          // 카카오 id 기반이라 위조 불가·유니크)만 안전하게 자동연결한다.
+          // 현재는 scope에 account_email이 없어 이메일 scope 미보유 → 이 분기는
+          // 이메일 scope 추가(비즈 앱 전환) 이후에나 real 이메일로 도달 가능하지만,
+          // 그 전환 시 즉시 취약해지므로 선제 방어한다.
+          if (!isSyntheticKakaoEmail(email, providerId)) {
+            return jsonError(
+              "email_conflict_manual_link_required",
+              "이미 다른 계정에서 사용 중인 이메일입니다. 계정 연결은 로그인 후 별도 절차로 진행해주세요.",
+              409,
+            );
+          }
+
           const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({
             perPage: 1000,
           });
@@ -230,9 +246,11 @@ Deno.serve(async (req: Request) => {
     //    클라이언트: supabase.auth.verifyOtp({ token_hash, type: 'email' })
     const { data: linkData, error: linkError } =
       await supabaseAdmin.auth.admin.generateLink({
+        // type "magiclink"은 기존 유저만 대상이라 별도 shouldCreateUser 옵션이 없다
+        // (GenerateLinkOptions는 data/redirectTo만 허용 — TS2353 방지).
+        // 위 3단계에서 auth user 존재를 이미 보장했으므로 옵션 없이 호출한다.
         type: "magiclink",
         email,
-        options: { shouldCreateUser: false },
       });
 
     if (linkError || !linkData?.properties?.hashed_token) {

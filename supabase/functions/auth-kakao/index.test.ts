@@ -15,6 +15,7 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
 import {
+  isSyntheticKakaoEmail,
   KakaoAuthError,
   normalizeKakaoUser,
   type KakaoUserInfo,
@@ -73,6 +74,40 @@ Deno.test("normalizeKakaoUser — 닉네임 없음 → 기본값", () => {
   const user: KakaoUserInfo = { id: 1 };
   const result = normalizeKakaoUser(user);
   assertEquals(result.nickname, "해낼게 유저");
+});
+
+// ─── isSyntheticKakaoEmail — 보안 결함3 회귀 테스트 ──────────────────────────
+// (email 충돌 시 real 이메일은 자동연결 거부, synthetic은 허용해야 함)
+
+Deno.test("isSyntheticKakaoEmail — providerId와 정확히 일치하면 true", () => {
+  assertEquals(isSyntheticKakaoEmail("kakao_12345@kakao.haenael.app", "12345"), true);
+  assertEquals(isSyntheticKakaoEmail("kakao_777@kakao.haenael.app", "777"), true);
+});
+
+Deno.test("isSyntheticKakaoEmail — real 이메일이면 false (자동연결 거부 대상)", () => {
+  assertEquals(isSyntheticKakaoEmail("test@example.com", "12345"), false);
+  assertEquals(isSyntheticKakaoEmail("victim@gmail.com", "12345"), false);
+});
+
+Deno.test("isSyntheticKakaoEmail — 도메인만 비슷한 위조 시도는 false", () => {
+  // suffix가 아니라 부분 포함이면 안 됨 (예: kakao.haenael.app.evil.com)
+  assertEquals(
+    isSyntheticKakaoEmail("kakao_1@kakao.haenael.app.evil.com", "1"),
+    false,
+  );
+});
+
+Deno.test("isSyntheticKakaoEmail — P2: 도메인으로 끝나는 real 이메일은 providerId 불일치로 false", () => {
+  // 공격자가 검증한 real 이메일이 우연/의도적으로 synthetic 도메인으로 끝나도
+  // providerId가 일치하지 않으면 synthetic 아님 → 자동연결 거부
+  assertEquals(
+    isSyntheticKakaoEmail("attacker@kakao.haenael.app", "99999"),
+    false,
+  );
+  assertEquals(
+    isSyntheticKakaoEmail("kakao_11111@kakao.haenael.app", "99999"),
+    false,
+  );
 });
 
 // ─── KakaoAuthError ───────────────────────────────────────────────────────────

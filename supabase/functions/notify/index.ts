@@ -19,6 +19,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
 import { buildCheerReceivedMessage, sendAlimtalk } from "../_shared/alimtalk.ts";
 
+// ─── CORS ───────────────────────────────────────────────────────────────────
+// report EF와 동일 버그(2026-07-20 수정): OPTIONS만 CORS를 붙이고 실제 응답엔
+// 안 붙어 있었다. 내부(service_role) 호출이 주지만 브라우저 경유 호출도 막지
+// 않도록 전 응답에 통일 적용.
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 // ─── 에러 응답 헬퍼 ─────────────────────────────────────────────────────────
 function err(status: number, code: string, message: string): Response {
   return new Response(
@@ -26,7 +36,7 @@ function err(status: number, code: string, message: string): Response {
     {
       status,
       headers: withRegionHeader(
-        new Headers({ "Content-Type": "application/json" }),
+        new Headers({ "Content-Type": "application/json", ...CORS_HEADERS }),
       ),
     },
   );
@@ -75,13 +85,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: withRegionHeader(
-        new Headers({
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        }),
-      ),
+      headers: withRegionHeader(new Headers(CORS_HEADERS)),
     });
   }
 
@@ -171,7 +175,7 @@ Deno.serve(async (req: Request) => {
     {
       status: 200,
       headers: withRegionHeader(
-        new Headers({ "Content-Type": "application/json" }),
+        new Headers({ "Content-Type": "application/json", ...CORS_HEADERS }),
       ),
     },
   );

@@ -14,8 +14,19 @@
 //
 // 응답: { reportId: number }
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
+import { sendSlackAlert } from "../_shared/slack.ts";
+
+// ─── CORS ───────────────────────────────────────────────────────────────────
+// 버그 수정(2026-07-20): OPTIONS 프리플라이트에만 CORS를 붙이고 실제 POST 응답
+// (err 헬퍼·201 성공)엔 안 붙였던 게 prod 크로스오리진 차단의 원인이었다.
+// cheer-order의 CORS_HEADERS 패턴을 그대로 차용 — 모든 응답 경로에 스프레드.
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
 
 // ─── 에러 응답 헬퍼 ─────────────────────────────────────────────────────────
 function err(status: number, code: string, message: string): Response {
@@ -24,7 +35,7 @@ function err(status: number, code: string, message: string): Response {
     {
       status,
       headers: withRegionHeader(
-        new Headers({ "Content-Type": "application/json" }),
+        new Headers({ "Content-Type": "application/json", ...CORS_HEADERS }),
       ),
     },
   );
@@ -69,7 +80,9 @@ function validate(body: unknown): { data: ReportInput } | { error: string } {
 
 // ─── 대상 존재 확인 ─────────────────────────────────────────────────────────
 async function targetExists(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  // ReturnType<typeof createClient>는 제네릭 기본값이 never로 풀려 실제 클라이언트와 안 맞는다(TS2345).
+  // 호출부가 만드는 실제 타입(public 스키마)으로 명시한다.
+  supabaseAdmin: SupabaseClient<any, "public", any>,
   targetType: "GOAL" | "CHEER",
   targetId: number,
 ): Promise<boolean> {
@@ -98,13 +111,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: withRegionHeader(
-        new Headers({
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        }),
-      ),
+      headers: withRegionHeader(new Headers(CORS_HEADERS)),
     });
   }
 
@@ -185,12 +192,27 @@ Deno.serve(async (req: Request) => {
     return err(500, "db_error", "신고 접수 실패. 잠시 후 재시도해주세요.");
   }
 
+  // 관리자 확인 수단: Slack 즉시 알림 (admin UI는 스코프 밖 — SLACK_WEBHOOK_URL
+  // 미설정 시 sendSlackAlert가 조용히 skip하므로 여기서도 실패해도 응답엔 영향 없음).
+  await sendSlackAlert({
+    event: "report_received",
+    severity: "warning",
+    summary: `신고 접수: ${input.targetType} #${input.targetId}`,
+    fields: {
+      reportId: report.id,
+      targetType: input.targetType,
+      targetId: input.targetId,
+      reason: input.reason.slice(0, 200),
+      reporterRef: reporterRef ?? "guest",
+    },
+  });
+
   return new Response(
     JSON.stringify({ reportId: report.id }),
     {
       status: 201,
       headers: withRegionHeader(
-        new Headers({ "Content-Type": "application/json" }),
+        new Headers({ "Content-Type": "application/json", ...CORS_HEADERS }),
       ),
     },
   );
