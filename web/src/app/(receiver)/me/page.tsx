@@ -262,6 +262,18 @@ export default async function ReceiverHomePage() {
         {/* 내 응원 링크 재접근 (user-flow.md §1.3 갭3, 2026-07-20) */}
         <MyLinkCard slug={goal.slug} />
 
+        {/* 친구에게 보이는 화면 미리보기 (본인 방문 시 OwnerBar 표시) */}
+        <Link
+          href={`/g/${goal.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block rounded-[12px] px-4 py-3 mb-4 text-center font-semibold"
+          style={{ background: "#F4EFE6", color: "#14613A", fontSize: 13 }}
+          data-testid="friend-view-preview-link"
+        >
+          👀 친구에게 이렇게 보여요 (미리보기)
+        </Link>
+
         {/* 클로버 잔액 — 🍀 개수만 (DESIGN.md §6 금액 3층 b) */}
         <div
           className="flex items-center justify-between rounded-[14px] p-4 mb-3"
@@ -296,17 +308,16 @@ export default async function ReceiverHomePage() {
             </p>
           </div>
           {/* 환전 버튼 — 도달판정(웰컴 포함) 기준. 실제 환전 EF는 kill switch(CASHOUT_ENABLED)로 별도 게이트. */}
+          {/* 환전 페이지 진입은 미달이어도 항상 허용(안내 확인용). 실제 신청은 cashout 페이지에서 도달·kill switch로 게이트. */}
           <Link
             href="/cashout"
             className="rounded-[10px] px-3 py-2 font-bold text-white text-center"
             style={{
               background: "#1B8A4F",
               fontSize: 12,
-              opacity: reachedThreshold ? 1 : 0.45,
-              pointerEvents: reachedThreshold ? "auto" : "none",
+              opacity: reachedThreshold ? 1 : 0.6,
             }}
-            data-testid={reachedThreshold ? "cashout-button-enabled" : "cashout-button-disabled"}
-            aria-disabled={!reachedThreshold}
+            data-testid={reachedThreshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
           >
             환전
           </Link>
@@ -320,10 +331,14 @@ export default async function ReceiverHomePage() {
         {/* 워드맵 미니 프리뷰 */}
         {previewWords.length > 0 && (
           <div
-            className="rounded-[14px] px-4 py-4 mb-4 text-center leading-relaxed"
+            className="rounded-[14px] px-4 py-4 mb-4 leading-relaxed"
             style={{ background: "#E7F4EC" }}
             data-testid="wordmap-mini-preview"
           >
+            <p className="mb-2 text-[11px] font-bold" style={{ color: "#6F6A60" }}>
+              워드맵 미리보기
+            </p>
+            <div className="text-center">
             {previewWords.map((w) => {
               const ratio = maxCount > 0 ? w.word_count / maxCount : 0;
               const fontSize = Math.round(13 + ratio * 8);
@@ -337,6 +352,7 @@ export default async function ReceiverHomePage() {
                 </span>
               );
             })}
+            </div>
           </div>
         )}
 

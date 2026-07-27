@@ -13,6 +13,7 @@ type AdminMember = {
   kyc_status: string;
   created_at: string;
   clover_count: number;
+  goal_slug: string | null;
 };
 
 type AdminLedgerEntry = {
@@ -201,12 +202,13 @@ export default async function AdminPage() {
                     <th className="border-b px-4 py-3 font-semibold">로그인</th>
                     <th className="border-b px-4 py-3 font-semibold">본인인증</th>
                     <th className="border-b px-4 py-3 text-right font-semibold">클로버</th>
+                    <th className="border-b px-4 py-3 font-semibold">해낼게</th>
                     <th className="border-b px-4 py-3 font-semibold">회원 ID</th>
                   </tr>
                 </thead>
                 <tbody>
                   {members.length === 0 ? (
-                    <EmptyRow colSpan={6} />
+                    <EmptyRow colSpan={7} />
                   ) : (
                     members.map((member) => (
                       <tr key={member.id} className="hover:bg-muted/40">
@@ -230,6 +232,20 @@ export default async function AdminPage() {
                         </td>
                         <td className="border-b px-4 py-3 text-right font-bold text-primary">
                           {formatNumber(member.clover_count)}
+                        </td>
+                        <td className="border-b px-4 py-3">
+                          {member.goal_slug ? (
+                            <a
+                              href={`/g/${member.goal_slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-semibold text-primary underline"
+                            >
+                              보기
+                            </a>
+                          ) : (
+                            "—"
+                          )}
                         </td>
                         <td
                           className="border-b px-4 py-3 font-mono text-xs text-muted-foreground"

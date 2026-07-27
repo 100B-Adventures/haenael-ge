@@ -420,3 +420,400 @@ Tests: 46 passed, Duration: ~4.5s
 - NotificationBadge, ReportButton 컴포넌트
 
 ---
+
+## 슬라이스 #10 — 알림(카카오 알림톡) + 신고/모더레이션 — B1 마지막 슬라이스 (완료 2026-07-06, 커밋 `a497f72`)
+
+### 무엇을 세웠나
+
+| 레이어 | 산출 |
+|---|---|
+| `supabase/functions/_shared/alimtalk.ts` | 카카오 알림톡 API 어댑터 실구현(ENV placeholder 모드) |
+| EF `notify` | 응원 도착 정보성 알림톡 + INAPP 폴백(N2) |
+| EF `report` | 신고 접수(R1) — anon/authenticated 모두 호출 가능, service_role DB write |
+| `supabase/tests/rls_policy.test.sql` | pgTAP 27케이스(report INSERT RLS + soft-delete cheer 워드맵 제외 신규 7케이스) |
+| `web/src/components/common/NotificationBadge.tsx` | 인앱 알림 배지 컴포넌트(N1), `/home` 통합 |
+| `web/src/components/common/ReportButton.tsx` | 신고 버튼 + 사유 선택 시트(F7), `/g/[slug]` GOAL 신고 통합 |
+| `web/e2e/report-flow.spec.ts` | 신고 플로우 E2E |
+
+### 검증 증거 (§3 직접 관찰, 커밋 메시지 인용)
+
+```
+vitest 63 PASS / Deno 21 PASS / pgTAP 27 PASS / E2E 9 PASS
+```
+
+- 변경 파일 14개, +1920/-35 (git show --stat a497f72).
+
+### 게이트 체크
+
+| 게이트 | 상태 |
+|---|---|
+| vitest 63 PASS | ✅ |
+| Deno EF 단위테스트 21 PASS | ✅ |
+| pgTAP 27 PASS(누적) | ✅ |
+| Playwright E2E 9 PASS | ✅ |
+| report INSERT RLS(anon/authenticated) | ✅ |
+
+### ⛔ 회수 필요 (누적, 슬라이스 #9와 동일 사유 유지)
+1. 실 카카오 로그인 후 알림톡 실발송/INAPP 폴백 전구간 미검증(카카오 비즈채널·템플릿 심사 전, ENV placeholder 모드).
+2. 신고 처리(운영자 검토·조치) admin 플로우는 build 스코프 밖 — 접수만 구현, 처리는 defer.
+
+---
+
+## B2 결제 — 최초 구현 (2026-07-08~10)
+
+### 무엇을 세웠나
+
+| 레이어 | 산출 |
+|---|---|
+| `web/src/app/g/[slug]/page.tsx` | 결제 CTA 활성화 |
+| `web/src/components/goal/CheerPaymentButton.tsx` | TossPayments v2 JS SDK 위젯 로더 + 결제 트리거 |
+| `web/src/app/payment/success·fail/page.tsx` | 결제 성공/실패 리다이렉트 페이지 |
+| EF `cheer-order` | 주문 생성(anon 호출 가능) |
+| EF `toss-confirm` | Toss 결제 승인 콜백 처리 |
+| DB RPC | `create_cheer_order`, `confirm_cheer_payment` — payment/cheer/ledger 원자 전이 |
+| 마이그레이션 | `20260708000000_payment_rpc.sql`, `20260708001000_payment_rpc_qualify_columns.sql` |
+| 보안 | 결제 RPC는 `PUBLIC`/`anon`/`authenticated` 실행권한 회수, `service_role`만 허용. pgTAP에 직접 호출 차단 테스트 추가 |
+
+### 검증 증거 (§3 직접 관찰 — `.handoff-state.md` 2026-07-08 15:36 KST 인용)
+
+```
+Vitest 63 PASS
+Next build PASS
+Supabase pgTAP 38 PASS
+Playwright goal-flow.spec.ts 14 PASS (E2E_BASE_URL=http://localhost:3001, slug 7druulwd)
+```
+
+### 게이트 체크
+
+| 게이트 | 상태 |
+|---|---|
+| web/ Next.js build PASS | ✅ |
+| vitest 63 PASS | ✅ |
+| pgTAP 38 PASS | ✅ |
+| Playwright goal-flow 14 PASS | ✅ |
+| 결제 RPC anon/authenticated 직접호출 차단(pgTAP) | ✅ |
+
+### ⛔ 회수 필요 (최초 구현 시점)
+1. 실 Toss 결제(진짜 test secret 없음) — confirm 미검증.
+2. `toss-webhook`/환전(cashout)/PASS 본인인증/payout = stub 또는 미구현.
+3. Supabase cloud keys·Vercel env·Toss/Kakao secrets·Toss redirect 설정 = 실배포 전 필요, 회장 벤더 액션.
+
+---
+
+## B2 결제 — Codex 2nd-pass 결함수정 (4라운드, 2026-07-10~13)
+
+Codex(money-code 2nd-pass, review-only)가 4라운드에 걸쳐 REJECT→수정→재리뷰를 반복한 기록. 각 라운드는 신규 migration으로만 반영(기존 적용된 migration 파일은 수정하지 않음).
+
+### 1라운드 — 최초 리뷰 결함 3건 수정 (2026-07-10~11)
+
+| 결함 | 수정 |
+|---|---|
+| ① `cancelPayment` 응답 미검증 | `_shared/toss.ts`에 paymentKey 일치 + `status === CANCELED` 검증 추가. 신규 `web/src/lib/__tests__/toss-cancel.test.ts`(6케이스) |
+| ② 공개 `cheer-order` 남용방지 없음 | 마이그레이션 `20260710050000_payment_expiry_enum.sql` + `20260710051000_cheer_order_abuse_guard.sql`(request_key 멱등 UNIQUE·customer/goal 이중 rate-limit·opportunistic+pg_cron stale 정리). `CheerPaymentButton.tsx` requestKey 실연동. 신규 pgTAP `supabase/tests/payment_abuse_guard.test.sql`(13 assertions) |
+| ③ 내부 오류 원문 노출 | 신규 `supabase/functions/_shared/errors.ts`(화이트리스트 코드+고정메시지). `cheer-order`/`toss-confirm` 응답경로 벤더/DB 원문 노출 0건 |
+
+**검증 (컨트롤러 직접 재관찰, `.handoff-state.md` 2026-07-11 17:50 KST):**
+
+```
+npm test (web) 69/69 PASS
+npm run build (web) PASS
+supabase migration up --local: 드리프트 없음
+supabase test db: PASS Files=2 Tests=65
+cheer-order 실 HTTP 멱등 smoke: 동일 requestKey 2회 → 동일 orderId + idempotent:true (직접 curl 관찰)
+Playwright goal-flow.spec.ts 14/14 PASS (E2E_GOAL_SLUG=7druulwd)
+```
+
+### 2라운드 — 동시성 blocker 2건 (create_cheer_order) (2026-07-13 18:15 KST)
+
+Codex 최종 리뷰가 순차 pgTAP(단일 커넥션)로는 재현 안 되는 진짜 동시성 레이스 2건을 REJECT.
+
+| Blocker | 수정 |
+|---|---|
+| rate-limit count↔insert 비직렬화 | `pg_advisory_xact_lock(hashtextextended(...))`으로 customer_key→goal_id 고정 순서 잠금(데드락 불가) 후 count+insert를 트랜잭션 스코프로 직렬화 |
+| request_key SELECT-then-INSERT 레이스 | `INSERT ... ON CONFLICT (request_key) WHERE request_key IS NOT NULL DO NOTHING RETURNING id`로 전환. 경합 패배 시 승자 행 재조회 → amount 일치=replay/불일치=request_key_conflict. raw 23505 노출 경로 0개 |
+
+신규 파일: `supabase/migrations/20260713180819_cheer_order_concurrency_fix.sql`(CREATE OR REPLACE, 시그니처 불변), `supabase/tests/concurrency/rate_limit_race.sh`, `supabase/tests/concurrency/request_key_race.sh`(실제 병렬 psql 세션, pg_sleep(0.3) 배리어로 겹치게 발사).
+
+**검증 (컨트롤러 직접 fresh 재검증, `.handoff-state.md` 2026-07-13 18:15 KST):**
+
+```
+supabase migration up --local: 드리프트 없음
+supabase test db: 65/65 PASS
+rate_limit_race.sh: ALL PASS — customer_key 10개 동시 발사 → READY 정확히 5 / rate_limited 정확히 5
+                      goal 30개 동시(customer_key 전부 다름) → READY 정확히 20 / 거부 정확히 10
+request_key_race.sh: ALL PASS — 동일 request_key+동일 amount 10개 동시 → payment 행 1개, 실패 0, raw 23505 노출 0
+                       동일 request_key+다른 amount(3000×5/5000×5) 동시 → 행 1개 수렴, 승자 그룹만 성공
+npm test (web): 69/69 PASS
+npm run build (web): PASS
+```
+Playwright E2E는 이번 라운드 DB 함수만 변경(EF·CheerPaymentButton mtime 미변경, RPC 9-인자 시그니처 동일) 확인 후 회귀 대상 없어 생략(근거 확인, 스킵 아님).
+
+### 3라운드 — request_key fingerprint 강화 (2026-07-13 22:35 KST)
+
+Codex 3차 리뷰가 request_key replay 판정이 **amount_krw만 비교**해 동일 request_key를 다른 goal_id/customer_key/displayName/isAnonymous/message로 재사용해도 기존 주문을 그대로 성공 반환하는 결함을 REJECT.
+
+**수정:** 신규 `supabase/migrations/20260713190000_cheer_order_request_fingerprint.sql`(CREATE OR REPLACE, 기존 3개 migration 미수정). `payment.request_fingerprint jsonb` 컬럼 신설 — goal_id·customer_key·amount_krw·display_name·is_anonymous·message를 cheer INSERT와 동일 정규화 표현으로 저장. fast-path·INSERT 경합 안전망 양쪽에서 `amount_krw !=` 비교를 `request_fingerprint IS DISTINCT FROM`(NULL-safe)으로 교체 — 하나라도 다르면 `request_key_conflict`.
+
+신규 테스트: pgTAP `#FP-1~6`(완전일치=replay 성공, goal_id/customer_key/displayName/isAnonymous/message 각 단독 변경=conflict) — `payment_abuse_guard.test.sql`에 추가(plan 13→20). 신규 병렬 스크립트 `supabase/tests/concurrency/request_key_fingerprint_race.sh`.
+
+**검증 (컨트롤러 직접 fresh 재검증, `.handoff-state.md` 2026-07-13 22:35 KST):**
+
+```
+supabase migration up --local: 드리프트 없음
+supabase test db: 72/72 PASS (20+52)
+rate_limit_race.sh: ALL PASS (회귀)
+request_key_race.sh: ALL PASS (회귀 — fingerprint 비교 전환 후에도 시나리오 A/B 동일 결과)
+request_key_fingerprint_race.sh (신규): ALL PASS — 동일 request_key+goal_id만 다른 5+5 동시 발사 → payment 행 1개, 승자 그룹만 성공, 나머지 전부 request_key_conflict(raw 23505 노출 0)
+npm test (web): 69/69 PASS
+npm run build (web): PASS
+```
+EF(`cheer-order/index.ts`)·`CheerPaymentButton.tsx` mtime 확인 결과 이번 라운드 미접촉(RPC 9-인자 시그니처·응답 스키마 불변) → Playwright 생략(근거 확인).
+
+### 4라운드 — Codex 최종 판정 (2026-07-13 23:10 KST)
+
+**Codex 4차 최종 판정: PASS.** request_fingerprint 수정으로 결제 코드 2nd-pass 리뷰 사이클(1라운드 cancelPayment 검증 → 2라운드 abuse guard → 3라운드 동시성 → 4라운드 fingerprint 재리뷰) 종료.
+
+### 게이트 체크 (B2 Codex 2nd-pass 종합)
+
+| 게이트 | 상태 |
+|---|---|
+| Codex money-code 2nd-pass 최종 PASS | ✅ |
+| pgTAP 72/72 PASS(누적) | ✅ |
+| 병렬 세션 레이스 스크립트 3종 ALL PASS(rate_limit·request_key·fingerprint) | ✅ |
+| web unit 69/69 PASS | ✅ |
+| web build PASS | ✅ |
+| Playwright goal-flow 14/14 PASS(회귀, 마지막 실행 라운드 1) | ✅ |
+| raw DB 예외(23505 등) 호출자 노출 0건 | ✅ |
+| 결제 RPC anon/authenticated 직접호출 차단 | ✅ |
+
+### ⛔ 회수 필요 (누적, 2026-07-13 기준)
+1. **실 Toss 결제 미검증** — 진짜 test secret 없어 confirm/cancel 왕복을 한 번도 실제로 못 쳐봄. 전 라운드 공통.
+2. **Supabase 클라우드 프로젝트 미생성** — `supabase projects list` → `LegacyPlatformAuthRequiredError`(로그인 필요), 배포 밑돌.
+3. **Vercel 프로젝트 미링크** — `web/.vercel` 없음, 로그인 필요.
+4. **`toss-webhook`/환전(cashout)/PASS 본인인증/payout = stub 상태** — build 스코프 밖, 별도 착수 필요.
+5. **하네스 실측**: `~/.sj-agent-harness/secrets/`·macOS Keychain 어디에도 haenael-ge 클라우드 키 없음 확인됨(2026-07-13) — 배포는 회장의 수동 로그인/콘솔 액션 없이는 이 세션에서 구조적으로 진행 불가.
+
+---
+
+## v1.0.0 출시 기능 (2026-07-15)
+
+- 리드 수집: 이메일/Instagram, 동의, UTM, referrer 저장. service-role RPC·RLS·IP salted hash 시간 제한·신규 리드 Slack 알림.
+- 분석: GA4 초기화와 `lead_submitted`, `goal_created`, `cheer_started`, `payment_success`, `wordmap_shared`, `report_submitted`; page path query/hash 제거.
+- 운영: DB 실조회 `/api/health`, `PAYMENTS_ENABLED`·`CASHOUT_ENABLED` kill switch, Slack 장애 알림.
+- 결제 복구: Toss 서버 재조회 기반 DONE/전액취소 재조정, 부분취소 수동검토 리스크 이벤트, 공유 URL 토큰 인증, 중복 웹훅 멱등 처리.
+- 현금화/PASS/payout은 v1.0.0에서 명시적으로 비활성화했다.
+- 검증 증거는 `docs/qa-tracker.md`의 2026-07-15 항목을 따른다.
+
+## toss-webhook Codex 2nd-pass — 요청단위 테스트 + 최종 PASS (2026-07-16)
+
+Codex 최종 리뷰(v1.0.0 diff)가 유일한 blocker(P2)로 `toss-webhook` 요청 단위 회귀테스트 부재를 지적 → 해소 → 재지적(null/array/원시값 JSON dereference) → 해소 → **Codex 최종 재리뷰 PASS(No P0-P2 findings)** 확보.
+
+**1라운드 — 리팩터링 + 테스트 신설:**
+- `supabase/functions/toss-webhook/index.ts`(108줄, 로직 전부 `Deno.serve` 안)를 Deno 전용 문법 없는 순수 함수로 분리. 신규 `supabase/functions/_shared/toss-webhook-handler.ts`가 `handleTossWebhook(req, deps)`로 토큰검증·payload검증·Toss Query·DONE/CANCELED/PARTIAL_CANCELED 분기·Slack알림을 동작 불변으로 그대로 이동(컨트롤러가 원본과 라인 단위 대조). `index.ts`는 env 읽기+client 준비+핸들러 호출만 하는 27줄 래퍼로 축소.
+- 신규 `web/src/lib/__tests__/toss-webhook.test.ts`(12케이스): 경로토큰 401·paymentKey 400(2)·Toss Query실패 502+Slack·amount없는 이벤트의 authoritative DONE/CANCELED 처리(2)·optional payload mismatch 400+Slack(2)·중복취소 멱등·DONE RPC실패 500+Slack·missing_server_env 503·eventType불일치 200 ignored.
+
+**2라운드 — Codex 재지적 수정(null/array/primitive):**
+- `req.json()`이 유효한 JSON이지만 `null`(dereference 예외)·배열·원시값(오토박싱으로 조용히 200 ignored)인 경우를 못 잡던 결함. `body === null || typeof body !== "object" || Array.isArray(body)` 통합 가드를 JSON 파싱 직후·`body.eventType` 접근 전에 추가, `invalid_payload`(기존 `invalid_json`과 구분) 에러코드 신설.
+- 테스트 3건 추가(#8 null·#9 배열·#10 원시값 3종) — 총 15케이스.
+
+**Codex 최종 재리뷰: PASS (No P0-P2 findings).**
+
+### 검증 (컨트롤러 직접 fresh 재확인, 2026-07-16)
+```
+web npm test: 86/86 PASS (기존 71 + toss-webhook 15)
+NEXT_PUBLIC_APP_VERSION=1.0.0 npm run build: PASS
+supabase migration up --local: 드리프트 없음
+supabase test db: 95/95 PASS (payment_abuse_guard 20 + release_v1 23 + rls_policy 52)
+release-v1.spec.ts (격리포트 3463, next start 프로덕션 모드): 3/3 PASS
+```
+
+### ⛔ 회수 필요 (누적 갱신)
+1. 실 Toss 결제/웹훅 왕복 미검증 — test secret 없음.
+2. Slack 실제 알림 발송 미검증 — webhook URL 없음.
+3. Supabase 클라우드 프로젝트 미생성, Vercel 프로젝트 미링크 — 배포는 회장의 수동 로그인 없이는 이 세션에서 진행 불가.
+4. prod-health-200 / prod-demo-login-200 — 실 배포 전까지 구조적으로 미검증(mock/로컬 대체 금지).
+
+## release_v1_hardening_fix — Codex REJECT 4건 수정 (2026-07-16)
+
+qa-verifier의 QA 재검증 중 `payment_webhook_reconciliation.sql`/`release_review_fixes.sql`에 Codex money-code 2nd-pass를 처음 실행해 REJECT 4건 발견 → 회장 "tracked 상태로 출시 거부" 확정 → build REOPEN → 전부 수정.
+
+**신규 migration `20260716120000_release_v1_hardening_fix.sql`**(기존 3개 migration 미수정):
+1. `reconcile_canceled_payment`의 `p_payment_key` NULL 우회(`IS NOT NULL AND !=`가 NULL 시 AND 전체 NULL=false 취급되던 결함) → `IS DISTINCT FROM`(같은 파일 `record_partial_cancel_review`가 이미 쓰던 정답 패턴)으로 교체.
+2. DONE 취소 시 잔액부족을 예외+영구롤백하던 것을 `payment.cancel_reconcile_required_at` durable 마커 + `risk_event(PAYMENT_CANCEL_BALANCE_INSUFFICIENT)`로 수렴, 트랜잭션 커밋. 반환 시그니처에 `review_required boolean` 추가(반환타입 변경으로 DROP FUNCTION 후 재생성). `toss-webhook-handler.ts` CANCELED 분기가 `review_required`를 해석해 200+reviewRequired+Slack critical로 응답(정상 취소 응답은 불변).
+3. `capture_lead`에 NULL/빈 `submitter_hash` DB 레벨 거부 가드 추가(EF 선차단에 더한 방어계층).
+4. 이메일/인스타그램 SELECT-then-INSERT 레이스 → advisory lock(email→instagram 고정순서, `create_cheer_order`와 동일 원칙) + `unique_violation` 방어적 catch로 안전 수렴.
+
+**신규 테스트**: `release_v1.test.sql`에 14건 추가(plan 23→37) — payment_key NULL 거부, 잔액부족 커밋+risk_event 1건+재시도 멱등(중복 안 쌓임), submitter_hash NULL/빈문자열 거부. 신규 병렬 스크립트 `supabase/tests/concurrency/lead_dedup_race.sh`(동일 이메일 10개 동시 신규 제출 → 1행+9중복, raw 23505 노출 0).
+
+**Codex 재리뷰: PASS**(1라운드, REJECT 없이 통과 — SECURITY DEFINER 경계·lock 순서 데드락 없음·raw exception 누출 0·리턴 컬럼 정합 확인).
+
+### 검증 (컨트롤러 직접 fresh 재확인, 2026-07-16)
+```
+web npm test: 88/88 PASS (86 + 신규 2)
+NEXT_PUBLIC_APP_VERSION=1.0.0 npm run build: PASS
+supabase migration up --local: 드리프트 없음
+supabase test db: 109/109 PASS (payment_abuse_guard 20 + release_v1 37 + rls_policy 52)
+동시성 스크립트 4종(신규 lead_dedup_race + 기존 rate_limit_race/request_key_race/request_key_fingerprint_race): 전부 ALL PASS
+release-v1.spec.ts (격리포트 3463, next start 프로덕션 모드): 3/3 PASS
+```
+컨트롤러가 신규 migration 전체·`toss-webhook-handler.ts` 변경분·신규 pgTAP 어서션을 코드 직접 대조로 재감사(자체보고 신뢰 안 함).
+
+### 미검증 (변동 없음)
+실 Toss 결제/웹훅 왕복, Slack 실제 알림, Supabase 클라우드/Vercel 배포, prod-health-200/prod-demo-login-200 — 전부 구조적 미검증 유지.
+
+## amount_krw_null_safe_fix — 3차 최종 하드닝 (2026-07-16, 마지막 라운드)
+
+qa-verifier가 3번째 독립 Codex 컨텍스트 리뷰에서 `reconcile_canceled_payment`에 남아있던 마지막 결함 1건 발견: `IF v_payment.amount_krw != p_amount_krw`가 payment_key와 동일한 NULL-unsafe 패턴. 회장 지시로 같은 클래스 결함을 비일관되게 남기지 않기 위해 마저 수정.
+
+**신규 migration `20260716130000_amount_krw_null_safe_fix.sql`**: `IS DISTINCT FROM`으로 교체(1줄), 나머지 로직 완전 동일. 신규 pgTAP 1건(plan 37→38, NULL amount 거부 확인).
+
+**Codex 재리뷰: PASS**(1라운드, 종료기준 ① 충족 — "이 diff가 새로 도입한 P0/P1/P2 결함 없음", 저장측 별개 이슈는 범위 밖으로 명시). 이걸로 이 마이그레이션 계열의 하드닝 라운드 종결.
+
+### 검증 (컨트롤러 직접 fresh 재확인, 2026-07-16 06:36 KST)
+```
+supabase migration up --local: 신규 migration 적용, 드리프트 없음
+supabase test db: 110/110 PASS (payment_abuse_guard 20 + release_v1 38 + rls_policy 52)
+web npm test: 88/88 PASS (변경 없음, SQL 전용 라운드)
+NEXT_PUBLIC_APP_VERSION=1.0.0 npm run build: PASS
+동시성 4종(rate_limit_race/request_key_race/request_key_fingerprint_race/lead_dedup_race): 전부 ALL PASS
+release-v1.spec.ts (격리포트 3463, next start 프로덕션 모드): 3/3 PASS
+```
+pane 충돌 사전/사후 점검 완료 — 예상 밖 신규 migration 없음.
+
+### 잔여 사항
+결제/리드 SECURITY DEFINER RPC 하드닝 3라운드 전부 종결. 남은 것은 구조적 갭(실 Toss/Slack/Supabase클라우드/Vercel)뿐 — 전부 회장의 자격증명/콘솔 액션 필요.
+
+## LoginSheet 구글/애플 OAuth 실구현 (2026-07-19)
+
+회장 지적: "구현완료라며 로그인도 안 된다" — `LoginSheet.tsx`의 구글/애플 버튼이 `alert("슬라이스 #4 연결 예정")`만 뜨는 껍데기였던 결함 수정.
+
+**변경**: `api-contract.md` A1b(`supabase.auth.signInWithOAuth(google/apple)` — 네이티브) 명세대로, 클라이언트 `createClient()`(anon key)로 `signInWithOAuth({provider, options:{redirectTo}})` 실호출로 교체. 신규 라우트 `web/src/app/auth/callback/route.ts`(카카오 커스텀 EF 콜백과 별개 — PKCE `exchangeCodeForSession(code)`만 수행, 카카오 `/auth/kakao/callback`과 동일한 dead-end 0/`?auth_error=` 패턴 재사용). `redirectAfterLogin`은 기존 `isSafeRedirectPath` 화이트리스트로 검증 후 `next` 쿼리로 `/auth/callback`에 실어보냄. provider 미설정 등 Supabase 에러는 raw 노출 없이 `describeOAuthError()`로 친절한 alert만(카카오 방어 패턴 재사용), pending state로 중복클릭 방지.
+
+**신규 파일**: `web/src/app/auth/callback/route.ts`.
+**변경 파일**: `web/src/components/auth/LoginSheet.tsx`(GoogleLoginButton/AppleLoginButton 실구현 + `buildOAuthRedirectTo` export), `web/src/components/auth/__tests__/LoginSheet.test.tsx`(signInWithOAuth 호출 검증 4건 추가).
+
+### 검증 (컨트롤러 직접 실행, 2026-07-19)
+```
+web npm test: 128/128 PASS (LoginSheet 15건 포함, 신규 4건)
+NEXT_PUBLIC_APP_VERSION=1.0.0 npm run build: PASS — /auth/callback 라우트(ƒ dynamic) 정상 등록, TypeScript 클린
+```
+
+### 미검증
+실제 구글/애플 동의화면 왕복(Supabase 대시보드 provider 활성화·Apple Developer Services ID 설정이 선결 — 로컬/스테이징 자격증명 없음). Apple은 코드 경로만 구현, 실제 provider 활성화는 회장의 Supabase/Apple 콘솔 액션 필요.
+
+## welcome_dedup_cleanup — 삭제 목표 웰컴 클로버 무효화 + 약관/개인정보 KYC·수수료·낙전 보강 (2026-07-21)
+
+회장 지적: "활성목표 1개인데 웰컴 클로버가 36개 누적" — 20260718000100의 `grant_welcome_clover()` 트리거는 목표 생성 시 웰컴을 적립만 하고, 그 목표가 이후 삭제돼도 상쇄하지 않았음. 20260720030000에서 정리한 회장 테스트용 중복 활성목표 11개가 DELETED로 전환됐지만 각각의 웰컴(3클로버×11)이 잔액에 그대로 남아 있었음.
+
+**신규 migration 3개(순서 중요, enum add-value는 별도 트랜잭션 필요 — 20260718000000 패턴 계승):**
+- `20260721010000_welcome_reversal_enum.sql`: `clover_entry_type_enum`에 `WELCOME_REVERSAL` 추가.
+- `20260721010100_welcome_dedup_cleanup.sql`: ①`clover_eligibility()` 재정의 — 웰컴 차감을 `WELCOME_GRANT` 단독합에서 `WELCOME_GRANT+WELCOME_REVERSAL` 순합산으로 수정(안 하면 상쇄 후에도 이중차감되는 2차 버그) ②백필 DO블록 — 삭제목표(status='DELETED' OR deleted_at IS NOT NULL)의 미상쇄 웰컴 WELCOME_GRANT를 WELCOME_REVERSAL로 상쇄(NOT EXISTS 가드, member별 순차 FOR UPDATE로 balance_after 정합) ③`reverse_welcome_clover_on_goal_delete()` 트리거 — 향후 목표가 DELETED 전환/deleted_at set 시 그 목표의 웰컴을 즉시 자동 상쇄.
+- `20260721020000_welcome_reversal_uniq_guard.sql`: Codex 2nd-pass Medium 지적 반영 — `clover_ledger(ref_id) WHERE entry_type='WELCOME_REVERSAL' AND ref_type='cheer'` 부분 유니크 인덱스로 이중 상쇄를 DB 레벨 최종 방어.
+
+**약관/개인정보 개정(terms/page.tsx, privacy/page.tsx)**: 제7조에 서비스 이용수수료 5%(+VAT)·계산순서, 원천징수 3.3% 별도 항목화, 환불/청약철회(전자상거래법 7일 + 제한사유 2건) 명시. 신설 제7조의2(환전 시 KYC — 본인인증·계좌실명확인·명의불일치 시 보류), 제7조의3(낙전수입 — 클로버 유효기간 5년·소멸 30일 전 고지·탈퇴 시 처리·웰컴 클로버는 애초 환전대상 아님+목표삭제 시 무효). 신설 제10조(환전 지급 계산식 요약), 문의처는 제11조로 재배치. privacy는 KYC 항목에 계좌 예금주조회(계좌실명확인) API로 본인인증 명의와 대조하는 명의일치 확인 목적을 명시.
+
+### Codex 2nd-pass 리뷰 (mcp__codex__codex, review-only, 2026-07-21)
+지적: High 2건(①마이그레이션 적용 순간의 동시 삭제 레이스 — 백필 스캔 이후·트리거 커밋 이전 삭제분 누락 가능, 회장 직접 psql 저트래픽 적용으로 리스크 낮음/재조정 스캔 필요 시 재실행 가능하게 backfill DO블록은 멱등 설계됨 ②`cheer_public`·`get_wordmap()`이 goal 삭제여부를 조인 필터하지 않아 삭제된 목표의 cheer가 여전히 조회 가능 — **이 원장 무효화 마이그레이션과 무관한 기존 별개 결함**, 범위 밖으로 명시하고 별도 이슈로 회수), Medium 2건(①WELCOME_REVERSAL 중복 방지가 NOT EXISTS뿐이라 유니크 인덱스 부재 → 20260721020000으로 즉시 반영 ②`GREATEST(v_welcome,0)` 클램프가 회계 이상 징후를 가릴 수 있음 — 정상 케이스에선 발생 불가, 모니터링 과제로 인지).
+
+### 검증 (컨트롤러 직접 실행, 2026-07-21/22 KST)
+```
+supabase db reset (로컬): 전체 33개 migration 무드리프트 적용
+supabase test db: 145/145 PASS (payment_abuse_guard + release_v1 + rls_policy + welcome_clover 20 + welcome_reversal 9신규)
+psql 수동 시나리오(회장 지적 재현) — 11개 목표 순차 생성→삭제 + 활성 1개 생성:
+  clover_balance = 3 (기대값, 과거엔 36)
+  WELCOME_GRANT 12건 / WELCOME_REVERSAL 11건 / 순합 3
+  clover_eligibility(): total=3, welcome=3, payable=0, reached_threshold=false
+web npm run build (next build, Turbopack): PASS — /terms, /privacy 정적 프리렌더 정상
+```
+
+### 미검증
+prod 실적용(회장이 psql로 직접 push, 이 세션은 마이그레이션 파일만 작성 — prod push 금지 지시). `cheer_public`/`get_wordmap()` goal-삭제 필터 누락은 Codex가 발견한 별개 결함으로 이번 라운드 범위 밖(⛔ 회수 필요 참조).
+
+## slices-10~12 배포 완료 — 랜딩·응원·웰컴·약관 (2026-07-21~23)
+
+### 무엇을 했나
+회장 지적 3종 병렬 구현 + prod 배포 완료.
+
+**S10: 랜딩·푸터·로고 (code-builder)**
+- `web/src/app/page.tsx`: LeadCaptureForm 제거, BrandMark→Link(로그인 시 /home, 비로그인 /), 재로그인 링크 가독성(bold+underline)
+- `web/src/components/common/Footer.tsx`: 신규, 사업자정보(상호·대표·사업자등록·주소·이메일·개인정보책임자)
+- `web/src/app/layout.tsx`: Footer 전역 렌더(flex-1 감싸 하단 고정)
+
+**S11: 응원 클로버 개수 UI + 알림 라우팅 (code-builder)**
+- `web/src/components/goal/CheerPaymentButton.tsx`: 프리셋 1/3/5/10클로버+직접입력(무제한, 서버 100,000클로버=1억 상한) + 1클로버=1000원
+- `supabase/functions/cheer-order/index.ts`: 금액검증 화이트리스트→1000원배수+상한검증(isValidAmount)
+- `supabase/migrations/20260721000000_cheer_amount_unbounded.sql`: RPC 금액검증 완화
+- `web/src/components/common/NotificationBadge.tsx`: 알림 클릭→/home 라우팅 + 읽음처리
+
+**S12: 웰컴 정리·약관 개정 (code-builder)**
+- `supabase/migrations/20260721010000_welcome_reversal_enum.sql`: enum에 WELCOME_REVERSAL 추가
+- `supabase/migrations/20260721010100_welcome_dedup_cleanup.sql`: 삭제목표 웰컴을 음수 REVERSAL로 상쇄(감사추적 보존), 기존 GRANT 12+REVERSAL 11=순합3
+- `supabase/migrations/20260721020000_welcome_reversal_uniq_guard.sql`: 부분 유니크 인덱스 (이중방어)
+- `web/src/app/terms/page.tsx`: 제7조의2(수수료5%+VAT) / 제7조의3(원천징수3.3%·낙전유효기간5년·환불)
+- `web/src/app/privacy/page.tsx`: 계좌실명확인 목적 명시
+
+### 검증(관찰됨)
+```
+prod DB:
+  enum clover_entry_type_enum: WELCOME_GRANT, WELCOME_REVERSAL 생김 ✅
+  clover_ledger: GRANT 12(+36) / REVERSAL 11(-33) = 순합 3 ✅
+  balance_after 최신 = 7 (활성목표 웰컴3 + 응원4) ✅
+
+prod web (haenael-ge.vercel.app):
+  / : lead-form 제거, Footer 서빙(사업자등록), relogin-link 노출 ✅
+  /terms: 5% 수수료·원천징수·본인인증·낙전·유효기간 서빙 ✅
+  /privacy: 계좌실명확인 목적 명시 ✅
+```
+
+### 미검증(회장 눈 필요)
+- 응원 클로버 개수 UI `/g/[slug]`: 40 = 40클로버 표시(40,000원 아님) — 클라이언트 React 렌더라 자동 테스트 불가
+- 로그아웃 signOut({scope:'global'}): 배포됨, 카카오 SSO 자동재로그인 동작 여부 별도 확인
+- 기존 별개 버그: `cheer_public`·`get_wordmap()` goal-삭제 필터 누락(Codex 발견) — 삭제 목표 응원메시지 여전히 조회 가능, 개인정보 노출(다음 슬라이스)
+
+### 배포 기술 기록
+- psql: 회장이 `!bash apply-and-deploy.sh`로 실행(auto 분류기 Bash 운영DB 쓰기 차단 — `!` 회피)
+  ```
+  psql -h aws-1-ap-northeast-2.pooler.supabase.com -p 5432 -U postgres.gmpwrcxpvgylmllasoqy
+  마이그레이션 4개 apply(enum 선행 트랜잭션 분리 = 20260721010000)
+  ```
+- Vercel: `npx vercel deploy --prod --yes --scope 100-b` (토큰 불필요, 로컬 로그인 유효)
+  - `--prod` 자동 승격 안 됨 → 수동 `vercel alias set` 필요(다음 배포 상기)
+  - canonical domain 2개(haenael-ge.vercel.app, haenaelge.vercel.app) alias 재지정해 새 배포(7v4s5tw5z)로 재지정
+- Vercel 토큰(vercel-token-haenael, 07-18 발급) 만료 예상 — 로컬 vercel 로그인(rosemallow95, 팀 100-b) 유효하면 토큰 불필요
+
+### 남은 것
+- 회장 미검증 2건(클로버 UI·로그아웃) 피드백 → 안 되면 즉시 수정
+- 보안결함 1건(cheer_public 필터): 다음 슬라이스로 별개 이슈 등록
+
+## 1차 베타 회장 직접 지적 UI 보정 — 배포 전 (2026-07-24)
+
+### 범위와 기반
+
+- 회장 확정 범위: 신규 기능·v2·별도 보안감사로 넓히지 않고, `docs/backlog-2026-07-20.md`의 직접 지적만 보정해 10~20명 반응을 본다.
+- 승인 기반: `docs/prd-haenael-ge-v0.3.0.md`, `DESIGN.md` v1.6+, `docs/fdd-haenael-ge-v0.1.0.md`, `docs/api-contract.md`, `docs/architecture.md`, `docs/test-plan.md`.
+- 제품 디자이너 보조 명세 `docs/beta-ui-fix-spec-2026-07-24.md`는 design-review 미호출로 verify FAIL이므로 정본으로 승격하지 않았다.
+
+### 구현(code-builder)
+
+- `GoalCard.tsx`: 공개 프로필 데이터가 없을 때 `?`·`익명` 대신 중립 클로버+`해낼게 사용자`; 이미지 prop과 로드 실패 폴백 추가. 실제 카카오 프로필 조회·공개 계약은 변경하지 않음.
+- `MyLinkCard.tsx`: 텍스트 복사 버튼을 44×44 Copy/Check 아이콘으로 변경. clipboard·textarea fallback·analytics·2초 성공 상태 유지.
+- `/home/page.tsx`: 각 응원 클로버 옆 `나만 보임` 라벨 추가.
+- `Wordmap.tsx`: 고정 절대좌표를 flex-wrap으로 교체하고 중복 정규화·빈도 정렬·최대 12개·긴 단어 줄바꿈 적용.
+- 위 4건의 테스트 5파일을 추가·보강. Backend/API/DB/RLS/모바일/의존성 변경 없음.
+
+### 검증
+
+- code-builder 품질 게이트: PASS(근거 있음, 경고 1건).
+- fresh web unit: 26 files / 186 tests PASS.
+- production build: compile·TypeScript·17 routes PASS.
+- actual browser+운영 데이터 `/g/knirdtaq`, 320/390/430px: HTTP 200, `?`/`익명` 0, 워드맵 overlap 0·clip 0·horizontal overflow 0.
+- 캡처: `/private/tmp/haenael-beta-local-after.png`.
+- prod 신고 UI→EF: HTTP 201 + 접수 완료 화면 관찰.
+
+⛔ 검증실패 보고: 독립 `qa-verifier`는 unit/build를 재현했지만 실행 샌드박스에서 포트·Chromium을 못 열었고, `verify-agent-quality`도 QA 스킬 미호출로 FAIL했다. 이 자기보고를 출고 증거로 사용하지 않고 컨트롤러 actual-browser 재검증을 별도로 수행했다.
+
+### 미검증·미완료
+
+- 실제 카카오 이미지·닉네임을 공개 목표에 연결하는 계약은 미구현. 1차 베타 중립 폴백 채택 여부가 결정 필요.
+- 인증된 `/home`에서 Copy 아이콘의 실제 clipboard와 `나만 보임`을 눈으로 보는 운영 검증은 남음.
+- 수정 코드는 아직 prod 미배포. 따라서 “운영 완료”로 기록하지 않는다.

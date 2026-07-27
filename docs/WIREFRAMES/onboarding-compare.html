@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — ① 온보딩 가입방식 2안 시퀀스 비교 (write-first vs social-first)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:24px 20px 64px}
+  h1.board{font-size:18px; text-align:center; margin-bottom:4px}
+  p.board{font-size:13px; color:#555; text-align:center; margin-bottom:16px}
+  .note{max-width:1000px; margin:0 auto 26px; font-size:12px; color:#666; background:#fff;
+        border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.6}
+  .note b{color:var(--clover-ink)}
+
+  .lane{max-width:1180px; margin:0 auto 34px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px 20px}
+  .lane-head{display:flex; align-items:baseline; gap:10px; margin-bottom:6px}
+  .lane-head h2{font-size:15px}
+  .lane-head .rec{font-size:11px; font-weight:700; color:#fff; background:var(--clover); padding:2px 8px; border-radius:20px}
+  .lane-head .neu{font-size:11px; font-weight:700; color:var(--muted); background:var(--warm); padding:2px 8px; border-radius:20px}
+  .lane-sub{font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.5}
+  .seq{display:flex; align-items:center; gap:6px; overflow-x:auto; padding-bottom:6px}
+  .seq::-webkit-scrollbar{height:6px}
+  .step{flex:0 0 auto; text-align:center}
+  .step .cap{font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:600; height:28px; display:flex; align-items:center; justify-content:center; line-height:1.3}
+  .step .cap b{color:var(--clover-ink)}
+  .arrow{flex:0 0 auto; color:var(--faint); font-size:20px; align-self:center; margin-top:18px}
+
+  /* compact phone */
+  .ph{width:236px; height:486px; background:var(--bg); border:1px solid #d9d5cc; border-radius:28px;
+      box-shadow:0 6px 22px rgba(0,0,0,.10); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:96px; height:18px; background:#000; border-radius:0 0 12px 12px; z-index:5}
+  .sc{height:100%; overflow:hidden; padding:38px 18px 18px; position:relative}
+  .brand{font-size:11.5px; font-weight:800}
+  .brand .dot{color:var(--clover-bright)}
+  .btn{display:block; width:100%; text-align:center; padding:12px; border-radius:12px; font-size:13px; font-weight:700; border:none; cursor:pointer}
+  .btn-primary{background:var(--clover); color:#fff}
+  .btn-ghost{background:transparent; color:var(--faint); font-weight:600; font-size:11.5px; padding:8px 0 0}
+
+  /* C start */
+  .c-mid{display:flex; flex-direction:column; justify-content:center; height:100%; text-align:center; padding:0 14px}
+  .c-mark{font-size:26px; font-weight:900; letter-spacing:-1px}
+  .c-mark .dot{color:var(--clover-bright)}
+  .c-slogan{font-size:12.5px; color:var(--muted); margin:12px 0 32px; line-height:1.5}
+
+  /* goal form */
+  .lbl{font-size:11px; font-weight:700; color:var(--muted); margin:14px 0 5px}
+  .inp{width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:12.5px; font-family:inherit; background:#fff}
+  .inp.goal{font-weight:700; color:var(--ink)}
+  .inp.goal .ph-txt{color:var(--ink)}
+  .goal-line{display:flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:10px; padding:10px 12px; background:#fff; font-size:13px; font-weight:700}
+  .goal-line input{border:none; outline:none; font:inherit; flex:1; min-width:0}
+  .goal-line .tail{color:var(--clover-ink); flex:0 0 auto}
+  .ta{width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:12px; font-family:inherit; resize:none; background:#fff}
+  .ta::placeholder,.goal-line input::placeholder{color:var(--faint); font-weight:400}
+  .form-cta{position:absolute; left:18px; right:18px; bottom:18px}
+
+  /* auth sheet */
+  .dim{position:absolute; inset:0; background:rgba(20,18,15,.34); display:flex; align-items:flex-end; z-index:10}
+  .sheet{width:100%; background:#fff; border-radius:18px 18px 0 0; padding:16px 18px 20px; box-shadow:0 8px 30px rgba(0,0,0,.12)}
+  .sheet h3{font-size:14px; font-weight:800; margin-bottom:3px}
+  .sheet .ss{font-size:11.5px; color:var(--muted); margin-bottom:14px; line-height:1.45}
+  .soc{display:block; width:100%; padding:11px; border-radius:10px; font-size:12.5px; font-weight:700; text-align:center; margin-bottom:8px; border:1px solid var(--line); background:#fff}
+  .soc.kakao{background:#FEE500; border-color:#FEE500; color:#191600}
+  .soc.apple{background:#000; color:#fff; border-color:#000}
+  .draftnote{font-size:10.5px; color:var(--clover-ink); background:var(--clover-soft); border-radius:8px; padding:7px 9px; margin-bottom:12px; line-height:1.4; text-align:center}
+  .wall{font-size:10.5px; color:#8a6d3b; background:#FBF3E2; border-radius:8px; padding:7px 9px; margin-bottom:12px; line-height:1.4; text-align:center}
+
+  /* full-screen auth (social-first = 벽) */
+  .auth-full{display:flex; flex-direction:column; justify-content:center; height:100%; padding:0 14px}
+  .auth-full .lead{font-size:13px; font-weight:700; text-align:center; margin-bottom:4px}
+  .auth-full .lead small{display:block; font-weight:400; color:var(--muted); font-size:11px; margin-top:4px; line-height:1.4}
+  .auth-full .socwrap{margin-top:22px}
+
+  /* link issued */
+  .li-title{font-size:15px; font-weight:800; line-height:1.35; margin:6px 0 4px}
+  .li-sub{font-size:11.5px; color:var(--muted); margin-bottom:14px; line-height:1.5}
+  .linkcard{border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff; margin-bottom:10px}
+  .linkcard .url{font-size:12px; font-weight:700; color:var(--clover-ink); word-break:break-all; margin-bottom:8px}
+  .copybtn{display:block; width:100%; padding:9px; border-radius:9px; font-size:12px; font-weight:700; background:var(--clover-soft); color:var(--clover-ink); border:none}
+  .guide{font-size:11px; color:var(--muted); line-height:1.6; background:var(--warm); border-radius:10px; padding:11px 12px}
+  .guide b{color:var(--ink)}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — ① 온보딩 가입방식 2안 시퀀스 <small style="font-weight:400;color:#888">(랜딩=C 미니멀 확정 / 그 다음 화면 비교)</small></h1>
+  <p class="board">DESIGN.md 토큰 적용 · 좌→우 단계 진행 · 두 줄 나란히 비교 · 회장이 마찰 차이를 눈으로 판단</p>
+  <div class="note">
+    회장 결정 = <b>랜딩 C 미니멀 확정</b>(슬로건 집중·궁금증 훅). C는 설명 0 → "시작하기" <b>다음 화면이 '아 이런 거구나'를 책임진다(설명-by-doing).</b>
+    두 안의 갈림은 <b>그 다음에 목표쓰기가 먼저냐(write-first), 로그인이 먼저냐(social-first)</b>.
+    핵심 시각 차이 → write-first는 로그인이 <b>목표 위에 덮여 뜨고(작성 글 보존)</b>, social-first는 로그인이 <b>가치 경험 전 벽처럼 먼저 선다</b>.
+  </div>
+
+  <!-- ============ write-first ============ -->
+  <div class="lane">
+    <div class="lane-head"><h2>A · write-first</h2><span class="rec">디자이너 추천</span></div>
+    <div class="lane-sub">목표를 먼저 쓰게 한다 → "저장"을 누르는 순간에만 로그인. 작성 행위 자체가 C가 못 한 설명을 대신하고(설명-by-doing), 몰입·투자가 쌓인 뒤 인증해 이탈이 적다.</div>
+    <div class="seq">
+
+      <!-- step1 C start -->
+      <div class="step">
+        <div class="cap">1. 랜딩 (C 확정)</div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc"><div class="c-mid">
+            <div class="c-mark">해낼게<span class="dot">.</span></div>
+            <div class="c-slogan">응원은 돈으로 하는 겁니다.</div>
+            <button class="btn btn-primary">시작하기</button>
+            <button class="btn btn-ghost">어떻게 쓰는 건가요?</button>
+          </div></div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- step2 goal write -->
+      <div class="step">
+        <div class="cap"><b>2. 목표 쓰기 (=설명 역할)</b></div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc">
+            <div class="brand">해낼게<span class="dot">.</span></div>
+            <div class="lbl">무엇을 해낼 거예요?</div>
+            <div class="goal-line"><input placeholder="편입 평점 4.0"><span class="tail">해낼게</span></div>
+            <div class="lbl">언제까지?</div>
+            <input class="inp" value="2026.09.15  (D-78)">
+            <div class="lbl">왜요? (응원의 이유가 돼요)</div>
+            <textarea class="ta" rows="3" placeholder="휴학하고 8개월째 새벽 도서관…"></textarea>
+            <div class="form-cta"><button class="btn btn-primary">저장하고 내 링크 받기</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- step3 auth overlay (draft 보존) -->
+      <div class="step">
+        <div class="cap"><b>3. 저장 시 로그인</b><br>(목표 위에 덮임)</div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc">
+            <div class="brand" style="opacity:.4">해낼게<span class="dot">.</span></div>
+            <div style="opacity:.35"><div class="lbl">무엇을 해낼 거예요?</div>
+              <div class="goal-line"><span style="flex:1">편입 평점 4.0</span><span class="tail">해낼게</span></div></div>
+            <div class="dim"><div class="sheet">
+              <h3>마지막 한 걸음, 로그인</h3>
+              <div class="ss">링크를 안전하게 만들고 응원을 받으려면 로그인이 필요해요.</div>
+              <div class="draftnote">✓ 작성한 목표는 안전하게 보관 중<br>로그인을 취소해도 글은 사라지지 않아요</div>
+              <button class="soc kakao">카카오로 계속하기</button>
+              <button class="soc apple">Apple로 계속하기</button>
+              <button class="btn btn-ghost">나중에 할게요</button>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- step4 link -->
+      <div class="step">
+        <div class="cap">4. 내 링크 발급·공유</div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc">
+            <div class="brand">해낼게<span class="dot">.</span></div>
+            <div class="li-title">"편입 평점 4.0 해낼게"<br>준비됐어요 🍀</div>
+            <div class="li-sub">이제 이 링크를 인스타 바이오에 걸면 끝이에요.</div>
+            <div class="linkcard">
+              <div class="url">haenael.ge/do_studylog</div>
+              <button class="copybtn">링크 복사</button>
+            </div>
+            <div class="guide"><b>다음 한 걸음</b><br>인스타 프로필 편집 → 웹사이트 칸에 붙여넣기. 친구가 눈팅하다 조용히 밀어줘요.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ social-first ============ -->
+  <div class="lane">
+    <div class="lane-head"><h2>B · social-first</h2><span class="neu">대안</span></div>
+    <div class="lane-sub">로그인을 먼저 받는다 → 계정·식별을 일찍 확보(알림·재방문 유리). 단 가치 경험(목표 쓰기) 전에 벽이 서고, C의 "이런 거구나"를 로그인이 가로막아 첫 진입 이탈 위험.</div>
+    <div class="seq">
+
+      <!-- step1 C start -->
+      <div class="step">
+        <div class="cap">1. 랜딩 (C 확정)</div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc"><div class="c-mid">
+            <div class="c-mark">해낼게<span class="dot">.</span></div>
+            <div class="c-slogan">응원은 돈으로 하는 겁니다.</div>
+            <button class="btn btn-primary">시작하기</button>
+            <button class="btn btn-ghost">어떻게 쓰는 건가요?</button>
+          </div></div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- step2 auth wall -->
+      <div class="step">
+        <div class="cap"><b>2. 로그인 먼저 (벽)</b></div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc"><div class="auth-full">
+            <div class="brand" style="text-align:center; margin-bottom:18px">해낼게<span class="dot">.</span></div>
+            <div class="lead">먼저 로그인할게요<small>아직 무엇을 하는지 보기 전이에요</small></div>
+            <div class="wall">⚠ 가치 경험 전 인증 — 여기서 많이 빠질 수 있음</div>
+            <div class="socwrap">
+              <button class="soc kakao">카카오로 계속하기</button>
+              <button class="soc apple">Apple로 계속하기</button>
+            </div>
+          </div></div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- step3 goal write -->
+      <div class="step">
+        <div class="cap">3. 목표 쓰기</div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc">
+            <div class="brand">해낼게<span class="dot">.</span></div>
+            <div class="lbl">무엇을 해낼 거예요?</div>
+            <div class="goal-line"><input placeholder="편입 평점 4.0"><span class="tail">해낼게</span></div>
+            <div class="lbl">언제까지?</div>
+            <input class="inp" value="2026.09.15  (D-78)">
+            <div class="lbl">왜요? (응원의 이유가 돼요)</div>
+            <textarea class="ta" rows="3" placeholder="휴학하고 8개월째 새벽 도서관…"></textarea>
+            <div class="form-cta"><button class="btn btn-primary">내 링크 받기</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- step4 link -->
+      <div class="step">
+        <div class="cap">4. 내 링크 발급·공유</div>
+        <div class="ph"><div class="notch"></div>
+          <div class="sc">
+            <div class="brand">해낼게<span class="dot">.</span></div>
+            <div class="li-title">"편입 평점 4.0 해낼게"<br>준비됐어요 🍀</div>
+            <div class="li-sub">이제 이 링크를 인스타 바이오에 걸면 끝이에요.</div>
+            <div class="linkcard">
+              <div class="url">haenael.ge/do_studylog</div>
+              <button class="copybtn">링크 복사</button>
+            </div>
+            <div class="guide"><b>다음 한 걸음</b><br>인스타 프로필 편집 → 웹사이트 칸에 붙여넣기. 친구가 눈팅하다 조용히 밀어줘요.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:0">
+    <b>한눈 비교</b> · A(write-first): 단계수 같지만 ②목표쓰기가 C의 설명을 대신하고 ③로그인이 작성 글을 덮어 보존(이탈↓, "부담 최소" 정합) — <b>디자이너 추천</b>.
+    B(social-first): ②에서 아무 가치도 못 본 채 로그인 벽 → 첫 진입 이탈 위험, 대신 계정 일찍 확보(알림·재방문).
+  </div>
+</body>
+</html>

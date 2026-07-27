@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — ① 랜딩 v2 (리테이크)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:28px 16px 48px}
+  h1.board{font-size:17px; text-align:center; margin-bottom:4px}
+  p.board{font-size:12.5px; color:#555; text-align:center; margin-bottom:20px}
+  .wrap{display:flex; justify-content:center}
+
+  .phone{width:352px; height:740px; background:var(--bg); border:1px solid #d9d5cc; border-radius:38px;
+         box-shadow:0 12px 40px rgba(0,0,0,.14); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#000; border-radius:0 0 18px 18px; z-index:5}
+  .screen{height:100%; display:flex; flex-direction:column; padding:58px 26px 30px; position:relative}
+
+  /* subtle paper texture via layered soft radial — 단색 규율 준수(gradient 남발 아님, 아주 옅은 1겹) */
+  .screen::before{content:""; position:absolute; inset:0; background:
+     radial-gradient(120% 60% at 50% 6%, rgba(31,158,90,.05), transparent 60%); pointer-events:none}
+
+  .brand{font-size:13px; font-weight:800; letter-spacing:-.2px; position:relative; z-index:1}
+  .brand .dot{color:var(--clover-bright)}
+
+  .hero{flex:0 0 auto; text-align:center; margin-top:26px; position:relative; z-index:1}
+  .mark{font-size:40px; font-weight:900; letter-spacing:-1.4px; line-height:1}
+  .mark .dot{color:var(--clover-bright)}
+  .slogan{font-size:15.5px; color:var(--muted); margin-top:14px; line-height:1.55; font-weight:500}
+  .hook{display:inline-block; margin-top:14px; font-size:12px; font-weight:700; color:var(--clover-ink);
+        background:var(--clover-soft); padding:6px 13px; border-radius:20px}
+
+  /* 워드맵 프리뷰 — 유기적 구름(회전·색농도 3단·클로버 산포) */
+  .pv{flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; position:relative; z-index:1; margin:8px 0}
+  .pv-cap{font-size:11.5px; color:var(--faint); text-align:center; margin-bottom:12px; font-weight:600}
+  .cloud{position:relative; height:230px; margin:0 auto; width:100%;
+         background:radial-gradient(80% 80% at 50% 50%, var(--clover-soft), #EEF6F0 70%, transparent);
+         border-radius:24px; display:flex}
+  .w{position:absolute; font-weight:800; white-space:nowrap; color:#2c7a4f}
+  .w.s1{color:#8bb79f; font-weight:600}    /* 옅게 = 원경 */
+  .w.s2{color:#57a178; font-weight:700}
+  .w.s3{color:#1f8a52}                      /* 진하게 = 근경 */
+  .clv{position:absolute; opacity:.5}
+  .pv-count{font-size:11.5px; color:var(--muted); text-align:center; margin-top:14px; font-weight:600}
+
+  /* 초미니 3스텝 — 돈으로 응원→환전 한 눈(슬로건 집중 안 해치게 faint) */
+  .steps3{display:flex; justify-content:center; align-items:center; gap:7px; font-size:10.5px; color:var(--faint); font-weight:600; margin-bottom:12px}
+  .steps3 b{color:var(--clover-ink); font-weight:700}
+  .steps3 .sep{opacity:.45}
+  .cta{flex:0 0 auto; position:relative; z-index:1}
+  .btn{display:block; width:100%; text-align:center; padding:16px; border-radius:15px; font-size:15.5px; font-weight:800; border:none; cursor:pointer;
+       box-shadow:0 6px 16px rgba(27,138,79,.22)}
+  .btn-primary{background:var(--clover); color:#fff; letter-spacing:-.2px}
+  .btn-primary:active{background:#166f40}
+  .btn-ghost{background:transparent; color:var(--muted); font-weight:600; font-size:13px; padding:12px; min-height:44px; margin-top:2px; cursor:pointer; width:100%; border:none}
+
+  .caption{max-width:352px; margin:18px auto 0; font-size:11px; color:#777; line-height:1.6; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+  .caption b{color:var(--clover-ink)}
+  .caption .k{color:#999}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — ① 랜딩 v2 <small style="font-weight:400;color:#888">(리테이크 · 구조=C+워드맵 하이브리드 잠김 유지)</small></h1>
+  <p class="board">비주얼 완성도만 상위 10%로 · 결정·카피 구조 불변</p>
+
+  <div class="wrap">
+    <div class="phone"><div class="notch"></div>
+      <div class="screen">
+        <div class="brand">해낼게<span class="dot">.</span></div>
+
+        <div class="hero">
+          <div class="mark">해낼게<span class="dot">.</span></div>
+          <div class="slogan">응원은 돈으로 하는 겁니다.</div>
+          <div class="hook">그게 무슨 말이냐면 ↓</div>
+        </div>
+
+        <div class="pv">
+          <div class="pv-cap">네 목표 위에, 응원이 이렇게 쌓여요</div>
+          <div class="cloud" id="cloud">
+            <span class="w s3" style="left:34%; top:16%; font-size:26px">멋지다</span>
+            <span class="w s2" style="left:9%; top:33%; font-size:17px; transform:rotate(-6deg)">화이팅</span>
+            <span class="w s3" style="left:52%; top:40%; font-size:30px">곧된다</span>
+            <span class="w s1" style="left:12%; top:60%; font-size:14px">할수있어</span>
+            <span class="w s2" style="left:60%; top:66%; font-size:19px; transform:rotate(4deg)">응원해</span>
+            <span class="w s1" style="left:38%; top:78%; font-size:13px">존경</span>
+            <span class="w s2" style="left:6%; top:82%; font-size:16px">고생많아</span>
+            <span class="w s1" style="left:70%; top:24%; font-size:14px; transform:rotate(-3deg)">힘내</span>
+            <!-- 클로버 산포(절제) — "단어 하나하나가 돈(클로버)으로 온 응원"임을 암시 -->
+            <svg class="clv" style="left:24%; top:50%; width:16px" viewBox="0 0 24 24" fill="#4aa877"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="clv" style="left:47%; top:55%; width:14px" viewBox="0 0 24 24" fill="#4aa877"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="clv" style="left:78%; top:52%; width:13px" viewBox="0 0 24 24" fill="#7bc09b"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+          </div>
+          <div class="pv-count">친구들이 🍀 클로버로 남긴 응원이에요 · 모이면 환전</div>
+        </div>
+
+        <div class="cta">
+          <div class="steps3">선언 <span class="sep">›</span> 친구가 <b>🍀로 응원</b> <span class="sep">›</span> 모이면 <b>환전</b></div>
+          <button class="btn btn-primary">시작하기</button>
+          <button class="btn-ghost">어떻게 쓰는 건가요?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="caption">
+    <b>벤치마킹</b> <span class="k">(웹 직접조사 2026-07-02):</span> Linktree=아바타·중앙정렬·CTA-first 브랜딩 차용 / 링크 나열은 버림(단일 CTA). 배경 워드맵은 Buy Me a Coffee의 supporter-wall을 "받는사람 보상 미리보기"로 재해석(개수·금액은 버림 — 3층 규칙).<br>
+    <b>심리 법칙:</b> <b>궁금증 갭</b>(슬로건+"무슨 말이냐면 ↓"으로 스크롤·탐색 유발) · <b>Zeigarnik</b>(반쯤 찬 워드맵 = 미완성 긴장 → 내 것도 채우고 싶음) · <b>사회적 증거 프리뷰</b>(먼저 쌓인 응원의 결과를 먼저 보여줌). 가짜 긴급·가짜 수치 없음(다크패턴 회피).
+  </div>
+</body>
+</html>

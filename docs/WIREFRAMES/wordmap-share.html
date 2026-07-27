@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — 워드맵 보기 → 공유 → 확산 고리</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:24px 20px 64px}
+  h1.board{font-size:18px; text-align:center; margin-bottom:4px}
+  p.board{font-size:13px; color:#555; text-align:center; margin-bottom:16px}
+  .note{max-width:1100px; margin:0 auto 24px; font-size:12px; color:#666; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.6}
+  .note b{color:var(--clover-ink)}
+  .seq{display:flex; align-items:flex-start; gap:6px; overflow-x:auto; padding-bottom:8px; max-width:1180px; margin:0 auto}
+  .seq::-webkit-scrollbar{height:6px}
+  .step{flex:0 0 auto; text-align:center}
+  .cap{font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:600; height:30px; display:flex; align-items:center; justify-content:center; line-height:1.3; padding:0 4px}
+  .cap b{color:var(--clover-ink)}
+  .arrow{flex:0 0 auto; color:var(--faint); font-size:20px; align-self:center; margin-top:28px}
+
+  .ph{width:236px; height:486px; background:var(--bg); border:1px solid #d9d5cc; border-radius:28px; box-shadow:0 6px 22px rgba(0,0,0,.10); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:96px; height:18px; background:#000; border-radius:0 0 12px 12px; z-index:5}
+  .sc{height:100%; overflow:hidden; padding:34px 16px 16px; position:relative; display:flex; flex-direction:column}
+  .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .brand{font-size:11px; font-weight:800}
+  .brand .dot{color:var(--clover-bright)}
+  .back{font-size:15px; color:var(--muted)}
+  .goal-t{font-size:16px; font-weight:800; line-height:1.3; letter-spacing:-.3px}
+  .count{font-size:10.5px; color:var(--muted); margin-top:3px; font-weight:600}
+
+  /* 홈 (단순화 재확인) */
+  .chips{display:flex; gap:5px; margin:6px 0 10px}
+  .chip{font-size:10.5px; font-weight:500; padding:3px 9px; border-radius:20px; background:var(--clover-soft); color:var(--clover-ink)}
+  .bal{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between}
+  .bal .k{font-size:10px; color:var(--faint); margin-bottom:2px}
+  .bal .v{font-size:17px; font-weight:800; color:var(--clover-ink)}
+  .bal .v small{font-size:10px; font-weight:600}
+  .bal .go{font-size:11px; font-weight:700; color:#fff; background:var(--clover); padding:7px 11px; border-radius:9px}
+  .wm-mini{background:var(--clover-soft); border-radius:12px; padding:12px 10px; text-align:center; line-height:1.9; margin-bottom:12px}
+  .wm-mini span{display:inline-block; margin:0 4px; color:#2c7a4f}
+  .btn{display:block; width:100%; text-align:center; padding:11px; border-radius:11px; font-size:12.5px; font-weight:700; border:none; cursor:pointer}
+  .btn-line{background:#fff; color:var(--ink); border:1px solid var(--line)}
+  .btn-primary{background:var(--clover); color:#fff}
+
+  /* 워드맵 풀뷰 — 크게 꽉 찬 */
+  .full{flex:1; background:linear-gradient(165deg,#F4EFE6 0%,#E7F4EC 100%); border-radius:16px; padding:18px 14px; display:flex; flex-direction:column; margin-bottom:12px; position:relative; overflow:hidden}
+  .full .fg{font-size:14px; font-weight:800; text-align:center; margin-bottom:2px}
+  .full .fc{font-size:10px; color:var(--muted); text-align:center; margin-bottom:10px}
+  .cloud{flex:1; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; align-content:center; gap:2px 6px; line-height:1.5}
+  .cloud span{display:inline-block; color:#2c7a4f; font-weight:700}
+  .full .fb{font-size:9.5px; color:var(--clover-ink); font-weight:800; text-align:center; margin-top:8px; opacity:.8}
+
+  /* 공유 아이콘 바 (텍스트 X, 아이콘) */
+  .iconbar{display:flex; justify-content:center; gap:16px; align-items:center}
+  .ib{display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer}
+  .ib .circle{width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--line)}
+  .ib.primary .circle{background:var(--clover); border-color:var(--clover)}
+  .ib .lab{font-size:9.5px; color:var(--muted); font-weight:600}
+  .ib svg{width:22px; height:22px}
+
+  /* 저장 완료 토스트 */
+  .toast{position:absolute; left:16px; right:16px; bottom:16px; background:var(--ink); color:#fff; border-radius:11px; padding:11px 13px; font-size:11.5px; z-index:20; display:flex; gap:9px; align-items:center}
+  .toast .ic{width:20px;height:20px;border-radius:50%;background:var(--clover-bright);flex:0 0 20px;display:flex;align-items:center;justify-content:center;font-size:11px}
+
+  /* 인스타 스토리 프리뷰 */
+  .story{flex:1; background:#111; border-radius:14px; position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px}
+  .story .bars{position:absolute; top:8px; left:10px; right:10px; display:flex; gap:3px}
+  .story .bars i{flex:1; height:2.5px; background:rgba(255,255,255,.4); border-radius:2px}
+  .story .bars i.on{background:#fff}
+  .story .u{position:absolute; top:16px; left:12px; display:flex; align-items:center; gap:6px; color:#fff; font-size:10px}
+  .story .u .ua{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#cfe9da,#a9d8bf)}
+  .story .card{background:#fff; border-radius:12px; padding:14px 12px; width:100%; text-align:center}
+  .story .card .sg{font-size:12.5px; font-weight:800; margin-bottom:6px}
+  .story .card .sw{line-height:1.85}
+  .story .card .sw span{display:inline-block; margin:0 3px; color:#2c7a4f; font-weight:700}
+  .story .card .sb{font-size:9px; color:var(--clover-ink); font-weight:800; margin-top:6px}
+  /* 링크 스티커 */
+  .linksticker{margin-top:12px; background:#fff; border-radius:8px; padding:7px 11px; display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--ink); box-shadow:0 2px 8px rgba(0,0,0,.3)}
+  .linksticker .lk{width:14px;height:14px}
+  .story .hint{position:absolute; bottom:12px; font-size:9px; color:rgba(255,255,255,.7); text-align:center; padding:0 10px; line-height:1.4}
+
+  /* 친구가 스토리 보고 링크 탭 */
+  .tapring{position:absolute; width:52px; height:52px; border:2px solid rgba(255,255,255,.9); border-radius:50%; animation:none}
+  .story .taplabel{position:absolute; bottom:36px; background:rgba(255,255,255,.95); border-radius:20px; padding:5px 11px; font-size:10px; font-weight:700; color:var(--ink)}
+
+  /* ② 도착 (확산 고리 닫힘) */
+  .arrive{flex:1; display:flex; flex-direction:column}
+  .gh{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+  .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#cfe9da,#a9d8bf);flex:0 0 28px}
+  .gh .nm{font-size:11.5px; font-weight:700}
+  .gh .gl{font-size:9.5px; color:var(--faint)}
+  .arrive .at{font-size:15px; font-weight:800; line-height:1.3; margin-bottom:8px}
+  .arrive .aw{background:var(--clover-soft); border-radius:11px; padding:12px 8px; text-align:center; line-height:1.85; margin-bottom:8px}
+  .arrive .aw span{display:inline-block; margin:0 3px; color:#2c7a4f}
+  .arrive .ac{font-size:10px; color:var(--muted); text-align:center; margin-bottom:auto}
+  .loopnote{font-size:9.5px; color:var(--clover-ink); background:var(--clover-soft); border-radius:8px; padding:7px 9px; text-align:center; margin-top:8px; line-height:1.4}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — 워드맵 보기 → 공유 → 확산 고리 <small style="font-weight:400;color:#888">(receiver-home "워드맵 보기"에서 진입)</small></h1>
+  <p class="board">공유는 <b>아이콘으로 직관</b>(텍스트 버튼 X) · 워드맵은 단어·"익명의 누군가"만 · 개별 후원 금액 X(과시·서열화 방지)</p>
+  <div class="note">
+    <b>흐름:</b> ① 홈("워드맵 보기"만) → ② 워드맵 풀뷰(꽉 찬 + 하단 공유 아이콘) → ③a 이미지 저장(토스트) / ③b 인스타 스토리(목표 링크 스티커 얹힘) → ④ 친구가 스토리 보고 링크 탭 → ⑤ ② 목표페이지 도착 = <b>확산 고리 닫힘</b>.
+  </div>
+
+  <div class="seq">
+
+    <!-- 1 홈 (단순화 확인) -->
+    <div class="step"><div class="cap"><b>1. 내 목표 홈</b><br>"워드맵 보기"만</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div class="back">🔔</div></div>
+        <div class="goal-t">나 편입 평점<br>4.0 해낼게</div>
+        <div class="chips"><span class="chip">D-14</span></div>
+        <div class="bal"><div><div class="k">모인 클로버</div><div class="v">🍀 128<small>개</small></div></div><div class="go">환전</div></div>
+        <div class="count" style="margin-bottom:8px">13명이 조용히 응원했어요</div>
+        <div class="wm-mini">
+          <span style="font-size:15px">화이팅</span><span style="font-size:18px">멋지다</span>
+          <span style="font-size:13px">곧된다</span><span style="font-size:14px">힘내자</span>
+        </div>
+        <button class="btn btn-line" style="margin-top:auto">워드맵 보기</button>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 2 워드맵 풀뷰 -->
+    <div class="step"><div class="cap"><b>2. 워드맵 풀뷰</b><br>+ 공유 아이콘</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="back">‹</div><div class="brand">해낼게<span class="dot">.</span></div><div style="width:14px"></div></div>
+        <div class="full">
+          <div class="fg">편입 평점 4.0 해낼게</div>
+          <div class="fc">13명이 조용히 응원했어요</div>
+          <div class="cloud">
+            <span style="font-size:22px">멋지다</span><span style="font-size:14px">화이팅</span>
+            <span style="font-size:28px">곧된다</span><span style="font-size:13px">존경해</span>
+            <span style="font-size:18px">고생많아</span><span style="font-size:24px">응원해</span>
+            <span style="font-size:15px">할수있어</span><span style="font-size:20px">힘내자</span>
+            <span style="font-size:13px">대박</span><span style="font-size:17px">자랑스러워</span>
+          </div>
+          <div class="fb">해낼게.</div>
+        </div>
+        <div class="iconbar">
+          <div class="ib primary"><div class="circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div><div class="lab">이미지 저장</div></div>
+          <div class="ib"><div class="circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16140F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="#16140F"/></svg>
+          </div><div class="lab">인스타 공유</div></div>
+          <div class="ib"><div class="circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16140F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+          </div><div class="lab">링크 복사</div></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 3a 이미지 저장 완료 -->
+    <div class="step"><div class="cap">3a. 이미지 저장</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="back">‹</div><div class="brand">해낼게<span class="dot">.</span></div><div style="width:14px"></div></div>
+        <div class="full">
+          <div class="fg">편입 평점 4.0 해낼게</div>
+          <div class="fc">13명이 조용히 응원했어요</div>
+          <div class="cloud">
+            <span style="font-size:22px">멋지다</span><span style="font-size:14px">화이팅</span>
+            <span style="font-size:28px">곧된다</span><span style="font-size:18px">고생많아</span>
+            <span style="font-size:24px">응원해</span><span style="font-size:20px">힘내자</span>
+          </div>
+          <div class="fb">해낼게.</div>
+        </div>
+        <div class="iconbar" style="opacity:.4">
+          <div class="ib primary"><div class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div class="lab">이미지 저장</div></div>
+        </div>
+        <div class="toast"><span class="ic">✓</span>이미지를 저장했어요. 스토리에 올려보세요.</div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 3b 인스타 스토리 (링크 스티커 얹힘) -->
+    <div class="step"><div class="cap"><b>3b. 인스타 스토리 공유</b><br>목표 링크 얹힘</div>
+      <div class="ph"><div class="notch"></div><div class="sc" style="padding:34px 12px 12px">
+        <div class="story">
+          <div class="bars"><i class="on"></i><i></i><i></i></div>
+          <div class="u"><div class="ua"></div>do_studylog</div>
+          <div class="card">
+            <div class="sg">편입 평점 4.0 해낼게</div>
+            <div class="sw"><span style="font-size:17px">멋지다</span><span style="font-size:13px">곧된다</span><span style="font-size:15px">응원해</span><span style="font-size:12px">고생많아</span></div>
+            <div class="sb">해낼게.</div>
+          </div>
+          <div class="linksticker">
+            <svg class="lk" viewBox="0 0 24 24" fill="none" stroke="var(--clover)" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+            haenael.ge/do_studylog
+          </div>
+          <div class="hint">이미지 + 링크 스티커가 스토리에 함께 올라가요<br>친구가 링크를 탭하면 목표 페이지로</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 4 친구가 스토리 보고 링크 탭 -->
+    <div class="step"><div class="cap">4. 친구가 스토리 봄<br>→ 링크 탭</div>
+      <div class="ph"><div class="notch"></div><div class="sc" style="padding:34px 12px 12px">
+        <div class="story">
+          <div class="bars"><i class="on"></i><i></i><i></i></div>
+          <div class="u"><div class="ua"></div>do_studylog</div>
+          <div class="card">
+            <div class="sg">편입 평점 4.0 해낼게</div>
+            <div class="sw"><span style="font-size:17px">멋지다</span><span style="font-size:13px">곧된다</span><span style="font-size:15px">응원해</span></div>
+            <div class="sb">해낼게.</div>
+          </div>
+          <div class="linksticker" style="outline:3px solid rgba(31,158,90,.5)">
+            <svg class="lk" viewBox="0 0 24 24" fill="none" stroke="var(--clover)" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+            haenael.ge/do_studylog
+          </div>
+          <div class="taplabel">👆 친구가 링크를 탭</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 5 ② 도착 (고리 닫힘) -->
+    <div class="step"><div class="cap"><b>5. ② 목표페이지 도착</b><br>확산 고리 닫힘</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div style="width:14px"></div></div>
+        <div class="arrive">
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="gl">@do_studylog</div></div></div>
+          <div class="at">나 편입 평점 4.0 해낼게</div>
+          <div class="count" style="margin-bottom:6px">13명이 조용히 응원했어요</div>
+          <div class="aw">
+            <span style="font-size:16px">멋지다</span><span style="font-size:13px">곧된다</span>
+            <span style="font-size:18px">응원해</span><span style="font-size:14px">힘내자</span>
+          </div>
+          <div class="ac">눈팅하던 새 친구가 여기 도착</div>
+          <button class="btn btn-primary" style="margin-top:8px">조용히 밀어줄게</button>
+          <div class="loopnote">🍀 재공유 → 새 친구 → 응원 → 다시 재공유<br>(goal-page.html 로 이어짐)</div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+</body>
+</html>

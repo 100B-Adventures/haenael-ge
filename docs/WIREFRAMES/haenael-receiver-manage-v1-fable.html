@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — 받는사람 재방문·관리 진입 + 개별 금액 노출 (라우팅 허브 v1)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+    --danger:#D9483B; --danger-soft:#FBEAE7;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:20px 20px 64px}
+
+  /* ── hub controls ─────────────────────────────── */
+  .hub{max-width:1180px; margin:0 auto}
+  h1.board{font-size:18px; margin-bottom:4px}
+  p.board{font-size:12.5px; color:#555; margin-bottom:14px; line-height:1.6}
+  .ctrl{position:sticky; top:0; z-index:50; background:#ECEAE4; padding:10px 0 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; border-bottom:1px solid #dcd8cf; margin-bottom:22px}
+  .ctrl .grp{display:flex; gap:5px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:11px; padding:4px}
+  .ctrl .lbl{font-size:10.5px; color:var(--faint); padding:0 6px; font-weight:600}
+  .ctrl button{border:none; background:transparent; font-size:12px; font-weight:600; color:var(--muted); padding:6px 11px; border-radius:8px; cursor:pointer}
+  .ctrl button.on{background:var(--clover); color:#fff}
+  .ctrl button.on2{background:var(--warm); color:var(--clover-ink)}
+
+  .screen-wrap{display:none}
+  .screen-wrap.show{display:block}
+  .note{font-size:12px; color:#666; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.65; margin-bottom:18px; max-width:860px}
+  .note b{color:var(--clover-ink)}
+  .note .route{font-family:ui-monospace,monospace; font-size:11px; background:var(--warm); padding:1px 6px; border-radius:6px; color:#6b6455}
+
+  /* ── phone frame (390) ────────────────────────── */
+  .stage{display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap}
+  .ph{width:250px; background:var(--bg); border:1px solid #d9d5cc; border-radius:28px; box-shadow:0 6px 22px rgba(0,0,0,.10); overflow:hidden; position:relative; flex:0 0 auto}
+  .ph .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:96px; height:18px; background:#000; border-radius:0 0 12px 12px; z-index:5}
+  .sc{height:500px; overflow-y:auto; padding:34px 16px 18px; position:relative}
+  .sc::-webkit-scrollbar{display:none}
+  .cap{font-size:11px; color:var(--muted); font-weight:600; text-align:center; margin:8px 0 6px; line-height:1.4}
+  .cap b{color:var(--clover-ink)}
+
+  /* ── desktop frame (1024) ─────────────────────── */
+  .dk{width:100%; max-width:860px; background:var(--bg); border:1px solid #d9d5cc; border-radius:14px; box-shadow:0 6px 22px rgba(0,0,0,.08); overflow:hidden}
+  .dk .bar{background:#EFEDE8; padding:7px 12px; font-size:10px; color:#999; display:flex; gap:6px; align-items:center}
+  .dk .bar .dot3{width:8px;height:8px;border-radius:50%;background:#d8d4ca}
+  .dk .inner{padding:34px 48px 44px; display:grid; grid-template-columns:1fr 300px; gap:40px}
+  .vp390 .dk{display:none}
+  .vp1024 .ph{display:none}
+  .vp1024 .stage{flex-direction:column}
+
+  /* ── shared UI atoms (receiver-home 톤 상속) ───── */
+  .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+  .brand{font-size:11.5px; font-weight:800}
+  .brand .dot{color:var(--clover-bright)}
+  .bell{font-size:13px; position:relative}
+  .bell .dot2{position:absolute; top:-2px; right:-3px; width:7px; height:7px; border-radius:50%; background:var(--clover-bright)}
+  .goal-t{font-size:18px; font-weight:800; line-height:1.32; letter-spacing:-.4px; margin:4px 0 8px}
+  .chips{display:flex; gap:5px; margin-bottom:12px}
+  .chip{font-size:10.5px; font-weight:500; padding:3px 9px; border-radius:20px}
+  .chip.dday{background:var(--clover-soft); color:var(--clover-ink)}
+  .chip.live{background:var(--warm); color:#7a7363}
+  .bal{background:#fff; border:1px solid var(--line); border-radius:12px; padding:13px 14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between}
+  .bal .k{font-size:10.5px; color:var(--faint); margin-bottom:3px}
+  .bal .v{font-size:18px; font-weight:800; color:var(--clover-ink)}
+  .bal .v small{font-size:11px; color:var(--muted); font-weight:600}
+  .bal .krw{font-size:10px; color:var(--faint); margin-top:2px}
+  .bal .go{font-size:11px; font-weight:700; color:#fff; background:var(--clover); padding:8px 12px; border-radius:9px; cursor:pointer}
+  .count{font-size:11px; color:var(--muted); margin-bottom:8px; font-weight:600}
+  .wordmap{background:var(--clover-soft); border-radius:12px; padding:13px 10px; text-align:center; line-height:1.9; margin-bottom:12px}
+  .wordmap span{display:inline-block; margin:0 4px; color:#2c7a4f}
+  .sec{font-size:11px; font-weight:700; color:var(--muted); margin:6px 0 6px}
+  .btn{display:block; width:100%; text-align:center; padding:11px; border-radius:11px; font-size:12.5px; font-weight:700; border:none; cursor:pointer; margin-top:8px}
+  .btn-primary{background:var(--clover); color:#fff}
+  .btn-line{background:#fff; color:var(--ink); border:1px solid var(--line)}
+
+  /* 응원 목록 행 — 개별 금액(클로버 개수) 노출판 */
+  .who{display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--line)}
+  .who .a2{width:26px; height:26px; border-radius:50%; background:#d8e8dd; flex:0 0 26px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--clover-ink)}
+  .who .a2.anon{background:#ECEAE4; color:#9C968B}
+  .who .nm{font-size:12px; font-weight:600}
+  .who .msg{font-size:10.5px; color:var(--muted); margin-top:1px}
+  .who .meta{margin-left:auto; text-align:right; flex:0 0 auto}
+  .who .clv{font-size:11px; font-weight:600; color:var(--clover-ink)}
+  .who .when{font-size:9.5px; color:var(--faint); margin-top:1px}
+  .privline{font-size:10px; color:var(--faint); text-align:center; margin-top:10px; line-height:1.5}
+
+  /* owner bar on /g/{slug} */
+  .ownerbar{background:var(--warm); border:1px solid var(--line); border-radius:11px; padding:9px 11px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .ownerbar .t{font-size:10.5px; color:#7a7363; line-height:1.4; padding-right:8px}
+  .ownerbar .t b{color:var(--clover-ink); font-size:11px}
+  .ownerbar .go{font-size:10.5px; font-weight:700; color:#fff; background:var(--clover); padding:6px 10px; border-radius:8px; cursor:pointer; flex:0 0 auto}
+
+  .cta-fixed{border-top:1px solid var(--line); padding-top:10px; margin-top:14px}
+  .empty{background:#fff; border:1px dashed #cdd9cf; border-radius:12px; padding:20px 14px; text-align:center; margin:10px 0}
+  .empty .b{font-size:13px; font-weight:700; margin-bottom:5px}
+  .empty .s{font-size:11px; color:var(--muted); line-height:1.55}
+  .errcard{background:var(--danger-soft); border:1px solid #f0cdc8; border-radius:12px; padding:14px; text-align:center; margin:10px 0}
+  .errcard .b{font-size:12.5px; font-weight:700; color:var(--danger); margin-bottom:4px}
+  .errcard .s{font-size:11px; color:#8a5f59; line-height:1.5}
+
+  /* flow map */
+  .flowmap{background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; max-width:860px; font-size:12px; line-height:1.7}
+  .flowmap pre{font-family:ui-monospace,monospace; font-size:11px; line-height:1.75; color:#444; overflow-x:auto}
+  .flowmap b{color:var(--clover-ink)}
+
+  .stamp{max-width:1180px; margin:36px auto 0; font-size:10.5px; color:#888; background:#fff; border:1px solid var(--line); border-radius:10px; padding:11px 14px; line-height:1.7}
+</style>
+</head>
+<body>
+<div class="hub">
+  <h1 class="board">해낼게 — 받는사람 재방문·관리 진입 + 개별 클로버 금액 (회장 결정 B, 2026-07-19)</h1>
+  <p class="board">기반: DESIGN.md v1.6.0(§6 금액 3층) + user-flow.md + receiver-home.html 톤 · 갭1=개인화 홈 진입 동선 / 갭2=본인에게만 개별 클로버 개수 노출(제3자·공개 비노출 유지, 랭킹 없음)</p>
+
+  <div class="ctrl">
+    <div class="grp"><span class="lbl">화면</span>
+      <button data-s="s1" class="on">1 /g/[slug] 본인진입</button>
+      <button data-s="s2">2 /home 응원목록(금액)</button>
+      <button data-s="s3">3 진입동선 맵</button>
+    </div>
+    <div class="grp"><span class="lbl">뷰포트</span>
+      <button data-v="vp390" class="on2">390</button>
+      <button data-v="vp1024">1024</button>
+    </div>
+    <div class="grp"><span class="lbl">상태</span>
+      <button data-st="default" class="on2">기본</button>
+      <button data-st="empty">empty</button>
+      <button data-st="error">error</button>
+    </div>
+  </div>
+
+  <!-- ══════════ 화면 1: /g/{slug} 본인 로그인 진입 (갭1-b) ══════════ -->
+  <div class="screen-wrap show vp390" id="s1">
+    <div class="note">
+      <b>갭1 해소 — 본인이 자기 공개링크를 열었을 때.</b> 받는사람의 가장 흔한 재방문 경로 = <b>자기 인스타 바이오의 자기 링크</b>(<span class="route">/g/[slug]</span>). 지금은 친구용 화면만 보임 → <b>owner bar</b>를 상단에 노출해 <span class="route">/home</span>으로 회수한다. 페이지 본체는 친구용 그대로(내 페이지가 친구에게 어떻게 보이는지 확인하는 용도 겸함 — "미리보기" 가치). 비로그인·타인 로그인이면 owner bar 없음(제3자 비노출 유지). 심리: 손실회피 — "새 응원 N개"가 확인 안 한 것을 상기시켜 관리 화면으로 끌어당김.
+    </div>
+    <div class="stage">
+      <div>
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div></div>
+          <div class="ownerbar st-default st-empty">
+            <div class="t"><b>내 목표예요</b><br><span class="od-default">새 응원 2개</span><span class="od-empty" style="display:none">받은 응원을 여기서 관리해요</span></div>
+            <div class="go">내 해낼게 관리</div>
+          </div>
+          <div class="goal-t">나 편입 평점<br>4.0 해낼게</div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="count">13명이 조용히 응원했어요</div>
+          <div class="wordmap">
+            <span style="font-size:16px">화이팅</span><span style="font-size:13px">할수있어</span>
+            <span style="font-size:19px">멋지다</span><span style="font-size:14px">고생많아</span>
+            <span style="font-size:17px">곧된다</span>
+          </div>
+          <div class="errcard st-error" style="display:none">
+            <div class="b">로그인이 풀렸어요</div>
+            <div class="s">내 목표를 관리하려면 다시 로그인해 주세요.<br>친구용 화면은 그대로 볼 수 있어요.</div>
+            <button class="btn btn-line" style="margin-top:8px">카카오로 다시 로그인</button>
+          </div>
+          <div class="cta-fixed"><button class="btn btn-primary">🍀 조용히 밀어줄게</button></div>
+          <div class="privline">owner bar는 본인 로그인 세션에서만 · 친구/제3자에겐 절대 안 보임</div>
+        </div></div>
+        <div class="cap"><b>본인 로그인 상태</b>로 /g/[slug] 열람<br>(상태 토글: 기본=새 응원 有 / empty=응원 0 / error=세션 만료)</div>
+      </div>
+    </div>
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.ge/g/pyeonip-40</div>
+      <div class="inner">
+        <div>
+          <div class="ownerbar"><div class="t"><b>내 목표예요</b> · 확인 안 한 응원 2개</div><div class="go">내 해낼게 관리</div></div>
+          <div class="goal-t" style="font-size:26px">나 편입 평점 4.0 해낼게</div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="count">13명이 조용히 응원했어요</div>
+          <div class="wordmap" style="padding:22px 16px; line-height:2.1">
+            <span style="font-size:22px">화이팅</span><span style="font-size:15px">할수있어</span>
+            <span style="font-size:26px">멋지다</span><span style="font-size:17px">고생많아</span>
+            <span style="font-size:21px">곧된다</span><span style="font-size:14px">힘내자</span>
+          </div>
+        </div>
+        <div>
+          <div class="sec">이 목표 응원하기</div>
+          <button class="btn btn-primary">🍀 조용히 밀어줄게</button>
+          <div class="privline" style="text-align:left; margin-top:12px">데스크톱 = 본문 + 우측 액션 레일 2컬럼.<br>owner bar는 본문 컬럼 최상단 고정.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 화면 2: /home 응원 목록 — 개별 클로버 개수 노출 (갭2) ══════════ -->
+  <div class="screen-wrap vp390" id="s2">
+    <div class="note">
+      <b>갭2 해소 — 회장 결정 B: 본인은 친구별 개별 클로버 금액 확인 가능.</b> Discreet 유지 장치: ①<b>시간순 고정</b>(정렬·랭킹·합계순 UI 없음) ②금액은 행 우측에 <b>🍀 개수, 작은 클로버-잉크색</b> — 이름·메시지가 주, 개수는 메타 ③₩ 환산 없음(§6-c: 원화는 환전에서만) ④익명 응원도 개수는 보임(익명은 <b>신원</b>을 가리는 것이지 본인의 <b>수입</b>을 가리는 게 아님) ⑤제3자·공개 화면(/g, 워드맵 공유이미지)은 종전대로 완전 비노출. 벤치마크: BMC·투네이션은 크리에이터 대시보드에 개별 금액+랭킹까지 보여줌 — 우리는 금액은 차용, 랭킹은 버림.
+    </div>
+    <div class="stage">
+      <div>
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div class="bell">🔔<span class="dot2"></span></div></div>
+          <div class="goal-t">나 편입 평점<br>4.0 해낼게</div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="bal">
+            <div><div class="k">모인 클로버</div><div class="v st-default">🍀 128<small>개</small></div><div class="v st-empty" style="display:none">🍀 30<small>개</small></div><div class="krw st-default">≈128,000원 상당</div><div class="krw st-empty" style="display:none">≈30,000원 상당 (웰컴 클로버)</div></div>
+            <div class="go">환전</div>
+          </div>
+          <div class="st-default">
+            <div class="sec">응원한 사람 <span style="font-weight:400; color:var(--faint)">· 최근 순</span></div>
+            <div class="who"><div class="a2">민</div><div><div class="nm">민지</div><div class="msg">"곧된다"</div></div><div class="meta"><div class="clv">🍀 5</div><div class="when">방금</div></div></div>
+            <div class="who"><div class="a2 anon">?</div><div><div class="nm">익명의 누군가</div><div class="msg">"존경해"</div></div><div class="meta"><div class="clv">🍀 10</div><div class="when">1시간 전</div></div></div>
+            <div class="who"><div class="a2">준</div><div><div class="nm">준호</div><div class="msg" style="color:var(--faint)">메시지 없음</div></div><div class="meta"><div class="clv">🍀 3</div><div class="when">어제</div></div></div>
+            <div class="who"><div class="a2 anon">?</div><div><div class="nm">익명의 누군가</div><div class="msg">"고생많아"</div></div><div class="meta"><div class="clv">🍀 3</div><div class="when">2일 전</div></div></div>
+            <div class="who"><div class="a2">서</div><div><div class="nm">서연</div><div class="msg">"멋지다"</div></div><div class="meta"><div class="clv">🍀 5</div><div class="when">3일 전</div></div></div>
+            <div class="privline">개별 클로버는 <b>나만</b> 볼 수 있어요 · 친구들에겐 안 보여요<br>순서는 최근 순 — 금액순 정렬은 없어요</div>
+          </div>
+          <div class="st-empty" style="display:none">
+            <div class="empty">
+              <div class="b">아직 응원이 없어요</div>
+              <div class="s">인스타 바이오에 링크를 걸면<br>친구들이 조용히 밀어주기 시작해요.</div>
+            </div>
+            <button class="btn btn-primary">내 링크 복사하기</button>
+          </div>
+          <div class="errcard st-error" style="display:none">
+            <div class="b">응원 목록을 못 불러왔어요</div>
+            <div class="s">네트워크가 불안정해요. 잔액은 정상이에요.</div>
+            <button class="btn btn-line" style="margin-top:8px">다시 불러오기</button>
+          </div>
+          <div class="cta-fixed"><button class="btn btn-line">워드맵 보기</button></div>
+        </div></div>
+        <div class="cap"><b>/home — 개별 클로버 개수 노출판</b><br>(상태 토글: 기본 / empty / error=목록 로드 실패)</div>
+      </div>
+    </div>
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.ge/home</div>
+      <div class="inner">
+        <div>
+          <div class="goal-t" style="font-size:24px">나 편입 평점 4.0 해낼게</div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="sec">응원한 사람 <span style="font-weight:400; color:var(--faint)">· 최근 순</span></div>
+          <div class="who"><div class="a2">민</div><div><div class="nm">민지</div><div class="msg">"곧된다"</div></div><div class="meta"><div class="clv">🍀 5</div><div class="when">방금</div></div></div>
+          <div class="who"><div class="a2 anon">?</div><div><div class="nm">익명의 누군가</div><div class="msg">"존경해"</div></div><div class="meta"><div class="clv">🍀 10</div><div class="when">1시간 전</div></div></div>
+          <div class="who"><div class="a2">준</div><div><div class="nm">준호</div><div class="msg" style="color:var(--faint)">메시지 없음</div></div><div class="meta"><div class="clv">🍀 3</div><div class="when">어제</div></div></div>
+          <div class="who"><div class="a2">서</div><div><div class="nm">서연</div><div class="msg">"멋지다"</div></div><div class="meta"><div class="clv">🍀 5</div><div class="when">3일 전</div></div></div>
+          <div class="privline" style="text-align:left">개별 클로버는 나만 · 정렬 없음(최근 순 고정)</div>
+        </div>
+        <div>
+          <div class="bal" style="display:block">
+            <div class="k">모인 클로버</div><div class="v">🍀 128<small>개</small></div><div class="krw">≈128,000원 상당</div>
+            <button class="btn btn-primary" style="margin-top:10px">환전하기</button>
+          </div>
+          <button class="btn btn-line">워드맵 보기</button>
+          <button class="btn btn-line">내 링크 복사하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 화면 3: 진입 동선 맵 (갭1 전체 경로) ══════════ -->
+  <div class="screen-wrap vp390" id="s3">
+    <div class="note">
+      <b>진입 동선 추천 = (a)+(b) 조합.</b> (a) 로그인 세션 보유자가 루트(<span class="route">/</span>)나 로그인 완료에 도달하면 <span class="route">/home</span>으로 랜딩(현행 코드도 인증 후 /home 리다이렉트 구조라 정합) + (b) 본인이 <span class="route">/g/[slug]</span>를 열면 owner bar(화면 1). (c) 전역 "내 해낼게" 헤더는 MVP 보류 — 공개 화면에 로그인 상태 의존 UI를 늘리면 Discreet·단일 CTA 원칙이 흐려짐. 알림톡/카카오 알림 딥링크도 <span class="route">/home</span> 직행.
+    </div>
+    <div class="flowmap">
+<pre>
+[재방문 시나리오별 경로 — dead-end 0]
+
+A. 인스타 바이오 자기링크 탭(가장 흔함)
+   /g/[slug] ─(본인 세션)→ <b>owner bar "내 해낼게 관리"</b> → /home
+             ─(세션 없음)→ 친구용 화면 → 하단 "내 목표가 있으신가요? 로그인" (footer, subtle)
+                            → 카카오 로그인 → 본인 확인 → /home
+
+B. 북마크·주소 직접입력  /home ─(세션 有)→ 홈  ─(세션 無)→ 카카오 로그인 → /home
+C. 루트 / 진입           / ─(세션 有 + 목표 有)→ /home 리다이렉트
+                          ─(세션 有 + 목표 無)→ /onboarding
+                          ─(세션 無)→ ① 랜딩(landing-final) 그대로
+D. 알림(카카오 알림톡) 링크 → /home 직행(세션 없으면 로그인 후 /home)
+
+edge: 로그인했지만 남의 /g/[slug] → owner bar 없음(친구용 그대로)
+      본인 목표 삭제 후 /home → "종료된 목표" + 새 목표 만들기(/onboarding)
+      세션 만료 상태로 owner 기능 접근 → 화면 1 error 상태(재로그인, draft·열람 유지)
+</pre>
+    </div>
+  </div>
+
+  <div class="stamp">
+    <b>STAMP</b> · 생성 2026-07-19 (KST) · 모델 claude-fable-5 · 에이전트 product-designer · 스킬 design-html(+design-review 자체QA) ·
+    기반: DESIGN.md v1.6.0 §6 + docs/user-flow.md + receiver-home.html + web/src/app/(receiver)/home/page.tsx 실측 + 회장 결정 B(2026-07-19) ·
+    벤치마크: help.toon.at(투네이션 후원목록·순위는 "공개 설정" 분리 — 우리는 랭킹 자체 배제), help.buymeacoffee.com(크리에이터 대시보드=개별 금액 노출, 재방문 로그인→대시보드 랜딩 차용) ·
+    고민 한 줄: "금액을 보여주되 비교 심리를 만들지 않기 — 시간순 고정 + 메타 위치 + ₩ 배제가 그 장치."
+    <br>예시 데이터 각주: 인명·클로버 수치는 페르소나(편입 준비생) 기반 예시.
+  </div>
+</div>
+
+<script>
+  const wraps = document.querySelectorAll('.screen-wrap');
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-s]').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    wraps.forEach(w=>w.classList.toggle('show', w.id===b.dataset.s));
+  });
+  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('on2'));
+    b.classList.add('on2');
+    wraps.forEach(w=>{w.classList.remove('vp390','vp1024'); w.classList.add(b.dataset.v);});
+  });
+  document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-st]').forEach(x=>x.classList.remove('on2'));
+    b.classList.add('on2');
+    const st = b.dataset.st;
+    document.querySelectorAll('.st-default,.st-empty,.st-error').forEach(el=>{
+      el.style.display = el.classList.contains('st-'+st) ? '' : 'none';
+    });
+    // owner bar 서브텍스트
+    document.querySelectorAll('.od-default').forEach(el=>el.style.display = st==='default'?'':'none');
+    document.querySelectorAll('.od-empty').forEach(el=>el.style.display = st==='empty'?'':'none');
+  });
+</script>
+</body>
+</html>

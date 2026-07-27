@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — ① 랜딩 shotgun 3안 (돈 벌이 payoff 공급 훅)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:26px 16px 56px}
+  h1.board{font-size:18px; text-align:center; margin-bottom:4px}
+  p.board{font-size:12.5px; color:#555; text-align:center; margin-bottom:6px}
+  .axis{max-width:1080px; margin:0 auto 22px; font-size:12px; color:#666; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.6}
+  .axis b{color:var(--clover-ink)}
+  .row{display:flex; gap:26px; justify-content:center; flex-wrap:wrap; align-items:flex-start}
+  .col{width:352px}
+  .tag{font-size:13px; font-weight:800; color:#333; text-align:center; margin-bottom:8px}
+  .tag small{display:block; font-weight:500; color:#888; margin-top:2px; font-size:11.5px}
+
+  .phone{width:352px; height:720px; background:var(--bg); border:1px solid #d9d5cc; border-radius:38px;
+         box-shadow:0 12px 40px rgba(0,0,0,.14); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#000; border-radius:0 0 18px 18px; z-index:5}
+  .screen{height:100%; display:flex; flex-direction:column; padding:54px 26px 26px; position:relative}
+  .screen::before{content:""; position:absolute; inset:0; background:radial-gradient(120% 55% at 50% 6%, rgba(31,158,90,.05), transparent 60%); pointer-events:none}
+  .brand{font-size:12.5px; font-weight:800; position:relative; z-index:1}
+  .brand .dot{color:var(--clover-bright)}
+
+  .hero{flex:0 0 auto; text-align:center; margin-top:20px; position:relative; z-index:1}
+  .mark{font-size:36px; font-weight:900; letter-spacing:-1.3px; line-height:1}
+  .mark .dot{color:var(--clover-bright)}
+  .slogan{font-size:14.5px; color:var(--muted); margin-top:12px; line-height:1.5; font-weight:500}
+
+  /* wordmap */
+  .wm{position:relative; border-radius:16px; overflow:hidden; background:radial-gradient(85% 85% at 50% 45%, var(--clover-soft), #EEF6F0 72%)}
+  .w{position:absolute; font-weight:800; white-space:nowrap}
+  .w.s1{color:#8bb79f; font-weight:600}
+  .w.s2{color:#57a178; font-weight:700}
+  .w.s3{color:#1a8150}
+  .clv{position:absolute; opacity:.55}
+
+  .spacer{flex:1 1 auto}
+  .cta{flex:0 0 auto; position:relative; z-index:1}
+  .btn{display:block; width:100%; text-align:center; padding:16px; border-radius:15px; font-size:15.5px; font-weight:800; border:none; cursor:pointer; background:var(--clover); color:#fff; box-shadow:0 6px 16px rgba(27,138,79,.22); letter-spacing:-.2px}
+  .btn-ghost{background:transparent; color:var(--muted); font-weight:600; font-size:13px; padding:12px; min-height:44px; cursor:pointer; width:100%; border:none}
+
+  /* A: payoff copy */
+  .a-pay{font-size:14.5px; line-height:1.66; color:#4a4640; text-align:center; margin:20px 4px 0; position:relative; z-index:1}
+  .a-pay b{color:var(--clover-ink); font-weight:800}
+  .a-wm{height:150px; margin-top:20px}
+
+  /* B: 적립 병 일러스트 + 환전 예시 (쌓여서 현금 된다) */
+  .b-wm{height:70px; margin:12px 0 0}
+  .jar-label{text-align:center; font-size:11.5px; color:var(--muted); font-weight:600; margin-top:12px; position:relative; z-index:1}
+  .jar-label b{color:var(--clover-ink); font-weight:800}
+  .jar{position:relative; width:150px; height:92px; margin:8px auto 0; border:2px solid #cdd9cf; border-top:none;
+       border-radius:6px 6px 20px 20px; background:linear-gradient(180deg, rgba(231,244,236,.35), var(--clover-soft)); overflow:hidden; z-index:1}
+  .jar .lid{position:absolute; top:-9px; left:50%; transform:translateX(-50%); width:88px; height:9px; border-radius:5px; background:#cdd9cf}
+  .jar .cl{position:absolute}
+  .exch{display:flex; align-items:center; justify-content:center; gap:14px; margin-top:14px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:15px 14px; position:relative; z-index:1}
+  .exch .amt-clv{font-size:17px; font-weight:900; color:var(--clover-ink); line-height:1}
+  .exch .amt-clv small{font-size:11px; font-weight:700}
+  .exch .arw{color:var(--clover); font-size:18px; font-weight:900}
+  .exch .amt-won{font-size:18px; font-weight:900; color:var(--ink); line-height:1; text-align:center}
+  .exch .amt-won small{display:block; font-size:9.5px; font-weight:600; color:var(--faint); margin-top:3px}
+  .exch-note{font-size:9.5px; color:var(--faint); text-align:center; margin-top:8px; line-height:1.55; position:relative; z-index:1}
+  .exch-note b{color:var(--muted); font-weight:700}
+
+  /* C: proof + reward band */
+  .c-band{position:relative; z-index:1; margin-top:18px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px}
+  .c-stat{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+  .c-stat .big{font-size:20px; font-weight:900; color:var(--clover-ink)}
+  .c-stat .big small{font-size:12px; font-weight:700}
+  .c-stat .who{font-size:11.5px; color:var(--muted); font-weight:600; text-align:right; line-height:1.4}
+  .c-prog{font-size:10.5px; color:var(--faint); font-weight:600; margin-bottom:5px}
+  .c-gauge{height:8px; border-radius:5px; background:var(--line); overflow:hidden}
+  .c-gauge > i{display:block; height:100%; width:78%; background:var(--clover)}
+  .c-eg{font-size:9.5px; color:var(--faint); text-align:center; margin-top:8px}
+  .c-wm{height:104px; margin-top:14px}
+
+  .cap{margin:16px auto 0; font-size:11px; color:#777; line-height:1.6; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; width:352px}
+  .cap b{color:var(--clover-ink)}
+  .cap .k{color:#999}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — ① 랜딩 shotgun 3안 <small style="font-weight:400;color:#888">(design-shotgun · HTML sketch)</small></h1>
+  <p class="board">/design-shotgun 방법론(anti-convergence 3방향) · 잠긴 base(C미니멀+워드맵+슬로건)·금액 3층 규칙 유지</p>
+  <div class="axis">
+    <b>탐색 축:</b> "받는 사람이 랜딩만 봐도 <b>'내가 해내는 동안 친구 진심이 진짜 돈이 돼 내 손에 들어온다'</b>는 공급 훅(돈 벌이 payoff)"을 얼마나·어떻게 전하나.
+    <b>공통 잠금:</b> 개별 후원 금액 비노출(과시·서열화 금지) · 클로버 <b>개수·환전</b>으로만 payoff 표현 · 따뜻한 보상 톤(상업/그리디 금지).
+    세 안은 <b>표현 수단</b>이 다르다 — A=언어, B=시각 흐름, C=증거+게이지.
+  </div>
+
+  <div class="row">
+
+    <!-- ============ A 카피형 ============ -->
+    <div class="col">
+      <div class="tag">A · 카피형 (언어로 payoff)<small>"해내는 동안 진심이 쌓여 네 손에"</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="hero">
+            <div class="mark">해낼게<span class="dot">.</span></div>
+            <div class="slogan">응원은 돈으로 하는 겁니다.</div>
+          </div>
+          <div class="a-pay">네가 해내는 동안,<br>친구들의 진심이 <b>🍀로 쌓여요.</b><br>모이면 <b>네 손에</b> 들어오고요.</div>
+          <div class="wm a-wm">
+            <span class="w s3" style="left:30%;top:14%;font-size:24px">멋지다</span>
+            <span class="w s2" style="left:9%;top:34%;font-size:16px;transform:rotate(-5deg)">화이팅</span>
+            <span class="w s3" style="left:52%;top:42%;font-size:27px">곧된다</span>
+            <span class="w s1" style="left:16%;top:64%;font-size:13px">할수있어</span>
+            <span class="w s2" style="left:58%;top:70%;font-size:17px">응원해</span>
+            <span class="w s1" style="left:38%;top:80%;font-size:12px">고생많아</span>
+            <svg class="clv" style="left:26%;top:52%;width:14px" viewBox="0 0 24 24" fill="#4aa877"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="clv" style="left:76%;top:54%;width:12px" viewBox="0 0 24 24" fill="#7bc09b"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+          </div>
+          <div class="spacer"></div>
+          <div class="cta">
+            <button class="btn">시작하기</button>
+            <button class="btn-ghost">어떻게 쓰는 건가요?</button>
+          </div>
+        </div>
+      </div>
+      <div class="cap">
+        <b>차이:</b> payoff를 <b>순수 카피</b>로 전함(새 시각 모듈 없음). 가장 미니멀·따뜻, 상업색 최소.<br>
+        <b>심리:</b> 미래보상 언어화 + <b>보유효과</b>("네 손에"=이미 내 것 프레이밍) · 실행의도(해내는 동안→쌓임).<br>
+        <span class="k">리스크: "돈이 된다" 느낌이 세 안 중 가장 은근 → 회장 지적("약하다")을 절반만 해소할 수도.</span>
+      </div>
+    </div>
+
+    <!-- ============ B 시각 흐름형 ============ -->
+    <div class="col">
+      <div class="tag">B · 적립→환전 시각화 (구체 금액)<small>🍀 쌓이는 모습 → "약 11만원 환전" 예시</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="hero">
+            <div class="mark">해낼게<span class="dot">.</span></div>
+            <div class="slogan">응원은 돈으로 하는 겁니다.</div>
+          </div>
+          <div class="wm b-wm">
+            <span class="w s3" style="left:26%;top:18%;font-size:19px">멋지다</span>
+            <span class="w s2" style="left:9%;top:52%;font-size:14px">화이팅</span>
+            <span class="w s3" style="left:52%;top:50%;font-size:21px">곧된다</span>
+            <span class="w s2" style="left:66%;top:20%;font-size:13px">응원해</span>
+          </div>
+          <div class="jar-label">친구들의 응원이 <b>🍀 클로버로 쌓여요</b></div>
+          <div class="jar"><div class="lid"></div>
+            <svg class="cl" style="left:10px;top:64px;width:17px" viewBox="0 0 24 24" fill="#3f9f6e"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:36px;top:68px;width:15px" viewBox="0 0 24 24" fill="#57a178"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:60px;top:63px;width:18px" viewBox="0 0 24 24" fill="#2f8f5c"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:88px;top:67px;width:15px" viewBox="0 0 24 24" fill="#57a178"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:112px;top:64px;width:17px" viewBox="0 0 24 24" fill="#3f9f6e"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:24px;top:48px;width:15px" viewBox="0 0 24 24" fill="#7bc09b"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:50px;top:44px;width:16px" viewBox="0 0 24 24" fill="#57a178"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:78px;top:47px;width:15px" viewBox="0 0 24 24" fill="#7bc09b"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+            <svg class="cl" style="left:104px;top:46px;width:14px" viewBox="0 0 24 24" fill="#57a178"><path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>
+          </div>
+          <div class="exch">
+            <div class="amt-clv">🍀 128<small>개</small></div>
+            <div class="arw">→</div>
+            <div class="amt-won">약 11만원<small>환전 (실수령 예시)</small></div>
+          </div>
+          <div class="exch-note">커피값 응원 <b>40여 개</b>가 모인 예시 · 수수료·세금 뗀 실수령<br>※ 랜딩 설명용 예시 — 실제 본인 화면은 클로버 개수만 보여요</div>
+          <div class="spacer"></div>
+          <div class="cta">
+            <button class="btn">시작하기</button>
+            <button class="btn-ghost">어떻게 쓰는 건가요?</button>
+          </div>
+        </div>
+      </div>
+      <div class="cap">
+        <b>차이:</b> payoff를 <b>적립 병 일러스트 + 환전 예시 금액</b>으로. "🍀가 쌓여서 → 약 11만원 현금 된다"를 눈에 보이게(회장 지적 정면 대응).<br>
+        <b>심리:</b> <b>구체성 효과</b>(모호한 "돈 된다"보다 "🍀128개=약11만원"이 훨씬 믿김) · 시각적 축적(병에 쌓인 클로버) · 목표근접.<br>
+        <span class="k">절제·정직: 커피값 응원 40여 개가 모인 <b>십몇만원</b> 수준(떼돈·"월○○만원" 그리디 톤 금지). "※예시·실화면은 개수만" 명시 → 금액 3층 규칙과 비충돌.</span>
+      </div>
+    </div>
+
+    <!-- ============ C 증거+보상형 ============ -->
+    <div class="col">
+      <div class="tag">C · 증거+보상형 (모여서 환전)<small>🍀 N개 모이면 환전 · 이미 밀어준 사람들</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="hero">
+            <div class="mark">해낼게<span class="dot">.</span></div>
+            <div class="slogan">응원은 돈으로 하는 겁니다.</div>
+          </div>
+          <div class="c-band">
+            <div class="c-stat">
+              <div class="big">🍀 128<small>개</small> 모이면</div>
+              <div class="who">이미 12명이<br>조용히 밀어줬어요</div>
+            </div>
+            <div class="c-prog">환전까지 거의 다 왔어요</div>
+            <div class="c-gauge"><i></i></div>
+            <div class="c-eg">※ 예시 — 실제 숫자는 네가 시작하면 채워져요</div>
+          </div>
+          <div class="wm c-wm">
+            <span class="w s3" style="left:30%;top:16%;font-size:21px">멋지다</span>
+            <span class="w s2" style="left:11%;top:50%;font-size:14px">화이팅</span>
+            <span class="w s3" style="left:54%;top:52%;font-size:23px">곧된다</span>
+            <span class="w s1" style="left:24%;top:78%;font-size:12px">응원해</span>
+          </div>
+          <div class="spacer"></div>
+          <div class="cta">
+            <button class="btn">시작하기</button>
+            <button class="btn-ghost">어떻게 쓰는 건가요?</button>
+          </div>
+        </div>
+      </div>
+      <div class="cap">
+        <b>차이:</b> payoff를 <b>사회적 증거 + 적립/환전 스탯 밴드</b>로. "이렇게 벌린다"가 가장 구체적·설득적.<br>
+        <b>심리:</b> <b>사회적 증거</b>(N명 밀어줌) · 목표 근접(환전 게이지) · 앵커링(🍀 128개).<br>
+        <span class="k">정직 장치: 콜드스타트라 "※예시" 명시(가짜 라이브 수치 다크패턴 회피). 3층 유지(개수만, 원화·개별금액 X). 리스크: 미니멀 가장 약함 — 밴드가 슬로건 집중을 가장 많이 눌러 상업색 최고.</span>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

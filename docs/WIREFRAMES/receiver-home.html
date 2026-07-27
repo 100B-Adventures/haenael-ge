@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — 받는 사람 로그인 후 화면 (내 목표 홈·수신·워드맵·재공유)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:24px 20px 64px}
+  h1.board{font-size:18px; text-align:center; margin-bottom:4px}
+  p.board{font-size:13px; color:#555; text-align:center; margin-bottom:16px}
+  .note{max-width:1100px; margin:0 auto 24px; font-size:12px; color:#666; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.6}
+  .note b{color:var(--clover-ink)}
+  .seq{display:flex; align-items:flex-start; gap:14px; overflow-x:auto; padding-bottom:8px; max-width:1180px; margin:0 auto; justify-content:flex-start}
+  .seq::-webkit-scrollbar{height:6px}
+  .step{flex:0 0 auto; text-align:center}
+  .cap{font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:600; height:30px; display:flex; align-items:center; justify-content:center; line-height:1.3; padding:0 4px}
+  .cap b{color:var(--clover-ink)}
+
+  .ph{width:236px; height:486px; background:var(--bg); border:1px solid #d9d5cc; border-radius:28px; box-shadow:0 6px 22px rgba(0,0,0,.10); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:96px; height:18px; background:#000; border-radius:0 0 12px 12px; z-index:5}
+  .sc{height:100%; overflow-y:auto; padding:34px 16px 16px; position:relative}
+  .sc::-webkit-scrollbar{display:none}
+  .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+  .brand{font-size:11px; font-weight:800}
+  .brand .dot{color:var(--clover-bright)}
+  .bell{font-size:13px; position:relative}
+  .bell .dot2{position:absolute; top:-2px; right:-3px; width:7px; height:7px; border-radius:50%; background:var(--clover-bright)}
+
+  .av{width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#cfe9da,#a9d8bf); flex:0 0 30px}
+  .goal-t{font-size:18px; font-weight:800; line-height:1.32; letter-spacing:-.4px; margin:4px 0 8px}
+  .chips{display:flex; gap:5px; margin-bottom:12px}
+  .chip{font-size:10.5px; font-weight:500; padding:3px 9px; border-radius:20px}
+  .chip.dday{background:var(--clover-soft); color:var(--clover-ink)}
+  .chip.live{background:var(--warm); color:#7a7363}
+  .chip.closed{background:#EFEDE8; color:#8a857a}
+
+  /* clover balance — 받는 사람 본인만 보는 자기 잔액(총액). 개별 후원자별 금액은 비노출 */
+  .bal{background:#fff; border:1px solid var(--line); border-radius:12px; padding:13px 14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between}
+  .bal .l .k{font-size:10.5px; color:var(--faint); margin-bottom:3px}
+  .bal .l .v{font-size:18px; font-weight:800; color:var(--clover-ink)}
+  .bal .l .v small{font-size:11px; color:var(--muted); font-weight:600}
+  .bal .go{font-size:11px; font-weight:700; color:#fff; background:var(--clover); padding:8px 12px; border-radius:9px}
+
+  .count{font-size:11px; color:var(--muted); margin-bottom:8px; font-weight:600}
+  .wordmap{background:var(--clover-soft); border-radius:12px; padding:14px 10px; text-align:center; line-height:1.95; margin-bottom:12px}
+  .wordmap span{display:inline-block; margin:0 4px; color:#2c7a4f}
+
+  .sec{font-size:11px; font-weight:700; color:var(--muted); margin:4px 0 8px}
+  .who{display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--line)}
+  .who .a2{width:26px; height:26px; border-radius:50%; background:#d8e8dd; flex:0 0 26px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--clover-ink)}
+  .who .a2.anon{background:#ECEAE4; color:#9C968B}
+  .who .nm{font-size:12px; font-weight:600}
+  .who .msg{font-size:10.5px; color:var(--muted); margin-top:1px}
+  .who .when{font-size:10px; color:var(--faint); margin-left:auto; flex:0 0 auto}
+  .nomoney{font-size:10px; color:var(--faint); text-align:center; margin-top:10px}
+
+  .btn{display:block; width:100%; text-align:center; padding:11px; border-radius:11px; font-size:12.5px; font-weight:700; border:none; cursor:pointer; margin-top:8px}
+  .btn-primary{background:var(--clover); color:#fff}
+  .btn-line{background:#fff; color:var(--ink); border:1px solid var(--line)}
+
+  /* notif */
+  .toast{position:absolute; left:16px; right:16px; top:46px; background:var(--ink); color:#fff; border-radius:11px; padding:11px 13px; font-size:11.5px; z-index:20; display:flex; gap:9px; align-items:flex-start; line-height:1.4}
+  .toast .ic{width:20px;height:20px;border-radius:50%;background:var(--clover-bright);flex:0 0 20px;display:flex;align-items:center;justify-content:center;font-size:11px}
+
+  /* empty */
+  .empty{background:#fff; border:1px dashed #cdd9cf; border-radius:12px; padding:22px 14px; text-align:center; margin:10px 0}
+  .empty .b{font-size:13px; font-weight:700; margin-bottom:5px}
+  .empty .s{font-size:11px; color:var(--muted); line-height:1.55}
+
+  /* share image */
+  .shareframe{background:linear-gradient(160deg,#F4EFE6,#E7F4EC); border:1px solid var(--line); border-radius:14px; padding:16px 14px; text-align:center; margin-bottom:10px}
+  .shareframe .sg{font-size:13px; font-weight:800; margin-bottom:8px}
+  .shareframe .sw{line-height:1.9}
+  .shareframe .sw span{display:inline-block; margin:0 3px; color:#2c7a4f}
+  .shareframe .sct{font-size:10px; color:var(--muted); margin-top:8px}
+  .shareframe .brandmini{font-size:9.5px; color:var(--clover-ink); font-weight:800; margin-top:6px}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — 받는 사람 로그인 후 화면 <small style="font-weight:400;color:#888">(자기 화면 · 돈 확인 · 워드맵 · 재공유)</small></h1>
+  <p class="board">받는사람 본인은 <b>클로버 개수(🍀 N개)</b>만 봄 · <b>₩ 환산 X</b>(원화는 환전 화면에서만) · 개별 후원자별 금액 안 봄 · 익명="익명의 누군가"</p>
+  <div class="note">
+    <b>화면:</b> ① 내 목표 홈(단순화 — <b>"워드맵 보기" 단일 CTA</b>) → ② 응원 수신 알림(은은·답장의무X) → ③ 누가 응원했나(이름/익명, 금액 X) → ④ empty(응원 0).
+    <b>워드맵 풀뷰·공유 시퀀스는 <a href="wordmap-share.html">wordmap-share.html</a></b>(확산 고리). 환전은 <b>cashout.html</b>. 마감 목표도 응원 계속(적립형).
+  </div>
+
+  <div class="seq">
+
+    <!-- 1 내 목표 홈 -->
+    <div class="step"><div class="cap"><b>1. 내 목표 홈</b></div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div class="bell">🔔<span class="dot2"></span></div></div>
+        <div class="goal-t">나 편입 평점<br>4.0 해낼게</div>
+        <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+        <div class="bal">
+          <div class="l"><div class="k">모인 클로버</div><div class="v">🍀 128<small>개</small></div></div>
+          <div class="go">환전</div>
+        </div>
+        <div class="count">13명이 조용히 응원했어요</div>
+        <div class="wordmap">
+          <span style="font-size:16px">화이팅</span><span style="font-size:13px">할수있어</span>
+          <span style="font-size:19px">멋지다</span><span style="font-size:14px">고생많아</span>
+          <span style="font-size:17px">곧된다</span><span style="font-size:13px">힘내자</span>
+        </div>
+        <button class="btn btn-line">워드맵 보기</button>
+      </div></div>
+    </div>
+    <div style="align-self:center; font-size:11px; color:var(--faint); flex:0 0 auto; padding:0 2px">"워드맵 보기"<br>→ wordmap-share.html</div>
+
+    <!-- 2 수신 알림 -->
+    <div class="step"><div class="cap">2. 응원 수신 알림</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div class="bell">🔔<span class="dot2"></span></div></div>
+        <div class="goal-t" style="opacity:.45">나 편입 평점 4.0 해낼게</div>
+        <div class="toast"><span class="ic">🍀</span><div>민지님이 조용히 응원했어요.<br><span style="opacity:.7">답장은 안 해도 괜찮아요.</span></div></div>
+        <div style="margin-top:90px" class="count">방금 워드맵에 한 마디가 늘었어요</div>
+        <div class="wordmap">
+          <span style="font-size:16px">화이팅</span><span style="font-size:19px; color:var(--clover); font-weight:700">곧된다</span>
+          <span style="font-size:14px">멋지다</span><span style="font-size:13px">힘내자</span>
+        </div>
+        <div class="nomoney">알림은 은은하게 · 금액·재촉 없음</div>
+      </div></div>
+    </div>
+
+    <!-- 3 누가 응원했나 -->
+    <div class="step"><div class="cap"><b>3. 누가 응원했나</b><br>(금액 X)</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div class="bell">🔔</div></div>
+        <div class="sec">조용히 밀어준 사람들</div>
+        <div class="who"><div class="a2">민</div><div><div class="nm">민지</div><div class="msg">"곧된다"</div></div><div class="when">방금</div></div>
+        <div class="who"><div class="a2 anon">?</div><div><div class="nm">익명의 누군가</div><div class="msg">"존경해"</div></div><div class="when">1시간</div></div>
+        <div class="who"><div class="a2">준</div><div><div class="nm">준호</div><div class="msg">메시지 없음</div></div><div class="when">어제</div></div>
+        <div class="who"><div class="a2 anon">?</div><div><div class="nm">익명의 누군가</div><div class="msg">"고생많아"</div></div><div class="when">2일</div></div>
+        <div class="who"><div class="a2">서</div><div><div class="nm">서연</div><div class="msg">"멋지다"</div></div><div class="when">3일</div></div>
+        <div class="nomoney">누가 응원했는지는 보여요 · <b>금액은 안 보여요</b></div>
+      </div></div>
+    </div>
+
+    <!-- (워드맵 풀뷰·재공유 시퀀스는 wordmap-share.html 로 분리 — 홈은 "워드맵 보기"만) -->
+
+    <!-- 4 empty -->
+    <div class="step"><div class="cap">4. empty (응원 0)</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div class="bell">🔔</div></div>
+        <div class="goal-t">나 편입 평점<br>4.0 해낼게</div>
+        <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+        <div class="bal"><div class="l"><div class="k">모인 클로버</div><div class="v">🍀 0<small>개</small></div></div></div>
+        <div class="empty">
+          <div class="b">아직 응원이 없어요</div>
+          <div class="s">인스타 바이오에 링크를 걸면<br>친구들이 조용히 밀어주기 시작해요.</div>
+        </div>
+        <button class="btn btn-primary">내 링크 복사하기</button>
+        <button class="btn btn-line">인스타 바이오에 거는 법</button>
+      </div></div>
+    </div>
+
+  </div>
+</body>
+</html>

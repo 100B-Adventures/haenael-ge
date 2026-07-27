@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — ② 친구가 보는 목표 페이지 (공유 링크 타깃) · 상태 전부</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+    --danger:#D9483B; --danger-soft:#FBEAE7;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:24px 16px 64px}
+  h1.board{font-size:18px; text-align:center; margin-bottom:4px}
+  p.board{font-size:13px; color:#555; text-align:center; margin-bottom:6px}
+  .note{max-width:780px; margin:0 auto 24px; font-size:12px; color:#666; background:#fff;
+        border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.6}
+  .note b{color:var(--clover-ink)}
+  .row{display:flex; gap:24px; justify-content:center; flex-wrap:wrap; align-items:flex-start}
+  .col{width:340px}
+  .tag{font-size:12px; font-weight:700; color:#444; text-align:center; margin-bottom:8px}
+  .tag small{display:block; font-weight:400; color:#888; margin-top:2px}
+  .phone{width:340px; height:712px; background:var(--bg); border:1px solid #d9d5cc;
+         border-radius:34px; box-shadow:0 8px 30px rgba(0,0,0,.12); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:130px; height:24px;
+         background:#000; border-radius:0 0 16px 16px; z-index:5}
+  .screen{height:100%; overflow-y:auto; padding:50px 22px 28px; position:relative}
+  .screen::-webkit-scrollbar{display:none}
+  .brand{font-size:13px; font-weight:800; letter-spacing:-.2px; margin-bottom:18px}
+  .brand .dot{color:var(--clover-bright)}
+
+  /* GoalCard */
+  .goal-head{display:flex; align-items:center; gap:12px; margin-bottom:14px}
+  .av{width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#cfe9da,#a9d8bf); flex:0 0 48px}
+  .goal-head .nm{font-size:14px; font-weight:700}
+  .goal-head .handle{font-size:12px; color:var(--faint)}
+  .goal-title{font-size:24px; font-weight:800; line-height:1.34; letter-spacing:-.5px; margin-bottom:10px}
+  .chips{display:flex; gap:6px; margin-bottom:14px}
+  .chip{font-size:11.5px; font-weight:500; padding:4px 10px; border-radius:20px}
+  .chip.dday{background:var(--clover-soft); color:var(--clover-ink)}
+  .chip.live{background:var(--warm); color:#7a7363}
+  .chip.closed{background:#EFEDE8; color:#8a857a}
+  .why{font-size:13.5px; color:var(--muted); line-height:1.6; background:#fff; border:1px solid var(--line);
+       border-radius:14px; padding:14px; margin-bottom:18px}
+  .why b{color:var(--ink); font-weight:600}
+
+  /* social proof + wordmap */
+  .count{font-size:12px; color:var(--muted); text-align:center; margin-bottom:10px; font-weight:500}
+  .wordmap{background:var(--clover-soft); border-radius:14px; padding:20px 14px; text-align:center; line-height:2.1; margin-bottom:20px}
+  .wordmap span{display:inline-block; margin:0 5px; color:#2c7a4f}
+
+  /* empty */
+  .empty{background:#fff; border:1px dashed #cdd9cf; border-radius:14px; padding:26px 18px; text-align:center; margin-bottom:20px}
+  .empty .big{font-size:15px; font-weight:700; margin-bottom:6px}
+  .empty .s{font-size:12.5px; color:var(--muted); line-height:1.6}
+
+  /* primary CTA (sticky bottom feel) */
+  .cta-wrap{position:sticky; bottom:0; padding-top:8px; background:linear-gradient(180deg,rgba(251,250,247,0),var(--bg) 30%)}
+  .btn{display:block; width:100%; text-align:center; padding:16px; border-radius:14px; font-size:15px; font-weight:700; border:none; cursor:pointer}
+  .btn-primary{background:var(--clover); color:#fff}
+  .btn-ghost{background:transparent; color:var(--faint); font-weight:600; font-size:12.5px; padding:12px 0 2px}
+
+  /* ---- bottom sheet (payment) ---- */
+  .sheet-dim{position:absolute; inset:0; background:rgba(20,18,15,.32); display:flex; align-items:flex-end; z-index:10}
+  .sheet{width:100%; background:var(--surface); border-radius:20px 20px 0 0; padding:18px 22px 26px; box-shadow:0 8px 30px rgba(0,0,0,.12)}
+  .sheet h3{font-size:16px; font-weight:800; margin-bottom:4px}
+  .sheet .sub{font-size:12.5px; color:var(--muted); margin-bottom:16px}
+  .amts{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px}
+  .amt{border:1px solid var(--line); border-radius:12px; padding:13px 0; text-align:center; font-size:14px; font-weight:700; cursor:pointer; color:var(--ink)}
+  .amt.on{border-color:var(--clover); background:var(--clover-soft); color:var(--clover-ink)}
+  .amt.free{font-size:12px; color:var(--muted); font-weight:600}
+  .amt-custom{font-size:12px; color:var(--faint); text-align:center; margin-bottom:16px}
+  .field{width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:13.5px; font-family:inherit; resize:none; margin-bottom:6px}
+  .field::placeholder{color:var(--faint)}
+  .hint{font-size:11px; color:var(--faint); margin-bottom:14px}
+  .anon{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin-bottom:16px}
+  .anon .lab{font-size:13px}
+  .anon .lab small{display:block; color:var(--faint); font-size:11px; margin-top:2px}
+  .toggle{width:44px; height:26px; border-radius:20px; background:var(--clover); position:relative}
+  .toggle::after{content:""; position:absolute; width:20px; height:20px; border-radius:50%; background:#fff; top:3px; right:3px}
+  .toggle.off{background:#D8D3C9}
+  .toggle.off::after{right:auto; left:3px}
+  .pay-meta{font-size:11px; color:var(--faint); text-align:center; margin-top:10px; line-height:1.5}
+  .spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-3px;margin-right:8px}
+
+  /* toast */
+  .toast{position:absolute; left:22px; right:22px; bottom:26px; background:var(--ink); color:#fff; border-radius:12px; padding:14px 16px; font-size:13px; z-index:20; display:flex; gap:10px; align-items:center}
+  .toast .ic{width:22px;height:22px;border-radius:50%;background:var(--clover-bright);flex:0 0 22px;display:flex;align-items:center;justify-content:center;font-size:12px}
+
+  /* error card */
+  .err{background:var(--danger-soft); border:1px solid #f0c8c1; border-radius:14px; padding:16px; margin-bottom:14px}
+  .err .t{font-size:13.5px; font-weight:700; color:#a8362a; margin-bottom:4px}
+  .err .d{font-size:12.5px; color:#9a4a40; line-height:1.5}
+  .row-btn{display:flex; gap:8px}
+  .row-btn .btn{padding:13px}
+  .btn-line{background:#fff; color:var(--ink); border:1px solid var(--line)}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — ② 친구가 보는 목표 페이지 <small style="font-weight:400;color:#888">(인스타 링크가 떨어지는 화면 · 콜드스타트 생사)</small></h1>
+  <p class="board">DESIGN.md contract 적용 · 금액 절대 비노출 · "N명"만 노출 · 비로그인 열람 가능</p>
+  <div class="note">
+    상태 전부 나열(dead-end 0): <b>① 기본(워드맵 참)</b> · <b>② empty(응원 0=첫 친구)</b> · <b>③ 결제 바텀시트</b> · <b>④ 결제 처리중</b> · <b>⑤ 결제 성공 toast</b> · <b>⑥ 결제 실패</b> · <b>⑦ 마감된 목표</b>.
+    "조용히 밀어줄게"가 유일한 primary. "나도 만들래"는 맨 아래 subtle(②→① 역할전환).
+  </div>
+
+  <div class="row">
+
+    <!-- ① 기본 -->
+    <div class="col">
+      <div class="tag">① 기본 (응원 차오른 상태)<small>happy path</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="goal-head"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-title">나 편입 평점<br>4.0 해낼게</div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="why"><b>왜요?</b> 휴학하고 8개월째 새벽 도서관. 인서울 편입, 이번엔 진짜 끝을 보려고요.</div>
+          <div class="count">12명이 조용히 응원했어요</div>
+          <div class="wordmap">
+            <span style="font-size:20px">화이팅</span><span style="font-size:14px">할수있어</span>
+            <span style="font-size:24px">멋지다</span><span style="font-size:13px">존경해</span>
+            <span style="font-size:17px">고생많아</span><span style="font-size:22px">응원해</span>
+            <span style="font-size:14px">대박</span><span style="font-size:16px">힘내자</span><span style="font-size:19px">곧된다</span>
+          </div>
+          <div class="cta-wrap">
+            <button class="btn btn-primary">조용히 밀어줄게</button>
+            <button class="btn btn-ghost">나도 해낼게 만들래 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② empty -->
+    <div class="col">
+      <div class="tag">② empty (응원 0 = 첫 친구)<small>콜드스타트 — 첫 응원을 초대</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="goal-head"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-title">나 편입 평점<br>4.0 해낼게</div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="why"><b>왜요?</b> 휴학하고 8개월째 새벽 도서관. 인서울 편입, 이번엔 진짜 끝을 보려고요.</div>
+          <div class="empty">
+            <div class="big">아직 아무도 없어요</div>
+            <div class="s">당신이 도경이의 <b style="color:var(--clover-ink)">첫 응원</b>이에요.<br>한 마디면 이 자리가 채워져요.</div>
+          </div>
+          <div class="cta-wrap">
+            <button class="btn btn-primary">내가 첫 번째로 밀어줄게</button>
+            <button class="btn btn-ghost">나도 해낼게 만들래 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ 결제 시트 -->
+    <div class="col">
+      <div class="tag">③ 결제 바텀시트<small>금액 → 메시지 → 익명 → 결제</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen" style="overflow:hidden">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="goal-head"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-title" style="opacity:.5">나 편입 평점 4.0 해낼게</div>
+          <div class="sheet-dim">
+            <div class="sheet">
+              <h3>도경이를 조용히 밀어줄게</h3>
+              <div class="sub">금액은 도경이에게 보이지 않아요. 마음만 닿아요.</div>
+              <div class="amts">
+                <div class="amt">3,000</div><div class="amt on">5,000</div><div class="amt">10,000</div>
+              </div>
+              <div class="amt-custom">직접 입력 · 커피 한 잔 값이면 충분해요</div>
+              <textarea class="field" rows="2" placeholder="안 써도 돼요. 마음만 닿아요."></textarea>
+              <div class="hint">한 줄 응원은 워드맵에 남아요 (선택)</div>
+              <div class="anon">
+                <div class="lab">이름 보여주기<small>끄면 익명으로 닿아요</small></div>
+                <div class="toggle"></div>
+              </div>
+              <button class="btn btn-primary">5,000원 보내기</button>
+              <div class="pay-meta">간편결제 · 그 자리에서 바로 · 충전 없음<br>로그인은 결제할 때만 최소로</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row" style="margin-top:28px">
+
+    <!-- ④ 처리중 -->
+    <div class="col">
+      <div class="tag">④ 결제 처리중<small>상태 가시성 — 침묵 금지</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen" style="overflow:hidden">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="goal-head"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-title" style="opacity:.5">나 편입 평점 4.0 해낼게</div>
+          <div class="sheet-dim">
+            <div class="sheet">
+              <h3>도경이를 조용히 밀어줄게</h3>
+              <div class="sub">결제를 안전하게 처리하고 있어요…</div>
+              <div class="amts"><div class="amt" style="opacity:.4">3,000</div><div class="amt on" style="opacity:.6">5,000</div><div class="amt" style="opacity:.4">10,000</div></div>
+              <div style="height:60px"></div>
+              <button class="btn btn-primary" style="opacity:.85"><span class="spin"></span>보내는 중…</button>
+              <div class="pay-meta">잠시만요 · 닫지 말아 주세요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ 성공 -->
+    <div class="col">
+      <div class="tag">⑤ 결제 성공 (은은한 완료)<small>toast 1회 · 감사답장 기다림 없음</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="goal-head"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-title">나 편입 평점<br>4.0 해낼게</div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="count">13명이 조용히 응원했어요</div>
+          <div class="wordmap">
+            <span style="font-size:20px">화이팅</span><span style="font-size:14px">할수있어</span>
+            <span style="font-size:24px">멋지다</span>
+            <span style="font-size:18px; color:var(--clover); font-weight:700">곧된다</span>
+            <span style="font-size:22px">응원해</span><span style="font-size:16px">힘내자</span>
+          </div>
+          <div class="cta-wrap">
+            <button class="btn btn-ghost">나도 해낼게 만들래 →</button>
+          </div>
+          <div class="toast"><span class="ic">✓</span>도경이에게 조용히 닿았어요. 답장은 안 와도 괜찮아요.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ 실패 -->
+    <div class="col">
+      <div class="tag">⑥ 결제 실패<small>사유 + 재시도 / 다른 수단 — dead-end 아님</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen" style="overflow:hidden">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="goal-head"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-title" style="opacity:.5">나 편입 평점 4.0 해낼게</div>
+          <div class="sheet-dim">
+            <div class="sheet">
+              <h3>결제가 닿지 못했어요</h3>
+              <div class="sub">마음은 그대로 두고, 다시 시도해 볼게요.</div>
+              <div class="err">
+                <div class="t">결제 승인이 거절됐어요</div>
+                <div class="d">카드 한도나 일시적 오류일 수 있어요. 입력한 메시지는 그대로 남아 있어요.</div>
+              </div>
+              <div class="row-btn">
+                <button class="btn btn-line">다른 결제수단</button>
+                <button class="btn btn-primary">다시 시도</button>
+              </div>
+              <div class="pay-meta">계속 안 되면 고객센터로 문의해 주세요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row" style="margin-top:28px">
+    <!-- ⑦ 마감 -->
+    <div class="col">
+      <div class="tag">⑦ 마감된 목표 (D-day 경과)<small>적립형=응원 계속 가능 · ⛔ §5-4 회장 확인</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="goal-head"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-title">나 편입 평점<br>4.0 해낼게</div>
+          <div class="chips"><span class="chip closed">마감됨</span><span class="chip live">결과 기다리는 중</span></div>
+          <div class="why"><b>한 마디</b> 시험은 끝났어요. 결과는 곧. 그동안의 응원 덕에 끝까지 갔어요. 고마워요.</div>
+          <div class="count">31명이 조용히 응원했어요</div>
+          <div class="wordmap">
+            <span style="font-size:22px">고생했어</span><span style="font-size:15px">멋지다</span>
+            <span style="font-size:24px">자랑스러워</span><span style="font-size:14px">결과좋길</span>
+            <span style="font-size:18px">끝까지갔다</span><span style="font-size:20px">대단해</span>
+          </div>
+          <div class="cta-wrap">
+            <button class="btn btn-primary">그래도 한 번 더 밀어줄게</button>
+            <button class="btn btn-ghost">나도 해낼게 만들래 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

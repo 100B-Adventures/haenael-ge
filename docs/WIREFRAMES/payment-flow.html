@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — ② 결제 v2 (리테이크)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:26px 18px 48px}
+  h1.board{font-size:17px; text-align:center; margin-bottom:4px}
+  p.board{font-size:12.5px; color:#555; text-align:center; margin-bottom:18px}
+  .seq{display:flex; align-items:flex-start; gap:8px; overflow-x:auto; padding-bottom:8px; max-width:1200px; margin:0 auto}
+  .seq::-webkit-scrollbar{height:6px}
+  .step{flex:0 0 auto; text-align:center}
+  .cap{font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:700; height:30px; display:flex; align-items:center; justify-content:center; line-height:1.3; padding:0 4px}
+  .cap b{color:var(--clover-ink)}
+  .arrow{flex:0 0 auto; color:var(--faint); font-size:18px; align-self:center; margin-top:150px}
+
+  .ph{width:262px; height:544px; background:#EDEBE5; border:1px solid #d9d5cc; border-radius:32px; box-shadow:0 8px 26px rgba(0,0,0,.12); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:100px; height:19px; background:#000; border-radius:0 0 13px 13px; z-index:5}
+  .sc{height:100%; position:relative; padding:36px 0 0}
+  .peek{padding:0 18px}
+  .brand{font-size:11px; font-weight:800}
+  .brand .dot{color:var(--clover-bright)}
+  .gh{display:flex; align-items:center; gap:9px; margin-top:10px}
+  .av{width:34px;height:34px;border-radius:50%;flex:0 0 34px;background:linear-gradient(135deg,#cfe9da,#a9d8bf);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--clover-soft)}
+  .gh .nm{font-size:12px;font-weight:800}
+  .gh .gl{font-size:10px;color:var(--faint)}
+
+  /* bottom sheet — 토스식 하단 고정 CTA + 큰 금액 */
+  .dim{position:absolute; inset:0; background:rgba(20,18,15,.36); display:flex; align-items:flex-end}
+  .sheet{width:100%; background:#fff; border-radius:22px 22px 0 0; padding:8px 18px calc(16px); box-shadow:0 -6px 30px rgba(0,0,0,.16)}
+  .grip{width:38px;height:4px;border-radius:3px;background:#E0DBD1;margin:0 auto 12px}
+  .sh-title{font-size:14px; font-weight:800; margin-bottom:2px}
+  .sh-sub{font-size:10.5px; color:var(--muted); margin-bottom:14px; line-height:1.4}
+
+  /* 큰 개수 디스플레이(토스 큰 금액 차용 → 클로버 개수·3층 규칙) */
+  .bigcount{text-align:center; margin-bottom:14px}
+  .bigcount .n{font-size:40px; font-weight:900; letter-spacing:-1.5px; line-height:1}
+  .bigcount .n .clv{color:var(--clover-bright)}
+  .bigcount .u{font-size:12px; color:var(--muted); font-weight:700; margin-top:4px}
+  .bigcount .u b{color:var(--clover-ink)}
+
+  /* 수량 칩(BMC 커피 은유 → 클로버 개수) */
+  .chips{display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:8px}
+  .amt{border:1.5px solid var(--line); border-radius:13px; padding:11px 0; text-align:center; font-size:13px; font-weight:800; cursor:pointer; background:#fff}
+  .amt .cn{font-size:9.5px; color:var(--faint); font-weight:600; display:block; margin-top:2px}
+  .amt.on{border-color:var(--clover); background:var(--clover-soft); color:var(--clover-ink)}
+  .custom{font-size:10px; color:var(--faint); text-align:center; margin-bottom:14px}
+
+  .ta{width:100%; border:1.5px solid var(--line); border-radius:12px; padding:11px 13px; font-size:12px; font-family:inherit; resize:none; margin-bottom:5px}
+  .ta::placeholder{color:var(--faint)}
+  .hint{font-size:10px; color:var(--faint); margin-bottom:14px}
+  .anon{display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:var(--warm); border-radius:13px; margin-bottom:14px}
+  .anon .lab{font-size:12px; font-weight:600}
+  .anon .lab small{display:block; color:#8a8478; font-size:9.5px; margin-top:1px; font-weight:400}
+  .toggle{width:42px;height:25px;border-radius:20px;background:var(--clover);position:relative;flex:0 0 42px}
+  .toggle::after{content:"";position:absolute;width:19px;height:19px;border-radius:50%;background:#fff;top:3px;right:3px}
+
+  /* 결제수단 로고 버튼(토스 위젯 차용) */
+  .pm{display:flex; align-items:center; gap:10px; width:100%; padding:12px 14px; border-radius:12px; font-size:12.5px; font-weight:700; margin-bottom:8px; border:1px solid var(--line); background:#fff; cursor:pointer}
+  .pm .logo{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex:0 0 22px}
+  .pm.kakao .logo{background:#FEE500;color:#3A1D1D}
+  .pm.toss .logo{background:#0064FF;color:#fff}
+  .pm.card .logo{background:#eee;color:#555}
+  .pm .chev{margin-left:auto;color:var(--faint)}
+
+  .btn{display:block; width:100%; text-align:center; padding:15px; border-radius:14px; font-size:14.5px; font-weight:800; border:none; cursor:pointer; background:var(--clover); color:#fff; box-shadow:0 6px 16px rgba(27,138,79,.24)}
+  .meta{font-size:9px; color:var(--faint); text-align:center; margin-top:9px; line-height:1.45}
+  .guest{font-size:10px; color:var(--clover-ink); background:var(--clover-soft); border-radius:9px; padding:8px 10px; margin-bottom:10px; text-align:center; font-weight:600}
+  .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-3px;margin-right:7px}
+
+  /* 완료 (피크엔드) */
+  .done{height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center; padding:0 22px}
+  .done .halo{width:72px;height:72px;border-radius:50%;background:var(--clover-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+  .done .halo svg{width:34px;height:34px}
+  .done .t{font-size:17px;font-weight:900;margin-bottom:8px;letter-spacing:-.3px}
+  .done .d{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px}
+  .done .receipt{font-size:9.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:10px;margin-bottom:14px;line-height:1.6}
+  .done .b2{display:block;width:100%;padding:13px;border-radius:13px;font-size:13px;font-weight:800;border:none;background:var(--clover);color:#fff;cursor:pointer}
+  .done .sub{background:transparent;color:var(--faint);font-size:11px;font-weight:600;border:none;padding:9px 0 0;width:100%;cursor:pointer}
+
+  .caption{max-width:1200px; margin:20px auto 0; font-size:11px; color:#777; line-height:1.6; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+  .caption b{color:var(--clover-ink)}
+  .caption .k{color:#999}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — ② 결제 v2 <small style="font-weight:400;color:#888">(리테이크 · 게스트·전부유료·익명표시·금액3층 잠김 유지)</small></h1>
+  <p class="board">클로버 개수로 표시(응원자 본인 결제액 확인용) · 받는사람에겐 개수·금액 모두 비노출</p>
+
+  <div class="seq">
+
+    <!-- 1 금액 -->
+    <div class="step"><div class="cap"><b>1. 얼마나 밀어줄까</b></div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="peek"><div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="gl">편입 평점 4.0 · D-14</div></div></div></div>
+        <div class="dim"><div class="sheet">
+          <div class="grip"></div>
+          <div class="sh-title">도경이를 조용히 밀어줄게</div>
+          <div class="sh-sub">커피 한 잔 값이면 충분해요. 금액은 도경이에게 안 보여요.</div>
+          <div class="bigcount"><div class="n"><span class="clv">🍀</span> 5</div><div class="u"><b>클로버 5개</b> · 5,000원</div></div>
+          <div class="chips">
+            <div class="amt">3<span class="cn">커피 ½잔</span></div>
+            <div class="amt on">5<span class="cn">커피 한 잔</span></div>
+            <div class="amt">10<span class="cn">커피 두 잔</span></div>
+          </div>
+          <div class="custom">직접 입력 · 최소 클로버 1개(1,000원)</div>
+          <button class="btn">다음</button>
+          <div class="meta">전부 유료 · 무료 응원은 없어요("응원은 돈으로")</div>
+        </div></div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 2 메시지 -->
+    <div class="step"><div class="cap">2. 한 줄 남길래? (선택)</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="peek"><div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="gl">편입 평점 4.0 · D-14</div></div></div></div>
+        <div class="dim"><div class="sheet">
+          <div class="grip"></div>
+          <div class="sh-title">워드맵에 남길 한 마디</div>
+          <div class="sh-sub">안 써도 돼요. 마음만으로 충분해요.</div>
+          <textarea class="ta" rows="3" placeholder="화이팅 같은 한 마디… (안 써도 됨)">곧된다 진짜</textarea>
+          <div class="hint">이 한 줄이 도경이 워드맵을 채워요</div>
+          <button class="btn">다음</button>
+          <div class="meta">비동기 · 감사답장 의무 없음</div>
+        </div></div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 3 익명 -->
+    <div class="step"><div class="cap">3. 어떻게 닿을까</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="peek"><div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="gl">편입 평점 4.0 · D-14</div></div></div></div>
+        <div class="dim"><div class="sheet">
+          <div class="grip"></div>
+          <div class="sh-title">이름을 보일까요?</div>
+          <div class="sh-sub">당신이 골라요. 익명이어도 마음은 그대로 닿아요.</div>
+          <div class="anon"><div class="lab">이름 보여주기<small>끄면 "익명의 누군가"로 닿아요</small></div><div class="toggle"></div></div>
+          <button class="btn">결제로</button>
+          <div class="meta">익명이어도 환불·문의 위해 기록은 안전 보관</div>
+        </div></div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 4 결제수단 -->
+    <div class="step"><div class="cap"><b>4. 간편결제 (게스트)</b></div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="peek"><div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="gl">편입 평점 4.0 · D-14</div></div></div></div>
+        <div class="dim"><div class="sheet">
+          <div class="grip"></div>
+          <div class="sh-title">클로버 5개 · 5,000원</div>
+          <div class="guest">✓ 가입 없이 바로 · 그 자리에서 직접 결제</div>
+          <div class="pm kakao"><div class="logo">pay</div>카카오페이<span class="chev">›</span></div>
+          <div class="pm toss"><div class="logo">t</div>토스페이<span class="chev">›</span></div>
+          <div class="pm card"><div class="logo">card</div>신용·체크카드<span class="chev">›</span></div>
+          <div class="meta">PG 경유 · 충전 없음 · 영수증 문자/이메일</div>
+        </div></div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 5 처리중 -->
+    <div class="step"><div class="cap">5. 처리중</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="peek"><div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="gl">편입 평점 4.0 · D-14</div></div></div></div>
+        <div class="dim"><div class="sheet">
+          <div class="grip"></div>
+          <div class="sh-title">안전하게 보내는 중…</div>
+          <div class="sh-sub">잠시만요. 닫지 말아 주세요.</div>
+          <div class="bigcount" style="opacity:.5"><div class="n"><span class="clv">🍀</span> 5</div><div class="u">클로버 5개</div></div>
+          <button class="btn" style="opacity:.9"><span class="spin"></span>처리 중</button>
+          <div class="meta">중복 결제 방지를 위해 버튼이 잠겨요</div>
+        </div></div>
+      </div></div>
+    </div>
+    <div class="arrow">⤢</div>
+
+    <!-- 5b 결제 실패 (처리중 분기 · dead-end 아님) -->
+    <div class="step"><div class="cap"><b>5b. 결제 실패</b><br>(처리중 분기)</div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="peek"><div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="gl">편입 평점 4.0 · D-14</div></div></div></div>
+        <div class="dim"><div class="sheet">
+          <div class="grip"></div>
+          <div class="sh-title" style="color:#a8362a">결제가 닿지 못했어요</div>
+          <div class="sh-sub">마음은 그대로 두고, 다시 시도해 볼게요.</div>
+          <div style="background:#FBEAE7; border:1px solid #f0c8c1; border-radius:12px; padding:12px 13px; margin-bottom:12px">
+            <div style="font-size:12px; font-weight:700; color:#a8362a; margin-bottom:3px">카드 승인이 거절됐어요</div>
+            <div style="font-size:10.5px; color:#9a4a40; line-height:1.5">한도나 일시적 오류일 수 있어요. 입력한 "곧된다 진짜"는 그대로 남아 있어요.</div>
+          </div>
+          <div style="display:flex; gap:7px">
+            <button class="btn" style="background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none">다른 수단</button>
+            <button class="btn">다시 시도</button>
+          </div>
+          <div class="meta">계속 안 되면 고객센터로 문의해 주세요</div>
+        </div></div>
+      </div></div>
+    </div>
+    <div class="arrow">→</div>
+
+    <!-- 6 완료 -->
+    <div class="step"><div class="cap"><b>6. 완료 (피크엔드)</b></div>
+      <div class="ph"><div class="notch"></div><div class="sc">
+        <div class="done">
+          <div class="halo"><svg viewBox="0 0 24 24" fill="#1B8A4F"><path d="M12 12c-1.2-3.6-6-4.8-7.2-1.2s2.4 6 7.2 1.2zm0 0c1.2-3.6 6-4.8 7.2-1.2s-2.4 6-7.2 1.2zm0 0c-3.6 1.2-4.8 6-1.2 7.2s6-2.4 1.2-7.2zm0 0c3.6 1.2 4.8 6 1.2 7.2s-6-2.4-1.2-7.2z"/></svg></div>
+          <div class="t">조용히 닿았어요</div>
+          <div class="d">도경이 워드맵에 "곧된다 진짜"가<br>방금 한 자리 채웠어요.<br>답장은 안 와도 괜찮아요.</div>
+          <div class="receipt">영수증 문자/이메일 발송 · 주문 HNG-260702-3812<br>환불·문의는 고객센터</div>
+          <button class="b2">도경이 페이지 다시 보기</button>
+          <button class="sub">나도 해낼게 만들래 →</button>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="caption">
+    <b>벤치마킹</b> <span class="k">(웹 직접조사 2026-07-02):</span> 토스 결제위젯 = 큰 금액 표시·결제수단 로고 버튼·하단 고정 CTA 차용(금융 대시보드 밀도는 버림). Buy Me a Coffee = "커피 한 잔 값" 수량 은유·"Say something nice…" 무부담 메시지 차용(금액 노출·답장 의무는 버림). 큰 숫자는 ₩ 아닌 <b>클로버 개수</b>로(3층 규칙).<br>
+    <b>심리 법칙:</b> <b>앵커링</b>(칩 3·5·10 + 커피 은유로 "이 정도면 적당" 기준점) · <b>디폴트 설계</b>(기본=중간 5개지만 최저 근처 3개 명확 노출 → 다크패턴 회피) · <b>손실회피</b>(2→5단계 입력 메시지 보존) · <b>피크엔드 법칙</b>(마지막 = 은은한 클로버 halo + 따뜻한 확정 카피 → 기억되는 마무리) · 처리중 <b>상태 가시성</b>.
+  </div>
+</body>
+</html>

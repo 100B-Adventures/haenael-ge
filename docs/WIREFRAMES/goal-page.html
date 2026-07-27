@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — ② 친구 목표페이지 v2 (리테이크 · 콜드스타트 생사)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:28px 16px 48px}
+  h1.board{font-size:17px; text-align:center; margin-bottom:4px}
+  p.board{font-size:12.5px; color:#555; text-align:center; margin-bottom:20px}
+  .row{display:flex; gap:26px; justify-content:center; flex-wrap:wrap; align-items:flex-start}
+  .tag{font-size:12px; font-weight:700; color:#444; text-align:center; margin-bottom:8px}
+  .tag small{display:block; font-weight:400; color:#888; margin-top:2px}
+
+  .phone{width:352px; height:740px; background:var(--bg); border:1px solid #d9d5cc; border-radius:38px;
+         box-shadow:0 12px 40px rgba(0,0,0,.14); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#000; border-radius:0 0 18px 18px; z-index:5}
+  .screen{height:100%; overflow-y:auto; padding:52px 24px 108px; position:relative}
+  .screen::-webkit-scrollbar{display:none}
+
+  .brand{font-size:12.5px; font-weight:800; margin-bottom:20px}
+  .brand .dot{color:var(--clover-bright)}
+
+  /* header */
+  .gh{display:flex; align-items:center; gap:13px; margin-bottom:16px}
+  .av{width:56px; height:56px; border-radius:50%; flex:0 0 56px; position:relative;
+      background:linear-gradient(135deg,#cfe9da,#a9d8bf); box-shadow:0 0 0 3px #fff, 0 0 0 4px var(--clover-soft)}
+  .gh .nm{font-size:15px; font-weight:800}
+  .gh .handle{font-size:12.5px; color:var(--faint); margin-top:2px}
+  .goal-t{font-size:27px; font-weight:900; line-height:1.28; letter-spacing:-.8px; margin-bottom:12px}
+  .goal-t em{font-style:normal; color:var(--clover-bright)}
+  .chips{display:flex; gap:6px; margin-bottom:16px}
+  .chip{font-size:11.5px; font-weight:600; padding:5px 11px; border-radius:20px}
+  .chip.dday{background:var(--clover); color:#fff}
+  .chip.live{background:var(--warm); color:#7a7363}
+  .why{font-size:14px; color:#4a4640; line-height:1.62; background:#fff; border:1px solid var(--line); border-radius:15px; padding:15px 16px; margin-bottom:20px}
+  .why .q{font-size:11px; font-weight:800; color:var(--clover-ink); letter-spacing:.3px; margin-bottom:5px}
+
+  /* social proof */
+  .proof{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+  .stack{display:flex}
+  .stack span{width:26px; height:26px; border-radius:50%; border:2px solid var(--bg); margin-left:-8px; background:#cfe0d6}
+  .stack span:first-child{margin-left:0}
+  .stack span.anon{background:#E4E0D8}
+  .proof .txt{font-size:12.5px; color:var(--muted); font-weight:600}
+  .proof .txt b{color:var(--ink)}
+
+  /* wordmap 유기적 */
+  .wm{position:relative; height:200px; border-radius:18px; margin-bottom:16px; overflow:hidden;
+      background:radial-gradient(90% 90% at 50% 45%, var(--clover-soft), #EEF6F0 72%)}
+  .w{position:absolute; font-weight:800; white-space:nowrap}
+  .w.s1{color:#8bb79f; font-weight:600}
+  .w.s2{color:#57a178; font-weight:700}
+  .w.s3{color:#1a8150}
+
+  /* recent supporters (BMC wall → 익명·금액X) */
+  .recent .sec{font-size:11.5px; font-weight:800; color:var(--muted); margin-bottom:10px}
+  .sup{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line)}
+  .sup .a2{width:30px;height:30px;border-radius:50%;flex:0 0 30px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#d8e8dd;color:var(--clover-ink)}
+  .sup .a2.anon{background:#ECEAE4;color:#9C968B}
+  .sup .nm{font-size:12.5px;font-weight:700}
+  .sup .msg{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .sup .when{font-size:10.5px;color:var(--faint);margin-left:auto}
+
+  /* empty */
+  .empty{border:1.5px dashed #c3d6c9; border-radius:18px; padding:30px 20px; text-align:center; margin-bottom:16px; background:#fff}
+  .empty .clv{width:38px;height:38px;margin:0 auto 12px;display:block}
+  .empty .b{font-size:16px; font-weight:800; margin-bottom:7px}
+  .empty .s{font-size:12.5px; color:var(--muted); line-height:1.6}
+  .empty .s b{color:var(--clover-ink)}
+
+  /* sticky CTA (토스식 하단 고정) */
+  .dock{position:absolute; left:0; right:0; bottom:0; padding:14px 24px calc(14px + env(safe-area-inset-bottom));
+        background:linear-gradient(180deg, rgba(251,250,247,0), var(--bg) 34%)}
+  .btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:17px; border-radius:16px; font-size:16px; font-weight:800; border:none; cursor:pointer;
+       background:var(--clover); color:#fff; box-shadow:0 8px 20px rgba(27,138,79,.28); letter-spacing:-.2px}
+  .btn:active{background:#166f40}
+  .btn svg{width:20px;height:20px}
+  .sub{display:block; width:100%; text-align:center; background:transparent; border:none; color:var(--faint); font-size:12px; font-weight:600; padding:9px 0 0; min-height:44px; cursor:pointer}
+
+  .caption{max-width:730px; margin:20px auto 0; font-size:11px; color:#777; line-height:1.6; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+  .caption b{color:var(--clover-ink)}
+  .caption .k{color:#999}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — ② 친구 목표페이지 v2 <small style="font-weight:400;color:#888">(리테이크 · 콜드스타트 생사 · 잠김 결정 유지)</small></h1>
+  <p class="board">금액 3층 규칙: 친구/공개엔 개수·금액 모두 X("N명"만) · 익명="익명의 누군가"</p>
+
+  <div class="row">
+
+    <!-- default -->
+    <div class="tag" style="width:100%">default (응원 차오른) &nbsp;·&nbsp; empty (첫 친구) &nbsp;·&nbsp; 마감된 목표 ↓</div>
+    <div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-t">나 편입 평점<br><em>4.0 해낼게</em></div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="why"><div class="q">WHY</div>휴학하고 8개월째 새벽 도서관. 인서울 편입, 이번엔 진짜 끝을 보려고요.</div>
+
+          <div class="proof">
+            <div class="stack"><span></span><span></span><span class="anon"></span><span></span></div>
+            <div class="txt"><b>13명</b>이 조용히 응원했어요</div>
+          </div>
+
+          <div class="wm">
+            <span class="w s3" style="left:30%;top:12%;font-size:27px">멋지다</span>
+            <span class="w s2" style="left:8%;top:30%;font-size:17px;transform:rotate(-5deg)">화이팅</span>
+            <span class="w s3" style="left:50%;top:38%;font-size:31px">곧된다</span>
+            <span class="w s1" style="left:14%;top:56%;font-size:14px">할수있어</span>
+            <span class="w s2" style="left:58%;top:64%;font-size:20px;transform:rotate(4deg)">응원해</span>
+            <span class="w s1" style="left:40%;top:78%;font-size:13px">존경해</span>
+            <span class="w s2" style="left:6%;top:80%;font-size:16px">고생많아</span>
+            <span class="w s1" style="left:72%;top:22%;font-size:14px">힘내자</span>
+          </div>
+
+          <div class="recent">
+            <div class="sec">방금 다녀간 응원</div>
+            <div class="sup"><div class="a2">민</div><div><div class="nm">민지</div><div class="msg">"곧된다 진짜"</div></div><div class="when">방금</div></div>
+            <div class="sup"><div class="a2 anon">?</div><div><div class="nm">익명의 누군가</div><div class="msg">"존경해요"</div></div><div class="when">1시간</div></div>
+            <div class="sup"><div class="a2">준</div><div><div class="nm">준호</div><div class="msg">메시지 없이 조용히</div></div><div class="when">어제</div></div>
+          </div>
+        </div>
+        <div class="dock">
+          <button class="btn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 12c-1.2-3.6-6-4.8-7.2-1.2s2.4 6 7.2 1.2zm0 0c1.2-3.6 6-4.8 7.2-1.2s-2.4 6-7.2 1.2zm0 0c-3.6 1.2-4.8 6-1.2 7.2s6-2.4 1.2-7.2zm0 0c3.6 1.2 4.8 6 1.2 7.2s-6-2.4-1.2-7.2z"/></svg>조용히 밀어줄게</button>
+          <button class="sub">나도 해낼게 만들래 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- empty -->
+    <div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-t">나 편입 평점<br><em>4.0 해낼게</em></div>
+          <div class="chips"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+          <div class="why"><div class="q">WHY</div>휴학하고 8개월째 새벽 도서관. 인서울 편입, 이번엔 진짜 끝을 보려고요.</div>
+
+          <div class="empty">
+            <svg class="clv" viewBox="0 0 24 24" fill="#4aa877"><path d="M12 12c-1.2-3.6-6-4.8-7.2-1.2s2.4 6 7.2 1.2zm0 0c1.2-3.6 6-4.8 7.2-1.2s-2.4 6-7.2 1.2zm0 0c-3.6 1.2-4.8 6-1.2 7.2s6-2.4 1.2-7.2zm0 0c3.6 1.2 4.8 6 1.2 7.2s-6-2.4-1.2-7.2z"/></svg>
+            <div class="b">아직 아무도 없어요</div>
+            <div class="s">당신이 도경이의 <b>첫 응원</b>이에요.<br>한 마디면 이 자리가 채워지기 시작해요.</div>
+          </div>
+        </div>
+        <div class="dock">
+          <button class="btn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 12c-1.2-3.6-6-4.8-7.2-1.2s2.4 6 7.2 1.2zm0 0c1.2-3.6 6-4.8 7.2-1.2s-2.4 6-7.2 1.2zm0 0c-3.6 1.2-4.8 6-1.2 7.2s6-2.4 1.2-7.2zm0 0c3.6 1.2 4.8 6 1.2 7.2s-6-2.4-1.2-7.2z"/></svg>내가 첫 번째로 밀어줄게</button>
+          <button class="sub">나도 해낼게 만들래 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 마감된 목표 (D-day 경과 · 적립형=응원 지속) -->
+    <div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="gh"><div class="av"></div><div><div class="nm">도경</div><div class="handle">@do_studylog</div></div></div>
+          <div class="goal-t">나 편입 평점<br><em>4.0 해낼게</em></div>
+          <div class="chips"><span class="chip" style="background:#EFEDE8;color:#8a857a">마감됨</span><span class="chip live">결과 기다리는 중</span></div>
+          <div class="why"><div class="q">한 마디</div>시험은 끝났어요. 결과는 곧. 그동안의 응원 덕에 끝까지 갔어요. 고마워요.</div>
+
+          <div class="proof">
+            <div class="stack"><span></span><span></span><span class="anon"></span><span></span></div>
+            <div class="txt"><b>31명</b>이 조용히 응원했어요</div>
+          </div>
+          <div class="wm">
+            <span class="w s3" style="left:26%;top:14%;font-size:26px">고생했어</span>
+            <span class="w s2" style="left:8%;top:34%;font-size:16px">멋지다</span>
+            <span class="w s3" style="left:48%;top:40%;font-size:29px">자랑스러워</span>
+            <span class="w s1" style="left:16%;top:60%;font-size:13px">결과좋길</span>
+            <span class="w s2" style="left:60%;top:66%;font-size:19px">끝까지갔다</span>
+            <span class="w s1" style="left:70%;top:24%;font-size:14px">대단해</span>
+          </div>
+        </div>
+        <div class="dock">
+          <button class="btn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 12c-1.2-3.6-6-4.8-7.2-1.2s2.4 6 7.2 1.2zm0 0c1.2-3.6 6-4.8 7.2-1.2s-2.4 6-7.2 1.2zm0 0c-3.6 1.2-4.8 6-1.2 7.2s6-2.4 1.2-7.2zm0 0c3.6 1.2 4.8 6 1.2 7.2s-6-2.4-1.2-7.2z"/></svg>그래도 한 번 더 밀어줄게</button>
+          <button class="sub">나도 해낼게 만들래 →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="caption">
+    <b>벤치마킹</b> <span class="k">(웹 직접조사 2026-07-02):</span> Buy Me a Coffee의 supporter-wall(아바타+이름+메시지) → "방금 다녀간 응원"으로 차용 / "bought N coffees"의 개수·금액 노출과 크리에이터 답장 의무는 버림(3층 규칙·감사답장 X). 토스 결제위젯의 하단 고정 CTA 차용. Linktree 아바타·프로필 헤더.<br>
+    <b>심리 법칙:</b> <b>사회적 증거</b>("13명"+아바타 스택·최근 응원) · <b>Zeigarnik</b>(유기적 워드맵의 미완성감) · empty=<b>희소성/영향력</b>("당신이 첫 응원"=deterrent가 아닌 초대) · <b>손실회피 회피</b>(가짜 긴급·마감압박 없음). 콜드스타트라 <b>가짜 수치 금지</b> — 0이면 정직하게 "아직 아무도".
+  </div>
+</body>
+</html>

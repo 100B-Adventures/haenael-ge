@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>해낼게 — 인스타 런치 피드 실제 결과 프리뷰</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#FFFFFF; --line:#E8E4DC;
+    --ink:#16140F; --muted:#6F6A60; --faint:#9C968B;
+    --clover:#1B8A4F; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    width:1108px; font-family:'Pretendard',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+    background:var(--bg); padding:36px;
+  }
+  h1{ font-size:32px; font-weight:800; letter-spacing:-0.5px; color:var(--ink); margin:0 0 8px; }
+  .sub{ font-size:18px; color:var(--muted); font-weight:500; margin:0 0 6px; }
+  .sub b{ color:var(--ink); }
+  .warn{
+    display:flex; align-items:flex-start; gap:10px; background:var(--clover-soft); color:var(--clover-ink);
+    border-radius:14px; padding:14px 18px; font-size:16px; font-weight:700; line-height:1.5; margin:14px 0 22px;
+  }
+  .divider{ width:64px; height:4px; background:var(--clover); border-radius:2px; margin:18px 0 24px; }
+  .grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
+  }
+  .row-label{
+    grid-column:1 / -1; display:flex; align-items:center; gap:10px; margin:18px 0 8px;
+  }
+  .row-label:first-of-type{ margin-top:0; }
+  .row-tag{
+    font-size:14px; font-weight:800; letter-spacing:-0.2px; padding:5px 12px; border-radius:999px;
+  }
+  .row-tag.pin{ background:var(--clover); color:#fff; }
+  .row-tag.flow{ background:var(--line); color:var(--muted); }
+  .row-desc{ font-size:14px; color:var(--muted); font-weight:600; }
+  .cell{
+    position:relative; aspect-ratio:1080/1350; border-radius:10px; overflow:hidden; border:1px solid var(--line);
+    background:#fff;
+  }
+  .cell img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .badge{
+    position:absolute; top:10px; left:10px; background:var(--clover); color:#fff; font-size:13px; font-weight:800;
+    padding:4px 10px; border-radius:8px; letter-spacing:-0.2px; box-shadow:0 2px 6px rgba(20,97,58,0.25);
+  }
+  .slot{
+    position:absolute; bottom:10px; right:10px; background:rgba(22,20,15,0.55); color:#fff; font-size:12px;
+    font-weight:700; padding:3px 9px; border-radius:7px; letter-spacing:-0.1px;
+  }
+  .legend{
+    margin-top:26px; padding-top:20px; border-top:1px solid var(--line);
+    font-size:14px; color:var(--muted); line-height:1.7;
+  }
+  .legend b{ color:var(--ink); }
+</style>
+</head>
+<body>
+
+<h1>해낼게 — 인스타그램 런치 피드 (실제 노출 결과)</h1>
+<p class="sub">이 배열은 <b>실제로 인스타그램이 렌더링하는 최종 그리드</b>입니다 — 핀 3개는 콘텐츠 위치와 무관하게 항상 <b>맨 위 1행(위치 1·2·3)</b>에 강제로 모입니다.</p>
+<div class="warn">⚠️ 핀은 좌상·정중앙·우하처럼 흩어 걸 수 없습니다. 최대 3개, 전부 최상단 1행으로 이동합니다 — 이전 배치(1·5·9 대각선)는 이 동작과 충돌해 폐기했습니다.</div>
+<div class="divider"></div>
+
+<div class="grid">
+  <div class="row-label"><span class="row-tag pin">PIN — 콜드 방문자가 무조건 보는 3칸</span><span class="row-desc">후킹 → 개념 설명 → 실행 방법. 3초 안에 "뭐 하는 곳이고 어떻게 쓰는지" 완결.</span></div>
+  <div class="cell"><img src="../feed-01-manifesto.png"><span class="badge">PIN 1</span><span class="slot">위치 1</span></div>
+  <div class="cell"><img src="../feed-02-what-is.png"><span class="badge">PIN 2</span><span class="slot">위치 2</span></div>
+  <div class="cell"><img src="../feed-08-howto.png"><span class="badge">PIN 3</span><span class="slot">위치 3</span></div>
+
+  <div class="row-label"><span class="row-tag flow">FLOW — 스크롤 시 노출</span><span class="row-desc">사회적 증거(사례 2종) + 브랜드 어휘 앵커</span></div>
+  <div class="cell"><img src="../feed-03-declare-exam.png"><span class="slot">위치 4</span></div>
+  <div class="cell"><img src="../feed-06-declare-fitness.png"><span class="slot">위치 5</span></div>
+  <div class="cell"><img src="../feed-05-clover-def.png"><span class="slot">위치 6</span></div>
+
+  <div class="row-label"><span class="row-tag flow">FLOW — 스크롤 시 노출</span><span class="row-desc">정서 후킹 2종 + 브랜드의 자기 선언(클로징)</span></div>
+  <div class="cell"><img src="../feed-04-hook-hearts.png"><span class="slot">위치 7</span></div>
+  <div class="cell"><img src="../feed-07-hook-contrast.png"><span class="slot">위치 8</span></div>
+  <div class="cell"><img src="../feed-09-start.png"><span class="slot">위치 9</span></div>
+</div>
+
+<div class="legend">
+  <b>운영 순서(회장 실행용)</b> — 게시물은 아래 순서로 먼저 전부 업로드한 뒤, 마지막에 핀 3개를 지정순서대로 겁니다.<br>
+  ① 업로드(오래된 것→최신 순): 09 → 07 → 04 → 05 → 06 → 03 → 08 → 02 → 01<br>
+  ② 핀 지정(마지막에, 이 순서로 — "나중에 핀 한 게 왼쪽으로 감" 규칙 이용): 08 먼저 핀 → 02 핀 → 01 핀(마지막). 결과: 좌→우 = 01·02·08.<br>
+  ③ 핀 이후 위치 4~9는 비핀 게시물의 업로드 최신순으로 자동 정렬 — 위 그리드가 그 결과입니다.
+</div>
+
+</body>
+</html>

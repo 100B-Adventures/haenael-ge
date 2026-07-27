@@ -1,5 +1,34 @@
 # QA Tracker — haenael-ge
 
+## 2026-07-27 — 결제·환전 전체 플로우 오픈 판정
+
+**판정: ❌ NG / 실결제 오픈 NO-GO**
+
+- 범위: 친구 `/g/[slug]` 응원 결제 → Toss 승인 → payment/cheer/ledger/notification → 본인 `/cashout` → KYC/HOLD/payout/SETTLED.
+- fresh PASS:
+  - Next.js production build·TypeScript PASS.
+  - Web Vitest 2차 **192/192 PASS**. 1차는 `/cashout` 5초 timeout으로 191/192였으나 격리 1/1, 전체 재실행 192/192 PASS — 환경 부하 민감 테스트로 기록.
+  - Deno unit **31/31 PASS**.
+  - `cheer-order`, `toss-confirm`, `cashout`, `cashout-payout`, `withholding` Deno check PASS.
+  - 운영 `/api/health` curl 2회 HTTP **200**, DB `ok`.
+- fresh FAIL/불가:
+  - `toss-webhook` Deno check TS2322, `auth-kakao` Deno check TS2353.
+  - pgTAP·seed: sandbox의 Docker socket/localhost 접근 거부로 실행 불가. `supabase test db` DB 연결 실패.
+  - Playwright: Chromium MachPort 권한 거부가 6회 반복돼 assertion 전 실행 불가. 앱 FAIL로 각색하지 않음.
+  - Maestro/mobile: 대상 프로젝트·flow 없음.
+- 결제 NG:
+  - Toss test secret으로 결제창→서버승인 `DONE` 실왕복 증거 없음.
+  - 운영 `PAYMENTS_ENABLED`/`NEXT_PUBLIC_PAYMENTS_ENABLED` 동시 true 상태 미검증.
+  - EF 401 `"Authorization required"` 및 `/payment/fail` query message가 사용자 화면에 노출될 수 있는 코드 경로 확인.
+- 환전 NG:
+  - `cashout`, `cashout-payout`, `kyc-verify`는 HTTP 501 스텁. KYC/PASS·ledger HOLD·실지급·SETTLED·지급명세·REVERSAL 전부 미구현.
+  - `_shared/withholding.ts` 직접 실행: 최소 30,000원, 3.3%, 30,000원 기준 placeholder 수수료 1,500원·원천징수 940원·실수령 27,560원.
+  - 웹 미리보기는 플랫폼 수수료를 제외하고 총액의 3.3%를 계산해 shared 계산식과 불일치. 웰컴 포함 도달/웰컴 제외 지급액의 30클로버 경계 계약도 미확정.
+- 법률 NG: `docs/risks.md#1` 전자금융거래법·선불충전금·개인 정산 법률의견서 미확보.
+- 🔧 전환 가능 TC: **0건** — 실제 Toss·환전 E2E 관찰이 없어 build/unit/health를 완료 대리지표로 쓰지 않음.
+- 근본원인: 결제 적립까지만 구현하고 환전 돈 이동 슬라이스를 501 스텁으로 남긴 채, 화면·원장·kill switch 존재를 서비스 전체 준비도로 오인할 수 있는 구조. 재발방지는 “친구 결제 + 본인 실지급”을 하나의 QA exit로 묶는 것.
+- 상세 증거: `docs/qa-report-payment-cashout-2026-07-27.md`.
+
 ## 2026-07-27 — 목표 수정 RPC 누락
 
 **판정: 🔧 수정됨 / 실제 Supabase DB QA 미검증**

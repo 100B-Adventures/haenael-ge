@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 — ① 가입 랜딩 시안 비교 (받는 사람 전용)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:24px 16px 64px}
+  h1.board{font-size:18px; text-align:center; margin-bottom:4px}
+  p.board{font-size:13px; color:#555; text-align:center; margin-bottom:6px; line-height:1.5}
+  .note{max-width:760px; margin:0 auto 24px; font-size:12px; color:#666; background:#fff;
+        border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.6}
+  .note b{color:var(--clover-ink)}
+  .row{display:flex; gap:24px; justify-content:center; flex-wrap:wrap; align-items:flex-start}
+  .col{width:340px}
+  .tag{font-size:12px; font-weight:700; color:#444; text-align:center; margin-bottom:8px}
+  .tag small{display:block; font-weight:400; color:#888; margin-top:2px}
+  .phone{width:340px; height:712px; background:var(--bg); border:1px solid #d9d5cc;
+         border-radius:34px; box-shadow:0 8px 30px rgba(0,0,0,.12); overflow:hidden; position:relative}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:130px; height:24px;
+         background:#000; border-radius:0 0 16px 16px; z-index:5}
+  .screen{height:100%; overflow-y:auto; padding:54px 22px 28px}
+  .screen::-webkit-scrollbar{display:none}
+  .brand{font-size:13px; font-weight:800; letter-spacing:-.2px}
+  .brand .dot{color:var(--clover-bright)}
+  .btn{display:block; width:100%; text-align:center; padding:15px; border-radius:14px;
+       font-size:15px; font-weight:700; border:none; cursor:pointer; margin-top:10px}
+  .btn-primary{background:var(--clover); color:#fff}
+  .btn-ghost{background:transparent; color:var(--muted); font-weight:600; font-size:13px; padding:10px}
+  .step{display:flex; gap:12px; align-items:flex-start; margin-bottom:16px}
+  .step .n{flex:0 0 26px; height:26px; border-radius:50%; background:var(--clover-soft);
+           color:var(--clover); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center}
+  .step .t{font-size:14px; line-height:1.45}
+  .step .t b{font-weight:700}
+  .step .t span{color:var(--muted); font-size:12.5px}
+
+  .a-hero{font-size:28px; font-weight:800; line-height:1.30; letter-spacing:-.6px; margin:18px 0 14px}
+  .a-hero em{font-style:normal; color:var(--clover-bright)}
+  .a-sub{font-size:14.5px; color:var(--muted); line-height:1.6; margin-bottom:26px}
+  .a-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px 18px; margin-bottom:18px}
+
+  .b-eyebrow{font-size:12px; font-weight:700; color:var(--clover); letter-spacing:.3px; margin:16px 0 8px}
+  .b-hero{font-size:24px; font-weight:800; line-height:1.34; letter-spacing:-.5px; margin-bottom:8px}
+  .b-sub{font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:16px}
+  /* 워드맵 = '네 페이지가 이렇게 차올라요'(받는사람 보상 미리보기) — ②의 친구뷰가 아님 */
+  .b-preview{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:10px}
+  .b-pv-cap{font-size:11.5px; color:var(--faint); margin-bottom:10px; font-weight:500}
+  .b-wordmap{background:var(--clover-soft); border-radius:12px; padding:16px 12px; text-align:center; line-height:2.0}
+  .b-wordmap span{display:inline-block; margin:0 4px; color:#2c7a4f}
+  .b-count{font-size:11.5px; color:var(--muted); text-align:center; margin-top:8px}
+
+  .c-screen{display:flex; flex-direction:column; justify-content:center; height:100%; text-align:center; padding:0 26px}
+  .c-mark{font-size:34px; font-weight:900; letter-spacing:-1px}
+  .c-mark .dot{color:var(--clover-bright)}
+  .c-slogan{font-size:15px; color:var(--muted); margin:16px 0 44px; line-height:1.6}
+
+  /* write-first vs social-first 비교 패널 */
+  .gate{max-width:760px; margin:34px auto 0; background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 20px}
+  .gate h2{font-size:14px; margin-bottom:10px}
+  .gate .two{display:flex; gap:16px; flex-wrap:wrap}
+  .gate .opt{flex:1; min-width:300px; border:1px solid var(--line); border-radius:12px; padding:14px}
+  .gate .opt h3{font-size:13px; margin-bottom:6px}
+  .gate .opt.rec h3::after{content:" ✓ 추천"; color:var(--clover); font-size:11px}
+  .gate .opt p{font-size:12px; color:#555; line-height:1.55}
+  .miniflow{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; font-size:11px}
+  .miniflow span{background:var(--warm); color:#7a7363; padding:3px 8px; border-radius:8px}
+</style>
+</head>
+<body>
+  <h1 class="board">해낼게 — ① 가입 랜딩 시안 3안 <small style="font-weight:400;color:#888">(받는 사람 전용 · 인스타 링크로 열리는 친구 화면 아님)</small></h1>
+  <p class="board">DESIGN.md contract 적용 · 비주얼 시스템은 확정 토큰, 카피·포지셔닝만 비교</p>
+  <div class="note">
+    <b>컨트롤러 draft 대비 교정:</b> 이전 B안은 도경의 목표+워드맵(=친구가 보는 <b>② 페이지</b>)과 "친구 응원하러 왔어요" CTA를 랜딩에 섞었음.
+    친구는 <b>랜딩에 오지 않는다</b>(인스타 링크는 항상 ②로 직행). 그래서 세 안 모두 <b>받는 사람 CTA 하나</b>만 둔다.
+    B안의 워드맵은 "친구 뷰"가 아니라 <b>"네 페이지가 이렇게 차올라"</b>라는 받는 사람 보상 미리보기로 재해석.
+  </div>
+
+  <div class="row">
+
+    <!-- A. 감정형 (추천 base) -->
+    <div class="col">
+      <div class="tag">A · 감정형 (추천 base)<small>"혼자 버티지 마" / 받는 사람 정서</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="a-hero">혼자 버티지 마,<br><em>응원이 돈이 되니까.</em></div>
+          <div class="a-sub">목표를 걸면 친구들이 조용히 밀어줘요.<br>부담스러운 DM도, 어색한 감사답장도 없이.</div>
+          <div class="a-card">
+            <div class="step"><div class="n">1</div><div class="t"><b>목표를 적어요</b><br><span>"나 편입 평점 4.0 해낼게"</span></div></div>
+            <div class="step"><div class="n">2</div><div class="t"><b>링크를 인스타 바이오에 걸어요</b><br><span>프로필 한 줄이면 끝</span></div></div>
+            <div class="step"><div class="n">3</div><div class="t"><b>친구가 조용히 밀어줘요</b><br><span>모이면 환전</span></div></div>
+          </div>
+          <button class="btn btn-primary">내 목표 시작하기</button>
+          <button class="btn btn-ghost">이미 해낼게가 있어요</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- B. 워드맵-보상형 -->
+    <div class="col">
+      <div class="tag">B · 워드맵-보상형<small>"네 페이지가 이렇게 차올라" / 받는사람 보상 미리보기</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="brand">해낼게<span class="dot">.</span></div>
+          <div class="b-eyebrow">화이팅은 3초면 휘발돼요</div>
+          <div class="b-hero">네 노력 위에,<br>응원이 이렇게 쌓여요.</div>
+          <div class="b-sub">친구들이 조용히 남긴 한 마디가<br>네 페이지를 채우는 워드맵이 돼요.</div>
+          <div class="b-preview">
+            <div class="b-pv-cap">↓ 네 목표 페이지가 이렇게 차올라요</div>
+            <div class="b-wordmap">
+              <span style="font-size:19px">화이팅</span><span style="font-size:14px">할수있어</span>
+              <span style="font-size:23px">멋지다</span><span style="font-size:13px">존경</span>
+              <span style="font-size:16px">고생많아</span><span style="font-size:21px">응원해</span>
+              <span style="font-size:13px">대박</span><span style="font-size:15px">힘내</span>
+            </div>
+            <div class="b-count">12명이 조용히 응원했어요</div>
+          </div>
+          <button class="btn btn-primary">내 목표 시작하기</button>
+          <button class="btn btn-ghost">이미 해낼게가 있어요</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- C. 미니멀 -->
+    <div class="col">
+      <div class="tag">C · 미니멀<small>슬로건 + CTA only</small></div>
+      <div class="phone"><div class="notch"></div>
+        <div class="c-screen">
+          <div class="c-mark">해낼게<span class="dot">.</span></div>
+          <div class="c-slogan">응원은 돈으로 하는 겁니다.</div>
+          <button class="btn btn-primary">내 목표 시작하기</button>
+          <button class="btn btn-ghost">어떻게 쓰는 건가요?</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 가입 방식 비교 (⛔ 회수 §5-2) -->
+  <div class="gate">
+    <h2>① 가입 방식 — write-first vs social-first <span style="font-weight:400;color:#888;font-size:12px">(⛔ 회장 결정 / user-flow §5-2)</span></h2>
+    <div class="two">
+      <div class="opt rec">
+        <h3>write-first (목표 먼저, 저장할 때 로그인)</h3>
+        <div class="miniflow"><span>CTA</span><span>→ 목표·일정·왜 입력</span><span>→ 저장 시 소셜로그인</span><span>→ 링크 발급</span></div>
+        <p>마찰 최소. 목표를 쓰는 행위 자체가 몰입·투자(작성 후 이탈률↓). "부담 최소" 에토스 정합. ⚠️ draft 로컬 보존 필수(로그인 실패해도 글 안 날아가게).</p>
+      </div>
+      <div class="opt">
+        <h3>social-first (로그인 먼저)</h3>
+        <div class="miniflow"><span>CTA</span><span>→ 소셜로그인</span><span>→ 목표 입력</span><span>→ 링크 발급</span></div>
+        <p>계정·식별 먼저 확보(알림·재방문 유리). ⚠️ 가치 경험 전 로그인 벽 → 첫 진입 이탈↑. 공스타 익명성 선호와 마찰.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
