@@ -50,13 +50,20 @@ export default async function GoalPublicPage({ params }: Props) {
   const supabase = await createServerSupabaseClient();
 
   // G2: goal_public 뷰 (금액 필드 없음)
+  // maybeSingle: 0행이면 error 없이 data=null → 진짜 '없음'만 404.
+  // 일시적 조회 오류(네트워크/DB)는 error로 오므로 throw해서 error.tsx가 재시도하게 한다
+  // (과거: .single()이 일시오류에도 error를 반환 → 전부 notFound()로 처리해 정상 목표가 간헐 404).
   const { data: goal, error } = await supabase
     .from("goal_public")
     .select("id, slug, title, reason, due_date, status, cheer_count")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
 
-  if (error || !goal || !goal.due_date) {
+  if (error) {
+    // 일시적 조회 실패 — 404가 아니라 재시도 가능한 오류로 올린다.
+    throw error;
+  }
+  if (!goal || !goal.due_date) {
     notFound();
   }
 
