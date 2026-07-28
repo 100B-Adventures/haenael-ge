@@ -1,5 +1,5 @@
-// ledger.ts — clover 원장 기입 헬퍼 (EARN/HOLD/SETTLE/REVERSAL)
-// 슬라이스 #1 scaffold: 타입 + 인터페이스 stub. 실구현은 슬라이스 #5+ (마이그레이션 #3 이후)
+// ledger.ts — legacy clover 원장 타입.
+// B2 결제 원장은 confirm_cheer_payment RPC가 payment/cheer와 같은 트랜잭션에서 쓴다.
 
 export type LedgerAction = "EARN" | "HOLD" | "SETTLE" | "REVERSAL";
 
@@ -13,10 +13,17 @@ export interface LedgerEntry {
   note?: string;
 }
 
-/** ⚠️ 슬라이스 #3(마이그레이션 clover_ledger 테이블) 이후 실구현 */
 export async function appendLedger(
-  _supabaseServiceRole: unknown,
-  _entry: LedgerEntry,
+  supabaseServiceRole: {
+    from: (table: string) => {
+      select: (columns: string) => unknown;
+    };
+  },
+  entry: LedgerEntry,
 ): Promise<void> {
-  throw new Error("Not implemented — 슬라이스 #3 마이그레이션 후 구현");
+  // B2 결제 경로는 DB RPC(confirm_cheer_payment)가 원자적으로 원장을 쓴다.
+  // 이 함수는 이전 scaffold API 호환용이며 직접 호출하지 않는다.
+  void supabaseServiceRole;
+  void entry;
+  throw new Error("appendLedger is superseded by confirm_cheer_payment RPC");
 }

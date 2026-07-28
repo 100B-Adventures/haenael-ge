@@ -164,6 +164,28 @@ export interface KakaoUserNormalized {
  * - 이메일 없거나 미인증: synthetic email 사용(unique = kakao_id 기반)
  * - 닉네임 없음: "해낼게 유저" 기본값
  */
+/** synthetic 이메일 도메인 suffix — normalizeKakaoUser의 폴백과 반드시 동기화 */
+export const SYNTHETIC_KAKAO_EMAIL_SUFFIX = "@kakao.haenael.app";
+
+/**
+ * 이메일이 이 카카오 사용자의 synthetic 이메일(`kakao_{providerId}@kakao.haenael.app`)과
+ * **정확히 일치**하는지 판별한다.
+ *
+ * 보안 결함3 수정: 자동 계정연결(별도 소유권 증명 없이 기존 유저에 새
+ * provider_id를 붙이는 동작)은 synthetic 이메일(카카오 고유 id 기반이라
+ * 위조 불가·유니크 보장)에서만 안전하다. 카카오가 검증한 real 이메일이
+ * 기존 계정과 충돌하면 그 계정을 "내 것"이라 주장하는 것과 다를 바 없는
+ * 신원 도용 벡터가 되므로 자동연결을 금지해야 한다.
+ *
+ * 보안 결함3 재리뷰(P2) 보강: suffix(`@kakao.haenael.app`)만 검사하면 카카오가
+ * 검증한 real 이메일이 우연히/의도적으로 이 도메인으로 끝날 때 synthetic으로
+ * 오인돼 자동연결 우회가 가능하다. 반드시 `kakao_${providerId}@kakao.haenael.app`
+ * 정확 문자열과 대조한다(providerId는 카카오가 부여한 위조 불가 값).
+ */
+export function isSyntheticKakaoEmail(email: string, providerId: string): boolean {
+  return email === `kakao_${providerId}${SYNTHETIC_KAKAO_EMAIL_SUFFIX}`;
+}
+
 export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
   const hasVerifiedEmail =
     user.kakao_account?.email &&

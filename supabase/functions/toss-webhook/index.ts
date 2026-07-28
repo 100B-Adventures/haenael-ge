@@ -1,16 +1,29 @@
-// toss-webhook — POST: 토스 웹훅 서명검증·상태 재동기(보상)
-// 슬라이스 #1 scaffold: entry point stub. 실구현은 슬라이스 #7 [강모델·리뷰].
-// architecture: HMAC-SHA256 서명검증 필수 → 상태 불일치 시 원장 REVERSAL.
+// toss-webhook/index.ts — Deno.serve 얇은 래퍼.
+// 순수 로직은 ../_shared/toss-webhook-handler.ts(handleTossWebhook)로 이동했다
+// (Deno 런타임 없이 vitest에서 요청 단위 회귀테스트를 돌리기 위함, Codex P2 대응).
+// 이 파일의 책임은 env 읽기 + 실 client(supabase/toss/slack) 준비 + 핸들러 호출뿐이다.
 
-import { withRegionHeader } from "../_shared/region.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { TossClient } from "../_shared/toss.ts";
+import { sendSlackAlert } from "../_shared/slack.ts";
+import { handleTossWebhook } from "../_shared/toss-webhook-handler.ts";
 
-Deno.serve(async (_req: Request) => {
-  // TODO(slice-7)[강모델·리뷰]: 웹훅 서명검증(TOSS_WEBHOOK_SECRET) → 상태 재동기 → 필요 시 REVERSAL
-  return new Response(
-    JSON.stringify({ error: "Not implemented — 슬라이스 #7 [강모델·리뷰] 에서 구현" }),
-    {
-      status: 501,
-      headers: withRegionHeader(new Headers({ "Content-Type": "application/json" })),
-    },
-  );
+Deno.serve(async (req) => {
+  const expectedToken = Deno.env.get("TOSS_WEBHOOK_TOKEN");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const tossSecret = Deno.env.get("TOSS_SECRET_KEY");
+
+  const supabase =
+    supabaseUrl && serviceKey
+      ? createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
+      : undefined;
+  const toss = tossSecret ? new TossClient(tossSecret) : undefined;
+
+  return handleTossWebhook(req, {
+    expectedToken,
+    supabase,
+    toss,
+    sendSlackAlert,
+  });
 });

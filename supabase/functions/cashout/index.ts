@@ -5,6 +5,12 @@
 import { withRegionHeader } from "../_shared/region.ts";
 
 Deno.serve(async (_req: Request) => {
+  if (Deno.env.get("CASHOUT_ENABLED") !== "true") {
+    return new Response(
+      JSON.stringify({ error: { code: "cashout_disabled", message: "환전 기능을 준비하고 있습니다." } }),
+      { status: 503, headers: withRegionHeader(new Headers({ "Content-Type": "application/json" })) },
+    );
+  }
   // TODO(slice-8)[강모델·리뷰]:
   //   1. 최소환전 금액 체크(MIN_CASHOUT_KRW)
   //   2. kyc_verification PASS 확인(is_adult=true)
