@@ -46,7 +46,7 @@ type SecureAdminCashout = {
   withholding_krw: number;
   net_krw: number;
   bank_code: string | null;
-  account_no: string;
+  account_no: string | null;
   account_holder: string | null;
   status: string;
   processing_note: string | null;
@@ -181,7 +181,7 @@ export default async function AdminPage() {
   const cashouts = ((secureCashoutsRaw ?? []) as SecureAdminCashout[]).map(
     ({ account_no, ...cashout }): AdminCashout => ({
       ...cashout,
-      account_masked: `••••••${account_no.slice(-4)}`,
+      account_masked: account_no ? `••••••${account_no.slice(-4)}` : "계좌 미등록",
     }),
   );
 

@@ -21,7 +21,7 @@ import { krwFromClover } from "@/lib/clover";
 // DESIGN.md §6-(b′)(2026-07-19 회장 결정 B): 본인 한정 개별 클로버 개수 노출.
 // Discreet 유지 장치: 시간순 고정(정렬/랭킹 X) · ₩ 환산 병기 X · 익명도 개수는 표시.
 
-export function formatCheerRelativeTime(createdAt: string, now = Date.now()) {
+function formatCheerRelativeTime(createdAt: string, now = Date.now()) {
   const createdTime = new Date(createdAt).getTime();
   if (!Number.isFinite(createdTime)) return "날짜 미상";
 

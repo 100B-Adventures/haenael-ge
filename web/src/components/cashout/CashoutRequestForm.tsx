@@ -167,6 +167,10 @@ export function CashoutRequestForm({
         status: data.status,
       });
       setAccountNo("");
+    } catch {
+      setErrorMessage(
+        "환전 신청 서버에 연결하지 못했어요. 잠시 후 다시 시도해주세요.",
+      );
     } finally {
       setSubmitting(false);
     }

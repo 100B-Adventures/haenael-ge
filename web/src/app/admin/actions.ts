@@ -18,7 +18,7 @@ async function requireAdmin() {
   } = await callerClient.auth.getUser();
   if (!user) throw new Error("admin_unauthorized");
 
-  const { data: isAdmin, error } = await callerClient.rpc("is_admin");
+  const { data: isAdmin, error } = await callerClient.rpc("is_admin" as never);
   if (error || !isAdmin) throw new Error("admin_forbidden");
 
   return {
