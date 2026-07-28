@@ -108,6 +108,17 @@ BEGIN
     pg_catalog.hashtextextended('cashout_member:' || p_member_id::text, 0)
   );
 
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.member AS m
+    JOIN public.kyc_verification AS kv ON kv.member_id = m.id
+    WHERE m.id = p_member_id
+      AND m.kyc_status = 'VERIFIED'
+      AND kv.is_adult = true
+  ) THEN
+    RAISE EXCEPTION 'cashout_kyc_required' USING ERRCODE = '42501';
+  END IF;
+
   SELECT *
   INTO v_existing
   FROM public.cashout_request AS cr

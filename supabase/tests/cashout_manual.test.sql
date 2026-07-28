@@ -5,7 +5,7 @@
 
 BEGIN;
 
-SELECT plan(20);
+SELECT plan(21);
 
 INSERT INTO auth.users (
   id, instance_id, aud, role, email,
@@ -36,9 +36,28 @@ VALUES
 
 INSERT INTO public.member (id, nickname, kyc_status)
 VALUES
-  ('ca500000-0000-0000-0000-000000000001', '환전A', 'NONE'),
-  ('ca500000-0000-0000-0000-000000000002', '환전B', 'NONE'),
+  ('ca500000-0000-0000-0000-000000000001', '환전A', 'VERIFIED'),
+  ('ca500000-0000-0000-0000-000000000002', '환전B', 'VERIFIED'),
   ('ca500000-0000-0000-0000-000000000003', '환전관리자', 'NONE');
+
+INSERT INTO public.kyc_verification (
+  member_id, real_name, birth_date, is_adult, provider
+)
+VALUES
+  (
+    'ca500000-0000-0000-0000-000000000001',
+    '환전A',
+    '1990-01-01',
+    true,
+    'PASS'
+  ),
+  (
+    'ca500000-0000-0000-0000-000000000002',
+    '환전B',
+    '1990-01-01',
+    true,
+    'PASS'
+  );
 
 INSERT INTO public.admin_member(member_id)
 VALUES ('ca500000-0000-0000-0000-000000000003');
@@ -69,6 +88,16 @@ SELECT throws_ok(
 
 RESET ROLE;
 SET LOCAL ROLE service_role;
+
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
+    '환전관리자', 'cashout-kyc-required', repeat('k', 40)
+  )$$,
+  '42501',
+  NULL,
+  'C1b: PASS 본인인증과 만 19세 확인 전에는 환전 신청 불가'
+);
 
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(

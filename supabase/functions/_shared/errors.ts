@@ -71,6 +71,10 @@ const KNOWN_ERRORS: Record<string, PublicError> = {
     code: "cashout_unavailable",
     message: "지금은 환전을 신청할 수 없어요. 잠시 후 다시 시도해주세요.",
   },
+  cashout_kyc_required: {
+    code: "cashout_kyc_required",
+    message: "환전 전에 본인인증과 성인 확인이 필요해요.",
+  },
   cashout_not_found: {
     code: "cashout_not_found",
     message: "환전 요청을 찾을 수 없습니다.",
@@ -125,6 +129,8 @@ export function toPublicHttpStatus(rawMessage: string | null | undefined): numbe
       return 409;
     case "cashout_below_minimum":
       return 422;
+    case "cashout_kyc_required":
+      return 403;
     case "invalid_order_id":
     case "invalid_amount":
     case "amount_mismatch":
