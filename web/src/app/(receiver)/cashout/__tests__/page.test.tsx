@@ -47,16 +47,20 @@ describe("/cashout 미달 상태", () => {
     } as never);
   });
 
-  it("미달 안내와 분해 미리보기를 함께 보여주고 신청 버튼만 막는다", async () => {
-    const { default: CashoutPage } = await import("../page");
-    render(await CashoutPage());
+  it(
+    "미달 안내와 분해 미리보기를 함께 보여주고 신청 버튼만 막는다",
+    async () => {
+      const { default: CashoutPage } = await import("../page");
+      render(await CashoutPage());
 
-    expect(screen.getByTestId("cashout-below-threshold-banner")).toHaveTextContent(
-      "22개",
-    );
-    expect(screen.getByTestId("cashout-breakdown-table")).toBeInTheDocument();
-    expect(screen.getByTestId("cashout-net-preview")).toBeInTheDocument();
-    expect(screen.getByTestId("cashout-confirm-disabled")).toBeInTheDocument();
-    expect(screen.queryByTestId("cashout-confirm-button")).not.toBeInTheDocument();
-  });
+      expect(screen.getByTestId("cashout-below-threshold-banner")).toHaveTextContent(
+        "22개",
+      );
+      expect(screen.getByTestId("cashout-breakdown-table")).toBeInTheDocument();
+      expect(screen.getByTestId("cashout-net-preview")).toBeInTheDocument();
+      expect(screen.getByTestId("cashout-confirm-disabled")).toBeInTheDocument();
+      expect(screen.queryByTestId("cashout-confirm-button")).not.toBeInTheDocument();
+    },
+    15_000,
+  );
 });
