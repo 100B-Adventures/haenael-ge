@@ -6,8 +6,8 @@
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Clock3 } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { CashoutRequestForm } from "@/components/cashout/CashoutRequestForm";
 
 const KRW_PER_CLOVER = 1000;
 const WITHHOLDING_RATE = 0.033; // 원천징수 3.3%(architecture.md §2.3 — 별풍선 선례)
@@ -39,6 +39,15 @@ export default async function CashoutPage() {
   const remaining = Math.max(minCashoutClover - totalBalance, 0);
 
   const cashoutEnabled = process.env.NEXT_PUBLIC_CASHOUT_ENABLED === "true";
+
+  const { data: cashoutHistoryRaw } = await supabase
+    .from("cashout_request")
+    .select(
+      "id,clover_amount,gross_krw,withholding_krw,net_krw,status,requested_at,paid_at",
+    )
+    .order("requested_at", { ascending: false })
+    .limit(10);
+  const cashoutHistory = cashoutHistoryRaw ?? [];
 
   const grossKrw = payableAmount * KRW_PER_CLOVER;
   const withholdingKrw = Math.floor(grossKrw * WITHHOLDING_RATE);
@@ -162,36 +171,18 @@ export default async function CashoutPage() {
             </span>
           </div>
           <p className="mt-2 text-[10.5px] leading-relaxed" style={{ color: "#6F6A60" }}>
-            수수료(플랫폼 take-rate)는 정책 확정 전이라 위 미리보기에 반영되지 않았어요.
-            실제 지급액은 신청 시점에 다시 확정해 보여드려요.
+            플랫폼 수수료 없이 요청액의 3.3%만 원천징수해요. 신청 후 회장이
+            계좌로 직접 송금하고 지급 완료 상태를 남깁니다.
           </p>
         </div>
 
-        {/* 확정 CTA — kill switch 게이트 */}
-        {cashoutEnabled && reachedThreshold ? (
-          <button
-            type="button"
-            className="w-full rounded-[15px] py-4 text-[15.5px] font-extrabold text-white"
-            style={{ background: "#1B8A4F", boxShadow: "0 6px 16px rgba(27,138,79,.22)" }}
-            data-testid="cashout-confirm-button"
-          >
-            {formatKrw(netKrwPreview)} 환전 신청하기
-          </button>
-        ) : (
-          <div
-            className="flex flex-col items-center rounded-[15px] py-5 text-center"
-            style={{ background: "#F4EFE6" }}
-            data-testid="cashout-confirm-disabled"
-          >
-            <Clock3 className="mb-2 text-[#1B8A4F]" size={22} aria-hidden="true" />
-            <p className="text-[13.5px] font-bold" style={{ color: "#16140F" }}>
-              환전 기능을 준비하고 있어요
-            </p>
-            <p className="mt-1 max-w-[260px] text-[11.5px] leading-relaxed" style={{ color: "#6F6A60" }}>
-              환전은 최소 30클로버(30,000원)부터 가능해요. 본인 확인과 안전한 지급 절차를 검증한 뒤 열겠습니다. 지금 쌓인 클로버는 그대로 보관됩니다.
-            </p>
-          </div>
-        )}
+        <CashoutRequestForm
+          cashoutEnabled={cashoutEnabled}
+          reachedThreshold={reachedThreshold}
+          payableAmount={payableAmount}
+          minCashoutClover={minCashoutClover}
+          history={cashoutHistory}
+        />
 
         <Link
           href="/me"

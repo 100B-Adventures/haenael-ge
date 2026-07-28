@@ -17,6 +17,14 @@ describe("/cashout 미달 상태", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("NEXT_PUBLIC_CASHOUT_ENABLED", "true");
+    const historyQuery = {
+      select: vi.fn(),
+      order: vi.fn(),
+      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+    };
+    historyQuery.select.mockReturnValue(historyQuery);
+    historyQuery.order.mockReturnValue(historyQuery);
+
     vi.mocked(createServerSupabaseClient).mockResolvedValue({
       auth: {
         getUser: vi.fn().mockResolvedValue({
@@ -35,6 +43,7 @@ describe("/cashout 미달 상태", () => {
         ],
         error: null,
       }),
+      from: vi.fn().mockReturnValue(historyQuery),
     } as never);
   });
 
