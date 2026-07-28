@@ -43,6 +43,54 @@ const KNOWN_ERRORS: Record<string, PublicError> = {
     code: "toss_confirm_failed",
     message: "결제 승인 처리에 실패했습니다. 잠시 후 다시 시도해주세요.",
   },
+
+  // cashout (create_cashout_request / admin transition RPC)
+  invalid_member: { code: "invalid_member", message: "회원 정보를 확인할 수 없습니다." },
+  invalid_bank_code: { code: "invalid_bank_code", message: "은행을 다시 선택해주세요." },
+  invalid_account_number: {
+    code: "invalid_account_number",
+    message: "계좌번호를 숫자로 정확히 입력해주세요.",
+  },
+  invalid_account_holder: {
+    code: "invalid_account_holder",
+    message: "예금주명을 정확히 입력해주세요.",
+  },
+  invalid_cashout_amount: {
+    code: "invalid_cashout_amount",
+    message: "환전 금액을 다시 확인해주세요.",
+  },
+  cashout_below_minimum: {
+    code: "cashout_below_minimum",
+    message: "환전은 30클로버부터 신청할 수 있어요.",
+  },
+  cashout_insufficient_balance: {
+    code: "cashout_insufficient_balance",
+    message: "환전 가능한 클로버가 부족해요.",
+  },
+  cashout_encryption_unavailable: {
+    code: "cashout_unavailable",
+    message: "지금은 환전을 신청할 수 없어요. 잠시 후 다시 시도해주세요.",
+  },
+  cashout_not_found: {
+    code: "cashout_not_found",
+    message: "환전 요청을 찾을 수 없습니다.",
+  },
+  cashout_already_paid: {
+    code: "cashout_already_paid",
+    message: "이미 지급 완료된 요청입니다.",
+  },
+  invalid_cashout_status: {
+    code: "invalid_cashout_status",
+    message: "이미 처리되었거나 처리할 수 없는 환전 요청입니다.",
+  },
+  processing_note_required: {
+    code: "processing_note_required",
+    message: "반려 사유를 입력해주세요.",
+  },
+  processing_note_too_long: {
+    code: "processing_note_too_long",
+    message: "처리 메모는 500자 이하로 입력해주세요.",
+  },
 };
 
 const GENERIC_ERROR: PublicError = {
@@ -71,14 +119,30 @@ export function toPublicHttpStatus(rawMessage: string | null | undefined): numbe
     case "invalid_payment_status":
     case "payment_already_done":
     case "payment_key_mismatch":
+    case "cashout_insufficient_balance":
+    case "cashout_already_paid":
+    case "invalid_cashout_status":
       return 409;
+    case "cashout_below_minimum":
+      return 422;
     case "invalid_order_id":
     case "invalid_amount":
     case "amount_mismatch":
     case "message_too_long":
     case "invalid_request_key":
     case "invalid_payment_key":
+    case "invalid_member":
+    case "invalid_bank_code":
+    case "invalid_account_number":
+    case "invalid_account_holder":
+    case "invalid_cashout_amount":
+    case "processing_note_required":
+    case "processing_note_too_long":
       return 400;
+    case "cashout_encryption_unavailable":
+      return 503;
+    case "cashout_not_found":
+      return 404;
     default:
       return 500;
   }
