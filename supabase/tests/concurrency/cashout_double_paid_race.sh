@@ -35,8 +35,13 @@ INSERT INTO auth.users (
    now(), now(), '', '', '', '{}'::jsonb, '{}'::jsonb, false, false);
 
 INSERT INTO public.member(id, nickname, kyc_status) VALUES
-  ('${MEMBER_ID}', '환전레이스', 'NONE'),
+  ('${MEMBER_ID}', '환전레이스', 'VERIFIED'),
   ('${ADMIN_ID}', '환전관리자레이스', 'NONE');
+INSERT INTO public.kyc_verification(
+  member_id, real_name, birth_date, is_adult, provider
+) VALUES (
+  '${MEMBER_ID}', '환전레이스', '1990-01-01', true, 'PASS'
+);
 INSERT INTO public.admin_member(member_id) VALUES ('${ADMIN_ID}');
 INSERT INTO public.clover_ledger(
   member_id, entry_type, clover_delta, ref_type, ref_id, balance_after
