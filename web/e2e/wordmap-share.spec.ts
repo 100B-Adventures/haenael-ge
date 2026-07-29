@@ -2,7 +2,7 @@
 // 워드맵 풀뷰 + 공유(확산 고리) 플로우.
 //
 // happy path: 홈 → "워드맵 보기" → 풀뷰 (공유 아이콘, 빈 워드맵 포함)
-// edge: 비인증 → /home redirect → /, 비인증 → /wordmap/* redirect → /
+// edge: 비인증 → /me redirect → /, 비인증 → /wordmap/* redirect → /
 //
 // 인증 필요 E2E(실 DB): E2E_GOAL_ID + E2E_WORDMAP_SESSION_TOKEN 환경변수로 조건부 실행.
 // 조건부 아닌 테스트는 비인증 시나리오(redirect 확인)만 — 항상 실행.
@@ -11,10 +11,10 @@ import { test, expect } from "@playwright/test";
 
 // ─── 비인증 엣지 케이스 (항상 실행) ─────────────────────────────────────────
 
-test("wordmap edge: 비인증 /home → 랜딩(/)으로 리다이렉트", async ({
+test("wordmap edge: 비인증 /me → 랜딩(/)으로 리다이렉트", async ({
   page,
 }) => {
-  await page.goto("/home");
+  await page.goto("/me");
   // 비인증 → redirect("/")
   await expect(page).toHaveURL("/");
 });
@@ -78,7 +78,7 @@ test.describe("wordmap full view (실 DB, E2E_GOAL_ID 있을 때)", () => {
 
 test.describe("receiver home (비인증 — redirect 검증)", () => {
   test("home: 비인증 접근 → /로 redirect", async ({ page }) => {
-    const response = await page.goto("/home");
+    const response = await page.goto("/me");
     // redirect 후 최종 URL이 / 여야 함
     await expect(page).toHaveURL("/");
     // 랜딩 CTA 존재

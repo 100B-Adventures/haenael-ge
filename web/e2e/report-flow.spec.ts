@@ -5,7 +5,9 @@
 
 import { test, expect } from "@playwright/test";
 
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
+// 다른 스펙들과 동일하게 E2E_BASE_URL을 우선 사용(env 변수명 통일). 둘 다 없으면 로컬 기본.
+const BASE_URL =
+  process.env.E2E_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
 const GOAL_SLUG = process.env.E2E_GOAL_SLUG;
 const REPORT_EF_URL =
   process.env.E2E_REPORT_EF_URL ??
