@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Clock3 } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { ManualCashoutForm } from "@/components/receiver/ManualCashoutForm";
 
 const KRW_PER_CLOVER = 1000;
 const WITHHOLDING_RATE = 0.033; // 원천징수 3.3%(architecture.md §2.3 — 별풍선 선례)
@@ -38,7 +39,6 @@ export default async function CashoutPage() {
   const reachedThreshold = eligibility?.reached_threshold ?? false;
   const remaining = Math.max(minCashoutClover - totalBalance, 0);
 
-  const cashoutEnabled = process.env.NEXT_PUBLIC_CASHOUT_ENABLED === "true";
 
   const grossKrw = payableAmount * KRW_PER_CLOVER;
   const withholdingKrw = Math.floor(grossKrw * WITHHOLDING_RATE);
@@ -167,16 +167,9 @@ export default async function CashoutPage() {
           </p>
         </div>
 
-        {/* 확정 CTA — kill switch 게이트 */}
-        {cashoutEnabled && reachedThreshold ? (
-          <button
-            type="button"
-            className="w-full rounded-[15px] py-4 text-[15.5px] font-extrabold text-white"
-            style={{ background: "#1B8A4F", boxShadow: "0 6px 16px rgba(27,138,79,.22)" }}
-            data-testid="cashout-confirm-button"
-          >
-            {formatKrw(netKrwPreview)} 환전 신청하기
-          </button>
+        {/* 환전 신청 — 도달 시 수동 정산 신청 폼(지급대행 승인 전 임시 운영). 미달은 안내. */}
+        {reachedThreshold ? (
+          <ManualCashoutForm netKrwPreview={netKrwPreview} />
         ) : (
           <div
             className="flex flex-col items-center rounded-[15px] py-5 text-center"
@@ -185,10 +178,10 @@ export default async function CashoutPage() {
           >
             <Clock3 className="mb-2 text-[#1B8A4F]" size={22} aria-hidden="true" />
             <p className="text-[13.5px] font-bold" style={{ color: "#16140F" }}>
-              환전 기능을 준비하고 있어요
+              조금만 더 모으면 환전할 수 있어요
             </p>
             <p className="mt-1 max-w-[260px] text-[11.5px] leading-relaxed" style={{ color: "#6F6A60" }}>
-              환전은 최소 30클로버(30,000원)부터 가능해요. 본인 확인과 안전한 지급 절차를 검증한 뒤 열겠습니다. 지금 쌓인 클로버는 그대로 보관됩니다.
+              환전은 최소 30클로버(30,000원)부터 신청할 수 있어요. 지금 쌓인 클로버는 그대로 보관됩니다.
             </p>
           </div>
         )}
