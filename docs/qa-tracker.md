@@ -2,10 +2,13 @@
 
 ## 2026-08-02 — 수동환전 계좌수집 슬라이스
 
-**판정: ❌ NG / 구현·로컬 검증 진행 중**
+**판정: ❌ NG 유지 / web·구 Edge 진입점은 🔧 전환, DB 상태전이는 미검증**
 
 - 범위: `cashout-manual-account-engdesign-decisions-v1-opus5.md` v1.2의 W-1~W-12, 수동환전 신청 Server Action, 관리자 지급·반려 상태전이, 경계 테스트 T1~T15.
-- 현재 NG 근거: 창고 migration은 있으나 W-6 웰컴 클로버 단일 소스화, W-7 KYC 가역 비활성화, W-12 Vercel 서버 환경변수·Server Action 단일 경유 계약 및 T1~T15 실행 증거가 아직 없다.
+- 근본원인: DB migration은 v1.2 계약으로 교체됐지만 web 신청 폼·관리자 페이지가 구 Edge Function/전건 복호화 RPC/`p_actor_id` 계약에 남아 있어 호출 체인이 서로 달랐다.
+- 🔧 전환한 범위: 신청 폼을 인증된 Server Action 1개로 고정, Edge Function 계좌 경로 410 폐기, 관리자 목록 마스킹 전용, 지급·반려를 `auth.uid()` RPC로 교체, 상태·이력·마이페이지 HOLD 표시 연결, Vercel Preview에서 암호화 키 사용 거부.
+- 직접 증거: web Vitest 32 files / 199 tests PASS, webpack production build PASS(신규 `/cashout/status`·`/cashout/history` 포함), Deno legacy handler 2/2 PASS, Deno check PASS, 빌드 산출물 내 임시 계좌키 문자열 검색 0건, T1~T15 존재·pgTAP plan 31=assertion 31·동시성 스크립트 `bash -n` PASS.
+- 전체 NG 잔여: 샌드박스가 Docker socket·localhost bind를 거부해 migration 실제 적용, pgTAP 31건, T15 병렬 psql, 로그인 브라우저 신청→관리자 지급/반려 실제 상태전이는 실행하지 못했다. 대리지표로 통과 처리하지 않는다.
 - 해제 조건: migration 실제 적용, T1~T15 전건 PASS, web unit/build, 실제 브라우저 신청 경로, 돈 코드 2nd-pass를 직접 관찰하고 증거를 이 항목에 기록한다.
 - 제한: 프로덕션 DB에는 적용하지 않는다. 로컬 파일 작성과 로컬 검증까지만 수행한다.
 

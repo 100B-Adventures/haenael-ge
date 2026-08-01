@@ -20,7 +20,7 @@ function response(status: number, body: unknown) {
   });
 }
 
-Deno.serve((req: Request) => {
+export function handleCashoutRequest(req: Request) {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -34,4 +34,8 @@ Deno.serve((req: Request) => {
       message: "웹 환전 화면에서 다시 신청해주세요.",
     },
   });
-});
+}
+
+if (import.meta.main) {
+  Deno.serve(handleCashoutRequest);
+}
