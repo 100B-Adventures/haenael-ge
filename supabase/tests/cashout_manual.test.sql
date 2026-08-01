@@ -1,312 +1,295 @@
--- =============================================================================
--- cashout_manual.test.sql — 회장 수동 지급 환전 (pgTAP)
--- 검증: 최소 미달·잔액 초과·3.3%·암호화·멱등·RLS·PAID 이중전이·REJECT 복원
--- =============================================================================
-
+-- cashout_manual.test.sql — 확정 계약 §0-1-6 T1~T14
 BEGIN;
 
-SELECT plan(21);
+SELECT plan(31);
 
 INSERT INTO auth.users (
-  id, instance_id, aud, role, email,
-  encrypted_password, created_at, updated_at,
+  id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
   confirmation_token, recovery_token, email_change_token_new,
-  raw_app_meta_data, raw_user_meta_data,
-  is_super_admin, is_anonymous
+  raw_app_meta_data, raw_user_meta_data, is_super_admin, is_anonymous
 )
-VALUES
-  (
-    'ca500000-0000-0000-0000-000000000001',
-    '00000000-0000-0000-0000-000000000000',
-    'authenticated', 'authenticated', 'cashout-a@test.local',
-    '', now(), now(), '', '', '', '{}'::jsonb, '{}'::jsonb, false, false
-  ),
-  (
-    'ca500000-0000-0000-0000-000000000002',
-    '00000000-0000-0000-0000-000000000000',
-    'authenticated', 'authenticated', 'cashout-b@test.local',
-    '', now(), now(), '', '', '', '{}'::jsonb, '{}'::jsonb, false, false
-  ),
-  (
-    'ca500000-0000-0000-0000-000000000003',
-    '00000000-0000-0000-0000-000000000000',
-    'authenticated', 'authenticated', 'cashout-admin@test.local',
-    '', now(), now(), '', '', '', '{}'::jsonb, '{}'::jsonb, false, false
-  );
+SELECT
+  id,
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
+  'authenticated',
+  email,
+  '', now(), now(), '', '', '', '{}'::jsonb, '{}'::jsonb, false, false
+FROM (VALUES
+  ('ca500000-0000-0000-0000-000000000001'::uuid, 'cashout-t1@test.local'),
+  ('ca500000-0000-0000-0000-000000000002'::uuid, 'cashout-t2@test.local'),
+  ('ca500000-0000-0000-0000-000000000003'::uuid, 'cashout-t3@test.local'),
+  ('ca500000-0000-0000-0000-000000000004'::uuid, 'cashout-t7@test.local'),
+  ('ca500000-0000-0000-0000-000000000005'::uuid, 'cashout-admin@test.local')
+) AS seed(id, email);
 
+-- W-7 검증을 위해 일반 회원은 KYC 행 없이 시드한다.
 INSERT INTO public.member (id, nickname, kyc_status)
 VALUES
-  ('ca500000-0000-0000-0000-000000000001', '환전A', 'VERIFIED'),
-  ('ca500000-0000-0000-0000-000000000002', '환전B', 'VERIFIED'),
-  ('ca500000-0000-0000-0000-000000000003', '환전관리자', 'NONE');
-
-INSERT INTO public.kyc_verification (
-  member_id, real_name, birth_date, is_adult, provider
-)
-VALUES
-  (
-    'ca500000-0000-0000-0000-000000000001',
-    '환전A',
-    '1990-01-01',
-    true,
-    'PASS'
-  ),
-  (
-    'ca500000-0000-0000-0000-000000000002',
-    '환전B',
-    '1990-01-01',
-    true,
-    'PASS'
-  );
+  ('ca500000-0000-0000-0000-000000000001', '미달회원', 'NONE'),
+  ('ca500000-0000-0000-0000-000000000002', '웰컴회원', 'NONE'),
+  ('ca500000-0000-0000-0000-000000000003', '지급회원', 'NONE'),
+  ('ca500000-0000-0000-0000-000000000004', '반려회원', 'NONE'),
+  ('ca500000-0000-0000-0000-000000000005', '환전관리자', 'NONE');
 
 INSERT INTO public.admin_member(member_id)
-VALUES ('ca500000-0000-0000-0000-000000000003');
+VALUES ('ca500000-0000-0000-0000-000000000005');
 
 INSERT INTO public.clover_ledger (
   member_id, entry_type, clover_delta, ref_type, ref_id, balance_after
 )
 VALUES
-  ('ca500000-0000-0000-0000-000000000001', 'EARN', 50, 'test', 1, 50),
-  ('ca500000-0000-0000-0000-000000000002', 'EARN', 40, 'test', 2, 40);
+  ('ca500000-0000-0000-0000-000000000001', 'EARN', 29, 'test', 1, 29),
+  ('ca500000-0000-0000-0000-000000000002', 'WELCOME_GRANT', 30, 'test', 2, 30),
+  ('ca500000-0000-0000-0000-000000000003', 'WELCOME_GRANT', 10, 'test', 3, 10),
+  ('ca500000-0000-0000-0000-000000000003', 'EARN', 40, 'test', 4, 50),
+  ('ca500000-0000-0000-0000-000000000004', 'EARN', 40, 'test', 5, 40);
 
-SET LOCAL ROLE authenticated;
-SELECT set_config(
-  'request.jwt.claims',
-  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000001","iss":"supabase-demo"}',
-  true
-);
-
-SELECT throws_ok(
-  $$SELECT * FROM public.create_cashout_request(
-    'ca500000-0000-0000-0000-000000000001', 30, 'KB', repeat('1', 12),
-    '환전A', 'cashout-auth-denied', repeat('k', 40)
-  )$$,
-  '42501',
-  NULL,
-  'C1: authenticated는 service_role 전용 환전 신청 RPC를 직접 호출할 수 없음'
-);
-
-RESET ROLE;
 SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
 
-SELECT throws_ok(
-  $$SELECT * FROM public.create_cashout_request(
-    'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
-    '환전관리자', 'cashout-kyc-required', repeat('k', 40)
-  )$$,
-  '42501',
-  NULL,
-  'C1b: PASS 본인인증과 만 19세 확인 전에는 환전 신청 불가'
-);
+SELECT is(public.cashout_require_kyc(), false, 'W-7: KYC 게이트는 한 줄 설정 함수로 비활성');
 
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000001', 29, 'KB', repeat('1', 12),
-    '환전A', 'cashout-below-min', repeat('k', 40)
+    '미달회원', 'cashout-t1-below', repeat('k', 40)
   )$$,
-  '22023',
-  NULL,
-  'C2: 최소 30클로버 미달은 거부'
-);
-
-SELECT is(
-  (SELECT count(*)::integer FROM public.cashout_request
-   WHERE request_key = 'cashout-below-min'),
-  0,
-  'C3: 최소 미달 거부는 cashout_request/HOLD를 남기지 않음'
+  '22023', 'cashout_below_minimum',
+  'T1: 총 29클로버 신청은 cashout_below_minimum'
 );
 
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
-    'ca500000-0000-0000-0000-000000000001', 60, 'KB', repeat('1', 12),
-    '환전A', 'cashout-over-balance', repeat('k', 40)
+    'ca500000-0000-0000-0000-000000000002', 30, 'KB', repeat('2', 12),
+    '웰컴회원', 'cashout-t2-welcome', repeat('k', 40)
   )$$,
-  '22023',
-  NULL,
-  'C4: 보유 지급가능 잔액을 초과한 요청은 거부'
+  '22023', 'cashout_insufficient_balance',
+  'T2: 총 30이 전부 웰컴이면 payable=0으로 거부'
+);
+
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000003', 41, 'KB', repeat('3', 12),
+    '지급회원', 'cashout-t3-over', repeat('k', 40)
+  )$$,
+  '22023', 'cashout_insufficient_balance',
+  'T3: clover_eligibility payable=40 초과 요청은 거부'
 );
 
 SELECT is(
   (SELECT status::text FROM public.create_cashout_request(
-    'ca500000-0000-0000-0000-000000000001', 30, 'KB', repeat('1', 12),
-    '환전A', 'cashout-request-a', repeat('k', 40)
+    'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
+    '지급회원', 'cashout-t4-replay', repeat('k', 40)
   )),
   'REQUESTED',
-  'C5: 정확히 30클로버 요청은 REQUESTED로 생성'
+  'W-7: KYC 행이 없어도 현재 계약에서는 신청 성공'
 );
 
 SELECT is(
-  (
-    SELECT (gross_krw, fee_krw, withholding_krw, net_krw)
-    FROM public.cashout_request
-    WHERE request_key = 'cashout-request-a'
-  ),
-  (30000, 0, 990, 29010),
-  'C6: 30,000원 → 수수료 0원·원천징수 990원·실지급 29,010원'
-);
-
-SELECT ok(
-  (
-    SELECT position(repeat('1', 12) IN encode(account_no_enc, 'escape')) = 0
-    FROM public.cashout_request
-    WHERE request_key = 'cashout-request-a'
-  ),
-  'C7: account_no_enc에는 계좌번호 평문이 남지 않음'
+  (SELECT (gross_krw, withholding_krw, net_krw)
+   FROM public.cashout_request WHERE request_key = 'cashout-t4-replay'),
+  (30000, 990, 29010),
+  'C1: 3.3% 원천징수 정수 절사를 유지'
 );
 
 SELECT is(
-  (SELECT clover_count FROM public.clover_balance
-   WHERE member_id = 'ca500000-0000-0000-0000-000000000001'),
-  20,
-  'C8: 신청과 같은 트랜잭션에서 30클로버 HOLD 후 잔액 20'
+  (SELECT is_replay FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
+    '지급회원', 'cashout-t4-replay', repeat('k', 40)
+  )),
+  true,
+  'T4: 같은 request_key와 입력은 is_replay=true'
 );
 
 SELECT is(
   (SELECT count(*)::integer FROM public.clover_ledger
    WHERE entry_type = 'CASHOUT_HOLD'
-     AND ref_id = (
-       SELECT id FROM public.cashout_request WHERE request_key = 'cashout-request-a'
-     )),
+     AND ref_id = (SELECT id FROM public.cashout_request WHERE request_key='cashout-t4-replay')),
   1,
-  'C9: 환전 요청당 CASHOUT_HOLD는 1건'
-);
-
-SELECT is(
-  (SELECT is_replay FROM public.create_cashout_request(
-    'ca500000-0000-0000-0000-000000000001', 30, 'KB', repeat('1', 12),
-    '환전A', 'cashout-request-a', repeat('k', 40)
-  )),
-  true,
-  'C10: 동일 request_key+fingerprint 재시도는 기존 요청 재생'
-);
-
-SELECT is(
-  (SELECT count(*)::integer FROM public.cashout_request
-   WHERE request_key = 'cashout-request-a'),
-  1,
-  'C11: 멱등 재시도 후 요청 행은 1건'
+  'T4: 멱등 재시도는 HOLD를 중복 생성하지 않음'
 );
 
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
-    'ca500000-0000-0000-0000-000000000001', 31, 'KB', repeat('1', 12),
-    '환전A', 'cashout-request-a', repeat('k', 40)
+    'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('9', 12),
+    '지급회원', 'cashout-t4-replay', repeat('k', 40)
   )$$,
-  '22023',
-  NULL,
-  'C12: 동일 request_key를 다른 금액에 재사용하면 conflict'
+  '22023', 'request_key_conflict',
+  'T5: 같은 request_key에 다른 계좌는 conflict'
+);
+
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
+    '지급회원', 'cashout-t6-second', repeat('k', 40)
+  )$$,
+  '55000', 'cashout_already_requested',
+  'T6: 진행 중 신청이 있으면 새 신청 차단'
+);
+
+SELECT is(
+  (SELECT status::text FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000004', 30, 'SHINHAN', '123-456 78-9012',
+    '  반려   회원  ', 'cashout-t7-normal', repeat('k', 40)
+  )),
+  'REQUESTED',
+  'T7: 계좌 하이픈·공백과 예금주 공백을 서버가 정규화'
+);
+
+SELECT is(
+  (SELECT (account_masked, account_holder, key_version)
+   FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+  ('********9012', '반려 회원', 1::smallint),
+  'T7: 마스킹은 마지막 4자리만 남기고 key_version=1 저장'
 );
 
 RESET ROLE;
 SET LOCAL ROLE authenticated;
 SELECT set_config(
   'request.jwt.claims',
-  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000002","iss":"supabase-demo"}',
+  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000001"}',
   true
 );
 
-SELECT is(
-  (SELECT count(*)::integer FROM public.cashout_request
-   WHERE member_id = 'ca500000-0000-0000-0000-000000000001'),
-  0,
-  'C13: RLS는 다른 회원의 환전 요청 조회를 차단'
+SELECT throws_ok(
+  $$SELECT * FROM public.admin_list_cashouts_v2(100)$$,
+  '42501', 'admin_forbidden',
+  'T8: 비관리자는 관리자 목록 호출 불가'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.admin_mark_cashout_paid(1, NULL)$$,
+  '42501', 'admin_forbidden',
+  'T8: 비관리자는 지급완료 호출 불가'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.admin_reject_cashout(1, '반려 사유')$$,
+  '42501', 'admin_forbidden',
+  'T8: 비관리자는 반려 호출 불가'
 );
 
-RESET ROLE;
-SET LOCAL ROLE service_role;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000005"}',
+  true
+);
 
-SELECT is(
-  (
-    SELECT account_no
-    FROM public.admin_list_cashouts_secure(
-      'ca500000-0000-0000-0000-000000000003',
-      repeat('k', 40),
-      100
-    )
-    WHERE id = (
-      SELECT id FROM public.cashout_request WHERE request_key = 'cashout-request-a'
-    )
-  ),
-  repeat('1', 12),
-  'C14: allowlist 관리자 secure RPC만 계좌번호 복호화 가능'
+SELECT ok(
+  (SELECT bool_and(account_masked IS NOT NULL)
+   FROM public.admin_list_cashouts_v2(100)),
+  'W-8: 관리자 목록은 복호화 없이 마스킹만 반환'
 );
 
 SELECT is(
-  (
-    SELECT status::text
-    FROM public.admin_mark_cashout_paid(
-      (SELECT id FROM public.cashout_request WHERE request_key = 'cashout-request-a'),
-      'ca500000-0000-0000-0000-000000000003',
-      '테스트 송금 완료'
-    )
-  ),
+  (SELECT public.admin_reveal_cashout_account(
+    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+    'ca500000-0000-0000-0000-000000000005', repeat('k', 40)
+  )),
+  '123456789012',
+  'T12: 명시적 계좌 열람은 정규화된 원문 1건 반환'
+);
+SELECT is(
+  (SELECT count(*)::integer FROM public.cashout_account_access_log
+   WHERE request_id=(SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal')),
+  1,
+  'T12: 계좌 열람 1회마다 감사 로그 1행'
+);
+
+SELECT is(
+  (SELECT status::text FROM public.admin_mark_cashout_paid(
+    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t4-replay'),
+    '은행 송금 완료'
+  )),
   'PAID',
-  'C15: 관리자는 REQUESTED를 PAID로 전이'
+  'T9: REQUESTED를 PAID로 전이'
 );
-
+SELECT throws_ok(
+  $$SELECT * FROM public.admin_mark_cashout_paid(
+    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t4-replay'),
+    '중복 송금 시도'
+  )$$,
+  '23505', 'cashout_already_paid',
+  'T9: 지급완료 2회차 차단'
+);
 SELECT is(
   (SELECT count(*)::integer FROM public.clover_ledger
-   WHERE entry_type = 'CASHOUT_SETTLED'
-     AND ref_id = (
-       SELECT id FROM public.cashout_request WHERE request_key = 'cashout-request-a'
-     )),
+   WHERE entry_type='CASHOUT_SETTLED'
+     AND ref_id=(SELECT id FROM public.cashout_request WHERE request_key='cashout-t4-replay')),
   1,
-  'C16: PAID 전이는 CASHOUT_SETTLED 감사 원장을 정확히 1건 남김'
+  'T9: CASHOUT_SETTLED는 정확히 1건'
 );
 
 SELECT throws_ok(
-  $$SELECT * FROM public.admin_mark_cashout_paid(
-    (SELECT id FROM public.cashout_request WHERE request_key = 'cashout-request-a'),
-    'ca500000-0000-0000-0000-000000000003',
-    '중복 지급 시도'
+  $$SELECT * FROM public.admin_reject_cashout(
+    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'), ''
   )$$,
-  '23505',
-  NULL,
-  'C17: 동일 요청 PAID 재진입은 차단'
+  '22023', 'processing_note_required',
+  'T11: 반려 note 미입력 차단'
 );
-
-SELECT * FROM public.create_cashout_request(
-  'ca500000-0000-0000-0000-000000000002', 30, 'SHINHAN', repeat('2', 12),
-  '환전B', 'cashout-request-b', repeat('k', 40)
-);
-
 SELECT is(
-  (
-    SELECT status::text
-    FROM public.admin_reject_cashout(
-      (SELECT id FROM public.cashout_request WHERE request_key = 'cashout-request-b'),
-      'ca500000-0000-0000-0000-000000000003',
-      '테스트 반려'
-    )
-  ),
+  (SELECT status::text FROM public.admin_reject_cashout(
+    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+    '예금주 불일치'
+  )),
   'REJECTED',
-  'C18: 관리자는 REQUESTED를 REJECTED로 전이'
+  'T10: REQUESTED를 REJECTED로 전이'
 );
-
+SELECT throws_ok(
+  $$SELECT * FROM public.admin_reject_cashout(
+    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+    '중복 반려 시도'
+  )$$,
+  '55000', 'invalid_cashout_status',
+  'T10: 반려 2회차 차단'
+);
+SELECT is(
+  (SELECT count(*)::integer FROM public.clover_ledger
+   WHERE entry_type='CASHOUT_REVERSAL'
+     AND ref_id=(SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal')),
+  1,
+  'T10: CASHOUT_REVERSAL은 정확히 1건'
+);
 SELECT is(
   (SELECT clover_count FROM public.clover_balance
-   WHERE member_id = 'ca500000-0000-0000-0000-000000000002'),
+   WHERE member_id='ca500000-0000-0000-0000-000000000004'),
   40,
-  'C19: 반려 시 CASHOUT_REVERSAL로 보류 클로버 전액 복원'
+  'T10: 반려 잔액은 정확히 1회만 복원'
 );
 
-RESET ROLE;
-SET LOCAL ROLE authenticated;
 SELECT set_config(
   'request.jwt.claims',
-  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000003","iss":"supabase-demo"}',
+  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000003"}',
   true
 );
+SELECT ok(
+  NOT ((SELECT to_jsonb(s) FROM public.my_cashout_status() AS s) ? 'account_no_enc'),
+  'T13: my_cashout_status 응답에 account_no_enc 미포함'
+);
+SELECT ok(
+  NOT ((SELECT to_jsonb(h) FROM public.my_cashout_history(20) AS h LIMIT 1) ? 'account_no_enc'),
+  'T13: my_cashout_history 응답에 account_no_enc 미포함'
+);
+SELECT is(
+  (SELECT count(*)::integer FROM public.my_cashout_history(20)),
+  1,
+  'T14: 사용자 이력은 auth.uid 본인 신청만 반환'
+);
 
-SELECT throws_ok(
-  $$SELECT * FROM public.admin_mark_cashout_paid(
-    1, 'ca500000-0000-0000-0000-000000000003', '직접호출'
-  )$$,
-  '42501',
-  NULL,
-  'C20: allowlist 회원이어도 authenticated 클라이언트는 상태전이 RPC 직접 호출 불가'
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000002"}',
+  true
+);
+SELECT is(
+  (SELECT count(*)::integer FROM public.my_cashout_status()),
+  0,
+  'T14: 타인 신청은 상태 조회에서 빈 결과'
+);
+SELECT is(
+  (SELECT count(*)::integer FROM public.my_cashout_history(20)),
+  0,
+  'T14: 타인 신청은 이력 조회에서 빈 결과'
 );
 
 SELECT * FROM finish();
-
 ROLLBACK;

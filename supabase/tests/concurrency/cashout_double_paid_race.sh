@@ -35,13 +35,8 @@ INSERT INTO auth.users (
    now(), now(), '', '', '', '{}'::jsonb, '{}'::jsonb, false, false);
 
 INSERT INTO public.member(id, nickname, kyc_status) VALUES
-  ('${MEMBER_ID}', '환전레이스', 'VERIFIED'),
+  ('${MEMBER_ID}', '환전레이스', 'NONE'),
   ('${ADMIN_ID}', '환전관리자레이스', 'NONE');
-INSERT INTO public.kyc_verification(
-  member_id, real_name, birth_date, is_adult, provider
-) VALUES (
-  '${MEMBER_ID}', '환전레이스', '1990-01-01', true, 'PASS'
-);
 INSERT INTO public.admin_member(member_id) VALUES ('${ADMIN_ID}');
 INSERT INTO public.clover_ledger(
   member_id, entry_type, clover_delta, ref_type, ref_id, balance_after
@@ -63,9 +58,14 @@ for i in 1 2; do
     psql "$DB_URL" -v ON_ERROR_STOP=1 -q -t -A <<SQL \
       > "${WORKDIR}/paid_${i}.out" 2> "${WORKDIR}/paid_${i}.err"
 SELECT pg_sleep(0.3);
-SET ROLE service_role;
+SET ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"${ADMIN_ID}"}',
+  true
+);
 SELECT * FROM public.admin_mark_cashout_paid(
-  ${REQUEST_ID}, '${ADMIN_ID}', '병렬 송금 완료 ${i}'
+  ${REQUEST_ID}, '병렬 송금 완료 ${i}'
 );
 RESET ROLE;
 SQL
