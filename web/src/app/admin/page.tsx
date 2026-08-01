@@ -1,10 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
-  createServiceRoleClient,
-  getCashoutAccountEncryptionKey,
-} from "@/lib/supabase/service";
-import {
   CashoutQueue,
   type AdminCashout,
 } from "@/components/admin/CashoutQueue";
@@ -36,29 +32,11 @@ type AdminLedgerEntry = {
   created_at: string;
 };
 
-type SecureAdminCashout = {
-  id: number;
-  member_id: string;
-  nickname: string | null;
-  clover_amount: number;
-  gross_krw: number;
-  fee_krw: number;
-  withholding_krw: number;
-  net_krw: number;
-  bank_code: string | null;
-  account_no: string | null;
-  account_holder: string | null;
-  status: string;
-  processing_note: string | null;
-  requested_at: string;
-  paid_at: string | null;
-  rejected_at: string | null;
-};
-
 type AdminRpcName =
   | "is_admin"
   | "admin_list_members"
-  | "admin_list_ledger";
+  | "admin_list_ledger"
+  | "admin_list_cashouts_v2";
 
 type AdminRpcArgs = { p_limit: number } | undefined;
 
@@ -155,35 +133,20 @@ export default async function AdminPage() {
     notFound();
   }
 
-  const [membersResult, ledgerResult] = await Promise.all([
+  const [membersResult, ledgerResult, cashoutsResult] = await Promise.all([
     callAdminRpc<AdminMember[]>("admin_list_members", { p_limit: 100 }),
     callAdminRpc<AdminLedgerEntry[]>("admin_list_ledger", { p_limit: 200 }),
+    callAdminRpc<AdminCashout[]>("admin_list_cashouts_v2", { p_limit: 100 }),
   ]);
 
-  if (membersResult.error || ledgerResult.error) {
+  if (membersResult.error || ledgerResult.error || cashoutsResult.error) {
     throw new Error("관리자 데이터를 불러오지 못했습니다.");
   }
 
   const members = membersResult.data ?? [];
   const ledger = ledgerResult.data ?? [];
-  const serviceClient = createServiceRoleClient();
-  const { data: secureCashoutsRaw, error: cashoutsError } = await serviceClient.rpc(
-    "admin_list_cashouts_secure" as never,
-    {
-      p_actor_id: user.id,
-      p_account_key: getCashoutAccountEncryptionKey(),
-      p_limit: 100,
-    } as never,
-  );
-  if (cashoutsError) {
-    throw new Error("환전 요청을 불러오지 못했습니다.");
-  }
-  const cashouts = ((secureCashoutsRaw ?? []) as SecureAdminCashout[]).map(
-    ({ account_no, ...cashout }): AdminCashout => ({
-      ...cashout,
-      account_masked: account_no ? `••••••${account_no.slice(-4)}` : "계좌 미등록",
-    }),
-  );
+  // W-8: 목록은 authenticated RPC로 마스킹 필드만 읽는다. 복호화는 행별 액션에서만 한다.
+  const cashouts = cashoutsResult.data ?? [];
 
   return (
     <main className="min-h-svh bg-background px-4 py-10 text-foreground sm:px-6 lg:px-10">

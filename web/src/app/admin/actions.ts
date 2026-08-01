@@ -23,7 +23,7 @@ async function requireAdmin() {
 
   return {
     actorId: user.id,
-    serviceClient: createServiceRoleClient(),
+    callerClient,
   };
 }
 
@@ -31,7 +31,8 @@ export async function revealCashoutAccount(
   requestId: number,
 ): Promise<ActionResult> {
   try {
-    const { actorId, serviceClient } = await requireAdmin();
+    const { actorId } = await requireAdmin();
+    const serviceClient = createServiceRoleClient();
     const { data, error } = await serviceClient.rpc(
       "admin_reveal_cashout_account" as never,
       {
@@ -54,12 +55,11 @@ export async function markCashoutPaid(
   processingNote: string,
 ): Promise<ActionResult> {
   try {
-    const { actorId, serviceClient } = await requireAdmin();
-    const { error } = await serviceClient.rpc(
+    const { callerClient } = await requireAdmin();
+    const { error } = await callerClient.rpc(
       "admin_mark_cashout_paid" as never,
       {
         p_request_id: requestId,
-        p_actor_id: actorId,
         p_processing_note: processingNote || null,
       } as never,
     );
@@ -88,12 +88,11 @@ export async function rejectCashout(
   }
 
   try {
-    const { actorId, serviceClient } = await requireAdmin();
-    const { error } = await serviceClient.rpc(
+    const { callerClient } = await requireAdmin();
+    const { error } = await callerClient.rpc(
       "admin_reject_cashout" as never,
       {
         p_request_id: requestId,
-        p_actor_id: actorId,
         p_processing_note: processingNote.trim(),
       } as never,
     );

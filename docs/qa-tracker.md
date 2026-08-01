@@ -1,5 +1,14 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-02 — 수동환전 계좌수집 슬라이스
+
+**판정: ❌ NG / 구현·로컬 검증 진행 중**
+
+- 범위: `cashout-manual-account-engdesign-decisions-v1-opus5.md` v1.2의 W-1~W-12, 수동환전 신청 Server Action, 관리자 지급·반려 상태전이, 경계 테스트 T1~T15.
+- 현재 NG 근거: 창고 migration은 있으나 W-6 웰컴 클로버 단일 소스화, W-7 KYC 가역 비활성화, W-12 Vercel 서버 환경변수·Server Action 단일 경유 계약 및 T1~T15 실행 증거가 아직 없다.
+- 해제 조건: migration 실제 적용, T1~T15 전건 PASS, web unit/build, 실제 브라우저 신청 경로, 돈 코드 2nd-pass를 직접 관찰하고 증거를 이 항목에 기록한다.
+- 제한: 프로덕션 DB에는 적용하지 않는다. 로컬 파일 작성과 로컬 검증까지만 수행한다.
+
 ## 2026-07-27 — 결제·환전 전체 플로우 오픈 판정
 
 **판정: ❌ NG / 실결제 오픈 NO-GO**

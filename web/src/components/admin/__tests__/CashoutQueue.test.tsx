@@ -2,15 +2,17 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CashoutQueue, type AdminCashout } from "../CashoutQueue";
 
-const { revealCashoutAccount, refresh } = vi.hoisted(() => ({
+const { revealCashoutAccount, markCashoutPaid, rejectCashout, refresh } = vi.hoisted(() => ({
   revealCashoutAccount: vi.fn(),
+  markCashoutPaid: vi.fn(),
+  rejectCashout: vi.fn(),
   refresh: vi.fn(),
 }));
 
 vi.mock("@/app/admin/actions", () => ({
   revealCashoutAccount,
-  markCashoutPaid: vi.fn(),
-  rejectCashout: vi.fn(),
+  markCashoutPaid,
+  rejectCashout,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -43,23 +45,40 @@ describe("CashoutQueue", () => {
       ok: true,
       accountNo: "123456789012",
     });
+    markCashoutPaid.mockResolvedValue({ ok: true });
+    rejectCashout.mockResolvedValue({ ok: true });
   });
 
   it("계좌는 기본 마스킹하고 명시적 클릭 뒤에만 전체 번호를 표시한다", async () => {
     render(<CashoutQueue cashouts={[cashout]} />);
 
-    expect(screen.getByText("••••••9012")).toBeInTheDocument();
+    expect(screen.getAllByText(/••••••9012/).length).toBeGreaterThan(0);
     expect(screen.queryByText("123456789012")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "전체 계좌 보기" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "전체 계좌 보기" })[0]);
 
     await waitFor(() =>
       expect(revealCashoutAccount).toHaveBeenCalledWith(cashout.id),
     );
-    expect(await screen.findByText("123456789012")).toBeInTheDocument();
+    expect((await screen.findAllByText(/123456789012/)).length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "다시 가리기" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "다시 가리기" })[0]);
     expect(screen.queryByText("123456789012")).not.toBeInTheDocument();
-    expect(screen.getByText("••••••9012")).toBeInTheDocument();
+    expect(screen.getAllByText(/••••••9012/).length).toBeGreaterThan(0);
+  });
+
+  it("지급 완료는 실제 이체 확인 체크 전에는 확정할 수 없다", async () => {
+    render(<CashoutQueue cashouts={[cashout]} />);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "지급 완료" })[0]);
+    const confirmButton = screen.getByRole("button", { name: "지급 완료 확정" });
+    expect(confirmButton).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("checkbox"));
+    expect(confirmButton).toBeEnabled();
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => expect(markCashoutPaid).toHaveBeenCalledWith(cashout.id, ""));
+    expect(refresh).toHaveBeenCalled();
   });
 });

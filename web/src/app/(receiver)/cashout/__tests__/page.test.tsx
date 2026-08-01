@@ -5,6 +5,10 @@ vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: vi.fn(),
 }));
 
+vi.mock("@/lib/supabase/service", () => ({
+  isCashoutEnabled: vi.fn(() => true),
+}));
+
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(() => {
     throw new Error("NEXT_REDIRECT");
@@ -16,14 +20,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 describe("/cashout 미달 상태", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv("NEXT_PUBLIC_CASHOUT_ENABLED", "true");
-    const historyQuery = {
-      select: vi.fn(),
-      order: vi.fn(),
-      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
-    };
-    historyQuery.select.mockReturnValue(historyQuery);
-    historyQuery.order.mockReturnValue(historyQuery);
+    vi.stubEnv("CASHOUT_ENABLED", "true");
 
     vi.mocked(createServerSupabaseClient).mockResolvedValue({
       auth: {
@@ -31,19 +28,15 @@ describe("/cashout 미달 상태", () => {
           data: { user: { id: "owner-uid" } },
         }),
       },
-      rpc: vi.fn().mockResolvedValue({
-        data: [
-          {
-            total_balance: 8,
-            welcome_amount: 3,
-            payable_amount: 5,
-            min_cashout_clover: 30,
-            reached_threshold: false,
-          },
-        ],
-        error: null,
+      rpc: vi.fn().mockImplementation((name: string) => {
+        if (name === "clover_eligibility") {
+          return Promise.resolve({
+            data: [{ total_balance: 8, welcome_amount: 3, payable_amount: 5, min_cashout_clover: 30, reached_threshold: false }],
+            error: null,
+          });
+        }
+        return Promise.resolve({ data: [], error: null });
       }),
-      from: vi.fn().mockReturnValue(historyQuery),
     } as never);
   });
 
