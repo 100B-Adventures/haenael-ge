@@ -374,6 +374,7 @@ export type Database = {
           id: string
           kyc_status: Database["public"]["Enums"]["kyc_status_enum"]
           nickname: string | null
+          phone: string | null
           profile_image: string | null
           provider: string | null
           provider_id: string | null
@@ -385,6 +386,7 @@ export type Database = {
           id: string
           kyc_status?: Database["public"]["Enums"]["kyc_status_enum"]
           nickname?: string | null
+          phone?: string | null
           profile_image?: string | null
           provider?: string | null
           provider_id?: string | null
@@ -396,6 +398,7 @@ export type Database = {
           id?: string
           kyc_status?: Database["public"]["Enums"]["kyc_status_enum"]
           nickname?: string | null
+          phone?: string | null
           profile_image?: string | null
           provider?: string | null
           provider_id?: string | null

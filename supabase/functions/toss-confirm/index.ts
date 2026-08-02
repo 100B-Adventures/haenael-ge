@@ -300,6 +300,12 @@ Deno.serve(async (req: Request) => {
   // 흡수하며, confirm_cheer_payment가 만든 기존 INAPP 알림과 결제 응답을 보존한다.
   const confirmed = data[0];
   await dispatchCheerReceivedNotification({
+    alimtalkConfigured: [
+      "KAKAO_ALIMTALK_API_URL",
+      "KAKAO_ALIMTALK_API_KEY",
+      "KAKAO_ALIMTALK_API_SECRET",
+      "KAKAO_ALIMTALK_SENDER_KEY",
+    ].every((name) => Boolean(Deno.env.get(name))),
     getMemberPhone: async (memberId) => {
       const { data: member, error: phoneError } = await supabase
         .from("member")

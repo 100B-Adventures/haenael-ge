@@ -9,6 +9,7 @@ export interface CheerReceivedNotificationInput {
 }
 
 export interface CheerNotificationDeps {
+  alimtalkConfigured: boolean;
   getMemberPhone: (
     memberId: string,
   ) => Promise<{ phone: string | null; error?: string }>;
@@ -23,7 +24,11 @@ export interface CheerNotificationDeps {
 
 export interface CheerNotificationResult {
   channel: "ALIMTALK" | "INAPP";
-  reason?: "phone_missing" | "phone_lookup_failed" | "notify_failed";
+  reason?:
+    | "phone_missing"
+    | "phone_lookup_failed"
+    | "alimtalk_not_configured"
+    | "notify_failed";
 }
 
 /**
@@ -55,6 +60,10 @@ export async function dispatchCheerReceivedNotification(
   const phone = phoneResult.phone?.trim();
   if (!phone) {
     return { channel: "INAPP", reason: "phone_missing" };
+  }
+
+  if (!deps.alimtalkConfigured) {
+    return { channel: "INAPP", reason: "alimtalk_not_configured" };
   }
 
   try {

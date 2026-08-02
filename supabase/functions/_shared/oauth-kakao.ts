@@ -112,7 +112,8 @@ export async function exchangeKakaoCode(
  * 카카오 액세스토큰으로 사용자 정보를 조회한다.
  *
  * ref: https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#req-user-info
- * 요청 scope: profile_nickname,profile_image,account_email (카카오 디벨로퍼 앱 설정 필수)
+ * 요청 scope: profile_nickname,profile_image,account_email,phone_number
+ * (카카오 디벨로퍼 앱 동의항목 설정 필수)
  */
 export async function getKakaoUserInfo(
   accessToken: string,
