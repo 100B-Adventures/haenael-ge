@@ -132,14 +132,14 @@ Deno.serve(async (req: Request) => {
 
     // 2. 카카오 사용자 정보
     const kakaoUserRaw = await getKakaoUserInfo(kakaoToken.access_token);
-    const { providerId, email, nickname, profileImage } =
+    const { providerId, email, nickname, profileImage, phone } =
       normalizeKakaoUser(kakaoUserRaw);
 
     // 3. 기존 유저 조회 (member 테이블 — provider_id가 PK보다 빠름)
     //    service_role → RLS 우회, 직접 조회 가능
     const { data: existingMember } = await supabaseAdmin
       .from("member")
-      .select("id")
+      .select("id,phone")
       .eq("provider", "kakao")
       .eq("provider_id", providerId)
       .maybeSingle();
@@ -159,14 +159,24 @@ Deno.serve(async (req: Request) => {
         },
       });
 
-      await supabaseAdmin
+      // 카카오가 최신 유효 번호를 제공한 로그인에서만 덮어쓴다.
+      // 동의 철회/일시 누락/비정상 응답에서는 기존 번호를 보존한다.
+      const { error: memberUpdateError } = await supabaseAdmin
         .from("member")
-        .update({ nickname, profile_image: profileImage })
+        .update({
+          nickname,
+          profile_image: profileImage,
+          ...(phone ? { phone } : {}),
+        })
         .eq("id", userId);
+
+      if (memberUpdateError) {
+        throw new Error(`member 갱신 실패: ${memberUpdateError.message}`);
+      }
     } else {
       // 신규 유저: auth user 생성
-      const { data: newUserData, error: createError } =
-        await supabaseAdmin.auth.admin.createUser({
+      const { data: newUserData, error: createError } = await supabaseAdmin.auth
+        .admin.createUser({
           email,
           email_confirm: true,
           user_metadata: {
@@ -226,6 +236,7 @@ Deno.serve(async (req: Request) => {
           provider_id: providerId,
           nickname,
           profile_image: profileImage,
+          phone,
         },
         { onConflict: "id", ignoreDuplicates: false },
       );

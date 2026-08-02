@@ -21,6 +21,8 @@ export interface KakaoUserInfo {
     email?: string;
     is_email_verified?: boolean;
     is_email_valid?: boolean;
+    phone_number?: string;
+    phone_number_needs_agreement?: boolean;
     profile?: {
       nickname?: string;
       profile_image_url?: string;
@@ -157,6 +159,8 @@ export interface KakaoUserNormalized {
   email: string;
   nickname: string;
   profileImage: string | null;
+  /** 국내 휴대전화 표기(숫자만, 예: 01012345678). 미동의/국외/비정상이면 null. */
+  phone: string | null;
 }
 
 /**
@@ -182,13 +186,35 @@ export const SYNTHETIC_KAKAO_EMAIL_SUFFIX = "@kakao.haenael.app";
  * 오인돼 자동연결 우회가 가능하다. 반드시 `kakao_${providerId}@kakao.haenael.app`
  * 정확 문자열과 대조한다(providerId는 카카오가 부여한 위조 불가 값).
  */
-export function isSyntheticKakaoEmail(email: string, providerId: string): boolean {
+export function isSyntheticKakaoEmail(
+  email: string,
+  providerId: string,
+): boolean {
   return email === `kakao_${providerId}${SYNTHETIC_KAKAO_EMAIL_SUFFIX}`;
 }
 
+/**
+ * 카카오 `phone_number`를 국내 휴대전화 숫자 표기로 정규화한다.
+ * 공식 응답의 국내 형식(`+82 10 1234 5678`, `+82 10-1234-5678`)과
+ * 이미 국내 표기인 입력만 허용한다. 문자 본인인증이나 해외 번호 추정은 하지 않는다.
+ */
+export function normalizeKoreanMobilePhone(phone: unknown): string | null {
+  if (typeof phone !== "string" || !phone.trim()) return null;
+
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("0082")) {
+    digits = digits.slice(4);
+  } else if (digits.startsWith("82")) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.startsWith("10")) digits = `0${digits}`;
+
+  return /^01[016789]\d{7,8}$/.test(digits) ? digits : null;
+}
+
 export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
-  const hasVerifiedEmail =
-    user.kakao_account?.email &&
+  const hasVerifiedEmail = user.kakao_account?.email &&
     user.kakao_account.is_email_verified &&
     user.kakao_account.is_email_valid;
 
@@ -197,13 +223,12 @@ export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
     email: hasVerifiedEmail
       ? user.kakao_account!.email!
       : `kakao_${user.id}@kakao.haenael.app`,
-    nickname:
-      user.kakao_account?.profile?.nickname ??
+    nickname: user.kakao_account?.profile?.nickname ??
       user.properties?.nickname ??
       "해낼게 유저",
-    profileImage:
-      user.kakao_account?.profile?.profile_image_url ??
+    profileImage: user.kakao_account?.profile?.profile_image_url ??
       user.properties?.profile_image ??
       null,
+    phone: normalizeKoreanMobilePhone(user.kakao_account?.phone_number),
   };
 }

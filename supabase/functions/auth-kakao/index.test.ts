@@ -17,8 +17,9 @@ import {
 import {
   isSyntheticKakaoEmail,
   KakaoAuthError,
-  normalizeKakaoUser,
   type KakaoUserInfo,
+  normalizeKakaoUser,
+  normalizeKoreanMobilePhone,
 } from "../_shared/oauth-kakao.ts";
 
 // ─── normalizeKakaoUser 단위 ──────────────────────────────────────────────────
@@ -76,12 +77,39 @@ Deno.test("normalizeKakaoUser — 닉네임 없음 → 기본값", () => {
   assertEquals(result.nickname, "해낼게 유저");
 });
 
+Deno.test("normalizeKoreanMobilePhone — 카카오 국내 +82 표기를 010 숫자 표기로 변환", () => {
+  assertEquals(normalizeKoreanMobilePhone("+82 10-1234-5678"), "01012345678");
+  assertEquals(normalizeKoreanMobilePhone("+82 10 9876 5432"), "01098765432");
+  assertEquals(normalizeKoreanMobilePhone("010-1234-5678"), "01012345678");
+});
+
+Deno.test("normalizeKoreanMobilePhone — 미동의·국외·비정상 번호는 저장하지 않음", () => {
+  assertEquals(normalizeKoreanMobilePhone(undefined), null);
+  assertEquals(normalizeKoreanMobilePhone("+1 202-555-0199"), null);
+  assertEquals(normalizeKoreanMobilePhone("02-1234-5678"), null);
+  assertEquals(normalizeKoreanMobilePhone("010-12-34"), null);
+});
+
+Deno.test("normalizeKakaoUser — phone_number를 국내 표기로 함께 정규화", () => {
+  const result = normalizeKakaoUser({
+    id: 20260802,
+    kakao_account: { phone_number: "+82 10-2468-1357" },
+  });
+  assertEquals(result.phone, "01024681357");
+});
+
 // ─── isSyntheticKakaoEmail — 보안 결함3 회귀 테스트 ──────────────────────────
 // (email 충돌 시 real 이메일은 자동연결 거부, synthetic은 허용해야 함)
 
 Deno.test("isSyntheticKakaoEmail — providerId와 정확히 일치하면 true", () => {
-  assertEquals(isSyntheticKakaoEmail("kakao_12345@kakao.haenael.app", "12345"), true);
-  assertEquals(isSyntheticKakaoEmail("kakao_777@kakao.haenael.app", "777"), true);
+  assertEquals(
+    isSyntheticKakaoEmail("kakao_12345@kakao.haenael.app", "12345"),
+    true,
+  );
+  assertEquals(
+    isSyntheticKakaoEmail("kakao_777@kakao.haenael.app", "777"),
+    true,
+  );
 });
 
 Deno.test("isSyntheticKakaoEmail — real 이메일이면 false (자동연결 거부 대상)", () => {
