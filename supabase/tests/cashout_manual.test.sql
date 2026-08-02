@@ -91,7 +91,7 @@ SELECT is(
 SELECT is(
   (SELECT (gross_krw, withholding_krw, net_krw)
    FROM public.cashout_request WHERE request_key = 'cashout-t4-replay'),
-  (30000, 990, 29010),
+  (30000::bigint, 990::bigint, 29010::bigint),
   'C1: 3.3% 원천징수 정수 절사를 유지'
 );
 
