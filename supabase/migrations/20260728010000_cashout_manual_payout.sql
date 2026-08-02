@@ -79,6 +79,9 @@ DECLARE
   v_welcome integer;
   v_min integer := public.min_cashout_clover();
 BEGIN
+  -- SECURITY DEFINER 함수 안의 current_user는 호출자가 아니라 함수 소유자다.
+  -- 따라서 실제 Supabase 호출자 권한은 auth.role()/auth.uid() JWT 클레임으로
+  -- 판정한다. current_user 비교는 기존 운영 동작을 바꾸지 않기 위해 유지한다.
   IF current_user IS DISTINCT FROM 'service_role'
      AND auth.role() IS DISTINCT FROM 'service_role'
      AND auth.uid() IS DISTINCT FROM p_member_id THEN

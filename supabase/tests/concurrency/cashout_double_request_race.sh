@@ -43,10 +43,17 @@ for suffix in A B; do
     psql "$DB_URL" -v ON_ERROR_STOP=1 -q -t -A <<SQL \
       > "$TASK_TMP_DIR/request_${suffix}.out" 2> "$TASK_TMP_DIR/request_${suffix}.err"
 SET ROLE service_role;
+BEGIN;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"service_role"}',
+  true
+);
 SELECT * FROM public.create_cashout_request(
   '${MEMBER_ID}', 30, 'KB', repeat('1', 12), '환전신청레이스',
   '${REQUEST_KEY}', repeat('k', 40)
 );
+COMMIT;
 RESET ROLE;
 SQL
     echo $? > "$TASK_TMP_DIR/request_${suffix}.exit"

@@ -43,10 +43,17 @@ INSERT INTO public.clover_ledger(
 ) VALUES ('${MEMBER_ID}', 'EARN', 30, 'test', 1, 30);
 
 SET ROLE service_role;
+BEGIN;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"service_role"}',
+  true
+);
 SELECT * FROM public.create_cashout_request(
   '${MEMBER_ID}', 30, 'KB', repeat('1', 12), '환전레이스',
   '${REQUEST_KEY}', repeat('k', 40)
 );
+COMMIT;
 RESET ROLE;
 SQL
 
@@ -59,6 +66,7 @@ for i in 1 2; do
       > "${WORKDIR}/paid_${i}.out" 2> "${WORKDIR}/paid_${i}.err"
 SELECT pg_sleep(0.3);
 SET ROLE authenticated;
+BEGIN;
 SELECT set_config(
   'request.jwt.claims',
   '{"role":"authenticated","sub":"${ADMIN_ID}"}',
@@ -67,6 +75,7 @@ SELECT set_config(
 SELECT * FROM public.admin_mark_cashout_paid(
   ${REQUEST_ID}, '병렬 송금 완료 ${i}'
 );
+COMMIT;
 RESET ROLE;
 SQL
     echo $? > "${WORKDIR}/paid_${i}.exit"
