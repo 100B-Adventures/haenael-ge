@@ -21,6 +21,12 @@ Deno.test("buildCheerReceivedMessage — 올바른 메시지 구조 반환", () 
   assertEquals(msg.templateCode, TEMPLATE_CODES.CHEER_RECEIVED);
   assertEquals(msg.variables["#{응원자}"], "도경이");
   assertEquals(msg.variables["#{목표}"], "편입 평점 4.0 해낼게");
+  assertEquals(
+    Object.keys(msg.variables).sort(),
+    ["#{목표}", "#{응원자}"].sort(),
+  );
+  assertEquals("#{금액}" in msg.variables, false);
+  assertEquals("#{클로버}" in msg.variables, false);
 });
 
 Deno.test("buildCheerReceivedMessage — goalTitle 30자 초과 시 truncate", () => {
@@ -48,10 +54,8 @@ Deno.test("sendAlimtalk — ENV 미설정 시 FAILED(placeholder) 반환", async
   );
 });
 
-Deno.test("TEMPLATE_CODES — CHEER_RECEIVED 값 존재", () => {
-  // ENV 미설정 → fallback default
-  assertEquals(typeof TEMPLATE_CODES.CHEER_RECEIVED, "string");
-  assertEquals(TEMPLATE_CODES.CHEER_RECEIVED.length > 0, true);
+Deno.test("TEMPLATE_CODES — CHEER_RECEIVED_V1로 고정", () => {
+  assertEquals(TEMPLATE_CODES.CHEER_RECEIVED, "CHEER_RECEIVED_V1");
 });
 
 // ─── notify EF 입력 검증 로직 독립 테스트 ────────────────────────────────────

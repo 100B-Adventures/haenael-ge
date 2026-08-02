@@ -1,0 +1,45 @@
+# supabase/edge-functions-env.example
+# Edge Function 시크릿 목록 (키 이름만 — 실값 절대 커밋 금지)
+#
+# 설정 방법:
+#   supabase secrets set KEY=value
+#
+# 일괄 설정 (실값 채운 .env 파일로):
+#   supabase secrets set --env-file ./supabase/.env.secrets
+#
+# 현재 설정된 시크릿 확인:
+#   supabase secrets list
+
+# ─── 운영 기능 스위치·알림 ──────────────────────────────────────────────────
+PAYMENTS_ENABLED=false
+CASHOUT_ENABLED=false
+SLACK_WEBHOOK_URL=
+LEAD_RATE_LIMIT_SALT=
+TOSS_WEBHOOK_TOKEN=
+
+# ─── 카카오 OAuth (developers.kakao.com → 내 앱 → 앱 키 / 보안) ───────────────
+KAKAO_CLIENT_ID=
+KAKAO_CLIENT_SECRET=
+
+# ─── 카카오 알림톡 (솔라피 → API 키 / 발신 프로필) ───────────────────────────
+# _shared/alimtalk.ts가 읽는 이름과 일치해야 한다. API_URL/API_KEY/API_SECRET/
+# SENDER_KEY 중 하나라도 없으면 외부 발송을 건너뛰고 기존 INAPP으로 강등한다.
+KAKAO_ALIMTALK_API_URL=
+KAKAO_ALIMTALK_API_KEY=
+KAKAO_ALIMTALK_API_SECRET=
+KAKAO_ALIMTALK_SENDER_KEY=
+KAKAO_ALIMTALK_PFID=
+
+# ─── 토스페이먼츠 (developers.tosspayments.com → 내 개발 정보) ───────────────
+# Secret key — 서버 승인·취소·webhook 상태 재조회에 사용
+TOSS_SECRET_KEY=
+
+# ─── PASS 본인인증 (나이스인증·PASS 계약 후 발급) ─────────────────────────────
+# kyc-verify EF에서 사용
+PASS_CLIENT_ID=
+PASS_CLIENT_SECRET=
+
+# ─── 지급대행 (cashout-payout EF — 계약·BM 확정 후 채울 것) ─────────────────
+# ⛔ 실값 = 법인 계좌·정산주기 D+n 확정 후
+PAYOUT_API_KEY=
+PAYOUT_API_SECRET=

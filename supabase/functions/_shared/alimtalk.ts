@@ -84,7 +84,8 @@ export async function sendAlimtalk(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `HMAC-SHA256 apiKey=${apiKey}, date=${timestamp}, salt=${Date.now()}, signature=${signature}`,
+        Authorization:
+          `HMAC-SHA256 apiKey=${apiKey}, date=${timestamp}, salt=${Date.now()}, signature=${signature}`,
       },
       body: JSON.stringify(body),
     });
@@ -100,8 +101,8 @@ export async function sendAlimtalk(
     }
 
     const data = await res.json().catch(() => null);
-    const messageId =
-      (data as { messageId?: string })?.messageId ?? `ok-${Date.now()}`;
+    const messageId = (data as { messageId?: string })?.messageId ??
+      `ok-${Date.now()}`;
 
     return { messageId, status: "SENT" };
   } catch (err) {
@@ -118,8 +119,7 @@ export async function sendAlimtalk(
 
 export const TEMPLATE_CODES = {
   /** 응원 도착 (정보성) — 사전심사 통과 필요 */
-  CHEER_RECEIVED: Deno.env.get("KAKAO_TEMPLATE_CODE_CHEER") ??
-    "CHEER_RECEIVED_V1",
+  CHEER_RECEIVED: "CHEER_RECEIVED_V1",
 } as const;
 
 /** 응원 도착 알림톡 메시지 빌더 */

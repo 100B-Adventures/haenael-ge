@@ -17,7 +17,10 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
-import { buildCheerReceivedMessage, sendAlimtalk } from "../_shared/alimtalk.ts";
+import {
+  buildCheerReceivedMessage,
+  sendAlimtalk,
+} from "../_shared/alimtalk.ts";
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 // report EF와 동일 버그(2026-07-20 수정): OPTIONS만 CORS를 붙이고 실제 응답엔
@@ -72,9 +75,7 @@ function validate(body: unknown): { data: NotifyInput } | { error: string } {
       displayName: typeof b.displayName === "string"
         ? b.displayName
         : "익명의 누군가",
-      goalTitle: typeof b.goalTitle === "string"
-        ? b.goalTitle
-        : "목표",
+      goalTitle: typeof b.goalTitle === "string" ? b.goalTitle : "목표",
     },
   };
 }
@@ -100,10 +101,17 @@ Deno.serve(async (req: Request) => {
     ? authHeader.slice(7)
     : authHeader;
 
-  // service_role 토큰이 아니면 내부 호출 거부
-  // (Supabase EF invoke는 JWT 검증이 이미 되어 있어, role 확인으로 충분)
+  if (!serviceRoleKey) {
+    return err(503, "missing_supabase_env", "Supabase service env missing");
+  }
+
+  // service_role 토큰이 아니면 내부 호출 거부. Gateway JWT 검증만으로는 일반
+  // 로그인 사용자 토큰도 통과하므로 실제 service key와 반드시 대조한다.
   if (!token) {
     return err(401, "unauthorized", "Authorization required");
+  }
+  if (token !== serviceRoleKey) {
+    return err(403, "forbidden", "Service role required");
   }
 
   // 입력 파싱
