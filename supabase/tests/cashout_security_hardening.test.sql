@@ -1,7 +1,33 @@
 -- cashout_security_hardening.test.sql — 배포차단 보안/경계 회귀
 BEGIN;
 
-SELECT plan(30);
+SELECT plan(32);
+
+SELECT ok(
+  (
+    SELECT p.proconfig IS NOT NULL
+      AND 'search_path=""' = ANY (p.proconfig)
+    FROM pg_catalog.pg_proc AS p
+    JOIN pg_catalog.pg_namespace AS n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'sync_clover_balance'
+      AND pg_catalog.pg_get_function_identity_arguments(p.oid) = ''
+  ),
+  'sync_clover_balance는 호출자와 무관한 빈 search_path를 고정'
+);
+
+SELECT like(
+  (
+    SELECT p.prosrc
+    FROM pg_catalog.pg_proc AS p
+    JOIN pg_catalog.pg_namespace AS n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'sync_clover_balance'
+      AND pg_catalog.pg_get_function_identity_arguments(p.oid) = ''
+  ),
+  '%INSERT INTO public.clover_balance%',
+  'sync_clover_balance 내부 테이블 참조는 public 스키마로 한정'
+);
 
 INSERT INTO auth.users (
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
