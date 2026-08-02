@@ -132,8 +132,14 @@ Deno.serve(async (req: Request) => {
 
     // 2. 카카오 사용자 정보
     const kakaoUserRaw = await getKakaoUserInfo(kakaoToken.access_token);
-    const { providerId, email, nickname, profileImage, phone } =
-      normalizeKakaoUser(kakaoUserRaw);
+    const {
+      providerId,
+      email,
+      nickname,
+      profileImage,
+      phone,
+      shouldUpdatePhone,
+    } = normalizeKakaoUser(kakaoUserRaw);
 
     // 3. 기존 유저 조회 (member 테이블 — provider_id가 PK보다 빠름)
     //    service_role → RLS 우회, 직접 조회 가능
@@ -159,14 +165,14 @@ Deno.serve(async (req: Request) => {
         },
       });
 
-      // 카카오가 최신 유효 번호를 제공한 로그인에서만 덮어쓴다.
-      // 동의 철회/일시 누락/비정상 응답에서는 기존 번호를 보존한다.
+      // 최신 번호는 교체, 명시적 동의 필요/철회 상태는 NULL로 삭제한다.
+      // 전화번호 관련 필드 자체가 없는 응답에서만 기존 값을 보존한다.
       const { error: memberUpdateError } = await supabaseAdmin
         .from("member")
         .update({
           nickname,
           profile_image: profileImage,
-          ...(phone ? { phone } : {}),
+          ...(shouldUpdatePhone ? { phone } : {}),
         })
         .eq("id", userId);
 

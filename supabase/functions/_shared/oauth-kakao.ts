@@ -162,6 +162,8 @@ export interface KakaoUserNormalized {
   profileImage: string | null;
   /** 국내 휴대전화 표기(숫자만, 예: 01012345678). 미동의/국외/비정상이면 null. */
   phone: string | null;
+  /** 기존 member.phone을 이번 로그인 응답으로 갱신(또는 삭제)해야 하는지 */
+  shouldUpdatePhone: boolean;
 }
 
 /**
@@ -218,6 +220,9 @@ export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
   const hasVerifiedEmail = user.kakao_account?.email &&
     user.kakao_account.is_email_verified &&
     user.kakao_account.is_email_valid;
+  const hasPhoneField = typeof user.kakao_account?.phone_number === "string";
+  const phoneNeedsAgreement =
+    user.kakao_account?.phone_number_needs_agreement === true;
 
   return {
     providerId: String(user.id),
@@ -231,5 +236,8 @@ export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
       user.properties?.profile_image ??
       null,
     phone: normalizeKoreanMobilePhone(user.kakao_account?.phone_number),
+    // 최신 번호가 왔으면 교체하고, 명시적 미동의/동의철회 상태면 NULL로 지운다.
+    // 두 필드가 모두 없으면 비즈앱 미승인/구형 응답일 수 있어 기존 값을 보존한다.
+    shouldUpdatePhone: hasPhoneField || phoneNeedsAgreement,
   };
 }

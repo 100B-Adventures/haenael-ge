@@ -96,6 +96,20 @@ Deno.test("normalizeKakaoUser — phone_number를 국내 표기로 함께 정규
     kakao_account: { phone_number: "+82 10-2468-1357" },
   });
   assertEquals(result.phone, "01024681357");
+  assertEquals(result.shouldUpdatePhone, true);
+});
+
+Deno.test("normalizeKakaoUser — 전화번호 동의 철회는 기존 값을 NULL로 지우도록 표시", () => {
+  const revoked = normalizeKakaoUser({
+    id: 20260803,
+    kakao_account: { phone_number_needs_agreement: true },
+  });
+  const unavailable = normalizeKakaoUser({ id: 20260804 });
+
+  assertEquals(revoked.phone, null);
+  assertEquals(revoked.shouldUpdatePhone, true);
+  assertEquals(unavailable.phone, null);
+  assertEquals(unavailable.shouldUpdatePhone, false);
 });
 
 // ─── isSyntheticKakaoEmail — 보안 결함3 회귀 테스트 ──────────────────────────
