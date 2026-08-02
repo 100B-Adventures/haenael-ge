@@ -1,5 +1,25 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-02 — 카카오 알림톡 발송 배선
+
+**상태: 🟡 코드·단위 회귀 통과 / ❌ 로컬 DB·실발송 미검증**
+
+- 증상: 응원 결제가 확정돼도 받는 분에게 카카오 알림톡이 발송되지 않는다.
+- 확인된 원인: `member`에 전화번호 저장 컬럼이 없고, `toss-confirm`이 결제 확정 RPC 성공 뒤 `notify` Edge Function을 호출하지 않는다.
+- 범위: 신규 마이그레이션, 카카오 전화번호 정규화·갱신, 결제 후 비치명적 알림 호출, 전화번호/환경변수 부재 시 기존 인앱 알림 폴백, 회귀 테스트. 프로덕션 DB·카카오/솔라피 콘솔은 제외한다.
+- 구현 결과:
+  - `member.phone` 신규 마이그레이션 + 국내 휴대전화 CHECK + 기존 본인 RLS/service_role 경계 유지.
+  - 카카오 `phone_number` 국내 표기 정규화. 최신 번호는 교체, 명시적 동의 철회는 NULL 삭제, 전화번호 필드 자체가 없는 응답은 기존 값 보존.
+  - 결제 확정 RPC 성공 뒤 트랜잭션 밖에서만 `notify` 호출. 번호/설정/조회/호출 실패는 결제 응답을 바꾸지 않고 기존 INAPP으로 강등.
+  - 템플릿 `CHEER_RECEIVED_V1` 고정, notify payload 금액·클로버 변수 0개.
+- 실행 증거:
+  - Deno 전체 단위 회귀 **40/40 PASS**, `deno check` Edge Function 엔트리 **3/3 PASS**, fmt **9/9 PASS**.
+  - Web Vitest **192/192 PASS**.
+  - Web production build: webpack compile **1/1 PASS** 후 기존 `/me/page.tsx`의 비표준 page export(`formatCheerRelativeTime`) 타입 오류로 최종 FAIL. 이번 diff가 수정한 파일이 아니므로 별도 기존 결함으로 유지.
+  - 신규 pgTAP **15 assertions 작성**(phone/RLS 8 + 번호 없는 결제 INAPP 폴백 7), 실행 **0건**. 샌드박스가 로컬 Postgres `127.0.0.1:54322` 연결을 `operation not permitted`로 차단해 `migration up --local`과 `supabase test db`가 DB 접속 전 종료됐다.
+- 미검증: 로컬 마이그레이션 실제 적용, pgTAP 15개 실행, 카카오 실로그인 phone payload, 솔라피 실발송, 프로덕션 DB/배포. 프로덕션 DB에는 변경을 적용하지 않았다.
+- 해제 조건: 로컬 DB 접근 가능한 QA 세션에서 신규 migration 1개 적용 + 전체 pgTAP PASS, 카카오/솔라피 계정 준비 후 실결제 1건으로 ALIMTALK 수신과 실패 시 INAPP 유지 직접 관찰.
+
 ## 2026-07-27 — 결제·환전 전체 플로우 오픈 판정
 
 **판정: ❌ NG / 실결제 오픈 NO-GO**
