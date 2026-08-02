@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   createServiceRoleClient,
-  getCashoutAccountEncryptionKey,
+  getCashoutAccountEncryptionConfig,
+  getCashoutAccountFingerprintKey,
   isCashoutEnabled,
 } from "@/lib/supabase/service";
 
@@ -60,8 +61,11 @@ const PUBLIC_ERRORS: Record<string, string> = {
   invalid_account_holder: "예금주명을 정확히 입력해주세요.",
   invalid_request_key: "신청 정보를 새로고침한 뒤 다시 시도해주세요.",
   cashout_encryption_unavailable: "환전 신청 서버를 점검하고 있어요.",
+  cashout_fingerprint_unavailable: "환전 신청 서버를 점검하고 있어요.",
   unauthorized: "로그인 후 다시 시도해주세요.",
 };
+
+const FALLBACK_ERROR_CODE = "cashout_request_failed";
 
 function fail(code: string): CreateCashoutResult {
   return {
@@ -109,6 +113,7 @@ export async function createCashoutRequest(
 
   try {
     const serviceClient = createServiceRoleClient();
+    const encryption = getCashoutAccountEncryptionConfig();
     const { data, error } = await serviceClient.rpc(
       "create_cashout_request" as never,
       {
@@ -118,16 +123,21 @@ export async function createCashoutRequest(
         p_account_no: accountNo,
         p_account_holder: accountHolder,
         p_request_key: requestKey,
-        p_account_key: getCashoutAccountEncryptionKey(),
+        p_account_key_version: encryption.activeVersion,
+        p_account_key: encryption.activeKey,
+        p_account_fingerprint_key: getCashoutAccountFingerprintKey(),
       } as never,
     );
 
     const row = (data as CashoutRow[] | null)?.[0];
     if (error || !row) {
-      const code = error?.message ?? "cashout_request_failed";
+      const rawCode = error?.message;
+      const code = rawCode && Object.prototype.hasOwnProperty.call(PUBLIC_ERRORS, rawCode)
+        ? rawCode
+        : FALLBACK_ERROR_CODE;
       console.error("[cashout-action] RPC failed", {
         dbCode: error?.code ?? "unknown",
-        publicCode: PUBLIC_ERRORS[code] ? code : "cashout_request_failed",
+        publicCode: code,
       });
       return fail(code);
     }
@@ -151,7 +161,10 @@ export async function createCashoutRequest(
         isReplay: row.is_replay,
       },
     };
-  } catch {
-    return fail("cashout_encryption_unavailable");
+  } catch (error) {
+    const rawCode = error instanceof Error ? error.message : null;
+    return fail(rawCode && Object.prototype.hasOwnProperty.call(PUBLIC_ERRORS, rawCode)
+      ? rawCode
+      : FALLBACK_ERROR_CODE);
   }
 }

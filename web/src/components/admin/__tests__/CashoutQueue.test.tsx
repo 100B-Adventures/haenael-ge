@@ -71,7 +71,10 @@ describe("CashoutQueue", () => {
     render(<CashoutQueue cashouts={[cashout]} />);
 
     fireEvent.click(screen.getAllByRole("button", { name: "지급 완료" })[0]);
-    const confirmButton = screen.getByRole("button", { name: "지급 완료 확정" });
+    const confirmButton = await screen.findByRole("button", { name: "지급 완료 확정" });
+    expect(revealCashoutAccount).toHaveBeenCalledWith(cashout.id);
+    expect(screen.getByRole("dialog")).toHaveTextContent("KB 123456789012");
+    expect(screen.getByRole("dialog")).not.toHaveTextContent(cashout.account_masked!);
     expect(confirmButton).toBeDisabled();
 
     fireEvent.click(screen.getByRole("checkbox"));

@@ -12,7 +12,12 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 vi.mock("@/lib/supabase/service", () => ({
   createServiceRoleClient: vi.fn(() => ({ rpc: serviceRpc })),
-  getCashoutAccountEncryptionKey: vi.fn(() => "k".repeat(40)),
+  getCashoutAccountEncryptionConfig: vi.fn(() => ({
+    activeVersion: 2,
+    activeKey: "k".repeat(40),
+    keys: { "1": "o".repeat(40), "2": "k".repeat(40) },
+  })),
+  getCashoutAccountFingerprintKey: vi.fn(() => "f".repeat(40)),
   isCashoutEnabled: vi.fn(() => true),
 }));
 
@@ -55,7 +60,9 @@ describe("createCashoutRequest Server Action", () => {
       p_account_no: "123456789012",
       p_account_holder: "홍길동 님",
       p_request_key: "cashout_action_01",
+      p_account_key_version: 2,
       p_account_key: "k".repeat(40),
+      p_account_fingerprint_key: "f".repeat(40),
     });
     expect(revalidatePath).toHaveBeenCalledWith("/cashout/status");
   });
@@ -71,5 +78,23 @@ describe("createCashoutRequest Server Action", () => {
     });
     expect(result.ok).toBe(false);
     expect(serviceRpc).not.toHaveBeenCalled();
+  });
+
+  it("허용 목록 밖 DB 오류 원문은 고정 코드로 치환한다", async () => {
+    serviceRpc.mockResolvedValueOnce({
+      data: null,
+      error: { code: "XX000", message: "relation secret_internal_table does not exist" },
+    });
+
+    const result = await createCashoutRequest({
+      cloverAmount: 30,
+      bankCode: "KB",
+      accountNo: "123456789012",
+      accountHolder: "홍길동",
+      requestKey: "cashout_action_03",
+    });
+
+    expect(result).toMatchObject({ ok: false, code: "cashout_request_failed" });
+    expect(result.ok ? "" : result.message).not.toContain("secret_internal_table");
   });
 });

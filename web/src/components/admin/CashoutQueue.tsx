@@ -14,7 +14,7 @@ export type AdminCashout = {
   withholding_krw: number;
   net_krw: number;
   bank_code: string | null;
-  account_masked: string;
+  account_masked: string | null;
   account_holder: string | null;
   status: string;
   processing_note: string | null;
@@ -24,7 +24,11 @@ export type AdminCashout = {
 };
 
 type Filter = "REQUESTED" | "ALL" | "PAID" | "REJECTED";
-type ModalState = { cashout: AdminCashout; action: "paid" | "rejected" } | null;
+type ModalState = {
+  cashout: AdminCashout;
+  action: "paid" | "rejected";
+  accountNo?: string;
+} | null;
 
 const dateTimeFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "2-digit",
@@ -97,7 +101,25 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
   function openModal(cashout: AdminCashout, action: "paid" | "rejected") {
     setErrors((current) => ({ ...current, [cashout.id]: "" }));
     setPaidConfirmed(false);
-    setModal({ cashout, action });
+    if (action === "rejected") {
+      setModal({ cashout, action });
+      return;
+    }
+
+    // 지급 확인 모달을 열 때마다 서버에서 전체 계좌를 다시 읽는다. 이 성공 열람이
+    // DB 감사로그에 남고, 같은 관리자의 10분 이내 로그만 PAID 전이를 허용한다.
+    startTransition(async () => {
+      const result = await revealCashoutAccount(cashout.id);
+      if (!result.ok || !result.accountNo) {
+        setErrors((current) => ({
+          ...current,
+          [cashout.id]: result.ok ? "계좌번호가 없습니다." : result.message,
+        }));
+        return;
+      }
+      setRevealedAccounts((current) => ({ ...current, [cashout.id]: result.accountNo! }));
+      setModal({ cashout, action, accountNo: result.accountNo });
+    });
   }
 
   function processSelected() {
@@ -209,7 +231,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
             <h3 id="cashout-modal-title" className="text-[17px] font-black">이 건을 <span className={modal.action === "paid" ? "text-[#14613A]" : "text-[#D9483B]"}>{modal.action === "paid" ? "지급 완료" : "반려"}</span>로 확정할까요?</h3>
             <div className="mt-4 rounded-[12px] bg-[#F4EFE6] p-4 text-[12.5px]">
               <div className="flex justify-between py-1"><span>신청자</span><strong>{modal.cashout.nickname} ({modal.cashout.account_holder})</strong></div>
-              <div className="flex justify-between gap-4 py-1"><span>입금 계좌</span><strong className="text-right">{modal.cashout.bank_code} {modal.cashout.account_masked}</strong></div>
+              <div className="flex justify-between gap-4 py-1"><span>입금 계좌</span><strong className="text-right">{modal.cashout.bank_code} {modal.action === "paid" ? modal.accountNo : modal.cashout.account_masked}</strong></div>
               <div className="flex justify-between py-1"><span>실지급액</span><strong className="text-[15px] text-[#14613A]">{formatKrw(modal.cashout.net_krw)}</strong></div>
             </div>
             {modal.action === "paid" ? (
