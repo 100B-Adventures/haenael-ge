@@ -45,10 +45,12 @@ VALUES
   ('ca500000-0000-0000-0000-000000000003', 'EARN', 40, 'test', 4, 50),
   ('ca500000-0000-0000-0000-000000000004', 'EARN', 40, 'test', 5, 40);
 
+-- 설정 함수는 앱 역할에 공개하지 않은 내부 토글이다. migration owner 권한에서
+-- 값을 검증한 뒤, 실제 신청 RPC는 아래 service_role 권한으로 검증한다.
+SELECT is(public.cashout_require_kyc(), false, 'W-7: KYC 게이트는 한 줄 설정 함수로 비활성');
+
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
-
-SELECT is(public.cashout_require_kyc(), false, 'W-7: KYC 게이트는 한 줄 설정 함수로 비활성');
 
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
@@ -140,8 +142,22 @@ SELECT is(
 SELECT is(
   (SELECT (account_masked, account_holder, key_version)
    FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
-  ('********9012', '반려 회원', 1::smallint),
+  ('********9012'::text, '반려 회원'::text, 1::smallint),
   'T7: 마스킹은 마지막 4자리만 남기고 key_version=1 저장'
+);
+
+-- 이후 authenticated 관리자 역할은 RLS상 타인의 cashout_request를 직접 SELECT할
+-- 수 없다. service_role 신청 구간에서 ID를 트랜잭션 로컬 설정에 고정해, 관리자
+-- RPC 인자 조회가 RLS 결과(NULL)에 의존하지 않게 한다.
+SELECT set_config(
+  'test.cashout_paid_request_id',
+  (SELECT id::text FROM public.cashout_request WHERE request_key='cashout-t4-replay'),
+  true
+);
+SELECT set_config(
+  'test.cashout_rejected_request_id',
+  (SELECT id::text FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+  true
 );
 
 RESET ROLE;
@@ -180,24 +196,42 @@ SELECT ok(
   'W-8: 관리자 목록은 복호화 없이 마스킹만 반환'
 );
 
+-- 계좌 원문 복호화는 운영 계약상 service_role 전용이다. authenticated에
+-- EXECUTE를 추가하지 않고 실제 Server Action과 같은 호출 역할로 전환한다.
+RESET ROLE;
+SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+
 SELECT is(
   (SELECT public.admin_reveal_cashout_account(
-    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+    current_setting('test.cashout_rejected_request_id')::bigint,
     'ca500000-0000-0000-0000-000000000005', repeat('k', 40)
   )),
   '123456789012',
   'T12: 명시적 계좌 열람은 정규화된 원문 1건 반환'
 );
+
+-- 감사로그 테이블은 service_role에도 직접 공개하지 않는다. 함수가 남긴 행은
+-- migration owner 컨텍스트에서만 검증해 운영 ACL을 넓히지 않는다.
+RESET ROLE;
 SELECT is(
   (SELECT count(*)::integer FROM public.cashout_account_access_log
-   WHERE request_id=(SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal')),
+   WHERE request_id=current_setting('test.cashout_rejected_request_id')::bigint),
   1,
   'T12: 계좌 열람 1회마다 감사 로그 1행'
 );
 
+-- 목록·지급·반려는 authenticated 관리자 JWT 전용 계약으로 복귀한다.
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000005"}',
+  true
+);
+
 SELECT is(
   (SELECT status::text FROM public.admin_mark_cashout_paid(
-    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t4-replay'),
+    current_setting('test.cashout_paid_request_id')::bigint,
     '은행 송금 완료'
   )),
   'PAID',
@@ -205,30 +239,45 @@ SELECT is(
 );
 SELECT throws_ok(
   $$SELECT * FROM public.admin_mark_cashout_paid(
-    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t4-replay'),
+    current_setting('test.cashout_paid_request_id')::bigint,
     '중복 송금 시도'
   )$$,
   '23505', 'cashout_already_paid',
   'T9: 지급완료 2회차 차단'
 );
+
+-- 원장 테이블은 authenticated 관리자에게도 직접 공개하지 않는다. 처리 RPC를
+-- 검증한 뒤 service_role로 전환해 정확히 한 번 기록됐는지만 확인한다.
+RESET ROLE;
+SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+
 SELECT is(
   (SELECT count(*)::integer FROM public.clover_ledger
    WHERE entry_type='CASHOUT_SETTLED'
-     AND ref_id=(SELECT id FROM public.cashout_request WHERE request_key='cashout-t4-replay')),
+     AND ref_id=current_setting('test.cashout_paid_request_id')::bigint),
   1,
   'T9: CASHOUT_SETTLED는 정확히 1건'
 );
 
+RESET ROLE;
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000005"}',
+  true
+);
+
 SELECT throws_ok(
   $$SELECT * FROM public.admin_reject_cashout(
-    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'), ''
+    current_setting('test.cashout_rejected_request_id')::bigint, ''
   )$$,
   '22023', 'processing_note_required',
   'T11: 반려 note 미입력 차단'
 );
 SELECT is(
   (SELECT status::text FROM public.admin_reject_cashout(
-    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+    current_setting('test.cashout_rejected_request_id')::bigint,
     '예금주 불일치'
   )),
   'REJECTED',
@@ -236,16 +285,21 @@ SELECT is(
 );
 SELECT throws_ok(
   $$SELECT * FROM public.admin_reject_cashout(
-    (SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
+    current_setting('test.cashout_rejected_request_id')::bigint,
     '중복 반려 시도'
   )$$,
   '55000', 'invalid_cashout_status',
   'T10: 반려 2회차 차단'
 );
+
+RESET ROLE;
+SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+
 SELECT is(
   (SELECT count(*)::integer FROM public.clover_ledger
    WHERE entry_type='CASHOUT_REVERSAL'
-     AND ref_id=(SELECT id FROM public.cashout_request WHERE request_key='cashout-t7-normal')),
+     AND ref_id=current_setting('test.cashout_rejected_request_id')::bigint),
   1,
   'T10: CASHOUT_REVERSAL은 정확히 1건'
 );
@@ -256,6 +310,8 @@ SELECT is(
   'T10: 반려 잔액은 정확히 1회만 복원'
 );
 
+RESET ROLE;
+SET LOCAL ROLE authenticated;
 SELECT set_config(
   'request.jwt.claims',
   '{"role":"authenticated","sub":"ca500000-0000-0000-0000-000000000003"}',

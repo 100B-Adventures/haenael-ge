@@ -4,6 +4,17 @@
 
 **판정: ❌ NG 유지 / web·구 Edge 진입점은 🔧 전환, DB 상태전이는 미검증**
 
+- 2026-08-02 관리자 pgTAP 후반부 일괄 보정: `admin_reveal_cashout_account`는 운영 계약대로 `service_role`에서 호출하고, 목록·지급·반려는 `authenticated` 관리자 JWT로 복귀시켰다. `authenticated` 관리자가 RLS로 타인 `cashout_request`를 직접 조회하던 RPC 인자와 원장 검증도 제거했다. 신청 시 service_role이 두 request id를 트랜잭션 로컬 설정에 캡처하고, 상태 전이는 관리자 JWT, 원장·잔액은 service_role, 비공개 감사로그는 migration owner가 각각 검증한다. 앱 역할의 운영 GRANT는 넓히지 않았다.
+- 최종 직접 실행: 확장 설치와 개별 pgTAP 모두 `127.0.0.1:54322 ... Operation not permitted`로 SQL 실행 전 종료(`exit 2`). 이어 `DO_NOT_TRACK=1 supabase db reset`은 Docker 소켓 `operation not permitted`(`exit 1`), `DO_NOT_TRACK=1 supabase test db`는 `LegacyDbConnectError`(`exit 1`). 따라서 요청 수치 `cashout_manual 31/31`과 나머지 6파일 ok는 여전히 **미검증**이며 NG를 해제하지 않는다.
+- 2026-08-02 pgTAP 147행 후속 보정: `is(record, record)`의 기대 레코드 문자열 2개가 `unknown`으로 남아 실제 컬럼 `text`와 비교를 중단했다. `account_masked`·`account_holder`의 기대값을 모두 `::text`로 고정했고 `key_version`의 기존 `::smallint`는 유지했다.
+- 실행 차단 증거: 지시된 `psql` 확장 설치·개별 테스트는 `127.0.0.1:54322 ... Operation not permitted`, Unix socket은 `Operation not permitted`, Docker socket은 `connect: operation not permitted`로 SQL 실행 전 차단됐다. 요청된 최종 명령도 `supabase db reset` **exit 1**, `supabase test db` **exit 1 (`LegacyDbConnectError`)**이다. 따라서 ERROR 0줄·`cashout_manual 31/31`·나머지 6파일 ok는 **미검증**이며 NG를 해제하지 않는다.
+- 2026-08-02 로컬 DB 후속 실패 2건: `cashout_manual.test.sql`은 앱 역할에 실행권한이 없는 내부 토글 `cashout_require_kyc()`를 `service_role`로 직접 호출해 31건 전체가 시작 전 중단됐고, `update_goal.test.sql` UG6은 비소유자 RLS가 검증용 `SELECT`도 숨겨 실제 저장값 대신 NULL을 비교했다.
+- 🔧 테스트 수정: KYC 토글 값은 migration owner 권한에서 확인한 뒤 T1~T14 실제 RPC는 종전 service/authenticated 역할로 실행한다. 목표 fixture는 고정 ID로 비소유 RPC에 전달해 UG5가 실제 타인 행을 겨냥하게 했고, UG6 저장값은 owner 권한에서 확인한다. 계약 assertion 수는 31·12로 유지했다.
+- 2026-08-02 추가 근본원인·🔧 수정: `20260728010000_cashout_manual_payout.sql:172`의 `pg_catalog.normalize(..., NFKC)`가 PostgreSQL의 특수 `normalize` 문법을 깨뜨려 `42703 column nfkc does not exist`를 발생시켰다. 저장소 내 동일 패턴은 이 1건뿐이며, `SET search_path = ''`를 유지한 채 암묵적 `pg_catalog` 탐색이 적용되도록 `normalize(..., NFKC)`로 한정자만 제거했다.
+- 후속 실행 차단: 이 Codex 샌드박스에서 `DO_NOT_TRACK=1 supabase test db`는 `LegacyDbConnectError`, Docker socket·기존 PostgreSQL socket은 `operation not permitted`, 독립 `initdb`는 `shmget ... operation not permitted`로 DB 접속 전에 차단됐다. 따라서 31/31·12/12와 전체 무회귀는 아직 **미검증**이며 NG를 해제하지 않는다.
+- 2026-08-02 잔여 실에러: 정상 신청 경로의 `clover_ledger` INSERT가 기존 AFTER INSERT 트리거 `sync_clover_balance()`를 호출했고, 호출자의 빈 `search_path`를 상속한 트리거가 한정되지 않은 `clover_balance`를 찾지 못해 `relation clover_balance does not exist`로 중단됐다. 앞선 `throws_ok` 3건은 INSERT 전 예외라 이 결함을 가렸다.
+- 🔧 근본 수정: 수동환전 migration에서 `public.sync_clover_balance()`를 `CREATE OR REPLACE`하고 `SET search_path = ''`를 고정했다. 내부 영속 객체는 `public.clover_balance`, 내장 함수는 `pg_catalog.now()`로 전부 한정해 수동환전뿐 아니라 기존 모든 ledger INSERT 호출자의 search path와 분리했다.
+- fresh 검증 시도: `DO_NOT_TRACK=1 supabase db reset`은 Docker socket `operation not permitted`, 이어 `DO_NOT_TRACK=1 supabase test db`는 `LegacyDbConnectError`로 테스트 실행 전 차단됐다. 정적 plan은 cashout 31 + 나머지 6파일 157 = 전체 188 assertion이나, 실행 수치가 아니므로 **31/31·6파일 ok는 미검증**이고 NG를 유지한다.
 - 범위: `cashout-manual-account-engdesign-decisions-v1-opus5.md` v1.2의 W-1~W-12, 수동환전 신청 Server Action, 관리자 지급·반려 상태전이, 경계 테스트 T1~T15.
 - 근본원인: DB migration은 v1.2 계약으로 교체됐지만 web 신청 폼·관리자 페이지가 구 Edge Function/전건 복호화 RPC/`p_actor_id` 계약에 남아 있어 호출 체인이 서로 달랐다.
 - 🔧 전환한 범위: 신청 폼을 인증된 Server Action 1개로 고정, Edge Function 계좌 경로 410 폐기, 관리자 목록 마스킹 전용, 지급·반려를 `auth.uid()` RPC로 교체, 상태·이력·마이페이지 HOLD 표시 연결, Vercel Preview에서 암호화 키 사용 거부.
