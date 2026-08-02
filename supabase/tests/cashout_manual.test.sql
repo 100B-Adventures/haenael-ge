@@ -55,7 +55,7 @@ SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000001', 29, 'KB', repeat('1', 12),
-    '미달회원', 'cashout-t1-below', repeat('k', 40)
+    '미달회원', 'cashout-t1-below', 1::smallint, repeat('k', 40), repeat('f', 40)
   )$$,
   '22023', 'cashout_below_minimum',
   'T1: 총 29클로버 신청은 cashout_below_minimum'
@@ -64,7 +64,7 @@ SELECT throws_ok(
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000002', 30, 'KB', repeat('2', 12),
-    '웰컴회원', 'cashout-t2-welcome', repeat('k', 40)
+    '웰컴회원', 'cashout-t2-welcome', 1::smallint, repeat('k', 40), repeat('f', 40)
   )$$,
   '22023', 'cashout_insufficient_balance',
   'T2: 총 30이 전부 웰컴이면 payable=0으로 거부'
@@ -73,7 +73,7 @@ SELECT throws_ok(
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000003', 41, 'KB', repeat('3', 12),
-    '지급회원', 'cashout-t3-over', repeat('k', 40)
+    '지급회원', 'cashout-t3-over', 1::smallint, repeat('k', 40), repeat('f', 40)
   )$$,
   '22023', 'cashout_insufficient_balance',
   'T3: clover_eligibility payable=40 초과 요청은 거부'
@@ -82,7 +82,7 @@ SELECT throws_ok(
 SELECT is(
   (SELECT status::text FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
-    '지급회원', 'cashout-t4-replay', repeat('k', 40)
+    '지급회원', 'cashout-t4-replay', 1::smallint, repeat('k', 40), repeat('f', 40)
   )),
   'REQUESTED',
   'W-7: KYC 행이 없어도 현재 계약에서는 신청 성공'
@@ -98,7 +98,7 @@ SELECT is(
 SELECT is(
   (SELECT is_replay FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
-    '지급회원', 'cashout-t4-replay', repeat('k', 40)
+    '지급회원', 'cashout-t4-replay', 1::smallint, repeat('k', 40), repeat('f', 40)
   )),
   true,
   'T4: 같은 request_key와 입력은 is_replay=true'
@@ -115,7 +115,7 @@ SELECT is(
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('9', 12),
-    '지급회원', 'cashout-t4-replay', repeat('k', 40)
+    '지급회원', 'cashout-t4-replay', 1::smallint, repeat('k', 40), repeat('f', 40)
   )$$,
   '22023', 'request_key_conflict',
   'T5: 같은 request_key에 다른 계좌는 conflict'
@@ -124,7 +124,7 @@ SELECT throws_ok(
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000003', 30, 'KB', repeat('3', 12),
-    '지급회원', 'cashout-t6-second', repeat('k', 40)
+    '지급회원', 'cashout-t6-second', 1::smallint, repeat('k', 40), repeat('f', 40)
   )$$,
   '55000', 'cashout_already_requested',
   'T6: 진행 중 신청이 있으면 새 신청 차단'
@@ -133,7 +133,8 @@ SELECT throws_ok(
 SELECT is(
   (SELECT status::text FROM public.create_cashout_request(
     'ca500000-0000-0000-0000-000000000004', 30, 'SHINHAN', '123-456 78-9012',
-    '  반려   회원  ', 'cashout-t7-normal', repeat('k', 40)
+    '  반려   회원  ', 'cashout-t7-normal', 1::smallint,
+    repeat('k', 40), repeat('f', 40)
   )),
   'REQUESTED',
   'T7: 계좌 하이픈·공백과 예금주 공백을 서버가 정규화'
@@ -142,8 +143,8 @@ SELECT is(
 SELECT is(
   (SELECT (account_masked, account_holder, key_version)
    FROM public.cashout_request WHERE request_key='cashout-t7-normal'),
-  ('********9012'::text, '반려 회원'::text, 1::smallint),
-  'T7: 마스킹은 마지막 4자리만 남기고 key_version=1 저장'
+  ('••••••9012'::text, '반려 회원'::text, 1::smallint),
+  'T7: 마스킹은 고정 길이로 마지막 4자리만 남기고 key_version=1 저장'
 );
 
 -- 이후 authenticated 관리자 역할은 RLS상 타인의 cashout_request를 직접 SELECT할
@@ -205,10 +206,22 @@ SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
 SELECT is(
   (SELECT public.admin_reveal_cashout_account(
     current_setting('test.cashout_rejected_request_id')::bigint,
-    'ca500000-0000-0000-0000-000000000005', repeat('k', 40)
+    'ca500000-0000-0000-0000-000000000005',
+    jsonb_build_object('1', repeat('k', 40))
   )),
   '123456789012',
   'T12: 명시적 계좌 열람은 정규화된 원문 1건 반환'
+);
+
+-- 지급완료 대상도 같은 관리자가 최근 성공 열람한 감사기록을 갖춰야 한다.
+SELECT set_config(
+  'test.cashout_paid_account',
+  public.admin_reveal_cashout_account(
+    current_setting('test.cashout_paid_request_id')::bigint,
+    'ca500000-0000-0000-0000-000000000005',
+    jsonb_build_object('1', repeat('k', 40))
+  ),
+  true
 );
 
 -- 감사로그 테이블은 service_role에도 직접 공개하지 않는다. 함수가 남긴 행은

@@ -6,12 +6,16 @@ DB_URL="${SUPABASE_DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgr
 MEMBER_ID="ca5c0000-0000-0000-0000-000000000001"
 ADMIN_ID="ca5c0000-0000-0000-0000-000000000002"
 REQUEST_KEY="cashout-race-$$"
+ACCOUNT_KEY_VERSION="1"
+ACCOUNT_KEY="kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+ACCOUNT_FINGERPRINT_KEY="ffffffffffffffffffffffffffffffffffffffff"
 WORKDIR="$(mktemp -d)"
 FAIL=0
 
 cleanup() {
   psql "$DB_URL" -v ON_ERROR_STOP=0 -q <<SQL
 DELETE FROM public.clover_ledger WHERE member_id = '${MEMBER_ID}';
+DELETE FROM public.cashout_account_access_log WHERE actor_id = '${ADMIN_ID}';
 DELETE FROM public.cashout_request WHERE member_id = '${MEMBER_ID}';
 DELETE FROM public.admin_member WHERE member_id = '${ADMIN_ID}';
 DELETE FROM public.member WHERE id IN ('${MEMBER_ID}', '${ADMIN_ID}');
@@ -51,7 +55,8 @@ SELECT set_config(
 );
 SELECT * FROM public.create_cashout_request(
   '${MEMBER_ID}', 30, 'KB', repeat('1', 12), '환전레이스',
-  '${REQUEST_KEY}', repeat('k', 40)
+  '${REQUEST_KEY}', '${ACCOUNT_KEY_VERSION}'::smallint,
+  '${ACCOUNT_KEY}', '${ACCOUNT_FINGERPRINT_KEY}'
 );
 COMMIT;
 RESET ROLE;
@@ -59,6 +64,19 @@ SQL
 
 REQUEST_ID=$(psql "$DB_URL" -v ON_ERROR_STOP=1 -q -t -A \
   -c "SELECT id FROM public.cashout_request WHERE request_key = '${REQUEST_KEY}'")
+
+# 실제 운영과 동일하게 같은 관리자의 성공 계좌 열람을 먼저 남긴다.
+psql "$DB_URL" -v ON_ERROR_STOP=1 -q <<SQL
+SET ROLE service_role;
+BEGIN;
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+SELECT public.admin_reveal_cashout_account(
+  ${REQUEST_ID}, '${ADMIN_ID}',
+  jsonb_build_object('${ACCOUNT_KEY_VERSION}', '${ACCOUNT_KEY}')
+);
+COMMIT;
+RESET ROLE;
+SQL
 
 for i in 1 2; do
   (

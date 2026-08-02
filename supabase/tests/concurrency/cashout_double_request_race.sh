@@ -6,6 +6,9 @@ DB_URL="${SUPABASE_DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgr
 MEMBER_ID="ca5d0000-0000-0000-0000-000000000001"
 KEY_A="cashout-race-a-$$"
 KEY_B="cashout-race-b-$$"
+ACCOUNT_KEY_VERSION="1"
+ACCOUNT_KEY="kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+ACCOUNT_FINGERPRINT_KEY="ffffffffffffffffffffffffffffffffffffffff"
 TASK_TMP_DIR="$(mktemp -d)"
 FAIL=0
 
@@ -51,7 +54,8 @@ SELECT set_config(
 );
 SELECT * FROM public.create_cashout_request(
   '${MEMBER_ID}', 30, 'KB', repeat('1', 12), '환전신청레이스',
-  '${REQUEST_KEY}', repeat('k', 40)
+  '${REQUEST_KEY}', '${ACCOUNT_KEY_VERSION}'::smallint,
+  '${ACCOUNT_KEY}', '${ACCOUNT_FINGERPRINT_KEY}'
 );
 COMMIT;
 RESET ROLE;
