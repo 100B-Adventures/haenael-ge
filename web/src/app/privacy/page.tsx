@@ -25,9 +25,39 @@ export default function PrivacyPage() {
       <p className="mb-2 leading-relaxed">회사는 다음과 같은 개인정보를 수집합니다.</p>
       <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
         <li>
-          <strong>카카오 소셜 로그인(회원가입) 시</strong>: 카카오계정
-          이메일, 닉네임, 프로필 이미지, 카카오 고유 식별자(provider id) —
-          카카오가 이용자의 동의를 받아 제공하는 항목에 한해 수집합니다.
+          <strong>카카오 소셜 로그인(회원가입) 시</strong>: 이용자가 카카오
+          로그인 동의 화면에서 동의한 항목에 한해, 카카오로부터 제공받아
+          수집합니다.
+          <ul className="list-disc pl-5 mt-2 space-y-1">
+            <li>
+              <strong>[필수]</strong> 닉네임(profile_nickname), 카카오 고유
+              식별자(provider id) — 회원 식별 및 로그인
+            </li>
+            <li>
+              <strong>[선택]</strong> 프로필 이미지(profile_image) — 프로필
+              표시
+            </li>
+            <li>
+              <strong>[선택]</strong> 카카오계정(이메일)(account_email) —
+              회원 식별 보조 및 서비스 관련 안내
+            </li>
+            <li>
+              <strong>[선택]</strong> 카카오계정(전화번호)(phone_number) —
+              응원 도착·환전 지급 완료 등 서비스 이용에 관한 정보성
+              알림톡(카카오톡 메시지) 발송
+            </li>
+            <li>
+              <strong>[선택]</strong> 연령대(age_range) — 미성년 이용자 구분에
+              따른 환전(정산) 정책 적용 및 통계 분석. 구간 값만 수집하며
+              생년월일 전체는 수집하지 않습니다.
+            </li>
+            <li>
+              <strong>[선택]</strong> 생일(birthday) — 생일 축하 혜택 등
+              이벤트 제공 및 통계 분석
+            </li>
+          </ul>
+          선택 항목에 동의하지 않아도 회원가입 및 서비스의 기본 이용에는
+          제한이 없습니다.
         </li>
         <li>
           <strong>출시 알림 리드 신청 시</strong>: 이메일 또는 인스타그램
@@ -101,6 +131,14 @@ export default function PrivacyPage() {
         <li>부정이용 방지 및 서비스 남용(어뷰징) 차단</li>
         <li>서비스 품질 개선 및 이용 통계 분석</li>
         <li>
+          (활성화 시) 응원 도착·환전 지급 완료 등 서비스 이용에 관한 정보성
+          알림톡 발송 — 광고성 정보는 발송하지 않습니다
+        </li>
+        <li>
+          (활성화 시) 미성년 이용자 구분에 따른 환전(정산) 정책 적용
+        </li>
+        <li>(활성화 시) 생일 축하 혜택 등 이벤트 제공</li>
+        <li>
           (활성화 시) 결제 처리, 결제 관련 분쟁 대응, 클로버 환전 및
           관계법령에 따른 정산·세무 처리
         </li>
@@ -139,6 +177,12 @@ export default function PrivacyPage() {
         회사는 원칙적으로 이용자의 개인정보를 외부에 제공하지 않으며,
         서비스 제공을 위해 아래와 같이 개인정보 처리를 위탁하고 있습니다.
       </p>
+      <p className="mb-2 leading-relaxed">
+        한편 카카오 소셜 로그인은 처리위탁이 아니라, 이용자가 카카오 로그인
+        동의 화면에서 직접 동의한 항목을 회사가 (주)카카오로부터{" "}
+        <strong>제공받는</strong> 것입니다. 제공받는 항목과 목적은 위 1항에
+        기재되어 있습니다.
+      </p>
       <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
         <li>
           <strong>Supabase</strong>(데이터베이스, 인증, 서버 호스팅 — 서울
@@ -150,8 +194,14 @@ export default function PrivacyPage() {
           서비스 구동 — 현재 활성 이용 중
         </li>
         <li>
-          <strong>카카오(Kakao)</strong>(소셜 로그인): 회원가입 및 로그인
-          인증 — 현재 활성 이용 중
+          <strong>(주)카카오</strong>(카카오톡 알림톡 발송): 응원 도착·환전
+          지급 완료 등 정보성 알림 발송을 위한 수신자 전화번호 처리 — 현재{" "}
+          <strong>비활성</strong>, 알림 기능 활성화 시 이용 예정
+        </li>
+        <li>
+          <strong>(주)넥스모어시스템즈(솔라피)</strong>(메시지 발송 대행):
+          알림톡 발송 요청 중계 — 현재 <strong>비활성</strong>, 알림 기능
+          활성화 시 이용 예정
         </li>
         <li>
           <strong>토스페이먼츠(Toss Payments)</strong>(결제 처리): 응원
