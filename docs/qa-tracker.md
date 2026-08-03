@@ -1,5 +1,18 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-02 — update_goal 비소유자 회귀 테스트
+
+**판정: ❌ NG / 원인 확인, 로컬 전체 회귀 재검증 전**
+
+- 증상: `supabase test db` 8개 파일 172건 중 `update_goal.test.sql`의 UG6만 실패하며, 기존 title 조회값이 `NULL`로 관찰된다.
+- 근본원인: 제품 RPC가 아니라 테스트의 RLS 컨텍스트 결함이다. 비소유자 역할에서 slug로 목표 ID를 조회해 RPC에 `NULL`을 전달했고, 거부 뒤 title도 같은 역할로 조회해 RLS에 숨겨진 행을 `NULL`로 오판했다.
+- 수정 방향: 고정 fixture ID로 실제 타인 목표를 호출하고, 거부 뒤 저장값 검증에만 migration owner 역할로 복귀한다. RPC 마이그레이션은 통과 작업트리와 동일하므로 변경하지 않는다.
+- 현재 증거:
+  - **근거 확인** — 수정한 테스트는 `pay-open`에서 12/12 통과한 파일과 diff 0, RPC migration도 양쪽 diff 0.
+  - **근거 확인** — 현재 DB 테스트 8개 파일의 `plan()` 합계는 172건(7+8+20+38+58+12+20+9).
+  - **미검증** — 이 세션의 `supabase db reset`은 Docker socket `operation not permitted`, 네이티브 PostgreSQL 대체 실행은 `shmget` `operation not permitted`로 DB 초기화 전에 중단됐다. 제품/test assertion 실패로 각색하지 않는다.
+- 해제 조건: `DO_NOT_TRACK=1 supabase db reset` 후 `DO_NOT_TRACK=1 supabase test db`에서 8개 파일, 172건 이상 전건 PASS.
+
 ## 2026-08-02 — 카카오 알림톡 발송 배선
 
 **상태: 🟡 코드·단위 회귀 통과 / ❌ 로컬 DB·실발송 미검증**
