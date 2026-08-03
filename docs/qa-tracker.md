@@ -1,5 +1,18 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-03 — `wt-pay-open` 머지 충돌
+
+**판정: 🔧 머지 결함 해소 / 실결제·DB 환전 상태전이는 미검증**
+
+- 증상: `main`의 결제 자유금액·카카오 개인정보/알림 변경과 `wt-pay-open`의 수동환전 보안 변경이 10개 파일에서 충돌해 머지가 중단됐다.
+- 위험: 충돌 한쪽을 통째로 선택하면 결제 금액 검증·멱등/웹훅, 카카오 심사 문구, 계좌 암호화·파기 경로 중 하나가 회귀할 수 있다.
+- 근본원인: 같은 결제·카카오·환전 경계 파일을 두 브랜치가 병렬 수정했고, add/add 파일까지 겹쳤다. Git 자동 머지는 `notify/index.ts`에 동일 `CORS_HEADERS` 선언을 두 번 남겨 충돌 마커 밖 회귀도 만들었다.
+- 해결: 결제 자유금액·금액 2중 대조·멱등·웹훅 재검증·알림 폴백은 main을 유지하고, 수동환전 Server Action·계좌 키링/지문·90일 파기·관리자 감사로그는 `wt-pay-open`을 결합했다. 개인정보처리방침은 카카오 심사 정본을 유지하면서 환전 계좌 암호화·보유 목적을 추가했다.
+- 직접 증거: 정밀 충돌 마커 검색 0, web Vitest **32 files / 200 tests PASS**, `next build --webpack` production build·TypeScript PASS, 관련 Deno **46/46 PASS**, Edge Function entry 6개 `deno check` PASS, Deno fmt·`git diff --check` PASS.
+- 환경 메모: 기본 `npm run build`의 Turbopack은 샌드박스 내부 포트 bind가 거부되어 앱 컴파일 전 중단됐다. 동일 Next production build를 `npm run build -- --webpack`으로 실행해 번들·타입·16개 정적 페이지 생성을 검증했다.
+- DB 시도: 환전 동시성 스크립트 2개 `bash -n` PASS. `DO_NOT_TRACK=1 supabase test db`는 SQL 실행 전 로컬 Postgres 연결 실패(`LegacyDbConnectError`)로 종료돼 pgTAP 수치는 만들지 않았다.
+- 미검증: 실 Toss 테스트키 승인 왕복, 로컬 Supabase migration/pgTAP, 브라우저 신청→관리자 지급·반려 실제 상태전이, 프로덕션 배포.
+
 ## 2026-08-02 — 카카오 알림톡 발송 배선
 
 **상태: 🟡 코드·단위 회귀 통과 / ❌ 로컬 DB·실발송 미검증**
@@ -19,6 +32,29 @@
   - 신규 pgTAP **15 assertions 작성**(phone/RLS 8 + 번호 없는 결제 INAPP 폴백 7), 실행 **0건**. 샌드박스가 로컬 Postgres `127.0.0.1:54322` 연결을 `operation not permitted`로 차단해 `migration up --local`과 `supabase test db`가 DB 접속 전 종료됐다.
 - 미검증: 로컬 마이그레이션 실제 적용, pgTAP 15개 실행, 카카오 실로그인 phone payload, 솔라피 실발송, 프로덕션 DB/배포. 프로덕션 DB에는 변경을 적용하지 않았다.
 - 해제 조건: 로컬 DB 접근 가능한 QA 세션에서 신규 migration 1개 적용 + 전체 pgTAP PASS, 카카오/솔라피 계정 준비 후 실결제 1건으로 ALIMTALK 수신과 실패 시 INAPP 유지 직접 관찰.
+
+## 2026-08-02 — 수동환전 계좌수집 슬라이스
+
+**판정: ❌ NG 유지 / web·구 Edge 진입점은 🔧 전환, DB 상태전이는 미검증**
+
+- 2026-08-02 관리자 pgTAP 후반부 일괄 보정: `admin_reveal_cashout_account`는 운영 계약대로 `service_role`에서 호출하고, 목록·지급·반려는 `authenticated` 관리자 JWT로 복귀시켰다. `authenticated` 관리자가 RLS로 타인 `cashout_request`를 직접 조회하던 RPC 인자와 원장 검증도 제거했다. 신청 시 service_role이 두 request id를 트랜잭션 로컬 설정에 캡처하고, 상태 전이는 관리자 JWT, 원장·잔액은 service_role, 비공개 감사로그는 migration owner가 각각 검증한다. 앱 역할의 운영 GRANT는 넓히지 않았다.
+- 최종 직접 실행: 확장 설치와 개별 pgTAP 모두 `127.0.0.1:54322 ... Operation not permitted`로 SQL 실행 전 종료(`exit 2`). 이어 `DO_NOT_TRACK=1 supabase db reset`은 Docker 소켓 `operation not permitted`(`exit 1`), `DO_NOT_TRACK=1 supabase test db`는 `LegacyDbConnectError`(`exit 1`). 따라서 요청 수치 `cashout_manual 31/31`과 나머지 6파일 ok는 여전히 **미검증**이며 NG를 해제하지 않는다.
+- 2026-08-02 pgTAP 147행 후속 보정: `is(record, record)`의 기대 레코드 문자열 2개가 `unknown`으로 남아 실제 컬럼 `text`와 비교를 중단했다. `account_masked`·`account_holder`의 기대값을 모두 `::text`로 고정했고 `key_version`의 기존 `::smallint`는 유지했다.
+- 실행 차단 증거: 지시된 `psql` 확장 설치·개별 테스트는 `127.0.0.1:54322 ... Operation not permitted`, Unix socket은 `Operation not permitted`, Docker socket은 `connect: operation not permitted`로 SQL 실행 전 차단됐다. 요청된 최종 명령도 `supabase db reset` **exit 1**, `supabase test db` **exit 1 (`LegacyDbConnectError`)**이다. 따라서 ERROR 0줄·`cashout_manual 31/31`·나머지 6파일 ok는 **미검증**이며 NG를 해제하지 않는다.
+- 2026-08-02 로컬 DB 후속 실패 2건: `cashout_manual.test.sql`은 앱 역할에 실행권한이 없는 내부 토글 `cashout_require_kyc()`를 `service_role`로 직접 호출해 31건 전체가 시작 전 중단됐고, `update_goal.test.sql` UG6은 비소유자 RLS가 검증용 `SELECT`도 숨겨 실제 저장값 대신 NULL을 비교했다.
+- 🔧 테스트 수정: KYC 토글 값은 migration owner 권한에서 확인한 뒤 T1~T14 실제 RPC는 종전 service/authenticated 역할로 실행한다. 목표 fixture는 고정 ID로 비소유 RPC에 전달해 UG5가 실제 타인 행을 겨냥하게 했고, UG6 저장값은 owner 권한에서 확인한다. 계약 assertion 수는 31·12로 유지했다.
+- 2026-08-02 추가 근본원인·🔧 수정: `20260728010000_cashout_manual_payout.sql:172`의 `pg_catalog.normalize(..., NFKC)`가 PostgreSQL의 특수 `normalize` 문법을 깨뜨려 `42703 column nfkc does not exist`를 발생시켰다. 저장소 내 동일 패턴은 이 1건뿐이며, `SET search_path = ''`를 유지한 채 암묵적 `pg_catalog` 탐색이 적용되도록 `normalize(..., NFKC)`로 한정자만 제거했다.
+- 후속 실행 차단: 이 Codex 샌드박스에서 `DO_NOT_TRACK=1 supabase test db`는 `LegacyDbConnectError`, Docker socket·기존 PostgreSQL socket은 `operation not permitted`, 독립 `initdb`는 `shmget ... operation not permitted`로 DB 접속 전에 차단됐다. 따라서 31/31·12/12와 전체 무회귀는 아직 **미검증**이며 NG를 해제하지 않는다.
+- 2026-08-02 잔여 실에러: 정상 신청 경로의 `clover_ledger` INSERT가 기존 AFTER INSERT 트리거 `sync_clover_balance()`를 호출했고, 호출자의 빈 `search_path`를 상속한 트리거가 한정되지 않은 `clover_balance`를 찾지 못해 `relation clover_balance does not exist`로 중단됐다. 앞선 `throws_ok` 3건은 INSERT 전 예외라 이 결함을 가렸다.
+- 🔧 근본 수정: 수동환전 migration에서 `public.sync_clover_balance()`를 `CREATE OR REPLACE`하고 `SET search_path = ''`를 고정했다. 내부 영속 객체는 `public.clover_balance`, 내장 함수는 `pg_catalog.now()`로 전부 한정해 수동환전뿐 아니라 기존 모든 ledger INSERT 호출자의 search path와 분리했다.
+- fresh 검증 시도: `DO_NOT_TRACK=1 supabase db reset`은 Docker socket `operation not permitted`, 이어 `DO_NOT_TRACK=1 supabase test db`는 `LegacyDbConnectError`로 테스트 실행 전 차단됐다. 정적 plan은 cashout 31 + 나머지 6파일 157 = 전체 188 assertion이나, 실행 수치가 아니므로 **31/31·6파일 ok는 미검증**이고 NG를 유지한다.
+- 범위: `cashout-manual-account-engdesign-decisions-v1-opus5.md` v1.2의 W-1~W-12, 수동환전 신청 Server Action, 관리자 지급·반려 상태전이, 경계 테스트 T1~T15.
+- 근본원인: DB migration은 v1.2 계약으로 교체됐지만 web 신청 폼·관리자 페이지가 구 Edge Function/전건 복호화 RPC/`p_actor_id` 계약에 남아 있어 호출 체인이 서로 달랐다.
+- 🔧 전환한 범위: 신청 폼을 인증된 Server Action 1개로 고정, Edge Function 계좌 경로 410 폐기, 관리자 목록 마스킹 전용, 지급·반려를 `auth.uid()` RPC로 교체, 상태·이력·마이페이지 HOLD 표시 연결, Vercel Preview에서 암호화 키 사용 거부.
+- 직접 증거: web Vitest 32 files / 199 tests PASS, webpack production build PASS(신규 `/cashout/status`·`/cashout/history` 포함), Deno legacy handler 2/2 PASS, Deno check PASS, 빌드 산출물 내 임시 계좌키 문자열 검색 0건, T1~T15 존재·pgTAP plan 31=assertion 31·동시성 스크립트 `bash -n` PASS.
+- 전체 NG 잔여: 샌드박스가 Docker socket·localhost bind를 거부해 migration 실제 적용, pgTAP 31건, T15 병렬 psql, 로그인 브라우저 신청→관리자 지급/반려 실제 상태전이는 실행하지 못했다. 대리지표로 통과 처리하지 않는다.
+- 해제 조건: migration 실제 적용, T1~T15 전건 PASS, web unit/build, 실제 브라우저 신청 경로, 돈 코드 2nd-pass를 직접 관찰하고 증거를 이 항목에 기록한다.
+- 제한: 프로덕션 DB에는 적용하지 않는다. 로컬 파일 작성과 로컬 검증까지만 수행한다.
 
 ## 2026-07-27 — 결제·환전 전체 플로우 오픈 판정
 

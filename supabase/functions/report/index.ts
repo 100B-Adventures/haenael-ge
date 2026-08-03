@@ -14,7 +14,10 @@
 //
 // 응답: { reportId: number }
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import {
+  createClient,
+  type SupabaseClient,
+} from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
 
@@ -58,7 +61,10 @@ function validate(body: unknown): { data: ReportInput } | { error: string } {
   if (b.targetType !== "GOAL" && b.targetType !== "CHEER") {
     return { error: "targetType must be GOAL or CHEER" };
   }
-  if (typeof b.targetId !== "number" || !Number.isInteger(b.targetId) || b.targetId <= 0) {
+  if (
+    typeof b.targetId !== "number" || !Number.isInteger(b.targetId) ||
+    b.targetId <= 0
+  ) {
     return { error: "targetId must be a positive integer" };
   }
   if (typeof b.reason !== "string" || b.reason.trim().length < 1) {
@@ -73,14 +79,18 @@ function validate(body: unknown): { data: ReportInput } | { error: string } {
       targetType: b.targetType as "GOAL" | "CHEER",
       targetId: b.targetId as number,
       reason: (b.reason as string).trim(),
-      reporterRef: typeof b.reporterRef === "string" ? b.reporterRef : undefined,
+      reporterRef: typeof b.reporterRef === "string"
+        ? b.reporterRef
+        : undefined,
     },
   };
 }
 
 // ─── 대상 존재 확인 ─────────────────────────────────────────────────────────
 async function targetExists(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  // ReturnType<typeof createClient>는 제네릭 기본값이 never로 풀려 실제 클라이언트와 안 맞는다(TS2345).
+  // 호출부가 만드는 실제 타입(public 스키마)으로 명시한다.
+  supabaseAdmin: SupabaseClient<any, "public", any>,
   targetType: "GOAL" | "CHEER",
   targetId: number,
 ): Promise<boolean> {
@@ -149,9 +159,17 @@ Deno.serve(async (req: Request) => {
   const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
   // 대상 존재 확인 (이미 삭제된 대상은 신고 불가 — 의미 없음)
-  const exists = await targetExists(supabaseAdmin, input.targetType, input.targetId);
+  const exists = await targetExists(
+    supabaseAdmin,
+    input.targetType,
+    input.targetId,
+  );
   if (!exists) {
-    return err(404, "target_not_found", "신고 대상을 찾을 수 없습니다 (이미 삭제됐거나 존재하지 않음)");
+    return err(
+      404,
+      "target_not_found",
+      "신고 대상을 찾을 수 없습니다 (이미 삭제됐거나 존재하지 않음)",
+    );
   }
 
   // 신고자 uuid 추출 — JWT payload에서 파싱 (sub claim)
@@ -161,7 +179,9 @@ Deno.serve(async (req: Request) => {
     // JWT는 Base64URL 인코딩: header.payload.sig
     const payloadB64 = token.split(".")[1];
     if (payloadB64) {
-      const payload = JSON.parse(atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/")));
+      const payload = JSON.parse(
+        atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/")),
+      );
       // 인증된 유저(카카오/구글/게스트 익명)는 sub=uuid
       // anon role JWT(API key)는 sub 없음
       if (payload.sub && payload.role !== "anon") {

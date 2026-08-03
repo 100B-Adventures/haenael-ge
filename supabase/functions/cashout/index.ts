@@ -1,27 +1,42 @@
-// cashout — POST: 최소환전·PASS만19+·riskHook·HOLD + payout 트리거
-// 슬라이스 #1 scaffold: entry point stub. 실구현은 슬라이스 #8 [강모델·리뷰].
-// architecture: MIN_CASHOUT=30,000원 · PASS KYC · noOpRiskHook(MVP) · HOLD 후 payout invoke.
+// Legacy cashout Edge Function — 수동환전 계좌수집 v1.2에서 폐기된 진입점.
+//
+// 계좌번호와 암호화 키는 Vercel Server Action 한 곳에서만 취급한다(W-12).
+// 이 함수는 기존 배포 URL이 남아 있어도 계좌 body를 읽거나 DB를 호출하지 않는다.
 
 import { withRegionHeader } from "../_shared/region.ts";
 
-Deno.serve(async (_req: Request) => {
-  if (Deno.env.get("CASHOUT_ENABLED") !== "true") {
-    return new Response(
-      JSON.stringify({ error: { code: "cashout_disabled", message: "환전 기능을 준비하고 있습니다." } }),
-      { status: 503, headers: withRegionHeader(new Headers({ "Content-Type": "application/json" })) },
-    );
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+function response(status: number, body: unknown) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: withRegionHeader(
+      new Headers({ "Content-Type": "application/json", ...CORS_HEADERS }),
+    ),
+  });
+}
+
+export function handleCashoutRequest(req: Request) {
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: withRegionHeader(new Headers(CORS_HEADERS)),
+    });
   }
-  // TODO(slice-8)[강모델·리뷰]:
-  //   1. 최소환전 금액 체크(MIN_CASHOUT_KRW)
-  //   2. kyc_verification PASS 확인(is_adult=true)
-  //   3. noOpRiskHook.evaluate → CLEAR면 진행
-  //   4. clover_ledger HOLD 기입
-  //   5. cashout-payout EF invoke
-  return new Response(
-    JSON.stringify({ error: "Not implemented — 슬라이스 #8 [강모델·리뷰] 에서 구현" }),
-    {
-      status: 501,
-      headers: withRegionHeader(new Headers({ "Content-Type": "application/json" })),
+
+  return response(410, {
+    error: {
+      code: "cashout_server_action_required",
+      message: "웹 환전 화면에서 다시 신청해주세요.",
     },
-  );
-});
+  });
+}
+
+if (import.meta.main) {
+  Deno.serve(handleCashoutRequest);
+}

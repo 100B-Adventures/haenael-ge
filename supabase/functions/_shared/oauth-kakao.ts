@@ -215,7 +215,6 @@ export function normalizeKoreanMobilePhone(phone: unknown): string | null {
 
   return /^01[016789]\d{7,8}$/.test(digits) ? digits : null;
 }
-
 export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
   const hasVerifiedEmail = user.kakao_account?.email &&
     user.kakao_account.is_email_verified &&

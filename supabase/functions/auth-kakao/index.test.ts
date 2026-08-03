@@ -111,7 +111,6 @@ Deno.test("normalizeKakaoUser — 전화번호 동의 철회는 기존 값을 NU
   assertEquals(unavailable.phone, null);
   assertEquals(unavailable.shouldUpdatePhone, false);
 });
-
 // ─── isSyntheticKakaoEmail — 보안 결함3 회귀 테스트 ──────────────────────────
 // (email 충돌 시 real 이메일은 자동연결 거부, synthetic은 허용해야 함)
 

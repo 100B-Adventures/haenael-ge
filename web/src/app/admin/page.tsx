@@ -1,5 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  CashoutQueue,
+  type AdminCashout,
+} from "@/components/admin/CashoutQueue";
 
 export const dynamic = "force-dynamic";
 
@@ -28,25 +32,11 @@ type AdminLedgerEntry = {
   created_at: string;
 };
 
-type AdminCashout = {
-  id: number;
-  member_id: string;
-  nickname: string | null;
-  clover_amount: number;
-  gross_krw: number;
-  fee_krw: number;
-  withholding_krw: number;
-  net_krw: number;
-  status: string;
-  requested_at: string;
-  paid_at: string | null;
-};
-
 type AdminRpcName =
   | "is_admin"
   | "admin_list_members"
   | "admin_list_ledger"
-  | "admin_list_cashouts";
+  | "admin_list_cashouts_v2";
 
 type AdminRpcArgs = { p_limit: number } | undefined;
 
@@ -72,26 +62,12 @@ const ledgerTypeLabels: Record<string, string> = {
   WELCOME_REVERSAL: "웰컴 회수",
 };
 
-const cashoutStatusLabels: Record<string, string> = {
-  REQUESTED: "요청",
-  KYC_PENDING: "본인인증 대기",
-  APPROVED: "승인",
-  PAYOUT_SENT: "지급 요청",
-  PAID: "지급 완료",
-  REJECTED: "거절",
-  FAILED: "실패",
-};
-
 function formatDateTime(value: string | null) {
   return value ? dateTimeFormatter.format(new Date(value)) : "—";
 }
 
 function formatNumber(value: number) {
   return numberFormatter.format(value);
-}
-
-function formatKrw(value: number) {
-  return `${formatNumber(value)}원`;
 }
 
 function shortId(value: string) {
@@ -160,7 +136,7 @@ export default async function AdminPage() {
   const [membersResult, ledgerResult, cashoutsResult] = await Promise.all([
     callAdminRpc<AdminMember[]>("admin_list_members", { p_limit: 100 }),
     callAdminRpc<AdminLedgerEntry[]>("admin_list_ledger", { p_limit: 200 }),
-    callAdminRpc<AdminCashout[]>("admin_list_cashouts", { p_limit: 100 }),
+    callAdminRpc<AdminCashout[]>("admin_list_cashouts_v2", { p_limit: 100 }),
   ]);
 
   if (membersResult.error || ledgerResult.error || cashoutsResult.error) {
@@ -169,6 +145,7 @@ export default async function AdminPage() {
 
   const members = membersResult.data ?? [];
   const ledger = ledgerResult.data ?? [];
+  // W-8: 목록은 authenticated RPC로 마스킹 필드만 읽는다. 복호화는 행별 액션에서만 한다.
   const cashouts = cashoutsResult.data ?? [];
 
   return (
@@ -177,11 +154,11 @@ export default async function AdminPage() {
         <header className="mb-10">
           <p className="text-sm font-extrabold text-primary">해낼게 운영</p>
           <h1 className="mt-2 text-3xl font-black tracking-[-0.04em]">
-            읽기전용 관리자 대시보드
+            관리자 운영 대시보드
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            회원, 클로버 원장, 환전 요청 현황을 조회합니다. 이 화면에서는 어떤 데이터도
-            변경할 수 없습니다.
+            회원과 클로버 원장은 조회만 합니다. 환전 요청은 실제 은행 송금을 마친 뒤
+            지급 완료로 표시하거나, 사유를 남기고 반려할 수 있습니다.
           </p>
         </header>
 
@@ -336,74 +313,10 @@ export default async function AdminPage() {
           <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
             <SectionHeader
               title="환전 요청 큐"
-              description="요청 금액과 처리 상태 · 계좌정보 등 암호화 민감필드 제외"
+              description="계좌는 기본 마스킹 · 실제 송금 후 지급 완료 · 반려 시 클로버 자동 복원"
               count={cashouts.length}
             />
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1240px] border-separate border-spacing-0 text-left text-sm">
-                <caption className="sr-only">환전 요청 목록</caption>
-                <thead>
-                  <tr className="text-xs text-muted-foreground">
-                    <th className="border-b px-4 py-3 font-semibold">요청일</th>
-                    <th className="border-b px-4 py-3 font-semibold">회원</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">클로버</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">총액</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">수수료</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">원천징수</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">실수령</th>
-                    <th className="border-b px-4 py-3 font-semibold">상태</th>
-                    <th className="border-b px-4 py-3 font-semibold">지급일</th>
-                    <th className="border-b px-4 py-3 font-semibold">요청 ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cashouts.length === 0 ? (
-                    <EmptyRow colSpan={10} />
-                  ) : (
-                    cashouts.map((cashout) => (
-                      <tr key={cashout.id} className="hover:bg-muted/40">
-                        <td className="border-b px-4 py-3 whitespace-nowrap">
-                          {formatDateTime(cashout.requested_at)}
-                        </td>
-                        <td className="border-b px-4 py-3">
-                          <p className="font-semibold">{cashout.nickname || "미설정"}</p>
-                          <p
-                            className="mt-0.5 font-mono text-xs text-muted-foreground"
-                            title={cashout.member_id}
-                          >
-                            {shortId(cashout.member_id)}
-                          </p>
-                        </td>
-                        <td className="border-b px-4 py-3 text-right font-semibold">
-                          {formatNumber(cashout.clover_amount)}
-                        </td>
-                        <td className="border-b px-4 py-3 text-right whitespace-nowrap">
-                          {formatKrw(cashout.gross_krw)}
-                        </td>
-                        <td className="border-b px-4 py-3 text-right whitespace-nowrap">
-                          {formatKrw(cashout.fee_krw)}
-                        </td>
-                        <td className="border-b px-4 py-3 text-right whitespace-nowrap">
-                          {formatKrw(cashout.withholding_krw)}
-                        </td>
-                        <td className="border-b px-4 py-3 text-right font-bold whitespace-nowrap">
-                          {formatKrw(cashout.net_krw)}
-                        </td>
-                        <td className="border-b px-4 py-3 whitespace-nowrap">
-                          {cashoutStatusLabels[cashout.status] ?? cashout.status}
-                        </td>
-                        <td className="border-b px-4 py-3 whitespace-nowrap">
-                          {formatDateTime(cashout.paid_at)}
-                        </td>
-                        <td className="border-b px-4 py-3 font-mono text-xs text-muted-foreground">
-                          #{cashout.id}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <CashoutQueue cashouts={cashouts} />
           </section>
         </div>
       </div>

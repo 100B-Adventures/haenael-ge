@@ -85,8 +85,11 @@ export async function handleTossWebhook(
 ): Promise<Response> {
   if (req.method !== "POST") return json(405, { error: "POST only" });
 
-  const suppliedToken = new URL(req.url).pathname.split("/").filter(Boolean).at(-1) ?? "";
-  if (!deps.expectedToken || !constantTimeEqual(suppliedToken, deps.expectedToken)) {
+  const suppliedToken =
+    new URL(req.url).pathname.split("/").filter(Boolean).at(-1) ?? "";
+  if (
+    !deps.expectedToken || !constantTimeEqual(suppliedToken, deps.expectedToken)
+  ) {
     return json(401, { error: "unauthorized" });
   }
 
@@ -105,15 +108,22 @@ export async function handleTossWebhook(
   if (body === null || typeof body !== "object" || Array.isArray(body)) {
     return json(400, { error: "invalid_payload" });
   }
-  if (body.eventType !== "PAYMENT_STATUS_CHANGED" || typeof body.data !== "object" || !body.data) {
+  if (
+    body.eventType !== "PAYMENT_STATUS_CHANGED" ||
+    typeof body.data !== "object" || !body.data
+  ) {
     return json(200, { ignored: true });
   }
 
   const incoming = body.data as Record<string, unknown>;
-  const paymentKey = typeof incoming.paymentKey === "string" ? incoming.paymentKey : "";
+  const paymentKey = typeof incoming.paymentKey === "string"
+    ? incoming.paymentKey
+    : "";
   if (!paymentKey) return json(400, { error: "payment_key_required" });
 
-  if (!deps.supabase || !deps.toss) return json(503, { error: "missing_server_env" });
+  if (!deps.supabase || !deps.toss) {
+    return json(503, { error: "missing_server_env" });
+  }
   const { supabase, toss, sendSlackAlert } = deps;
 
   let payment: TossPaymentResponse;
@@ -129,9 +139,15 @@ export async function handleTossWebhook(
     return json(502, { error: "verification_failed" });
   }
 
-  const incomingOrderId = typeof incoming.orderId === "string" ? incoming.orderId : null;
-  const incomingAmount = typeof incoming.totalAmount === "number" ? incoming.totalAmount : null;
-  const incomingStatus = typeof incoming.status === "string" ? incoming.status : null;
+  const incomingOrderId = typeof incoming.orderId === "string"
+    ? incoming.orderId
+    : null;
+  const incomingAmount = typeof incoming.totalAmount === "number"
+    ? incoming.totalAmount
+    : null;
+  const incomingStatus = typeof incoming.status === "string"
+    ? incoming.status
+    : null;
   if (
     (incomingOrderId !== null && payment.orderId !== incomingOrderId) ||
     (incomingAmount !== null && payment.totalAmount !== incomingAmount) ||
@@ -166,13 +182,18 @@ export async function handleTossWebhook(
       });
       return json(500, { error: "reconcile_failed" });
     }
-  } else if (payment.status === "CANCELED" || payment.status === "PARTIAL_CANCELED") {
+  } else if (
+    payment.status === "CANCELED" || payment.status === "PARTIAL_CANCELED"
+  ) {
     if (payment.status === "PARTIAL_CANCELED") {
       const { error } = await supabase.rpc("record_partial_cancel_review", {
         p_order_id: payment.orderId,
         p_payment_key: payment.paymentKey,
         p_amount_krw: payment.totalAmount,
-        p_detail: { status: payment.status, canceledAt: payment.canceledAt ?? null },
+        p_detail: {
+          status: payment.status,
+          canceledAt: payment.canceledAt ?? null,
+        },
       });
       if (error) return json(500, { error: "partial_cancel_review_failed" });
       await sendSlackAlert({
@@ -187,7 +208,10 @@ export async function handleTossWebhook(
       p_order_id: payment.orderId,
       p_payment_key: payment.paymentKey,
       p_amount_krw: payment.totalAmount,
-      p_detail: { status: payment.status, canceledAt: payment.canceledAt ?? null },
+      p_detail: {
+        status: payment.status,
+        canceledAt: payment.canceledAt ?? null,
+      },
     });
     if (error) {
       console.error("[toss-webhook] cancellation reconcile failed", error.code);
@@ -203,12 +227,15 @@ export async function handleTossWebhook(
     // 불가능할 때 예외 대신 durable risk marker로 수렴하며 review_required=true를
     // 반환한다. 이 경우 Toss는 이미 CANCELED가 확인됐으므로 웹훅은 200으로
     // 정상 종료하되(재시도 무한반복 방지), 수동검토가 필요함을 Slack으로 알린다.
-    const reconcileRow = Array.isArray(data) ? (data[0] as Record<string, unknown> | undefined) : undefined;
+    const reconcileRow = Array.isArray(data)
+      ? (data[0] as Record<string, unknown> | undefined)
+      : undefined;
     if (reconcileRow?.review_required) {
       await sendSlackAlert({
         event: "payment_cancel_balance_insufficient",
         severity: "critical",
-        summary: "Canceled payment could not be reversed — clover balance insufficient, manual reconciliation required",
+        summary:
+          "Canceled payment could not be reversed — clover balance insufficient, manual reconciliation required",
         fields: { orderId: payment.orderId },
       });
       return json(200, { processed: true, reviewRequired: true });

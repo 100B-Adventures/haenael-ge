@@ -12,7 +12,8 @@
 
 # ─── 운영 기능 스위치·알림 ──────────────────────────────────────────────────
 PAYMENTS_ENABLED=false
-CASHOUT_ENABLED=false
+# 수동환전 CASHOUT_ENABLED·계좌 암호화 키링은 Vercel Production 전용이다.
+# Edge Function에는 등록하지 않는다(W-12).
 SLACK_WEBHOOK_URL=
 LEAD_RATE_LIMIT_SALT=
 TOSS_WEBHOOK_TOKEN=
@@ -39,7 +40,7 @@ TOSS_SECRET_KEY=
 PASS_CLIENT_ID=
 PASS_CLIENT_SECRET=
 
-# ─── 지급대행 (cashout-payout EF — 계약·BM 확정 후 채울 것) ─────────────────
+# ─── 지급대행 (다음 단계 — 현재 수동 지급 슬라이스에서는 호출하지 않음) ─────
 # ⛔ 실값 = 법인 계좌·정산주기 D+n 확정 후
 PAYOUT_API_KEY=
 PAYOUT_API_SECRET=

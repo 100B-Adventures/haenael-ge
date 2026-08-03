@@ -16,12 +16,13 @@ import { HomeSeenTracker } from "@/components/goal/HomeSeenTracker";
 import { MyLinkCard } from "@/components/goal/MyLinkCard";
 import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
 import { krwFromClover } from "@/lib/clover";
+import { type CashoutRecord, formatCashoutKrw } from "@/lib/cashout";
 
 // ─── 응원자 행 ─────────────────────────────────────────────────────────────────
 // DESIGN.md §6-(b′)(2026-07-19 회장 결정 B): 본인 한정 개별 클로버 개수 노출.
 // Discreet 유지 장치: 시간순 고정(정렬/랭킹 X) · ₩ 환산 병기 X · 익명도 개수는 표시.
 
-export function formatCheerRelativeTime(createdAt: string, now = Date.now()) {
+function formatCheerRelativeTime(createdAt: string, now = Date.now()) {
   const createdTime = new Date(createdAt).getTime();
   if (!Number.isFinite(createdTime)) return "날짜 미상";
 
@@ -174,6 +175,12 @@ export default async function ReceiverHomePage() {
   const reachedThreshold = eligibility?.reached_threshold ?? false;
   const krwEquivalent = krwFromClover(cloverCount); // 1클로버=1,000원 등가(고정 환산 표기, 실제 환전액 보증 아님)
 
+  // 수동환전 계약 §0-1-7: 홈은 진행 중 1건 또는 최근 종결 1건을 상태 RPC로 읽는다.
+  // account_no_enc는 RPC 반환형에 없어 브라우저/RSC 경계로 넘어오지 않는다.
+  const { data: cashoutStatusRaw } = await supabase.rpc("my_cashout_status" as never);
+  const cashoutStatus = ((((cashoutStatusRaw ?? []) as unknown) as CashoutRecord[])[0]) ?? null;
+  const pendingCashout = cashoutStatus?.status === "REQUESTED" ? cashoutStatus : null;
+
   // cheer_select_goal_owner: 응원 목록 (CONFIRMED + not deleted, 최근 8개)
   // DESIGN.md §6-(b′): 본인 한정 clover_amount 노출. goal.id는 위에서 member_id=user.id로
   // 스코프된 본인 목표이고, RLS cheer_select_goal_owner도 goal.member_id=auth.uid()만 허용 —
@@ -276,10 +283,11 @@ export default async function ReceiverHomePage() {
 
         {/* 클로버 잔액 — 🍀 개수만 (DESIGN.md §6 금액 3층 b) */}
         <div
-          className="flex items-center justify-between rounded-[14px] p-4 mb-3"
+          className="rounded-[14px] mb-3 overflow-hidden"
           style={{ background: "#fff", border: "1px solid #E8E4DC" }}
           data-testid="clover-balance-card"
         >
+          <div className="flex items-center justify-between p-4">
           <div>
             <p className="mb-1" style={{ fontSize: 10.5, color: "#9C968B" }}>
               모인 클로버
@@ -307,21 +315,37 @@ export default async function ReceiverHomePage() {
               ≈{krwEquivalent.toLocaleString("ko-KR")}원 상당
             </p>
           </div>
-          {/* 환전 버튼 — 도달판정(웰컴 포함) 기준. 실제 환전 EF는 kill switch(CASHOUT_ENABLED)로 별도 게이트. */}
-          {/* 환전 페이지 진입은 미달이어도 항상 허용(안내 확인용). 실제 신청은 cashout 페이지에서 도달·kill switch로 게이트. */}
+          {/* 환전 페이지 진입은 미달이어도 항상 허용. 실제 신청은 Server Action의 서버측 CASHOUT_ENABLED와 DB 계약으로 게이트한다. */}
           <Link
-            href="/cashout"
+            href={pendingCashout ? "/cashout/status" : "/cashout"}
             className="rounded-[10px] px-3 py-2 font-bold text-white text-center"
             style={{
-              background: "#1B8A4F",
+              background: pendingCashout ? "#FBF1DD" : "#1B8A4F",
+              color: pendingCashout ? "#B4791F" : "#fff",
               fontSize: 12,
-              opacity: reachedThreshold ? 1 : 0.6,
+              opacity: pendingCashout || reachedThreshold ? 1 : 0.6,
             }}
-            data-testid={reachedThreshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
+            data-testid={pendingCashout ? "cashout-button-pending" : reachedThreshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
           >
-            환전
+            {pendingCashout ? "진행중" : "환전"}
           </Link>
+          </div>
+          {pendingCashout && (
+            <div className="flex items-center justify-between border-t border-dashed border-[#E8E4DC] bg-[#FCFBF8] px-4 py-3" data-testid="cashout-hold-line">
+              <div>
+                <p className="text-[11.5px] text-[#6F6A60]">🔒 환전 진행중 <span className="text-[#9C968B]">(지급되면 사라져요)</span></p>
+                <p className="mt-0.5 text-[10.5px] text-[#9C968B]">{formatCashoutKrw(pendingCashout.net_krw)} 입금 예정</p>
+              </div>
+              <strong className="text-[12.5px] text-[#B4791F]">🍀 {pendingCashout.clover_amount}개</strong>
+            </div>
+          )}
         </div>
+
+        {cashoutStatus && (
+          <Link href="/cashout/history" className="mb-3 flex items-center justify-between rounded-[14px] border border-[#E8E4DC] bg-white px-4 py-3 text-[13px] font-bold text-[#16140F]" data-testid="cashout-history-link">
+            <span>환전 내역</span><span className="text-[11.5px] font-medium text-[#9C968B]">최근 #{cashoutStatus.id} ›</span>
+          </Link>
+        )}
 
         {/* 응원자 수 */}
         <div className="mb-3">

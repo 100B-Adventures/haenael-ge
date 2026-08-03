@@ -266,6 +266,9 @@ Deno.serve(async (req: Request) => {
       // magiclink generateLink는 대상 유저가 이미 존재해야 hashed_token을 만들므로,
       // 이 속성 제거로 기존 동작(기존 유저만 링크 생성) 그대로 유지 — 타입에러(TS2353)만 해소.
       await supabaseAdmin.auth.admin.generateLink({
+        // type "magiclink"은 기존 유저만 대상이라 별도 shouldCreateUser 옵션이 없다
+        // (GenerateLinkOptions는 data/redirectTo만 허용 — TS2353 방지).
+        // 위 3단계에서 auth user 존재를 이미 보장했으므로 옵션 없이 호출한다.
         type: "magiclink",
         email,
       });
