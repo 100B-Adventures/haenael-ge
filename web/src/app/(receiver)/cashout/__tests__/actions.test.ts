@@ -1,14 +1,31 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { callerGetUser, serviceRpc, revalidatePath } = vi.hoisted(() => ({
+const {
+  callerGetUser,
+  callerFrom,
+  callerUpdate,
+  callerEq,
+  callerSelect,
+  callerMaybeSingle,
+  serviceRpc,
+  revalidatePath,
+} = vi.hoisted(() => ({
   callerGetUser: vi.fn(),
+  callerFrom: vi.fn(),
+  callerUpdate: vi.fn(),
+  callerEq: vi.fn(),
+  callerSelect: vi.fn(),
+  callerMaybeSingle: vi.fn(),
   serviceRpc: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({ revalidatePath }));
 vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: vi.fn(async () => ({ auth: { getUser: callerGetUser } })),
+  createServerSupabaseClient: vi.fn(async () => ({
+    auth: { getUser: callerGetUser },
+    from: callerFrom,
+  })),
 }));
 vi.mock("@/lib/supabase/service", () => ({
   createServiceRoleClient: vi.fn(() => ({ rpc: serviceRpc })),
@@ -27,6 +44,11 @@ describe("createCashoutRequest Server Action", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     callerGetUser.mockResolvedValue({ data: { user: { id: "member-uid" } } });
+    callerFrom.mockReturnValue({ update: callerUpdate });
+    callerUpdate.mockReturnValue({ eq: callerEq });
+    callerEq.mockReturnValue({ select: callerSelect });
+    callerSelect.mockReturnValue({ maybeSingle: callerMaybeSingle });
+    callerMaybeSingle.mockResolvedValue({ data: { id: "member-uid" }, error: null });
     serviceRpc.mockResolvedValue({
       data: [{
         cashout_request_id: 71,
@@ -49,10 +71,13 @@ describe("createCashoutRequest Server Action", () => {
       bankCode: " kb ",
       accountNo: "123-456 78-9012",
       accountHolder: "  홍길동   님 ",
+      phone: "010-1234-5678",
       requestKey: "cashout_action_01",
     });
 
     expect(result.ok).toBe(true);
+    expect(callerFrom).toHaveBeenCalledWith("member");
+    expect(callerUpdate).toHaveBeenCalledWith({ phone: "01012345678" });
     expect(serviceRpc).toHaveBeenCalledWith("create_cashout_request", {
       p_member_id: "member-uid",
       p_clover_amount: 30,
@@ -74,6 +99,7 @@ describe("createCashoutRequest Server Action", () => {
       bankCode: "KB",
       accountNo: "123456789012",
       accountHolder: "홍길동",
+      phone: "01012345678",
       requestKey: "cashout_action_02",
     });
     expect(result.ok).toBe(false);
@@ -91,10 +117,26 @@ describe("createCashoutRequest Server Action", () => {
       bankCode: "KB",
       accountNo: "123456789012",
       accountHolder: "홍길동",
+      phone: "01012345678",
       requestKey: "cashout_action_03",
     });
 
     expect(result).toMatchObject({ ok: false, code: "cashout_request_failed" });
     expect(result.ok ? "" : result.message).not.toContain("secret_internal_table");
+  });
+
+  it("전화번호가 없거나 국내 휴대전화 형식이 아니면 저장과 신청 전에 거부한다", async () => {
+    const result = await createCashoutRequest({
+      cloverAmount: 30,
+      bankCode: "KB",
+      accountNo: "123456789012",
+      accountHolder: "홍길동",
+      phone: "02-1234-5678",
+      requestKey: "cashout_action_04",
+    });
+
+    expect(result).toMatchObject({ ok: false, code: "invalid_phone" });
+    expect(callerFrom).not.toHaveBeenCalled();
+    expect(serviceRpc).not.toHaveBeenCalled();
   });
 });

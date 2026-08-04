@@ -37,6 +37,16 @@ describe("/cashout 미달 상태", () => {
         }
         return Promise.resolve({ data: [], error: null });
       }),
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { phone: "01012345678" },
+              error: null,
+            }),
+          })),
+        })),
+      })),
     } as never);
   });
 

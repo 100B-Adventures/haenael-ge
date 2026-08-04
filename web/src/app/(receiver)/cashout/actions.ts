@@ -8,6 +8,7 @@ import {
   getCashoutAccountFingerprintKey,
   isCashoutEnabled,
 } from "@/lib/supabase/service";
+import { normalizeKoreanMobilePhone } from "@/lib/phone";
 
 const BANK_CODE_PATTERN = /^[A-Za-z0-9_-]{2,20}$/;
 const REQUEST_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
@@ -18,6 +19,7 @@ export type CreateCashoutInput = {
   bankCode: string;
   accountNo: string;
   accountHolder: string;
+  phone: string;
   requestKey: string;
 };
 
@@ -59,6 +61,8 @@ const PUBLIC_ERRORS: Record<string, string> = {
   invalid_bank_code: "은행을 다시 선택해주세요.",
   invalid_account_number: "계좌번호를 숫자로 정확히 입력해주세요.",
   invalid_account_holder: "예금주명을 정확히 입력해주세요.",
+  invalid_phone: "전화번호를 숫자로 정확히 입력해주세요.",
+  phone_save_failed: "전화번호를 저장하지 못했어요. 잠시 후 다시 시도해주세요.",
   invalid_request_key: "신청 정보를 새로고침한 뒤 다시 시도해주세요.",
   cashout_encryption_unavailable: "환전 신청 서버를 점검하고 있어요.",
   cashout_fingerprint_unavailable: "환전 신청 서버를 점검하고 있어요.",
@@ -83,9 +87,10 @@ function normalizeInput(input: CreateCashoutInput) {
   const accountHolder = typeof input.accountHolder === "string"
     ? input.accountHolder.normalize("NFKC").trim().replace(/\s+/g, " ")
     : "";
+  const phone = normalizeKoreanMobilePhone(input.phone);
   const requestKey = typeof input.requestKey === "string" ? input.requestKey.trim() : "";
 
-  return { bankCode, accountNo, accountHolder, requestKey };
+  return { bankCode, accountNo, accountHolder, phone, requestKey };
 }
 
 export async function createCashoutRequest(
@@ -100,7 +105,7 @@ export async function createCashoutRequest(
   } = await callerClient.auth.getUser();
   if (!user) return fail("unauthorized");
 
-  const { bankCode, accountNo, accountHolder, requestKey } = normalizeInput(input);
+  const { bankCode, accountNo, accountHolder, phone, requestKey } = normalizeInput(input);
   if (!Number.isSafeInteger(input.cloverAmount) || input.cloverAmount < 1) {
     return fail("cashout_below_minimum");
   }
@@ -109,9 +114,23 @@ export async function createCashoutRequest(
   if (accountHolder.length < 2 || accountHolder.length > 40) {
     return fail("invalid_account_holder");
   }
+  if (!phone) return fail("invalid_phone");
   if (!REQUEST_KEY_PATTERN.test(requestKey)) return fail("invalid_request_key");
 
   try {
+    const { data: updatedMember, error: phoneUpdateError } = await callerClient
+      .from("member")
+      .update({ phone })
+      .eq("id", user.id)
+      .select("id")
+      .maybeSingle();
+    if (phoneUpdateError || !updatedMember) {
+      console.error("[cashout-action] phone update failed", {
+        dbCode: phoneUpdateError?.code ?? "member_not_found",
+      });
+      return fail("phone_save_failed");
+    }
+
     const serviceClient = createServiceRoleClient();
     const encryption = getCashoutAccountEncryptionConfig();
     const { data, error } = await serviceClient.rpc(

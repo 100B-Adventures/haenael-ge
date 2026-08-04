@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Clock3, LoaderCircle, ShieldCheck } from "lucide-react";
 import { createCashoutRequest } from "@/app/(receiver)/cashout/actions";
 import { trackEvent } from "@/lib/analytics";
+import { normalizeKoreanMobilePhone } from "@/lib/phone";
 import {
   CASHOUT_BANKS,
   CASHOUT_STATUS_LABELS,
@@ -21,6 +22,7 @@ type Props = {
   minCashoutClover: number;
   currentCashout: CashoutRecord | null;
   history: CashoutRecord[];
+  initialPhone: string | null;
 };
 
 type Success = {
@@ -45,6 +47,7 @@ export function CashoutRequestForm({
   minCashoutClover,
   currentCashout,
   history,
+  initialPhone,
 }: Props) {
   const [step, setStep] = useState<"form" | "confirm" | "done">("form");
   const [cloverAmount, setCloverAmount] = useState(
@@ -53,6 +56,7 @@ export function CashoutRequestForm({
   const [bankCode, setBankCode] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accountHolder, setAccountHolder] = useState("");
+  const [phone, setPhone] = useState(initialPhone ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [success, setSuccess] = useState<Success | null>(null);
@@ -65,6 +69,10 @@ export function CashoutRequestForm({
   const normalizedHolder = useMemo(
     () => accountHolder.normalize("NFKC").trim().replace(/\s+/g, " "),
     [accountHolder],
+  );
+  const normalizedPhone = useMemo(
+    () => normalizeKoreanMobilePhone(phone),
+    [phone],
   );
   const grossKrw = cloverAmount * 1000;
   const withholdingKrw = Math.floor((grossKrw * 33) / 1000);
@@ -91,6 +99,9 @@ export function CashoutRequestForm({
     if (normalizedHolder.length < 2 || normalizedHolder.length > 40) {
       return "예금주명을 정확히 입력해주세요.";
     }
+    if (!normalizedPhone) {
+      return "전화번호를 숫자로 정확히 입력해주세요.";
+    }
     return "";
   }
 
@@ -105,6 +116,7 @@ export function CashoutRequestForm({
       bankCode,
       normalizedAccountNo,
       normalizedHolder,
+      normalizedPhone,
     ].join("|");
     if (idempotencyRef.current?.fingerprint !== fingerprint) {
       idempotencyRef.current = { fingerprint, key: createRequestKey() };
@@ -127,6 +139,7 @@ export function CashoutRequestForm({
         bankCode,
         accountNo,
         accountHolder,
+        phone,
         requestKey: idempotencyRef.current.key,
       });
       if (!result.ok) {
@@ -252,6 +265,26 @@ export function CashoutRequestForm({
             />
             <p className="mt-1 text-[10.5px] leading-relaxed text-[#9C968B]">
               본인 명의 계좌만 입금할 수 있어요. 예금주가 다르면 반려돼요.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="cashout-phone" className="mb-1.5 block text-[12.5px] font-bold text-[#16140F]">전화번호</label>
+            <input
+              id="cashout-phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              maxLength={20}
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              aria-required="true"
+              className="w-full rounded-xl border border-[#D8D2C8] px-3 py-3 text-sm outline-none focus:border-[#1B8A4F]"
+              placeholder="010-1234-5678"
+              data-testid="cashout-phone"
+            />
+            <p className="mt-1 text-[10.5px] leading-relaxed text-[#9C968B]">
+              지급 완료 안내를 보내드릴 번호예요. 신청할 때 최신 번호로 저장해요.
             </p>
           </div>
 

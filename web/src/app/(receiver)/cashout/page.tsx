@@ -16,10 +16,11 @@ export default async function CashoutPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const [eligibilityResult, statusResult, historyResult] = await Promise.all([
+  const [eligibilityResult, statusResult, historyResult, memberResult] = await Promise.all([
     supabase.rpc("clover_eligibility", { p_member_id: user.id }),
     supabase.rpc("my_cashout_status" as never),
     supabase.rpc("my_cashout_history" as never, { p_limit: 20 } as never),
+    supabase.from("member").select("phone").eq("id", user.id).maybeSingle(),
   ]);
 
   const eligibilityRaw = eligibilityResult.data;
@@ -97,6 +98,7 @@ export default async function CashoutPage() {
               minCashoutClover={minCashoutClover}
               currentCashout={currentCashout}
               history={history}
+              initialPhone={memberResult.data?.phone ?? null}
             />
           </aside>
         </div>

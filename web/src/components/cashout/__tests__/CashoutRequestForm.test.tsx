@@ -29,7 +29,7 @@ describe("CashoutRequestForm", () => {
     });
   });
 
-  function renderForm() {
+  function renderForm(initialPhone: string | null = "01012345678") {
     return render(
       <CashoutRequestForm
         cashoutEnabled
@@ -38,6 +38,7 @@ describe("CashoutRequestForm", () => {
         minCashoutClover={30}
         currentCashout={null}
         history={[]}
+        initialPhone={initialPhone}
       />,
     );
   }
@@ -63,6 +64,7 @@ describe("CashoutRequestForm", () => {
       bankCode: "KB",
       accountNo: "123-456-789012",
       accountHolder: "홍길동",
+      phone: "01012345678",
       requestKey: expect.stringMatching(/^cashout_[a-z0-9]+$/),
     });
     expect(await screen.findByTestId("cashout-request-success")).toHaveTextContent("29,010원");
@@ -70,6 +72,22 @@ describe("CashoutRequestForm", () => {
       clover_amount: 30,
       status: "REQUESTED",
     });
+  });
+
+  it("저장된 전화번호를 미리 채우고 번호가 없으면 인라인에서 신청을 막는다", () => {
+    const { unmount } = renderForm();
+    expect(screen.getByLabelText("전화번호")).toHaveValue("01012345678");
+    unmount();
+
+    renderForm(null);
+    fireEvent.change(screen.getByLabelText("은행"), { target: { value: "KB" } });
+    fireEvent.change(screen.getByLabelText("계좌번호"), { target: { value: "123456789012" } });
+    fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("전화번호를 숫자로 정확히 입력해주세요.");
+    expect(screen.queryByTestId("cashout-confirm-step")).not.toBeInTheDocument();
+    expect(createCashoutRequest).not.toHaveBeenCalled();
   });
 
   it("Server Action 예외 원문을 화면에 노출하지 않는다", async () => {
@@ -108,6 +126,7 @@ describe("CashoutRequestForm", () => {
           processing_note: null,
         }}
         history={[]}
+        initialPhone="01012345678"
       />,
     );
     expect(screen.getByTestId("cashout-pending-block")).toBeInTheDocument();
