@@ -42,6 +42,7 @@ type UserFixtureState = {
   welcomeAmount: number;
   payableAmount: number;
   pendingCashout: CashoutRecord | null;
+  phone: string | null;
 };
 
 const fixtureByUser = new Map<string, UserFixtureState>();
@@ -152,24 +153,28 @@ function resetFixtureState() {
     welcomeAmount: 0,
     payableAmount: 29,
     pendingCashout: null,
+    phone: null,
   });
   fixtureByUser.set(USERS.invalid, {
     totalBalance: 40,
     welcomeAmount: 0,
     payableAmount: 40,
     pendingCashout: null,
+    phone: null,
   });
   fixtureByUser.set(USERS.happy, {
     totalBalance: 40,
     welcomeAmount: 0,
     payableAmount: 40,
     pendingCashout: null,
+    phone: "01012345678",
   });
   fixtureByUser.set(USERS.duplicate, {
     totalBalance: 10,
     welcomeAmount: 0,
     payableAmount: 10,
     pendingCashout: existingDuplicate(),
+    phone: "01087654321",
   });
 }
 
@@ -256,6 +261,19 @@ async function handleMockSupabase(request: IncomingMessage, response: ServerResp
       requested_at: requestedAt,
       is_replay: false,
     }]);
+  }
+
+  if (url.pathname === "/rest/v1/member") {
+    const fixture = userId ? fixtureByUser.get(userId) : null;
+    if (!userId || !fixture) return json(response, 401, { message: "unauthorized" });
+
+    if (request.method === "PATCH") {
+      const body = await requestJson(request);
+      fixture.phone = typeof body.phone === "string" ? body.phone : null;
+      return json(response, 200, { id: userId });
+    }
+
+    return json(response, 200, { phone: fixture.phone });
   }
 
   if (url.pathname === "/rest/v1/clover_balance") {
@@ -348,20 +366,41 @@ test.describe("수동 환전 — happy + edge", () => {
     await expect(page.getByTestId("cashout-confirm-button")).toHaveCount(0);
   });
 
+  test("저장된 전화번호가 없으면 환전 신청을 인라인에서 거부한다", async ({ page }) => {
+    await openCashout(page, USERS.invalid);
+
+    await page.locator("#cashout-bank").selectOption("KB");
+    await page.locator("#cashout-account").fill(FULL_ACCOUNT);
+    await page.locator("#cashout-holder").fill("홍길동");
+    await expect(page.getByTestId("cashout-phone")).toHaveValue("");
+    await page.getByTestId("cashout-confirm-button").click();
+
+    await expect(page.getByTestId("cashout-request-form").getByRole("alert"))
+      .toHaveText("전화번호를 숫자로 정확히 입력해주세요.");
+    await expect(page.getByTestId("cashout-confirm-step")).toHaveCount(0);
+  });
+
+  test("저장된 전화번호가 있으면 환전 신청 폼에 미리 채운다", async ({ page }) => {
+    await openCashout(page, USERS.happy);
+
+    await expect(page.getByTestId("cashout-phone")).toHaveValue("01012345678");
+  });
+
   test("잘못된 계좌 형식과 최소 수량 미만을 인라인에서 거부한다", async ({ page }) => {
     await openCashout(page, USERS.invalid);
     const requestForm = page.getByTestId("cashout-request-form");
     const cloverAmountInput = page.locator("#cashout-clover-amount");
 
-    // type=number의 native min 검증은 submit 이벤트 자체를 막는다. 이 케이스는
-    // React validate()의 인라인 문구를 검증하므로 테스트 DOM에서만 native min을
-    // 해제해 애플리케이션 submit handler까지 도달시킨다.
     await expect(cloverAmountInput).toHaveAttribute("min", "30");
-    await cloverAmountInput.evaluate((input) => input.removeAttribute("min"));
-    await cloverAmountInput.fill("29");
     await page.locator("#cashout-bank").selectOption("KB");
     await page.locator("#cashout-account").fill("1234-ABCD");
     await page.locator("#cashout-holder").fill("홍길동");
+    await page.locator("#cashout-phone").fill("010-5555-6666");
+    // type=number의 native min 검증은 submit 이벤트 자체를 막는다. 이 케이스는
+    // React validate()의 인라인 문구를 검증하므로 테스트 DOM에서만 native min을
+    // 해제해 애플리케이션 submit handler까지 도달시킨다.
+    await cloverAmountInput.evaluate((input) => input.removeAttribute("min"));
+    await cloverAmountInput.fill("29");
     await page.getByTestId("cashout-confirm-button").click();
     await expect(requestForm.getByRole("alert")).toHaveText("30~40클로버 사이로 입력해주세요.");
 
@@ -374,6 +413,7 @@ test.describe("수동 환전 — happy + edge", () => {
   test("계좌 신청 후 REQUESTED 상태·마스킹 응답·상태/이력을 렌더한다", async ({ page }) => {
     await openCashout(page, USERS.happy);
 
+    await page.getByTestId("cashout-phone").fill("010-9999-8888");
     await page.locator("#cashout-clover-amount").fill("30");
     await page.locator("#cashout-bank").selectOption("KB");
     await page.locator("#cashout-account").fill(FULL_ACCOUNT);
@@ -389,6 +429,7 @@ test.describe("수동 환전 — happy + edge", () => {
     const actionBody = await actionResponse.text();
 
     await expect(page.getByTestId("cashout-request-success")).toBeVisible();
+    expect(fixtureByUser.get(USERS.happy)?.phone).toBe("01099998888");
     await expect(page.getByTestId("cashout-request-success")).toContainText("********9012");
     await expect(page.getByTestId("cashout-request-success")).not.toContainText(FULL_ACCOUNT);
     expect(actionBody).toContain("REQUESTED");
