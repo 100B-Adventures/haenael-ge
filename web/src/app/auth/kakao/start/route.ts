@@ -43,7 +43,10 @@ export async function GET(request: NextRequest) {
     `&redirect_uri=${encodeURIComponent(callbackUri)}` +
     `&response_type=code` +
     // account_email은 비즈 앱 전환 후 복원 (미전환 앱은 권한 없음 → KOE205 방지)
-    `&scope=profile_nickname,profile_image` +
+    // phone_number·age_range: 2026-08-04 카카오 개인정보 동의항목 심사 승인 → 콘솔에서
+    // 둘 다 '선택 동의'로 설정 완료. 선택 동의라 미동의해도 로그인은 성공한다.
+    // birthday는 승인됐지만 사용 기능이 없어 콘솔·scope 모두 미사용(최소수집).
+    `&scope=profile_nickname,profile_image,phone_number,age_range` +
     `&state=${encodeURIComponent(state)}`;
 
   const response = NextResponse.redirect(kakaoAuthorizeUrl);

@@ -1,5 +1,96 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-05 — 수동환전 E2E 마지막 실패 1건
+
+**판정: 🔧 E2E 스펙·전화번호 환전 경로 구현 / 컨트롤러 Playwright·DB 재실행 대기**
+
+- 컨트롤러 관찰값: `web/e2e/cashout-manual.spec.ts` **3 passed / 1 failed (23.7s)**. 실패는 최소 수량 미만 입력 후 기대한 `role="alert"`가 생성되지 않은 1건이다.
+- 근본원인: `#cashout-clover-amount`는 `type="number"`이면서 `min=30`이다. Playwright가 `29`를 채운 뒤 submit 버튼을 클릭하면 브라우저의 native constraint validation이 submit 이벤트를 차단하므로, React `review()`와 `validate()`가 실행되지 않고 `errorMessage`도 설정되지 않는다. 입력값·`payableAmount=40`·버튼 locator는 모두 의도대로였다.
+- 수정: 제품 검증 로직은 변경하지 않았다. E2E가 먼저 실제 `min=30` 속성을 확인한 뒤 테스트 DOM에서만 `min`을 제거해 React submit handler에 도달하도록 했다. 이어서 `29`의 수량 오류와 `30 + 영문 계좌`의 계좌 오류를 기존 인라인 `role="alert"`로 검증한다.
+- 기존 구현 확인: `member.phone` 컬럼·국내 휴대전화 CHECK·본인 RLS·service role 권한 회귀는 선행 커밋 `ef9b109`에, 카카오 `phone_number`의 `+82` 정규화·선택동의 누락/철회 처리는 `ef9b109`·`2abaf90`에 이미 존재했다. 적용된 migration을 재작성하거나 중복 컬럼 migration을 만들지 않고 이 구현을 보존했다.
+- 환전 경로: `/cashout`이 본인 `member.phone`을 읽어 폼에 프리필한다. 폼은 번호가 없거나 국내 휴대전화 형식이 아니면 기존과 같은 `role="alert"`로 차단한다. Server Action은 번호를 숫자 전용 `01X` 표기로 정규화하고, 로그인 사용자의 own-row RLS 경로로 `member.phone`을 저장한 뒤 환전 RPC를 호출한다.
+- E2E 보강: 독립 케이스 2건(번호 없음 필수 차단, 저장 번호 프리필)을 추가하고 happy path에서 수정 번호 `010-9999-8888`이 `01099998888`로 저장되는 fixture 상태를 검증한다. `npx playwright test e2e/cashout-manual.spec.ts --list`는 **6 tests / 1 file** 로딩을 확인했다.
+- 테스트됨: `npm test` **33 files / 204 tests PASS**. 신규 전화번호 정규화·폼·Server Action·페이지 단위 테스트를 포함한다. 기존 `NotificationBadge`의 `act(...)` 경고는 남아 있으나 실패는 0건이다.
+- production build: 기본 `npm run build`는 Turbopack이 PostCSS 처리 중 내부 프로세스의 포트 bind를 시도하다 샌드박스 `Operation not permitted (os error 1)`로 실패했다(`BUILD_RC=1`). 코드/타입 우회 없이 `npm run build -- --webpack`으로 재검증해 **compile PASS · TypeScript PASS · static pages 16/16 · BUILD_ID 생성**을 관찰했다.
+- 미검증: 이 환경에서는 포트 listen이 막혀 Playwright 본 실행을 하지 않는다. 컨트롤러가 동일 spec을 재실행하기 전까지 **6/6 PASS로 전환하지 않는다.** DB migration/pgTAP도 이번 세션에서 재실행하지 않았으므로 선행 `alimtalk_phone.test.sql` 8건의 현재 로컬 DB 결과는 미검증이다.
+
+## 2026-08-04 — 수동환전 브라우저 E2E 등록·pgTAP 재시도
+
+**판정: ❌ NG 유지 / E2E 스펙 4건 등록·정적 로딩 확인, 브라우저·DB 상태전이는 미검증**
+
+- 범위: 기술설계 v1.2 `W-1~W-12`·`T1~T15` 중 사용자 수동환전 화면의 미달, 신청 입력, `REQUESTED`(화면 표기: 지급 대기), 계좌 마스킹, 상태·이력, 중복 신청 차단. 운영 URL·운영 DB 쓰기는 수행하지 않았다.
+- 신규 스펙: `web/e2e/cashout-manual.spec.ts` 4건. ① 29클로버 미달 ② 최소 수량 미만·잘못된 계좌 형식 ③ 신청→`REQUESTED`→마스킹 응답→`/cashout/status`·`/cashout/history` ④ 진행 중 신청 중복 차단. `npx playwright test ... --list`에서 **4 tests / 1 file** 로딩을 확인했다.
+- 브라우저 실행: `npx playwright test e2e/cashout-manual.spec.ts`는 assertion 전 격리 Supabase fixture가 `127.0.0.1:54329`를 listen하는 단계에서 **`EPERM: operation not permitted`**. 결과 **1 failed / 3 did not run / 실행 assertion 0건**이므로 Playwright PASS로 전환하지 않는다.
+- backend 회귀: `deno test supabase/functions/_shared/withholding.test.ts supabase/functions/cashout/index.test.ts` **6 passed / 0 failed**.
+- web 회귀: `npm test` **32 files / 200 tests PASS**. `npm run build -- --webpack` production build·TypeScript·정적 페이지 **16/16 PASS**.
+- pgTAP 재시도: 선행 `docker ps`가 Docker daemon socket에서 **`connect: operation not permitted`**로 종료됐다. 지시된 조건에 따라 `supabase db reset`·`supabase test db`는 실행하지 않았다. 환전 DB 테스트 `cashout_manual.test.sql` 31 assertions + `cashout_security_hardening.test.sql` 32 assertions = **63건 전부 미실행**.
+- seed·주요 API: Docker 차단으로 로컬 seed를 실행하지 못했다. 운영 `/api/health` read-only curl도 DNS 단계에서 **`curl: (6) Could not resolve host: haenael-ge.vercel.app`**로 종료돼 HTTP 코드는 얻지 못했다.
+- mobile/Maestro: 저장소에 mobile 앱 manifest와 Maestro flow가 없어 대상 없음. `optional:true`로 실패를 숨긴 flow는 추가하지 않았다.
+- 401 노출: Server Action은 비인증을 고정 한국어 오류로 치환하고, 스펙 fixture도 원문 401을 UI에 전달하지 않도록 구성했다(`근거 확인`). 실제 브라우저 비인증 오류 화면은 이번 환경에서 `미검증`이다.
+
+### 요구 ↔ 수용기준 ↔ E2E 추적
+
+```mermaid
+flowchart LR
+  R[기술설계 W-1~W-12 / T1~T15] --> S[cashout-manual.spec.ts 4건]
+  S --> B[Next 화면 + Server Action]
+  B --> P[Playwright 관찰]
+  R --> D[pgTAP 63 assertions]
+  P -->|listen EPERM| N[미검증]
+  D -->|Docker EPERM| N
+```
+
+| 요구·경계 | 수용기준 | TC | 작성 | 실행 판정 |
+|---|---|---|---|---|
+| T1 미달 | 29클로버에서 안내, 신청 버튼 0 | E2E-CO-01 | ✅ | ⬜ 미실행 |
+| 잘못된 입력 | 29개·영문 포함 계좌를 인라인 거부 | E2E-CO-02 | ✅ | ⬜ 미실행 |
+| 신청 happy | 30개 신청 후 `REQUESTED` 결과 | E2E-CO-03 | ✅ | ⬜ 미실행 |
+| T13 최소노출 | 제출 후 화면·Server Action 응답·상태·이력에 전체 계좌 0건, 마스킹만 | E2E-CO-03 | ✅ | ⬜ 미실행 |
+| 상태·이력 | `/cashout/status` 접수됨, `/cashout/history` 지급 대기 렌더 | E2E-CO-03 | ✅ | ⬜ 미실행 |
+| T6 중복 | 진행 중이면 폼 0, 중복 차단 안내 | E2E-CO-04 | ✅ | ⬜ 미실행 |
+
+커버리지: 요구 6/6 스펙 매핑, E2E 케이스 작성 4/4, **브라우저 실행 0/4**, 환전 pgTAP 실행 **0/63**.
+
+### design-conformance-matrix
+
+| 화면 | 승인 기준 | 구현 | 스크린샷 | 판정 |
+|---|---|---|---|---|
+| `/cashout` 미달·신청 | 승인 프로토타입 `docs/design/*.html` | 페이지·폼 코드 존재 | 없음 | ⬜ 승인 프로토타입 디렉터리 자체가 없어 눈대조 불가 |
+| `/cashout/status` | 승인 프로토타입 `docs/design/*.html` | `cashout-status-page` 구현 | 없음 | ⬜ 브라우저 listen 차단으로 구현 캡처 불가 |
+| `/cashout/history` | 승인 프로토타입 `docs/design/*.html` | `cashout-history-page` 구현 | 없음 | ⬜ 브라우저 listen 차단으로 구현 캡처 불가 |
+
+프로토타입·구현 스크린샷 쌍이 0세트이므로 디자인 정합 PASS를 주장하지 않는다.
+
+### 페르소나 결정 1문항
+
+**Q. 코어 페르소나 윤도경이 “환전 가능 금액·보류 상태·입금 계좌”를 문의 없이 이해할 수 있는가?**
+
+**A. 미검증.** 스펙은 분해표→신청→접수→상태→이력을 한 경로로 검증하도록 작성했지만, 실제 브라우저 화면과 승인 프로토타입 스크린샷을 관찰하지 못했다. 코드·단위 테스트 PASS를 사용자 이해의 대리지표로 쓰지 않는다.
+
+### 잔여 미검증·해제 조건
+
+- 로컬 포트·Docker 접근 가능한 QA 환경에서 `supabase db reset` seed 성공 → 환전 pgTAP **63/63** → `npx playwright test e2e/cashout-manual.spec.ts` **4/4** 순서로 fresh 실행.
+- 승인 프로토타입 원본을 `docs/design/*.html`에 복원하고, 프로토타입·실제 화면 390px/1024px 스크린샷을 화면별 1쌍 이상 남겨 위 matrix를 판정한다.
+- 실제 Postgres에서 신청 1건이 `CASHOUT_HOLD` 1건과 함께 생성되고, 상태·이력 응답에 `account_no_enc`·전체 계좌번호가 0건인지 관찰한다.
+
+**셀프심문:** 이 E2E가 틀렸다면 가장 그럴듯한 이유는 격리 fixture가 실제 PostgREST·Auth·DB 동시성 동작을 대신해 성공 응답을 낸다는 점이다. 그래서 브라우저 PASS가 나더라도 DB 상태전이 완료 근거로 쓰지 않고 pgTAP·실로컬 DB 관찰을 별도 해제 조건으로 고정했다.
+
+**레드팀(QA 리드):** “4개 테스트를 등록했으니 QA 됐다”는 주장을 거부한다. 이번 관찰값은 스펙 로딩·Deno/unit/build뿐이고, 돈 경로의 브라우저 0/4·DB 0/63·스크린샷 0세트이므로 NG가 맞다.
+
+STAMP: 2026-08-04 05:45 KST · model=gpt-5.6-sol · agent=qa-verifier worker · 기반=`cashout-manual-account-engdesign-decisions-v1-opus5.md` v1.2 + `docs/test-plan.md` + `docs/persona.md` + 기존 E2E 5개.
+
+벤치마크 차용: Playwright `APIRequestContext/storageState`의 격리 인증 원칙, Supabase 로컬 seed·pgTAP의 재현 가능한 DB 검증 원칙. 변경: 운영 DB 대신 로컬 계약 fixture를 사용하되 DB 완료 주장과 분리.
+
+RUBRIC_SCORE: 완결성=3/5 정밀성=5/5 벤치마크=5/5 추적성=5/5 전문성=5/5 total=23/25
+
+WEAKEST_LINE: "승인 프로토타입 원본과 브라우저 스크린샷이 없어 design-conformance 판정을 채우지 못했다."
+
+SKILLS_USED: 없음
+
+SKILLS_SKIPPED: 설치된 스킬 중 코드·QA 실행에 직접 매칭되는 스킬 없음
+
+SOURCES/MODEL: gpt-5.6-sol · `scratchpad/cashout-manual-account-engdesign-decisions-v1-opus5.md` v1.2 · `docs/test-plan.md` · `docs/persona.md` · `web/e2e/*.spec.ts` · `web/playwright.config.ts` · [Playwright APIRequestContext](https://playwright.dev/docs/api/class-apirequestcontext) · [Supabase Testing Overview](https://supabase.com/docs/guides/local-development/testing/overview) · [Supabase Seeding](https://supabase.com/docs/guides/local-development/seeding-your-database)
+
 ## 2026-08-03 — `wt-pay-open` 머지 충돌
 
 **판정: 🔧 머지 결함 해소 / 실결제·DB 환전 상태전이는 미검증**

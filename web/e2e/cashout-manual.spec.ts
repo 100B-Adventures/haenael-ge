@@ -14,7 +14,8 @@ const APP_URL = `http://127.0.0.1:${APP_PORT}`;
 const SUPABASE_URL = `http://127.0.0.1:${SUPABASE_PORT}`;
 const AUTH_COOKIE = "sb-127-auth-token";
 const FULL_ACCOUNT = "123456789012";
-const MASKED_ACCOUNT = "••••••9012";
+const FORM_MASKED_ACCOUNT = "********9012";
+const PERSISTED_MASKED_ACCOUNT = "••••••9012";
 
 const USERS = {
   below: "ca5e2e00-0000-0000-0000-000000000001",
@@ -46,6 +47,36 @@ type UserFixtureState = {
 };
 
 const fixtureByUser = new Map<string, UserFixtureState>();
+const INITIAL_FIXTURE_BY_USER = new Map<string, UserFixtureState>([
+  [USERS.below, {
+    totalBalance: 29,
+    welcomeAmount: 0,
+    payableAmount: 29,
+    pendingCashout: null,
+    phone: null,
+  }],
+  [USERS.invalid, {
+    totalBalance: 40,
+    welcomeAmount: 0,
+    payableAmount: 40,
+    pendingCashout: null,
+    phone: null,
+  }],
+  [USERS.happy, {
+    totalBalance: 40,
+    welcomeAmount: 0,
+    payableAmount: 40,
+    pendingCashout: null,
+    phone: "01012345678",
+  }],
+  [USERS.duplicate, {
+    totalBalance: 10,
+    welcomeAmount: 0,
+    payableAmount: 10,
+    pendingCashout: existingDuplicate(),
+    phone: "01087654321",
+  }],
+]);
 let mockServer: Server;
 let nextProcess: ChildProcess;
 
@@ -148,34 +179,9 @@ function existingDuplicate(): CashoutRecord {
 
 function resetFixtureState() {
   fixtureByUser.clear();
-  fixtureByUser.set(USERS.below, {
-    totalBalance: 29,
-    welcomeAmount: 0,
-    payableAmount: 29,
-    pendingCashout: null,
-    phone: null,
-  });
-  fixtureByUser.set(USERS.invalid, {
-    totalBalance: 40,
-    welcomeAmount: 0,
-    payableAmount: 40,
-    pendingCashout: null,
-    phone: null,
-  });
-  fixtureByUser.set(USERS.happy, {
-    totalBalance: 40,
-    welcomeAmount: 0,
-    payableAmount: 40,
-    pendingCashout: null,
-    phone: "01012345678",
-  });
-  fixtureByUser.set(USERS.duplicate, {
-    totalBalance: 10,
-    welcomeAmount: 0,
-    payableAmount: 10,
-    pendingCashout: existingDuplicate(),
-    phone: "01087654321",
-  });
+  for (const [userId, initialFixture] of INITIAL_FIXTURE_BY_USER) {
+    fixtureByUser.set(userId, structuredClone(initialFixture));
+  }
 }
 
 async function handleMockSupabase(request: IncomingMessage, response: ServerResponse) {
@@ -238,7 +244,7 @@ async function handleMockSupabase(request: IncomingMessage, response: ServerResp
       clover_amount: cloverAmount,
       net_krw: grossKrw - withholdingKrw,
       bank_code: String(body.p_bank_code),
-      account_masked: MASKED_ACCOUNT,
+      account_masked: PERSISTED_MASKED_ACCOUNT,
       account_holder: String(body.p_account_holder),
       requested_at: requestedAt,
       paid_at: null,
@@ -430,8 +436,8 @@ test.describe("수동 환전 — happy + edge", () => {
 
     await expect(page.getByTestId("cashout-request-success")).toBeVisible();
     expect(fixtureByUser.get(USERS.happy)?.phone).toBe("01099998888");
-    await expect(page.getByTestId("cashout-request-success")).toContainText("********9012");
-    await expect(page.getByTestId("cashout-request-success")).not.toContainText(FULL_ACCOUNT);
+    await expect(page.getByTestId("cashout-request-success")).toContainText(FORM_MASKED_ACCOUNT);
+    await expect(page.getByTestId("cashout-page")).not.toContainText(FULL_ACCOUNT);
     expect(actionBody).toContain("REQUESTED");
     expect(actionBody).not.toContain(FULL_ACCOUNT);
 
@@ -439,7 +445,7 @@ test.describe("수동 환전 — happy + edge", () => {
     const statusDocument = await statusResponse?.text();
     await expect(page.getByTestId("cashout-status-page")).toBeVisible();
     await expect(page.getByTestId("cashout-status-page")).toContainText("접수됨");
-    await expect(page.getByTestId("cashout-status-page")).toContainText(MASKED_ACCOUNT);
+    await expect(page.getByTestId("cashout-status-page")).toContainText(PERSISTED_MASKED_ACCOUNT);
     await expect(page.getByTestId("cashout-status-page")).not.toContainText(FULL_ACCOUNT);
     expect(statusDocument).not.toContain(FULL_ACCOUNT);
 
@@ -447,7 +453,7 @@ test.describe("수동 환전 — happy + edge", () => {
     const historyDocument = await historyResponse?.text();
     await expect(page.getByTestId("cashout-history-page")).toBeVisible();
     await expect(page.getByTestId("cashout-history-page")).toContainText("지급 대기");
-    await expect(page.getByTestId("cashout-history-page")).toContainText(MASKED_ACCOUNT);
+    await expect(page.getByTestId("cashout-history-page")).toContainText(PERSISTED_MASKED_ACCOUNT);
     await expect(page.getByTestId("cashout-history-page")).not.toContainText(FULL_ACCOUNT);
     expect(historyDocument).not.toContain(FULL_ACCOUNT);
   });
