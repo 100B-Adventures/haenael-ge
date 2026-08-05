@@ -1,0 +1,86 @@
+# 회귀 테스트 CI
+#
+# 트리거: main 푸시 + 모든 PR + 수동 실행
+#
+# 커버리지 경계 (숨기지 않고 명시한다):
+#   포함  = 단위 테스트 전량, 프로덕션 빌드, cashout-manual 브라우저 E2E
+#   미포함 = cheer-payment / goal-flow / release-v1 / report-flow / wordmap-share
+#            이 5개는 E2E_BASE_URL로 지정한 실행 중인 앱과 Supabase를 요구한다.
+#            운영 DB에 쓰지 않는다는 원칙 때문에 CI에서 자동 실행하지 않는다.
+#            이 5개는 배포 전 컨트롤러가 로컬에서 직접 실행해 증거를 남긴다.
+#   미포함 = pgTAP DB 정책 테스트 63건. Docker 기반이라 별도 잡이 필요하다.
+#
+# cashout-manual 은 스펙 내부에 격리된 Supabase 계약 서버를 띄우므로 외부 의존이 없다.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-and-build:
+    name: 단위 테스트 + 빌드
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - name: 단위 테스트
+        run: npm test
+
+      - name: 프로덕션 빌드
+        run: npm run build
+        env:
+          # 빌드 타임에만 필요한 공개 값. 실제 운영 값은 Vercel 환경변수가 소유한다.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+
+  e2e-cashout:
+    name: 환전 브라우저 E2E
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - name: 브라우저 설치
+        run: npx playwright install --with-deps chromium
+
+      - name: 환전 E2E 실행
+        run: npx playwright test e2e/cashout-manual.spec.ts --reporter=line
+
+      - name: 실패 시 리포트 보관
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            web/playwright-report/
+            web/test-results/
+          retention-days: 14
