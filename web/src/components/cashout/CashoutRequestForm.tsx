@@ -182,7 +182,7 @@ export function CashoutRequestForm({
         redirectPath="/cashout"
         context="cashout"
       />
-      {hasPendingCashout && currentCashout ? (
+      {hasPendingCashout && currentCashout && !(step === "done" && success) ? (
         <div className="rounded-[16px] border border-[#E8D3A6] bg-[#FBF1DD] p-4" data-testid="cashout-pending-block">
           <p className="text-[14px] font-extrabold text-[#B4791F]">
             이미 처리 중인 신청이 있어요
@@ -343,7 +343,7 @@ export function CashoutRequestForm({
           </button>
           <button type="button" onClick={() => setStep("form")} className="w-full rounded-[15px] border border-[#E8E4DC] bg-white py-3 text-[13px] font-bold text-[#6F6A60]">계좌 다시 입력</button>
         </section>
-      ) : canRequest && step === "done" && success ? (
+      ) : step === "done" && success ? (
         <section className="space-y-4" data-testid="cashout-request-success" role="status">
           <div className="rounded-[16px] border border-[#B7DFC5] bg-[#F1FAF4] p-6 text-center">
             <p className="text-[30px]">🍀</p>

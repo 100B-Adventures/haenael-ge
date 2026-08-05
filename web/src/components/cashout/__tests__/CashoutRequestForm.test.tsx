@@ -43,8 +43,8 @@ describe("CashoutRequestForm", () => {
     );
   }
 
-  it("최종 확인 뒤 Server Action 한 곳으로만 신청하고 3.3% 실지급액을 표시한다", async () => {
-    renderForm();
+  it("최종 확인 뒤 신청하고 서버 재검증 후에도 접수 성공 화면을 유지한다", async () => {
+    const view = renderForm();
     expect(screen.getByTestId("cashout-live-preview")).toHaveTextContent(
       "30,000원 요청 → 원천징수 990원 → 29,010원 입금",
     );
@@ -67,11 +67,46 @@ describe("CashoutRequestForm", () => {
       phone: "01012345678",
       requestKey: expect.stringMatching(/^cashout_[a-z0-9]+$/),
     });
-    expect(await screen.findByTestId("cashout-request-success")).toHaveTextContent("29,010원");
+    expect(await screen.findByTestId("cashout-request-success")).toHaveTextContent(
+      "국민은행 ********9012 (홍길동)",
+    );
+    expect(screen.getByTestId("cashout-request-success")).toHaveTextContent("29,010원");
     expect(trackEvent).toHaveBeenCalledWith("cashout_initiated", {
       clover_amount: 30,
       status: "REQUESTED",
     });
+
+    // revalidatePath()가 갱신한 RSC payload는 client state를 보존하면서
+    // currentCashout=REQUESTED props를 전달한다. 이때 성공 확인이 대기 블록에
+    // 덮이지 않아야 사용자가 접수 결과와 마스킹 계좌를 끝까지 확인할 수 있다.
+    view.rerender(
+      <CashoutRequestForm
+        cashoutEnabled
+        reachedThreshold
+        payableAmount={10}
+        minCashoutClover={30}
+        currentCashout={{
+          id: 71,
+          status: "REQUESTED",
+          clover_amount: 30,
+          net_krw: 29_010,
+          bank_code: "KB",
+          account_masked: "********9012",
+          account_holder: "홍길동",
+          requested_at: "2026-08-02T00:00:00.000Z",
+          paid_at: null,
+          rejected_at: null,
+          processing_note: null,
+        }}
+        history={[]}
+        initialPhone="01099998888"
+      />,
+    );
+
+    expect(screen.getByTestId("cashout-request-success")).toHaveTextContent(
+      "국민은행 ********9012 (홍길동)",
+    );
+    expect(screen.queryByTestId("cashout-pending-block")).not.toBeInTheDocument();
   });
 
   it("저장된 전화번호를 미리 채우고 번호가 없으면 인라인에서 신청을 막는다", () => {

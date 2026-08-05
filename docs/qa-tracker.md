@@ -1,5 +1,17 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-06 — CI 전용 환전 접수 성공 화면 소실
+
+**판정: ❌ NG 관찰 → 🔧 제품 수정·비포트 회귀 통과 / Playwright·CI 재실행 대기**
+
+- CI 관찰값: `web/e2e/cashout-manual.spec.ts` 9/10, retry도 동일 실패. `cashout-request-success`의 최초 visible은 통과했지만 다음 마스킹 계좌 검증 때 요소가 DOM에서 사라졌다. 로컬 macOS는 10/10이다.
+- 근본원인: 신청 Server Action의 `revalidatePath(...)` 호출로 현재 React Server Component 트리가 갱신되고 `currentCashout=REQUESTED`가 전달된다. 클라이언트 `done` state는 보존되지만 `CashoutRequestForm`이 `hasPendingCashout` 분기를 성공 분기보다 먼저 평가해 접수 성공 화면을 진행 중 블록으로 교체했다. Playwright locator는 매 assertion마다 최신 DOM을 다시 찾으므로 locator 캐시 결함이 아니다.
+- 수정: `done + success`인 현재 제출 세션에서는 성공 화면을 우선 유지하고, 새로 방문하거나 새로고침해 로컬 성공 state가 없는 경우에는 기존 `REQUESTED` 진행 중 블록을 그대로 표시한다. 마스킹 기대값 `********9012`와 전체 계좌번호 비노출 검사는 완화하지 않는다.
+- 회귀 추가: Server Action 성공 뒤 `currentCashout=REQUESTED`, 지급 가능 잔액 감소 props로 rerender해도 성공 화면·정확한 마스킹 계좌가 유지되고 pending 블록이 나타나지 않는 단위 테스트를 추가했다.
+- 테스트됨: 대상 `CashoutRequestForm` 4/4, 전체 Web Vitest 34 files / 211 tests PASS. 기존 `NotificationBadge`의 `act(...)` 경고는 남아 있으나 실패는 0건이다.
+- production build: 기본 Turbopack은 샌드박스가 내부 PostCSS 프로세스의 포트 bind를 거부해 코드 컴파일 전 실패했다. 동일 Next.js 16.2.10의 `next build --webpack`은 compile·TypeScript·static pages 16/16 PASS, BUILD_ID `EOHEoeOUiJTBoifxOO9yG`를 생성했다.
+- 미검증: 지시상 이 워커는 Playwright를 실행하지 않는다. 컨트롤러가 로컬 10/10과 GitHub Actions ubuntu 10/10을 재관찰하기 전까지 E2E는 NG다.
+
 ## 2026-08-05 — 수동환전 E2E 마지막 실패 1건
 
 **판정: 🔧 E2E 스펙·전화번호 환전 경로 구현 / 컨트롤러 Playwright·DB 재실행 대기**
