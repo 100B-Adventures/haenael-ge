@@ -80,6 +80,13 @@ describe("CashoutRequestForm", () => {
     unmount();
 
     renderForm(null);
+    expect(screen.getByTestId("phone-consent-notice")).toHaveTextContent(
+      "환전 안내를 받을 전화번호가 필요해요",
+    );
+    expect(screen.getByTestId("phone-consent-cta")).toHaveAttribute(
+      "href",
+      "/auth/kakao/start?redirect=%2Fcashout",
+    );
     fireEvent.change(screen.getByLabelText("은행"), { target: { value: "KB" } });
     fireEvent.change(screen.getByLabelText("계좌번호"), { target: { value: "123456789012" } });
     fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });

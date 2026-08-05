@@ -364,6 +364,46 @@ test.afterAll(async () => {
 });
 
 test.describe("수동 환전 — happy + edge", () => {
+  test("전화번호가 없는 회원에게 카카오 재동의 안내를 노출한다", async ({ page }) => {
+    await openCashout(page, USERS.invalid);
+
+    await expect(page.getByTestId("phone-consent-notice")).toContainText(
+      "환전 안내를 받을 전화번호가 필요해요",
+    );
+  });
+
+  test("전화번호가 있는 회원에게는 카카오 재동의 안내를 노출하지 않는다", async ({ page }) => {
+    await openCashout(page, USERS.happy);
+
+    await expect(page.getByTestId("phone-consent-notice")).toHaveCount(0);
+  });
+
+  test("재동의 CTA는 현재 환전 경로를 담아 카카오 시작 라우트로 간다", async ({ page }) => {
+    await openCashout(page, USERS.invalid);
+
+    const href = await page.getByTestId("phone-consent-cta").getAttribute("href");
+    const target = new URL(href ?? "", APP_URL);
+    expect(target.pathname).toBe("/auth/kakao/start");
+    expect(target.searchParams.get("redirect")).toBe("/cashout");
+  });
+
+  test("재동의 후에도 번호가 없으면 직접 입력 폴백을 안내한다", async ({ page }) => {
+    await openCashout(page, USERS.invalid);
+    await page.evaluate(() => {
+      window.sessionStorage.setItem("haenael_phone_consent_pending", "/cashout");
+    });
+    await page.reload();
+
+    await expect(page.getByTestId("phone-consent-notice")).toContainText(
+      "카카오에서 전화번호를 받지 못했어요",
+    );
+    await expect(page.getByTestId("phone-consent-notice")).toContainText(
+      "아래에 전화번호를 직접 입력해 주세요.",
+    );
+    await expect(page.getByTestId("phone-consent-cta")).toHaveCount(0);
+    await expect(page.getByTestId("cashout-phone")).toBeVisible();
+  });
+
   test("잔액 29클로버 미달이면 안내를 노출하고 신청을 차단한다", async ({ page }) => {
     await openCashout(page, USERS.below);
 

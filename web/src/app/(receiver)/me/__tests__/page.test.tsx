@@ -48,7 +48,10 @@ const GOAL_ROW = {
   status: "ACTIVE",
 };
 
-function buildSupabase(cheers: Array<Record<string, unknown>>) {
+function buildSupabase(
+  cheers: Array<Record<string, unknown>>,
+  phone: string | null = "01012345678",
+) {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "owner-uid" } } }) },
     rpc: vi.fn().mockImplementation((fn: string) => {
@@ -61,6 +64,7 @@ function buildSupabase(cheers: Array<Record<string, unknown>>) {
       if (table === "goal") return chainable({ data: [GOAL_ROW], error: null });
       if (table === "clover_balance") return chainable({ data: { clover_count: 5 }, error: null });
       if (table === "cheer") return chainable({ data: cheers, error: null });
+      if (table === "member") return chainable({ data: { phone }, error: null });
       throw new Error(`unexpected table: ${table}`);
     }),
   };
@@ -163,5 +167,33 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     expect(screen.getByTestId("goal-reason")).toHaveTextContent("건강해지려고");
     expect(screen.getByTestId("open-goal-edit-sheet")).toBeInTheDocument();
+  });
+
+  it("전화번호가 없는 회원에게만 카카오 재동의 안내를 보여준다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], null) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    expect(screen.getByTestId("phone-consent-notice")).toHaveTextContent(
+      "알림 받으려면 전화번호 동의가 필요해요",
+    );
+    expect(screen.getByTestId("phone-consent-cta")).toHaveAttribute(
+      "href",
+      "/auth/kakao/start?redirect=%2Fme",
+    );
+  });
+
+  it("전화번호가 있는 회원에게는 카카오 재동의 안내를 보여주지 않는다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678") as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    expect(screen.queryByTestId("phone-consent-notice")).not.toBeInTheDocument();
   });
 });
