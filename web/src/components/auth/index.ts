@@ -2,3 +2,4 @@
 export { LoginSheet } from "./LoginSheet";
 export type { LoginSheetProps } from "./LoginSheet";
 export { LogoutButton } from "./LogoutButton";
+export { PhoneConsentNotice } from "./PhoneConsentNotice";

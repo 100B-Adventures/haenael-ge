@@ -4,6 +4,7 @@ import { type FormEvent, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Clock3, LoaderCircle, ShieldCheck } from "lucide-react";
 import { createCashoutRequest } from "@/app/(receiver)/cashout/actions";
+import { PhoneConsentNotice } from "@/components/auth/PhoneConsentNotice";
 import { trackEvent } from "@/lib/analytics";
 import { normalizeKoreanMobilePhone } from "@/lib/phone";
 import {
@@ -176,6 +177,11 @@ export function CashoutRequestForm({
 
   return (
     <div>
+      <PhoneConsentNotice
+        hasPhone={Boolean(initialPhone)}
+        redirectPath="/cashout"
+        context="cashout"
+      />
       {hasPendingCashout && currentCashout ? (
         <div className="rounded-[16px] border border-[#E8D3A6] bg-[#FBF1DD] p-4" data-testid="cashout-pending-block">
           <p className="text-[14px] font-extrabold text-[#B4791F]">

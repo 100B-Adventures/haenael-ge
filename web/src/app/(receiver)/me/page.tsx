@@ -12,6 +12,7 @@ import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import { CheerCount } from "@/components/goal/CheerCount";
 import { NotificationBadge } from "@/components/common/NotificationBadge";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { PhoneConsentNotice } from "@/components/auth/PhoneConsentNotice";
 import { HomeSeenTracker } from "@/components/goal/HomeSeenTracker";
 import { MyLinkCard } from "@/components/goal/MyLinkCard";
 import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
@@ -158,6 +159,12 @@ export default async function ReceiverHomePage() {
     redirect("/onboarding");
   }
 
+  const { data: member } = await supabase
+    .from("member")
+    .select("phone")
+    .eq("id", user.id)
+    .maybeSingle();
+
   // K1: 클로버 잔액 (개수 — 주표기) + 웰컴 클로버 성장훅(2026-07-18): 원화 등가는 보조표기만.
   const { data: balance } = await supabase
     .from("clover_balance")
@@ -236,6 +243,14 @@ export default async function ReceiverHomePage() {
             <LogoutButton />
           </div>
         </div>
+
+        {member && (
+          <PhoneConsentNotice
+            hasPhone={Boolean(member.phone)}
+            redirectPath="/me"
+            context="me"
+          />
+        )}
 
         {/* 목표 제목 */}
         <p
