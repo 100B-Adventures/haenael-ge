@@ -18,8 +18,16 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
     const pending = window.sessionStorage.getItem(PHONE_CONSENT_PENDING_KEY);
     if (pending !== redirectPath) return;
 
-    window.sessionStorage.removeItem(PHONE_CONSENT_PENDING_KEY);
-    if (!hasPhone) setReturnedWithoutPhone(true);
+    if (hasPhone) {
+      window.sessionStorage.removeItem(PHONE_CONSENT_PENDING_KEY);
+      setReturnedWithoutPhone(false);
+      return;
+    }
+
+    // Keep the failed-return marker until Kakao actually supplies a phone number.
+    // Next.js can remount this client subtree after hydration; consuming the marker
+    // before the state update survives would make the remount show the CTA again.
+    setReturnedWithoutPhone(true);
   }, [hasPhone, redirectPath]);
 
   if (hasPhone) return null;

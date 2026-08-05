@@ -51,7 +51,7 @@ describe("PhoneConsentNotice", () => {
 
   it("재동의 후에도 번호가 없으면 반복 CTA 대신 직접 입력을 안내한다", async () => {
     window.sessionStorage.setItem("haenael_phone_consent_pending", "/cashout");
-    render(
+    const firstRender = render(
       <PhoneConsentNotice hasPhone={false} redirectPath="/cashout" context="cashout" />,
     );
 
@@ -64,6 +64,20 @@ describe("PhoneConsentNotice", () => {
       "아래에 전화번호를 직접 입력해 주세요.",
     );
     expect(screen.queryByTestId("phone-consent-cta")).not.toBeInTheDocument();
-    expect(window.sessionStorage.getItem("haenael_phone_consent_pending")).toBeNull();
+    expect(window.sessionStorage.getItem("haenael_phone_consent_pending")).toBe(
+      "/cashout",
+    );
+
+    firstRender.unmount();
+    render(
+      <PhoneConsentNotice hasPhone={false} redirectPath="/cashout" context="cashout" />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("phone-consent-notice")).toHaveTextContent(
+        "카카오에서 전화번호를 받지 못했어요",
+      );
+    });
+    expect(screen.queryByTestId("phone-consent-cta")).not.toBeInTheDocument();
   });
 });
