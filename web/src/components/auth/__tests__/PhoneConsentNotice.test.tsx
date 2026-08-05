@@ -25,6 +25,16 @@ describe("PhoneConsentNotice", () => {
     expect(screen.queryByTestId("phone-consent-notice")).not.toBeInTheDocument();
   });
 
+  it("재동의 뒤 전화번호가 채워졌으면 왕복 상태를 지우고 안내를 숨긴다", async () => {
+    window.sessionStorage.setItem("haenael_phone_consent_pending", "/me");
+    render(<PhoneConsentNotice hasPhone redirectPath="/me" context="me" />);
+
+    expect(screen.queryByTestId("phone-consent-notice")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(window.sessionStorage.getItem("haenael_phone_consent_pending")).toBeNull();
+    });
+  });
+
   it("CTA를 누르면 카카오 왕복 상태를 현재 탭에 저장한다", () => {
     render(
       <PhoneConsentNotice hasPhone={false} redirectPath="/cashout" context="cashout" />,

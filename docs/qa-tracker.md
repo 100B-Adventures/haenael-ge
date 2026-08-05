@@ -539,3 +539,13 @@ Status: **local readiness PASS / ship NG**
 - 390px 화면 증거: `/private/tmp/haenael-beta-local-after.png`.
 - 독립 `qa-verifier`는 unit/build PASS를 재현했지만 샌드박스 포트·Chromium 제약으로 actual browser를 못 봤고, 품질 게이트도 QA 스킬 미호출로 FAIL했다. 따라서 그 자기보고는 출고 근거로 쓰지 않고 컨트롤러의 actual-browser 관찰을 별도 증거로 채택했다.
 - 로그인된 `/home` actual browser와 prod 배포 후 회귀는 여전히 미검증이다.
+## 2026-08-05 — 카카오 전화번호 재동의 복귀 경로
+
+- **범위:** `member.phone`이 비어 있는 로그인 회원에게만 `/me`와 `/cashout`에서 카카오 재동의 CTA를 노출한다. 전 페이지 인터셉트, DB 스키마, 기존 환전 직접 입력 폴백은 변경하지 않았다.
+- **구현:** CTA는 `/auth/kakao/start?redirect=<현재경로>`로 이동한다. 같은 탭의 `sessionStorage`에 왕복 경로를 남기고, 복귀 시 서버가 다시 읽은 `member.phone` 결과로 안내를 숨기거나 직접 입력 문구로 전환한다.
+- **테스트됨:** `npm test` 34 files / 211 tests PASS. 신규 컴포넌트, `/me` 통합, 환전 폼 통합 테스트를 포함한다.
+- **테스트됨:** `npm run build -- --webpack` compile, TypeScript, static pages 16/16 PASS. BUILD_ID 생성 확인.
+- **미검증:** `web/e2e/cashout-manual.spec.ts`에 전화번호 없음, 전화번호 있음, CTA 경로, 재동의 후 미수집 폴백 4건을 추가했으나 워커 포트 제한과 실행 금지 지시로 Playwright는 실행하지 않았다. 기존 6건을 포함한 10건은 컨트롤러 재실행이 필요하다.
+- **보존 확인:** 계좌번호 원문 비노출 어설션 7건, 환전 직접 입력, 신청 상태와 이력, 중복 신청 차단 테스트를 삭제하거나 완화하지 않았다.
+
+---
