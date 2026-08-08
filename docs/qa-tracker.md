@@ -569,3 +569,10 @@ Status: **local readiness PASS / ship NG**
 - **미검증:** 포트 바인딩 금지에 따라 Playwright는 실행하지 않았다. 컨트롤러가 `cashout-manual.spec.ts` 10건을 재실행해 해당 1건과 계좌번호 미노출 어설션 7건을 확인해야 한다.
 
 ---
+# 2026-08-08 — Solapi 알림톡 API 규격 불일치
+
+- 상태: ❌ NG (수정 착수)
+- 범위: `supabase/functions/_shared/alimtalk.ts`
+- 증상: 현 구현의 HMAC 입력·날짜·인코딩·salt 결합 및 `kakaoOptions`/`message.from` 필드가 Solapi 실제 규격과 달라, 운영 키를 등록해도 인증 또는 발송이 실패한다.
+- 보존 조건: ENV 미설정 시 `FAILED` 반환 및 `INAPP` 폴백, 결제 성공 경로, `#{응원자}`·`#{목표}` 변수 키.
+- 종료 증거 예정: 공식 예제 기반 서명 단위 테스트, 관련 `deno test`, 대상 import chain `deno check`.

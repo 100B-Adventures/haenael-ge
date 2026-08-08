@@ -304,7 +304,9 @@ Deno.serve(async (req: Request) => {
       "KAKAO_ALIMTALK_API_URL",
       "KAKAO_ALIMTALK_API_KEY",
       "KAKAO_ALIMTALK_API_SECRET",
-      "KAKAO_ALIMTALK_SENDER_KEY",
+      "KAKAO_ALIMTALK_PFID",
+      "KAKAO_ALIMTALK_FROM",
+      "KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED",
     ].every((name) => Boolean(Deno.env.get(name))),
     getMemberPhone: async (memberId) => {
       const { data: member, error: phoneError } = await supabase

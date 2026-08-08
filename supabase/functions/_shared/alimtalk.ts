@@ -1,18 +1,19 @@
 // alimtalk.ts — 카카오 알림톡 API 어댑터 (정보성·템플릿)
 // ⚠️ 정보성만(마케팅/광고성 금지) — architecture §1 표 참조.
-// 실발송 = 카카오 비즈채널 개설 + 템플릿 사전심사 + 중계업체 계약 필요 (⛔ 회수)
+// 실발송 = 카카오 비즈채널 개설 + 템플릿 사전심사 + Solapi 계약 필요 (⛔ 회수)
 // ENV:
-//   KAKAO_ALIMTALK_API_URL      — 중계업체 REST API URL (예: https://api.solapi.com/messages/v4/send)
-//   KAKAO_ALIMTALK_API_KEY      — 중계업체 API 키
-//   KAKAO_ALIMTALK_API_SECRET   — 중계업체 API 시크릿 (HMAC-SHA256 서명)
-//   KAKAO_ALIMTALK_SENDER_KEY   — 카카오 비즈채널 발신프로필 키
-//   KAKAO_ALIMTALK_PFID         — 발신프로필 ID (중계업체별 상이)
+//   KAKAO_ALIMTALK_API_URL      — Solapi REST API URL (예: https://api.solapi.com/messages/v4/send)
+//   KAKAO_ALIMTALK_API_KEY      — Solapi API 키
+//   KAKAO_ALIMTALK_API_SECRET   — Solapi API 시크릿 (HMAC-SHA256 서명)
+//   KAKAO_ALIMTALK_PFID         — Solapi 채널 연동 ID
+//   KAKAO_ALIMTALK_FROM         — Solapi에 사전 등록한 발신번호
+//   KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED — 검수 승인된 응원 도착 templateId
 
 export interface AlimtalkMessage {
   /** 수신자 전화번호 E.164 (예: "01012345678" or "+821012345678") */
   to: string;
-  /** 사전심사 통과 템플릿 코드 */
-  templateCode: string;
+  /** Solapi에 등록·검수된 템플릿 ID */
+  templateId: string;
   /** 템플릿 변수 치환 맵 */
   variables: Record<string, string>;
 }
@@ -27,8 +28,7 @@ export interface AlimtalkResult {
  * 카카오 알림톡 발송.
  * ENV 미설정 시 → placeholder 모드(FAILED 반환, INAPP 폴백 유도).
  *
- * 중계업체 API는 Solapi-compatible 스펙(multipart/JSON)을 가정.
- * 실제 중계업체 계약 후 KAKAO_ALIMTALK_API_URL을 교체하면 동작.
+ * Solapi messages/v4 JSON 스펙을 사용한다.
  */
 export async function sendAlimtalk(
   msg: AlimtalkMessage,
@@ -36,11 +36,11 @@ export async function sendAlimtalk(
   const apiUrl = Deno.env.get("KAKAO_ALIMTALK_API_URL");
   const apiKey = Deno.env.get("KAKAO_ALIMTALK_API_KEY");
   const apiSecret = Deno.env.get("KAKAO_ALIMTALK_API_SECRET");
-  const senderKey = Deno.env.get("KAKAO_ALIMTALK_SENDER_KEY");
-  const pfId = Deno.env.get("KAKAO_ALIMTALK_PFID") ?? "";
+  const pfId = Deno.env.get("KAKAO_ALIMTALK_PFID")?.trim();
+  const from = Deno.env.get("KAKAO_ALIMTALK_FROM")?.trim();
 
   // ENV 미설정 = placeholder 모드 → caller가 INAPP 폴백
-  if (!apiUrl || !apiKey || !apiSecret || !senderKey) {
+  if (!apiUrl || !apiKey || !apiSecret || !pfId || !from || !msg.templateId) {
     console.warn(
       "[alimtalk] ENV 미설정 — placeholder 모드. 카카오 비즈채널 셋업 후 실발송 가능.",
     );
@@ -51,30 +51,18 @@ export async function sendAlimtalk(
     };
   }
 
-  // 서명 생성: HMAC-SHA256(apiKey + ":" + timestamp, apiSecret)
-  const timestamp = Date.now().toString();
-  const sigData = new TextEncoder().encode(`${apiKey}:${timestamp}`);
-  const keyData = new TextEncoder().encode(apiSecret);
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw",
-    keyData,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const sig = await crypto.subtle.sign("HMAC", cryptoKey, sigData);
-  const signature = btoa(String.fromCharCode(...new Uint8Array(sig)));
+  const authorization = await createSolapiAuthorization(apiKey, apiSecret);
 
-  // 요청 바디 (Solapi-compatible)
+  // Solapi 알림톡 요청에는 text를 넣지 않는다. 변수는 검수 템플릿에 치환한다.
   const body = {
     message: {
       to: msg.to,
-      from: pfId,
+      from,
       kakaoOptions: {
-        senderKey,
-        templateCode: msg.templateCode,
+        pfId,
+        templateId: msg.templateId,
         variables: msg.variables,
-        disableSms: false, // SMS 대체발송 비활성(정보성 알림톡만)
+        disableSms: true,
       },
     },
   };
@@ -84,8 +72,7 @@ export async function sendAlimtalk(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization:
-          `HMAC-SHA256 apiKey=${apiKey}, date=${timestamp}, salt=${Date.now()}, signature=${signature}`,
+        Authorization: authorization,
       },
       body: JSON.stringify(body),
     });
@@ -115,11 +102,51 @@ export async function sendAlimtalk(
   }
 }
 
+/** Solapi 규격: HMAC-SHA256(date + salt, apiSecret), lowercase hex. */
+export async function generateSolapiSignature(
+  apiSecret: string,
+  date: string,
+  salt: string,
+): Promise<string> {
+  const sigData = new TextEncoder().encode(`${date}${salt}`);
+  const keyData = new TextEncoder().encode(apiSecret);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", cryptoKey, sigData);
+  return Array.from(new Uint8Array(sig))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+interface SolapiAuthorizationOptions {
+  date?: string;
+  salt?: string;
+}
+
+/** 요청별 ISO 8601 date와 고유 salt를 사용한 Solapi Authorization 헤더. */
+export async function createSolapiAuthorization(
+  apiKey: string,
+  apiSecret: string,
+  options: SolapiAuthorizationOptions = {},
+): Promise<string> {
+  const date = options.date ?? new Date().toISOString();
+  const salt = options.salt ?? crypto.randomUUID().replaceAll("-", "");
+  const signature = await generateSolapiSignature(apiSecret, date, salt);
+
+  return `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${signature}`;
+}
+
 // ─── 템플릿 헬퍼 ────────────────────────────────────────────────────────────
 
 export const TEMPLATE_CODES = {
-  /** 응원 도착 (정보성) — 사전심사 통과 필요 */
-  CHEER_RECEIVED: "CHEER_RECEIVED_V1",
+  /** 응원 도착 (정보성) — Solapi 검수 승인 후 환경변수로 주입 */
+  CHEER_RECEIVED:
+    Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED")?.trim() ?? "",
 } as const;
 
 /** 응원 도착 알림톡 메시지 빌더 */
@@ -129,7 +156,7 @@ export function buildCheerReceivedMessage(
 ): AlimtalkMessage {
   return {
     to,
-    templateCode: TEMPLATE_CODES.CHEER_RECEIVED,
+    templateId: TEMPLATE_CODES.CHEER_RECEIVED,
     variables: {
       "#{응원자}": opts.displayName,
       "#{목표}": opts.goalTitle.slice(0, 30), // 템플릿 변수 최대 30자
