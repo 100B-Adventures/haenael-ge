@@ -1,0 +1,20 @@
+# .pipeline/stages.override.yaml — haenael-ge 전용 override
+# 글로벌 ~/.claude/pipeline/stages.yaml 위에 머지된다(이 repo에서만). /pipeline·/approve가 읽음.
+# 이유: 해낼게는 독립 서버리스(Next.js+Supabase+Edge Functions) 스택 — 글로벌 build 스킬 postagi-scaffold(Spring Boot/Expo 모놀리스용)가 안 맞아 이 repo만 교체.
+# 회장 승인 2026-07-05. 글로벌은 안 건드림(데이팅 Romeo/Dark 등 타 벤처 postagi-scaffold 유지).
+version: 1
+stages:
+  build:
+    delegate:
+      agents: [code-builder]
+      skills: [haenael-supabase-build, verify, code-review, codex]   # postagi-scaffold 대체
+    money_gate:
+      skill: codex
+      targets: [cheer-order, toss-confirm, toss-webhook, cashout, cashout-payout]
+      requirement: "codex review PASS + money-threat 체크리스트(웹훅서명·RLS우회·self-cashout·secrets·rate limit·멱등·amount·원장누락) 통과해야 슬라이스 완료"
+    loop: [slice-define, migration, gen-types, code, unit-test, e2e-critical, money-gate?, verify, log]   # 수직 슬라이스 루프. E2E=핵심 플로우 브라우저 실행(mock 완료 아님 §3).
+    build_phases:
+      B1: [scaffold, migration, auth-kakao, goal-cheer-ui, wordmap-share, notify-report]   # 비결제 — 지금
+      B2: [cheer-order, toss-confirm, toss-webhook, cashout]   # 돈 — legal ⛔ 4건 확정 후. 강모델+Codex.
+    models: { volume: sonnet, money_core: opus }
+    # artifacts·gate 는 글로벌 build 상속(docs/build-log.md, gate: human)
