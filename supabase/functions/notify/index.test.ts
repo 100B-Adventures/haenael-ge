@@ -18,7 +18,7 @@ Deno.test("buildCheerReceivedMessage — 올바른 메시지 구조 반환", () 
   });
 
   assertEquals(msg.to, "01012345678");
-  assertEquals(msg.templateCode, TEMPLATE_CODES.CHEER_RECEIVED);
+  assertEquals(msg.templateId, TEMPLATE_CODES.CHEER_RECEIVED);
   assertEquals(msg.variables["#{응원자}"], "도경이");
   assertEquals(msg.variables["#{목표}"], "편입 평점 4.0 해낼게");
   assertEquals(
@@ -39,11 +39,10 @@ Deno.test("buildCheerReceivedMessage — goalTitle 30자 초과 시 truncate", (
   assertEquals(msg.variables["#{목표}"].length, 30);
 });
 
-Deno.test("sendAlimtalk — ENV 미설정 시 FAILED(placeholder) 반환", async () => {
-  // 테스트 환경에서는 ENV 미설정 → placeholder 모드
+Deno.test("sendAlimtalk — templateId 미발급 시 FAILED(placeholder) 반환", async () => {
   const result = await sendAlimtalk({
     to: "01099999999",
-    templateCode: "TEST_TEMPLATE",
+    templateId: "",
     variables: { "#{이름}": "테스터" },
   });
 
@@ -54,8 +53,11 @@ Deno.test("sendAlimtalk — ENV 미설정 시 FAILED(placeholder) 반환", async
   );
 });
 
-Deno.test("TEMPLATE_CODES — CHEER_RECEIVED_V1로 고정", () => {
-  assertEquals(TEMPLATE_CODES.CHEER_RECEIVED, "CHEER_RECEIVED_V1");
+Deno.test("TEMPLATE_CODES — 승인된 templateId를 환경변수로 주입", () => {
+  assertEquals(
+    TEMPLATE_CODES.CHEER_RECEIVED,
+    Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED")?.trim() ?? "",
+  );
 });
 
 // ─── notify EF 입력 검증 로직 독립 테스트 ────────────────────────────────────

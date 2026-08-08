@@ -571,8 +571,13 @@ Status: **local readiness PASS / ship NG**
 ---
 # 2026-08-08 — Solapi 알림톡 API 규격 불일치
 
-- 상태: ❌ NG (수정 착수)
+- 상태: 🔧 로컬 교정·회귀 통과 / 운영 미배포·실수신 미검증
 - 범위: `supabase/functions/_shared/alimtalk.ts`
 - 증상: 현 구현의 HMAC 입력·날짜·인코딩·salt 결합 및 `kakaoOptions`/`message.from` 필드가 Solapi 실제 규격과 달라, 운영 키를 등록해도 인증 또는 발송이 실패한다.
 - 보존 조건: ENV 미설정 시 `FAILED` 반환 및 `INAPP` 폴백, 결제 성공 경로, `#{응원자}`·`#{목표}` 변수 키.
-- 종료 증거 예정: 공식 예제 기반 서명 단위 테스트, 관련 `deno test`, 대상 import chain `deno check`.
+- 근본원인: 중계업체가 미정인 시점의 추정 계약을 Solapi 공식 API와 재대조하지 않은 채 어댑터·ENV·테스트에 고정했다. 설정 키 목록도 `toss-confirm`과 어댑터에 중복돼 계약 드리프트를 막지 못했다.
+- 수정: Solapi 공식 HMAC/payload 계약으로 교정하고, 필수 ENV 6종 판정을 `isAlimtalkConfigured` 한 곳으로 통합했다. 미발급 templateId·미등록 발신번호는 추정값을 두지 않고 필수 ENV로 잠갔다.
+- [테스트됨] 전체 Deno 단위 회귀 **50 passed / 0 failed**. 이 중 Solapi 인증·payload·필수 ENV 신규 테스트 4건, 기존 INAPP 폴백 5건을 포함한다.
+- [테스트됨] `deno check` — `_shared/alimtalk.ts`, `notify/index.ts`, `toss-confirm/index.ts` 3개 import chain 통과. 대상 4개 TypeScript 파일 `deno fmt --check` 통과.
+- [근거 확인] 실행 코드·ENV 예시에서 레거시 `senderKey`, `templateCode`, `disableSms: false`, `from: pfId` 잔존 0건(제거 사실을 설명하는 주석·런북 언급만 유지).
+- [미검증] 실제 Solapi API 왕복, 카카오 실수신, 운영 secret·배포 후 결제 E2E. 이번 요청에 따라 배포하지 않았다.

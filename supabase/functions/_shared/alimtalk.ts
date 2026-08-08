@@ -24,6 +24,23 @@ export interface AlimtalkResult {
   error?: string;
 }
 
+export const ALIMTALK_REQUIRED_ENV_NAMES = [
+  "KAKAO_ALIMTALK_API_URL",
+  "KAKAO_ALIMTALK_API_KEY",
+  "KAKAO_ALIMTALK_API_SECRET",
+  "KAKAO_ALIMTALK_PFID",
+  "KAKAO_ALIMTALK_FROM",
+  "KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED",
+] as const;
+
+export function isAlimtalkConfigured(
+  getEnv: (name: string) => string | undefined = Deno.env.get,
+): boolean {
+  return ALIMTALK_REQUIRED_ENV_NAMES.every((name) =>
+    Boolean(getEnv(name)?.trim())
+  );
+}
+
 /**
  * 카카오 알림톡 발송.
  * ENV 미설정 시 → placeholder 모드(FAILED 반환, INAPP 폴백 유도).
@@ -54,18 +71,7 @@ export async function sendAlimtalk(
   const authorization = await createSolapiAuthorization(apiKey, apiSecret);
 
   // Solapi 알림톡 요청에는 text를 넣지 않는다. 변수는 검수 템플릿에 치환한다.
-  const body = {
-    message: {
-      to: msg.to,
-      from,
-      kakaoOptions: {
-        pfId,
-        templateId: msg.templateId,
-        variables: msg.variables,
-        disableSms: true,
-      },
-    },
-  };
+  const body = buildSolapiMessageBody(msg, pfId, from);
 
   try {
     const res = await fetch(apiUrl, {
@@ -100,6 +106,26 @@ export async function sendAlimtalk(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+}
+
+/** Solapi 알림톡 payload. text/senderKey/templateCode는 의도적으로 포함하지 않는다. */
+export function buildSolapiMessageBody(
+  msg: AlimtalkMessage,
+  pfId: string,
+  from: string,
+) {
+  return {
+    message: {
+      to: msg.to,
+      from,
+      kakaoOptions: {
+        pfId,
+        templateId: msg.templateId,
+        variables: msg.variables,
+        disableSms: true,
+      },
+    },
+  };
 }
 
 /** Solapi 규격: HMAC-SHA256(date + salt, apiSecret), lowercase hex. */
