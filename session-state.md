@@ -1308,3 +1308,202 @@ Codex가 부여한 타임스탬프 20260802010000이 **이미 운영 적용된**
 1. pipeline-state.md 현행화(current_stage=design인데 실제 build/ship, 8/2 이후 미갱신).
 2. pane 잔재 파일 2건 처리.
 3. 회장 카카오 재로그인 → 필수동의 심사 결과 → 솔라피 템플릿 심사 → secrets 5종 → toss-confirm/notify 돈경로 리뷰 후 배포.
+
+## 2026-08-08 21:20 — 카카오 필수동의 반려 사유 확보 + 솔라피 실태 정정
+
+### 1. 카카오 필수 동의 승격 = 심사 반려 (관찰됨)
+콘솔 `/console/app/1516450/config/review` → 개인정보 동의항목 `심사 반려`. 사유 모달 원문:
+- 신청 내역: 필수 항목 = 카카오계정(전화번호)
+- 반려 사유: "개인정보처리방침 링크를 확인해 주세요. 개인정보처리방침 수집 조건과 일치하도록 (전화번호) 항목을 '선택' 조건으로 신청해 주세요. → 전화번호 항목은 개인정보 처리방침 → 회원가입 영역 내 선택 항목으로 명시되어 있습니다."
+- 즉 **거절 근거는 정책 위반이 아니라 문서 불일치**. 우리 처리방침이 전화번호를 [선택]으로 적어놨는데 콘솔에선 필수로 신청해서 어긋남.
+- 현재 `phone_number` 상태 = **선택 동의** 유지(`/product/login/scope` 실측). `age_range` 선택, `profile_nickname` 필수.
+- 재신청 모달 확인: 카카오계정(전화번호)의 `필수 동의` 라디오가 **활성 상태**(과거 disabled에서 바뀜). 처리방침만 맞추면 재신청 가능.
+
+### 2. 조치 (로컬 완료, 배포 대기)
+- `web/src/app/privacy/page.tsx` 수정: 카카오계정(전화번호)을 `[선택]` → `[필수]`로 변경, 필수 수집 사유(알림톡이 기본 전달 수단)와 카카오톡 미사용 계정 대비 직접입력 폴백 유지를 명시. 하단 문구에 "필수 항목 미동의 시 회원가입 제한" 추가.
+- `npm run build` PASS(`/privacy` static 생성 확인).
+- **미배포**: 대외 법률 문서라 회장 승인 전 배포 보류.
+
+### 3. 솔라피 실태 정정 (기존 런북 오류)
+- 런북·O-007은 "채널 연동 미완"으로 적혀 있었으나 **실제로는 연동 완료**. `console.solapi.com/kakao/channels`에 `@해낼게` 26.08.05 등록 관찰됨. 회장 진술("채널연동 함")이 맞았고 문서가 틀렸다. 런북 7번 항목 정정 필요.
+- 알림톡 템플릿 = **0개**(`/kakao/templates` "템플릿이 존재하지 않습니다"). 채널 그룹 없음.
+- 계정 solapi7, 잔액 9,588원, 한도 50건.
+
+### 4. 템플릿 등록에 필요한 계약(코드 기준)
+`supabase/functions/_shared/alimtalk.ts:120-138`
+- 템플릿 코드 = `CHEER_RECEIVED_V1`
+- 변수 2개 = `#{응원자}`, `#{목표}`(최대 30자 절단)
+- 본문 초안은 회장 승인 대기.
+
+### 다음 액션
+1. 회장 승인 → 처리방침 배포 → 카카오 필수동의 재신청.
+2. 회장 승인 → 솔라피 `CHEER_RECEIVED_V1` 템플릿 등록·검수 접수.
+3. 승인 후 secrets 5종 등록(로컬 + 운영 이중) → 실결제 E2E.
+4. 런북 `wiki/ops/kakao-alimtalk-runbook.md` 7번(채널 연동) 정정.
+
+## 2026-08-08 22:10 — 카카오 재신청·솔라피 템플릿 접수 완료 + 발송코드 규격 결함 8건 발견
+
+### 완료 (관찰됨)
+1. **처리방침 배포**: 커밋 `5de801f` → `vercel deploy --prod` → `vercel alias set haenael-ge.vercel.app`. 운영 curl 확인: `[필수]</strong> 카카오계정(전화번호)`, "필수 항목에 동의하지 않으면 회원가입이 제한됩니다" 실서빙.
+2. **카카오 필수동의 재신청**: 콘솔 모달에서 카카오계정(전화번호)만 REQUIRED, 나머지 7개 NONE(DOM `aria-checked` 실측 확인). 회원가입 링크 `https://haenael-ge.vercel.app/`, 처리방침 `https://haenael-ge.vercel.app/privacy`, 가입화면 캡처 첨부, 수집 사유 서술. 제출 후 화면 "개인정보 동의항목 심사가 신청되었습니다 / 영업일 기준 약 3~5일", 상태 **심사 중**.
+3. **솔라피 템플릿 검수 접수**: 채널 `@해낼게`, 카테고리 기타(999999), 기본형, 대체발송 안함, 검수자 참고의견 225자. 본문 = `[해낼게] 응원이 도착했어요 / #{응원자}님이 목표 "#{목표}"에 응원을 보냈어요. / 해낼게에서 확인해 보세요.` 변수 2개 인식 확인. 화면 "알림톡 템플릿 검수요청을 완료했습니다", 목록 상태 **검수진행중**(2026.08.08).
+
+### ★ 새로 발견된 결함: 발송 코드가 솔라피 규격과 불일치 8건 (미수정)
+`supabase/functions/_shared/alimtalk.ts`는 '중계업체 미정' 상태에서 Solapi-compatible을 가정해 작성됐다. 공식 규격 대조 결과 지금 키를 넣어도 **인증부터 실패**한다.
+
+공식 규격(근거: developers.solapi.dev API Key 인증, solapi.com/developers/api/messages-ata):
+- `Authorization: HMAC-SHA256 apiKey=<key>, date=<ISO8601>, salt=<random>, signature=<hex>`
+- signature = HMAC-SHA256(date+salt 연결 문자열, apiSecret), **hex** 인코딩
+- 알림톡은 `message.kakaoOptions`에 `pfId`·`templateId`·`variables`
+- `message.from` = 사전 등록된 **발신번호**. 미등록이면 알림톡 실패 시 폴백 없이 그냥 실패
+
+현재 코드 결함:
+1. 서명 대상이 `apiKey:timestamp` (규격은 date+salt)
+2. date가 epoch ms (규격은 ISO8601)
+3. signature가 base64 (규격은 hex)
+4. salt가 서명에 미포함, 헤더엔 별도 `Date.now()`
+5. `kakaoOptions.templateCode` (규격은 `templateId`)
+6. `kakaoOptions.senderKey` (규격은 `pfId`)
+7. `message.from`에 pfId를 넣음 (발신번호여야 함)
+8. `disableSms:false` (템플릿을 대체발송 안함으로 등록했고 발신번호 미등록이라 true여야 함)
+
+추가 함의: 템플릿 ID는 검수 승인 후 발급되므로 `TEMPLATE_CODES.CHEER_RECEIVED="CHEER_RECEIVED_V1"` 상수는 못 쓴다. 환경변수 주입으로 바꿔야 한다. 발신번호 등록도 별도 필요.
+
+### 미완: 수정 위임 실패
+`codex-delegate.sh code-builder`로 위임했으나 Codex가 프롬프트만 출력하고 작업 없이 종료(exit 0, git 변경 0건). 로그 `scratchpad/alimtalk-solapi-fix.log` 143줄, 세션 019fe15a. **재위임 필요.**
+
+### 다음 액션
+1. alimtalk.ts 솔라피 규격 수정 재위임(결함 8건 목록은 위 그대로 사용) → deno test·check 통과 확인.
+2. 솔라피 발신번호 등록(회장 휴대폰 인증 필요할 수 있음).
+3. 카카오 심사 결과 회수(영업일 3~5일, 8/13경) → 승인 시 콘솔에서 필수 동의 실제 전환 확인.
+4. 솔라피 템플릿 승인 시 발급된 templateId 회수 → secrets 등록.
+5. secrets 등록: API_URL(https://api.solapi.com/messages/v4/send)·API_KEY·API_SECRET·PFID·FROM·TEMPLATE_CHEER_RECEIVED. 로컬 ~/.sj-agent-harness/secrets/ + 운영 supabase secrets 이중.
+6. 실결제 1건 E2E: 카카오 실수신 + 솔라피 메시지 ID + DB notification.channel='ALIMTALK' 3종 동시 관찰.
+7. 런북 `wiki/ops/kakao-alimtalk-runbook.md` 갱신: 채널연동 항목 '완료'로 정정, 키 표를 솔라피 실규격으로 교체.
+
+## 2026-08-08 22:20 — 솔라피 계정 실태 확인 (발신번호·pfId·API키·한도)
+
+### 관찰됨
+- **발신번호 010-6856-6609 이미 등록 완료**: 상태 활성화, 번호인증 완료, 만료일 2026.11.29. 최근 이력 "관리자님이 발신번호 중복 해제 요청을 '승인' 처리". 회장 진술이 맞았고 앞선 보고("발신번호 미등록, 회장이 등록 필요")는 오판이었다.
+- **pfId(채널 연동 ID) 확보**: `KA01PF260804201523860sfqf8I9f8Ty` (채널 정보 페이지 URL에서 관찰). 시크릿 아님, 채널 식별자.
+- **일일 발송 한도**: 50건/일, 오늘 50건 남음, 매일 오전 9시 초기화. 잔액 9,588원. (초기 로딩 중 "0건"으로 보인 것은 렌더 전 값이었다.)
+- **API KEY 이미 존재**: `NCSXLB2KMEE2O7YP`, 사용중. API SECRET은 마스킹돼 있고 "생성 시에만 확인 가능".
+- **★ 이 계정은 실사용 중**: 메시지 로그에 API 경유 SMS 발송 이력 다수(07/30, 07/29 x2, 07/19, 07/04, 07/03 ...). 즉 이 API 키를 쓰는 다른 시스템이 살아 있다.
+
+### 로컬 저장 (비밀값 아닌 설정만)
+`~/.sj-agent-harness/secrets/haenael-ge-alimtalk.env` (600) 신규 생성. 등록 키: `KAKAO_ALIMTALK_API_URL`, `KAKAO_ALIMTALK_PFID`, `KAKAO_ALIMTALK_FROM`. API_KEY/API_SECRET/TEMPLATE_ID는 미등록.
+
+### ⛔ 회수 필요: API SECRET 확보 방법 결정
+SECRET은 재생성해야만 볼 수 있는데, **재생성하면 기존 키가 무효화되어 7/30까지 발송 중인 다른 시스템이 깨진다.** 두 갈래이며 회장 판단 필요:
+- (A) 새 API KEY 추가 발급 → 기존 키 무해, 해낼게 전용 키 분리. 콘솔에서 "새로운 API KEY" 클릭이 반응하지 않아 미완.
+- (B) 기존 SECRET 재생성 → 다른 시스템 사용처를 먼저 특정하고 그쪽도 새 값으로 교체해야 함.
+어느 쪽이든 시크릿 원문은 채팅·로그에 남기지 않고 클립보드에서 600 파일로 직행시킨다(§4.5).
+
+### 다음 액션
+1. 회장이 (A)/(B) 선택 → API KEY/SECRET 확보 → 로컬 + 운영 supabase secrets 이중 등록.
+2. alimtalk.ts 솔라피 규격 수정 재위임(결함 8건, 앞 절 참조). Codex 1차 위임은 무작업 종료.
+3. 카카오 필수동의 심사 결과 회수(8/13경). 솔라피 템플릿 검수 결과 회수 후 templateId 확보.
+4. 실결제 1건 E2E: 카카오 실수신 + 솔라피 메시지 ID + DB notification.channel='ALIMTALK'.
+5. 런북 정정: 채널연동 '완료', 발신번호 '완료', 키 표를 솔라피 실규격(pfId/templateId/from)으로 교체.
+
+---
+
+## 2026-08-09 01:35 — 이 파일은 아카이브입니다. 최신 핸드오프는 `.handoff-state.md`
+
+- 2026-08-08 22:18경 누군가(다른 세션 또는 롤오버)가 기존 `.handoff-state.md` 181KB 본문을 이 파일로 옮겼고, 이후 세션 기록은 새 `.handoff-state.md`에 쌓이고 있다.
+- **파일명 규약 위반:** 루트 `session-state.md`는 `~/.claude/standards/state-file-convention.md`에 없는 이름이다. 허용되는 3종은 `pipeline-state.md`(+라인별), `.handoff-state.md`, 공유 얇은 인덱스 `wiki/ops/session-state.md`뿐이다. 이 파일은 raw 아카이브로 옮기거나 이름을 바로잡아야 한다. 회장 판단 대기(파일 정리는 회장이 직접 지시하겠다고 함).
+- **현재 진행 상황은 여기 말고 `.handoff-state.md`를 볼 것.** 요약: 솔라피 해낼게 전용 API Key `NCSOPUYJMSRDS0JD` 발급·시크릿 로컬 600 저장 완료, 카카오 필수동의 재신청 심사 중, 솔라피 템플릿 `CHEER_RECEIVED_V1` 검수진행중, `supabase/functions/_shared/alimtalk.ts` 솔라피 규격 결함 8건 수정 미완(재위임 필요).
+
+## 2026-08-09 — Solapi 알림톡 규격 교정 build 인계
+
+### 지금까지 한 것
+- `pipeline-state.md`에서 build 승인 범위를 확인하고 기반 산출물 4종(`alimtalk.ts`, `notify/index.ts`, `toss-confirm/index.ts`, 카카오 알림톡 런북)과 `docs/구현현황.md`를 읽어 기존 구현 위에서 작업했다.
+- Solapi 규격 불일치 8건은 로컬 커밋 `398d2b0`·`843ce9f`에 반영돼 있음을 확인했다: `date + salt` HMAC-SHA256, ISO 8601 date, lowercase hex, 동일 salt, `templateId`, `pfId`, 등록 발신번호 `from`, `disableSms: true`.
+- 필수 ENV 6종 중 하나 또는 미발급 templateId가 비면 `FAILED`를 반환하고 `toss-confirm` 호출자가 기존 INAPP으로 폴백하는 경로, 결제 응답, `#{응원자}`·`#{목표}` 키를 보존했다.
+- 기본 생성 Authorization의 ISO 8601 date·32자리 salt·64자리 hex 서명과 서명 재계산 일치를 검증하는 테스트를 추가하고 `docs/구현현황.md`·`docs/qa-tracker.md`를 갱신했다. 커밋 `ec36438`.
+
+### 직접 관찰 증거
+- `deno test --allow-env supabase/functions` → 7개 테스트 파일, **51 passed / 0 failed**.
+- `deno check supabase/functions/_shared/alimtalk.ts supabase/functions/notify/index.ts supabase/functions/toss-confirm/index.ts` → 3개 import chain 통과.
+- `deno fmt --check` 대상 4파일 통과. 배포 명령은 실행하지 않았다.
+
+### 남은 이슈
+- 솔라피 templateId가 아직 미발급이고 운영 Supabase secrets·교정 코드가 미배포라 실제 Solapi 응답, 카카오 실수신, 배포 후 결제 E2E는 **미검증**이다.
+- 신규 Solapi 슬라이스의 QA/ship 게이트는 통과하지 않았다. 기존 다른 세션 변경인 `wiki/ops/kakao-alimtalk-runbook.md`의 2026-08-09 계정 대장 append와 pane별 상태 파일은 보존했다.
+
+### 다음 액션
+1. QA가 위 `deno test`·`deno check`를 독립 재현한다.
+2. 템플릿 승인 후 실제 templateId를 로컬·운영 secret에 등록하되 원문을 문서나 Git에 쓰지 않는다.
+3. 별도 QA/배포 승인 뒤 `notify`·`toss-confirm`을 배포하고, 소액 실결제 1건으로 카카오 실수신·Solapi messageId·DB `notification.channel='ALIMTALK'`를 함께 관찰한다. 실패 시 INAPP 폴백도 재현한다.
+
+## 2026-08-09 02:00 — 알림톡 어댑터 솔라피 규격 수정 완료 (컨트롤러 재검증)
+
+- 재위임 성공. 커밋 `398d2b0`(어댑터 수정+테스트), `843ce9f`(env example·런북·구현현황), `ec36438`(인증 회귀 테스트 보강).
+- 결함 8건 반영 확인: 서명 대상 date+salt, date ISO8601, signature hex, salt 서명·헤더 일치, kakaoOptions.templateId/pfId, message.from=발신번호, disableSms=true.
+- **컨트롤러 독립 재현**: `deno test --allow-env supabase/functions/_shared/ auth-kakao/ notify/` = **36 passed / 0 failed**. Codex 자기보고는 51 passed였으나 대상 범위가 달라 수치 불일치. 실행 사실 자체는 재현됨.
+- **주의 1**: `--allow-env` 없이 돌리면 `alimtalk.test.ts`가 uncaught error로 실패한다. `TEMPLATE_CODES`가 모듈 최상위에서 `Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED")`를 읽기 때문(`alimtalk.ts:172-176`). CI에 넣을 때 플래그 필요. 함수 내부 조회로 옮기는 게 더 안전하나 현재 동작에는 문제 없음.
+- **주의 2**: 다른 세션이 커밋 `82fb89f`로 `.handoff-state.md` → `session-state.md` 리네임을 확정했다. 이 파일이 현재 정본 핸드오프다.
+
+### 회장 지시 반영 (2026-08-09)
+- **Codex 토큰 소진.** 이후 개발·QA 위임은 Claude 모델로 한다. 자동메모리 `feedback_role_delegation.md` 갱신 완료.
+
+### 남은 미결
+1. 카카오 개인정보 동의항목 필수 승격 심사 결과 회수(8/13경).
+2. 솔라피 템플릿 `CHEER_RECEIVED_V1` 검수 결과 및 templateId 회수(영업일 1~3일).
+3. templateId 확보 후 운영 Supabase secrets 6종 등록(API_URL·API_KEY·API_SECRET·PFID·FROM·TEMPLATE_CHEER_RECEIVED).
+4. `notify`/`toss-confirm` 재배포(코드가 바뀌었으므로 필수). 돈 경로라 2차 리뷰 후.
+5. 실결제 1건 E2E: 카카오 실수신 + 솔라피 메시지 ID + DB notification.channel='ALIMTALK'.
+6. CI에 deno 테스트 편입 검토(`--allow-env` 필요).
+
+## (구 .handoff-state.md 흡수 2026-08-09)
+
+## 2026-08-08 22:35 — 솔라피 신규 API Key 발급 시도, 2차 비밀번호에서 정지
+
+- 회장 지시: "하나 더 늘려" (기존 키 유지, 해낼게 전용 키 신규 발급). 기존 키는 다른 서비스(회장 추정 Romeo 계열)가 7/30까지 실사용 중이라 SECRET 재생성 금지.
+- 진행: `console.solapi.com/credentials` → "새로운 API KEY" → 별칭 "해낼게 알림톡 Supabase Edge Function" 입력 → "모든 IP 허용" 선택 → 확인.
+- **IP 제한 없이 발급하기로 한 근거**: 이 키는 Supabase Edge Function(Deno 서버리스)에서 호출한다. 아웃바운드 IP가 고정이 아니라 CIDR 화이트리스트를 걸면 발송이 실패한다. 대신 키를 해낼게 전용으로 분리해 유출 시 영향 범위를 좁혔다. 추후 Supabase 고정 IP를 확보하면 CIDR로 조일 것.
+- **정지 지점**: 솔라피가 **2차 비밀번호 6자리**(또는 이메일 인증) 요구. 컨트롤러는 비밀번호 입력 금지(안전 규칙)라 진행 불가. 화면은 열어둔 상태로 회장 회수.
+- 발급 성공 시 SECRET은 그 화면에서 1회만 노출된다. 회장이 복사만 해두면 컨트롤러가 `pbpaste`로 600 파일에 직행시켜 채팅·로그 노출 없이 저장한다.
+
+### 다음 액션
+1. 회장이 2차 비밀번호 입력 → 키 발급 → SECRET 복사(붙여넣지 말고 클립보드에만) → 컨트롤러가 로컬 저장 후 운영 supabase secrets 등록.
+2. alimtalk.ts 솔라피 규격 수정 재위임(결함 8건).
+3. 카카오 필수동의 심사 결과(8/13경), 솔라피 템플릿 검수 결과 및 templateId 회수.
+4. 실결제 1건 E2E.
+
+## 2026-08-09 01:40 — 솔라피 신규 API Key 재확인: 미생성
+
+- 회장 "다시 확인해요" 요청으로 `console.solapi.com/credentials` 재조회.
+- **결과: 키 여전히 1개**(`NCSXLB2KMEE2O7YP`, 사용중). 해낼게 별칭 키 없음. 2차 비밀번호 창이 닫히며 입력 내용도 소실됐다.
+- 정지 원인 불변: 솔라피가 6자리 2차 비밀번호(또는 이메일 인증)를 요구하고, 컨트롤러는 비밀번호 입력이 금지돼 있다.
+- 회장께 두 경로 제시: (A) 컨트롤러가 키패드 화면까지 다시 만들어 두면 회장이 숫자만 입력 (B) 회장이 6단계를 직접 수행. 세션 만료 우려로 회장 신호 시점에 여는 편이 낫다고 안내.
+- 재개 절차: /credentials → "새로운 API KEY" → "모든 IP 허용" → 확인 → 6자리 입력 → SECRET 1회 노출 시 복사 버튼만(채팅 붙여넣기 금지) → 컨트롤러가 pbpaste로 600 파일 직행.
+
+### 현재 미결 (변동 없음)
+1. 솔라피 API KEY/SECRET 확보 (회장 인증 대기).
+2. `supabase/functions/_shared/alimtalk.ts` 솔라피 규격 결함 8건 수정 재위임. Codex 1차 위임은 무작업 종료(로그 scratchpad/alimtalk-solapi-fix.log).
+3. 카카오 개인정보 동의항목 필수 승격 심사 결과 회수(8/13경).
+4. 솔라피 템플릿 `응원 도착 알림 CHEER_RECEIVED_V1` 검수 결과 및 templateId 회수.
+5. secrets 6종 운영 등록 후 실결제 1건 E2E(카카오 실수신 + 솔라피 메시지 ID + DB notification.channel='ALIMTALK').
+6. 런북 `wiki/ops/kakao-alimtalk-runbook.md` 정정(채널연동 완료·발신번호 완료·키 표를 pfId/templateId/from 실규격으로).
+
+### 확보 완료된 값 (로컬 600 파일 `~/.sj-agent-harness/secrets/haenael-ge-alimtalk.env`)
+KAKAO_ALIMTALK_API_URL / KAKAO_ALIMTALK_PFID / KAKAO_ALIMTALK_FROM. API_KEY·API_SECRET·TEMPLATE_ID는 미등록.
+
+## 2026-08-09 01:30 — 솔라피 해낼게 전용 API Key 확보 완료
+
+- 회장이 2차 비밀번호 인증 수행 → 신규 키 `NCSOPUYJMSRDS0JD` 생성됨(콘솔 카드 2개 확인, 새 키에 "경고! 모든 IP에서 사용이 허용됨" 표시).
+- 시크릿은 클립보드에서 `~/.sj-agent-harness/secrets/haenael-ge-alimtalk.env`(600)로 직행 저장. 값 원문은 채팅·로그·커밋 어디에도 미노출. 저장 후 클립보드 비움(pbpaste 길이 0 확인).
+- 전역 gitignore `~/.gitignore_global:1`에 `.sj-agent-harness/secrets/` 등재 확인.
+- 기존 키 `NCSXLB2KMEE2O7YP`는 무손상. 다른 서비스가 계속 사용 가능.
+- 런북 `wiki/ops/kakao-alimtalk-runbook.md`에 계정 인벤토리·API Key 대장 절 추가(§4.7), 앞선 "채널연동 미완/발신번호 미등록" 오류 정정.
+
+### 운영 Supabase secrets 등록은 의도적으로 보류
+코드가 아직 솔라피 규격이 아니고 templateId도 미발급이라 지금 넣어도 발송 불가. 실패 로그만 쌓인다. 코드 수정 + 템플릿 승인 후 일괄 등록한다.
+
+### 남은 미결
+1. `supabase/functions/_shared/alimtalk.ts` 솔라피 규격 결함 8건 수정 재위임(Codex 1차 무작업 종료).
+2. 카카오 개인정보 동의항목 필수 승격 심사 결과 회수(8/13경).
+3. 솔라피 템플릿 검수 결과 및 templateId 회수.
+4. secrets 6종 운영 등록 → 실결제 1건 E2E(카카오 실수신 + 솔라피 메시지 ID + DB notification.channel='ALIMTALK').
+5. Supabase 고정 IP 확보 시 신규 키에 CIDR 제한 적용 검토.
