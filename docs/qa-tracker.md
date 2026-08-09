@@ -577,7 +577,7 @@ Status: **local readiness PASS / ship NG**
 - 보존 조건: ENV 미설정 시 `FAILED` 반환 및 `INAPP` 폴백, 결제 성공 경로, `#{응원자}`·`#{목표}` 변수 키.
 - 근본원인: 중계업체가 미정인 시점의 추정 계약을 Solapi 공식 API와 재대조하지 않은 채 어댑터·ENV·테스트에 고정했다. 설정 키 목록도 `toss-confirm`과 어댑터에 중복돼 계약 드리프트를 막지 못했다.
 - 수정: Solapi 공식 HMAC/payload 계약으로 교정하고, 필수 ENV 6종 판정을 `isAlimtalkConfigured` 한 곳으로 통합했다. 미발급 templateId·미등록 발신번호는 추정값을 두지 않고 필수 ENV로 잠갔다.
-- [테스트됨] 전체 Deno 단위 회귀 **50 passed / 0 failed**. 이 중 Solapi 인증·payload·필수 ENV 신규 테스트 4건, 기존 INAPP 폴백 5건을 포함한다.
+- [테스트됨] 2026-08-09 전체 Deno 단위 회귀 **51 passed / 0 failed**. 이 중 Solapi 인증·payload·필수 ENV 신규 테스트 5건, 기존 INAPP 폴백 5건을 포함한다. 기본 생성 Authorization의 ISO 8601 date·32자리 salt·64자리 lowercase hex 서명을 추가 검증했다.
 - [테스트됨] `deno check` — `_shared/alimtalk.ts`, `notify/index.ts`, `toss-confirm/index.ts` 3개 import chain 통과. 대상 4개 TypeScript 파일 `deno fmt --check` 통과.
 - [근거 확인] 실행 코드·ENV 예시에서 레거시 `senderKey`, `templateCode`, `disableSms: false`, `from: pfId` 잔존 0건(제거 사실을 설명하는 주석·런북 언급만 유지).
 - [미검증] 실제 Solapi API 왕복, 카카오 실수신, 운영 secret·배포 후 결제 E2E. 이번 요청에 따라 배포하지 않았다.

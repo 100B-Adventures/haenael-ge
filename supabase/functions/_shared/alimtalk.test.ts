@@ -47,6 +47,25 @@ Deno.test("Solapi Authorization — 공식 예시 date/salt와 ISO 8601 형식 �
   );
 });
 
+Deno.test("Solapi Authorization — 기본 생성 date는 ISO 8601이고 서명은 64자리 hex", async () => {
+  const authorization = await createSolapiAuthorization(
+    "NCSAYU7YDBXYORXC",
+    "test-secret",
+  );
+  const match = authorization.match(
+    /^HMAC-SHA256 apiKey=NCSAYU7YDBXYORXC, date=([^,]+), salt=([0-9a-f]{32}), signature=([0-9a-f]{64})$/,
+  );
+
+  assertEquals(match !== null, true);
+  const [, date, salt, signature] = match!;
+  assertEquals(new Date(date).toISOString(), date);
+  assertEquals(signature.length, 64);
+  assertEquals(
+    signature,
+    await generateSolapiSignature("test-secret", date, salt),
+  );
+});
+
 Deno.test("Solapi 알림톡 payload — 등록 발신번호와 pfId/templateId만 사용", () => {
   const body = buildSolapiMessageBody(
     {
