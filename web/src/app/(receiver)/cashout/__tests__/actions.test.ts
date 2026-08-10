@@ -8,6 +8,7 @@ const {
   callerSelect,
   callerMaybeSingle,
   serviceRpc,
+  notifyInvoke,
   revalidatePath,
 } = vi.hoisted(() => ({
   callerGetUser: vi.fn(),
@@ -17,6 +18,7 @@ const {
   callerSelect: vi.fn(),
   callerMaybeSingle: vi.fn(),
   serviceRpc: vi.fn(),
+  notifyInvoke: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
@@ -28,7 +30,10 @@ vi.mock("@/lib/supabase/server", () => ({
   })),
 }));
 vi.mock("@/lib/supabase/service", () => ({
-  createServiceRoleClient: vi.fn(() => ({ rpc: serviceRpc })),
+  createServiceRoleClient: vi.fn(() => ({
+    rpc: serviceRpc,
+    functions: { invoke: notifyInvoke },
+  })),
   getCashoutAccountEncryptionConfig: vi.fn(() => ({
     activeVersion: 2,
     activeKey: "k".repeat(40),
@@ -48,7 +53,10 @@ describe("createCashoutRequest Server Action", () => {
     callerUpdate.mockReturnValue({ eq: callerEq });
     callerEq.mockReturnValue({ select: callerSelect });
     callerSelect.mockReturnValue({ maybeSingle: callerMaybeSingle });
-    callerMaybeSingle.mockResolvedValue({ data: { id: "member-uid" }, error: null });
+    callerMaybeSingle.mockResolvedValue({
+      data: { id: "member-uid", phone: "01012345678" },
+      error: null,
+    });
     serviceRpc.mockResolvedValue({
       data: [{
         cashout_request_id: 71,
@@ -63,6 +71,7 @@ describe("createCashoutRequest Server Action", () => {
       }],
       error: null,
     });
+    notifyInvoke.mockResolvedValue({ data: { channel: "ALIMTALK" }, error: null });
   });
 
   it("세션 member_id를 고정하고 계좌·예금주를 서버에서 정규화한다", async () => {
@@ -90,6 +99,13 @@ describe("createCashoutRequest Server Action", () => {
       p_account_fingerprint_key: "f".repeat(40),
     });
     expect(revalidatePath).toHaveBeenCalledWith("/cashout/status");
+    expect(notifyInvoke).toHaveBeenCalledWith("notify", {
+      body: {
+        memberId: "member-uid",
+        type: "CASHOUT_REQUESTED",
+        phone: "01012345678",
+      },
+    });
   });
 
   it("비로그인 요청은 service role RPC 전에 거부한다", async () => {
@@ -138,5 +154,52 @@ describe("createCashoutRequest Server Action", () => {
     expect(result).toMatchObject({ ok: false, code: "invalid_phone" });
     expect(callerFrom).not.toHaveBeenCalled();
     expect(serviceRpc).not.toHaveBeenCalled();
+  });
+
+  it("환전 신청 후 알림 호출이 실패해도 원래 성공 응답을 유지한다", async () => {
+    notifyInvoke.mockRejectedValueOnce(new Error("notify unavailable"));
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await createCashoutRequest({
+      cloverAmount: 30,
+      bankCode: "KB",
+      accountNo: "123456789012",
+      accountHolder: "홍길동",
+      phone: "01012345678",
+      requestKey: "cashout_action_05",
+    });
+
+    expect(result).toMatchObject({ ok: true, data: { requestId: 71 } });
+    expect(revalidatePath).toHaveBeenCalledWith("/cashout/status");
+    consoleError.mockRestore();
+  });
+
+  it("멱등 재호출은 신청 알림을 중복 발송하지 않는다", async () => {
+    serviceRpc.mockResolvedValueOnce({
+      data: [{
+        cashout_request_id: 71,
+        status: "REQUESTED",
+        clover_amount: 30,
+        gross_krw: 30_000,
+        fee_krw: 0,
+        withholding_krw: 990,
+        net_krw: 29_010,
+        requested_at: "2026-08-02T00:00:00.000Z",
+        is_replay: true,
+      }],
+      error: null,
+    });
+
+    const result = await createCashoutRequest({
+      cloverAmount: 30,
+      bankCode: "KB",
+      accountNo: "123456789012",
+      accountHolder: "홍길동",
+      phone: "01012345678",
+      requestKey: "cashout_action_06",
+    });
+
+    expect(result).toMatchObject({ ok: true, data: { isReplay: true } });
+    expect(notifyInvoke).not.toHaveBeenCalled();
   });
 });

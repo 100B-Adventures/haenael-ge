@@ -122,7 +122,7 @@ export async function createCashoutRequest(
       .from("member")
       .update({ phone })
       .eq("id", user.id)
-      .select("id")
+      .select("id, phone")
       .maybeSingle();
     if (phoneUpdateError || !updatedMember) {
       console.error("[cashout-action] phone update failed", {
@@ -159,6 +159,32 @@ export async function createCashoutRequest(
         publicCode: code,
       });
       return fail(code);
+    }
+
+    // 환전 신청은 이미 DB에서 확정됐다. 알림 호출은 후속 best-effort라서
+    // 어떤 실패도 신청 성공 응답을 바꾸거나 재시도시키면 안 된다.
+    if (!row.is_replay) {
+      try {
+        const { error: notifyError } = await serviceClient.functions.invoke(
+          "notify",
+          {
+            body: {
+              memberId: user.id,
+              type: "CASHOUT_REQUESTED",
+              phone: updatedMember.phone ?? phone,
+            },
+          },
+        );
+        if (notifyError) {
+          console.error("[cashout-action] requested notification failed", {
+            message: notifyError.message,
+          });
+        }
+      } catch (notifyError) {
+        console.error("[cashout-action] requested notification failed", {
+          message: notifyError instanceof Error ? notifyError.message : "unknown",
+        });
+      }
     }
 
     revalidatePath("/me");

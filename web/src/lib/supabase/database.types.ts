@@ -864,7 +864,10 @@ export type Database = {
       goal_status_enum: "ACTIVE" | "CLOSED" | "DELETED"
       kyc_status_enum: "NONE" | "VERIFIED"
       notification_channel_enum: "ALIMTALK" | "INAPP"
-      notification_type_enum: "CHEER_RECEIVED"
+      notification_type_enum:
+        | "CHEER_RECEIVED"
+        | "CASHOUT_REQUESTED"
+        | "CASHOUT_PAID"
       payment_status_enum: "READY" | "DONE" | "CANCELED" | "FAILED" | "EXPIRED"
       report_status_enum: "OPEN" | "RESOLVED_DELETED" | "DISMISSED"
       report_target_type_enum: "GOAL" | "CHEER"
@@ -1021,7 +1024,11 @@ export const Constants = {
       goal_status_enum: ["ACTIVE", "CLOSED", "DELETED"],
       kyc_status_enum: ["NONE", "VERIFIED"],
       notification_channel_enum: ["ALIMTALK", "INAPP"],
-      notification_type_enum: ["CHEER_RECEIVED"],
+      notification_type_enum: [
+        "CHEER_RECEIVED",
+        "CASHOUT_REQUESTED",
+        "CASHOUT_PAID",
+      ],
       payment_status_enum: ["READY", "DONE", "CANCELED", "FAILED", "EXPIRED"],
       report_status_enum: ["OPEN", "RESOLVED_DELETED", "DISMISSED"],
       report_target_type_enum: ["GOAL", "CHEER"],

@@ -7,7 +7,9 @@
 //   KAKAO_ALIMTALK_API_SECRET   — Solapi API 시크릿 (HMAC-SHA256 서명)
 //   KAKAO_ALIMTALK_PFID         — Solapi 채널 연동 ID
 //   KAKAO_ALIMTALK_FROM         — Solapi에 사전 등록한 발신번호
-//   KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED — 검수 승인된 응원 도착 templateId
+//   KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED    — 검수 승인된 응원 도착 templateId
+//   KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED — 검수 승인된 환전 신청 접수 templateId
+//   KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID      — 검수 승인된 환전 지급 완료 templateId
 
 export interface AlimtalkMessage {
   /** 수신자 전화번호 E.164 (예: "01012345678" or "+821012345678") */
@@ -173,6 +175,12 @@ export const TEMPLATE_CODES = {
   /** 응원 도착 (정보성) — Solapi 검수 승인 후 환경변수로 주입 */
   CHEER_RECEIVED:
     Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED")?.trim() ?? "",
+  /** 환전 신청 접수 (정보성) — Solapi 검수 승인 후 환경변수로 주입 */
+  CASHOUT_REQUESTED:
+    Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED")?.trim() ?? "",
+  /** 환전 지급 완료 (정보성) — Solapi 검수 승인 후 환경변수로 주입 */
+  CASHOUT_PAID:
+    Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID")?.trim() ?? "",
 } as const;
 
 /** 응원 도착 알림톡 메시지 빌더 */
@@ -186,6 +194,36 @@ export function buildCheerReceivedMessage(
     variables: {
       "#{응원자}": opts.displayName,
       "#{목표}": opts.goalTitle.slice(0, 30), // 템플릿 변수 최대 30자
+    },
+  };
+}
+
+/**
+ * 환전 신청 접수 알림톡 메시지 빌더.
+ * 변수 없음 — 문구가 확정 고정이라 치환할 것이 없다.
+ */
+export function buildCashoutRequestedMessage(to: string): AlimtalkMessage {
+  return {
+    to,
+    templateId: TEMPLATE_CODES.CASHOUT_REQUESTED,
+    variables: {},
+  };
+}
+
+/**
+ * 환전 지급 완료 알림톡 메시지 빌더.
+ * ⚠️ 금액·계좌번호는 절대 넣지 않는다(회장 결정) — 은행명만 전달하고
+ * 상세는 앱에서 확인하도록 유도한다.
+ */
+export function buildCashoutPaidMessage(
+  to: string,
+  opts: { bankName: string },
+): AlimtalkMessage {
+  return {
+    to,
+    templateId: TEMPLATE_CODES.CASHOUT_PAID,
+    variables: {
+      "#{은행}": opts.bankName,
     },
   };
 }
