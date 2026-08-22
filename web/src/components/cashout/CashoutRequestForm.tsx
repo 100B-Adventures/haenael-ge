@@ -15,11 +15,14 @@ import {
   formatCashoutKrw,
   maskAccountNumber,
 } from "@/lib/cashout";
+import { KRW_PER_CLOVER, calcCashoutFee } from "@/lib/cashout-fee";
 
 type Props = {
   cashoutEnabled: boolean;
   reachedThreshold: boolean;
   payableAmount: number;
+  /** 총 클로버(총량). 확인 배너의 "모은 N개는 그대로" 문구용 — A안(DESIGN §6-(d)) */
+  totalBalance: number;
   minCashoutClover: number;
   currentCashout: CashoutRecord | null;
   history: CashoutRecord[];
@@ -45,6 +48,7 @@ export function CashoutRequestForm({
   cashoutEnabled,
   reachedThreshold,
   payableAmount,
+  totalBalance,
   minCashoutClover,
   currentCashout,
   history,
@@ -75,9 +79,9 @@ export function CashoutRequestForm({
     () => normalizeKoreanMobilePhone(phone),
     [phone],
   );
-  const grossKrw = cloverAmount * 1000;
-  const withholdingKrw = Math.floor((grossKrw * 33) / 1000);
-  const netKrw = grossKrw - withholdingKrw;
+  const { grossKrw, feeTotalKrw, withholdingKrw, netKrw } = calcCashoutFee(
+    cloverAmount * KRW_PER_CLOVER,
+  );
   const hasPendingCashout = currentCashout?.status === "REQUESTED";
   const canRequest =
     cashoutEnabled &&
@@ -296,7 +300,8 @@ export function CashoutRequestForm({
 
           <div className="rounded-xl bg-[#E7F4EC] p-3" data-testid="cashout-live-preview">
             <p className="text-[12px] leading-6 text-[#3D7A5A]">
-              {formatCashoutKrw(grossKrw)} 요청 → 원천징수 {formatCashoutKrw(withholdingKrw)} →{" "}
+              {formatCashoutKrw(grossKrw)} 요청 → 서비스 이용료 {formatCashoutKrw(feeTotalKrw)} · 원천징수{" "}
+              {formatCashoutKrw(withholdingKrw)} →{" "}
               <strong className="text-[#14613A]">{formatCashoutKrw(netKrw)} 입금</strong>
             </p>
           </div>
@@ -327,9 +332,14 @@ export function CashoutRequestForm({
               <div className="flex justify-between gap-4 py-3"><dt className="text-[#6F6A60]">받으실 금액</dt><dd className="text-[15px] font-extrabold text-[#14613A]">{formatCashoutKrw(netKrw)}</dd></div>
             </dl>
           </div>
-          <div className="rounded-[14px] border border-[#E8D3A6] bg-[#FBF1DD] p-4">
+          {/* 정본 = 프로토 v3.6 확인 배너(scratchpad/cashout-full-journey-v3-opus.html:666).
+              DESIGN.md §6-(d) ①단계 예고("입금이 끝나면 그때 N개가 빠져요") + §8.2 용어(잠금·잠금
+              해제, "돌아옵니다"·"환전 진행중" 폐기어 금지)를 여기서 지킨다. */}
+          <div className="rounded-[14px] border border-[#E8D3A6] bg-[#FBF1DD] p-4" data-testid="cashout-confirm-banner">
             <p className="text-[13.5px] font-extrabold text-[#B4791F]">신청하면 클로버 {cloverAmount}개가 잠겨요</p>
-            <p className="mt-1 text-[11.5px] leading-relaxed text-[#8A6218]">지급이 끝날 때까지 잔액에 환전 진행중으로 보여요. 반려되면 그대로 돌아옵니다.</p>
+            <p className="mt-1 text-[11.5px] leading-relaxed text-[#8A6218]">
+              모은 {totalBalance}개는 그대로 남고, 그중 {cloverAmount}개에만 잠금이 걸려요. <b>입금이 끝나면 그때 {cloverAmount}개가 빠져요.</b> 반려되면 잠금이 풀립니다.
+            </p>
           </div>
           {errorMessage && <p role="alert" className="text-[12px] font-semibold text-[#B42318]">{errorMessage}</p>}
           <button

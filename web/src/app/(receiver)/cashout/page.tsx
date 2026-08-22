@@ -2,10 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CashoutRequestForm } from "@/components/cashout/CashoutRequestForm";
 import { type CashoutRecord, formatCashoutKrw } from "@/lib/cashout";
+import { KRW_PER_CLOVER, calcCashoutFee } from "@/lib/cashout-fee";
 import { isCashoutEnabled } from "@/lib/supabase/service";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-const KRW_PER_CLOVER = 1000;
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +33,9 @@ export default async function CashoutPage() {
   const minCashoutClover = eligibility?.min_cashout_clover ?? 30;
   const reachedThreshold = eligibility?.reached_threshold ?? false;
   const remaining = Math.max(minCashoutClover - totalBalance, 0);
-  const grossKrw = payableAmount * KRW_PER_CLOVER;
-  const withholdingKrw = Math.floor((grossKrw * 33) / 1000);
-  const netKrwPreview = grossKrw - withholdingKrw;
+  const { grossKrw, feeTotalKrw, withholdingKrw, netKrw: netKrwPreview } = calcCashoutFee(
+    payableAmount * KRW_PER_CLOVER,
+  );
 
   return (
     <main className="min-h-svh bg-[#FBFAF7] px-[22px] py-10" data-testid="cashout-page">
@@ -79,14 +78,19 @@ export default async function CashoutPage() {
                 <span>환산 (🍀1개 = 1,000원)</span><strong>{formatCashoutKrw(grossKrw)}</strong>
               </div>
               <div className="flex items-center justify-between py-1.5 text-[12.5px] text-[#3D7A5A]">
-                <span>사업소득 원천징수 3.3%</span><strong>− {formatCashoutKrw(withholdingKrw)}</strong>
+                <span>서비스 이용료 (부가세 포함)</span><strong data-testid="cashout-fee-amount">− {formatCashoutKrw(feeTotalKrw)}</strong>
+              </div>
+              <div className="flex items-center justify-between py-1.5 text-[12.5px] text-[#3D7A5A]">
+                <span>사업소득 원천징수 3.3%</span><strong data-testid="cashout-withholding-amount">− {formatCashoutKrw(withholdingKrw)}</strong>
               </div>
               <div className="my-2 border-t border-[rgba(20,97,58,.18)]" />
               <div className="flex items-center justify-between py-1.5">
                 <span className="text-[13.5px] font-bold text-[#16140F]">받으실 금액</span>
                 <strong className="text-[18px] font-extrabold text-[#14613A]" data-testid="cashout-net-amount">{formatCashoutKrw(netKrwPreview)}</strong>
               </div>
-              <p className="mt-2 text-[10.5px] leading-relaxed text-[#6F6A60]">플랫폼 수수료 없이 요청액의 3.3%만 원천징수해요. 실제 지급액은 신청 시점에 DB에서 다시 확정합니다.</p>
+              <p className="mt-2 text-[10.5px] leading-relaxed text-[#6F6A60]">
+                서비스 이용료는 커피 한 잔 값이에요. 카드 결제 수수료, 응원 알림 발송, 계좌 확인과 송금에 쓰입니다. 소득세는 저희가 가져가는 돈이 아니라 국세청에 대신 내드리는 금액이에요. 다음 해 5월에 종합소득세 신고하시면 돌려받으실 수도 있어요. 실제 지급액은 신청 시점에 다시 확정합니다.
+              </p>
             </div>
           </section>
 
@@ -95,6 +99,7 @@ export default async function CashoutPage() {
               cashoutEnabled={isCashoutEnabled()}
               reachedThreshold={reachedThreshold}
               payableAmount={payableAmount}
+              totalBalance={totalBalance}
               minCashoutClover={minCashoutClover}
               currentCashout={currentCashout}
               history={history}

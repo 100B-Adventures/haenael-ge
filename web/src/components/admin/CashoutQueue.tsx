@@ -237,10 +237,17 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
             {modal.action === "paid" ? (
               <label className="mt-4 flex gap-2 text-[12.5px] leading-relaxed text-[#6F6A60]"><input type="checkbox" checked={paidConfirmed} onChange={(event) => setPaidConfirmed(event.target.checked)} className="mt-1 size-4 accent-[#1B8A4F]" /><span>은행 앱에서 위 계좌로 <strong>{formatKrw(modal.cashout.net_krw)} 이체를 실제로 마쳤습니다.</strong></span></label>
             ) : (
-              <div className="mt-4"><label htmlFor="cashout-reject-note" className="text-[11.5px] font-bold text-[#6F6A60]">반려 사유 <span className="text-[#D9483B]">*필수</span></label><textarea id="cashout-reject-note" rows={3} maxLength={500} value={notes[modal.cashout.id] ?? ""} onChange={(event) => setNotes((current) => ({ ...current, [modal.cashout.id]: event.target.value }))} className="mt-2 w-full rounded-[12px] border border-[#E8E4DC] p-3 text-[12.5px]" /></div>
+              <div className="mt-4">
+                {/* 정본 = 프로토 v3.6 관리자 반려 확인 모달(scratchpad/cashout-full-journey-v3-opus.html:965).
+                    A안에서 반려는 잠금 해제일 뿐이다 — §8.2 폐기어("복원") 사용 금지. */}
+                <p className="rounded-[12px] bg-[#FBEAE7] p-3 text-[11.5px] leading-relaxed text-[#8A2E22]" data-testid="cashout-reject-warning">
+                  반려하면 친구 응원분 🍀{modal.cashout.clover_amount}개에 걸린 <strong>잠금이 풀려요.</strong> 총량은 애초에 줄지 않았으므로 되돌릴 잔액이 없습니다. 신청자는 사유를 보고 다시 신청할 수 있어요.
+                </p>
+                <label htmlFor="cashout-reject-note" className="mt-3 block text-[11.5px] font-bold text-[#6F6A60]">반려 사유 <span className="text-[#D9483B]">*필수</span></label><textarea id="cashout-reject-note" rows={3} maxLength={500} value={notes[modal.cashout.id] ?? ""} onChange={(event) => setNotes((current) => ({ ...current, [modal.cashout.id]: event.target.value }))} className="mt-2 w-full rounded-[12px] border border-[#E8E4DC] p-3 text-[12.5px]" />
+              </div>
             )}
             {errors[modal.cashout.id] && <p role="alert" className="mt-2 text-xs font-semibold text-destructive">{errors[modal.cashout.id]}</p>}
-            <div className="mt-5 flex gap-2"><button type="button" onClick={() => setModal(null)} className="flex-1 rounded-[14px] border border-[#E8E4DC] py-3 text-sm font-bold">취소</button><button type="button" onClick={processSelected} disabled={pending || (modal.action === "paid" && !paidConfirmed)} className={`flex-1 rounded-[14px] py-3 text-sm font-extrabold text-white disabled:opacity-40 ${modal.action === "paid" ? "bg-[#1B8A4F]" : "bg-[#D9483B]"}`}>{modal.action === "paid" ? "지급 완료 확정" : "반려하고 복원"}</button></div>
+            <div className="mt-5 flex gap-2"><button type="button" onClick={() => setModal(null)} className="flex-1 rounded-[14px] border border-[#E8E4DC] py-3 text-sm font-bold">취소</button><button type="button" onClick={processSelected} disabled={pending || (modal.action === "paid" && !paidConfirmed)} className={`flex-1 rounded-[14px] py-3 text-sm font-extrabold text-white disabled:opacity-40 ${modal.action === "paid" ? "bg-[#1B8A4F]" : "bg-[#D9483B]"}`} data-testid="cashout-modal-confirm-button">{modal.action === "paid" ? "지급 완료 확정" : "반려하고 잠금 해제"}</button></div>
           </div>
         </div>
       )}

@@ -84,4 +84,26 @@ describe("CashoutQueue", () => {
     await waitFor(() => expect(markCashoutPaid).toHaveBeenCalledWith(cashout.id, ""));
     expect(refresh).toHaveBeenCalled();
   });
+
+  // 컨트롤러 재검증 MAJOR3: A안에서 반려는 잠금 해제일 뿐이고 되돌릴 잔액이 없다.
+  // §8.2 폐기어("보류"·"복원")가 버튼·경고문 어디에도 남으면 안 된다.
+  it("반려 모달은 '복원'이 아니라 '잠금 해제'를 말하고, 버튼도 같은 사실을 말한다", async () => {
+    render(<CashoutQueue cashouts={[cashout]} />);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "반려" })[0]);
+    const dialog = await screen.findByRole("dialog");
+
+    const warning = screen.getByTestId("cashout-reject-warning");
+    expect(warning).toHaveTextContent(
+      `반려하면 친구 응원분 🍀${cashout.clover_amount}개에 걸린 잠금이 풀려요. 총량은 애초에 줄지 않았으므로 되돌릴 잔액이 없습니다. 신청자는 사유를 보고 다시 신청할 수 있어요.`,
+    );
+    expect(dialog.textContent).not.toMatch(/보류|복원/);
+
+    fireEvent.change(screen.getByLabelText(/반려 사유/), { target: { value: "예금주 불일치" } });
+    const confirmButton = screen.getByTestId("cashout-modal-confirm-button");
+    expect(confirmButton).toHaveTextContent("반려하고 잠금 해제");
+
+    fireEvent.click(confirmButton);
+    await waitFor(() => expect(rejectCashout).toHaveBeenCalledWith(cashout.id, "예금주 불일치"));
+  });
 });

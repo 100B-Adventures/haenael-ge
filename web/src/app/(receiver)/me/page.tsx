@@ -16,8 +16,8 @@ import { PhoneConsentNotice } from "@/components/auth/PhoneConsentNotice";
 import { HomeSeenTracker } from "@/components/goal/HomeSeenTracker";
 import { MyLinkCard } from "@/components/goal/MyLinkCard";
 import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
-import { krwFromClover } from "@/lib/clover";
-import { type CashoutRecord, formatCashoutKrw } from "@/lib/cashout";
+import { SplitBalanceCard } from "@/components/goal/SplitBalanceCard";
+import { type CashoutRecord } from "@/lib/cashout";
 
 // ─── 응원자 행 ─────────────────────────────────────────────────────────────────
 // DESIGN.md §6-(b′)(2026-07-19 회장 결정 B): 본인 한정 개별 클로버 개수 노출.
@@ -165,22 +165,21 @@ export default async function ReceiverHomePage() {
     .eq("id", user.id)
     .maybeSingle();
 
-  // K1: 클로버 잔액 (개수 — 주표기) + 웰컴 클로버 성장훅(2026-07-18): 원화 등가는 보조표기만.
-  const { data: balance } = await supabase
-    .from("clover_balance")
-    .select("clover_count")
-    .eq("member_id", user.id)
-    .single();
-
-  const cloverCount = balance?.clover_count ?? 0;
-
-  // 환전 도달판정(웰컴 포함) — 환전 버튼 활성 여부 판단에만 사용, 지급액 계산은 cashout 화면 전담.
-  const { data: eligibilityRaw } = await supabase.rpc("clover_eligibility", {
-    p_member_id: user.id,
-  });
+  // K1: 클로버 잔액 (개수 — 주표기) + 환전 잠금(A안, FDD §9.1): total/locked/available을
+  // clover_eligibility 한 함수 한 스냅샷에서 받는다(clover_balance 직접 조회 폐기 — I1 보장).
+  const { data: eligibilityRaw, error: eligibilityError } = await supabase.rpc(
+    "clover_eligibility",
+    { p_member_id: user.id },
+  );
   const eligibility = Array.isArray(eligibilityRaw) ? eligibilityRaw[0] : eligibilityRaw;
+  // 컨트롤러 3차 리뷰 MINOR: 조회가 실패해도 여기서 그냥 0으로 떨어지면 "🍀 0개"가 정상
+  // 상태처럼 보인다(DESIGN.md §6 상태 가시성: 침묵 금지 위반). balanceLoadFailed를 화면이
+  // 직접 분기해서 실패를 실패로 그린다.
+  const balanceLoadFailed = Boolean(eligibilityError) || !eligibility;
+  const cloverCount = eligibility?.total_balance ?? 0;
+  const lockedAmount = eligibility?.locked_amount ?? 0;
+  const availableAmount = eligibility?.available_amount ?? cloverCount;
   const reachedThreshold = eligibility?.reached_threshold ?? false;
-  const krwEquivalent = krwFromClover(cloverCount); // 1클로버=1,000원 등가(고정 환산 표기, 실제 환전액 보증 아님)
 
   // 수동환전 계약 §0-1-7: 홈은 진행 중 1건 또는 최근 종결 1건을 상태 RPC로 읽는다.
   // account_no_enc는 RPC 반환형에 없어 브라우저/RSC 경계로 넘어오지 않는다.
@@ -296,62 +295,45 @@ export default async function ReceiverHomePage() {
           👀 친구에게 이렇게 보여요 (미리보기)
         </Link>
 
-        {/* 클로버 잔액 — 🍀 개수만 (DESIGN.md §6 금액 3층 b) */}
+        {/* 클로버 잔액 — 환전 잠금(A안) 분할 표시. DESIGN.md §6-(d) · §4 SplitBalanceCard */}
         <div
-          className="rounded-[14px] mb-3 overflow-hidden"
+          className="rounded-[14px] mb-3 overflow-hidden p-4"
           style={{ background: "#fff", border: "1px solid #E8E4DC" }}
           data-testid="clover-balance-card"
         >
-          <div className="flex items-center justify-between p-4">
-          <div>
-            <p className="mb-1" style={{ fontSize: 10.5, color: "#9C968B" }}>
-              모인 클로버
+          {balanceLoadFailed ? (
+            <p className="text-[12px] text-[#B23225]" data-testid="clover-balance-error">
+              🍀 잔액을 불러오지 못했어요. 새로고침 해주세요.
             </p>
-            <p
-              className="font-extrabold"
-              style={{ fontSize: 20, color: "#14613A" }}
-              data-testid="clover-count"
-            >
-              🍀 {cloverCount}
-              <small
-                className="font-semibold ml-0.5"
-                style={{ fontSize: 11, color: "#6F6A60" }}
-              >
-                개
-              </small>
-            </p>
-            {/* 원화 등가 보조표기(2026-07-18 회장·컨트롤러 확정, DESIGN.md §6 개정) —
-                크기·색으로 개수가 여전히 주(主), 이 값은 고정환산 참고치이지 실제 환전액 보증 아님. */}
-            <p
-              className="mt-0.5"
-              style={{ fontSize: 10.5, color: "#9C968B" }}
-              data-testid="clover-krw-equivalent"
-            >
-              ≈{krwEquivalent.toLocaleString("ko-KR")}원 상당
-            </p>
-          </div>
-          {/* 환전 페이지 진입은 미달이어도 항상 허용. 실제 신청은 Server Action의 서버측 CASHOUT_ENABLED와 DB 계약으로 게이트한다. */}
-          <Link
-            href={pendingCashout ? "/cashout/status" : "/cashout"}
-            className="rounded-[10px] px-3 py-2 font-bold text-white text-center"
-            style={{
-              background: pendingCashout ? "#FBF1DD" : "#1B8A4F",
-              color: pendingCashout ? "#B4791F" : "#fff",
-              fontSize: 12,
-              opacity: pendingCashout || reachedThreshold ? 1 : 0.6,
-            }}
-            data-testid={pendingCashout ? "cashout-button-pending" : reachedThreshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
-          >
-            {pendingCashout ? "진행중" : "환전"}
-          </Link>
-          </div>
-          {pendingCashout && (
-            <div className="flex items-center justify-between border-t border-dashed border-[#E8E4DC] bg-[#FCFBF8] px-4 py-3" data-testid="cashout-hold-line">
-              <div>
-                <p className="text-[11.5px] text-[#6F6A60]">🔒 환전 진행중 <span className="text-[#9C968B]">(지급되면 사라져요)</span></p>
-                <p className="mt-0.5 text-[10.5px] text-[#9C968B]">{formatCashoutKrw(pendingCashout.net_krw)} 입금 예정</p>
+          ) : (
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <SplitBalanceCard
+                  total={cloverCount}
+                  locked={lockedAmount}
+                  available={availableAmount}
+                  pendingNetKrw={pendingCashout?.net_krw ?? null}
+                />
               </div>
-              <strong className="text-[12.5px] text-[#B4791F]">🍀 {pendingCashout.clover_amount}개</strong>
+              {/* 환전 페이지 진입은 미달이어도 항상 허용. 실제 신청은 Server Action의 서버측 CASHOUT_ENABLED와 DB 계약으로 게이트한다. */}
+              <Link
+                href={pendingCashout ? "/cashout/status" : "/cashout"}
+                className="ml-3 shrink-0 rounded-[10px] px-3 py-2 font-bold text-white text-center flex flex-col items-center gap-0.5"
+                style={{
+                  background: pendingCashout ? "#FBF1DD" : "#1B8A4F",
+                  // 컨트롤러 3차 리뷰 ★3: amber-soft(#FBF1DD) 배경 위 글자는 원색(#B4791F)이 아니라
+                  // amber-ink(#8A5A12, 5.27:1)를 쓴다 — §3.1 원색은 테두리·점·채움 전용 규칙.
+                  color: pendingCashout ? "#8A5A12" : "#fff",
+                  fontSize: 12,
+                  opacity: pendingCashout || reachedThreshold ? 1 : 0.6,
+                }}
+                data-testid={pendingCashout ? "cashout-button-pending" : reachedThreshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
+              >
+                <span>{pendingCashout ? "진행중" : "환전"}</span>
+                {pendingCashout && (
+                  <small style={{ fontSize: 9, fontWeight: 700, opacity: 0.85 }}>상태 보기</small>
+                )}
+              </Link>
             </div>
           )}
         </div>

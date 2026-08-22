@@ -52,11 +52,14 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ko-KR", {
 
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 
+// DESIGN.md §8.2 용어 사전: A안에서 "보류·복원"은 폐기어다(2026-08-21 확정).
+// CASHOUT_HOLD = 잠금(총량 불변) · CASHOUT_SETTLED = 확정 차감(총량 감소 유일 지점) ·
+// CASHOUT_REVERSAL = 잠금 해제(되돌릴 잔액 없음). 관리자 화면도 같은 단어를 쓴다.
 const ledgerTypeLabels: Record<string, string> = {
   EARN: "응원 적립",
-  CASHOUT_HOLD: "환전 보류",
-  CASHOUT_SETTLED: "환전 확정",
-  CASHOUT_REVERSAL: "환전 복원",
+  CASHOUT_HOLD: "환전 잠금",
+  CASHOUT_SETTLED: "환전 확정 차감",
+  CASHOUT_REVERSAL: "환전 잠금 해제",
   REFUND_REVERSAL: "환불 차감",
   WELCOME_GRANT: "웰컴 적립",
   WELCOME_REVERSAL: "웰컴 회수",
@@ -313,7 +316,7 @@ export default async function AdminPage() {
           <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
             <SectionHeader
               title="환전 요청 큐"
-              description="계좌는 기본 마스킹 · 실제 송금 후 지급 완료 · 반려 시 클로버 자동 복원"
+              description="계좌는 기본 마스킹 · 실제 송금 후 지급 완료 · 반려 시 클로버 잠금 해제(총량은 그대로)"
               count={cashouts.length}
             />
             <CashoutQueue cashouts={cashouts} />

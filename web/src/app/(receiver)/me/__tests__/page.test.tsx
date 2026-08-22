@@ -51,18 +51,18 @@ const GOAL_ROW = {
 function buildSupabase(
   cheers: Array<Record<string, unknown>>,
   phone: string | null = "01012345678",
+  eligibility: Record<string, unknown> = { reached_threshold: false },
 ) {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "owner-uid" } } }) },
     rpc: vi.fn().mockImplementation((fn: string) => {
       if (fn === "clover_eligibility") {
-        return Promise.resolve({ data: [{ reached_threshold: false }], error: null });
+        return Promise.resolve({ data: [eligibility], error: null });
       }
       return Promise.resolve({ data: [], error: null });
     }),
     from: vi.fn((table: string) => {
       if (table === "goal") return chainable({ data: [GOAL_ROW], error: null });
-      if (table === "clover_balance") return chainable({ data: { clover_count: 5 }, error: null });
       if (table === "cheer") return chainable({ data: cheers, error: null });
       if (table === "member") return chainable({ data: { phone }, error: null });
       throw new Error(`unexpected table: ${table}`);
@@ -195,5 +195,28 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     render(await ReceiverHomePage());
 
     expect(screen.queryByTestId("phone-consent-notice")).not.toBeInTheDocument();
+  });
+
+  // 컨트롤러 3차 리뷰 MINOR: clover_eligibility 목이 reached_threshold만 갖고 있어서
+  // available/locked가 항상 0으로 떨어졌다 — page.tsx가 total/locked/available을 서로
+  // 바꿔 넘겨도 이 회귀망이 못 잡는 상태였다. 잠김이 있는 목을 추가해 SplitBalanceCard로
+  // 넘어가는 세 값이 각각 제자리(스왑 없이)인지 직접 단언한다.
+  it("잠김이 있으면 사용가능/잠김 개수가 서로 바뀌지 않고 각자 제자리에 렌더된다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678", {
+        total_balance: 52,
+        locked_amount: 40,
+        available_amount: 12,
+        reached_threshold: true,
+      }) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    expect(screen.getByTestId("split-balance-total")).toHaveTextContent("🍀 52");
+    expect(screen.getByTestId("split-balance-available")).toHaveTextContent("🍀 12개");
+    expect(screen.getByTestId("split-balance-locked")).toHaveTextContent("🍀 40개");
+    expect(screen.getByTestId("split-balance-block")).toBeInTheDocument();
   });
 });
