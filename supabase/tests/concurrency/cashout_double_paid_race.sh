@@ -108,15 +108,21 @@ PAID_ROWS=$(psql "$DB_URL" -q -t -A \
   -c "SELECT count(*) FROM public.cashout_request WHERE id=${REQUEST_ID} AND status='PAID'")
 SETTLED_ROWS=$(psql "$DB_URL" -q -t -A \
   -c "SELECT count(*) FROM public.clover_ledger WHERE entry_type='CASHOUT_SETTLED' AND ref_type='cashout_request' AND ref_id=${REQUEST_ID}")
+# A안(FDD §10·§16-R1): SETTLED가 delta=-N이 되면서 이중 실행 = 이중 차감 위험이 신규
+# 발생했다. 예전엔 SETTLED delta=0이라 잔액을 볼 이유가 없었지만 이제는 필수 단언이다.
+# member는 EARN 30만 있었고(총량 30) 30클로버를 신청·지급했으므로 정확히 1회만 감소하면 0.
+FINAL_BALANCE=$(psql "$DB_URL" -q -t -A \
+  -c "SELECT COALESCE(clover_count, -999) FROM public.clover_balance WHERE member_id='${MEMBER_ID}'")
 
-echo "parallel PAID results: success=${SUCCESS_COUNT}, blocked=${REJECT_COUNT}, paid_rows=${PAID_ROWS}, settled_rows=${SETTLED_ROWS}"
+echo "parallel PAID results: success=${SUCCESS_COUNT}, blocked=${REJECT_COUNT}, paid_rows=${PAID_ROWS}, settled_rows=${SETTLED_ROWS}, final_balance=${FINAL_BALANCE}"
 
 if [ "$SUCCESS_COUNT" -ne 1 ] || [ "$REJECT_COUNT" -ne 1 ] ||
-   [ "$PAID_ROWS" -ne 1 ] || [ "$SETTLED_ROWS" -ne 1 ]; then
-  echo "FAIL — 병렬 지급완료가 정확히 1건으로 수렴하지 않음"
+   [ "$PAID_ROWS" -ne 1 ] || [ "$SETTLED_ROWS" -ne 1 ] ||
+   [ "$FINAL_BALANCE" -ne 0 ]; then
+  echo "FAIL — 병렬 지급완료가 정확히 1건으로 수렴하지 않거나 잔액이 이중 차감됨(기대 0, 실측 ${FINAL_BALANCE})"
   FAIL=1
 else
-  echo "ALL PASS — 병렬 지급완료 2건 중 1건만 성공, PAID/SETTLED 각 1건"
+  echo "ALL PASS — 병렬 지급완료 2건 중 1건만 성공, PAID/SETTLED 각 1건, 잔액 정확히 1회만 감소(30→0)"
 fi
 
 exit "$FAIL"

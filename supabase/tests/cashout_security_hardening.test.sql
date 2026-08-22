@@ -1,7 +1,8 @@
 -- cashout_security_hardening.test.sql — 배포차단 보안/경계 회귀
 BEGIN;
 
-SELECT plan(32);
+-- MAJOR2 회귀 2건(파기가드 신청·throws_ok) 추가로 32 → 34.
+SELECT plan(34);
 
 SELECT ok(
   (
@@ -16,7 +17,11 @@ SELECT ok(
   'sync_clover_balance는 호출자와 무관한 빈 search_path를 고정'
 );
 
-SELECT like(
+-- pgtap에는 최상위 like()가 없다(있는 건 alike/ialike/throws_like) — 이 파일의 원래
+-- 호출이 존재하지 않는 함수를 불러 첫 assertion에서 전체 32개 plan이 즉시 죽고 있었다
+-- (컨트롤러 재검증 지적: "이 회귀를 잡아줄 유일한 테스트가 꺼져 있던 상태로 지나간 것").
+-- alike(anyelement, like_pattern, description)로 교체 — alike는 SQL LIKE 패턴(% _)을 받는다, 정규식이 아니다. 정규식 대조가 필요하면 matches()를 쓴다. 인자 순서·의미는 동일.
+SELECT alike(
   (
     SELECT p.prosrc
     FROM pg_catalog.pg_proc AS p
@@ -260,10 +265,10 @@ SELECT is(
   '65,076클로버 오버플로 경계 신청 성공'
 );
 SELECT is(
-  (SELECT (gross_krw, withholding_krw, net_krw)
+  (SELECT (gross_krw, fee_krw, withholding_krw, net_krw)
    FROM public.cashout_request WHERE request_key = 'overflow-65076'),
-  (65076000::bigint, 2147508::bigint, 62928492::bigint),
-  '65,076클로버 원화/원천징수/실지급 bigint 계산 정확'
+  (65076000::bigint, 7158360::bigint, 1911282::bigint, 56006358::bigint),
+  '65,076클로버 원화/이용료/원천징수/실지급 bigint 계산 정확'
 );
 
 SELECT is(
@@ -327,6 +332,57 @@ SELECT ok(
     'service_role', 'public.cashout_account_access_log', 'DELETE'
   ),
   'service_role은 감사 로그 DELETE 권한 없음'
+);
+
+-- 컨트롤러 재검증 MAJOR2 회귀: account_purged_at IS NULL 가드가 admin_mark_cashout_paid
+-- 본문에서 실제로 걸리는지 직접 증명한다(정상 흐름에선 REQUESTED가 파기될 일이 없어
+-- 방어적 가드라 위 fixture만으론 안 걸린다 — 여기서 강제로 파기시각을 심어 확인).
+SELECT is(
+  (SELECT status::text FROM public.create_cashout_request(
+    'ca5e0000-0000-0000-0000-000000000004', 30, 'KB', repeat('5', 12),
+    '파기가드회원', 'purge-guard-check', 1::smallint,
+    repeat('o', 40), repeat('f', 40)
+  )),
+  'REQUESTED',
+  'MAJOR2 회귀: 파기가드 확인용 신청 성공'
+);
+RESET ROLE;
+-- id를 service_role 하에서 미리 세션변수로 고정한다(파일 전역 패턴, 예: test.secure_request_id).
+-- authenticated 하에서 cashout_request를 request_key로 직접 서브쿼리하면 RLS가 타인(관리자)
+-- 소유가 아닌 행을 가려 NULL을 반환하고, 그 NULL이 함수 인자로 들어가면 엉뚱하게
+-- cashout_account_reveal_required로 오판정된다(실측: p_request_id=NULL이 되는 것을 RAISE
+-- NOTICE로 직접 확인) — 이 파일의 기존 관례(현재값 세션변수)를 따라 그 함정을 피한다.
+SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+SELECT set_config(
+  'test.purge_guard_request_id',
+  (SELECT id::text FROM public.cashout_request WHERE request_key = 'purge-guard-check'),
+  true
+);
+-- 열람은 파기 전에 먼저 남긴다(파기 후엔 admin_reveal_cashout_account 자체가 암호문
+-- 없음으로 실패한다 — 이 테스트가 확인하려는 건 열람 게이트가 아니라 파기 가드다).
+SELECT public.admin_reveal_cashout_account(
+  current_setting('test.purge_guard_request_id')::bigint,
+  'ca5e0000-0000-0000-0000-000000000005',
+  jsonb_build_object('1', repeat('o', 40))
+);
+RESET ROLE;
+UPDATE public.cashout_request
+SET account_purged_at = now()
+WHERE request_key = 'purge-guard-check';
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"ca5e0000-0000-0000-0000-000000000005"}',
+  true
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.admin_mark_cashout_paid(
+    current_setting('test.purge_guard_request_id')::bigint,
+    '파기된 계좌로 송금 시도'
+  )$$,
+  '55000', 'invalid_cashout_status',
+  'MAJOR2 회귀: account_purged_at IS NULL 가드가 걸려 REQUESTED→PAID 전이 자체가 매칭되지 않음'
 );
 
 SELECT * FROM finish();

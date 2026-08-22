@@ -41,7 +41,10 @@ type CashoutRecord = {
 type UserFixtureState = {
   totalBalance: number;
   welcomeAmount: number;
+  // A안(FDD §9.3): 신청은 총량을 건드리지 않고 잠금만 건다. payableAmount는
+  // "신청 가능한 잔여분"(잠김을 뺀 값)이고, lockedAmount가 잠긴 클로버의 진실원이다.
   payableAmount: number;
+  lockedAmount: number;
   pendingCashout: CashoutRecord | null;
   phone: string | null;
 };
@@ -52,6 +55,7 @@ const INITIAL_FIXTURE_BY_USER = new Map<string, UserFixtureState>([
     totalBalance: 29,
     welcomeAmount: 0,
     payableAmount: 29,
+    lockedAmount: 0,
     pendingCashout: null,
     phone: null,
   }],
@@ -59,6 +63,7 @@ const INITIAL_FIXTURE_BY_USER = new Map<string, UserFixtureState>([
     totalBalance: 40,
     welcomeAmount: 0,
     payableAmount: 40,
+    lockedAmount: 0,
     pendingCashout: null,
     phone: null,
   }],
@@ -66,13 +71,18 @@ const INITIAL_FIXTURE_BY_USER = new Map<string, UserFixtureState>([
     totalBalance: 40,
     welcomeAmount: 0,
     payableAmount: 40,
+    lockedAmount: 0,
     pendingCashout: null,
     phone: "01012345678",
   }],
   [USERS.duplicate, {
-    totalBalance: 10,
+    // 컨트롤러 재검증 MINOR 수정: total=10·locked=30은 I2(locked<=total)를 위반하는
+    // 자기모순 상태였다(B안 시절 값이 남아 있었다). total=40으로 올려 locked=30 ·
+    // payable=10(=40-0-30)이 실제로 성립하게 맞춘다.
+    totalBalance: 40,
     welcomeAmount: 0,
     payableAmount: 10,
+    lockedAmount: 30, // existingDuplicate()의 clover_amount와 정합(진행 중 신청 = 잠김)
     pendingCashout: existingDuplicate(),
     phone: "01087654321",
   }],
@@ -152,9 +162,12 @@ function eligibility(userId: string | null) {
   const totalBalance = fixture?.totalBalance ?? 0;
   const welcomeAmount = fixture?.welcomeAmount ?? 0;
   const payableAmount = fixture?.payableAmount ?? 0;
+  const lockedAmount = fixture?.lockedAmount ?? 0;
   return [{
     total_balance: totalBalance,
     welcome_amount: welcomeAmount,
+    locked_amount: lockedAmount,
+    available_amount: Math.max(totalBalance - lockedAmount, 0),
     payable_amount: payableAmount,
     min_cashout_clover: 30,
     reached_threshold: totalBalance >= 30,
@@ -166,7 +179,7 @@ function existingDuplicate(): CashoutRecord {
     id: 8004,
     status: "REQUESTED",
     clover_amount: 30,
-    net_krw: 29_010,
+    net_krw: 25_819, // 30,000 − 이용료 3,300(VAT 포함) − 원천징수 881
     bank_code: "KB",
     account_masked: "••••••0042",
     account_holder: "중복회원",
@@ -236,13 +249,16 @@ async function handleMockSupabase(request: IncomingMessage, response: ServerResp
 
     const cloverAmount = Number(body.p_clover_amount);
     const grossKrw = cloverAmount * 1000;
-    const withholdingKrw = Math.floor((grossKrw * 33) / 1000);
+    // 서비스 이용료 10% + 부가세 10% → 원천징수는 이용료 차감 후 3.3%.
+    const feeKrw = Math.floor((grossKrw * 10) / 100);
+    const feeTotalKrw = feeKrw + Math.floor((feeKrw * 10) / 100);
+    const withholdingKrw = Math.floor(((grossKrw - feeTotalKrw) * 33) / 1000);
     const requestedAt = "2026-08-04T01:23:45.000Z";
     const record: CashoutRecord = {
       id: 8103,
       status: "REQUESTED",
       clover_amount: cloverAmount,
-      net_krw: grossKrw - withholdingKrw,
+      net_krw: grossKrw - feeTotalKrw - withholdingKrw,
       bank_code: String(body.p_bank_code),
       account_masked: PERSISTED_MASKED_ACCOUNT,
       account_holder: String(body.p_account_holder),
@@ -252,7 +268,8 @@ async function handleMockSupabase(request: IncomingMessage, response: ServerResp
       processing_note: null,
     };
     fixture.pendingCashout = record;
-    fixture.totalBalance -= cloverAmount;
+    // A안(FDD T1): 신청은 총량을 줄이지 않는다. 잠금만 늘고 payable(신청 가능 잔여분)만 준다.
+    fixture.lockedAmount += cloverAmount;
     fixture.payableAmount -= cloverAmount;
 
     // 실제 RPC 계약처럼 응답에는 계좌 원문·암호문을 포함하지 않는다.
@@ -261,7 +278,7 @@ async function handleMockSupabase(request: IncomingMessage, response: ServerResp
       status: record.status,
       clover_amount: cloverAmount,
       gross_krw: grossKrw,
-      fee_krw: 0,
+      fee_krw: feeTotalKrw,
       withholding_krw: withholdingKrw,
       net_krw: record.net_krw,
       requested_at: requestedAt,
@@ -430,6 +447,26 @@ test.describe("수동 환전 — happy + edge", () => {
     await openCashout(page, USERS.happy);
 
     await expect(page.getByTestId("cashout-phone")).toHaveValue("01012345678");
+  });
+
+  test("미리보기 박스가 서비스 이용료 10%(VAT 포함)와 이용료 차감 후 원천징수를 렌더한다", async ({ page }) => {
+    await openCashout(page, USERS.happy);
+
+    // payable 40클로버 = 40,000원 → 이용료 4,000 + VAT 400 = 4,400,
+    // 원천징수 floor((40,000 − 4,400) × 33/1000) = 1,174, 실지급 34,426.
+    const preview = page.getByTestId("cashout-net-preview");
+    await expect(preview).toContainText("서비스 이용료 (부가세 포함)");
+    await expect(page.getByTestId("cashout-fee-amount")).toHaveText("− 4,400원");
+    await expect(page.getByTestId("cashout-withholding-amount")).toHaveText("− 1,174원");
+    await expect(page.getByTestId("cashout-net-amount")).toHaveText("34,426원");
+    await expect(preview).not.toContainText("플랫폼 수수료 없이");
+    await expect(preview).toContainText("서비스 이용료는 커피 한 잔 값이에요.");
+
+    // 같은 화면 안의 신청 폼 미리보기도 같은 계산식이어야 한다(옛 29,010원 잔존 금지).
+    // 폼 기본 신청량은 최소 30클로버 = 30,000원 → 이용료 3,300 · 원천징수 881 · 실지급 25,819.
+    await expect(page.getByTestId("cashout-live-preview")).toContainText("서비스 이용료 3,300원");
+    await expect(page.getByTestId("cashout-live-preview")).toContainText("25,819원 입금");
+    await expect(page.getByTestId("cashout-page")).not.toContainText("29,010원");
   });
 
   test("잘못된 계좌 형식과 최소 수량 미만을 인라인에서 거부한다", async ({ page }) => {

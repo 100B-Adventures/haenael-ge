@@ -30,6 +30,9 @@ export type CashoutRecord = {
   paid_at: string | null;
   rejected_at: string | null;
   processing_note: string | null;
+  /** PAID 확정 시점 총량 스냅샷(my_cashout_status 전용, MAJOR1). REQUESTED/REJECTED는 undefined일 수 있음. */
+  settled_balance_before?: number | null;
+  settled_balance_after?: number | null;
 };
 
 export const CASHOUT_STATUS_LABELS: Record<CashoutStatus, string> = {

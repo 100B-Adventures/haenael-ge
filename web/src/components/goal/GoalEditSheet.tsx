@@ -99,7 +99,10 @@ export function GoalEditSheet({
     const { error } = await supabase.rpc("update_goal", {
       p_goal_id: goalId,
       p_title: normalized.title,
-      p_reason: normalized.reason || null,
+      // DB(20260727010000_update_goal_rpc.sql:58)가 NULLIF(btrim(p_reason), '')로
+      // 빈 문자열도 NULL로 정규화하므로 ""와 null은 런타임 의미가 동일하다.
+      // gen types가 p_reason을 string(non-null)으로 좁혀 내보내 null 리터럴이 타입 에러였다 — 최소 변경으로 해소.
+      p_reason: normalized.reason || "",
       p_due_date: normalized.dueDate,
     });
 

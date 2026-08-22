@@ -34,50 +34,142 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_member: {
+        Row: {
+          created_at: string
+          member_id: string
+        }
+        Insert: {
+          created_at?: string
+          member_id: string
+        }
+        Update: {
+          created_at?: string
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_member_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cashout_account_access_log: {
+        Row: {
+          accessed_at: string
+          actor_id: string
+          id: number
+          purpose: string
+          request_id: number
+        }
+        Insert: {
+          accessed_at?: string
+          actor_id: string
+          id?: never
+          purpose: string
+          request_id: number
+        }
+        Update: {
+          accessed_at?: string
+          actor_id?: string
+          id?: never
+          purpose?: string
+          request_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cashout_account_access_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cashout_account_access_log_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "cashout_request"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cashout_request: {
         Row: {
+          account_holder: string | null
+          account_masked: string | null
           account_no_enc: string | null
+          account_purged_at: string | null
           bank_code: string | null
           clover_amount: number
+          contact: string | null
           fee_krw: number
           gross_krw: number
           id: number
+          key_version: number
           member_id: string
           net_krw: number
           paid_at: string | null
           payout_id: string | null
+          processed_by: string | null
+          processing_note: string | null
+          rejected_at: string | null
+          request_fingerprint: Json | null
+          request_key: string | null
           requested_at: string
           risk_flag: Database["public"]["Enums"]["risk_flag_enum"]
           status: Database["public"]["Enums"]["cashout_status_enum"]
           withholding_krw: number
         }
         Insert: {
+          account_holder?: string | null
+          account_masked?: string | null
           account_no_enc?: string | null
+          account_purged_at?: string | null
           bank_code?: string | null
           clover_amount: number
+          contact?: string | null
           fee_krw: number
           gross_krw: number
           id?: never
+          key_version?: number
           member_id: string
           net_krw: number
           paid_at?: string | null
           payout_id?: string | null
+          processed_by?: string | null
+          processing_note?: string | null
+          rejected_at?: string | null
+          request_fingerprint?: Json | null
+          request_key?: string | null
           requested_at?: string
           risk_flag?: Database["public"]["Enums"]["risk_flag_enum"]
           status?: Database["public"]["Enums"]["cashout_status_enum"]
           withholding_krw: number
         }
         Update: {
+          account_holder?: string | null
+          account_masked?: string | null
           account_no_enc?: string | null
+          account_purged_at?: string | null
           bank_code?: string | null
           clover_amount?: number
+          contact?: string | null
           fee_krw?: number
           gross_krw?: number
           id?: never
+          key_version?: number
           member_id?: string
           net_krw?: number
           paid_at?: string | null
           payout_id?: string | null
+          processed_by?: string | null
+          processing_note?: string | null
+          rejected_at?: string | null
+          request_fingerprint?: Json | null
+          request_key?: string | null
           requested_at?: string
           risk_flag?: Database["public"]["Enums"]["risk_flag_enum"]
           status?: Database["public"]["Enums"]["cashout_status_enum"]
@@ -87,6 +179,13 @@ export type Database = {
           {
             foreignKeyName: "cashout_request_member_id_fkey"
             columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cashout_request_processed_by_fkey"
+            columns: ["processed_by"]
             isOneToOne: false
             referencedRelation: "member"
             referencedColumns: ["id"]
@@ -684,6 +783,48 @@ export type Database = {
       }
     }
     Views: {
+      cheer_public: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          goal_id: number | null
+          id: number | null
+          is_anonymous: boolean | null
+          message: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: never
+          goal_id?: number | null
+          id?: number | null
+          is_anonymous?: boolean | null
+          message?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: never
+          goal_id?: number | null
+          id?: number | null
+          is_anonymous?: boolean | null
+          message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cheer_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cheer_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_public: {
         Row: {
           cheer_count: number | null
@@ -722,6 +863,89 @@ export type Database = {
       }
     }
     Functions: {
+      admin_list_cashouts: {
+        Args: { p_limit?: number }
+        Returns: {
+          clover_amount: number
+          fee_krw: number
+          gross_krw: number
+          id: number
+          member_id: string
+          net_krw: number
+          nickname: string
+          paid_at: string
+          requested_at: string
+          status: Database["public"]["Enums"]["cashout_status_enum"]
+          withholding_krw: number
+        }[]
+      }
+      admin_list_cashouts_v2: {
+        Args: { p_limit?: number }
+        Returns: {
+          account_holder: string
+          account_masked: string
+          bank_code: string
+          clover_amount: number
+          fee_krw: number
+          gross_krw: number
+          id: number
+          member_id: string
+          net_krw: number
+          nickname: string
+          paid_at: string
+          processing_note: string
+          rejected_at: string
+          requested_at: string
+          status: Database["public"]["Enums"]["cashout_status_enum"]
+          withholding_krw: number
+        }[]
+      }
+      admin_list_ledger: {
+        Args: { p_limit?: number }
+        Returns: {
+          balance_after: number
+          clover_delta: number
+          created_at: string
+          entry_type: Database["public"]["Enums"]["clover_entry_type_enum"]
+          id: number
+          member_id: string
+          nickname: string
+          ref_id: number
+          ref_type: string
+        }[]
+      }
+      admin_list_members: {
+        Args: { p_limit?: number }
+        Returns: {
+          clover_count: number
+          created_at: string
+          goal_slug: string
+          id: string
+          kyc_status: Database["public"]["Enums"]["kyc_status_enum"]
+          nickname: string
+          provider: string
+        }[]
+      }
+      admin_mark_cashout_paid: {
+        Args: { p_processing_note?: string; p_request_id: number }
+        Returns: {
+          cashout_request_id: number
+          paid_at: string
+          status: Database["public"]["Enums"]["cashout_status_enum"]
+        }[]
+      }
+      admin_reject_cashout: {
+        Args: { p_processing_note: string; p_request_id: number }
+        Returns: {
+          cashout_request_id: number
+          rejected_at: string
+          status: Database["public"]["Enums"]["cashout_status_enum"]
+        }[]
+      }
+      admin_reveal_cashout_account: {
+        Args: { p_account_keys: Json; p_actor_id: string; p_request_id: number }
+        Returns: string
+      }
       capture_lead: {
         Args: {
           p_campaign: string
@@ -740,9 +964,12 @@ export type Database = {
           lead_id: number
         }[]
       }
+      cashout_require_kyc: { Args: never; Returns: boolean }
       clover_eligibility: {
         Args: { p_member_id: string }
         Returns: {
+          available_amount: number
+          locked_amount: number
           min_cashout_clover: number
           payable_amount: number
           reached_threshold: boolean
@@ -766,6 +993,30 @@ export type Database = {
           goal_title: string
           member_id: string
           payment_id: number
+        }[]
+      }
+      create_cashout_request: {
+        Args: {
+          p_account_fingerprint_key: string
+          p_account_holder: string
+          p_account_key: string
+          p_account_key_version: number
+          p_account_no: string
+          p_bank_code: string
+          p_clover_amount: number
+          p_member_id: string
+          p_request_key: string
+        }
+        Returns: {
+          cashout_request_id: number
+          clover_amount: number
+          fee_krw: number
+          gross_krw: number
+          is_replay: boolean
+          net_krw: number
+          requested_at: string
+          status: Database["public"]["Enums"]["cashout_status_enum"]
+          withholding_krw: number
         }[]
       }
       create_cheer_order: {
@@ -795,16 +1046,44 @@ export type Database = {
           word_count: number
         }[]
       }
-      update_goal: {
-        Args: {
-          p_due_date: string
-          p_goal_id: number
-          p_reason: string | null
-          p_title: string
-        }
-        Returns: Database["public"]["Tables"]["goal"]["Row"]
-      }
+      is_admin: { Args: never; Returns: boolean }
       min_cashout_clover: { Args: never; Returns: number }
+      my_cashout_history: {
+        Args: { p_limit?: number }
+        Returns: {
+          account_holder: string
+          account_masked: string
+          bank_code: string
+          clover_amount: number
+          id: number
+          net_krw: number
+          paid_at: string
+          processing_note: string
+          rejected_at: string
+          requested_at: string
+          status: Database["public"]["Enums"]["cashout_status_enum"]
+        }[]
+      }
+      my_cashout_status: {
+        Args: never
+        Returns: {
+          account_holder: string
+          account_masked: string
+          bank_code: string
+          clover_amount: number
+          id: number
+          net_krw: number
+          paid_at: string
+          processing_note: string
+          rejected_at: string
+          requested_at: string
+          status: Database["public"]["Enums"]["cashout_status_enum"]
+        }[]
+      }
+      purge_expired_cashout_accounts: {
+        Args: { p_limit?: number }
+        Returns: number
+      }
       reconcile_canceled_payment: {
         Args: {
           p_amount_krw: number
@@ -841,6 +1120,15 @@ export type Database = {
           status: Database["public"]["Enums"]["payment_status_enum"]
         }[]
       }
+      update_goal: {
+        Args: {
+          p_due_date: string
+          p_goal_id: number
+          p_reason: string
+          p_title: string
+        }
+        Returns: undefined
+      }
       welcome_clover_amount: { Args: never; Returns: number }
     }
     Enums: {
@@ -861,6 +1149,7 @@ export type Database = {
         | "CASHOUT_REVERSAL"
         | "REFUND_REVERSAL"
         | "WELCOME_GRANT"
+        | "WELCOME_REVERSAL"
       goal_status_enum: "ACTIVE" | "CLOSED" | "DELETED"
       kyc_status_enum: "NONE" | "VERIFIED"
       notification_channel_enum: "ALIMTALK" | "INAPP"
@@ -1020,6 +1309,7 @@ export const Constants = {
         "CASHOUT_REVERSAL",
         "REFUND_REVERSAL",
         "WELCOME_GRANT",
+        "WELCOME_REVERSAL",
       ],
       goal_status_enum: ["ACTIVE", "CLOSED", "DELETED"],
       kyc_status_enum: ["NONE", "VERIFIED"],
@@ -1036,3 +1326,4 @@ export const Constants = {
     },
   },
 } as const
+

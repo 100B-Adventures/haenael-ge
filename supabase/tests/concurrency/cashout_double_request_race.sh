@@ -73,12 +73,14 @@ BALANCE=$(psql "$DB_URL" -q -t -A -c "SELECT clover_count FROM public.clover_bal
 
 echo "T15 results: success=${SUCCESS_COUNT}, blocked=${BLOCKED_COUNT}, requests=${REQUEST_ROWS}, holds=${HOLD_ROWS}, balance=${BALANCE}"
 
+# A안(FDD §14 #5): 신청은 총량을 건드리지 않는다. "음수 없음"이 아니라
+# "애초에 안 줄어야" 한다 — 시작 잔액 60 그대로여야 정상.
 if [ "$SUCCESS_COUNT" -ne 1 ] || [ "$BLOCKED_COUNT" -ne 1 ] ||
-   [ "$REQUEST_ROWS" -ne 1 ] || [ "$HOLD_ROWS" -ne 1 ] || [ "$BALANCE" -lt 0 ]; then
-  echo "FAIL — T15 병렬 신청이 1건으로 수렴하지 않음"
+   [ "$REQUEST_ROWS" -ne 1 ] || [ "$HOLD_ROWS" -ne 1 ] || [ "$BALANCE" -ne 60 ]; then
+  echo "FAIL — T15 병렬 신청이 1건으로 수렴하지 않거나 총량이 줄어듦(기대 60, 실측 ${BALANCE})"
   FAIL=1
 else
-  echo "ALL PASS — T15 병렬 신청 2건 중 1건만 성공, 잔액 음수 없음"
+  echo "ALL PASS — T15 병렬 신청 2건 중 1건만 성공, 총량은 60 그대로(A안 — 잠금만, 감소 없음)"
 fi
 
 exit "$FAIL"

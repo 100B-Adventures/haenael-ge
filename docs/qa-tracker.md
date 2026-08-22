@@ -1,5 +1,17 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-22: 이용료 10%와 환전 잠금 A안 재검증
+
+**판정: 백엔드 상태전이 테스트됨 / build `changes-requested` 유지 / 화면 픽셀 대조·운영 적용 미검증**
+
+- 로컬 DB reset 뒤 실제 RPC 호출과 원장 직접 조회에서 신청 직후 총량 52 유지·잠김 40, 지급 완료 시 52에서 12로 감소, 반려 시 총량 52 유지와 잠금 해제를 확인했다.
+- 30,000원 환전은 이용료 3,000원, 부가세 300원, 원천징수 881원, 실수령 25,819원으로 웹·Edge Function·DB 계산 기준이 일치한다.
+- pgTAP 최신 기록은 10개 파일 246개 단언 통과다. Vitest 최신 재실행 기록은 227/227, 환전 Playwright 최신 기록은 11/11이다.
+- 2차 코드리뷰가 지적한 4건은 지급 전후 잔액 역산, 신청 확인 문구, 관리자 반려 문구, 진행 상태의 분할 잔액 카드 누락이었다. 현재 작업트리에는 원장 스냅샷, A안 용어, 공용 `SplitBalanceCard`와 대응 단위 테스트가 들어 있다.
+- 이 문서는 작업트리 존재를 기록할 뿐 build 승인으로 승격하지 않는다. `pipeline-state.core.md`의 build는 여전히 `changes-requested`이고, 같은 조건의 시안·개발 화면 픽셀 대조는 실행되지 않았다.
+
+STAMP: 수정 시각 2026-08-22 14:22 KST | 모델 GPT-5 Codex | 근거 `pipeline-state.core.md`, `DESIGN.md` v1.12.0, `web/src/app/(receiver)/cashout/status/page.tsx`, `web/src/components/cashout/CashoutRequestForm.tsx`, `web/src/components/admin/CashoutQueue.tsx`, `web/src/components/goal/SplitBalanceCard.tsx`, `supabase/migrations/20260822000000_cashout_clover_lock_a1.sql`, `supabase/tests/**`
+
 ## 2026-08-06 — CI 전용 환전 접수 성공 화면 소실
 
 **판정: ❌ NG 관찰 → 🔧 제품 수정·비포트 회귀 통과 / Playwright·CI 재실행 대기**
