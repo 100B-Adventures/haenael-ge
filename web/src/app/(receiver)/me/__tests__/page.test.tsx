@@ -24,6 +24,8 @@ vi.mock("next/navigation", () => ({
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+const cheerIlike = vi.fn();
+
 function chainable<T>(result: T) {
   const obj: Record<string, unknown> & PromiseLike<T> = {
     select: () => obj,
@@ -32,6 +34,10 @@ function chainable<T>(result: T) {
     is: () => obj,
     order: () => obj,
     limit: () => obj,
+    ilike: (column: string, value: string) => {
+      cheerIlike(column, value);
+      return obj;
+    },
     single: () => Promise.resolve(result),
     maybeSingle: () => Promise.resolve(result),
     then: (resolve: (v: T) => unknown) => Promise.resolve(result).then(resolve),
@@ -52,6 +58,7 @@ function buildSupabase(
   cheers: Array<Record<string, unknown>>,
   phone: string | null = "01012345678",
   eligibility: Record<string, unknown> = { reached_threshold: false },
+  cheerCount = cheers.length,
 ) {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "owner-uid" } } }) },
@@ -63,7 +70,7 @@ function buildSupabase(
     }),
     from: vi.fn((table: string) => {
       if (table === "goal") return chainable({ data: [GOAL_ROW], error: null });
-      if (table === "cheer") return chainable({ data: cheers, error: null });
+      if (table === "cheer") return chainable({ data: cheers, count: cheerCount, error: null });
       if (table === "member") return chainable({ data: { phone }, error: null });
       throw new Error(`unexpected table: ${table}`);
     }),
@@ -73,6 +80,7 @@ function buildSupabase(
 describe("/me 응원 목록 — 개별 클로버 개수", () => {
   beforeEach(() => {
     vi.mocked(createServerSupabaseClient).mockReset();
+    cheerIlike.mockReset();
   });
 
   it(
@@ -97,13 +105,10 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
       render(element);
 
       expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 5");
-      expect(screen.getByTestId("cheer-item-privacy-label")).toHaveTextContent("나만 보임");
       expect(
-        screen.getByRole("group", { name: "클로버 5개, 나만 보임" }),
+        screen.getByRole("group", { name: "클로버 5개, 1번째 응원, 나만 보임" }),
       ).toBeInTheDocument();
-      expect(screen.getByTestId("cheer-item-relative-time")).toHaveTextContent(
-        "2시간 전",
-      );
+      expect(screen.getByTestId("cheer-item-ordinal")).toHaveTextContent("1번째");
     },
     15000,
   );
@@ -128,7 +133,9 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     expect(screen.getByText("익명의 누군가")).toBeInTheDocument();
     expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 3");
-    expect(screen.getByTestId("cheer-item-privacy-label")).toHaveTextContent("나만 보임");
+    expect(
+      screen.getByRole("group", { name: "클로버 3개, 1번째 응원, 나만 보임" }),
+    ).toBeInTheDocument();
   });
 
   it("응원이 없으면 개별 프라이버시 라벨을 만들지 않는다", async () => {
@@ -140,7 +147,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     const element = await ReceiverHomePage();
     render(element);
 
-    expect(screen.queryByTestId("cheer-item-privacy-label")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cheer-item-ordinal")).not.toBeInTheDocument();
   });
 
   it("갭C(2026-07-20): 내 응원 링크 복사 카드가 /me에 항상 렌더된다", async () => {
@@ -195,6 +202,41 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     render(await ReceiverHomePage());
 
     expect(screen.queryByTestId("phone-consent-notice")).not.toBeInTheDocument();
+  });
+
+  it("TC-OV-02 정상 경로: 121번째 응원 검색을 이름과 메시지 서버 쿼리로 실행한다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([
+        {
+          id: 121,
+          display_name: "오래된 응원자",
+          is_anonymous: false,
+          message: "121번째 응원 메시지",
+          clover_amount: 2,
+          created_at: "2026-01-01T00:00:00.000Z",
+        },
+      ], "01012345678", { reached_threshold: false }, 121) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage({ searchParams: Promise.resolve({ q: "121번째" }) }));
+
+    expect(cheerIlike).toHaveBeenCalledWith("display_name", "%121번째%");
+    expect(cheerIlike).toHaveBeenCalledWith("message", "%121번째%");
+    expect(screen.getByTestId("receiver-cheer-list")).toHaveTextContent("121번째 응원 메시지");
+    expect(screen.getByTestId("cheer-overflow-summary")).toHaveTextContent("1개 찾았어요");
+  });
+
+  it("TC-OV-03 거절 경로: 검색 필터 메타문자만 들어오면 서버 검색을 실행하지 않는다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678", { reached_threshold: false }, 121) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage({ searchParams: Promise.resolve({ q: "%_\\" }) }));
+
+    expect(cheerIlike).not.toHaveBeenCalled();
+    expect(screen.queryByRole("search")).not.toBeInTheDocument();
   });
 
   // 컨트롤러 3차 리뷰 MINOR: clover_eligibility 목이 reached_threshold만 갖고 있어서

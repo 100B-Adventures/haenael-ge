@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useMemo, useRef, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Clock3, LoaderCircle, ShieldCheck } from "lucide-react";
 import { createCashoutRequest } from "@/app/(receiver)/cashout/actions";
@@ -21,13 +21,16 @@ type Props = {
   cashoutEnabled: boolean;
   reachedThreshold: boolean;
   payableAmount: number;
-  /** 총 클로버(총량). 확인 배너의 "모은 N개는 그대로" 문구용 — A안(DESIGN §6-(d)) */
+  /** 총 클로버(총량). 확인 배너의 "모은 N개는 그대로" 문구용. A안(DESIGN §6-(d)) */
   totalBalance: number;
   minCashoutClover: number;
   currentCashout: CashoutRecord | null;
   history: CashoutRecord[];
   initialPhone: string | null;
+  onScreenChange?: (screen: CashoutFlowScreen) => void;
 };
+
+export type CashoutFlowScreen = "form" | "confirm" | "submitting" | "done";
 
 type Success = {
   requestId: number;
@@ -53,6 +56,7 @@ export function CashoutRequestForm({
   currentCashout,
   history,
   initialPhone,
+  onScreenChange,
 }: Props) {
   const [step, setStep] = useState<"form" | "confirm" | "done">("form");
   const [cloverAmount, setCloverAmount] = useState(
@@ -89,23 +93,29 @@ export function CashoutRequestForm({
     payableAmount >= minCashoutClover &&
     !hasPendingCashout;
 
+  useEffect(() => {
+    onScreenChange?.(submitting ? "submitting" : step);
+  }, [onScreenChange, step, submitting]);
+
   function validate() {
-    if (
-      !Number.isInteger(cloverAmount) ||
-      cloverAmount < minCashoutClover ||
-      cloverAmount > payableAmount
-    ) {
-      return `${minCashoutClover}~${payableAmount}클로버 사이로 입력해주세요.`;
+    if (!Number.isInteger(cloverAmount)) {
+      return "클로버는 한 개 단위로 입력해 주세요.";
     }
-    if (!bankCode) return "은행을 선택해주세요.";
+    if (cloverAmount < minCashoutClover) {
+      return `환전하려면 클로버가 최소 ${minCashoutClover}개 필요해요. ${minCashoutClover}개 이상 입력해 주세요.`;
+    }
+    if (cloverAmount > payableAmount) {
+      return `지금 환전할 수 있는 클로버는 ${payableAmount}개예요. ${payableAmount}개 이하로 입력해 주세요.`;
+    }
+    if (!bankCode) return "입금받을 은행을 선택해 주세요.";
     if (!/^[0-9]{8,20}$/.test(normalizedAccountNo)) {
-      return "계좌번호를 숫자로 정확히 입력해주세요.";
+      return "계좌번호를 하이픈 없이 숫자 8~20자로 입력해 주세요.";
     }
     if (normalizedHolder.length < 2 || normalizedHolder.length > 40) {
-      return "예금주명을 정확히 입력해주세요.";
+      return "예금주 이름을 2~40자로 입력해 주세요.";
     }
     if (!normalizedPhone) {
-      return "전화번호를 숫자로 정확히 입력해주세요.";
+      return "입금 완료 안내를 받을 휴대전화 번호를 입력해 주세요.";
     }
     return "";
   }
@@ -137,6 +147,7 @@ export function CashoutRequestForm({
       return;
     }
 
+    setErrorMessage("");
     setSubmitting(true);
     try {
       const result = await createCashoutRequest({
@@ -181,24 +192,26 @@ export function CashoutRequestForm({
 
   return (
     <div>
-      <PhoneConsentNotice
-        hasPhone={Boolean(initialPhone)}
-        redirectPath="/cashout"
-        context="cashout"
-      />
+      {step === "form" && (
+        <PhoneConsentNotice
+          hasPhone={Boolean(initialPhone)}
+          redirectPath="/cashout"
+          context="cashout"
+        />
+      )}
       {hasPendingCashout && currentCashout && !(step === "done" && success) ? (
-        <div className="rounded-[16px] border border-[#E8D3A6] bg-[#FBF1DD] p-4" data-testid="cashout-pending-block">
-          <p className="text-[14px] font-extrabold text-[#B4791F]">
+        <div className="rounded-md border border-amber-line bg-amber-soft p-4" data-testid="cashout-pending-block">
+          <p className="text-sm font-extrabold text-amber-ink">
             이미 처리 중인 신청이 있어요
           </p>
-          <p className="mt-1 text-[12px] leading-relaxed text-[#8A6218]">
+          <p className="mt-1 text-xs leading-relaxed text-amber-ink">
             {new Date(currentCashout.requested_at).toLocaleDateString("ko-KR")}에 신청한{" "}
             <strong>{formatCashoutKrw(currentCashout.net_krw)}</strong> 건을 확인하고 있어요.
             한 번에 한 건씩만 신청할 수 있어요.
           </p>
           <Link
             href="/cashout/status"
-            className="mt-4 block rounded-[14px] bg-[#1B8A4F] px-4 py-3 text-center text-[13px] font-extrabold text-white"
+            className="mt-4 block rounded-md bg-primary px-4 py-3 text-center text-[13px] font-extrabold text-primary-foreground"
           >
             진행 상태 보기
           </Link>
@@ -206,11 +219,12 @@ export function CashoutRequestForm({
       ) : canRequest && step === "form" ? (
         <form
           onSubmit={review}
-          className="space-y-4 rounded-[16px] border border-[#E8E4DC] bg-white p-4 sm:p-5"
+          noValidate
+          className="space-y-4 rounded-md border border-border bg-card p-4 sm:p-5"
           data-testid="cashout-request-form"
         >
           <div>
-            <label htmlFor="cashout-clover-amount" className="mb-1.5 block text-[12.5px] font-bold text-[#16140F]">
+            <label htmlFor="cashout-clover-amount" className="mb-1.5 block text-[12.5px] font-bold text-foreground">
               환전할 클로버
             </label>
             <div className="flex items-center gap-2">
@@ -221,24 +235,33 @@ export function CashoutRequestForm({
                 max={payableAmount}
                 step={1}
                 value={cloverAmount}
-                onChange={(event) => setCloverAmount(Number(event.target.value))}
-                className="min-w-0 flex-1 rounded-xl border border-[#D8D2C8] px-3 py-3 text-sm outline-none focus:border-[#1B8A4F]"
+                onChange={(event) => {
+                  const nextAmount = Number(event.target.value);
+                  const browserMessage = nextAmount < minCashoutClover
+                    ? `환전하려면 클로버가 최소 ${minCashoutClover}개 필요해요. ${minCashoutClover}개 이상 입력해 주세요.`
+                    : nextAmount > payableAmount
+                      ? `지금 환전할 수 있는 클로버는 ${payableAmount}개예요. ${payableAmount}개 이하로 입력해 주세요.`
+                      : "";
+                  event.currentTarget.setCustomValidity(browserMessage);
+                  setCloverAmount(nextAmount);
+                }}
+                className="min-w-0 flex-1 rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
                 required
               />
-              <span className="text-sm font-bold text-[#14613A]">클로버</span>
+              <span className="text-sm font-bold text-accent-foreground">클로버</span>
             </div>
-            <p className="mt-1 text-[11px] text-[#6F6A60]">
+            <p className="mt-1 text-[11px] text-muted-foreground">
               최소 {minCashoutClover}개 · 현재 지급 가능 {payableAmount}개
             </p>
           </div>
 
           <div>
-            <label htmlFor="cashout-bank" className="mb-1.5 block text-[12.5px] font-bold text-[#16140F]">은행</label>
+            <label htmlFor="cashout-bank" className="mb-1.5 block text-[12.5px] font-bold text-foreground">은행</label>
             <select
               id="cashout-bank"
               value={bankCode}
               onChange={(event) => setBankCode(event.target.value)}
-              className="w-full rounded-xl border border-[#D8D2C8] bg-white px-3 py-3 text-sm outline-none focus:border-[#1B8A4F]"
+              className="w-full rounded-sm border border-border bg-card px-3 py-3 text-sm outline-none focus:border-primary"
               required
             >
               <option value="">은행을 선택해주세요</option>
@@ -247,7 +270,7 @@ export function CashoutRequestForm({
           </div>
 
           <div>
-            <label htmlFor="cashout-account" className="mb-1.5 block text-[12.5px] font-bold text-[#16140F]">계좌번호</label>
+            <label htmlFor="cashout-account" className="mb-1.5 block text-[12.5px] font-bold text-foreground">계좌번호</label>
             <input
               id="cashout-account"
               type="text"
@@ -255,14 +278,14 @@ export function CashoutRequestForm({
               autoComplete="off"
               value={accountNo}
               onChange={(event) => setAccountNo(event.target.value)}
-              className="w-full rounded-xl border border-[#D8D2C8] px-3 py-3 text-sm outline-none focus:border-[#1B8A4F]"
+              className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
               placeholder="하이픈 없이 숫자만 입력"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="cashout-holder" className="mb-1.5 block text-[12.5px] font-bold text-[#16140F]">예금주</label>
+            <label htmlFor="cashout-holder" className="mb-1.5 block text-[12.5px] font-bold text-foreground">예금주</label>
             <input
               id="cashout-holder"
               type="text"
@@ -270,16 +293,16 @@ export function CashoutRequestForm({
               maxLength={40}
               value={accountHolder}
               onChange={(event) => setAccountHolder(event.target.value)}
-              className="w-full rounded-xl border border-[#D8D2C8] px-3 py-3 text-sm outline-none focus:border-[#1B8A4F]"
+              className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
               required
             />
-            <p className="mt-1 text-[10.5px] leading-relaxed text-[#9C968B]">
+            <p className="mt-1 text-[length:var(--text-meta-micro)] leading-relaxed text-[var(--faint)]">
               본인 명의 계좌만 입금할 수 있어요. 예금주가 다르면 반려돼요.
             </p>
           </div>
 
           <div>
-            <label htmlFor="cashout-phone" className="mb-1.5 block text-[12.5px] font-bold text-[#16140F]">전화번호</label>
+            <label htmlFor="cashout-phone" className="mb-1.5 block text-[12.5px] font-bold text-foreground">전화번호</label>
             <input
               id="cashout-phone"
               type="tel"
@@ -289,112 +312,135 @@ export function CashoutRequestForm({
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
               aria-required="true"
-              className="w-full rounded-xl border border-[#D8D2C8] px-3 py-3 text-sm outline-none focus:border-[#1B8A4F]"
+              className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
               placeholder="010-1234-5678"
               data-testid="cashout-phone"
             />
-            <p className="mt-1 text-[10.5px] leading-relaxed text-[#9C968B]">
+            <p className="mt-1 text-[length:var(--text-meta-micro)] leading-relaxed text-[var(--faint)]">
               지급 완료 안내를 보내드릴 번호예요. 신청할 때 최신 번호로 저장해요.
             </p>
           </div>
 
-          <div className="rounded-xl bg-[#E7F4EC] p-3" data-testid="cashout-live-preview">
-            <p className="text-[12px] leading-6 text-[#3D7A5A]">
+          <div className="rounded-sm bg-accent p-3" data-testid="cashout-live-preview">
+            <p className="text-xs leading-6 text-accent-foreground">
               {formatCashoutKrw(grossKrw)} 요청 → 서비스 이용료 {formatCashoutKrw(feeTotalKrw)} · 원천징수{" "}
               {formatCashoutKrw(withholdingKrw)} →{" "}
-              <strong className="text-[#14613A]">{formatCashoutKrw(netKrw)} 입금</strong>
+              <strong>{formatCashoutKrw(netKrw)} 입금</strong>
             </p>
           </div>
-          <div className="flex gap-2 rounded-xl bg-[#F4EFE6] p-3 text-[11px] leading-relaxed text-[#6F6A60]">
-            <ShieldCheck size={17} className="shrink-0 text-[#1B8A4F]" aria-hidden="true" />
+          <div className="flex gap-2 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
+            <ShieldCheck size={17} className="shrink-0 text-primary" aria-hidden="true" />
             <p>
               계좌는 암호화해 보관하고 입금 처리에만 사용해요. 관리자가 전체 계좌를 보면 열람 기록이 남아요.{" "}
               <Link href="/privacy" className="font-semibold underline">개인정보처리방침</Link>
             </p>
           </div>
 
-          {errorMessage && <p role="alert" className="text-[12px] font-semibold text-[#B42318]">{errorMessage}</p>}
+          {errorMessage && <p role="alert" className="text-xs font-semibold text-danger-ink">{errorMessage}</p>}
           <button
             type="submit"
-            className="flex w-full items-center justify-center rounded-[15px] bg-[#1B8A4F] py-4 text-[15px] font-extrabold text-white"
+            className="flex w-full items-center justify-center rounded-md bg-primary py-4 text-[15px] font-extrabold text-primary-foreground"
             data-testid="cashout-confirm-button"
           >
             환전 신청하기
           </button>
         </form>
       ) : canRequest && step === "confirm" ? (
-        <section className="space-y-4" data-testid="cashout-confirm-step">
-          <div className="rounded-[16px] border border-[#E8E4DC] bg-white p-4">
-            <h2 className="text-[16px] font-black text-[#16140F]">이 계좌가 맞나요?</h2>
-            <dl className="mt-3 divide-y divide-[#F2EEE6] text-[12.5px]">
-              <div className="flex justify-between gap-4 py-3"><dt className="text-[#6F6A60]">보내는 곳</dt><dd className="text-right font-bold">{cashoutBankName(bankCode)} {accountNo}</dd></div>
-              <div className="flex justify-between gap-4 py-3"><dt className="text-[#6F6A60]">예금주</dt><dd className="font-bold">{normalizedHolder}</dd></div>
-              <div className="flex justify-between gap-4 py-3"><dt className="text-[#6F6A60]">받으실 금액</dt><dd className="text-[15px] font-extrabold text-[#14613A]">{formatCashoutKrw(netKrw)}</dd></div>
-            </dl>
-          </div>
-          {/* 정본 = 프로토 v3.6 확인 배너(scratchpad/cashout-full-journey-v3-opus.html:666).
-              DESIGN.md §6-(d) ①단계 예고("입금이 끝나면 그때 N개가 빠져요") + §8.2 용어(잠금·잠금
-              해제, "돌아옵니다"·"환전 진행중" 폐기어 금지)를 여기서 지킨다. */}
-          <div className="rounded-[14px] border border-[#E8D3A6] bg-[#FBF1DD] p-4" data-testid="cashout-confirm-banner">
-            <p className="text-[13.5px] font-extrabold text-[#B4791F]">신청하면 클로버 {cloverAmount}개가 잠겨요</p>
-            <p className="mt-1 text-[11.5px] leading-relaxed text-[#8A6218]">
-              모은 {totalBalance}개는 그대로 남고, 그중 {cloverAmount}개에만 잠금이 걸려요. <b>입금이 끝나면 그때 {cloverAmount}개가 빠져요.</b> 반려되면 잠금이 풀립니다.
-            </p>
-          </div>
-          {errorMessage && <p role="alert" className="text-[12px] font-semibold text-[#B42318]">{errorMessage}</p>}
-          <button
-            type="button"
-            onClick={submitConfirmed}
-            disabled={submitting}
-            className="flex w-full items-center justify-center rounded-[15px] bg-[#1B8A4F] py-4 text-[15px] font-extrabold text-white disabled:opacity-60"
-            data-testid="cashout-submit-button"
-          >
-            {submitting ? <><LoaderCircle className="mr-2 animate-spin" size={18} aria-hidden="true" />신청 중</> : "이 계좌로 신청하기"}
-          </button>
-          <button type="button" onClick={() => setStep("form")} className="w-full rounded-[15px] border border-[#E8E4DC] bg-white py-3 text-[13px] font-bold text-[#6F6A60]">계좌 다시 입력</button>
+        <section className="space-y-4" data-testid="cashout-confirm-step" aria-busy={submitting}>
+          {submitting ? (
+            <div className="space-y-4" role="status" aria-live="polite" data-testid="cashout-submitting-state">
+              <div className="rounded-md border border-border bg-card p-3">
+                <dl className="divide-y divide-border text-[12.5px]">
+                  <div className="flex justify-between gap-4 py-2"><dt className="text-muted-foreground">입금 계좌</dt><dd className="text-right font-bold">{cashoutBankName(bankCode)} {maskAccountNumber(normalizedAccountNo)}</dd></div>
+                  <div className="flex justify-between gap-4 py-2"><dt className="text-muted-foreground">예금주</dt><dd className="font-bold">{normalizedHolder}</dd></div>
+                  <div className="flex justify-between gap-4 py-2"><dt className="font-bold text-foreground">받으실 금액</dt><dd className="text-[19px] font-extrabold text-accent-foreground">{formatCashoutKrw(netKrw)}</dd></div>
+                </dl>
+              </div>
+              <div className="rounded-md border border-border bg-card p-4">
+                <p className="text-[length:var(--text-label-small)] font-bold text-accent-foreground">환전 신청 제출 중</p>
+                <p className="mt-2 text-[19px] font-black text-foreground">신청을 안전하게 보내고 있어요</p>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  계좌와 금액을 다시 확인해 접수하고 있어요. 이 화면을 닫아도 같은 신청이 두 번 들어가지 않습니다.
+                </p>
+                <div className="mt-5 flex min-h-14 items-center justify-center gap-2 rounded-md bg-primary text-[15px] font-extrabold text-primary-foreground" aria-disabled="true">
+                  <LoaderCircle className="animate-spin" size={18} aria-hidden="true" />
+                  신청을 보내는 중이에요
+                </div>
+              </div>
+              <p className="rounded-sm bg-muted p-3 text-[length:var(--text-label-small)] leading-relaxed text-muted-foreground">
+                🔒 제출이 끝날 때까지 이전 화면과 재신청 버튼은 잠겨요. 성공 또는 오류 결과가 나오면 다음 행동을 바로 보여줍니다.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="rounded-md border border-border bg-card p-3">
+                <dl className="divide-y divide-border text-[12.5px]">
+                  <div className="flex justify-between gap-4 py-2"><dt className="text-muted-foreground">보내는 곳</dt><dd className="text-right font-bold">{cashoutBankName(bankCode)} {accountNo}</dd></div>
+                  <div className="flex justify-between gap-4 py-2"><dt className="text-muted-foreground">예금주</dt><dd className="font-bold">{normalizedHolder}</dd></div>
+                  <div className="flex justify-between gap-4 py-2"><dt className="text-muted-foreground">받으실 금액</dt><dd className="text-[15px] font-extrabold text-accent-foreground">{formatCashoutKrw(netKrw)}</dd></div>
+                </dl>
+              </div>
+              <div className="rounded-md border border-amber-line bg-amber-soft p-3" data-testid="cashout-confirm-banner">
+                <p className="text-sm font-extrabold text-amber-ink">신청하면 클로버 {cloverAmount}개가 잠겨요</p>
+                <p className="mt-1 text-[length:var(--text-label-small)] leading-relaxed text-amber-ink">
+                  모은 {totalBalance}개는 그대로 남고, 그중 {cloverAmount}개에만 잠금이 걸려요. <b>입금이 끝나면 그때 {cloverAmount}개가 빠져요.</b> 반려되면 잠금이 풀립니다.
+                </p>
+              </div>
+              {errorMessage && <p role="alert" className="text-xs font-semibold text-danger-ink">{errorMessage}</p>}
+              <button
+                type="button"
+                onClick={submitConfirmed}
+                className="flex w-full items-center justify-center rounded-md bg-primary py-4 text-[15px] font-extrabold text-primary-foreground"
+                data-testid="cashout-submit-button"
+              >
+                이 계좌로 신청하기
+              </button>
+              <button type="button" onClick={() => setStep("form")} className="w-full rounded-md border border-border bg-card py-3 text-[13px] font-bold text-muted-foreground">계좌 다시 입력</button>
+            </>
+          )}
         </section>
       ) : step === "done" && success ? (
         <section className="space-y-4" data-testid="cashout-request-success" role="status">
-          <div className="rounded-[16px] border border-[#B7DFC5] bg-[#F1FAF4] p-6 text-center">
+          <div className="rounded-md border border-primary/30 bg-accent p-6 text-center">
             <p className="text-[30px]">🍀</p>
-            <h2 className="mt-2 text-[17px] font-black text-[#14613A]">환전 신청이 접수됐어요</h2>
-            <p className="mt-2 text-[12px] leading-relaxed text-[#3D7A5A]">
+            <h2 className="mt-2 text-[17px] font-black text-accent-foreground">환전 신청이 접수됐어요</h2>
+            <p className="mt-2 text-xs leading-relaxed text-accent-foreground">
               {cashoutBankName(success.bankCode)} {success.accountMasked} ({success.accountHolder})<br />
               <strong className="text-[15px]">{formatCashoutKrw(success.netKrw)}</strong>을 1~3영업일 안에 보내드릴게요.
             </p>
           </div>
-          <Link href="/cashout/status" className="block rounded-[15px] bg-[#1B8A4F] py-4 text-center text-[14px] font-extrabold text-white">진행 상태 보기</Link>
-          <Link href="/me" className="block rounded-[15px] border border-[#E8E4DC] bg-white py-3 text-center text-[13px] font-bold text-[#6F6A60]">홈으로</Link>
+          <Link href="/cashout/status" className="block rounded-md bg-primary py-4 text-center text-sm font-extrabold text-primary-foreground">진행 상태 보기</Link>
+          <Link href="/me" className="block rounded-md border border-border bg-card py-3 text-center text-[13px] font-bold text-muted-foreground">홈으로</Link>
         </section>
       ) : (
-        <div className="flex flex-col items-center rounded-[15px] bg-[#F4EFE6] py-5 text-center" data-testid="cashout-confirm-disabled">
-          <Clock3 className="mb-2 text-[#1B8A4F]" size={22} aria-hidden="true" />
-          <p className="text-[13.5px] font-bold text-[#16140F]">
+        <div className="flex flex-col items-center rounded-md bg-muted py-5 text-center" data-testid="cashout-confirm-disabled">
+          <Clock3 className="mb-2 text-primary" size={22} aria-hidden="true" />
+          <p className="text-sm font-bold text-foreground">
             {!cashoutEnabled ? "환전 기능을 준비하고 있어요" : "친구 응원분 30클로버부터 신청할 수 있어요"}
           </p>
-          <p className="mt-1 max-w-[260px] text-[11.5px] leading-relaxed text-[#6F6A60]">환전은 최소 30클로버부터 가능해요. 지금 쌓인 클로버는 그대로 보관됩니다.</p>
+          <p className="mt-1 max-w-64 text-[length:var(--text-label-small)] leading-relaxed text-muted-foreground">환전은 최소 30클로버부터 가능해요. 지금 쌓인 클로버는 그대로 보관됩니다.</p>
         </div>
       )}
 
-      {history.length > 0 && step !== "done" && (
+      {history.length > 0 && step === "form" && (
         <section className="mt-6" aria-labelledby="cashout-history-title">
           <div className="mb-3 flex items-center justify-between">
-            <h2 id="cashout-history-title" className="text-[15px] font-extrabold text-[#16140F]">환전 내역</h2>
-            <Link href="/cashout/history" className="text-[11.5px] font-bold text-[#1B8A4F]">전체 보기 ›</Link>
+            <h2 id="cashout-history-title" className="text-[15px] font-extrabold text-foreground">환전 내역</h2>
+            <Link href="/cashout/history" className="text-[length:var(--text-label-small)] font-bold text-primary">전체 보기 ›</Link>
           </div>
           <div className="space-y-2">
             {history.slice(0, 3).map((item) => (
               <Link
                 key={item.id}
                 href={item.status === "REQUESTED" ? "/cashout/status" : "/cashout/history"}
-                className="block rounded-xl border border-[#E8E4DC] bg-white p-3"
+                className="block rounded-sm border border-border bg-card p-3"
                 data-testid={`cashout-history-${item.id}`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-[12.5px] font-bold text-[#16140F]">{formatCashoutKrw(item.net_krw)}</p>
-                  <span className="rounded-full bg-[#E7F4EC] px-2 py-1 text-[10.5px] font-bold text-[#14613A]">{CASHOUT_STATUS_LABELS[item.status]}</span>
+                  <p className="text-[12.5px] font-bold text-foreground">{formatCashoutKrw(item.net_krw)}</p>
+                  <span className="rounded-full bg-accent px-2 py-1 text-[length:var(--text-meta-micro)] font-bold text-accent-foreground">{CASHOUT_STATUS_LABELS[item.status]}</span>
                 </div>
-                <p className="mt-1 text-[10px] text-[#9C968B]">{new Date(item.requested_at).toLocaleString("ko-KR")}</p>
+                <p className="mt-1 text-[length:var(--text-meta-micro)] text-[var(--faint)]">{new Date(item.requested_at).toLocaleString("ko-KR")}</p>
               </Link>
             ))}
           </div>

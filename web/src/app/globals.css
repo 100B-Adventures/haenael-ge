@@ -27,6 +27,12 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-ink: var(--danger-ink);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-amber-line: var(--amber-line);
+  --color-amber-ink: var(--amber-ink);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -39,13 +45,13 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: var(--radius-control);
+  --radius-md: var(--radius-card);
+  --radius-lg: var(--radius-sheet);
+  --radius-xl: var(--radius-sheet);
+  --radius-2xl: var(--radius-sheet);
+  --radius-3xl: var(--radius-sheet);
+  --radius-4xl: var(--radius-sheet);
 }
 
 :root {
@@ -93,6 +99,27 @@
   --line:          #E8E4DC;
   --danger:        #D9483B;
   --danger-soft:   #FBEAE7;
+  --danger-ink:    #B23225;
+  --amber:         #B4791F;
+  --amber-soft:    #FBF1DD;
+  --amber-line:    #E8D3A6;
+  --amber-ink:     #8A5A12;
+
+  /* shape · spacing · typography: DESIGN.md v2.0.0 YAML frontmatter */
+  --radius-control: 12px;
+  --radius-card: 14px;
+  --radius-sheet: 20px;
+  --space-mobile-gutter: 1.375rem;
+  --space-page-y: 40px;
+  --space-bottom-safe: 80px;
+  --text-wordmark: 12.5px;
+  --text-goal-title: 1.375rem;
+  --text-page-title-mobile: 1.375rem;
+  --text-page-title-desktop: 1.875rem;
+  --text-body-description: 12px;
+  --text-input-label: 12.5px;
+  --text-label-small: 11.5px;
+  --text-meta-micro: 10.5px;
 
   /* chart/sidebar (shadcn internal, not used in product UI) */
   --chart-1: #1B8A4F;
@@ -154,4 +181,107 @@
   html {
     @apply font-sans;
   }
+}
+
+@layer components {
+  .receiver-page-frame {
+    width: 100%;
+    max-width: 64rem;
+    margin-inline: auto;
+    padding: var(--space-page-y) var(--space-mobile-gutter);
+  }
+
+  .receiver-page-frame--bottom-safe {
+    padding-bottom: var(--space-bottom-safe);
+  }
+
+  .receiver-wordmark {
+    color: var(--foreground);
+    font-size: var(--text-wordmark);
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+
+  .receiver-page-title {
+    color: var(--foreground);
+    font-size: var(--text-page-title-mobile);
+    font-weight: 900;
+    letter-spacing: -0.4px;
+    line-height: 1.32;
+  }
+
+  .receiver-goal-title {
+    color: var(--foreground);
+    display: -webkit-box;
+    font-size: var(--text-goal-title);
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    line-height: 1.32;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .split-balance-progress {
+    appearance: none;
+    background-color: var(--amber-soft);
+    background-image: repeating-linear-gradient(
+      135deg,
+      var(--amber-line) 0 0.25rem,
+      var(--amber-soft) 0.25rem 0.5rem
+    );
+    border: 0;
+  }
+
+  .split-balance-progress::-webkit-progress-bar {
+    background-color: transparent;
+  }
+
+  .split-balance-progress::-webkit-progress-value {
+    background-color: var(--primary);
+    border-radius: 9999px;
+  }
+
+  .split-balance-progress::-moz-progress-bar {
+    background-color: var(--primary);
+    border-radius: 9999px;
+  }
+
+  .receiver-bottom-fade {
+    padding-top: var(--radius-card);
+    padding-bottom: calc(var(--radius-card) + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgb(251 250 247 / 0%) 0%, var(--background) 34%);
+  }
+
+  .receiver-fixed-action {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    width: min(100%, 64rem);
+    margin-inline: auto;
+    padding-inline: var(--space-mobile-gutter);
+  }
+
+  .receiver-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 9999px;
+    animation: spin 800ms linear infinite;
+  }
+
+  .receiver-balance-skeleton {
+    background: linear-gradient(90deg, var(--warm), var(--card), var(--warm));
+    background-size: 200% 100%;
+    animation: receiver-skeleton 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes receiver-skeleton {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }

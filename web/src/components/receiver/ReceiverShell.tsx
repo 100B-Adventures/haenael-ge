@@ -1,0 +1,69 @@
+import Link from "next/link";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import { NotificationBadge } from "@/components/common/NotificationBadge";
+
+type ReceiverPageShellProps = {
+  children: React.ReactNode;
+  testId: string;
+  bottomSafe?: boolean;
+  className?: string;
+};
+
+export function ReceiverPageShell({
+  children,
+  testId,
+  bottomSafe = false,
+  className = "",
+}: ReceiverPageShellProps) {
+  return (
+    <div
+      className={`receiver-page-frame${bottomSafe ? " receiver-page-frame--bottom-safe" : ""} ${className}`.trim()}
+      data-testid={testId}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function ReceiverBrandMark() {
+  return (
+    <p className="receiver-wordmark">
+      해낼게<span className="text-[var(--clover-bright)]">.</span>
+    </p>
+  );
+}
+
+type ReceiverTopBarProps = {
+  variant: "home" | "detail";
+};
+
+export function ReceiverTopBar({ variant }: ReceiverTopBarProps) {
+  if (variant === "detail") {
+    return (
+      <header data-testid="receiver-top-bar-detail">
+        <ReceiverBrandMark />
+      </header>
+    );
+  }
+
+  return (
+    <header className="mb-5 flex items-center justify-between" data-testid="receiver-top-bar-home">
+      <ReceiverBrandMark />
+      <div className="flex items-center gap-3">
+        <NotificationBadge />
+        <LogoutButton />
+      </div>
+    </header>
+  );
+}
+
+export function BackHomeLink({ label = "홈으로 돌아가기" }: { label?: string }) {
+  return (
+    <Link
+      href="/me"
+      className="mt-6 block text-center text-xs font-semibold text-[var(--faint)]"
+    >
+      {label}
+    </Link>
+  );
+}

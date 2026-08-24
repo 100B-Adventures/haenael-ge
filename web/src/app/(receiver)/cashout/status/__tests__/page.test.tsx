@@ -3,7 +3,7 @@
 //         my_cashout_status의 settled_balance_before/after 원장 스냅샷을 그대로 쓴다.
 // MAJOR4: 잠김이 있는 화면은 SplitBalanceCard(분할 막대 + 두 줄 라벨)를 그린다.
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -30,6 +30,10 @@ function mockSupabase(rpcImpl: (name: string) => unknown) {
 describe("/cashout/status", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("MAJOR1: PAID 배너는 라이브 총량 역산이 아니라 원장 스냅샷(settled_balance_before/after)을 쓴다", async () => {
@@ -86,7 +90,9 @@ describe("/cashout/status", () => {
     expect(banner.textContent).not.toMatch(/62개/);
   });
 
-  it("MAJOR4: 잠김이 있는 REQUESTED 상태는 SplitBalanceCard(분할 막대 + 두 줄 라벨)를 렌더한다", async () => {
+  it("TC-STATUS-01~04: REQUESTED 상태는 분할 잔액·단계 시각·카드 안내·비활성 재신청·홈 경로를 렌더한다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-21T01:00:00.000Z"));
     mockSupabase((name) => {
       if (name === "my_cashout_status") {
         return {
@@ -139,5 +145,14 @@ describe("/cashout/status", () => {
     expect(block).toHaveTextContent("🔒 환전으로 잠김");
     expect(screen.getByTestId("split-balance-available")).toHaveTextContent("🍀 12개");
     expect(screen.getByTestId("split-balance-locked")).toHaveTextContent("🍀 40개");
+    expect(screen.getByText("8/21 09:00")).toBeInTheDocument();
+    expect(screen.getAllByText("예정")).toHaveLength(2);
+    expect(screen.getByTestId("cashout-step-note")).toHaveTextContent("지금은 확인 대기 중이에요. 따로 하실 일은 없어요.");
+
+    const nextCashoutButton = screen.getByRole("button", { name: /새 환전 신청하기/ });
+    expect(nextCashoutButton).toBeDisabled();
+    expect(nextCashoutButton).toHaveTextContent("이 건이 끝나면 다시 신청할 수 있어요");
+    expect(screen.queryByRole("link", { name: "환전 내역 보기" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "홈으로" })).toHaveAttribute("href", "/me");
   });
 });

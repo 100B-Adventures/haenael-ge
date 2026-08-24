@@ -29,6 +29,8 @@ describe("SplitBalanceCard", () => {
     expect(screen.getByTestId("split-balance-available")).toHaveTextContent("🍀 12개");
     expect(screen.getByTestId("split-balance-locked")).toHaveTextContent("🍀 40개");
     expect(screen.getByTestId("split-balance-locked-krw")).toHaveTextContent("34,426원 입금 예정");
+    expect(screen.getByTestId("split-balance-progress")).toHaveAttribute("value", "12");
+    expect(screen.getByTestId("split-balance-progress")).toHaveAttribute("max", "52");
 
     // 안내 두 문장(DESIGN §6-(d)) — "52개는 왜 12개만 쓰냐" 오해를 닫는 문구
     const note = screen.getByTestId("split-balance-note");
