@@ -1,5 +1,46 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-25: 환전 main CI 로그인 세션 회귀
+
+**판정: 🔧 수정 검증 / 앱 소스 회귀 없음, CI production build 환경 누락 해소**
+
+- 실패 재현: 기존 `.next`를 `next start`로 실행한 환전 E2E 첫 케이스에서 로그인 쿠키가 세션으로 읽히지 않아 `/cashout`이 `/` 랜딩으로 이동했고 `cashout-page`를 찾지 못했다.
+- 원인: `772f873`에서 E2E 실행이 `next dev`에서 `next start`로 바뀌었지만 E2E 잡은 production build를 만들지 않았다. `NEXT_PUBLIC_SUPABASE_URL`은 build 시 고정되므로 다른 환경의 bundle과 런타임 계약 서버를 섞으면 Supabase Auth 저장소가 달라진다.
+- 반증: `/cashout/page.tsx`의 `getUser()`와 redirect는 커밋 전후 동일하다. `(receiver)/layout.tsx`는 인증 로직이 없고 `CashoutPageView`는 인증 완료 뒤 받은 props만 렌더한다.
+- 수정: 환전 E2E 잡에서 로컬 계약 서버 URL로 `npm run build`한 뒤 기존 `next start`와 12개 테스트를 실행한다. production 모드 검증 강도는 유지했다.
+- 직접 증거: Playwright 12/12, Vitest 246/246, pgTAP 247/247, Next build 통과. 실제 로컬 Supabase Auth 로그인 세션의 dev 서버 `/cashout`은 HTTP 200과 `cashout-page` 노출을 확인했다.
+- 잔여: 운영 배포본의 로그인 환전 화면은 미검증이다. 운영 DB 쓰기와 배포는 하지 않았다.
+
+STAMP: 수정 시각 2026-08-25 00:21 KST | 모델 gpt-5.6-sol | 에이전트 code-builder | 근거 Git diff, production E2E, 실제 로컬 Supabase Auth 세션
+
+## 2026-08-25: 환전 릴리즈 운영 전 최종 관문
+
+**판정: ❌ NG / 로컬 돈 상태전이 통과, 운영 schema와 품질 게이트 미통과**
+
+- 릴리즈 커밋 `772f873`과 현재 `main` 병합 커밋의 전체 tree hash가 동일해 마지막 화면 정합 커밋 뒤 제품 트리 회귀가 없음을 확인했다.
+- 로컬 실제 화면과 Postgres에서 잘못된 계좌번호 차단, 관리자 전체 계좌 열람, 10분 열람 만료 차단, 새 열람 뒤 지급 완료, 계좌 정보 오류 이체 실패 후 반려를 관찰했다.
+- 10분 만료 확정은 `REQUESTED`와 정산 원장 0건을 유지했다. 새 열람 뒤 30개 지급은 `PAID`, `CASHOUT_SETTLED delta=-30`, 총량 `124→94`였다. 이체 실패 반려는 `REJECTED`, `CASHOUT_REVERSAL delta=0`, 총량 94 유지였다.
+- 실제 은행 앱의 성공 및 실패 응답은 미검증이다. 외부 은행 연동이 없고 관리자 수동 처리만 존재한다.
+- `design-lint.sh web/src`는 인라인 style과 토큰 밖 hex 2종 위반을 검출해 FAIL이다. 스크립트 종료코드 0은 통과 근거로 쓰지 않았다.
+- Storybook 정적 build와 기존 6개 story 렌더는 통과했다. 그러나 컴포넌트 인벤토리가 없고 릴리즈 핵심 컴포넌트 story 및 shadow와 시각적 spacing 토큰 표면이 없어 품질 게이트는 FAIL이다.
+- 운영 read-only migration 조회에서 local만 있고 remote에 없는 버전이 15개이며, 관련 `20260821000000`, `20260822000000`도 미적용이다. 새 웹을 배포하면 표시 금액과 DB 계산 계약이 갈릴 수 있어 BLOCKER다.
+- 환전 클로버 잠금 및 화면 정합 릴리즈 PR 1번은 QA 판정 전에 `main`으로 머지됐다. 2026-08-25 00:01 KST 운영 read-only 확인은 health 200과 기존 약관 5% 문구를 반환했다. 운영 배포는 보류한다.
+
+| 요청번호 | 요청 요지 | 테스트번호 | 판정 | 증거 |
+|---|---|---|---|---|
+| QA-FINAL-01 | 마지막 커밋 회귀 | REG-01 | ✅ | release와 main 전체 tree hash 동일 |
+| QA-FINAL-02 | 미검증 경로 | FAIL-01, AUTH-01 | ⚠️ | 계좌 오류와 비인증 redirect 관찰, 실제 은행 응답 미검증 |
+| QA-FINAL-03 | 관리자 큐와 상세 | ADMIN-01~04 | ✅ | 모달, 10분 게이트, 지급, 반려, 감사로그 |
+| QA-FINAL-04 | 실패 경로 | FAIL-01~03 | ⚠️ | 입력 오류와 운영자 반려 통과, 실제 은행 실패 미검증 |
+| QA-FINAL-05 | design-lint와 Storybook | DESIGN-01, SB-01 | ❌ | lint 2종 위반, Storybook 품질 커버리지 미달 |
+| QA-FINAL-06 | 돈과 신뢰 위험 | RISK-01 | ❌ | remote migration gap 15개, 관련 2개 미적용 |
+| QA-FINAL-07 | 최종 판정 | GATE-01 | ❌ NG | BLOCKER 2건, MAJOR 3건 |
+| QA-FINAL-08 | 운영 배포 위험 | SHIP-01 | ❌ | main 머지됨, 운영은 기존 약관, 배포 보류 |
+
+산출물: `docs/core-cashout-release-final-qa-v2-gpt-codex.md`, `artifacts/qa-cashout-core-20260824/final-gate-v2/`.
+
+STAMP: 수정 시각 2026-08-25 00:18 KST | 모델 gpt-5.6-sol | 에이전트 qa-verifier | 스킬 qa | 근거 로컬 Playwright, Postgres, Storybook 렌더, 운영 read-only migration 및 HTTP 확인
+
 ## 2026-08-24: 환전 신청 실제 로컬 여정 QA
 
 **판정: ❌ NG / 기능 상태전이 관찰 통과, 승인 프로토타입 정합 실패**

@@ -69,6 +69,15 @@ jobs:
 
       - run: npm ci
 
+      - name: 환전 격리 환경 프로덕션 빌드
+        run: npm run build
+        env:
+          # cashout-manual.spec.ts가 띄우는 로컬 계약 서버와 같은 URL로 빌드한다.
+          # NEXT_PUBLIC_* 값은 next build에서 고정되므로 다른 환경의 .next를
+          # next start로 실행하면 Supabase 세션 쿠키 이름이 달라져 로그아웃으로 판정된다.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: e2e-anon-key
+
       - name: 브라우저 설치
         run: npx playwright install --with-deps chromium
 

@@ -51,3 +51,4 @@ artifacts/
 
 # 편집기 개인 설정
 .obsidian/
+.vercel
