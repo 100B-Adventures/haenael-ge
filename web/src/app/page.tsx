@@ -13,12 +13,20 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "해낼게 — 응원은 돈으로 하는 겁니다",
+  title: "해낼게 : 응원은 돈으로 하는 겁니다",
   description:
     "친구가 선언한 목표에 조용히 클로버로 응원하세요. 응원이 쌓이면 예쁜 워드맵이 됩니다.",
   openGraph: {
-    title: "해낼게",
+    title: "해낼게 : 응원은 돈으로 하는 겁니다",
     description: "응원은 돈으로 하는 겁니다.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "해낼게. 응원은 돈으로 하는 겁니다.",
+      },
+    ],
   },
 };
 

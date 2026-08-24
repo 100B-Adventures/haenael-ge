@@ -29,16 +29,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single();
 
   if (!goal) {
-    return { title: "목표를 찾을 수 없어요 — 해낼게" };
+    return { title: "목표를 찾을 수 없어요 : 해낼게" };
   }
 
   const titleText = goal.title ?? slug;
   return {
-    title: `${titleText} — 해낼게`,
+    title: `${titleText} : 해낼게`,
     description: goal.reason ?? "친구의 목표를 조용히 응원하세요.",
     openGraph: {
       title: titleText,
       description: goal.reason ?? "친구의 목표를 조용히 응원하세요.",
+      images: [
+        {
+          url: "/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "해낼게. 응원은 돈으로 하는 겁니다.",
+        },
+      ],
     },
   };
 }

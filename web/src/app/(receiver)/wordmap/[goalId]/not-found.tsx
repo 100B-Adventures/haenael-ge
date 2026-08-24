@@ -6,7 +6,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "목표를 찾을 수 없어요 — 해낼게",
+  title: "목표를 찾을 수 없어요 : 해낼게",
 };
 
 export default function WordmapNotFound() {

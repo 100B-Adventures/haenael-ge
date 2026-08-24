@@ -9,7 +9,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { OnboardingGoalForm } from "@/components/receiver/OnboardingGoalForm";
 
 export const metadata: Metadata = {
-  title: "목표 쓰기 — 해낼게",
+  title: "목표 쓰기 : 해낼게",
   description: "나만의 목표를 작성하고 친구들의 응원을 받아보세요.",
 };
 
