@@ -16,6 +16,7 @@ import {
   maskAccountNumber,
 } from "@/lib/cashout";
 import { KRW_PER_CLOVER, calcCashoutFee } from "@/lib/cashout-fee";
+import { getCashoutErrorMessage } from "@/lib/cashout-errors";
 
 type Props = {
   cashoutEnabled: boolean;
@@ -159,7 +160,7 @@ export function CashoutRequestForm({
         requestKey: idempotencyRef.current.key,
       });
       if (!result.ok) {
-        setErrorMessage(result.message);
+        setErrorMessage(getCashoutErrorMessage(result.code));
         if (result.code === "request_key_conflict") {
           idempotencyRef.current = null;
           setStep("form");

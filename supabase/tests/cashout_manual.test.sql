@@ -1,10 +1,11 @@
 -- cashout_manual.test.sql — 확정 계약 §0-1-6 T1~T14
 BEGIN;
 
--- A안(환전 클로버 잠금) 반영: plan 31 → 41. 추가분: C3(HOLD delta=0)·A-I4(신청 직후
+-- A안(환전 클로버 잠금) + 인증 게이트 완화 반영: plan 31 → 44. 추가분: C3(HOLD delta=0)·A-I4(신청 직후
 -- 총량 불변)·C4(SETTLED delta/잔액 감소 2건)·C5(신청 직후 불변)·C6(REVERSAL delta=0)·
--- A-I2 회귀 3건(컨트롤러 재검증 MINOR, 잠금 중 웰컴 회수)·중간상태 0건 회귀 1건.
-SELECT plan(41);
+-- A-I2 회귀 3건(컨트롤러 재검증 MINOR, 잠금 중 웰컴 회수)·중간상태 0건 회귀 1건·
+-- KYC-GATE 가입 직후 통과 1건·확인된 미성년 차단 1건·최신 성인 판정 우선 1건.
+SELECT plan(44);
 
 INSERT INTO auth.users (
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -23,7 +24,9 @@ FROM (VALUES
   ('ca500000-0000-0000-0000-000000000002'::uuid, 'cashout-t2@test.local'),
   ('ca500000-0000-0000-0000-000000000003'::uuid, 'cashout-t3@test.local'),
   ('ca500000-0000-0000-0000-000000000004'::uuid, 'cashout-t7@test.local'),
-  ('ca500000-0000-0000-0000-000000000005'::uuid, 'cashout-admin@test.local')
+  ('ca500000-0000-0000-0000-000000000005'::uuid, 'cashout-admin@test.local'),
+  ('ca500000-0000-0000-0000-000000000007'::uuid, 'cashout-signup@test.local'),
+  ('ca500000-0000-0000-0000-000000000008'::uuid, 'cashout-minor@test.local')
 ) AS seed(id, email);
 
 -- W-7 검증을 위해 일반 회원은 KYC 행 없이 시드한다.
@@ -34,6 +37,19 @@ VALUES
   ('ca500000-0000-0000-0000-000000000003', '지급회원', 'NONE'),
   ('ca500000-0000-0000-0000-000000000004', '반려회원', 'NONE'),
   ('ca500000-0000-0000-0000-000000000005', '환전관리자', 'NONE');
+
+-- auth-kakao 신규 가입과 같은 상태: provider 식별값만 있고 kyc_status는 기본 NONE,
+-- kyc_verification 행은 없다. 미성년 fixture도 회원 기본값에서 시작한 뒤 확인 행만 추가한다.
+INSERT INTO public.member (id, provider, provider_id, nickname)
+VALUES
+  ('ca500000-0000-0000-0000-000000000007', 'kakao', 'cashout-signup', '가입직후회원'),
+  ('ca500000-0000-0000-0000-000000000008', 'kakao', 'cashout-minor', '미성년확인회원');
+
+INSERT INTO public.kyc_verification (member_id, is_adult, provider, verified_at)
+VALUES (
+  'ca500000-0000-0000-0000-000000000008', false, 'PASS',
+  '2026-08-24T00:00:00+09:00'::timestamptz
+);
 
 INSERT INTO public.admin_member(member_id)
 VALUES ('ca500000-0000-0000-0000-000000000005');
@@ -46,7 +62,9 @@ VALUES
   ('ca500000-0000-0000-0000-000000000002', 'WELCOME_GRANT', 30, 'test', 2, 30),
   ('ca500000-0000-0000-0000-000000000003', 'WELCOME_GRANT', 10, 'test', 3, 10),
   ('ca500000-0000-0000-0000-000000000003', 'EARN', 40, 'test', 4, 50),
-  ('ca500000-0000-0000-0000-000000000004', 'EARN', 40, 'test', 5, 40);
+  ('ca500000-0000-0000-0000-000000000004', 'EARN', 40, 'test', 5, 40),
+  ('ca500000-0000-0000-0000-000000000007', 'EARN', 30, 'test', 6, 30),
+  ('ca500000-0000-0000-0000-000000000008', 'EARN', 30, 'test', 7, 30);
 
 -- 설정 함수는 앱 역할에 공개하지 않은 내부 토글이다. migration owner 권한에서
 -- 값을 검증한 뒤, 실제 신청 RPC는 아래 service_role 권한으로 검증한다.
@@ -54,6 +72,39 @@ SELECT is(public.cashout_require_kyc(), false, 'W-7: KYC 게이트는 한 줄 �
 
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+
+SELECT is(
+  (SELECT status::text FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 30, 'KB', repeat('7', 12),
+    '가입직후회원', 'cashout-signup-none', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )),
+  'REQUESTED',
+  'KYC-GATE-01 정상 경로: 가입 직후 NONE·확인 행 없음 계정도 환전 신청 성공'
+);
+
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000008', 30, 'KB', repeat('8', 12),
+    '미성년확인회원', 'cashout-minor-block', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '42501', 'cashout_minor_not_allowed',
+  'KYC-GATE-02 거절 경로: 미성년 확인 행의 최신 is_adult=false는 신청 차단'
+);
+
+INSERT INTO public.kyc_verification (member_id, is_adult, provider, verified_at)
+VALUES (
+  'ca500000-0000-0000-0000-000000000008', true, 'PASS',
+  '2026-08-25T00:00:00+09:00'::timestamptz
+);
+
+SELECT is(
+  (SELECT status::text FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000008', 30, 'KB', repeat('8', 12),
+    '미성년확인회원', 'cashout-latest-adult', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )),
+  'REQUESTED',
+  'KYC-GATE-03 경계값: 과거 false 뒤 최신 is_adult=true 판정이면 신청 성공'
+);
 
 SELECT throws_ok(
   $$SELECT * FROM public.create_cashout_request(

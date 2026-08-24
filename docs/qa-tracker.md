@@ -1,5 +1,21 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-25: 환전 신청 PASS 게이트와 오류 응답 회귀
+
+**판정: 🔧 로컬 수정 검증 / 운영 migration·배포·실사용자 재검증 미실행**
+
+- 증상은 가입 직후 `kyc_status=NONE` 계정의 첫 환전 신청이 `cashout_kyc_required`로 거절되지만 화면에는 `cashout_request_failed`만 보이고, 한국어 오류가 mojibake로 표시된 것이었다.
+- 원인은 DB 함수의 `VERIFIED AND is_adult=true` 선행 요구, Server Action의 알려진 오류 목록 누락, 한국어 메시지를 Next.js Flight 응답에 직접 실은 구조였다.
+- 신규 migration은 연령 확인 행이 없으면 통과시키고, 가장 최근 `kyc_verification.is_adult=false`일 때만 `cashout_minor_not_allowed`로 차단한다. 기존 함수와 diff한 결과 게이트 외 실행문은 동일하다.
+- Server Action은 계약된 환전 SQLSTATE에서 발생한 snake_case ASCII 오류 코드만 반환한다. 일반 서버 예외와 다른 SQLSTATE는 고정 코드로 닫는다. 한국어는 브라우저의 `cashout-errors.ts`에서 조립하고, 새 환전 DB 코드는 안전한 코드 자체를 함께 표시한다.
+- 직접 증거: 전체 migration 체인에 신규 파일 적용, 환전 pgTAP 44/44, 전체 pgTAP 250/250, 병렬 신청 2건 중 1건 성공·1건 차단·요청/HOLD 각 1건, 환전 웹 계약 30/30, 전체 Vitest 263/263, Next production build 정적 페이지 16/16 통과.
+- 계좌 마스킹 `••••••9012`, A안 `CASHOUT_HOLD delta=0`, 30,000원의 `3,300·881·25,819`, `status='REQUESTED'` 중복 차단 단언은 그대로 통과했다.
+- `design-lint.sh web/src`는 선행 작업의 인라인 style과 토큰 밖 hex 2종을 계속 보고한다. 이번 변경 파일의 신규 디자인 토큰 이탈은 없지만 전역 gate는 미통과다.
+- `supabase db reset`은 신규 migration 적용 뒤 Storage 컨테이너 health 대기에서 실패했다. 같은 Postgres를 대상으로 이어 실행한 pgTAP 250건은 전부 통과했으며 Storage 장애는 이번 DB 함수 변경과 무관하다.
+- 운영 DB 적용, Vercel 배포, 회장 실계정 신청, 실제 지급 단계의 주민등록번호 수집은 미검증이다.
+
+STAMP: 수정 시각 2026-08-25 03:06 KST | 모델 gpt-5-codex | 에이전트 code-builder | 스킬 없음 | 근거 회장 결정, 신규 migration, Next.js 로컬 문서, PostgreSQL·Supabase 공식 문서, 로컬 Postgres·Vitest·build 실출력, 독립 코드리뷰 보완
+
 ## 2026-08-25: 환전 main CI 로그인 세션 회귀
 
 **판정: 🔧 수정 검증 / 앱 소스 회귀 없음, CI production build 환경 누락 해소**

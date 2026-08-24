@@ -9,6 +9,11 @@ import {
   isCashoutEnabled,
 } from "@/lib/supabase/service";
 import { normalizeKoreanMobilePhone } from "@/lib/phone";
+import {
+  PUBLIC_ERRORS,
+  normalizeCashoutErrorCode,
+  normalizeCashoutRpcErrorCode,
+} from "@/lib/cashout-errors";
 
 const BANK_CODE_PATTERN = /^[A-Za-z0-9_-]{2,20}$/;
 const REQUEST_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
@@ -50,32 +55,12 @@ export type CreateCashoutResult =
         isReplay: boolean;
       };
     }
-  | { ok: false; code: string; message: string };
-
-const PUBLIC_ERRORS: Record<string, string> = {
-  cashout_disabled: "환전 기능을 준비하고 있어요.",
-  cashout_below_minimum: "최소 30클로버부터 환전할 수 있어요.",
-  cashout_insufficient_balance: "지급 가능한 친구 응원분을 다시 확인해주세요.",
-  cashout_already_requested: "이미 처리 중인 환전 신청이 있어요.",
-  request_key_conflict: "입력값이 바뀌었어요. 다시 확인한 뒤 신청해주세요.",
-  invalid_bank_code: "은행을 다시 선택해주세요.",
-  invalid_account_number: "계좌번호를 숫자로 정확히 입력해주세요.",
-  invalid_account_holder: "예금주명을 정확히 입력해주세요.",
-  invalid_phone: "전화번호를 숫자로 정확히 입력해주세요.",
-  phone_save_failed: "전화번호를 저장하지 못했어요. 잠시 후 다시 시도해주세요.",
-  invalid_request_key: "신청 정보를 새로고침한 뒤 다시 시도해주세요.",
-  cashout_encryption_unavailable: "환전 신청 서버를 점검하고 있어요.",
-  cashout_fingerprint_unavailable: "환전 신청 서버를 점검하고 있어요.",
-  unauthorized: "로그인 후 다시 시도해주세요.",
-};
-
-const FALLBACK_ERROR_CODE = "cashout_request_failed";
+  | { ok: false; code: string };
 
 function fail(code: string): CreateCashoutResult {
   return {
     ok: false,
-    code,
-    message: PUBLIC_ERRORS[code] ?? "환전 신청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.",
+    code: normalizeCashoutErrorCode(code),
   };
 }
 
@@ -150,13 +135,11 @@ export async function createCashoutRequest(
 
     const row = (data as CashoutRow[] | null)?.[0];
     if (error || !row) {
-      const rawCode = error?.message;
-      const code = rawCode && Object.prototype.hasOwnProperty.call(PUBLIC_ERRORS, rawCode)
-        ? rawCode
-        : FALLBACK_ERROR_CODE;
+      const code = normalizeCashoutRpcErrorCode(error?.message, error?.code);
       console.error("[cashout-action] RPC failed", {
         dbCode: error?.code ?? "unknown",
         publicCode: code,
+        knownPublicCode: Object.prototype.hasOwnProperty.call(PUBLIC_ERRORS, code),
       });
       return fail(code);
     }
@@ -206,10 +189,7 @@ export async function createCashoutRequest(
         isReplay: row.is_replay,
       },
     };
-  } catch (error) {
-    const rawCode = error instanceof Error ? error.message : null;
-    return fail(rawCode && Object.prototype.hasOwnProperty.call(PUBLIC_ERRORS, rawCode)
-      ? rawCode
-      : FALLBACK_ERROR_CODE);
+  } catch {
+    return fail("cashout_request_failed");
   }
 }

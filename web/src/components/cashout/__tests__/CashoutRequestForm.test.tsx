@@ -159,6 +159,38 @@ describe("CashoutRequestForm", () => {
     expect(screen.queryByText(/request body contained account/)).not.toBeInTheDocument();
   });
 
+  it("TC-ERR-02 서버는 ASCII 코드만 보내고 브라우저가 정상 한글 오류를 표시한다", async () => {
+    createCashoutRequest.mockResolvedValueOnce({
+      ok: false,
+      code: "cashout_minor_not_allowed",
+    });
+    renderForm();
+    fireEvent.change(screen.getByLabelText("은행"), { target: { value: "KB" } });
+    fireEvent.change(screen.getByLabelText("계좌번호"), { target: { value: "123456789012" } });
+    fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+    fireEvent.click(screen.getByTestId("cashout-submit-button"));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("미성년으로 확인된 계정은 환전을 신청할 수 없어요.");
+    expect(alert.textContent).not.toMatch(/[íìë�]/);
+  });
+
+  it("TC-ERR-03 새 DB 오류 코드는 숨기지 않고 안전한 코드와 재시도 안내를 표시한다", async () => {
+    createCashoutRequest.mockResolvedValueOnce({
+      ok: false,
+      code: "cashout_new_gate",
+    });
+    renderForm();
+    fireEvent.change(screen.getByLabelText("은행"), { target: { value: "KB" } });
+    fireEvent.change(screen.getByLabelText("계좌번호"), { target: { value: "123456789012" } });
+    fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+    fireEvent.click(screen.getByTestId("cashout-submit-button"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("오류 코드: cashout_new_gate");
+  });
+
   it("TC-LD-01 정상 경로: 제출 중 작업명과 중복 방지 안내를 보여주고 재입력을 잠근다", async () => {
     let resolveRequest!: (value: unknown) => void;
     createCashoutRequest.mockReturnValueOnce(new Promise((resolve) => {

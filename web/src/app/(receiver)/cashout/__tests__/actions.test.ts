@@ -138,7 +138,55 @@ describe("createCashoutRequest Server Action", () => {
     });
 
     expect(result).toMatchObject({ ok: false, code: "cashout_request_failed" });
-    expect(result.ok ? "" : result.message).not.toContain("secret_internal_table");
+  });
+
+  it("TC-ERR-02 일반 서버 예외의 내부 snake_case 코드는 공개하지 않는다", async () => {
+    serviceRpc.mockRejectedValueOnce(new Error("admin_service_unavailable"));
+
+    const result = await createCashoutRequest({
+      cloverAmount: 30,
+      bankCode: "KB",
+      accountNo: "123456789012",
+      accountHolder: "홍길동",
+      phone: "01012345678",
+      requestKey: "cashout_action_internal_error",
+    });
+
+    expect(result).toEqual({ ok: false, code: "cashout_request_failed" });
+  });
+
+  it.each([
+    ["invalid_member", "22023"],
+    ["cashout_below_minimum", "22023"],
+    ["invalid_bank_code", "22023"],
+    ["invalid_account_number", "22023"],
+    ["invalid_account_holder", "22023"],
+    ["invalid_request_key", "22023"],
+    ["cashout_key_version_unavailable", "55000"],
+    ["cashout_encryption_unavailable", "55000"],
+    ["cashout_fingerprint_unavailable", "55000"],
+    ["cashout_kyc_required", "42501"],
+    ["cashout_minor_not_allowed", "42501"],
+    ["request_key_conflict", "22023"],
+    ["cashout_already_requested", "55000"],
+    ["cashout_insufficient_balance", "22023"],
+  ])("TC-ERR-01 DB RAISE 코드 %s를 실제 코드로 전달한다", async (dbCode, sqlstate) => {
+    serviceRpc.mockResolvedValueOnce({
+      data: null,
+      error: { code: sqlstate, message: dbCode },
+    });
+
+    const result = await createCashoutRequest({
+      cloverAmount: 30,
+      bankCode: "KB",
+      accountNo: "123456789012",
+      accountHolder: "홍길동",
+      phone: "01012345678",
+      requestKey: "cashout_action_error_codes",
+    });
+
+    expect(result).toEqual({ ok: false, code: dbCode });
+    expect(JSON.stringify(result)).toMatch(/^[\x00-\x7F]+$/);
   });
 
   it("전화번호가 없거나 국내 휴대전화 형식이 아니면 저장과 신청 전에 거부한다", async () => {
