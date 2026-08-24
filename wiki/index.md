@@ -7,13 +7,13 @@
 ## ⚡ 새 세션/하위모델 진입 규칙 (여기부터)
 
 1. **마케팅·운영 작업이면** → [ops/agent-runbook.md](ops/agent-runbook.md) **하나만 먼저 읽어라** (진입 절차·주간 사이클·금지선·판단 위임 경계 전부 있음).
-2. 개발 작업이면 → 루트 `pipeline-state.md` + `docs/` 정본.
+2. 개발 작업이면 → 루트 `pipeline-state.core.md` + `docs/` 정본.
 3. 브랜드 판단이 필요하면 → [brand-marketing-strategy.md](brand-marketing-strategy.md) §1~2가 헌법. 모순되는 산출 금지.
 
 ## SSOT 라우팅 (3줄)
 - **빌드 스펙 정본 = [`docs/`](../docs/)** — 게이트(stages.yaml)가 검사. 이동 금지, 여기서는 링크만.
 - **사업 지식(결정·교훈·마케팅 실행층) = 이 `wiki/`** — decisions.md·learnings/ledger.md + 아래 실행층.
-- **라이브 핸드오프 = 루트 `.handoff-state.md`** / 단계 상태 = `pipeline-state.md`.
+- **라이브 핸드오프 = 루트 `session-state.core.md`** / 단계 상태 = `pipeline-state.core.md`.
 
 ## 브랜드/마케팅 실행층 (wiki 정본)
 
@@ -43,7 +43,7 @@
 - [고객 피드백 루프](ops/feedback-loop.md) — 정성 신호 태그 8종·주간 다이제스트·즉시 회수 트리거·성장 루프 포트폴리오
 
 ## 기획 정본 (docs/ 링크)
-- 기획: [PRD](../docs/prd-haenael-ge-v0.2.0.md) · [one-thing](../docs/one-thing.md) · [persona](../docs/persona.md) · [bm](../docs/bm.md) · [risks](../docs/risks.md)
+- 기획: [승인 PRD v0.3.0](../docs/prd-haenael-ge-v0.3.0.md) · [미승인 증분안 v0.4.0](../docs/prd-haenael-ge-v0.4.0.md) · [one-thing](../docs/one-thing.md) · [persona](../docs/persona.md) · [bm](../docs/bm.md) · [risks](../docs/risks.md)
 - 디자인: [DESIGN.md](../DESIGN.md) · [user-flow](../docs/user-flow.md) · [WIREFRAMES/](../docs/WIREFRAMES/) · [coverage](../docs/WIREFRAMES/coverage.md)
 
 ## 이 위키의 규칙
@@ -51,3 +51,7 @@
 - 교훈은 [learnings/ledger.md](learnings/ledger.md)에 1줄 append — 같은 category 3회+ = 규칙 승격 제안.
 - 아이디어 캡처는 `/capture` → `raw/inbox/` (raw는 불변 — append만).
 - BRAIN 정본 핀은 `brain://` 표기 (BRAIN/ops/pin-notation.md). 실경로는 [전략 문서 말미 대조표](brand-marketing-strategy.md#brain-핀-대조표-2026-07-10-검증).
+
+---
+
+STAMP: 수정 시각 2026-08-22 14:22 KST | 모델 GPT-5 Codex | 근거 `pipeline-state.core.md`의 approved_artifacts, 루트 실제 파일 목록, `docs/prd-haenael-ge-v0.3.0.md`, `docs/prd-haenael-ge-v0.4.0.md`

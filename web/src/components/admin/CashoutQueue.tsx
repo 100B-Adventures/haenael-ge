@@ -43,7 +43,7 @@ const numberFormatter = new Intl.NumberFormat("ko-KR");
 const statusLabels: Record<string, string> = { REQUESTED: "지급 대기", PAID: "지급 완료", REJECTED: "반려" };
 
 function formatDateTime(value: string | null) {
-  return value ? dateTimeFormatter.format(new Date(value)) : "—";
+  return value ? dateTimeFormatter.format(new Date(value)) : "없음";
 }
 
 function formatKrw(value: number) {
@@ -55,9 +55,9 @@ function shortId(value: string) {
 }
 
 function statusClass(status: string) {
-  if (status === "REQUESTED") return "bg-[#FBF1DD] text-[#B4791F]";
-  if (status === "REJECTED") return "bg-[#FBEAE7] text-[#D9483B]";
-  return "bg-[#E7F4EC] text-[#14613A]";
+  if (status === "REQUESTED") return "bg-amber-soft text-amber-ink";
+  if (status === "REJECTED") return "bg-danger-soft text-danger-ink";
+  return "bg-accent text-accent-foreground";
 }
 
 export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
@@ -184,15 +184,15 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
           ["PAID", "지급 완료"],
           ["REJECTED", "반려"],
         ] as const).map(([value, label]) => (
-          <button key={value} type="button" onClick={() => setFilter(value)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${filter === value ? "border-[#16140F] bg-[#16140F] text-white" : "border-[#E8E4DC] bg-white text-[#6F6A60]"}`}>{label} <span className="opacity-70">{counts[value]}</span></button>
+          <button key={value} type="button" onClick={() => setFilter(value)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${filter === value ? "border-foreground bg-foreground text-primary-foreground" : "border-border bg-card text-muted-foreground"}`}>{label} <span className="opacity-70">{counts[value]}</span></button>
         ))}
       </div>
 
       <div className="space-y-3 md:hidden" data-testid="cashout-mobile-cards">
-        {filtered.length === 0 ? <div className="rounded-[14px] border border-[#E8E4DC] bg-white p-8 text-center text-sm text-muted-foreground">지급 대기 중인 신청이 없어요.</div> : filtered.map((cashout) => (
-          <article key={cashout.id} className={`rounded-[14px] border bg-white p-4 ${cashout.status === "REQUESTED" ? "border-[#E8D3A6]" : "border-[#E8E4DC]"}`}>
+        {filtered.length === 0 ? <div className="rounded-md border border-border bg-card p-8 text-center text-sm text-muted-foreground">지급 대기 중인 신청이 없어요.</div> : filtered.map((cashout) => (
+          <article key={cashout.id} className={`rounded-md border bg-card p-4 ${cashout.status === "REQUESTED" ? "border-amber-line" : "border-border"}`}>
             <div className="flex items-start justify-between gap-3"><div><p className="font-bold">{cashout.nickname || "미설정"} <span className="font-mono text-xs text-muted-foreground">#{cashout.id}</span></p><p className="mt-1 text-[11px] text-muted-foreground">{formatDateTime(cashout.requested_at)}</p></div><span className={`rounded-full px-2 py-1 text-[10.5px] font-extrabold ${statusClass(cashout.status)}`}>{statusLabels[cashout.status] ?? cashout.status}</span></div>
-            <dl className="mt-3 divide-y divide-[#F2EEE6] text-xs">
+            <dl className="mt-3 divide-y divide-border text-xs">
               <div className="flex justify-between py-2"><dt className="text-muted-foreground">친구 응원분</dt><dd className="font-bold">🍀 {cashout.clover_amount} · {formatKrw(cashout.gross_krw)}</dd></div>
               <div className="flex justify-between py-2"><dt className="text-muted-foreground">원천징수</dt><dd>−{formatKrw(cashout.withholding_krw)}</dd></div>
               <div className="flex justify-between py-2"><dt className="text-muted-foreground">실지급액</dt><dd className="font-extrabold text-primary">{formatKrw(cashout.net_krw)}</dd></div>
@@ -226,21 +226,27 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
       </div>
 
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-3 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="cashout-modal-title">
-          <div className="w-full max-w-[430px] rounded-[20px] bg-white p-5 shadow-2xl">
-            <h3 id="cashout-modal-title" className="text-[17px] font-black">이 건을 <span className={modal.action === "paid" ? "text-[#14613A]" : "text-[#D9483B]"}>{modal.action === "paid" ? "지급 완료" : "반려"}</span>로 확정할까요?</h3>
-            <div className="mt-4 rounded-[12px] bg-[#F4EFE6] p-4 text-[12.5px]">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/50 p-3 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="cashout-modal-title">
+          <div className="w-full max-w-md rounded-lg bg-card p-5 shadow-2xl">
+            <h3 id="cashout-modal-title" className="text-[17px] font-black">이 건을 <span className={modal.action === "paid" ? "text-accent-foreground" : "text-danger-ink"}>{modal.action === "paid" ? "지급 완료" : "반려"}</span>로 확정할까요?</h3>
+            <div className="mt-4 rounded-sm bg-muted p-4 text-[12.5px]">
               <div className="flex justify-between py-1"><span>신청자</span><strong>{modal.cashout.nickname} ({modal.cashout.account_holder})</strong></div>
               <div className="flex justify-between gap-4 py-1"><span>입금 계좌</span><strong className="text-right">{modal.cashout.bank_code} {modal.action === "paid" ? modal.accountNo : modal.cashout.account_masked}</strong></div>
-              <div className="flex justify-between py-1"><span>실지급액</span><strong className="text-[15px] text-[#14613A]">{formatKrw(modal.cashout.net_krw)}</strong></div>
+              <div className="flex justify-between py-1"><span>실지급액</span><strong className="text-[15px] text-accent-foreground">{formatKrw(modal.cashout.net_krw)}</strong></div>
             </div>
             {modal.action === "paid" ? (
-              <label className="mt-4 flex gap-2 text-[12.5px] leading-relaxed text-[#6F6A60]"><input type="checkbox" checked={paidConfirmed} onChange={(event) => setPaidConfirmed(event.target.checked)} className="mt-1 size-4 accent-[#1B8A4F]" /><span>은행 앱에서 위 계좌로 <strong>{formatKrw(modal.cashout.net_krw)} 이체를 실제로 마쳤습니다.</strong></span></label>
+              <label className="mt-4 flex gap-2 text-[12.5px] leading-relaxed text-muted-foreground"><input type="checkbox" checked={paidConfirmed} onChange={(event) => setPaidConfirmed(event.target.checked)} className="mt-1 size-4 accent-primary" /><span>은행 앱에서 위 계좌로 <strong>{formatKrw(modal.cashout.net_krw)} 이체를 실제로 마쳤습니다.</strong></span></label>
             ) : (
-              <div className="mt-4"><label htmlFor="cashout-reject-note" className="text-[11.5px] font-bold text-[#6F6A60]">반려 사유 <span className="text-[#D9483B]">*필수</span></label><textarea id="cashout-reject-note" rows={3} maxLength={500} value={notes[modal.cashout.id] ?? ""} onChange={(event) => setNotes((current) => ({ ...current, [modal.cashout.id]: event.target.value }))} className="mt-2 w-full rounded-[12px] border border-[#E8E4DC] p-3 text-[12.5px]" /></div>
+              <div className="mt-4">
+                {/* 정본 = 프로토 v3.7 관리자 반려 확인 모달. A안에서 반려는 잠금 해제일 뿐이다. */}
+                <p className="rounded-sm bg-danger-soft p-3 text-[11.5px] leading-relaxed text-danger-ink" data-testid="cashout-reject-warning">
+                  반려하면 친구 응원분 🍀{modal.cashout.clover_amount}개에 걸린 <strong>잠금이 풀려요.</strong> 총량은 애초에 줄지 않았으므로 되돌릴 잔액이 없습니다. 신청자는 사유를 보고 다시 신청할 수 있어요.
+                </p>
+                <label htmlFor="cashout-reject-note" className="mt-3 block text-[11.5px] font-bold text-muted-foreground">반려 사유 <span className="text-danger-ink">*필수</span></label><textarea id="cashout-reject-note" rows={3} maxLength={500} value={notes[modal.cashout.id] ?? ""} onChange={(event) => setNotes((current) => ({ ...current, [modal.cashout.id]: event.target.value }))} className="mt-2 w-full rounded-sm border border-border p-3 text-[12.5px]" />
+              </div>
             )}
             {errors[modal.cashout.id] && <p role="alert" className="mt-2 text-xs font-semibold text-destructive">{errors[modal.cashout.id]}</p>}
-            <div className="mt-5 flex gap-2"><button type="button" onClick={() => setModal(null)} className="flex-1 rounded-[14px] border border-[#E8E4DC] py-3 text-sm font-bold">취소</button><button type="button" onClick={processSelected} disabled={pending || (modal.action === "paid" && !paidConfirmed)} className={`flex-1 rounded-[14px] py-3 text-sm font-extrabold text-white disabled:opacity-40 ${modal.action === "paid" ? "bg-[#1B8A4F]" : "bg-[#D9483B]"}`}>{modal.action === "paid" ? "지급 완료 확정" : "반려하고 복원"}</button></div>
+            <div className="mt-5 flex gap-2"><button type="button" onClick={() => setModal(null)} className="flex-1 rounded-md border border-border py-3 text-sm font-bold">취소</button><button type="button" onClick={processSelected} disabled={pending || (modal.action === "paid" && !paidConfirmed)} className={`flex-1 rounded-md py-3 text-sm font-extrabold text-primary-foreground disabled:opacity-40 ${modal.action === "paid" ? "bg-primary" : "bg-destructive"}`} data-testid="cashout-modal-confirm-button">{modal.action === "paid" ? "지급 완료 확정" : "반려하고 잠금 해제"}</button></div>
           </div>
         </div>
       )}

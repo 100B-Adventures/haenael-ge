@@ -1,11 +1,11 @@
 "use client";
 
-// components/goal/MyLinkCard.tsx — /me 재방문 시 "내 응원 링크 공유/복사" 재접근.
+// components/goal/MyLinkCard.tsx: /me 재방문 시 "내 응원 링크 공유/복사" 재접근.
 // user-flow.md §1.3 갭3(홈 링크 재접근, 2026-07-20): 온보딩 직후 ShareLinkCard 화면이
 // 아니라도, 홈 재방문 언제든 링크를 복사할 수 있어야 한다. ShareLinkCard와 동일한
 // 클립보드 복사 로직(fallback 포함)을 재사용하되, 웰컴배너 등 1회성 온보딩 UI는 제외.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
@@ -16,11 +16,13 @@ export interface MyLinkCardProps {
 export function MyLinkCard({ slug }: MyLinkCardProps) {
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
+  const [appUrl, setAppUrl] = useState(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app",
+  );
 
-  const appUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app";
+  useEffect(() => {
+    setAppUrl(window.location.origin);
+  }, []);
 
   const fullUrl = `${appUrl}/g/${slug}`;
 
@@ -73,18 +75,16 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
 
   return (
     <div
-      className="rounded-[14px] p-4 mb-4"
-      style={{ background: "#fff", border: "1px solid #E8E4DC" }}
+      className="mb-4 rounded-md border border-border bg-card p-4"
       data-testid="my-link-card"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="mb-1" style={{ fontSize: 10.5, color: "#9C968B" }}>
+          <p className="mb-1 text-[length:var(--text-meta-micro)] text-[var(--faint)]">
             내 응원 링크
           </p>
           <p
-            className="font-bold truncate select-text"
-            style={{ fontSize: 12.5, color: "#14613A" }}
+            className="truncate select-text text-[length:var(--text-input-label)] font-bold text-accent-foreground"
             data-testid="my-link-url"
           >
             {fullUrl}
@@ -93,19 +93,13 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
         <button
           type="button"
           onClick={handleCopy}
-          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[12px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B8A4F] focus-visible:ring-offset-2"
-          style={{
-            background: copied
-              ? "#1B8A4F"
+          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+            copied
+              ? "bg-primary text-primary-foreground"
               : copyFailed
-                ? "#FBEAE7"
-                : "#E7F4EC",
-            color: copied
-              ? "#ffffff"
-              : copyFailed
-                ? "#D9483B"
-                : "#14613A",
-          }}
+                ? "bg-danger-soft text-danger-ink"
+                : "bg-accent text-accent-foreground"
+          }`}
           data-testid="my-link-copy-button"
           aria-label={copyLabel}
         >
@@ -119,8 +113,7 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
       </div>
       {copyFailed && (
         <p
-          className="mt-2"
-          style={{ fontSize: 11, color: "#D9483B" }}
+          className="mt-2 text-[11px] text-danger-ink"
           role="status"
           data-testid="my-link-copy-error"
         >

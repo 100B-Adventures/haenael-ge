@@ -1,26 +1,30 @@
-// notify — 카카오 알림톡 발송(응원 도착 등 정보성) + 인앱 폴백
+// notify — 카카오 알림톡 발송(응원 도착·환전 신청 접수·환전 지급 완료 등 정보성) + 인앱 폴백
 // ⚠️ 정보성만(마케팅/광고성 금지) — design-patterns §11c.
-// 호출 방식: service_role 내부 호출 (toss-confirm EF 등에서 invoke).
+// 호출 방식: service_role 내부 호출 (web server action, toss-confirm EF 등에서 invoke).
 //
 // 요청:
 //   POST /functions/v1/notify
 //   Authorization: Bearer <SERVICE_ROLE_KEY>
 //   Body: {
-//     memberId: string,        // 받는사람(목표 주인공) uuid
-//     type: "CHEER_RECEIVED",
-//     phone?: string,          // 없으면 INAPP 폴백 (현재 B1 — member.phone 미구현)
+//     memberId: string,        // 받는사람 uuid
+//     type: "CHEER_RECEIVED" | "CASHOUT_REQUESTED" | "CASHOUT_PAID",
+//     phone?: string,          // 없으면 INAPP 폴백
+//     // CHEER_RECEIVED 전용:
 //     displayName?: string,    // 응원자 이름 ("익명의 누군가" 등)
 //     goalTitle?: string,      // 목표 제목
+//     // CASHOUT_PAID 전용 (필수):
+//     bankName?: string,       // 은행명만 — 계좌번호는 절대 싣지 않는다(회장 결정)
 //   }
 //
 // 응답: { notificationId: number, channel: "ALIMTALK" | "INAPP", alimtalkStatus?: "SENT" | "FAILED" }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
+import { sendAlimtalk } from "../_shared/alimtalk.ts";
 import {
-  buildCheerReceivedMessage,
-  sendAlimtalk,
-} from "../_shared/alimtalk.ts";
+  buildNotifyMessage,
+  validateNotifyInput,
+} from "../_shared/notify-message.ts";
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 // report EF와 동일 버그(2026-07-20 수정): OPTIONS만 CORS를 붙이고 실제 응답엔
@@ -43,41 +47,6 @@ function err(status: number, code: string, message: string): Response {
       ),
     },
   );
-}
-
-// ─── 입력 검증 ──────────────────────────────────────────────────────────────
-interface NotifyInput {
-  memberId: string;
-  type: "CHEER_RECEIVED";
-  phone?: string;
-  displayName?: string;
-  goalTitle?: string;
-}
-
-function validate(body: unknown): { data: NotifyInput } | { error: string } {
-  if (typeof body !== "object" || body === null) {
-    return { error: "body must be JSON object" };
-  }
-  const b = body as Record<string, unknown>;
-
-  if (typeof b.memberId !== "string" || !b.memberId) {
-    return { error: "memberId required (string)" };
-  }
-  if (b.type !== "CHEER_RECEIVED") {
-    return { error: "type must be CHEER_RECEIVED" };
-  }
-
-  return {
-    data: {
-      memberId: b.memberId as string,
-      type: "CHEER_RECEIVED",
-      phone: typeof b.phone === "string" ? b.phone : undefined,
-      displayName: typeof b.displayName === "string"
-        ? b.displayName
-        : "익명의 누군가",
-      goalTitle: typeof b.goalTitle === "string" ? b.goalTitle : "목표",
-    },
-  };
 }
 
 // ─── 메인 핸들러 ────────────────────────────────────────────────────────────
@@ -122,7 +91,7 @@ Deno.serve(async (req: Request) => {
     return err(400, "invalid_json", "body must be valid JSON");
   }
 
-  const validated = validate(rawBody);
+  const validated = validateNotifyInput(rawBody);
   if ("error" in validated) {
     return err(400, "validation_error", validated.error);
   }
@@ -139,10 +108,7 @@ Deno.serve(async (req: Request) => {
 
   if (input.phone) {
     channel = "ALIMTALK";
-    const alimtalkMsg = buildCheerReceivedMessage(input.phone, {
-      displayName: input.displayName ?? "익명의 누군가",
-      goalTitle: input.goalTitle ?? "목표",
-    });
+    const alimtalkMsg = buildNotifyMessage(input, input.phone);
 
     const result = await sendAlimtalk(alimtalkMsg);
     alimtalkStatus = result.status;

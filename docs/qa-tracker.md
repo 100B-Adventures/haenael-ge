@@ -1,5 +1,64 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-24: 환전 신청 실제 로컬 여정 QA
+
+**판정: ❌ NG / 기능 상태전이 관찰 통과, 승인 프로토타입 정합 실패**
+
+- 로컬 Supabase와 390px 실제 화면을 함께 태웠다. 응원 적립→40개 신청→관리자 전체 계좌 열람→지급 완료에서 총량·잠김·사용 가능은 `52·0·52 → 52·40·12 → 12·0·12`였다.
+- 30개 신청→반려는 `52·0·52 → 52·30·22 → 52·0·52`였다. DB 원장은 신청 `CASHOUT_HOLD delta=0`, 반려 `CASHOUT_REVERSAL delta=0`, 지급 `CASHOUT_SETTLED delta=-40`이었다.
+- 30,000원은 이용료 3,300원·원천징수 881원·실수령 25,819원, 40,000원은 4,400원·1,174원·34,426원으로 화면·DB·Server Action 응답이 일치했다.
+- 최소 30개 미달은 차단됐지만 영어 native validation 문구가 노출됐다. 중복 신청은 `cashout_already_requested`와 한국어 alert로 차단됐다. loading은 실제 POST 지연 중 viewport 안에서 `role=status`, `aria-live=polite`로 관찰됐다.
+- 응원 122건에서 미리보기 8행, 전체 20행, 101건 너머 검색 결과 1건을 관찰했다.
+- 관리자 전체 계좌 열람은 지급 목적 감사로그를 남겼다. 신청자 화면과 응답은 마스킹 계좌만 노출했다.
+- 회귀는 올바른 로컬 ENV에서 전체 45개 고유 Playwright 케이스를 전건 관찰 통과했다. 컨트롤러 선행 Vitest 240, pgTAP 247, Next build exit 0은 재실행하지 않고 신뢰했다.
+- 디자인 정합은 FAIL이다. 승인 프로토타입은 확인·loading을 전용 화면으로 전환하지만 dev는 이전 잔액·공제·내역을 계속 남긴다. 390px 높이는 확인 `510→1,346`, loading `617→1,505`다. 워드맵 미리보기도 시안 6개, dev 12개로 다르다.
+- `design-lint.sh web/src`는 인라인 style과 토큰 밖 hex 두 범주를 경고했다.
+- 요청 원장 파일이 없어 요청번호 승계 대상은 아니며, 이번 요청 1~7을 `QA-LOCAL-01~07`로 추적했다.
+- 운영 DB·실은행 송금·모바일·Maestro는 검증하지 않았다.
+
+| 요청·TC | 요청 요지 | 판정 | 증거 |
+|---|---|---|---|
+| QA-LOCAL-01 | 적립→신청→계좌 열람→지급 완료 | ✅ | 화면·DB 상태표, 신청 46번, 감사로그 |
+| QA-LOCAL-02 | 신청→반려→잠금 해제 | ✅ | 신청 45번, `CASHOUT_REVERSAL delta=0`, 반려 화면 |
+| QA-LOCAL-03 | 30,000원·40,000원 정확성 | ✅ | 화면·DB·Server Action 3면 일치 |
+| QA-LOCAL-04 | 최소액 미달 | ⚠️ | 차단 PASS, 영어 native 문구 UX NG |
+| QA-LOCAL-05 | 중복 신청 차단 | ✅ | `cashout_already_requested`, 성공 화면 0건 |
+| QA-LOCAL-06 | 실제 loading 피드백 | ✅ | viewport 교차, `role=status`, `aria-live=polite` |
+| QA-LOCAL-07 | 100건 이상 상한·검색 | ✅ | 122건, 8→20행, 101건 너머 검색 1건 |
+| DESIGN-390 | 승인 프로토타입 v3.7 정합 | ❌ | 전용 확인·loading 구조와 워드맵 수량 불일치 |
+
+산출물: `docs/core-cashout-qa-report-v1-gpt-codex.md`, `docs/core-cashout-design-conformance-matrix-v1-gpt-codex.md`, `artifacts/qa-cashout-core-20260824/`.
+
+STAMP: 수정 시각 2026-08-24 17:45 KST | 모델 gpt-codex/GPT-5 | 에이전트 qa-verifier | 스킬 qa | 근거 실제 로컬 Playwright·Postgres·390px 스크린샷·승인 프로토타입 v3.7
+
+## 2026-08-24: 환전 프로토타입 v3.7 응원 overflow build 재검증
+
+**판정: 🔧 코드 수정·로컬 실행 증거 통과 / 독립 QA와 운영 반영은 미검증**
+
+- 응원 100건은 둥근 카드 안에 최근 20행과 하단 안내를 함께 표시한다. 같은 카드 하단에서 검색 폼을 열며, 목록을 가리던 고정 `워드맵 보기` 레이어는 문서 흐름으로 옮겼다.
+- `/me?q=` 서버 검색은 최근 20건 배열이 아니라 전체 본인 응원에서 이름과 메시지를 각각 `ilike` 조회한다. 익명 응원의 저장 이름은 검색 대상에서 제외하고, raw `or()` 필터 문자열은 사용하지 않는다.
+- 워드맵 overflow는 응원 목록 다음에 12개를 표시하고 `88개는 검색으로 찾기`를 같은 카드에 붙인다.
+- `ReceiverTopBar`는 `home`과 `detail` 변형을 강제한다. 홈만 알림·로그아웃 액션을 표시하고 `/cashout`, `/cashout/status`, `/cashout/history`는 브랜드 상단만 쓴다.
+- 직접 관찰: production `next start`, Playwright 390×844에서 응원 100건 카드와 121번째 메시지 서버 검색을 확인했다. 캡처는 `artifacts/cashout-v3.7/me-overflow-100-390.png`, `artifacts/cashout-v3.7/me-search-121-of-121-390.png`다.
+- 로컬 실제 Postgres·PostgREST에도 소유자 1명과 응원 121건을 일시 시딩했다. authenticated 소유자 RLS 세션의 `message ilike '%121번째%'`가 `121번째 실제 DB 응원 메시지` 1건을 반환했고, 검증 뒤 payment·member·goal·auth user 잔여가 모두 0건임을 확인했다.
+- 테스트됨: Web Vitest 41파일 243건, pgTAP 10파일 247건, Next build 16/16 정적 페이지, 환전 Playwright 12건 전부 통과했다.
+- 계산식과 운영 DB는 변경하지 않았다. 30,000원은 3,300원·881원·25,819원, 40,000원은 4,400원·1,174원·34,426원 계약을 기존 테스트로 보존했다.
+- design-lint는 이번 변경 파일에 신규 인라인 style·토큰 밖 hex·8pt 밖 spacing이 없지만, `web/src` 전체에는 기존 파일의 인라인 style과 토큰 밖 hex 2종 경고가 남아 있다. 이 build 범위를 넘어서는 전역 토큰 마이그레이션은 하지 않았다.
+
+STAMP: 수정 시각 2026-08-24 16:45 KST | 모델 gpt-5.6-sol | 에이전트 code-builder | 스킬 없음 | 근거 `pipeline-state.core.md`, `DESIGN.md` v2.0.0, `scratchpad/cashout-full-journey-v3-opus.html` v3.7, Vitest·pgTAP·Next build·Playwright 실출력
+
+## 2026-08-22: 이용료 10%와 환전 잠금 A안 재검증
+
+**판정: 백엔드 상태전이 테스트됨 / build `changes-requested` 유지 / 화면 픽셀 대조·운영 적용 미검증**
+
+- 로컬 DB reset 뒤 실제 RPC 호출과 원장 직접 조회에서 신청 직후 총량 52 유지·잠김 40, 지급 완료 시 52에서 12로 감소, 반려 시 총량 52 유지와 잠금 해제를 확인했다.
+- 30,000원 환전은 이용료 3,000원, 부가세 300원, 원천징수 881원, 실수령 25,819원으로 웹·Edge Function·DB 계산 기준이 일치한다.
+- pgTAP 최신 기록은 10개 파일 246개 단언 통과다. Vitest 최신 재실행 기록은 227/227, 환전 Playwright 최신 기록은 11/11이다.
+- 2차 코드리뷰가 지적한 4건은 지급 전후 잔액 역산, 신청 확인 문구, 관리자 반려 문구, 진행 상태의 분할 잔액 카드 누락이었다. 현재 작업트리에는 원장 스냅샷, A안 용어, 공용 `SplitBalanceCard`와 대응 단위 테스트가 들어 있다.
+- 이 문서는 작업트리 존재를 기록할 뿐 build 승인으로 승격하지 않는다. `pipeline-state.core.md`의 build는 여전히 `changes-requested`이고, 같은 조건의 시안·개발 화면 픽셀 대조는 실행되지 않았다.
+
+STAMP: 수정 시각 2026-08-22 14:22 KST | 모델 GPT-5 Codex | 근거 `pipeline-state.core.md`, `DESIGN.md` v1.12.0, `web/src/app/(receiver)/cashout/status/page.tsx`, `web/src/components/cashout/CashoutRequestForm.tsx`, `web/src/components/admin/CashoutQueue.tsx`, `web/src/components/goal/SplitBalanceCard.tsx`, `supabase/migrations/20260822000000_cashout_clover_lock_a1.sql`, `supabase/tests/**`
+
 ## 2026-08-06 — CI 전용 환전 접수 성공 화면 소실
 
 **판정: ❌ NG 관찰 → 🔧 제품 수정·비포트 회귀 통과 / Playwright·CI 재실행 대기**
@@ -569,3 +628,15 @@ Status: **local readiness PASS / ship NG**
 - **미검증:** 포트 바인딩 금지에 따라 Playwright는 실행하지 않았다. 컨트롤러가 `cashout-manual.spec.ts` 10건을 재실행해 해당 1건과 계좌번호 미노출 어설션 7건을 확인해야 한다.
 
 ---
+# 2026-08-08 — Solapi 알림톡 API 규격 불일치
+
+- 상태: 🔧 로컬 교정·회귀 통과 / 운영 미배포·실수신 미검증
+- 범위: `supabase/functions/_shared/alimtalk.ts`
+- 증상: 현 구현의 HMAC 입력·날짜·인코딩·salt 결합 및 `kakaoOptions`/`message.from` 필드가 Solapi 실제 규격과 달라, 운영 키를 등록해도 인증 또는 발송이 실패한다.
+- 보존 조건: ENV 미설정 시 `FAILED` 반환 및 `INAPP` 폴백, 결제 성공 경로, `#{응원자}`·`#{목표}` 변수 키.
+- 근본원인: 중계업체가 미정인 시점의 추정 계약을 Solapi 공식 API와 재대조하지 않은 채 어댑터·ENV·테스트에 고정했다. 설정 키 목록도 `toss-confirm`과 어댑터에 중복돼 계약 드리프트를 막지 못했다.
+- 수정: Solapi 공식 HMAC/payload 계약으로 교정하고, 필수 ENV 6종 판정을 `isAlimtalkConfigured` 한 곳으로 통합했다. 미발급 templateId·미등록 발신번호는 추정값을 두지 않고 필수 ENV로 잠갔다.
+- [테스트됨] 2026-08-09 전체 Deno 단위 회귀 **51 passed / 0 failed**. 이 중 Solapi 인증·payload·필수 ENV 신규 테스트 5건, 기존 INAPP 폴백 5건을 포함한다. 기본 생성 Authorization의 ISO 8601 date·32자리 salt·64자리 lowercase hex 서명을 추가 검증했다.
+- [테스트됨] `deno check` — `_shared/alimtalk.ts`, `notify/index.ts`, `toss-confirm/index.ts` 3개 import chain 통과. 대상 4개 TypeScript 파일 `deno fmt --check` 통과.
+- [근거 확인] 실행 코드·ENV 예시에서 레거시 `senderKey`, `templateCode`, `disableSms: false`, `from: pfId` 잔존 0건(제거 사실을 설명하는 주석·런북 언급만 유지).
+- [미검증] 실제 Solapi API 왕복, 카카오 실수신, 운영 secret·배포 후 결제 E2E. 이번 요청에 따라 배포하지 않았다.

@@ -6,6 +6,7 @@ import {
   createServiceRoleClient,
   getCashoutAccountEncryptionConfig,
 } from "@/lib/supabase/service";
+import { cashoutBankName } from "@/lib/cashout";
 
 type ActionResult =
   | { ok: true; accountNo?: string }
@@ -97,6 +98,51 @@ export async function markCashoutPaid(
     if (error) {
       return fail(safeErrorCode(error.message));
     }
+
+    // 지급 완료는 위 RPC 성공 시점에 이미 확정됐다. 이후 조회·알림은
+    // best-effort로 격리해 실패해도 지급 완료 결과를 절대 되돌리지 않는다.
+    try {
+      const serviceClient = createServiceRoleClient();
+      const { data: cashout, error: cashoutError } = await serviceClient
+        .from("cashout_request")
+        .select("member_id, bank_code")
+        .eq("id", requestId)
+        .maybeSingle();
+      if (cashoutError || !cashout) {
+        throw new Error(cashoutError?.message ?? "cashout_not_found");
+      }
+
+      const { data: recipient, error: recipientError } = await serviceClient
+        .from("member")
+        .select("phone")
+        .eq("id", cashout.member_id)
+        .maybeSingle();
+      if (recipientError || !recipient) {
+        throw new Error(recipientError?.message ?? "recipient_not_found");
+      }
+
+      const { error: notifyError } = await serviceClient.functions.invoke(
+        "notify",
+        {
+          body: {
+            memberId: cashout.member_id,
+            type: "CASHOUT_PAID",
+            phone: recipient.phone ?? undefined,
+            bankName: cashoutBankName(cashout.bank_code),
+          },
+        },
+      );
+      if (notifyError) {
+        console.error("[admin-action] paid notification failed", {
+          message: notifyError.message,
+        });
+      }
+    } catch (notifyError) {
+      console.error("[admin-action] paid notification failed", {
+        message: notifyError instanceof Error ? notifyError.message : "unknown",
+      });
+    }
+
     revalidatePath("/admin");
     return { ok: true };
   } catch (error) {

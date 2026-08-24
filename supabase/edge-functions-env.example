@@ -22,14 +22,17 @@ TOSS_WEBHOOK_TOKEN=
 KAKAO_CLIENT_ID=
 KAKAO_CLIENT_SECRET=
 
-# ─── 카카오 알림톡 (솔라피 → API 키 / 발신 프로필) ───────────────────────────
-# _shared/alimtalk.ts가 읽는 이름과 일치해야 한다. API_URL/API_KEY/API_SECRET/
-# SENDER_KEY 중 하나라도 없으면 외부 발송을 건너뛰고 기존 INAPP으로 강등한다.
+# ─── 카카오 알림톡 (솔라피 → API 키 / 채널 / 템플릿) ─────────────────────────
+# _shared/alimtalk.ts가 읽는 이름과 일치해야 한다. 아래 6개 중 하나라도 없으면
+# 외부 발송을 건너뛰고 기존 INAPP으로 강등한다.
 KAKAO_ALIMTALK_API_URL=
 KAKAO_ALIMTALK_API_KEY=
 KAKAO_ALIMTALK_API_SECRET=
-KAKAO_ALIMTALK_SENDER_KEY=
 KAKAO_ALIMTALK_PFID=
+KAKAO_ALIMTALK_FROM=
+KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED=
+KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED=
+KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID=
 
 # ─── 토스페이먼츠 (developers.tosspayments.com → 내 개발 정보) ───────────────
 # Secret key — 서버 승인·취소·webhook 상태 재조회에 사용

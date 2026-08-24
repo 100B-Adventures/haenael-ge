@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>해낼게 — 환전/정산 전체 (적립형 cash-out · KYC · 원천징수)</title>
+<title>해낼게 · 환전/정산 전체 (적립형 cash-out · KYC · 원천징수)</title>
 <style>
   :root{
     --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
@@ -66,14 +66,14 @@
 </style>
 </head>
 <body>
-  <h1 class="board">해낼게 — 환전 · 정산 전체 <small style="font-weight:400;color:#888">(적립형 cash-out · KYC · 3.3% 원천징수)</small></h1>
+  <h1 class="board">해낼게 · 환전 · 정산 전체 <small style="font-weight:400;color:#888">(적립형 cash-out · KYC · 이용료 10% · 3.3% 원천징수)</small></h1>
   <p class="board">클로버 잔액 → 환전 신청 → 본인확인(KYC) → 처리 → 정산 완료/내역 · 적립형=마감목표도 응원 지속 · <b>₩ 환산은 여기(환전)서만 현실화</b></p>
   <div class="note">
-    <b>흐름:</b> ① 잔액·환전 진입 → ②(분기) 최소환전액 미달=대기 → ③ 환전 신청(원천징수 안내) → ④ KYC 본인확인 → ⑤ 처리중 → ⑥ 완료·내역.
+    <b>흐름:</b> ① 잔액·환전 진입 → ②(분기) 최소환전액 미달=대기 → ③ 환전 신청(이용료·원천징수 안내) → ④ KYC 본인확인 → ⑤ 처리중 → ⑥ 완료·내역.
     받는사람 본인이 보는 <b>총 잔액(자기 돈)</b>은 노출 · 친구/공개엔 여전히 금액 비노출.
   </div>
   <div class="defer">
-    ⛔ <b>eng-design/legal defer</b>: (a) 미성년 환전 연령게이트(만19+? 법정대리인 동의 — risks#7) → ④ KYC에 자리만 표시. (b) 환불 정책(자동 vs 문의) → 결제측 처리. (c) 셀프후원·자금세탁 차단 = ④ KYC·이상거래 탐지에서 거름(risks#8). 본 프로토는 UI 자리만, 정책 수치는 미정.
+    ⛔ <b>eng-design/legal defer</b>: (a) 미성년 환전 연령게이트(만19+? 법정대리인 동의, risks#7) → ④ KYC에 자리만 표시. (b) 환불 정책(자동 vs 문의) → 결제측 처리. (c) 셀프후원·자금세탁 차단 = ④ KYC·이상거래 탐지에서 거름(risks#8). 본 프로토는 UI 자리만, 정책 수치는 미정.
   </div>
 
   <div class="seq">
@@ -101,7 +101,7 @@
         <div class="info">조금만 더 모이면 환전할 수 있어요.<br>최소 환전 기준까지 거의 왔어요.</div>
         <div class="lbl">환전까지</div>
         <div class="progress"><i></i></div>
-        <div class="meta" style="text-align:left">최소 환전 기준(금액)은 미정 — BM·legal 확정 대기. dead-end 아님: 대기 상태로 응원 계속.</div>
+        <div class="meta" style="text-align:left">최소 환전 기준(금액)은 미정. BM·legal 확정 대기. dead-end 아님: 대기 상태로 응원 계속.</div>
         <button class="btn btn-dis">아직 환전할 수 없어요</button>
         <button class="btn btn-line">내 링크 더 공유하기</button>
       </div></div>
@@ -109,17 +109,18 @@
     <div class="arrow">→</div>
 
     <!-- 3 환전 신청 -->
-    <div class="step"><div class="cap"><b>3. 환전 신청</b><br>원천징수 안내</div>
+    <div class="step"><div class="cap"><b>3. 환전 신청</b><br>이용료·원천징수 안내</div>
       <div class="ph"><div class="notch"></div><div class="sc">
         <div class="brand">해낼게<span class="dot">.</span></div>
         <div class="h">얼마를 환전할까요?</div>
         <div class="lbl">환전할 클로버</div>
         <input class="field" value="128 클로버 (전액)">
-        <div class="rowln"><span class="k">환전 금액</span><span class="v">128,000원</span></div>
-        <div class="rowln"><span class="k">원천징수 3.3%</span><span class="v">-4,224원</span></div>
-        <div class="rowln"><span class="k">서비스 수수료</span><span class="v">-(미정%)</span></div>
-        <div class="rowln tot"><span class="k">받을 금액</span><span class="v">≈ 123,776원</span></div>
-        <div class="warn">환전 소득은 5월 종합소득세 신고 대상이에요. 지급명세서가 국세청에 제출돼요.</div>
+        <div class="rowln"><span class="k">환산 (🍀1개 = 1,000원)</span><span class="v">128,000원</span></div>
+        <div class="rowln"><span class="k">서비스 이용료 (부가세 포함)</span><span class="v">-14,080원</span></div>
+        <div class="rowln"><span class="k">사업소득 원천징수 3.3%</span><span class="v" style="color:var(--muted)">-3,759원</span></div>
+        <div class="rowln tot"><span class="k">받으실 금액</span><span class="v">110,161원</span></div>
+        <div class="warn">서비스 이용료는 커피 한 잔 값이에요. 카드 결제 수수료, 응원 알림 발송, 계좌 확인과 송금에 쓰입니다.</div>
+        <div class="meta" style="text-align:left">소득세는 저희가 가져가는 돈이 아니라 국세청에 대신 내드리는 금액이에요. 다음 해 5월에 종합소득세 신고하시면 돌려받으실 수도 있어요. 실제 지급액은 신청 시점에 다시 확정합니다.</div>
         <button class="btn btn-primary">본인확인하고 신청</button>
       </div></div>
     </div>
@@ -148,7 +149,7 @@
         <div class="done-ic" style="background:#fff;border:1px solid var(--line)"><span class="spin" style="border-color:rgba(27,138,79,.3);border-top-color:var(--clover)"></span></div>
         <div class="h" style="text-align:center">환전을 처리하고 있어요</div>
         <div class="meta">정산은 영업일 기준 처리돼요.<br>4만원 미만은 모아서 정산될 수 있어요(투네이션 선례).</div>
-        <div class="rowln" style="margin-top:14px"><span class="k">신청 금액</span><span class="v">128,000원</span></div>
+        <div class="rowln" style="margin-top:14px"><span class="k">받으실 금액</span><span class="v">110,161원</span></div>
         <div class="rowln"><span class="k">상태</span><span class="v" style="color:var(--clover-ink)">처리 중</span></div>
       </div></div>
     </div>
@@ -160,10 +161,11 @@
         <div class="brand">해낼게<span class="dot">.</span></div>
         <div class="done-ic">🍀</div>
         <div class="h" style="text-align:center">환전이 완료됐어요</div>
-        <div class="meta" style="margin-bottom:12px">123,776원이 등록한 계좌로 입금됐어요.</div>
+        <div class="meta" style="margin-bottom:12px">110,161원이 등록한 계좌로 입금됐어요.</div>
         <div class="lbl">정산 내역</div>
-        <div class="rowln"><span class="k">2026.07.01 환전</span><span class="v">123,776원</span></div>
-        <div class="rowln"><span class="k">원천징수</span><span class="v">4,224원</span></div>
+        <div class="rowln"><span class="k">2026.07.01 환전</span><span class="v">110,161원</span></div>
+        <div class="rowln"><span class="k">서비스 이용료 (부가세 포함)</span><span class="v">14,080원</span></div>
+        <div class="rowln"><span class="k">원천징수</span><span class="v">3,759원</span></div>
         <div class="rowln"><span class="k">상태</span><span class="v" style="color:var(--clover-ink)">완료</span></div>
         <button class="btn btn-line">지급명세서·세금 안내</button>
         <button class="btn btn-primary">목표 계속 이어가기</button>

@@ -45,3 +45,9 @@ web/test-results/
 *.swp
 *.swo
 .gstack/
+
+# QA 캡처 증거(용량 큼, 로컬 보관)
+artifacts/
+
+# 편집기 개인 설정
+.obsidian/
