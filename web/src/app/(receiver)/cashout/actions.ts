@@ -189,7 +189,14 @@ export async function createCashoutRequest(
         isReplay: row.is_replay,
       },
     };
-  } catch {
-    return fail("cashout_request_failed");
+  } catch (thrown) {
+    // 암호화 설정 읽기 등 RPC 이전 단계에서 던진 예외는 지금까지 메시지를 버리고
+    // 전부 cashout_request_failed 하나로 뭉개졌다. 그래서 화면에도 로그에도
+    // 실제 사유가 남지 않았다. 아는 코드면 그대로 전달하고, 모르면 서버 로그에는
+    // 반드시 남긴다.
+    const raw = thrown instanceof Error ? thrown.message : "unknown";
+    const known = Object.prototype.hasOwnProperty.call(PUBLIC_ERRORS, raw);
+    console.error("[cashout-action] unhandled", { raw, known });
+    return fail(known ? raw : "cashout_request_failed");
   }
 }
