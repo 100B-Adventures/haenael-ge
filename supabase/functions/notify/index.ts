@@ -1,10 +1,10 @@
 // notify — 카카오 알림톡 발송(응원 도착·환전 신청 접수·환전 지급 완료 등 정보성) + 인앱 폴백
 // ⚠️ 정보성만(마케팅/광고성 금지) — design-patterns §11c.
-// 호출 방식: service_role 내부 호출 (web server action, toss-confirm EF 등에서 invoke).
+// 호출 방식: NOTIFY_INTERNAL_TOKEN을 공유한 내부 호출(web server action, toss-confirm EF).
 //
 // 요청:
 //   POST /functions/v1/notify
-//   Authorization: Bearer <SERVICE_ROLE_KEY>
+//   x-notify-internal-token: <NOTIFY_INTERNAL_TOKEN>
 //   Body: {
 //     memberId: string,        // 받는사람 uuid
 //     type: "CHEER_RECEIVED" | "CASHOUT_REQUESTED" | "CASHOUT_PAID",
@@ -21,10 +21,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
 import { sendAlimtalk } from "../_shared/alimtalk.ts";
+import { authorizeNotifyRequest } from "../_shared/notify-auth.ts";
 import {
+  buildCashoutRequestedSlackAlert,
   buildNotifyMessage,
   validateNotifyInput,
 } from "../_shared/notify-message.ts";
+import { sendSlackAlert } from "../_shared/slack.ts";
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 // report EF와 동일 버그(2026-07-20 수정): OPTIONS만 CORS를 붙이고 실제 응답엔
@@ -33,7 +36,8 @@ import {
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, x-notify-internal-token",
 };
 
 // ─── 에러 응답 헬퍼 ─────────────────────────────────────────────────────────
@@ -63,24 +67,15 @@ Deno.serve(async (req: Request) => {
     return err(405, "method_not_allowed", "POST only");
   }
 
-  // 내부 서비스 호출 확인 — Authorization: Bearer <SERVICE_ROLE_KEY>
-  const authHeader = req.headers.get("Authorization") ?? "";
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : authHeader;
-
-  if (!serviceRoleKey) {
-    return err(503, "missing_supabase_env", "Supabase service env missing");
-  }
-
-  // service_role 토큰이 아니면 내부 호출 거부. Gateway JWT 검증만으로는 일반
-  // 로그인 사용자 토큰도 통과하므로 실제 service key와 반드시 대조한다.
-  if (!token) {
-    return err(401, "unauthorized", "Authorization required");
-  }
-  if (token !== serviceRoleKey) {
-    return err(403, "forbidden", "Service role required");
+  // 이 함수는 config.toml에서 gateway JWT 검증을 끄고 별도 내부 토큰을 검증한다.
+  // 일반 로그인 사용자 JWT는 이 토큰을 알 수 없으므로 반드시 거부한다. 이를 생략하면
+  // 로그인 사용자도 임의의 member_id로 알림을 만들고 관리자 Slack을 울릴 수 있다.
+  const auth = await authorizeNotifyRequest(
+    req.headers.get("x-notify-internal-token"),
+    Deno.env.get("NOTIFY_INTERNAL_TOKEN"),
+  );
+  if (!auth.ok) {
+    return err(auth.status, auth.code, auth.message);
   }
 
   // 입력 파싱
@@ -100,6 +95,9 @@ Deno.serve(async (req: Request) => {
   // Supabase Admin 클라이언트 (service_role — notification INSERT 권한)
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return err(503, "missing_supabase_env", "Supabase service env missing");
+  }
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // ── 알림톡 발송 시도 ────────────────────────────────────────────────────
@@ -138,6 +136,17 @@ Deno.serve(async (req: Request) => {
   if (insertErr || !notif) {
     console.error("[notify] notification INSERT 실패:", insertErr);
     return err(500, "db_error", "notification insert failed");
+  }
+
+  if (input.type === "CASHOUT_REQUESTED") {
+    const slackSent = await sendSlackAlert(
+      buildCashoutRequestedSlackAlert(input),
+    );
+    if (!slackSent) {
+      console.error("[notify] cashout requested Slack failed", {
+        cashoutRequestId: input.cashoutRequestId,
+      });
+    }
   }
 
   return new Response(

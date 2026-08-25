@@ -25,6 +25,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  qa-contracts:
+    name: 배포 환경·환전 층간 계약
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 코드 기반 환경변수 인벤토리·환전 층간 계약
+        run: npm --prefix web run test:qa-contracts
+
   unit-and-build:
     name: 단위 테스트 + 빌드
     runs-on: ubuntu-latest

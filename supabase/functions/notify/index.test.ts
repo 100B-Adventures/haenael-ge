@@ -8,10 +8,22 @@ import {
   sendAlimtalk,
   TEMPLATE_CODES,
 } from "../_shared/alimtalk.ts";
+import { authorizeNotifyRequest } from "../_shared/notify-auth.ts";
 import {
+  buildCashoutRequestedSlackAlert,
   buildNotifyMessage,
   validateNotifyInput,
 } from "../_shared/notify-message.ts";
+
+const cashoutRequestedInput = {
+  memberId: "member-1",
+  type: "CASHOUT_REQUESTED" as const,
+  cashoutRequestId: 71,
+  cloverAmount: 30,
+  netKrw: 25_819,
+  requestedAt: "2026-08-25T09:10:00.000Z",
+  adminUrl: "https://haenael.app/admin",
+};
 
 // ─── alimtalk 헬퍼 단위 테스트 ──────────────────────────────────────────────
 
@@ -74,7 +86,7 @@ Deno.test("validateNotifyInput — 알림 3종 타입과 각 필수 입력을 �
       displayName: "응원자",
       goalTitle: "편입 해낼게",
     },
-    { memberId: "member-1", type: "CASHOUT_REQUESTED" },
+    cashoutRequestedInput,
     { memberId: "member-1", type: "CASHOUT_PAID", bankName: "KB국민은행" },
   ] as const;
 
@@ -87,8 +99,7 @@ Deno.test("validateNotifyInput — 알림 3종 타입과 각 필수 입력을 �
 
 Deno.test("buildNotifyMessage — 타입별 템플릿과 최소 변수만 선택한다", () => {
   const requested = buildNotifyMessage({
-    memberId: "member-1",
-    type: "CASHOUT_REQUESTED",
+    ...cashoutRequestedInput,
   }, "01012345678");
   const paid = buildNotifyMessage({
     memberId: "member-1",
@@ -164,4 +175,61 @@ Deno.test("validateNotifyInput — 타입별 필수 입력 누락을 거부한�
 
   assertEquals("error" in cheer, true);
   assertEquals("error" in paid, true);
+});
+
+Deno.test("ALT-AUTH-01 내부 공유 토큰은 허용하고 일반 로그인 사용자 토큰은 거부한다", async () => {
+  const internalToken = "n".repeat(48);
+  const allowed = await authorizeNotifyRequest(internalToken, internalToken);
+  const userJwtOnly = await authorizeNotifyRequest(null, internalToken);
+  const wrongToken = await authorizeNotifyRequest(
+    "u".repeat(48),
+    internalToken,
+  );
+
+  assertEquals(allowed, { ok: true });
+  assertEquals(userJwtOnly, {
+    ok: false,
+    status: 401,
+    code: "unauthorized",
+    message: "Internal notify token required",
+  });
+  assertEquals(wrongToken, {
+    ok: false,
+    status: 403,
+    code: "forbidden",
+    message: "Internal notify token required",
+  });
+});
+
+Deno.test("ALT-AUTH-02 내부 공유 토큰 미설정은 fail-closed로 거부한다", async () => {
+  const result = await authorizeNotifyRequest("n".repeat(48), "short");
+  assertEquals(result, {
+    ok: false,
+    status: 503,
+    code: "missing_notify_internal_token",
+    message: "Notify internal token missing",
+  });
+});
+
+Deno.test("ALT-SLACK-01 환전 신청 관리자 통지는 필수 5필드만 포함하고 민감정보를 제외한다", () => {
+  const validated = validateNotifyInput({
+    ...cashoutRequestedInput,
+    accountNo: "123456789012",
+    residentRegistrationNumber: "900101-1234567",
+  });
+  assertEquals("data" in validated, true);
+  if ("error" in validated) return;
+
+  const alert = buildCashoutRequestedSlackAlert(validated.data);
+  assertEquals(alert.fields, {
+    "신청 ID": 71,
+    "클로버 수": "30개",
+    "입금 예정액": "25,819원",
+    "신청 시각": "2026-08-25T09:10:00.000Z",
+    "관리자 화면": "https://haenael.app/admin",
+  });
+  const serialized = JSON.stringify(alert);
+  assertEquals(serialized.includes("123456789012"), false);
+  assertEquals(serialized.includes("900101-1234567"), false);
+  assertEquals(serialized.includes("accountNo"), false);
 });

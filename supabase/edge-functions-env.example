@@ -15,6 +15,8 @@ PAYMENTS_ENABLED=false
 # 수동환전 CASHOUT_ENABLED·계좌 암호화 키링은 Vercel Production 전용이다.
 # Edge Function에는 등록하지 않는다(W-12).
 SLACK_WEBHOOK_URL=
+# Vercel Production의 동명 env var와 같은 32자 이상 무작위 값.
+NOTIFY_INTERNAL_TOKEN=
 LEAD_RATE_LIMIT_SALT=
 TOSS_WEBHOOK_TOKEN=
 

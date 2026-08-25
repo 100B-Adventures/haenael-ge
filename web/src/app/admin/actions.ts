@@ -7,6 +7,7 @@ import {
   getCashoutAccountEncryptionConfig,
 } from "@/lib/supabase/service";
 import { cashoutBankName } from "@/lib/cashout";
+import { deliverCashoutNotification } from "@/lib/cashout-notifications";
 
 type ActionResult =
   | { ok: true; accountNo?: string }
@@ -121,22 +122,13 @@ export async function markCashoutPaid(
         throw new Error(recipientError?.message ?? "recipient_not_found");
       }
 
-      const { error: notifyError } = await serviceClient.functions.invoke(
-        "notify",
-        {
-          body: {
-            memberId: cashout.member_id,
-            type: "CASHOUT_PAID",
-            phone: recipient.phone ?? undefined,
-            bankName: cashoutBankName(cashout.bank_code),
-          },
-        },
-      );
-      if (notifyError) {
-        console.error("[admin-action] paid notification failed", {
-          message: notifyError.message,
-        });
-      }
+      await deliverCashoutNotification(serviceClient, {
+        memberId: cashout.member_id,
+        type: "CASHOUT_PAID",
+        phone: recipient.phone ?? undefined,
+        bankName: cashoutBankName(cashout.bank_code),
+        cashoutRequestId: requestId,
+      });
     } catch (notifyError) {
       console.error("[admin-action] paid notification failed", {
         message: notifyError instanceof Error ? notifyError.message : "unknown",

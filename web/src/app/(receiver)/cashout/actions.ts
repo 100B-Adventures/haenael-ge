@@ -14,6 +14,7 @@ import {
   normalizeCashoutErrorCode,
   normalizeCashoutRpcErrorCode,
 } from "@/lib/cashout-errors";
+import { deliverCashoutNotification } from "@/lib/cashout-notifications";
 
 const BANK_CODE_PATTERN = /^[A-Za-z0-9_-]{2,20}$/;
 const REQUEST_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
@@ -76,6 +77,18 @@ function normalizeInput(input: CreateCashoutInput) {
   const requestKey = typeof input.requestKey === "string" ? input.requestKey.trim() : "";
 
   return { bankCode, accountNo, accountHolder, phone, requestKey };
+}
+
+function cashoutAdminUrl(): string {
+  try {
+    return new URL(
+      "/admin",
+      process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app",
+    ).toString();
+  } catch {
+    console.error("[cashout-action] invalid NEXT_PUBLIC_APP_URL for admin link");
+    return "https://haenael.app/admin";
+  }
 }
 
 export async function createCashoutRequest(
@@ -147,27 +160,16 @@ export async function createCashoutRequest(
     // 환전 신청은 이미 DB에서 확정됐다. 알림 호출은 후속 best-effort라서
     // 어떤 실패도 신청 성공 응답을 바꾸거나 재시도시키면 안 된다.
     if (!row.is_replay) {
-      try {
-        const { error: notifyError } = await serviceClient.functions.invoke(
-          "notify",
-          {
-            body: {
-              memberId: user.id,
-              type: "CASHOUT_REQUESTED",
-              phone: updatedMember.phone ?? phone,
-            },
-          },
-        );
-        if (notifyError) {
-          console.error("[cashout-action] requested notification failed", {
-            message: notifyError.message,
-          });
-        }
-      } catch (notifyError) {
-        console.error("[cashout-action] requested notification failed", {
-          message: notifyError instanceof Error ? notifyError.message : "unknown",
-        });
-      }
+      await deliverCashoutNotification(serviceClient, {
+        memberId: user.id,
+        type: "CASHOUT_REQUESTED",
+        phone: updatedMember.phone ?? phone,
+        cashoutRequestId: row.cashout_request_id,
+        cloverAmount: row.clover_amount,
+        netKrw: row.net_krw,
+        requestedAt: row.requested_at,
+        adminUrl: cashoutAdminUrl(),
+      });
     }
 
     revalidatePath("/me");
