@@ -5,6 +5,19 @@
 > 🔒 스택(2026-07-04): 서버리스 — Next.js/Vercel + Supabase(Postgres/Auth/RLS) + Edge Functions(돈). 테스트 = **Edge Function 로컬(`supabase functions serve`) + stage 배포** + RLS 정책 검증 + Vercel 프리뷰.
 > 레벨: [U]단위 [I]통합 [E]E2E. 우선순위: 🔴돈/규제(무관용) · 🟠콜드스타트 · 🟡일반.
 
+## 2026-08-25 운영 첫 환전 실패 QA 복구 요구 추적표
+
+| 요청번호 | 요구 | 테스트번호 | 실행 계층 | 합격 기준 |
+|---|---|---|---|---|
+| QA-RECOVERY-01 | 코드 기반 필수 env 목록과 실제 대상 환경 존재 확인 | ENV-CONTRACT-01 | 정적 분석 + Vercel/Supabase read-only metadata | 미분류 0, 필수 누락 0, 값 비출력, 누락 시 non-zero |
+| QA-RECOVERY-02 | 최소 기준, 잔액, 금액 계산의 DB와 web 일치 | CASHOUT-CONTRACT-01 | 저장소 계약 + local PostgREST | 총30·웰컴3·지급가능27에서 27 신청 성공, 기준 변이 FAIL |
+| QA-RECOVERY-03 | 가입 직후 상태부터 모든 DB 실패 분기 실행 | CASHOUT-DB-NEW-USER-01 | local pgTAP | 초기 0개, 순차 적립, 최신 함수 RAISE 코드 전수 직접 실행 |
+| QA-RECOVERY-04 | 환전 알림 403을 0건과 구분 | CASHOUT-NOTIFY-01 | Vitest + 관측 계약 | 403에서 `INAPP/FAILED` 기록, 기록 제거 변이 FAIL |
+| QA-RECOVERY-05 | 계좌 마스킹과 수수료 계산식 보존 | REG-CASHOUT-SEC-FEE-01 | pgTAP + Deno + Playwright | 마스킹 원문 비노출, 30개 기준 3,300·881·25,819 유지 |
+| QA-RECOVERY-06 | 사고 3종의 탐지력 반증 | MUTATION-01~08 | mutation runner | env 누락, 층간 기준 변경, 실패 삼킴이 각각 기대한 exit 1 |
+
+운영 DB에는 시험 데이터를 쓰지 않는다. Production env는 이름과 존재 여부만 조회하고, local Supabase reset 및 transaction rollback 기반 pgTAP을 사용한다.
+
 ## 0. 🤖 build 구현·리뷰 모델 split (🔒 회장 지시 2026-07-04)
 - **저가 모델(기본)**: Next.js UI·RLS 읽기 쿼리·워드맵·공유·알림·목표/응원 조회·랜딩. → 일반 QA(🟠🟡).
 - **강한 모델 + 별도 리뷰 게이트(돈 코어)**: `toss-confirm`·`cashout`·`cashout-payout`·`toss-webhook` **Edge Functions** + clover 원장·멱등·전금법 자금흐름·RLS 정책(§1·§2·§3·§7·§7b 케이스). 실수=돈 사고 → 강한 모델 + 코드리뷰 통과 후에만 배포. 아래 🔴 전항이 이 게이트 검증 목록.

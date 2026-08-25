@@ -1,11 +1,13 @@
 -- cashout_manual.test.sql — 확정 계약 §0-1-6 T1~T14
 BEGIN;
 
--- A안(환전 클로버 잠금) + 인증 게이트 완화 반영: plan 31 → 44. 추가분: C3(HOLD delta=0)·A-I4(신청 직후
+-- A안(환전 클로버 잠금) + 인증 게이트 완화 + QA-RECOVERY-03 반영: plan 44 → 54.
+-- 추가 10건: 가입 직후 잔액 0 확인 1건 + create_cashout_request 고유 RAISE 중 미실행 9건.
+-- 기존 추가분: C3(HOLD delta=0)·A-I4(신청 직후
 -- 총량 불변)·C4(SETTLED delta/잔액 감소 2건)·C5(신청 직후 불변)·C6(REVERSAL delta=0)·
 -- A-I2 회귀 3건(컨트롤러 재검증 MINOR, 잠금 중 웰컴 회수)·중간상태 0건 회귀 1건·
 -- KYC-GATE 가입 직후 통과 1건·확인된 미성년 차단 1건·최신 성인 판정 우선 1건.
-SELECT plan(44);
+SELECT plan(54);
 
 INSERT INTO auth.users (
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -63,7 +65,6 @@ VALUES
   ('ca500000-0000-0000-0000-000000000003', 'WELCOME_GRANT', 10, 'test', 3, 10),
   ('ca500000-0000-0000-0000-000000000003', 'EARN', 40, 'test', 4, 50),
   ('ca500000-0000-0000-0000-000000000004', 'EARN', 40, 'test', 5, 40),
-  ('ca500000-0000-0000-0000-000000000007', 'EARN', 30, 'test', 6, 30),
   ('ca500000-0000-0000-0000-000000000008', 'EARN', 30, 'test', 7, 30);
 
 -- 설정 함수는 앱 역할에 공개하지 않은 내부 토글이다. migration owner 권한에서
@@ -74,12 +75,103 @@ SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
 
 SELECT is(
+  (SELECT (total_balance, welcome_amount, locked_amount, available_amount, payable_amount, reached_threshold)
+   FROM public.clover_eligibility('ca500000-0000-0000-0000-000000000007')),
+  (0, 0, 0, 0, 0, false),
+  'QA-RECOVERY-03 가입 직후 기준: KYC·원장 사전 통과 시드 없이 총량·지급가능액 0에서 시작'
+);
+
+-- create_cashout_request의 선행 RAISE를 실제 함수에서 전부 태운다. web mock이
+-- 오류 문자열을 흉내 내는 것으로 DB 분기 실행을 대체하지 않는다.
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    NULL, 1, 'KB', repeat('7', 12), '가입직후회원',
+    'raise-invalid-member', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '22023', 'invalid_member',
+  'DB-RAISE-01: member_id NULL은 invalid_member'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 0, 'KB', repeat('7', 12),
+    '가입직후회원', 'raise-zero-amount', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '22023', 'cashout_below_minimum',
+  'DB-RAISE-02: 신청량 0은 총 보유 기준과 별개로 cashout_below_minimum'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 1, '!', repeat('7', 12),
+    '가입직후회원', 'raise-bank-code', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '22023', 'invalid_bank_code',
+  'DB-RAISE-03: 은행 코드 형식 오류는 invalid_bank_code'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 1, 'KB', '1234',
+    '가입직후회원', 'raise-account-no', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '22023', 'invalid_account_number',
+  'DB-RAISE-04: 계좌번호 형식 오류는 invalid_account_number'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 1, 'KB', repeat('7', 12),
+    '가', 'raise-account-holder', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '22023', 'invalid_account_holder',
+  'DB-RAISE-05: 예금주 길이 오류는 invalid_account_holder'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 1, 'KB', repeat('7', 12),
+    '가입직후회원', 'short', 1::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '22023', 'invalid_request_key',
+  'DB-RAISE-06: request_key 형식 오류는 invalid_request_key'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 1, 'KB', repeat('7', 12),
+    '가입직후회원', 'raise-key-version', 0::smallint, repeat('k', 40), repeat('f', 40)
+  )$$,
+  '55000', 'cashout_key_version_unavailable',
+  'DB-RAISE-07: 암호화 key version 오류는 cashout_key_version_unavailable'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 1, 'KB', repeat('7', 12),
+    '가입직후회원', 'raise-encryption-key', 1::smallint, 'short', repeat('f', 40)
+  )$$,
+  '55000', 'cashout_encryption_unavailable',
+  'DB-RAISE-08: 암호화 key 길이 오류는 cashout_encryption_unavailable'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.create_cashout_request(
+    'ca500000-0000-0000-0000-000000000007', 1, 'KB', repeat('7', 12),
+    '가입직후회원', 'raise-fingerprint', 1::smallint, repeat('k', 40), 'short'
+  )$$,
+  '55000', 'cashout_fingerprint_unavailable',
+  'DB-RAISE-09: fingerprint key 길이 오류는 cashout_fingerprint_unavailable'
+);
+
+-- 가입 직후 0에서 실제 적립 경로와 같은 원장 이벤트를 순서대로 만든다.
+-- 웰컴 3개가 최소 기준에는 포함되지만 지급액에는 포함되지 않는 사고 조건이다.
+INSERT INTO public.clover_ledger (
+  member_id, entry_type, clover_delta, ref_type, ref_id, balance_after
+)
+VALUES
+  ('ca500000-0000-0000-0000-000000000007', 'WELCOME_GRANT', 3, 'test', 6, 3),
+  ('ca500000-0000-0000-0000-000000000007', 'EARN', 27, 'test', 8, 30);
+
+SELECT is(
   (SELECT status::text FROM public.create_cashout_request(
-    'ca500000-0000-0000-0000-000000000007', 30, 'KB', repeat('7', 12),
+    'ca500000-0000-0000-0000-000000000007', 27, 'KB', repeat('7', 12),
     '가입직후회원', 'cashout-signup-none', 1::smallint, repeat('k', 40), repeat('f', 40)
   )),
   'REQUESTED',
-  'KYC-GATE-01 정상 경로: 가입 직후 NONE·확인 행 없음 계정도 환전 신청 성공'
+  'KYC-GATE-01/QA-RECOVERY-02 정상 경로: 가입 직후 NONE·확인 행 없음·총30(웰컴3+적립27)에서 27 신청 성공'
 );
 
 SELECT throws_ok(

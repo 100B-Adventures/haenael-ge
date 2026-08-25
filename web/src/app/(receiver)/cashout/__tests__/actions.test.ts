@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   callerGetUser,
@@ -8,6 +8,8 @@ const {
   callerSelect,
   callerMaybeSingle,
   serviceRpc,
+  serviceFrom,
+  notificationInsert,
   notifyInvoke,
   revalidatePath,
 } = vi.hoisted(() => ({
@@ -18,6 +20,8 @@ const {
   callerSelect: vi.fn(),
   callerMaybeSingle: vi.fn(),
   serviceRpc: vi.fn(),
+  serviceFrom: vi.fn(),
+  notificationInsert: vi.fn(),
   notifyInvoke: vi.fn(),
   revalidatePath: vi.fn(),
 }));
@@ -32,6 +36,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/service", () => ({
   createServiceRoleClient: vi.fn(() => ({
     rpc: serviceRpc,
+    from: serviceFrom,
     functions: { invoke: notifyInvoke },
   })),
   getCashoutAccountEncryptionConfig: vi.fn(() => ({
@@ -48,6 +53,8 @@ import { createCashoutRequest } from "../actions";
 describe("createCashoutRequest Server Action", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("NOTIFY_INTERNAL_TOKEN", "n".repeat(48));
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://haenael.app");
     callerGetUser.mockResolvedValue({ data: { user: { id: "member-uid" } } });
     callerFrom.mockReturnValue({ update: callerUpdate });
     callerUpdate.mockReturnValue({ eq: callerEq });
@@ -72,9 +79,15 @@ describe("createCashoutRequest Server Action", () => {
       error: null,
     });
     notifyInvoke.mockResolvedValue({ data: { channel: "ALIMTALK" }, error: null });
+    serviceFrom.mockReturnValue({ insert: notificationInsert });
+    notificationInsert.mockResolvedValue({ error: null });
   });
 
-  it("세션 member_id를 고정하고 계좌·예금주를 서버에서 정규화한다", async () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("ALT-REQ-01 신청 성공 시 내부 토큰과 관리자 통지 필드를 notify에 전달한다", async () => {
     const result = await createCashoutRequest({
       cloverAmount: 30,
       bankCode: " kb ",
@@ -100,10 +113,16 @@ describe("createCashoutRequest Server Action", () => {
     });
     expect(revalidatePath).toHaveBeenCalledWith("/cashout/status");
     expect(notifyInvoke).toHaveBeenCalledWith("notify", {
+      headers: { "x-notify-internal-token": "n".repeat(48) },
       body: {
         memberId: "member-uid",
         type: "CASHOUT_REQUESTED",
         phone: "01012345678",
+        cashoutRequestId: 71,
+        cloverAmount: 30,
+        netKrw: 29_010,
+        requestedAt: "2026-08-02T00:00:00.000Z",
+        adminUrl: "https://haenael.app/admin",
       },
     });
   });
@@ -204,8 +223,15 @@ describe("createCashoutRequest Server Action", () => {
     expect(serviceRpc).not.toHaveBeenCalled();
   });
 
-  it("환전 신청 후 알림 호출이 실패해도 원래 성공 응답을 유지한다", async () => {
-    notifyInvoke.mockRejectedValueOnce(new Error("notify unavailable"));
+  it("ALT-REQ-02 환전 신청 알림 403을 INAPP/FAILED로 기록하고 원래 성공 응답을 유지한다", async () => {
+    const forbidden = Object.assign(
+      new Error("Edge Function returned a non-2xx status code"),
+      { context: new Response('{"error":"Forbidden"}', { status: 403 }) },
+    );
+    notifyInvoke.mockResolvedValueOnce({
+      data: null,
+      error: forbidden,
+    });
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const result = await createCashoutRequest({
@@ -219,6 +245,20 @@ describe("createCashoutRequest Server Action", () => {
 
     expect(result).toMatchObject({ ok: true, data: { requestId: 71 } });
     expect(revalidatePath).toHaveBeenCalledWith("/cashout/status");
+    expect(notificationInsert).toHaveBeenCalledWith({
+      member_id: "member-uid",
+      type: "CASHOUT_REQUESTED",
+      channel: "INAPP",
+      alimtalk_status: "FAILED",
+      read: false,
+    });
+    expect(consoleError).toHaveBeenCalledWith(
+      "[cashout-notification] notify delivery failed",
+      expect.objectContaining({
+        cashoutRequestId: 71,
+        type: "CASHOUT_REQUESTED",
+      }),
+    );
     consoleError.mockRestore();
   });
 

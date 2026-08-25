@@ -1,5 +1,27 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-25: 운영 첫 환전 실패 3계층 QA 복구
+
+**판정: 🔧 QA 복구 검사 통과 / 제품 릴리즈는 changes-requested 유지**
+
+| 요청번호 | 사고·요구 | 테스트번호 | 현재 판정 | 해제 조건·증거 |
+|---|---|---|---|---|
+| QA-RECOVERY-01 | Vercel Production에 `SUPABASE_SERVICE_ROLE_KEY`가 없어 서버가 DB 연결 전에 실패 | ENV-CONTRACT-01 | ✅ PASS | 코드 34/34 env 분류, Vercel 13/13과 Supabase 19/19 이름 존재 관찰, 값 비출력, 누락 시 exit 1 |
+| QA-RECOVERY-02 | DB는 총 보유, 화면은 환전가능액으로 최소 기준을 판정 | CASHOUT-CONTRACT-01 | ✅ PASS | 계약 30/30, 총30·웰컴3·지급가능27 local PostgREST HTTP 200과 REQUESTED |
+| QA-RECOVERY-03 | 테스트 계정이 관문 통과 상태로 사전 시딩돼 가입 직후 경로 미검증 | CASHOUT-DB-NEW-USER-01 | ✅ PASS | 가입 직후 0개부터 웰컴3+적립27 순차 적립, RAISE 13/13, local pgTAP 88/88 |
+| QA-RECOVERY-04 | 환전 알림톡 403 실패를 삼켜 0건과 실패를 구분할 수 없음 | CASHOUT-NOTIFY-01 | ✅ PASS | 403에서 `notification(INAPP/FAILED)` insert 관찰, 실패 기록 제거 변이 exit 1 |
+| QA-RECOVERY-05 | 계좌 마스킹·수수료 검증 보존 | REG-CASHOUT-SEC-FEE-01 | ✅ PASS | 보안 pgTAP 포함 88/88, Playwright 12/12, 30개 기준 3,300·881·25,819 유지 |
+| QA-RECOVERY-06 | (a)·(b)·(c) 검사의 결함 탐지력 증명 | MUTATION-ENV/CONTRACT/NOTIFY | ✅ PASS | env 3종, 층간 3종, 알림 삼킴 1종을 포함한 변이 8/8 기대 exit 관찰 |
+
+- 근본 원인: 테스트가 로컬 코드·관문 통과 fixture만 검증했고, 배포 환경 구성·DB↔UI 계약·외부 알림 실패 관측을 독립 관문으로 두지 않았다.
+- 운영 DB 쓰기: 0건. local/test DB와 read-only Production metadata만 사용했다.
+- 전체 회귀: pgTAP 260/260, Edge Function 58/58, Vitest 263/263, Playwright 12/12, Next production build PASS, health HTTP 200.
+- 잔여 blocker: 신규 migration의 운영 적용과 production 첫 환전은 미검증이다. 전역 design-lint의 인라인 style과 토큰 밖 hex 2종도 남아 있어 `qa: changes-requested`를 유지한다.
+- 요청 정본: `docs/requests/core-qa-recovery-request-2026-08-25.md`.
+- 상세 증거: `docs/core-qa-recovery-v1-gpt-codex.md`.
+
+STAMP: 수정 시각 2026-08-25 19:04 KST | 모델 gpt-5.6 | 에이전트 qa-verifier | 스킬 qa | 상태 복구 검사 통과·릴리즈 NG 유지
+
 ## 2026-08-25: 환전 신청 PASS 게이트와 오류 응답 회귀
 
 **판정: 🔧 로컬 수정 검증 / 운영 migration·배포·실사용자 재검증 미실행**

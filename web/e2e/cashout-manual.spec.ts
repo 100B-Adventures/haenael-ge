@@ -543,30 +543,32 @@ test.describe("수동 환전: happy + edge", () => {
     await expect(preview).not.toContainText("플랫폼 수수료 없이");
     await expect(preview).toContainText("서비스 이용료는 커피 한 잔 값이에요.");
 
-    // 같은 화면 안의 신청 폼 미리보기도 같은 계산식이어야 한다(옛 29,010원 잔존 금지).
-    // 폼 기본 신청량은 최소 30클로버 = 30,000원 → 이용료 3,300 · 원천징수 881 · 실지급 25,819.
+    // 같은 화면 안의 신청 폼도 30클로버 기준값을 정확히 재현해야 한다.
+    // 기본값은 지급가능액 전부이므로 30을 직접 입력해 수수료 계약을 고정한다.
+    await page.locator("#cashout-clover-amount").fill("30");
     await expect(page.getByTestId("cashout-live-preview")).toContainText("서비스 이용료 3,300원");
+    await expect(page.getByTestId("cashout-live-preview")).toContainText("원천징수 881원");
     await expect(page.getByTestId("cashout-live-preview")).toContainText("25,819원 입금");
     await expect(page.getByTestId("cashout-page")).not.toContainText("29,010원");
   });
 
-  test("잘못된 계좌 형식과 최소 수량 미만을 인라인에서 거부한다", async ({ page }) => {
+  test("잘못된 계좌 형식과 신청량 0개를 인라인에서 거부한다", async ({ page }) => {
     await openCashout(page, USERS.invalid);
     const requestForm = page.getByTestId("cashout-request-form");
     const cloverAmountInput = page.locator("#cashout-clover-amount");
 
-    await expect(cloverAmountInput).toHaveAttribute("min", "30");
+    await expect(cloverAmountInput).toHaveAttribute("min", "1");
     await page.locator("#cashout-bank").selectOption("KB");
     await page.locator("#cashout-account").fill("1234-ABCD");
     await page.locator("#cashout-holder").fill("홍길동");
     await page.locator("#cashout-phone").fill("010-5555-6666");
-    await cloverAmountInput.fill("29");
+    await cloverAmountInput.fill("0");
     await page.getByTestId("cashout-confirm-button").click();
     await expect(requestForm.getByRole("alert")).toHaveText(
-      "환전하려면 클로버가 최소 30개 필요해요. 30개 이상 입력해 주세요.",
+      "환전할 클로버를 한 개 이상 입력해 주세요.",
     );
     expect(await cloverAmountInput.evaluate((input) => input.validationMessage)).toBe(
-      "환전하려면 클로버가 최소 30개 필요해요. 30개 이상 입력해 주세요.",
+      "환전할 클로버를 한 개 이상 입력해 주세요.",
     );
 
     await cloverAmountInput.fill("30");

@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node ../scripts/qa/check-deploy-env.mjs --target vercel-production --source runtime --only-if-vercel",
     "build": "next build",
+    "qa:predeploy-production": "node ../scripts/qa/check-deploy-env.mjs --target vercel-production --source provider && node ../scripts/qa/check-deploy-env.mjs --target supabase-production --source provider",
+    "test:qa-contracts": "node ../scripts/qa/check-deploy-env.mjs --static-only && node ../scripts/qa/check-cashout-layer-contract.mjs && node ../scripts/qa/check-cashout-raise-coverage.mjs && node ../scripts/qa/check-cashout-notification-contract.mjs && node ../scripts/qa/run-contract-mutations.mjs",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",

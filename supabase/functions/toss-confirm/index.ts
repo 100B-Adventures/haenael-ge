@@ -314,8 +314,12 @@ Deno.serve(async (req: Request) => {
       };
     },
     invokeNotify: async (payload) => {
+      const notifyInternalToken = Deno.env.get("NOTIFY_INTERNAL_TOKEN") ?? "";
       const { data: notifyData, error: notifyError } = await supabase.functions
-        .invoke("notify", { body: payload });
+        .invoke("notify", {
+          headers: { "x-notify-internal-token": notifyInternalToken },
+          body: payload,
+        });
       return { data: notifyData, error: notifyError?.message };
     },
   }, {
