@@ -3,16 +3,16 @@
 무엇이 지금 운영에 올라가 있는지를 여기서 본다. 변경 내역은 `CHANGELOG.md`에 있다.
 
 ```yaml
-release: 1.0.0
+release: 1.1.0
 date: 2026-08-25
 url: https://haenaelge.vercel.app
-commit: 8b172ff
+commit: 3b43f0c
 ships:
   prd: 0.4.0        # docs/prd-haenael-ge-v0.4.0.md
   design: 2.0.0     # DESIGN.md
   fdd: 1.2.0        # 수동환전 계좌수집 계약
   qa: changes-requested
-changelog: CHANGELOG.md#100
+changelog: CHANGELOG.md#110
 ```
 
 ## 이 릴리즈에 실린 것
