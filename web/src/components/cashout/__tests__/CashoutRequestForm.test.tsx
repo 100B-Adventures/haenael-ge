@@ -29,13 +29,16 @@ describe("CashoutRequestForm", () => {
     });
   });
 
-  function renderForm(initialPhone: string | null = "01012345678") {
+  function renderForm(
+    initialPhone: string | null = "01012345678",
+    balances: { totalBalance?: number; payableAmount?: number } = {},
+  ) {
     return render(
       <CashoutRequestForm
         cashoutEnabled
         reachedThreshold
-        payableAmount={40}
-        totalBalance={40}
+        payableAmount={balances.payableAmount ?? 40}
+        totalBalance={balances.totalBalance ?? 40}
         minCashoutClover={30}
         currentCashout={null}
         history={[]}
@@ -46,6 +49,8 @@ describe("CashoutRequestForm", () => {
 
   it("최종 확인 뒤 신청하고 서버 재검증 후에도 접수 성공 화면을 유지한다", async () => {
     const view = renderForm();
+    // 기본 입력값은 환전 가능액 전체(40)다. 이 검증은 30개 기준 금액을 보므로 30을 넣는다.
+    fireEvent.change(screen.getByLabelText("환전할 클로버"), { target: { value: "30" } });
     expect(screen.getByTestId("cashout-live-preview")).toHaveTextContent(
       "30,000원 요청 → 서비스 이용료 3,300원 · 원천징수 881원 → 25,819원 입금",
     );
@@ -241,19 +246,20 @@ describe("CashoutRequestForm", () => {
     expect(screen.getByTestId("cashout-submit-button")).toBeInTheDocument();
   });
 
-  it("QA-LOCAL-03 거절 경로: 최소 수량 미만은 브라우저 문구 대신 한국어 행동 안내를 보여준다", () => {
-    renderForm();
+  it("QA-LOCAL-03 총 30개(웰컴 3 포함)면 환전 가능액 27개로 신청할 수 있다", () => {
+    // 최소 환전 기준은 총 보유로 판정하고, 실제 환전액만 친구 응원분으로 제한한다.
+    // 예전에는 최소 기준까지 환전 가능액으로 재서, 총 30개를 모았는데도 웰컴 3개
+    // 때문에 신청 자체가 막혔다.
+    renderForm(undefined, { totalBalance: 30, payableAmount: 27 });
     const cloverInput = screen.getByLabelText("환전할 클로버") as HTMLInputElement;
-    fireEvent.change(cloverInput, { target: { value: "29" } });
-    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "환전하려면 클로버가 최소 30개 필요해요. 30개 이상 입력해 주세요.",
-    );
-    expect(cloverInput.validationMessage).toBe(
-      "환전하려면 클로버가 최소 30개 필요해요. 30개 이상 입력해 주세요.",
-    );
-    expect(screen.queryByTestId("cashout-confirm-step")).not.toBeInTheDocument();
+    expect(cloverInput.value).toBe("27");
+
+    fireEvent.change(screen.getByLabelText("은행"), { target: { value: "KB" } });
+    fireEvent.change(screen.getByLabelText("계좌번호"), { target: { value: "123-456-789012" } });
+    fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+    expect(screen.getByTestId("cashout-confirm-step")).toBeInTheDocument();
   });
 
   it("진행 중 신청이 있으면 새 신청을 막고 상태 화면으로 연결한다", () => {

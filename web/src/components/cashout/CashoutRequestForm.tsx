@@ -60,9 +60,10 @@ export function CashoutRequestForm({
   onScreenChange,
 }: Props) {
   const [step, setStep] = useState<"form" | "confirm" | "done">("form");
-  const [cloverAmount, setCloverAmount] = useState(
-    Math.min(Math.max(minCashoutClover, 0), payableAmount),
-  );
+  // 최소 환전 기준은 총 보유(웰컴 포함)로 판정하고, 실제 환전액은 친구 응원분으로
+  // 제한한다. 그래서 기본값은 payableAmount 를 그대로 쓴다. 최소 기준을 넘겼는데도
+  // 웰컴분 때문에 payableAmount 가 minCashoutClover 보다 작을 수 있기 때문이다.
+  const [cloverAmount, setCloverAmount] = useState(payableAmount);
   const [bankCode, setBankCode] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accountHolder, setAccountHolder] = useState("");
@@ -91,7 +92,8 @@ export function CashoutRequestForm({
   const canRequest =
     cashoutEnabled &&
     reachedThreshold &&
-    payableAmount >= minCashoutClover &&
+    totalBalance >= minCashoutClover &&
+    payableAmount > 0 &&
     !hasPendingCashout;
 
   useEffect(() => {
@@ -102,8 +104,11 @@ export function CashoutRequestForm({
     if (!Number.isInteger(cloverAmount)) {
       return "클로버는 한 개 단위로 입력해 주세요.";
     }
-    if (cloverAmount < minCashoutClover) {
-      return `환전하려면 클로버가 최소 ${minCashoutClover}개 필요해요. ${minCashoutClover}개 이상 입력해 주세요.`;
+    if (cloverAmount < 1) {
+      return "환전할 클로버를 한 개 이상 입력해 주세요.";
+    }
+    if (totalBalance < minCashoutClover) {
+      return `환전하려면 클로버가 최소 ${minCashoutClover}개 필요해요.`;
     }
     if (cloverAmount > payableAmount) {
       return `지금 환전할 수 있는 클로버는 ${payableAmount}개예요. ${payableAmount}개 이하로 입력해 주세요.`;
@@ -232,7 +237,7 @@ export function CashoutRequestForm({
               <input
                 id="cashout-clover-amount"
                 type="number"
-                min={minCashoutClover}
+                min={1}
                 max={payableAmount}
                 step={1}
                 value={cloverAmount}
