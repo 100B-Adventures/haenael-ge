@@ -59,12 +59,16 @@ function buildSupabase(
   phone: string | null = "01012345678",
   eligibility: Record<string, unknown> = { reached_threshold: false },
   cheerCount = cheers.length,
+  wordmap: Array<{ word: string; word_count: number }> = [],
 ) {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "owner-uid" } } }) },
     rpc: vi.fn().mockImplementation((fn: string) => {
       if (fn === "clover_eligibility") {
         return Promise.resolve({ data: [eligibility], error: null });
+      }
+      if (fn === "get_wordmap") {
+        return Promise.resolve({ data: wordmap, error: null });
       }
       return Promise.resolve({ data: [], error: null });
     }),
@@ -237,6 +241,36 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     expect(cheerIlike).not.toHaveBeenCalled();
     expect(screen.queryByRole("search")).not.toBeInTheDocument();
+  });
+
+  it("TC-V37-03 정상 경로: 워드 100개 중 미리보기는 승인 시안대로 6개만 표시한다", async () => {
+    const words = Array.from({ length: 100 }, (_, index) => ({
+      word: `응원 ${index + 1}`,
+      word_count: 100 - index,
+    }));
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678", { reached_threshold: false }, 0, words) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    expect(screen.getByTestId("wordmap-mini-preview").querySelectorAll("span")).toHaveLength(6);
+    expect(screen.getByTestId("wordmap-overflow-summary")).toHaveTextContent(
+      "6개 표시 · 94개는 전체 워드맵에서 확인",
+    );
+  });
+
+  it("TC-V37-03 거절 경로: 워드가 없으면 빈 미리보기 카드를 만들지 않는다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678", { reached_threshold: false }, 0, []) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    expect(screen.queryByTestId("wordmap-mini-preview")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("wordmap-overflow-summary")).not.toBeInTheDocument();
   });
 
   // 컨트롤러 3차 리뷰 MINOR: clover_eligibility 목이 reached_threshold만 갖고 있어서

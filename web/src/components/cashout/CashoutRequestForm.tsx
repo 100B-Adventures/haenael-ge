@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Clock3, LoaderCircle, ShieldCheck } from "lucide-react";
 import { createCashoutRequest } from "@/app/(receiver)/cashout/actions";
@@ -59,7 +59,7 @@ export function CashoutRequestForm({
   initialPhone,
   onScreenChange,
 }: Props) {
-  const [step, setStep] = useState<"form" | "confirm" | "done">("form");
+  const [screen, setScreen] = useState<CashoutFlowScreen>("form");
   // 최소 환전 기준은 총 보유(웰컴 포함)로 판정하고, 실제 환전액은 친구 응원분으로
   // 제한한다. 그래서 기본값은 payableAmount 를 그대로 쓴다. 최소 기준을 넘겼는데도
   // 웰컴분 때문에 payableAmount 가 minCashoutClover 보다 작을 수 있기 때문이다.
@@ -68,7 +68,6 @@ export function CashoutRequestForm({
   const [accountNo, setAccountNo] = useState("");
   const [accountHolder, setAccountHolder] = useState("");
   const [phone, setPhone] = useState(initialPhone ?? "");
-  const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [success, setSuccess] = useState<Success | null>(null);
   const idempotencyRef = useRef<{ fingerprint: string; key: string } | null>(null);
@@ -96,9 +95,10 @@ export function CashoutRequestForm({
     payableAmount > 0 &&
     !hasPendingCashout;
 
-  useEffect(() => {
-    onScreenChange?.(submitting ? "submitting" : step);
-  }, [onScreenChange, step, submitting]);
+  function changeScreen(nextScreen: CashoutFlowScreen) {
+    setScreen(nextScreen);
+    onScreenChange?.(nextScreen);
+  }
 
   function validate() {
     if (!Number.isInteger(cloverAmount)) {
@@ -142,19 +142,19 @@ export function CashoutRequestForm({
     if (idempotencyRef.current?.fingerprint !== fingerprint) {
       idempotencyRef.current = { fingerprint, key: createRequestKey() };
     }
-    setStep("confirm");
+    changeScreen("confirm");
   }
 
   async function submitConfirmed() {
     const validationError = validate();
     setErrorMessage(validationError);
     if (validationError || !idempotencyRef.current) {
-      setStep("form");
+      changeScreen("form");
       return;
     }
 
     setErrorMessage("");
-    setSubmitting(true);
+    changeScreen("submitting");
     try {
       const result = await createCashoutRequest({
         cloverAmount,
@@ -168,7 +168,9 @@ export function CashoutRequestForm({
         setErrorMessage(getCashoutErrorMessage(result.code));
         if (result.code === "request_key_conflict") {
           idempotencyRef.current = null;
-          setStep("form");
+          changeScreen("form");
+        } else {
+          changeScreen("confirm");
         }
         return;
       }
@@ -184,28 +186,27 @@ export function CashoutRequestForm({
         accountHolder: normalizedHolder,
       });
       setAccountNo("");
-      setStep("done");
+      changeScreen("done");
       trackEvent("cashout_initiated", {
         clover_amount: cloverAmount,
         status: result.data.status,
       });
     } catch {
       setErrorMessage("환전 신청 서버에 연결하지 못했어요. 잠시 후 다시 시도해주세요.");
-    } finally {
-      setSubmitting(false);
+      changeScreen("confirm");
     }
   }
 
   return (
     <div>
-      {step === "form" && (
+      {screen === "form" && (
         <PhoneConsentNotice
           hasPhone={Boolean(initialPhone)}
           redirectPath="/cashout"
           context="cashout"
         />
       )}
-      {hasPendingCashout && currentCashout && !(step === "done" && success) ? (
+      {hasPendingCashout && currentCashout && !(screen === "done" && success) ? (
         <div className="rounded-md border border-amber-line bg-amber-soft p-4" data-testid="cashout-pending-block">
           <p className="text-sm font-extrabold text-amber-ink">
             이미 처리 중인 신청이 있어요
@@ -222,7 +223,7 @@ export function CashoutRequestForm({
             진행 상태 보기
           </Link>
         </div>
-      ) : canRequest && step === "form" ? (
+      ) : canRequest && screen === "form" ? (
         <form
           onSubmit={review}
           noValidate
@@ -351,10 +352,10 @@ export function CashoutRequestForm({
             환전 신청하기
           </button>
         </form>
-      ) : canRequest && step === "confirm" ? (
-        <section className="space-y-4" data-testid="cashout-confirm-step" aria-busy={submitting}>
-          {submitting ? (
-            <div className="space-y-4" role="status" aria-live="polite" data-testid="cashout-submitting-state">
+      ) : canRequest && (screen === "confirm" || screen === "submitting") ? (
+        <section className="space-y-4" data-testid="cashout-confirm-step" aria-busy={screen === "submitting"}>
+          {screen === "submitting" ? (
+            <div className="space-y-4" role="status" aria-live="polite" aria-busy="true" data-testid="cashout-submitting-state">
               <div className="rounded-md border border-border bg-card p-3">
                 <dl className="divide-y divide-border text-[12.5px]">
                   <div className="flex justify-between gap-4 py-2"><dt className="text-muted-foreground">입금 계좌</dt><dd className="text-right font-bold">{cashoutBankName(bankCode)} {maskAccountNumber(normalizedAccountNo)}</dd></div>
@@ -401,11 +402,11 @@ export function CashoutRequestForm({
               >
                 이 계좌로 신청하기
               </button>
-              <button type="button" onClick={() => setStep("form")} className="w-full rounded-md border border-border bg-card py-3 text-[13px] font-bold text-muted-foreground">계좌 다시 입력</button>
+              <button type="button" onClick={() => changeScreen("form")} className="w-full rounded-md border border-border bg-card py-3 text-[13px] font-bold text-muted-foreground">계좌 다시 입력</button>
             </>
           )}
         </section>
-      ) : step === "done" && success ? (
+      ) : screen === "done" && success ? (
         <section className="space-y-4" data-testid="cashout-request-success" role="status">
           <div className="rounded-md border border-primary/30 bg-accent p-6 text-center">
             <p className="text-[30px]">🍀</p>
@@ -428,7 +429,7 @@ export function CashoutRequestForm({
         </div>
       )}
 
-      {history.length > 0 && step === "form" && (
+      {history.length > 0 && screen === "form" && (
         <section className="mt-6" aria-labelledby="cashout-history-title">
           <div className="mb-3 flex items-center justify-between">
             <h2 id="cashout-history-title" className="text-[15px] font-extrabold text-foreground">환전 내역</h2>

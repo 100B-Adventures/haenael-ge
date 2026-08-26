@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CashoutPageView } from "../CashoutPageView";
 import { CashoutRequestForm } from "../CashoutRequestForm";
 
 const { createCashoutRequest, trackEvent } = vi.hoisted(() => ({
@@ -45,6 +46,28 @@ describe("CashoutRequestForm", () => {
         initialPhone={initialPhone}
       />,
     );
+  }
+
+  function renderPage() {
+    return render(
+      <CashoutPageView
+        cashoutEnabled
+        reachedThreshold
+        payableAmount={40}
+        totalBalance={52}
+        welcomeAmount={12}
+        minCashoutClover={30}
+        currentCashout={null}
+        history={[]}
+        initialPhone="01012345678"
+      />,
+    );
+  }
+
+  function fillRequiredFields() {
+    fireEvent.change(screen.getByLabelText("은행"), { target: { value: "KB" } });
+    fireEvent.change(screen.getByLabelText("계좌번호"), { target: { value: "123456789012" } });
+    fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });
   }
 
   it("최종 확인 뒤 신청하고 서버 재검증 후에도 접수 성공 화면을 유지한다", async () => {
@@ -242,6 +265,56 @@ describe("CashoutRequestForm", () => {
     fireEvent.click(screen.getByTestId("cashout-submit-button"));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("환전 신청 서버에 연결하지 못했어요");
+    expect(screen.queryByTestId("cashout-submitting-state")).not.toBeInTheDocument();
+    expect(screen.getByTestId("cashout-submit-button")).toBeInTheDocument();
+  });
+
+  it("TC-V37-01 정상 경로: 최종 확인은 전용 화면으로 전환해 신청 분해표와 내역을 숨긴다", async () => {
+    renderPage();
+    fillRequiredFields();
+
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+
+    expect(await screen.findByRole("heading", { name: "이 계좌가 맞나요?" })).toBeInTheDocument();
+    expect(screen.getByTestId("cashout-confirm-step")).toBeInTheDocument();
+    expect(screen.queryByTestId("cashout-form-breakdown")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cashout-request-form")).not.toBeInTheDocument();
+  });
+
+  it("TC-V37-01 거절 경로: 필수 입력 오류면 전용 확인 화면으로 전환하지 않는다", () => {
+    renderPage();
+
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("입금받을 은행을 선택해 주세요.");
+    expect(screen.getByTestId("cashout-form-breakdown")).toBeInTheDocument();
+    expect(screen.queryByTestId("cashout-confirm-step")).not.toBeInTheDocument();
+  });
+
+  it("TC-V37-02 정상 경로: 제출 중에는 확인 배너를 숨기고 전용 loading 화면만 보여준다", async () => {
+    createCashoutRequest.mockReturnValueOnce(new Promise(() => undefined));
+    renderPage();
+    fillRequiredFields();
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+    fireEvent.click(await screen.findByTestId("cashout-submit-button"));
+
+    expect(await screen.findByRole("heading", {
+      name: "잠깐 기다리는 동안에도 지금 하는 일을 알려드려요",
+    })).toBeInTheDocument();
+    expect(screen.getByTestId("cashout-submitting-state")).toBeInTheDocument();
+    expect(screen.queryByTestId("cashout-form-breakdown")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cashout-confirm-banner")).not.toBeInTheDocument();
+  });
+
+  it("TC-V37-02 거절 경로: 제출 실패 뒤 전용 loading을 닫고 확인 화면으로 복귀한다", async () => {
+    createCashoutRequest.mockRejectedValueOnce(new Error("network down"));
+    renderPage();
+    fillRequiredFields();
+    fireEvent.click(screen.getByTestId("cashout-confirm-button"));
+    fireEvent.click(await screen.findByTestId("cashout-submit-button"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("환전 신청 서버에 연결하지 못했어요");
+    expect(await screen.findByRole("heading", { name: "이 계좌가 맞나요?" })).toBeInTheDocument();
     expect(screen.queryByTestId("cashout-submitting-state")).not.toBeInTheDocument();
     expect(screen.getByTestId("cashout-submit-button")).toBeInTheDocument();
   });

@@ -27,6 +27,7 @@ type ReceiverHomePageProps = {
 
 const CHEER_SELECT = "id, display_name, is_anonymous, message, clover_amount, created_at";
 const CHEER_RESULT_LIMIT = 20;
+const WORDMAP_PREVIEW_LIMIT = 6;
 
 function normalizeCheerSearch(rawQuery: string | string[] | undefined) {
   const query = Array.isArray(rawQuery) ? rawQuery[0] : rawQuery;
@@ -146,7 +147,7 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
   });
 
   const previewWords: Array<{ word: string; word_count: number }> = (wordmapRaw ?? [])
-    .slice(0, 6)
+    .slice(0, WORDMAP_PREVIEW_LIMIT)
     .map((w: { word: string; word_count: number }) => ({
       word: w.word,
       word_count: Number(w.word_count),
@@ -284,9 +285,9 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
                 })}
               </div>
             </div>
-            {wordmapTotal > 6 && (
+            {wordmapTotal > WORDMAP_PREVIEW_LIMIT && (
               <p className="border-t border-border px-4 py-3 text-[length:var(--text-label-small)] text-muted-foreground" data-testid="wordmap-overflow-summary">
-                <strong className="text-accent-foreground">6개 표시</strong> · {wordmapTotal - 6}개는 전체 워드맵에서 확인
+                <strong className="text-accent-foreground">{WORDMAP_PREVIEW_LIMIT}개 표시</strong> · {wordmapTotal - WORDMAP_PREVIEW_LIMIT}개는 전체 워드맵에서 확인
               </p>
             )}
           </div>
