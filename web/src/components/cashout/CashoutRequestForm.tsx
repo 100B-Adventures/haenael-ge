@@ -243,8 +243,8 @@ export function CashoutRequestForm({
                 value={cloverAmount}
                 onChange={(event) => {
                   const nextAmount = Number(event.target.value);
-                  const browserMessage = nextAmount < minCashoutClover
-                    ? `환전하려면 클로버가 최소 ${minCashoutClover}개 필요해요. ${minCashoutClover}개 이상 입력해 주세요.`
+                  const browserMessage = nextAmount < 1
+                    ? "환전할 클로버를 한 개 이상 입력해 주세요."
                     : nextAmount > payableAmount
                       ? `지금 환전할 수 있는 클로버는 ${payableAmount}개예요. ${payableAmount}개 이하로 입력해 주세요.`
                       : "";
