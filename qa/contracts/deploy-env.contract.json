@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "sourceRoots": ["web/src", "supabase/functions"],
+  "systemVariables": ["NODE_ENV", "VERCEL_ENV"],
+  "variables": {
+    "NEXT_PUBLIC_SUPABASE_URL": { "targets": ["vercel-production"], "features": ["core"] },
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": { "targets": ["vercel-production"], "features": ["core"] },
+    "NEXT_PUBLIC_APP_URL": { "targets": ["vercel-production"], "features": ["core"] },
+    "NEXT_PUBLIC_APP_VERSION": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
+    "SUPABASE_SERVICE_ROLE_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout", "core"] },
+    "CASHOUT_ENABLED": { "targets": ["vercel-production"], "features": ["cashout"] },
+    "CASHOUT_ACCOUNT_ENCRYPTION_KEYS": { "targets": ["vercel-production"], "features": ["cashout"] },
+    "CASHOUT_ACCOUNT_ENCRYPTION_KEY": { "targets": ["vercel-production"], "features": ["cashout-legacy"], "optional": true },
+    "CASHOUT_ACCOUNT_ACTIVE_KEY_VERSION": { "targets": ["vercel-production"], "features": ["cashout"] },
+    "CASHOUT_ACCOUNT_FINGERPRINT_KEY": { "targets": ["vercel-production"], "features": ["cashout"] },
+    "NOTIFY_INTERNAL_TOKEN": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout-notifications", "notify"] },
+    "NEXT_PUBLIC_KAKAO_REST_API_KEY": { "targets": ["vercel-production"], "features": ["kakao-auth"] },
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID": { "targets": ["vercel-production"], "features": ["analytics"] },
+    "NEXT_PUBLIC_PAYMENTS_ENABLED": { "targets": ["vercel-production"], "features": ["payments"] },
+    "NEXT_PUBLIC_TOSS_CLIENT_KEY": { "targets": ["vercel-production"], "features": ["payments"] },
+
+    "SUPABASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
+    "SUPABASE_ANON_KEY": { "targets": ["supabase-production"], "features": ["wordmap"] },
+    "PAYMENTS_ENABLED": { "targets": ["supabase-production"], "features": ["payments"] },
+    "TOSS_SECRET_KEY": { "targets": ["supabase-production"], "features": ["payments"] },
+    "TOSS_WEBHOOK_TOKEN": { "targets": ["supabase-production"], "features": ["payments"] },
+    "SLACK_WEBHOOK_URL": { "targets": ["supabase-production"], "features": ["slack"] },
+    "LEAD_RATE_LIMIT_SALT": { "targets": ["supabase-production"], "features": ["lead-capture"] },
+    "KAKAO_CLIENT_ID": { "targets": ["supabase-production"], "features": ["kakao-auth"] },
+    "KAKAO_CLIENT_SECRET": { "targets": ["supabase-production"], "features": ["kakao-auth"] },
+    "KAKAO_ALIMTALK_API_URL": { "targets": ["supabase-production"], "features": ["notify"] },
+    "KAKAO_ALIMTALK_API_KEY": { "targets": ["supabase-production"], "features": ["notify"] },
+    "KAKAO_ALIMTALK_API_SECRET": { "targets": ["supabase-production"], "features": ["notify"] },
+    "KAKAO_ALIMTALK_PFID": { "targets": ["supabase-production"], "features": ["notify"] },
+    "KAKAO_ALIMTALK_FROM": { "targets": ["supabase-production"], "features": ["notify"] },
+    "KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED": { "targets": ["supabase-production"], "features": ["notify"] },
+    "KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED": { "targets": ["supabase-production"], "features": ["cashout-notifications"] },
+    "KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID": { "targets": ["supabase-production"], "features": ["cashout-notifications"] }
+  },
+  "targets": {
+    "vercel-production": {
+      "provider": "vercel",
+      "features": ["core", "cashout", "cashout-notifications", "kakao-auth", "analytics", "payments"]
+    },
+    "supabase-production": {
+      "provider": "supabase",
+      "features": ["core", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications"]
+    }
+  }
+}
