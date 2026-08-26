@@ -34,13 +34,18 @@
 
 ### growth/ — 성장 엔진
 - [DM 아웃바운드 플레이북](growth/dm-outbound-playbook.md) — 타깃 추출·스크립트 5종·램프업·응답률 게이트
-- [DM 프리테스트 배치](growth/dm-pretest-batch.md) — 실결제 전 10~20명 반응검증용 메시지 A/B/C·판독 게이트
-- [첫 매출 전환 플레이북](growth/first-revenue-playbook.md) — 유입→선언→공유→첫 유료 응원 결제, 10건 4주 스프린트·앵커 3단
+- [DM 프리테스트 배치](growth/dm-pretest-batch.md): **구버전·실행 폐기**. 실결제 전 10~20명 반응검증의 역사 기준선
+- [콜드 DM 첫 통 리테이크](growth/haenael-ge-dm-coldopen-retake-v1-opus5.md): 상태 의존 첫 통 문안. 발송 전 선언자 수·운영 기능 재확인 필수
+- [DM 이후 유입 전략](growth/haenael-ge-post-dm-inflow-strategy-v1-opus5.md): DM 회신 뒤 프로필·콘텐츠·공유면 전환 설계
+- [첫 매출 전환 플레이북](growth/first-revenue-playbook.md): 유입→선언→공유→첫 유료 응원 결제, 10건 4주 스프린트·현행 결제 입력 범위
 - [KPI 런북](growth/kpi-runbook.md) — 주간 5칸 대시보드·kill-criteria 소집 조건
+- [등급제·초대링크 바이럴 설계](growth/등급제-초대링크-바이럴설계.md): 설계안. 현재 구현 0 상태와 도입 조건
 
 ### ops/ — 운영
 - [★에이전트 마스터 런북](ops/agent-runbook.md) — 하위모델용. 이번 주 할 일이 여기서 도출됨
 - [고객 피드백 루프](ops/feedback-loop.md) — 정성 신호 태그 8종·주간 다이제스트·즉시 회수 트리거·성장 루프 포트폴리오
+- [카카오 알림톡 운영 런북](ops/kakao-alimtalk-runbook.md): 솔라피 배선·운영 개통 상태·INAPP 폴백
+- [운영 미결 원장](ops/운영-미결-원장.md): 세무·토스·알림톡 등 회장·외부사업자 확인이 필요한 미결 인덱스
 
 ## 기획 정본 (docs/ 링크)
 - 기획: [승인 PRD v0.3.0](../docs/prd-haenael-ge-v0.3.0.md) · [미승인 증분안 v0.4.0](../docs/prd-haenael-ge-v0.4.0.md) · [one-thing](../docs/one-thing.md) · [persona](../docs/persona.md) · [bm](../docs/bm.md) · [risks](../docs/risks.md)

@@ -57,6 +57,27 @@
 | `youtube-banner.png` | 2560×1440 | D-005 |
 | `youtube-thumbnail-declaration-log.png` / `youtube-thumbnail-buildlog.png` | 1280×720 | — |
 
+### 1-4. 인스타그램 런치 피드 실산출물 (`docs/brand-assets/feed/`, 2026-08-25 파일 실측)
+
+첫 9개 피드 본편은 모두 1080×1350이다. 2번 피드는 본편 커버 외에 같은 규격의 캐러셀 슬라이드 4장이 있다.
+
+| 순서 | 본편 파일 | 추가 산출물 |
+|---|---|---|
+| 1 | `feed-01-manifesto.png` | 스탬프 |
+| 2 | `feed-02-what-is.png` | `feed-02-slide-02.png`~`feed-02-slide-05.png`, 캐러셀 HTML 소스, 디자인 리뷰 |
+| 3 | `feed-03-declare-exam.png` | 스탬프 |
+| 4 | `feed-04-hook-hearts.png` | 스탬프 |
+| 5 | `feed-05-clover-def.png` | 스탬프 |
+| 6 | `feed-06-declare-fitness.png` | 스탬프 |
+| 7 | `feed-07-hook-contrast.png` | 스탬프 |
+| 8 | `feed-08-howto.png` | 스탬프 |
+| 9 | `feed-09-start.png` | 스탬프 |
+
+- 전체 미리보기: `feed-preview.png`(1108×1867)와 `_src/feed-preview-template.html`.
+- 발행 카피와 바이오: `post-copy.md`, `bio-ready.md`.
+- 배포 묶음: `haenael-ge-instagram-launch-assets-v1.zip`, `해낼게-피드-9장.zip`.
+- 재생성 소스: `_src/feed-template.html`, `_src/feed-preview-template.html`, `_src/feed-02-carousel.html`.
+
 ---
 
 ## 2. 힉스필드 프롬프트 프리셋 (`docs/brand-assets/photo-bank-wip/*.json`)
@@ -152,7 +173,7 @@ curl -L -o docs/brand-assets/photo-bank-wip/p2-retake.png "<생성 URL>"
 ## 6. ⛔ 회수 필요
 
 1. **크레딧 델타 -15(§4)** — 본 세션 원인 아님. 다른 pane/세션이 이 계정으로 동시 작업했는지 확인 부탁드립니다. 확인되면 이 문서 §4에 원인 기록.
-2. **그리드 개별 포스트 4:5 전환(§5-1)** — 현재 `grid-preview-9posts.png`는 전략 프리뷰용(정사각 9칸)이라 그대로 유효하지만, 9개를 실제로 각각 게시할 때는 1080×1350 개별 파일 제작이 필요합니다. 이번 배치 범위 밖(태스크 지정 산출물 = 프리뷰 1장)이라 별도 착수 승인 필요.
+2. **그리드 개별 포스트 4:5 전환(§5-1)**: 2026-08-25 기준 `docs/brand-assets/feed/feed-01`~`feed-09` 본편 9장은 모두 1080×1350으로 제작되어 이 회수 항목은 해소됐다. 전략 프리뷰 `grid-preview-9posts.png`의 정사각 칸은 배치 검토용으로만 유지한다.
 
 ---
 

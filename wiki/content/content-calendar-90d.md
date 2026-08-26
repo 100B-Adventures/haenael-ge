@@ -4,6 +4,7 @@
 > 상위 전략: [brand-marketing-strategy.md](../brand-marketing-strategy.md) §4 채널 · §5 90일 플랜 · §6 시리즈 · §7 KPI
 > 자매 문서(내용 중복 금지, 참조만): 계정 정본 [wiki/brand/channel-identity-kit.md](../brand/channel-identity-kit.md) · 카피 [wiki/brand/voice-copy-bank.md](../brand/voice-copy-bank.md) · 실원고 [series-s1-buildlog.md](series-s1-buildlog.md)(12편)·[series-s2-declaration-log.md](series-s2-declaration-log.md)(8편)·[series-s3-mind-observation.md](series-s3-mind-observation.md)(6편) · DM 절차 [wiki/growth/dm-outbound-playbook.md](../growth/dm-outbound-playbook.md) · 에셋 규격 [wiki/brand/visual-guidelines.md](../brand/visual-guidelines.md)
 > 지표 판독은 [wiki/growth/kpi-runbook.md](../growth/kpi-runbook.md) · 운영 루틴은 [wiki/ops/agent-runbook.md](../ops/agent-runbook.md)
+> 구현 상태 메모(2026-08-25): 결제·환전 화면과 로컬 코드 경로는 존재한다. 다만 이용료 10% 마이그레이션의 운영 DB 적용은 미검증이다. 아래 W7은 기능 개발 예정일이 아니라 캠페인에서 실결제 공지를 내는 주차다.
 
 ---
 
@@ -50,7 +51,7 @@ W1_START_DATE: (미기입 — 회장 GO 선언 시 스레드 첫 포스트 발�
 
 | 주차 | 발행 | DM | 운영 액션 |
 |---|---|---|---|
-| **W3** | S1-07/08/09 · S2-01(화)·S2-02(토) · S3-02(목) | **50/일** | ① 무결제 선언 페이지 오픈 확인(실 URL 접속 관찰) ② 첫 선언자 사례 S2 소재화 — **본인 동의 DM 필수**(미동의 시 익명·디테일 변형) ③ 주간 계기판 기록 시작(매주 반복, 이하 생략) |
+| **W3** | S1-07/08/09 · S2-01(화)·S2-02(토) · S3-02(목) | **50/일** | ① 선언 페이지 실 URL 접속 관찰 ② 첫 선언자 사례 S2 소재화. **본인 동의 DM 필수**(미동의 시 익명·디테일 변형) ③ 주간 계기판 기록 시작(매주 반복, 이하 생략) |
 | **W4** | S1-10/11/12 · S2-03/04 · S3-03 | **75/일** | ① S1 재고 소진 임박 → **S1 재생산 6편(S1-13~18) 착수**(§4-1) ② DM 응답률 첫 판독(≥8% 확인) |
 | **W5** | S1-13/14/15 · S2-05/06 · S3-04 | **100/일** | ① S2 재고 4편 → **S2 재생산 4편(S2-09~12) 소재 수집 시작**(§4-2) ② 공유율 실측(선언자 중 카드 공유 비율) |
 | **W6** | S1-16/17/18 · S2-07/08 · S3-05 | 100/일 | ① S3 재고 2편(하한 4편 미달) → **S3 재생산 4편(S3-07~10) 착수**(§4-3) ② 선언자 수 집계·게이트 리허설 |
@@ -58,13 +59,13 @@ W1_START_DATE: (미기입 — 회장 GO 선언 시 스레드 첫 포스트 발�
 
 ### P2 — 조용한 결제 온 (W7~W10) · 게이트: 유료응원 1회경험률 ≥30% (건당 5,000원 앵커)
 
-⛔ 회수 필요: W7 결제 오픈은 제품(build/QA/배포) 완료에 종속 — 제품이 늦으면 **P2 이후 전체를 주 단위로 시프트**해야 한다. 시프트 결정은 회장 승인 사안(하위모델이 임의로 결제 없이 P2 콘텐츠를 내보내지 말 것).
+⛔ 회수 필요: W7 실결제 공지는 운영 결제·환전 경로 직접 확인에 종속된다. 로컬 코드 존재만으로 공지하지 않는다. 운영 확인이 늦으면 **P2 이후 전체를 주 단위로 시프트**하며, 시프트는 회장 승인 사안이다.
 
 | 주차 | 발행 | DM | 운영 액션 |
 |---|---|---|---|
-| **W7** | S1-19/20/21(재생산분·**수수료 서사 회차 우선 배치** — 결제 오픈 공지와 정합) · S2-09/10 · S3-06 | 100/일 유지 | ① 결제 실동작 확인(테스트 결제 1건 관찰 후 콘텐츠 발행) ② 결제 오픈 공지 = 스레드(슬로건 노출면 O) + 공스타(주인공 면 — **돈 언어 0으로 재작성**, [voice-copy-bank](../brand/voice-copy-bank.md)) |
+| **W7** | S1-19/20/21(재생산분·**수수료 서사 회차 우선 배치**, 실결제 공지와 정합) · S2-09/10 · S3-06 | 100/일 유지 | ① 운영 결제 실동작 1건과 운영 환전 정책 표시를 관찰한 뒤 콘텐츠 발행 ② 실결제 공지 = 스레드(슬로건 노출면 O) + 공스타(주인공 면, **돈 언어 0으로 재작성**, [voice-copy-bank](../brand/voice-copy-bank.md)) |
 | **W8** | S1-22/23/24 · S2-11/12 · S3-07 | 100/일 | ① 첫 유료응원 사례 콘텐츠화(가드레일: 금액·신원 비노출) ② 1회경험률 첫 판독 |
-| **W9** | S1-25/26/27 · S2-13/14 · S3-08 | 100/일 | ① 마일스톤 pledge 소프트 런칭 콘텐츠(응원자 면 한정, "내기" 프레임 금지 — bm.md §3-2) ② 재생산 사이클 반복(재고 하한 룰) |
+| **W9** | S1-25/26/27 · S2-13/14 · S3-08 | 100/일 | ① 마일스톤 pledge 소프트 런칭 콘텐츠(응원자 면 한정, "내기" 프레임 금지) ② 재생산 사이클 반복(재고 하한 룰) |
 | **W10** | S1-28/29/30 · S2-15/16 · S3-09 | 100/일 | ① 달성/환전 첫 사례 준비(있으면 S2 특별편) ② P2 게이트 집계 |
 | **✅ P2 게이트 체크포인트** (W10 일요일) | — | — | 유료응원 1회경험률 ≥30%(정의는 [kpi-runbook §2-3](../growth/kpi-runbook.md) — 선언자 기준) · 건당 평균 ~5,000원 앵커 확인. 미달 시 회장 소집 |
 
@@ -72,9 +73,9 @@ W1_START_DATE: (미기입 — 회장 GO 선언 시 스레드 첫 포스트 발�
 
 | 주차 | 발행 | DM | 운영 액션 |
 |---|---|---|---|
-| **W11** | S1-31/32/33 · S2-17/18 · S3-10 | **50/일로 감속 [실험]**(판정 기간 — 신규 시드보다 코호트 관찰 우선) | ① W3~W7 가입 코호트 W4 잔존 집계 ② 역할 전환(주인공→응원자) 사례 탐색 |
+| **W11** | S1-31/32/33 · S2-17/18 · S3-10 | **50/일로 감속 [실험]**(판정 기간, 신규 시드보다 코호트 관찰 우선) | ① W3~W7 가입 코호트 W4 잔존 집계 ② 역할 전환(주인공→응원자) 사례 탐색 |
 | **W12** | S1-34/35/36 · S2-19/20 · S3-11 | 50/일 | ① 반복후원율·자가확산 계수 집계 ② kill-criteria 회의 자료 초안([kpi-runbook §4](../growth/kpi-runbook.md) 안건 템플릿) |
-| **W13** | S1-37/38/39 · S2-21/22 · S3-12 | 50/일 | ① **kill-criteria 회의 소집**(회장 필수 참석 — [bm.md §6](../../docs/bm.md) 3criteria) ② 90일 회고를 [learnings/ledger.md](../learnings/ledger.md)에 기록 |
+| **W13** | S1-37/38/39 · S2-21/22 · S3-12 | 50/일 | ① **kill-criteria 회의 소집**(회장 필수 참석, [bm.md §6](../../docs/bm.md) 3criteria) ② 90일 회고를 [learnings/ledger.md](../learnings/ledger.md)에 기록 |
 | **✅ P3 게이트 체크포인트** (W13) | — | — | W4 잔존 ≥20% · 역할 전환 ≥1. **GO/pivot/kill 판정 = 회장 전권.** 하위모델은 데이터 패킷 준비까지만 |
 
 ---
@@ -107,4 +108,4 @@ W1_START_DATE: (미기입 — 회장 GO 선언 시 스레드 첫 포스트 발�
 
 ---
 
-*SOURCES/MODEL: model=claude-fable-5 (content-growth-marketer) · 근거: wiki/brand-marketing-strategy.md §4~§7 · docs/bm.md §3·§6 · wiki/decisions.md D-001~D-006 · docs/persona.md · docs/architecture.md(GA4 이벤트 자리) · pipeline-state.md · 벤치마크: https://pipeline.airfleet.co/resources/content-calendar (90일 케이던스·주간 체크인) · https://themarketplaceguide.com/patterns/cold-start/ (시딩→실공급 전환) · 스킬: series-content-planner(캘린더/재생산 구조 검증)*
+*SOURCES/MODEL: model=claude-fable-5 (content-growth-marketer) · 2026-08-25 현행화 근거: wiki/growth/dm-outbound-playbook.md §4-1 · web/src/components/goal/CheerPaymentButton.tsx · web/src/components/cashout/CashoutPageView.tsx · pipeline-state.core.md · 기존 근거: wiki/brand-marketing-strategy.md §4~§7 · docs/bm.md §3·§6 · wiki/decisions.md · docs/persona.md · docs/architecture.md · 벤치마크: https://pipeline.airfleet.co/resources/content-calendar · https://themarketplaceguide.com/patterns/cold-start/ · 스킬: series-content-planner*
