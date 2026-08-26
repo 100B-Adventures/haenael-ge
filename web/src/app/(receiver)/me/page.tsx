@@ -19,6 +19,10 @@ import { type CashoutRecord } from "@/lib/cashout";
 import { CheerList, type ReceiverCheer } from "@/components/receiver/CheerList";
 import { ReceiverPageShell, ReceiverTopBar } from "@/components/receiver/ReceiverShell";
 
+// 로그인 사용자 전용 화면이라 빌드 시점에 미리 그리지 않는다.
+// 미리 그리려 하면 빌드가 DB 키를 요구해서, 키 없는 환경에서 빌드가 죽는다.
+export const dynamic = "force-dynamic";
+
 // ─── 페이지 ───────────────────────────────────────────────────────────────────
 
 type ReceiverHomePageProps = {

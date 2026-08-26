@@ -18,16 +18,34 @@ const pretendard = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "해낼게 — 응원은 돈으로 하는 겁니다",
+  title: "해낼게 : 응원은 돈으로 하는 겁니다",
   description:
     "친구의 목표에 조용히 클로버로 응원하세요. 응원이 쌓이면 예쁜 워드맵이 됩니다.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app",
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael-ge.vercel.app",
   ),
   openGraph: {
     type: "website",
     locale: "ko_KR",
     siteName: "해낼게",
+    title: "해낼게 : 응원은 돈으로 하는 겁니다",
+    description:
+      "친구의 목표에 조용히 클로버로 응원하세요. 응원이 쌓이면 예쁜 워드맵이 됩니다.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "해낼게. 응원은 돈으로 하는 겁니다.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "해낼게 : 응원은 돈으로 하는 겁니다",
+    description:
+      "친구의 목표에 조용히 클로버로 응원하세요. 응원이 쌓이면 예쁜 워드맵이 됩니다.",
+    images: ["/og-image.jpg"],
   },
 };
 

@@ -8,7 +8,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "어떻게 쓰는 건가요? — 해낼게",
+  title: "어떻게 쓰는 건가요? : 해낼게",
   description:
     "해낼게는 어떻게 쓰나요. 선언하고, 친구가 클로버로 응원하고, 모이면 환전(오픈 예정)까지 3단계로 안내합니다.",
 };
@@ -25,7 +25,7 @@ const STEPS: StepInfo[] = [
   {
     no: "1",
     title: "선언",
-    desc: "말하면 시작된다. 해낼게. — 이루고 싶은 목표를 한 문장으로 선언해요.",
+    desc: "말하면 시작된다. 해낼게. 이루고 싶은 목표를 한 문장으로 선언해요.",
   },
   {
     no: "2",

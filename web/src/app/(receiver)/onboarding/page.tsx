@@ -8,8 +8,13 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { OnboardingGoalForm } from "@/components/receiver/OnboardingGoalForm";
 
+// 로그인 사용자 전용 화면이라 빌드 시점에 미리 그리지 않는다.
+// 미리 그리려 하면 빌드가 DB 키를 요구해서, 키 없는 환경에서 빌드가 죽는다.
+export const dynamic = "force-dynamic";
+
+
 export const metadata: Metadata = {
-  title: "목표 쓰기 — 해낼게",
+  title: "목표 쓰기 : 해낼게",
   description: "나만의 목표를 작성하고 친구들의 응원을 받아보세요.",
 };
 
