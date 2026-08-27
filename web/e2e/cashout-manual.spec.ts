@@ -676,10 +676,10 @@ test.describe("수동 환전: happy + edge", () => {
     await expect(page.getByTestId("cashout-page")).toBeVisible();
     await page.screenshot({ path: path.join(CAPTURE_DIR, "cashout-390.png"), fullPage: true });
 
-    await page.locator("#cashout-clover-amount").fill("30");
+    await page.locator("#cashout-clover-amount").fill("40");
     await page.locator("#cashout-bank").selectOption("KB");
-    await page.locator("#cashout-account").fill(FULL_ACCOUNT);
-    await page.locator("#cashout-holder").fill("홍길동");
+    await page.locator("#cashout-account").fill(VISUAL_ACCOUNT);
+    await page.locator("#cashout-holder").fill("조도경");
     await page.getByTestId("cashout-confirm-button").click();
     await expect(page.getByRole("heading", { name: "이 계좌가 맞나요?" })).toBeVisible();
     await expect(page.getByTestId("cashout-form-breakdown")).toHaveCount(0);

@@ -12,7 +12,7 @@
 2. **이번 주 행 읽기**: 캘린더 §3에서 현재 주차 행 = 발행할 원고 ID·DM 발송량·운영 액션·게이트 여부.
 3. **원고 확보**: 해당 ID를 시리즈 문서에서 로드 — [series-s1-buildlog.md](../content/series-s1-buildlog.md) / [series-s2-declaration-log.md](../content/series-s2-declaration-log.md) / [series-s3-mind-observation.md](../content/series-s3-mind-observation.md). ID가 아직 없으면(재생산 구간) 캘린더 §4 재생산 절차 수행.
 4. **지표 상태 확인**: [wiki/growth/kpi-runbook.md](../growth/kpi-runbook.md) §5 로그 최신 행 — 빨강이 있으면 해당 지표의 "빨강 액션"이 이번 주 우선순위에 추가된다.
-5. **미결 확인**: [wiki/decisions.md](../decisions.md) 상단(최신 결정·보류) + `pipeline-state.md` Blocked/Notes — 회장 결정 대기 항목을 임의로 닫지 않는다.
+5. **미결 확인**: [wiki/decisions.md](../decisions.md) 상단(최신 결정·보류) + [wiki/ops/운영-미결-원장.md](운영-미결-원장.md)(외부 전문가만 닫는 O-NNN) + `pipeline-state.core.md` Blocked/Notes — 회장 결정 대기 항목을 임의로 닫지 않는다.
 
 깊은 컨텍스트가 필요할 때만: [brand-marketing-strategy.md](../brand-marketing-strategy.md)(전략 정본) → [docs/bm.md](../../docs/bm.md)(BM·kill) → [docs/persona.md](../../docs/persona.md)(도경·민지) 순.
 
@@ -95,7 +95,7 @@
    ```
    2026-07-15 | [dm-ops] | 목요일 발송분 응답률 반토막 | 발송 시간대를 회신 몰리는 21~23시로 이동 | count:1
    ```
-3. **진행** → 루트 `pipeline-state.md`의 Blocked/Notes에 주차 단위 1줄 (상세는 계기판 로그가 정본 — 중복 서술 금지):
+3. **진행** → 루트 `pipeline-state.core.md`의 Blocked/Notes에 주차 단위 1줄 (상세는 계기판 로그가 정본 — 중복 서술 금지):
    ```
    ### 마케팅 W3 (2026-07-20) — P1 진행 중: 발행 6/6 · DM 250발송/응답 9.1% · 선언자 누적 14 · 블로커: 없음
    ```
@@ -128,7 +128,7 @@
 
 ### 7-3. 교대 시 인수인계 최소 절차
 - 새 모델 첫 세션: §① 진입 절차 그대로 수행 + 이 §⑦을 읽었음을 진행 기록(§⑤-3)에 1줄 남긴다.
-- 전임의 미완 작업은 `pipeline-state.md` Blocked/Notes와 [decisions.md](../decisions.md) 보류 항목에서만 복원한다 — 채팅 기억·추측으로 복원 금지.
+- 전임의 미완 작업은 `pipeline-state.core.md` Blocked/Notes와 [decisions.md](../decisions.md) 보류 항목에서만 복원한다 — 채팅 기억·추측으로 복원 금지.
 - 힉스필드 등 **크레딧/돈이 드는 도구는 잔량 실측 후 사용**, 신규 지출은 §④ "돈 지출 일체" = 회장 회수.
 
 ---
