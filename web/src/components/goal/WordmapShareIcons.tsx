@@ -23,7 +23,9 @@ async function svgUrlToPngBlob(svgUrl: string): Promise<Blob | null> {
     if (!res.ok) return null;
     const svgText = await res.text();
 
-    const svgBlob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
+    const svgBlob = new Blob([svgText], {
+      type: "image/svg+xml;charset=utf-8",
+    });
     const objectUrl = URL.createObjectURL(svgBlob);
 
     const canvas = document.createElement("canvas");
@@ -32,7 +34,7 @@ async function svgUrlToPngBlob(svgUrl: string): Promise<Blob | null> {
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    ctx.fillStyle = "#F4EFE6";
+    ctx.fillStyle = "var(--muted)";
     ctx.fillRect(0, 0, 800, 500);
 
     await new Promise<void>((resolve, reject) => {
@@ -98,9 +100,7 @@ export function WordmapShareIcons({
   // ── share_event INSERT (S1, 확산 analytics) ───────────────────────────────
   const recordShare = useCallback(
     async (channel: "IMAGE" | "STORY" | "LINK") => {
-      await supabase
-        .from("share_event")
-        .insert({ goal_id: goalId, channel });
+      await supabase.from("share_event").insert({ goal_id: goalId, channel });
     },
     [goalId, supabase],
   );
@@ -138,7 +138,10 @@ export function WordmapShareIcons({
       URL.revokeObjectURL(url);
 
       await recordShare("IMAGE");
-      trackEvent("wordmap_shared", { method: "image", goal_id: String(goalId) });
+      trackEvent("wordmap_shared", {
+        method: "image",
+        goal_id: String(goalId),
+      });
       showToast("이미지를 저장했어요. 스토리에 올려보세요.");
     } finally {
       setLoading(null);
@@ -155,7 +158,9 @@ export function WordmapShareIcons({
       if (imageUrl) {
         const pngBlob = await svgUrlToPngBlob(imageUrl);
         if (pngBlob && typeof navigator.canShare === "function") {
-          const file = new File([pngBlob], "wordmap.png", { type: "image/png" });
+          const file = new File([pngBlob], "wordmap.png", {
+            type: "image/png",
+          });
           if (navigator.canShare({ files: [file] })) {
             try {
               await navigator.share({
@@ -189,7 +194,10 @@ export function WordmapShareIcons({
       }
 
       await recordShare("STORY");
-      trackEvent("wordmap_shared", { method: "instagram", goal_id: String(goalId) });
+      trackEvent("wordmap_shared", {
+        method: "instagram",
+        goal_id: String(goalId),
+      });
     } finally {
       setLoading(null);
     }
@@ -222,17 +230,10 @@ export function WordmapShareIcons({
           data-testid="share-save-image"
           className="flex flex-col items-center gap-[6px] cursor-pointer disabled:opacity-60"
         >
-          <div
-            className="w-[52px] h-[52px] rounded-full flex items-center justify-center"
-            style={{ background: "#1B8A4F" }}
-          >
-            {loading === "image" ? (
-              <SpinnerIcon />
-            ) : (
-              <DownloadIcon />
-            )}
+          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center [background-color:var(--primary)]!">
+            {loading === "image" ? <SpinnerIcon /> : <DownloadIcon />}
           </div>
-          <span className="text-[10.5px] font-semibold" style={{ color: "#6F6A60" }}>
+          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">
             이미지 저장
           </span>
         </button>
@@ -246,13 +247,10 @@ export function WordmapShareIcons({
           data-testid="share-instagram"
           className="flex flex-col items-center gap-[6px] cursor-pointer disabled:opacity-60"
         >
-          <div
-            className="w-[52px] h-[52px] rounded-full flex items-center justify-center border"
-            style={{ background: "#fff", borderColor: "#E8E4DC" }}
-          >
+          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center border [background-color:var(--card)]! [border-color:var(--border)]!">
             {loading === "instagram" ? <SpinnerIcon dark /> : <InstagramIcon />}
           </div>
-          <span className="text-[10.5px] font-semibold" style={{ color: "#6F6A60" }}>
+          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">
             인스타 공유
           </span>
         </button>
@@ -265,13 +263,10 @@ export function WordmapShareIcons({
           data-testid="share-copy-link"
           className="flex flex-col items-center gap-[6px] cursor-pointer"
         >
-          <div
-            className="w-[52px] h-[52px] rounded-full flex items-center justify-center border"
-            style={{ background: "#fff", borderColor: "#E8E4DC" }}
-          >
+          <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center border [background-color:var(--card)]! [border-color:var(--border)]!">
             <LinkIcon />
           </div>
-          <span className="text-[10.5px] font-semibold" style={{ color: "#6F6A60" }}>
+          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">
             링크 복사
           </span>
         </button>
@@ -280,16 +275,12 @@ export function WordmapShareIcons({
       {/* 토스트 (이미지 저장 완료·링크 복사 완료 등) */}
       {toast && (
         <div
-          className="absolute left-0 right-0 -top-14 flex items-center gap-3 rounded-[12px] px-4 py-3"
-          style={{ background: "#16140F", color: "#fff" }}
+          className="absolute left-0 right-0 -top-14 flex items-center gap-3 rounded-[12px] px-4 py-3 [background-color:var(--foreground)]! [color:var(--card)]!"
           role="status"
           aria-live="polite"
           data-testid="share-toast"
         >
-          <div
-            className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold"
-            style={{ background: "#1F9E5A" }}
-          >
+          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold [background-color:var(--clover-bright)]!">
             ✓
           </div>
           <span className="text-[12px] leading-snug">{toast}</span>
@@ -308,7 +299,7 @@ function DownloadIcon() {
       height="22"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#fff"
+      stroke="var(--card)"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -328,7 +319,7 @@ function InstagramIcon() {
       height="22"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#16140F"
+      stroke="var(--foreground)"
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -336,7 +327,7 @@ function InstagramIcon() {
     >
       <rect x="3" y="3" width="18" height="18" rx="5" />
       <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="1.2" fill="#16140F" />
+      <circle cx="17.5" cy="6.5" r="1.2" fill="var(--foreground)" />
     </svg>
   );
 }
@@ -348,7 +339,7 @@ function LinkIcon() {
       height="22"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#16140F"
+      stroke="var(--foreground)"
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -361,7 +352,7 @@ function LinkIcon() {
 }
 
 function SpinnerIcon({ dark }: { dark?: boolean }) {
-  const stroke = dark ? "#16140F" : "#fff";
+  const stroke = dark ? "var(--foreground)" : "var(--card)";
   return (
     <svg
       width="20"

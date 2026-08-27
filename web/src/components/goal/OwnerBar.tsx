@@ -33,12 +33,13 @@ export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
 
   return (
     <div
-      className="rounded-[11px] px-3 py-2.5 mb-3 flex items-center justify-between"
-      style={{ background: "#F4EFE6", border: "1px solid #E8E4DC" }}
+      className="rounded-[11px] px-3 py-2.5 mb-3 flex items-center justify-between [background-color:var(--muted)]! [border:1px_solid_var(--border)]!"
       data-testid="owner-bar"
     >
-      <p style={{ fontSize: 10.5, color: "#7a7363", lineHeight: 1.4 }}>
-        <b style={{ color: "#14613A", fontSize: 11 }}>내 목표예요</b>
+      <p className="[font-size:10.5px]! [color:#7a7363]! [line-height:1.4]!">
+        <b className="[color:var(--accent-foreground)]! [font-size:11px]!">
+          내 목표예요
+        </b>
         {" · "}
         <span data-testid="owner-bar-status">
           {newCount === null
@@ -50,13 +51,7 @@ export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
       </p>
       <Link
         href="/me"
-        className="text-white font-bold rounded-[8px] text-center"
-        style={{
-          fontSize: 10.5,
-          background: "#1B8A4F",
-          padding: "6px 10px",
-          flex: "0 0 auto",
-        }}
+        className="text-white font-bold rounded-[8px] text-center [font-size:10.5px]! [background-color:var(--primary)]! p-[6px_10px]! [flex:0_0_auto]!"
         data-testid="owner-bar-cta"
       >
         내 해낼게 관리

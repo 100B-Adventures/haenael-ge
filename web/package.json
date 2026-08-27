@@ -15,7 +15,8 @@
     "test:e2e:ui": "playwright test --ui",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "qa:verify-production": "node ../scripts/qa/verify-production.mjs"
+    "qa:verify-production": "node ../scripts/qa/verify-production.mjs",
+    "qa:verify-production:auth": "playwright test --config=playwright.production.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -24,21 +24,19 @@ export default function HomeError({
 
   return (
     <main
-      className="min-h-svh flex flex-col items-center justify-center px-[22px] text-center"
-      style={{ background: "#FBFAF7" }}
+      className="min-h-svh flex flex-col items-center justify-center px-[22px] text-center [background-color:var(--background)]!"
       data-testid="me-error-card"
     >
-      <p className="text-[18px] font-bold mb-2" style={{ color: "#16140F" }}>
+      <p className="text-[18px] font-bold mb-2 [color:var(--foreground)]!">
         불러오지 못했어요
       </p>
-      <p className="text-[13.5px] mb-6" style={{ color: "#6F6A60" }}>
+      <p className="text-[13.5px] mb-6 [color:var(--muted-foreground)]!">
         네트워크 상태를 확인하고 다시 시도해 주세요.
       </p>
       <button
         type="button"
         onClick={() => reset()}
-        className="py-3 px-6 rounded-[14px] text-[14px] font-semibold"
-        style={{ background: "#1B8A4F", color: "#fff" }}
+        className="py-3 px-6 rounded-[14px] text-[14px] font-semibold [background-color:var(--primary)]! [color:var(--card)]!"
         data-testid="me-error-retry"
       >
         다시 불러오기

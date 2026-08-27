@@ -39,8 +39,7 @@ export function ReportButton({
     <>
       <button
         type="button"
-        className={`flex items-center gap-1 rounded-lg text-[12px] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 ${className ?? ""}`}
-        style={{ color: "#A09B93" }}
+        className={`flex items-center gap-1 rounded-lg text-[12px] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 ${className ?? ""} [color:#A09B93]!`}
         onClick={() => setOpen(true)}
         aria-label="신고하기"
         data-testid="report-button"
@@ -97,36 +96,39 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
       // EF report R1 호출
-      const res = await fetch(
-        `${supabaseUrl}/functions/v1/report`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token ?? anonKey}`,
-          },
-          body: JSON.stringify({
-            targetType,
-            targetId,
-            reason: reason.trim(),
-          }),
+      const res = await fetch(`${supabaseUrl}/functions/v1/report`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token ?? anonKey}`,
         },
-      );
+        body: JSON.stringify({
+          targetType,
+          targetId,
+          reason: reason.trim(),
+        }),
+      });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
-        const msg = (errData as { error?: { message?: string } })?.error
-          ?.message ?? "신고 접수 실패. 잠시 후 재시도해주세요.";
+        const msg =
+          (errData as { error?: { message?: string } })?.error?.message ??
+          "신고 접수 실패. 잠시 후 재시도해주세요.";
         toast.error(msg);
         return;
       }
 
       // GA4
       if (typeof window !== "undefined" && "gtag" in window) {
-        (window as typeof window & { gtag: Function }).gtag("event", "report_submitted", { // eslint-disable-line @typescript-eslint/ban-types
-          target_type: targetType,
-          target_id: targetId,
-        });
+        (window as typeof window & { gtag: Function }).gtag(
+          "event",
+          "report_submitted",
+          {
+            // eslint-disable-line @typescript-eslint/ban-types
+            target_type: targetType,
+            target_id: targetId,
+          },
+        );
       }
 
       setDone(true);
@@ -148,8 +150,7 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
 
       {/* 시트 */}
       <div
-        className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-3xl pb-safe-bottom"
-        style={{ background: "#FBFAF7" }}
+        className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-3xl pb-safe-bottom [background-color:var(--background)]!"
         role="dialog"
         aria-modal="true"
         aria-label="신고하기"
@@ -157,10 +158,7 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
       >
         {/* 핸들 */}
         <div className="flex justify-center pt-3 pb-1">
-          <div
-            className="h-1 w-10 rounded-full"
-            style={{ background: "#D5D0C8" }}
-          />
+          <div className="h-1 w-10 rounded-full [background-color:#D5D0C8]!" />
         </div>
 
         <div className="px-6 pt-3 pb-6">
@@ -170,25 +168,20 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
               className="flex flex-col items-center gap-3 py-8"
               data-testid="report-done"
             >
-              <span className="text-4xl" aria-hidden="true">✅</span>
-              <p
-                className="text-center text-[15px] font-semibold"
-                style={{ color: "#16140F" }}
-              >
+              <span className="text-4xl" aria-hidden="true">
+                ✅
+              </span>
+              <p className="text-center text-[15px] font-semibold [color:var(--foreground)]!">
                 신고가 접수됐어요
               </p>
-              <p
-                className="text-center text-[13px]"
-                style={{ color: "#6F6A60" }}
-              >
+              <p className="text-center text-[13px] [color:var(--muted-foreground)]!">
                 검토 후 조치할게요.
                 <br />
                 소중한 신고 감사해요.
               </p>
               <button
                 type="button"
-                className="mt-2 rounded-full px-6 py-2 text-[14px] font-semibold text-white"
-                style={{ background: "#14613A" }}
+                className="mt-2 rounded-full px-6 py-2 text-[14px] font-semibold text-white [background-color:var(--accent-foreground)]!"
                 onClick={onClose}
               >
                 닫기
@@ -197,16 +190,10 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
           ) : (
             // 신고 폼
             <>
-              <h2
-                className="mb-1 text-[17px] font-bold"
-                style={{ color: "#16140F" }}
-              >
+              <h2 className="mb-1 text-[17px] font-bold [color:var(--foreground)]!">
                 신고하기
               </h2>
-              <p
-                className="mb-4 text-[13px]"
-                style={{ color: "#6F6A60" }}
-              >
+              <p className="mb-4 text-[13px] [color:var(--muted-foreground)]!">
                 {targetType === "GOAL" ? "이 목표를" : "이 응원 메시지를"} 왜
                 신고하나요?
               </p>
@@ -224,11 +211,14 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
                     className="flex items-center gap-2 rounded-xl px-4 py-3 text-left text-[14px] transition-colors"
                     style={{
                       background:
-                        selectedReason === preset ? "#E7F4EC" : "#F5F2EE",
-                      color: selectedReason === preset ? "#14613A" : "#16140F",
+                        selectedReason === preset ? "var(--accent)" : "#F5F2EE",
+                      color:
+                        selectedReason === preset
+                          ? "var(--accent-foreground)"
+                          : "var(--foreground)",
                       border:
                         selectedReason === preset
-                          ? "1.5px solid #14613A"
+                          ? "1.5px solid var(--accent-foreground)"
                           : "1.5px solid transparent",
                     }}
                     onClick={() => setSelectedReason(preset)}
@@ -243,13 +233,7 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
               {/* 기타 사유 입력 */}
               {selectedReason === "기타" && (
                 <textarea
-                  className="mb-4 w-full resize-none rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:ring-2"
-                  style={{
-                    background: "#F5F2EE",
-                    color: "#16140F",
-                    border: "1.5px solid #D5D0C8",
-                    minHeight: 80,
-                  }}
+                  className="mb-4 w-full resize-none rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:ring-2 [background-color:#F5F2EE]! [color:var(--foreground)]! [border:1.5px_solid_#D5D0C8]! [min-height:80px]!"
                   placeholder="신고 사유를 입력해주세요 (최대 500자)"
                   maxLength={500}
                   value={customReason}
@@ -264,7 +248,9 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
                 type="button"
                 className="w-full rounded-2xl py-3.5 text-[15px] font-bold text-white transition-opacity disabled:opacity-40"
                 style={{
-                  background: canSubmit ? "#14613A" : "#A09B93",
+                  background: canSubmit
+                    ? "var(--accent-foreground)"
+                    : "#A09B93",
                 }}
                 disabled={!canSubmit}
                 onClick={handleSubmit}
@@ -276,8 +262,7 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
 
               <button
                 type="button"
-                className="mt-3 w-full rounded-2xl py-2.5 text-[14px]"
-                style={{ color: "#A09B93" }}
+                className="mt-3 w-full rounded-2xl py-2.5 text-[14px] [color:#A09B93]!"
                 onClick={onClose}
                 data-testid="report-cancel"
               >

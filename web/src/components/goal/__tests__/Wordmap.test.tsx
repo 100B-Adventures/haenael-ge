@@ -49,7 +49,7 @@ describe("Wordmap", () => {
     wordmap.querySelectorAll("span").forEach((word) => {
       expect(word).not.toHaveClass("absolute", "whitespace-nowrap");
       expect(word).toHaveClass("min-w-0", "max-w-full", "whitespace-normal");
-      expect(word).toHaveStyle({ overflowWrap: "anywhere" });
+      expect(word).toHaveClass("[overflow-wrap:anywhere]!");
       expect(word.style.transform).toBe("");
     });
   });

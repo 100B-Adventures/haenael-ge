@@ -19,7 +19,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
   const appUrl =
     typeof window !== "undefined"
       ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app";
+      : (process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app");
 
   const fullUrl = `${appUrl}/g/${slug}`;
 
@@ -49,39 +49,36 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
     <div className="w-full" data-testid="share-link-card">
       {/* 제목 */}
       <div className="mb-5">
-        <p
-          className="text-[15px] font-extrabold leading-snug mb-1"
-          style={{ color: "#16140F", letterSpacing: "-0.3px" }}
-        >
+        <p className="text-[15px] font-extrabold leading-snug mb-1 [color:var(--foreground)]! [letter-spacing:-0.3px]!">
           &ldquo;{goalTitle} 해낼게&rdquo; 준비됐어요 🍀
         </p>
-        <p className="text-[13px] leading-relaxed" style={{ color: "#6F6A60" }}>
+        <p className="text-[13px] leading-relaxed [color:var(--muted-foreground)]!">
           이제 이 링크를 인스타 바이오에 걸면 끝이에요.
         </p>
       </div>
 
       {/* 웰컴 클로버 안내 — 목표 생성 시 시스템이 자동으로 웰컴 응원(클로버 3개)을 보냄 */}
       <div
-        className="flex items-center gap-2.5 rounded-[12px] px-4 py-3 mb-4"
-        style={{ background: "#E7F4EC" }}
+        className="flex items-center gap-2.5 rounded-[12px] px-4 py-3 mb-4 [background-color:var(--accent)]!"
         data-testid="welcome-clover-banner"
       >
-        <span className="text-[18px]" aria-hidden="true">🍀</span>
-        <p className="text-[12.5px] leading-snug" style={{ color: "#14613A" }}>
+        <span className="text-[18px]" aria-hidden="true">
+          🍀
+        </span>
+        <p className="text-[12.5px] leading-snug [color:var(--accent-foreground)]!">
           <strong>해낼게 팀이 먼저 웰컴 클로버 3개를 보냈어요.</strong>
           <br />
-          <span style={{ color: "#3d7a5a" }}>다음 응원은 곧 친구들 차례예요.</span>
+          <span className="[color:#3d7a5a]!">
+            다음 응원은 곧 친구들 차례예요.
+          </span>
         </p>
       </div>
 
       {/* 링크 카드 */}
-      <div
-        className="rounded-[14px] p-4 mb-4"
-        style={{ border: "1px solid #E8E4DC", background: "#FFFFFF" }}
-      >
+      <div className="rounded-[14px] p-4 mb-4 [border:1px_solid_var(--border)]! [background-color:var(--card)]!">
         <p
-          className="text-[13px] font-bold mb-3 break-all"
-          style={{ color: "#14613A" }} // --clover-ink
+          className="text-[13px] font-bold mb-3 break-all [color:var(--accent-foreground)]!"
+          // --clover-ink
           data-testid="goal-link-url"
         >
           {fullUrl}
@@ -91,8 +88,8 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
           onClick={handleCopy}
           className="w-full py-2.5 rounded-[10px] text-[13px] font-bold transition-colors"
           style={{
-            background: copied ? "#1B8A4F" : "#E7F4EC",
-            color: copied ? "#ffffff" : "#14613A",
+            background: copied ? "var(--primary)" : "var(--accent)",
+            color: copied ? "var(--card)" : "var(--accent-foreground)",
           }}
           data-testid="copy-link-button"
           aria-label="링크 복사"
@@ -103,11 +100,11 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
 
       {/* 인스타 바이오 안내 */}
       <div
-        className="rounded-[12px] p-4 mb-5"
-        style={{ background: "#F4EFE6" }} // --warm
+        className="rounded-[12px] p-4 mb-5 [background-color:var(--muted)]!"
+        // --warm
       >
-        <p className="text-[12px] leading-relaxed" style={{ color: "#6F6A60" }}>
-          <strong style={{ color: "#16140F" }}>다음 한 걸음</strong>
+        <p className="text-[12px] leading-relaxed [color:var(--muted-foreground)]!">
+          <strong className="[color:var(--foreground)]!">다음 한 걸음</strong>
           <br />
           인스타 프로필 편집 → 웹사이트 칸에 붙여넣기.
           <br />
@@ -118,12 +115,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
       {/* 내 목표 바로가기 */}
       <Link
         href={`/g/${slug}`}
-        className="block w-full py-3 rounded-[14px] text-center text-[14px] font-semibold transition-opacity active:opacity-75"
-        style={{
-          border: "1px solid #E8E4DC",
-          background: "#FFFFFF",
-          color: "#6F6A60",
-        }}
+        className="block w-full py-3 rounded-[14px] text-center text-[14px] font-semibold transition-opacity active:opacity-75 [border:1px_solid_var(--border)]! [background-color:var(--card)]! [color:var(--muted-foreground)]!"
         data-testid="view-goal-link"
       >
         내 목표 페이지 확인하기 →

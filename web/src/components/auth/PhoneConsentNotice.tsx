@@ -35,7 +35,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
   if (returnedWithoutPhone) {
     return (
       <section
-        className="mb-4 rounded-[14px] border border-[#E8D3A6] bg-[#FBF1DD] px-4 py-3"
+        className="mb-4 rounded-[14px] border border-[var(--amber-line)] bg-[var(--amber-soft)] px-4 py-3"
         data-testid="phone-consent-notice"
         role="status"
       >
@@ -62,18 +62,23 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
 
   return (
     <section
-      className="mb-4 rounded-[14px] border border-[#B7DFC5] bg-[#E7F4EC] px-4 py-4"
+      className="mb-4 rounded-[14px] border border-[#B7DFC5] bg-[var(--accent)] px-4 py-4"
       data-testid="phone-consent-notice"
       role="status"
     >
-      <p className="text-[13.5px] font-extrabold text-[#14613A]">{title}</p>
+      <p className="text-[13.5px] font-extrabold text-[var(--accent-foreground)]">
+        {title}
+      </p>
       <p className="mt-1 text-[11.5px] leading-relaxed text-[#3D7A5A]">
         {description}
       </p>
       <Link
         href={`/auth/kakao/start?redirect=${encodeURIComponent(redirectPath)}`}
         onClick={() => {
-          window.sessionStorage.setItem(PHONE_CONSENT_PENDING_KEY, redirectPath);
+          window.sessionStorage.setItem(
+            PHONE_CONSENT_PENDING_KEY,
+            redirectPath,
+          );
         }}
         className="mt-3 block rounded-[12px] bg-[#FEE500] px-4 py-3 text-center text-[13px] font-extrabold text-[#191600]"
         data-testid="phone-consent-cta"

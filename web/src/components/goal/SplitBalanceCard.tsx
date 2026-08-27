@@ -24,7 +24,12 @@ export interface SplitBalanceCardProps {
   pendingNetKrw?: number | null;
 }
 
-export function SplitBalanceCard({ total, locked, available, pendingNetKrw }: SplitBalanceCardProps) {
+export function SplitBalanceCard({
+  total,
+  locked,
+  available,
+  pendingNetKrw,
+}: SplitBalanceCardProps) {
   const hasLock = locked > 0;
   const progressMax = Math.max(total, 1);
   const progressValue = Math.min(Math.max(available, 0), progressMax);
@@ -32,7 +37,9 @@ export function SplitBalanceCard({ total, locked, available, pendingNetKrw }: Sp
   return (
     <div data-testid="split-balance-card">
       <div className="flex items-baseline justify-between">
-        <p className="text-[length:var(--text-meta-micro)] text-[var(--faint)]">모인 클로버</p>
+        <p className="text-[length:var(--text-meta-micro)]! text-[var(--faint)]">
+          모인 클로버
+        </p>
       </div>
       <p
         className="text-xl font-extrabold text-accent-foreground"
@@ -46,7 +53,10 @@ export function SplitBalanceCard({ total, locked, available, pendingNetKrw }: Sp
 
       {/* 잠김이 있을 때만 등가 은닉. 없을 때는 기존 원화 등가 보조표기 유지 */}
       {!hasLock && (
-        <p className="mt-0.5 text-[length:var(--text-meta-micro)] text-[var(--faint)]" data-testid="clover-krw-equivalent">
+        <p
+          className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--faint)]"
+          data-testid="clover-krw-equivalent"
+        >
           ≈{krwFromClover(total).toLocaleString("ko-KR")}원 상당
         </p>
       )}
@@ -62,7 +72,9 @@ export function SplitBalanceCard({ total, locked, available, pendingNetKrw }: Sp
           />
 
           <div className="mt-2 flex items-start justify-between gap-3">
-            <p className="pt-0.5 text-[length:var(--text-label-small)] font-bold text-foreground">지금 쓸 수 있어요</p>
+            <p className="pt-0.5 text-[length:var(--text-label-small)]! font-bold text-foreground">
+              지금 쓸 수 있어요
+            </p>
             <div className="shrink-0 text-right tabular-nums">
               <strong
                 className="block whitespace-nowrap text-[13px] text-accent-foreground"
@@ -70,14 +82,19 @@ export function SplitBalanceCard({ total, locked, available, pendingNetKrw }: Sp
               >
                 🍀 {available}개
               </strong>
-              <p className="mt-0.5 text-[length:var(--text-meta-micro)] text-[var(--faint)]" data-testid="split-balance-available-krw">
+              <p
+                className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--faint)]"
+                data-testid="split-balance-available-krw"
+              >
                 ≈{krwFromClover(available).toLocaleString("ko-KR")}원 상당
               </p>
             </div>
           </div>
 
           <div className="mt-2 flex items-start justify-between gap-3 border-t border-border pt-2">
-            <p className="pt-0.5 text-[length:var(--text-label-small)] font-bold text-amber-ink">🔒 환전으로 잠김</p>
+            <p className="pt-0.5 text-[length:var(--text-label-small)]! font-bold text-amber-ink">
+              🔒 환전으로 잠김
+            </p>
             <div className="shrink-0 text-right tabular-nums">
               <strong
                 className="block whitespace-nowrap text-[13px] text-amber-ink"
@@ -86,15 +103,23 @@ export function SplitBalanceCard({ total, locked, available, pendingNetKrw }: Sp
                 🍀 {locked}개
               </strong>
               {typeof pendingNetKrw === "number" && (
-                <p className="mt-0.5 text-[length:var(--text-meta-micro)] text-[var(--faint)]" data-testid="split-balance-locked-krw">
+                <p
+                  className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--faint)]"
+                  data-testid="split-balance-locked-krw"
+                >
                   {formatCashoutKrw(pendingNetKrw)} 입금 예정
                 </p>
               )}
             </div>
           </div>
 
-          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground" data-testid="split-balance-note">
-            모은 <b>{total}개는 그대로</b>예요. 그중 {locked}개에 잠금이 걸려 있어요. 입금이 끝나면 그때 {locked}개가 총량에서 빠지고, 반려되면 잠금만 풀려요.
+          <p
+            className="mt-2 text-[11px] leading-relaxed text-muted-foreground"
+            data-testid="split-balance-note"
+          >
+            모은 <b>{total}개는 그대로</b>예요. 그중 {locked}개에 잠금이 걸려
+            있어요. 입금이 끝나면 그때 {locked}개가 총량에서 빠지고, 반려되면
+            잠금만 풀려요.
           </p>
         </div>
       )}

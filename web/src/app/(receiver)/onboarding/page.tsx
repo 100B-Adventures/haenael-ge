@@ -39,8 +39,7 @@ export default async function OnboardingPage() {
 
   return (
     <main
-      className="min-h-svh"
-      style={{ background: "#FBFAF7" }}
+      className="min-h-svh [background-color:var(--background)]!"
       data-testid="onboarding-page"
     >
       <OnboardingGoalForm initialUser={user} />

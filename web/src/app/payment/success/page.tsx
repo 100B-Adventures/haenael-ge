@@ -13,7 +13,11 @@ type Props = {
   }>;
 };
 
-async function confirmPayment(params: { paymentKey: string; orderId: string; amount: number }) {
+async function confirmPayment(params: {
+  paymentKey: string;
+  orderId: string;
+  amount: number;
+}) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !anonKey) {
@@ -66,26 +70,28 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
     } catch (e) {
       status = "error";
       title = "결제 확인이 필요해요";
-      message = e instanceof Error ? e.message : "결제 승인 처리에 실패했습니다.";
+      message =
+        e instanceof Error ? e.message : "결제 승인 처리에 실패했습니다.";
     }
   }
 
   return (
     <main
-      className="flex min-h-svh flex-col items-center justify-center px-6 text-center"
-      style={{ background: "#FBFAF7" }}
+      className="flex min-h-svh flex-col items-center justify-center px-6 text-center [background-color:var(--background)]!"
       data-testid="payment-success-page"
     >
-      <div
-        className="w-full max-w-[390px] rounded-[24px] p-7"
-        style={{ background: "#fff", border: "1px solid #E8E4DC" }}
-      >
-        {status === "success" && <AnalyticsEvent event="payment_success" params={{ value: amount, currency: "KRW" }} />}
+      <div className="w-full max-w-[390px] rounded-[24px] p-7 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
+        {status === "success" && (
+          <AnalyticsEvent
+            event="payment_success"
+            params={{ value: amount, currency: "KRW" }}
+          />
+        )}
         <div
           className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-[26px]"
           style={{
-            background: status === "success" ? "#E7F4EC" : "#FCEEEE",
-            color: status === "success" ? "#1B8A4F" : "#B3261E",
+            background: status === "success" ? "var(--accent)" : "#FCEEEE",
+            color: status === "success" ? "var(--primary)" : "#B3261E",
           }}
           aria-hidden="true"
         >
@@ -95,16 +101,15 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
             <CircleAlert size={28} strokeWidth={2.5} />
           )}
         </div>
-        <h1 className="text-[23px] font-black" style={{ color: "#16140F" }}>
+        <h1 className="text-[23px] font-black [color:var(--foreground)]!">
           {title}
         </h1>
-        <p className="mt-3 text-[14px] leading-relaxed" style={{ color: "#6F6A60" }}>
+        <p className="mt-3 text-[14px] leading-relaxed [color:var(--muted-foreground)]!">
           {message}
         </p>
         <Link
           href={status === "success" ? backHref : "/"}
-          className="mt-6 block rounded-[16px] py-4 text-[15px] font-extrabold"
-          style={{ background: "#1B8A4F", color: "#fff" }}
+          className="mt-6 block rounded-[16px] py-4 text-[15px] font-extrabold [background-color:var(--primary)]! [color:var(--card)]!"
           data-testid="payment-success-back"
         >
           {status === "success" ? backLabel : "해낼게 홈으로"}

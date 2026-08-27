@@ -40,7 +40,9 @@ interface FormValues {
 
 // ─── 유효성 검사 ──────────────────────────────────────────────────────────────
 
-function validate(values: FormValues): Partial<Record<keyof FormValues, string>> {
+function validate(
+  values: FormValues,
+): Partial<Record<keyof FormValues, string>> {
   const errors: Partial<Record<keyof FormValues, string>> = {};
   if (!values.title.trim()) {
     errors.title = "목표를 입력해 주세요.";
@@ -126,7 +128,9 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     reason: "",
     due_date: defaultDueDate(),
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof FormValues, string>>
+  >({});
   const [showLoginSheet, setShowLoginSheet] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -158,7 +162,11 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         setAutoSaveDone(true);
         setIsSaving(true);
         saveGoalToDB(
-          { title: draft.title, reason: draft.reason ?? "", due_date: draft.due_date || defaultDueDate() },
+          {
+            title: draft.title,
+            reason: draft.reason ?? "",
+            due_date: draft.due_date || defaultDueDate(),
+          },
           user.id,
         ).then((result) => {
           setIsSaving(false);
@@ -179,13 +187,15 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     }
     // user 상태 변화도 감지 (Supabase 세션 변화)
     const supabase = createClient();
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user && event === "SIGNED_IN") {
-        setUser(session.user);
-      }
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user && event === "SIGNED_IN") {
+          setUser(session.user);
+        }
+      },
+    );
     return () => authListener.subscription.unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── 입력 처리 ────────────────────────────────────────────────────────────────
@@ -194,7 +204,11 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
       setValues((prev) => {
         const next = { ...prev, [field]: value };
         // 실시간 draft 저장
-        saveDraft({ title: next.title, reason: next.reason, due_date: next.due_date });
+        saveDraft({
+          title: next.title,
+          reason: next.reason,
+          due_date: next.due_date,
+        });
         return next;
       });
       // 에러 즉시 해소
@@ -217,7 +231,11 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
       // 미인증 → 저장 "의도"가 있었음을 마킹 + draft 저장 후 LoginSheet.
       // 이 플래그가 있어야만 로그인 후 복귀 시 자동 커밋된다(§ 마운트 effect).
       saveSaveIntent();
-      saveDraft({ title: values.title, reason: values.reason, due_date: values.due_date });
+      saveDraft({
+        title: values.title,
+        reason: values.reason,
+        due_date: values.due_date,
+      });
       setShowLoginSheet(true);
       return;
     }
@@ -260,11 +278,10 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         data-testid="saving-state"
       >
         <div
-          className="w-10 h-10 rounded-full border-4 animate-spin mb-4"
-          style={{ borderColor: "#E7F4EC", borderTopColor: "#1B8A4F" }}
+          className="w-10 h-10 rounded-full border-4 animate-spin mb-4 [border-color:var(--accent)]! [border-top-color:var(--primary)]!"
           aria-label="저장 중"
         />
-        <p className="text-[14px]" style={{ color: "#6F6A60" }}>
+        <p className="text-[14px] [color:var(--muted-foreground)]!">
           목표를 저장하는 중이에요...
         </p>
       </div>
@@ -281,18 +298,15 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         {/* 헤더 */}
         <div className="flex flex-col gap-1">
           <p
-            className="text-[13px] font-extrabold"
-            style={{ color: "#1B8A4F" }} // --clover
+            className="text-[13px] font-extrabold [color:var(--primary)]!"
+            // --clover
           >
             해낼게.
           </p>
-          <h1
-            className="font-black leading-tight"
-            style={{ fontSize: 24, letterSpacing: "-0.5px", color: "#16140F" }}
-          >
+          <h1 className="font-black leading-tight [font-size:24px]! [letter-spacing:-0.5px]! [color:var(--foreground)]!">
             무엇을 해낼 거예요?
           </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: "#6F6A60" }}>
+          <p className="text-[13px] mt-0.5 [color:var(--muted-foreground)]!">
             작성하고 저장하면 나만의 응원 링크가 생겨요.
           </p>
         </div>
@@ -301,14 +315,15 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-title"
-            className="text-[11px] font-bold tracking-wider uppercase"
-            style={{ color: "#6F6A60" }}
+            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
           >
             목표
           </label>
           <div
-            className="flex items-center rounded-[12px] px-4 py-3 gap-2"
-            style={{ border: `1px solid ${errors.title ? "#D9483B" : "#E8E4DC"}`, background: "#fff" }}
+            className="flex items-center rounded-[12px] px-4 py-3 gap-2 [background-color:var(--card)]!"
+            style={{
+              border: `1px solid ${errors.title ? "var(--destructive)" : "var(--border)"}`,
+            }}
           >
             <input
               id="goal-title"
@@ -316,22 +331,21 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
               value={values.title}
               onChange={(e) => handleChange("title", e.target.value)}
               placeholder="편입 평점 4.0"
-              className="flex-1 min-w-0 outline-none text-[14px] font-bold bg-transparent"
-              style={{ color: "#16140F" }}
+              className="flex-1 min-w-0 outline-none text-[14px] font-bold bg-transparent [color:var(--foreground)]!"
               maxLength={60}
               data-testid="goal-title-input"
               autoComplete="off"
               autoFocus
             />
             <span
-              className="flex-shrink-0 text-[13px] font-bold"
-              style={{ color: "#14613A" }} // --clover-ink
+              className="flex-shrink-0 text-[13px] font-bold [color:var(--accent-foreground)]!"
+              // --clover-ink
             >
               해낼게
             </span>
           </div>
           {errors.title && (
-            <p className="text-[12px]" style={{ color: "#D9483B" }} role="alert">
+            <p className="text-[12px] [color:var(--destructive)]!" role="alert">
               {errors.title}
             </p>
           )}
@@ -341,8 +355,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-due-date"
-            className="text-[11px] font-bold tracking-wider uppercase"
-            style={{ color: "#6F6A60" }}
+            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
           >
             언제까지?
           </label>
@@ -351,17 +364,14 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             type="date"
             value={values.due_date}
             onChange={(e) => handleChange("due_date", e.target.value)}
-            className="w-full rounded-[12px] px-4 py-3 text-[14px] outline-none"
+            className="w-full rounded-[12px] px-4 py-3 text-[14px] outline-none [background-color:var(--card)]! [color:var(--foreground)]! [font-family:inherit]!"
             style={{
-              border: `1px solid ${errors.due_date ? "#D9483B" : "#E8E4DC"}`,
-              background: "#fff",
-              color: "#16140F",
-              fontFamily: "inherit",
+              border: `1px solid ${errors.due_date ? "var(--destructive)" : "var(--border)"}`,
             }}
             data-testid="goal-due-date-input"
           />
           {errors.due_date && (
-            <p className="text-[12px]" style={{ color: "#D9483B" }} role="alert">
+            <p className="text-[12px] [color:var(--destructive)]!" role="alert">
               {errors.due_date}
             </p>
           )}
@@ -371,11 +381,10 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-reason"
-            className="text-[11px] font-bold tracking-wider uppercase"
-            style={{ color: "#6F6A60" }}
+            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
           >
             왜요?{" "}
-            <span className="text-[10px] font-normal normal-case" style={{ color: "#9C968B" }}>
+            <span className="text-[10px] font-normal normal-case [color:var(--faint)]!">
               (응원의 이유가 돼요 · 선택)
             </span>
           </label>
@@ -385,17 +394,11 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             onChange={(e) => handleChange("reason", e.target.value)}
             placeholder="휴학하고 8개월째 새벽 도서관. 이번엔 진짜 끝을 보려고요."
             rows={3}
-            className="w-full rounded-[12px] px-4 py-3 text-[14px] outline-none resize-none"
-            style={{
-              border: "1px solid #E8E4DC",
-              background: "#fff",
-              color: "#16140F",
-              fontFamily: "inherit",
-            }}
+            className="w-full rounded-[12px] px-4 py-3 text-[14px] outline-none resize-none [border:1px_solid_var(--border)]! [background-color:var(--card)]! [color:var(--foreground)]! [font-family:inherit]!"
             maxLength={200}
             data-testid="goal-reason-input"
           />
-          <p className="text-right text-[11px]" style={{ color: "#9C968B" }}>
+          <p className="text-right text-[11px] [color:var(--faint)]!">
             {values.reason.length}/200
           </p>
         </div>
@@ -403,8 +406,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         {/* 저장 에러 */}
         {saveError && (
           <div
-            className="rounded-[12px] px-4 py-3 text-[13px]"
-            style={{ background: "#FBEAE7", color: "#D9483B" }}
+            className="rounded-[12px] px-4 py-3 text-[13px] [background-color:var(--danger-soft)]! [color:var(--destructive)]!"
             role="alert"
           >
             {saveError}
@@ -416,21 +418,15 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           type="button"
           onClick={handleSubmit}
           disabled={isSaving}
-          className="w-full py-4 rounded-[15px] text-[15.5px] font-extrabold transition-opacity active:opacity-80"
-          style={{
-            background: "#1B8A4F",
-            color: "#fff",
-            boxShadow: "0 6px 16px rgba(27,138,79,.22)",
-            letterSpacing: "-0.2px",
-            opacity: isSaving ? 0.7 : 1,
-          }}
+          className="w-full py-4 rounded-[15px] text-[15.5px] font-extrabold transition-opacity active:opacity-80 [background-color:var(--primary)]! [color:var(--card)]! [box-shadow:0_6px_16px_rgba(27,138,79,.22)]! [letter-spacing:-0.2px]!"
+          style={{ opacity: isSaving ? 0.7 : 1 }}
           data-testid="save-goal-button"
         >
           {user ? "내 링크 받기" : "저장하고 내 링크 받기"}
         </button>
 
         {/* 안내 */}
-        <p className="text-center text-[12px]" style={{ color: "#9C968B" }}>
+        <p className="text-center text-[12px] [color:var(--faint)]!">
           {user
             ? "바로 저장돼요."
             : "저장하면 로그인 화면이 잠깐 뜨고, 작성 중인 목표는 안전하게 보관 중이에요."}

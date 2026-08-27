@@ -38,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]">
+      <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]!">
         <GoogleAnalytics />
         <div className="flex-1 flex flex-col">{children}</div>
         <Footer />

@@ -71,20 +71,18 @@ export default async function GoalPublicPage({ params }: Props) {
   if (goal.status === "DELETED") {
     return (
       <main
-        className="min-h-svh px-[22px] py-12 flex flex-col items-center justify-center text-center"
-        style={{ background: "#FBFAF7" }}
+        className="min-h-svh px-[22px] py-12 flex flex-col items-center justify-center text-center [background-color:var(--background)]!"
         data-testid="goal-deleted-page"
       >
-        <p className="text-[20px] font-bold mb-2" style={{ color: "#16140F" }}>
+        <p className="text-[20px] font-bold mb-2 [color:var(--foreground)]!">
           종료된 목표예요
         </p>
-        <p className="text-[14px] mb-6" style={{ color: "#6F6A60" }}>
+        <p className="text-[14px] mb-6 [color:var(--muted-foreground)]!">
           이 목표는 더 이상 활성화되어 있지 않아요.
         </p>
         <Link
           href="/"
-          className="inline-block py-3 px-6 rounded-[14px] text-[14px] font-semibold"
-          style={{ background: "#1B8A4F", color: "#fff" }}
+          className="inline-block py-3 px-6 rounded-[14px] text-[14px] font-semibold [background-color:var(--primary)]! [color:var(--card)]!"
         >
           나도 목표 만들기
         </Link>
@@ -97,10 +95,12 @@ export default async function GoalPublicPage({ params }: Props) {
     p_goal_id: goal.id!,
   });
 
-  const words: WordmapWord[] = (wordmapRaw ?? []).map((w: { word: string; word_count: number }) => ({
-    word: w.word,
-    word_count: Number(w.word_count),
-  }));
+  const words: WordmapWord[] = (wordmapRaw ?? []).map(
+    (w: { word: string; word_count: number }) => ({
+      word: w.word,
+      word_count: Number(w.word_count),
+    }),
+  );
 
   const cheerCount = goal.cheer_count ?? 0;
 
@@ -147,18 +147,14 @@ export default async function GoalPublicPage({ params }: Props) {
 
   return (
     <main
-      className="min-h-svh pb-32"
-      style={{ background: "#FBFAF7" }}
+      className="min-h-svh pb-32 [background-color:var(--background)]!"
       data-testid="goal-public-page"
     >
       {/* 스크롤 영역 */}
       <div className="px-[22px] pt-12 pb-4">
         {/* BrandMark */}
-        <p
-          className="font-extrabold mb-5"
-          style={{ fontSize: 12.5, letterSpacing: "-0.2px", color: "#16140F" }}
-        >
-          해낼게<span style={{ color: "#1F9E5A" }}>.</span>
+        <p className="font-extrabold mb-5 [font-size:12.5px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
+          해낼게<span className="[color:var(--clover-bright)]!">.</span>
         </p>
 
         {/* owner bar — 본인 세션 열람 시에만 렌더(위에서 이미 판정 완료) */}
@@ -167,15 +163,13 @@ export default async function GoalPublicPage({ params }: Props) {
         {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
         {!user && (
           <p
-            className="text-center mb-3"
-            style={{ fontSize: 10.5, color: "#9C968B" }}
+            className="text-center mb-3 [font-size:10.5px]! [color:var(--faint)]!"
             data-testid="relogin-hint"
           >
             내 목표가 있으신가요?{" "}
             <Link
               href="/auth/kakao/start?redirect=/me"
-              className="font-semibold underline underline-offset-2"
-              style={{ color: "#6F6A60" }}
+              className="font-semibold underline underline-offset-2 [color:var(--muted-foreground)]!"
               data-testid="relogin-link"
             >
               카카오로 로그인
@@ -205,39 +199,22 @@ export default async function GoalPublicPage({ params }: Props) {
 
         {/* 신고 버튼 (F7 — 게스트/비로그인 모두 가능) */}
         <div className="mt-1 flex justify-end">
-          <ReportButton
-            targetType="GOAL"
-            targetId={goal.id!}
-            variant="text"
-          />
+          <ReportButton targetType="GOAL" targetId={goal.id!} variant="text" />
         </div>
       </div>
 
       {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}
-      <div
-        className="fixed left-0 right-0 bottom-0 px-[22px]"
-        style={{
-          paddingBottom: "calc(14px + env(safe-area-inset-bottom, 0px))",
-          paddingTop: 14,
-          background:
-            "linear-gradient(180deg, rgba(251,250,247,0) 0%, #FBFAF7 34%)",
-        }}
-      >
-        <CheerPaymentButton goalId={goal.id!} goalTitle={rawTitle} goalSlug={slug} />
+      <div className="fixed left-0 right-0 bottom-0 px-[22px] pb-[calc(14px_+_env(safe-area-inset-bottom,_0px))]! pt-[14px]! [background-image:linear-gradient(180deg,_rgba(251,250,247,0)_0%,_var(--background)_34%)]!">
+        <CheerPaymentButton
+          goalId={goal.id!}
+          goalTitle={rawTitle}
+          goalSlug={slug}
+        />
 
         {/* role-transition: "나도 해낼게 만들래" */}
         <Link
           href="/"
-          className="block w-full text-center font-semibold mt-1"
-          style={{
-            fontSize: 12,
-            color: "#9C968B",
-            padding: "9px 0 0",
-            minHeight: 44,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className="block w-full text-center font-semibold mt-1 [font-size:12px]! [color:var(--faint)]! p-[9px_0_0]! [min-height:44px]! [display:flex]! [align-items:center]! [justify-content:center]!"
           data-testid="role-transition-link"
         >
           나도 해낼게 만들래 →

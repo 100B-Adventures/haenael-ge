@@ -68,8 +68,7 @@ export default async function WordmapFullViewPage({ params }: Props) {
 
   return (
     <main
-      className="flex flex-col min-h-svh"
-      style={{ background: "#FBFAF7" }}
+      className="flex flex-col min-h-svh [background-color:var(--background)]!"
       data-testid="wordmap-fullview-page"
     >
       <WordmapViewTracker goalId={goalIdNum} />
@@ -79,44 +78,30 @@ export default async function WordmapFullViewPage({ params }: Props) {
           href="/me"
           aria-label="뒤로"
           data-testid="back-button"
-          className="flex items-center justify-center w-10 h-10 -ml-2"
-          style={{ color: "#6F6A60", fontSize: 22 }}
+          className="flex items-center justify-center w-10 h-10 -ml-2 [color:var(--muted-foreground)]! [font-size:22px]!"
         >
           ‹
         </Link>
-        <p
-          className="font-extrabold"
-          style={{ fontSize: 12.5, letterSpacing: "-0.2px", color: "#16140F" }}
-        >
-          해낼게<span style={{ color: "#1F9E5A" }}>.</span>
+        <p className="font-extrabold [font-size:12.5px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
+          해낼게<span className="[color:var(--clover-bright)]!">.</span>
         </p>
         {/* 균형 spacer */}
-        <div style={{ width: 40 }} />
+        <div className="[width:40px]!" />
       </div>
 
       {/* 워드맵 풀뷰 카드 */}
       <div className="flex-1 flex flex-col px-[22px] pb-4">
         <div
-          className="flex-1 flex flex-col rounded-[20px] px-5 pt-5 pb-4"
-          style={{
-            background: "linear-gradient(165deg, #F4EFE6 0%, #E7F4EC 100%)",
-            minHeight: 320,
-          }}
+          className="flex-1 flex flex-col rounded-[20px] px-5 pt-5 pb-4 [background-image:linear-gradient(165deg,_var(--muted)_0%,_var(--accent)_100%)]! [min-height:320px]!"
           data-testid="wordmap-fullview-card"
         >
           {/* 목표 제목 */}
-          <p
-            className="font-extrabold text-center"
-            style={{ fontSize: 15, letterSpacing: "-0.2px", color: "#16140F" }}
-          >
+          <p className="font-extrabold text-center [font-size:15px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
             {displayTitle}
           </p>
 
           {/* 응원자 수 */}
-          <p
-            className="text-center mt-1 mb-3"
-            style={{ fontSize: 11, color: "#6F6A60" }}
-          >
+          <p className="text-center mt-1 mb-3 [font-size:11px]! [color:var(--muted-foreground)]!">
             {cheerCount != null && cheerCount > 0
               ? `${cheerCount}명이 조용히 응원했어요`
               : "응원이 아직 없어요 — 첫 번째를 기다리고 있어요"}
@@ -130,20 +115,14 @@ export default async function WordmapFullViewPage({ params }: Props) {
           </div>
 
           {/* 워터마크 */}
-          <p
-            className="text-right font-extrabold mt-2"
-            style={{ fontSize: 10, color: "#14613A", opacity: 0.8 }}
-          >
+          <p className="text-right font-extrabold mt-2 [font-size:10px]! [color:var(--accent-foreground)]! [opacity:0.8]!">
             해낼게.
           </p>
         </div>
       </div>
 
       {/* 공유 아이콘 바 */}
-      <div
-        className="px-[22px] pb-[max(28px,env(safe-area-inset-bottom,28px))]"
-        style={{ paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))" }}
-      >
+      <div className="px-[22px] pb-[max(28px,env(safe-area-inset-bottom,28px))] pb-[max(28px,_env(safe-area-inset-bottom,_28px))]!">
         <WordmapShareIcons
           goalId={goalIdNum}
           goalSlug={goal.slug}

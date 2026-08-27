@@ -9,9 +9,9 @@ import { Clover } from "lucide-react";
 import { DdayChip, StatusChip } from "./DdayChip";
 
 export interface GoalCardProps {
-  title: string;          // "나 편입 평점 4.0"
-  reason: string | null;  // 왜(이유)
-  dueDate: string;        // ISO date
+  title: string; // "나 편입 평점 4.0"
+  reason: string | null; // 왜(이유)
+  dueDate: string; // ISO date
   status: "ACTIVE" | "CLOSED" | "DELETED";
   /** 목표 소유자 닉네임 */
   nickname?: string | null;
@@ -27,20 +27,14 @@ function OwnerAvatar({
   profileImageUrl?: string | null;
 }) {
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
-  const showImage = Boolean(profileImageUrl && failedImageUrl !== profileImageUrl);
+  const showImage = Boolean(
+    profileImageUrl && failedImageUrl !== profileImageUrl,
+  );
   const initial = nickname ? Array.from(nickname)[0] : null;
 
   return (
     <div
-      className="flex-shrink-0 flex items-center justify-center rounded-full text-base font-bold"
-      style={{
-        width: 56,
-        height: 56,
-        background: "#E7F4EC",
-        boxShadow: "0 0 0 3px #fff, 0 0 0 4px #E7F4EC",
-        color: "#14613A", // --clover-ink
-        overflow: "hidden",
-      }}
+      className="flex-shrink-0 flex items-center justify-center rounded-full text-base font-bold [width:56px]! [height:56px]! [background-color:var(--accent)]! [box-shadow:0_0_0_3px_var(--card),_0_0_0_4px_var(--accent)]! [color:var(--accent-foreground)]! [overflow:hidden]!"
       aria-hidden="true"
       data-testid="goal-owner-avatar"
     >
@@ -57,7 +51,11 @@ function OwnerAvatar({
       ) : initial ? (
         initial
       ) : (
-        <Clover size={24} strokeWidth={1.8} data-testid="goal-owner-avatar-clover" />
+        <Clover
+          size={24}
+          strokeWidth={1.8}
+          data-testid="goal-owner-avatar-clover"
+        />
       )}
     </div>
   );
@@ -84,14 +82,14 @@ export function GoalCard({
         />
         <div>
           <p
-            className="text-[15px] font-extrabold leading-snug"
-            style={{ color: "#16140F" }} // --ink
+            className="text-[15px] font-extrabold leading-snug [color:var(--foreground)]!"
+            // --ink
           >
             {displayName}
           </p>
           <p
-            className="text-[12.5px] mt-0.5"
-            style={{ color: "#9C968B" }} // --faint
+            className="text-[12.5px] mt-0.5 [color:var(--faint)]!"
+            // --faint
           >
             해낼게 목표
           </p>
@@ -100,17 +98,10 @@ export function GoalCard({
 
       {/* 목표 제목 */}
       <h1
-        className="font-black leading-tight mb-3"
-        style={{
-          fontSize: 27,
-          letterSpacing: "-0.8px",
-          lineHeight: 1.28,
-          color: "#16140F",
-        }}
+        className="font-black leading-tight mb-3 [font-size:27px]! [letter-spacing:-0.8px]! [line-height:1.28]! [color:var(--foreground)]!"
         data-testid="goal-title"
       >
-        {title}{" "}
-        <span style={{ color: "#1F9E5A" }}>해낼게</span>
+        {title} <span className="[color:var(--clover-bright)]!">해낼게</span>
       </h1>
 
       {/* 칩 */}
@@ -121,23 +112,14 @@ export function GoalCard({
 
       {/* 왜 */}
       {reason && (
-        <div
-          className="rounded-[15px] p-4 mb-5"
-          style={{
-            background: "#FFFFFF",
-            border: "1px solid #E8E4DC",
-          }}
-        >
+        <div className="rounded-[15px] p-4 mb-5 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
           <p
-            className="text-[11px] font-extrabold mb-1.5 tracking-wide"
-            style={{ color: "#14613A" }} // --clover-ink
+            className="text-[11px] font-extrabold mb-1.5 tracking-wide [color:var(--accent-foreground)]!"
+            // --clover-ink
           >
             WHY
           </p>
-          <p
-            className="text-[14px] leading-relaxed"
-            style={{ color: "#4a4640" }}
-          >
+          <p className="text-[14px] leading-relaxed [color:#4a4640]!">
             {reason}
           </p>
         </div>

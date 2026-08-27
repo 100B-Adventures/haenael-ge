@@ -17,7 +17,10 @@ import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
 import { SplitBalanceCard } from "@/components/goal/SplitBalanceCard";
 import { type CashoutRecord } from "@/lib/cashout";
 import { CheerList, type ReceiverCheer } from "@/components/receiver/CheerList";
-import { ReceiverPageShell, ReceiverTopBar } from "@/components/receiver/ReceiverShell";
+import {
+  ReceiverPageShell,
+  ReceiverTopBar,
+} from "@/components/receiver/ReceiverShell";
 
 // ─── 페이지 ───────────────────────────────────────────────────────────────────
 
@@ -25,7 +28,8 @@ type ReceiverHomePageProps = {
   searchParams?: Promise<{ q?: string | string[] }>;
 };
 
-const CHEER_SELECT = "id, display_name, is_anonymous, message, clover_amount, created_at";
+const CHEER_SELECT =
+  "id, display_name, is_anonymous, message, clover_amount, created_at";
 const CHEER_RESULT_LIMIT = 20;
 const WORDMAP_PREVIEW_LIMIT = 6;
 
@@ -39,7 +43,9 @@ function normalizeCheerSearch(rawQuery: string | string[] | undefined) {
     .slice(0, 80);
 }
 
-export default async function ReceiverHomePage({ searchParams }: ReceiverHomePageProps = {}) {
+export default async function ReceiverHomePage({
+  searchParams,
+}: ReceiverHomePageProps = {}) {
   const supabase = await createServerSupabaseClient();
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const cheerSearchQuery = normalizeCheerSearch(resolvedSearchParams?.q);
@@ -82,7 +88,9 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
     "clover_eligibility",
     { p_member_id: user.id },
   );
-  const eligibility = Array.isArray(eligibilityRaw) ? eligibilityRaw[0] : eligibilityRaw;
+  const eligibility = Array.isArray(eligibilityRaw)
+    ? eligibilityRaw[0]
+    : eligibilityRaw;
   // 컨트롤러 3차 리뷰 MINOR: 조회가 실패해도 여기서 그냥 0으로 떨어지면 "🍀 0개"가 정상
   // 상태처럼 보인다(DESIGN.md §6 상태 가시성: 침묵 금지 위반). balanceLoadFailed를 화면이
   // 직접 분기해서 실패를 실패로 그린다.
@@ -94,9 +102,13 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
 
   // 수동환전 계약 §0-1-7: 홈은 진행 중 1건 또는 최근 종결 1건을 상태 RPC로 읽는다.
   // account_no_enc는 RPC 반환형에 없어 브라우저/RSC 경계로 넘어오지 않는다.
-  const { data: cashoutStatusRaw } = await supabase.rpc("my_cashout_status" as never);
-  const cashoutStatus = ((((cashoutStatusRaw ?? []) as unknown) as CashoutRecord[])[0]) ?? null;
-  const pendingCashout = cashoutStatus?.status === "REQUESTED" ? cashoutStatus : null;
+  const { data: cashoutStatusRaw } = await supabase.rpc(
+    "my_cashout_status" as never,
+  );
+  const cashoutStatus =
+    ((cashoutStatusRaw ?? []) as unknown as CashoutRecord[])[0] ?? null;
+  const pendingCashout =
+    cashoutStatus?.status === "REQUESTED" ? cashoutStatus : null;
 
   // cheer_select_goal_owner: 응원 목록 (CONFIRMED + not deleted, 최근 20개).
   // DESIGN.md v2.0.0 §6.1: 첫 8개 뒤 같은 자리에서 20개까지 펼치고,
@@ -104,17 +116,19 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
   // DESIGN.md §6-(b′): 본인 한정 clover_amount 노출. goal.id는 위에서 member_id=user.id로
   // 스코프된 본인 목표이고, RLS cheer_select_goal_owner도 goal.member_id=auth.uid()만 허용 —
   // 이중 스코프로 남의 목표 cheer 금액이 섞일 수 없다.
-  const ownerCheerQuery = () => supabase
-    .from("cheer")
-    .select(CHEER_SELECT, { count: "exact" })
-    .eq("goal_id", goal.id)
-    .eq("status", "CONFIRMED")
-    .is("deleted_at", null);
+  const ownerCheerQuery = () =>
+    supabase
+      .from("cheer")
+      .select(CHEER_SELECT, { count: "exact" })
+      .eq("goal_id", goal.id)
+      .eq("status", "CONFIRMED")
+      .is("deleted_at", null);
 
   const recentCheerResult = await ownerCheerQuery()
     .order("created_at", { ascending: false }) // 🔒 시간순 고정, 금액순 정렬/랭킹 금지
     .limit(CHEER_RESULT_LIMIT);
-  const cheerCount = recentCheerResult.count ?? recentCheerResult.data?.length ?? 0;
+  const cheerCount =
+    recentCheerResult.count ?? recentCheerResult.data?.length ?? 0;
 
   let cheers = (recentCheerResult.data ?? []) as ReceiverCheer[];
   if (cheerSearchQuery) {
@@ -133,11 +147,16 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
         .limit(CHEER_RESULT_LIMIT),
     ]);
     const uniqueMatches = new Map<number, ReceiverCheer>();
-    [...(nameMatches.data ?? []), ...(messageMatches.data ?? [])].forEach((cheer) => {
-      uniqueMatches.set(cheer.id, cheer as ReceiverCheer);
-    });
+    [...(nameMatches.data ?? []), ...(messageMatches.data ?? [])].forEach(
+      (cheer) => {
+        uniqueMatches.set(cheer.id, cheer as ReceiverCheer);
+      },
+    );
     cheers = Array.from(uniqueMatches.values())
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )
       .slice(0, CHEER_RESULT_LIMIT);
   }
 
@@ -146,7 +165,9 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
     p_goal_id: goal.id,
   });
 
-  const previewWords: Array<{ word: string; word_count: number }> = (wordmapRaw ?? [])
+  const previewWords: Array<{ word: string; word_count: number }> = (
+    wordmapRaw ?? []
+  )
     .slice(0, WORDMAP_PREVIEW_LIMIT)
     .map((w: { word: string; word_count: number }) => ({
       word: w.word,
@@ -187,7 +208,9 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
           <div className="flex gap-2 mb-4">
             <DdayChip dueDate={goal.due_date} />
             {goal.status !== "ACTIVE" && (
-              <StatusChip status={goal.status as "ACTIVE" | "CLOSED" | "DELETED"} />
+              <StatusChip
+                status={goal.status as "ACTIVE" | "CLOSED" | "DELETED"}
+              />
             )}
           </div>
         )}
@@ -215,9 +238,15 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
         </Link>
 
         {/* 클로버 잔액 — 환전 잠금(A안) 분할 표시. DESIGN.md §6-(d) · §4 SplitBalanceCard */}
-        <div className="mb-3 overflow-hidden rounded-md border border-border bg-card p-4" data-testid="clover-balance-card">
+        <div
+          className="mb-3 overflow-hidden rounded-md border border-border bg-card p-4"
+          data-testid="clover-balance-card"
+        >
           {balanceLoadFailed ? (
-            <p className="text-xs text-danger-ink" data-testid="clover-balance-error">
+            <p
+              className="text-xs text-danger-ink"
+              data-testid="clover-balance-error"
+            >
               🍀 잔액을 불러오지 못했어요. 새로고침 해주세요.
             </p>
           ) : (
@@ -238,11 +267,19 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
                     ? "bg-amber-soft text-amber-ink"
                     : "bg-primary text-primary-foreground"
                 } ${pendingCashout || reachedThreshold ? "opacity-100" : "opacity-60"}`}
-                data-testid={pendingCashout ? "cashout-button-pending" : reachedThreshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
+                data-testid={
+                  pendingCashout
+                    ? "cashout-button-pending"
+                    : reachedThreshold
+                      ? "cashout-button-enabled"
+                      : "cashout-button-belowthreshold"
+                }
               >
                 <span>{pendingCashout ? "진행중" : "환전"}</span>
                 {pendingCashout && (
-                  <small className="text-[length:var(--text-meta-micro)] font-bold opacity-85">상태 보기</small>
+                  <small className="text-[length:var(--text-meta-micro)]! font-bold opacity-85">
+                    상태 보기
+                  </small>
                 )}
               </Link>
             </div>
@@ -250,8 +287,15 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
         </div>
 
         {cashoutStatus && (
-          <Link href="/cashout/history" className="mb-3 flex items-center justify-between rounded-md border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground" data-testid="cashout-history-link">
-            <span>환전 내역</span><span className="text-[length:var(--text-label-small)] font-medium text-[var(--faint)]">최근 #{cashoutStatus.id} ›</span>
+          <Link
+            href="/cashout/history"
+            className="mb-3 flex items-center justify-between rounded-md border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground"
+            data-testid="cashout-history-link"
+          >
+            <span>환전 내역</span>
+            <span className="text-[length:var(--text-label-small)]! font-medium text-[var(--faint)]">
+              최근 #{cashoutStatus.id} ›
+            </span>
           </Link>
         )}
 
@@ -261,13 +305,20 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
         </div>
 
         {/* 응원자 목록 (이름/익명 + 본인 한정 클로버 개수, ₩ 환산 X) */}
-        <CheerList cheers={cheers} totalCount={cheerCount} searchQuery={cheerSearchQuery} />
+        <CheerList
+          cheers={cheers}
+          totalCount={cheerCount}
+          searchQuery={cheerSearchQuery}
+        />
 
         {/* 워드맵 미니 상한. 승인 v3.7처럼 응원 목록 다음에 6개와 초과 수를 함께 둔다. */}
         {previewWords.length > 0 && (
-          <div className="mb-4 overflow-hidden rounded-md border border-border bg-card leading-relaxed" data-testid="wordmap-mini-preview">
+          <div
+            className="mb-4 overflow-hidden rounded-md border border-border bg-card leading-relaxed"
+            data-testid="wordmap-mini-preview"
+          >
             <div className="px-4 py-4">
-              <p className="mb-2 text-[length:var(--text-label-small)] font-bold text-muted-foreground">
+              <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">
                 워드맵 과다 데이터
               </p>
               <div className="flex flex-wrap gap-2">
@@ -276,7 +327,7 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
                   return (
                     <span
                       key={w.word}
-                      className={`inline-block max-w-full truncate rounded-lg border border-primary bg-accent px-3 py-2 text-[length:var(--text-label-small)] text-accent-foreground ${emphasized ? "font-extrabold" : "font-bold"}`}
+                      className={`inline-block max-w-full truncate rounded-lg border border-primary bg-accent px-3 py-2 text-[length:var(--text-label-small)]! text-accent-foreground ${emphasized ? "font-extrabold" : "font-bold"}`}
                       title={w.word}
                     >
                       {w.word}
@@ -286,8 +337,15 @@ export default async function ReceiverHomePage({ searchParams }: ReceiverHomePag
               </div>
             </div>
             {wordmapTotal > WORDMAP_PREVIEW_LIMIT && (
-              <p className="border-t border-border px-4 py-3 text-[length:var(--text-label-small)] text-muted-foreground" data-testid="wordmap-overflow-summary">
-                <strong className="text-accent-foreground">{WORDMAP_PREVIEW_LIMIT}개 표시</strong> · {wordmapTotal - WORDMAP_PREVIEW_LIMIT}개는 전체 워드맵에서 확인
+              <p
+                className="border-t border-border px-4 py-3 text-[length:var(--text-label-small)]! text-muted-foreground"
+                data-testid="wordmap-overflow-summary"
+              >
+                <strong className="text-accent-foreground">
+                  {WORDMAP_PREVIEW_LIMIT}개 표시
+                </strong>{" "}
+                · {wordmapTotal - WORDMAP_PREVIEW_LIMIT}개는 전체 워드맵에서
+                확인
               </p>
             )}
           </div>

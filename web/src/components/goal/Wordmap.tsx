@@ -69,12 +69,7 @@ function EmptyWordmap({ ownerName }: { ownerName?: string }) {
   const name = ownerName ?? "이 목표";
   return (
     <div
-      className="flex flex-col items-center justify-center rounded-[18px] py-8 px-5 text-center"
-      style={{
-        border: "1.5px dashed #c3d6c9",
-        background: "#fff",
-        minHeight: 160,
-      }}
+      className="flex flex-col items-center justify-center rounded-[18px] py-8 px-5 text-center [border:1.5px_dashed_#c3d6c9]! [background-color:var(--card)]! [min-height:160px]!"
       data-testid="wordmap-empty"
     >
       {/* 클로버 아이콘 */}
@@ -88,13 +83,16 @@ function EmptyWordmap({ ownerName }: { ownerName?: string }) {
       >
         <path d="M12 12c-1.2-3.6-6-4.8-7.2-1.2s2.4 6 7.2 1.2zm0 0c1.2-3.6 6-4.8 7.2-1.2s-2.4 6-7.2 1.2zm0 0c-3.6 1.2-4.8 6-1.2 7.2s6-2.4 1.2-7.2zm0 0c3.6 1.2 4.8 6 1.2 7.2s-6-2.4-1.2-7.2z" />
       </svg>
-      <p className="text-[16px] font-extrabold mb-1.5" style={{ color: "#16140F" }}>
+      <p className="text-[16px] font-extrabold mb-1.5 [color:var(--foreground)]!">
         아직 아무도 없어요
       </p>
-      <p className="text-[12.5px] leading-relaxed" style={{ color: "#6F6A60" }}>
-        당신이 <strong style={{ color: "#14613A" }}>{name}의 첫 응원</strong>이에요.
-        <br />
-        한 마디면 이 자리가 채워지기 시작해요.
+      <p className="text-[12.5px] leading-relaxed [color:var(--muted-foreground)]!">
+        당신이{" "}
+        <strong className="[color:var(--accent-foreground)]!">
+          {name}의 첫 응원
+        </strong>
+        이에요.
+        <br />한 마디면 이 자리가 채워지기 시작해요.
       </p>
     </div>
   );
@@ -116,12 +114,7 @@ export function Wordmap({ words, ownerName }: WordmapProps) {
 
   return (
     <div
-      className="flex min-h-[200px] w-full flex-wrap content-center justify-center gap-x-3 gap-y-2.5 rounded-[18px] px-4 py-5"
-      style={{
-        // DESIGN.md §5-5 예외: clover 계열 옅은 radial (장식적 남발 아님)
-        background:
-          "radial-gradient(90% 90% at 50% 45%, #E7F4EC, #EEF6F0 72%, transparent)",
-      }}
+      className="flex min-h-[200px] w-full flex-wrap content-center justify-center gap-x-3 gap-y-2.5 rounded-[18px] px-4 py-5 [background-image:radial-gradient(90%_90%_at_50%_45%,_var(--accent),_#EEF6F0_72%,_transparent)]!"
       data-testid="wordmap"
       role="group"
       aria-label={`응원 메시지 워드맵, 전체 ${normalizedWords.length}개 중 ${visibleWords.length}개 표시`}
@@ -137,14 +130,8 @@ export function Wordmap({ words, ownerName }: WordmapProps) {
         return (
           <span
             key={item.word}
-            className="inline-flex min-w-0 max-w-full select-none whitespace-normal text-center"
-            style={{
-              maxInlineSize: "100%",
-              minInlineSize: 0,
-              overflowWrap: "anywhere",
-              lineHeight: 1.35,
-              ...TIER_STYLE[tier],
-            }}
+            className="inline-flex min-w-0 max-w-full select-none whitespace-normal text-center [max-inline-size:100%]! [min-inline-size:0]! [overflow-wrap:anywhere]! [line-height:1.35]!"
+            style={{ ...TIER_STYLE[tier] }}
             data-wordmap-tier={tier}
           >
             {item.word}

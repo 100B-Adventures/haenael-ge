@@ -16,14 +16,10 @@ function AvatarStack({ count }: { count: number }) {
       {Array.from({ length: visibleCount }).map((_, i) => (
         <span
           key={i}
-          className="rounded-full border-2"
+          className="rounded-full border-2 [width:26px]! [height:26px]! [border-color:var(--background)]! [display:inline-block]!"
           style={{
-            width: 26,
-            height: 26,
             marginLeft: i === 0 ? 0 : -8,
-            background: i % 3 === 1 ? "#E4E0D8" : "#cfe0d6", // 일부 익명
-            borderColor: "#FBFAF7", // --bg
-            display: "inline-block",
+            background: i % 3 === 1 ? "#E4E0D8" : "#cfe0d6",
           }}
         />
       ))}
@@ -35,16 +31,13 @@ export function CheerCount({ count }: CheerCountProps) {
   if (count === 0) return null;
 
   return (
-    <div
-      className="flex items-center gap-2.5 mb-3"
-      data-testid="cheer-count"
-    >
+    <div className="flex items-center gap-2.5 mb-3" data-testid="cheer-count">
       <AvatarStack count={count} />
       <p
-        className="text-[12.5px] font-semibold"
-        style={{ color: "#6F6A60" }} // --muted
+        className="text-[12.5px] font-semibold [color:var(--muted-foreground)]!"
+        // --muted
       >
-        <strong style={{ color: "#16140F", fontWeight: 700 }}>
+        <strong className="[color:var(--foreground)]! [font-weight:700]!">
           {count.toLocaleString("ko-KR")}명
         </strong>
         이 조용히 응원했어요

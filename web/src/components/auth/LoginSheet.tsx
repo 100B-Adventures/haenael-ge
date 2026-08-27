@@ -54,8 +54,13 @@ function buildKakaoStartUrl(redirectAfterLogin: string): string {
 // exchangeCodeForSession 처리)을 지정해 세션을 확립한다.
 
 /** redirectAfterLogin(내부 경로)을 /auth/callback?next=... 절대 URL로 인코딩 */
-export function buildOAuthRedirectTo(origin: string, redirectAfterLogin: string): string {
-  const nextPath = isSafeRedirectPath(redirectAfterLogin) ? redirectAfterLogin : "/onboarding";
+export function buildOAuthRedirectTo(
+  origin: string,
+  redirectAfterLogin: string,
+): string {
+  const nextPath = isSafeRedirectPath(redirectAfterLogin)
+    ? redirectAfterLogin
+    : "/onboarding";
   return `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
 }
 
@@ -132,34 +137,21 @@ export function LoginSheet({
     // 오버레이
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-end justify-center"
+      className="fixed inset-0 z-50 flex items-end justify-center [background-color:rgba(22,_20,_15,_0.48)]!"
       onClick={handleOverlayClick}
       aria-modal="true"
       role="dialog"
       aria-label="로그인"
       data-testid="login-sheet-overlay"
-      style={{ backgroundColor: "rgba(22, 20, 15, 0.48)" }}
     >
       {/* 바텀시트 패널 */}
       <div
-        className="w-full max-w-md bg-white flex flex-col gap-0 animate-in slide-in-from-bottom-4 duration-200"
-        style={{
-          borderTopLeftRadius: 20, // DESIGN.md §3.4 lg=20
-          borderTopRightRadius: 20,
-          paddingBottom: "env(safe-area-inset-bottom, 24px)",
-        }}
+        className="w-full max-w-md bg-white flex flex-col gap-0 animate-in slide-in-from-bottom-4 duration-200 rounded-tl-[20px]! rounded-tr-[20px]! pb-[env(safe-area-inset-bottom,_24px)]!"
         data-testid="login-sheet-panel"
       >
         {/* 핸들 */}
         <div className="flex justify-center pt-3 pb-2">
-          <div
-            className="rounded-full"
-            style={{
-              width: 36,
-              height: 4,
-              backgroundColor: "#E8E4DC", // --line token
-            }}
-          />
+          <div className="rounded-full [width:36px]! [height:4px]! [background-color:var(--border)]!" />
         </div>
 
         {/* 본문 */}
@@ -167,21 +159,20 @@ export function LoginSheet({
           {/* 안내 메시지 */}
           <div className="flex flex-col gap-1.5">
             <p
-              className="font-bold text-lg leading-snug"
-              style={{ color: "#16140F", letterSpacing: "-0.3px" }} // --ink
+              className="font-bold text-lg leading-snug [color:var(--foreground)]! [letter-spacing:-0.3px]!"
+              // --ink
             >
               저장하려면 로그인이 필요해요
             </p>
 
             {goalTitle ? (
               <p
-                className="text-sm leading-relaxed"
-                style={{ color: "#6F6A60" }} // --muted
+                className="text-sm leading-relaxed [color:var(--muted-foreground)]!"
+                // --muted
               >
                 작성 중인{" "}
                 <span
-                  className="font-semibold"
-                  style={{ color: "#16140F" }}
+                  className="font-semibold [color:var(--foreground)]!"
                   data-testid="login-sheet-goal-title"
                 >
                   &ldquo;{goalTitle}&rdquo;
@@ -189,10 +180,7 @@ export function LoginSheet({
                 은(는) 로그인 후에도 그대로 있어요.
               </p>
             ) : (
-              <p
-                className="text-sm leading-relaxed"
-                style={{ color: "#6F6A60" }}
-              >
+              <p className="text-sm leading-relaxed [color:var(--muted-foreground)]!">
                 로그인하면 목표를 저장하고 나만의 링크를 받을 수 있어요.
               </p>
             )}
@@ -204,13 +192,7 @@ export function LoginSheet({
             <button
               type="button"
               onClick={handleKakaoLogin}
-              className="w-full flex items-center justify-center gap-2.5 rounded-xl font-semibold text-sm h-13 transition-opacity active:opacity-80"
-              style={{
-                backgroundColor: "#FEE500", // Kakao yellow
-                color: "#000000",
-                height: 52,
-                borderRadius: 14, // DESIGN.md §3.4 md=14
-              }}
+              className="w-full flex items-center justify-center gap-2.5 rounded-xl font-semibold text-sm h-13 transition-opacity active:opacity-80 [background-color:#FEE500]! [color:#000000]! [height:52px]! [border-radius:14px]!"
               data-testid="kakao-login-button"
               aria-label="카카오로 로그인"
             >
@@ -225,12 +207,12 @@ export function LoginSheet({
               <>
                 {/* 구분선 */}
                 <div
-                  className="flex items-center gap-3"
-                  style={{ color: "#9C968B" }} // --faint
+                  className="flex items-center gap-3 [color:var(--faint)]!"
+                  // --faint
                 >
-                  <div className="flex-1 h-px" style={{ backgroundColor: "#E8E4DC" }} />
+                  <div className="flex-1 h-px [background-color:var(--border)]!" />
                   <span className="text-xs">또는</span>
-                  <div className="flex-1 h-px" style={{ backgroundColor: "#E8E4DC" }} />
+                  <div className="flex-1 h-px [background-color:var(--border)]!" />
                 </div>
 
                 {/* 구글 — secondary */}
@@ -244,8 +226,8 @@ export function LoginSheet({
 
           {/* 약관 고지 */}
           <p
-            className="text-center text-xs leading-relaxed"
-            style={{ color: "#9C968B" }} // --faint
+            className="text-center text-xs leading-relaxed [color:var(--faint)]!"
+            // --faint
           >
             로그인 시{" "}
             <a
@@ -296,7 +278,11 @@ function KakaoIcon() {
 
 // export: 카카오 단일 통일로 렌더에서는 숨겨졌지만(SHOW_SOCIAL_LOGIN),
 // 로직 자체는 보존 — 테스트가 이 컴포넌트를 직접 렌더해 회귀를 검증한다.
-export function GoogleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: string }) {
+export function GoogleLoginButton({
+  redirectAfterLogin,
+}: {
+  redirectAfterLogin: string;
+}) {
   const [pending, setPending] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -304,7 +290,10 @@ export function GoogleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: 
     setPending(true);
     try {
       const supabase = createClient();
-      const redirectTo = buildOAuthRedirectTo(window.location.origin, redirectAfterLogin);
+      const redirectTo = buildOAuthRedirectTo(
+        window.location.origin,
+        redirectAfterLogin,
+      );
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo },
@@ -330,14 +319,7 @@ export function GoogleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: 
       type="button"
       onClick={handleGoogleLogin}
       disabled={pending}
-      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80 disabled:opacity-60"
-      style={{
-        height: 48,
-        borderRadius: 14,
-        backgroundColor: "#FFFFFF",
-        color: "#16140F",
-        border: "1px solid #E8E4DC",
-      }}
+      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80 disabled:opacity-60 [height:48px]! [border-radius:14px]! [background-color:var(--card)]! [color:var(--foreground)]! [border:1px_solid_var(--border)]!"
       data-testid="google-login-button"
       aria-label="구글로 로그인"
     >
@@ -347,7 +329,11 @@ export function GoogleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: 
   );
 }
 
-export function AppleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: string }) {
+export function AppleLoginButton({
+  redirectAfterLogin,
+}: {
+  redirectAfterLogin: string;
+}) {
   const [pending, setPending] = useState(false);
 
   const handleAppleLogin = async () => {
@@ -355,7 +341,10 @@ export function AppleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: s
     setPending(true);
     try {
       const supabase = createClient();
-      const redirectTo = buildOAuthRedirectTo(window.location.origin, redirectAfterLogin);
+      const redirectTo = buildOAuthRedirectTo(
+        window.location.origin,
+        redirectAfterLogin,
+      );
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "apple",
         options: { redirectTo },
@@ -380,13 +369,7 @@ export function AppleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: s
       type="button"
       onClick={handleAppleLogin}
       disabled={pending}
-      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80 disabled:opacity-60"
-      style={{
-        height: 48,
-        borderRadius: 14,
-        backgroundColor: "#16140F",
-        color: "#FFFFFF",
-      }}
+      className="w-full flex items-center justify-center gap-2.5 rounded-xl font-medium text-sm transition-opacity active:opacity-80 disabled:opacity-60 [height:48px]! [border-radius:14px]! [background-color:var(--foreground)]! [color:var(--card)]!"
       data-testid="apple-login-button"
       aria-label="애플로 로그인"
     >
@@ -398,7 +381,13 @@ export function AppleLoginButton({ redirectAfterLogin }: { redirectAfterLogin: s
 
 function GoogleIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2086 1.125-.8427 2.0782-1.7963 2.7164v2.2581h2.9087C16.6582 14.0127 17.64 11.8 17.64 9.2045z"
         fill="#4285F4"
@@ -421,7 +410,13 @@ function GoogleIcon() {
 
 function AppleIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <path d="M12.3258 0C11.2567 0.0671875 9.99986 0.740625 9.25736 1.63437C8.58236 2.45156 8.03548 3.66875 8.27736 4.85312C9.44173 4.88906 10.6511 4.19531 11.3705 3.28125C12.042 2.43125 12.5417 1.22656 12.3258 0Z" />
       <path d="M16.1548 6.06992C15.2235 4.97617 13.9251 4.33867 12.6938 4.33867C11.0579 4.33867 10.3704 5.10742 9.22663 5.10742C8.04788 5.10742 7.15976 4.34102 5.74413 4.34102C4.36226 4.34102 2.88726 5.21133 1.95288 6.67383C0.621634 8.76992 0.848509 12.7137 3.00163 16.0387C3.80163 17.2809 4.87663 18.6762 6.28913 18.6887C7.54601 18.7012 7.89288 17.9043 9.24413 17.8965C10.5954 17.8887 10.9173 18.7012 12.1704 18.6887C13.5829 18.6762 14.7204 17.1106 15.5204 15.8684C16.0923 14.9965 16.3048 14.5574 16.7548 13.5715C13.5923 12.3293 13.0813 7.7543 16.1548 6.06992Z" />
     </svg>

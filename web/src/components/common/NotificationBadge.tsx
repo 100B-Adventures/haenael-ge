@@ -9,8 +9,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/database.types";
 
-type NotificationRow =
-  Database["public"]["Tables"]["notification"]["Row"];
+type NotificationRow = Database["public"]["Tables"]["notification"]["Row"];
 
 interface NotificationBadgeProps {
   /** 사용하지 않을 때도 언마운트 없이 유지 (홈 헤더 등) */
@@ -109,8 +108,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
         aria-busy="true"
       >
         <span
-          className="text-[22px]"
-          style={{ color: "#B5B0A6" }}
+          className="text-[22px] [color:#B5B0A6]!"
           aria-label="알림 로딩 중"
         >
           🔔
@@ -124,7 +122,9 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
       <button
         type="button"
         className="relative flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        style={{ color: unreadCount > 0 ? "#14613A" : "#B5B0A6" }}
+        style={{
+          color: unreadCount > 0 ? "var(--accent-foreground)" : "#B5B0A6",
+        }}
         onClick={() => {
           setOpen((v) => !v);
           if (!open && unreadCount > 0) markAllRead();
@@ -132,11 +132,12 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
         aria-label={`알림 ${unreadCount > 0 ? `${unreadCount}개 새 알림` : "없음"}`}
         data-testid="notification-badge-button"
       >
-        <span className="text-[22px]" aria-hidden="true">🔔</span>
+        <span className="text-[22px]" aria-hidden="true">
+          🔔
+        </span>
         {unreadCount > 0 && (
           <span
-            className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-[3px] text-[9px] font-bold text-white"
-            style={{ background: "#14613A" }}
+            className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-[3px] text-[9px] font-bold text-white [background-color:var(--accent-foreground)]!"
             aria-hidden="true"
             data-testid="notification-unread-count"
           >
@@ -155,29 +156,18 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
           />
           {/* 드롭다운 */}
           <div
-            className="absolute right-0 z-50 mt-2 w-72 rounded-2xl shadow-xl"
-            style={{
-              background: "#FBFAF7",
-              border: "1px solid #E4E0D8",
-            }}
+            className="absolute right-0 z-50 mt-2 w-72 rounded-2xl shadow-xl [background-color:var(--background)]! [border:1px_solid_#E4E0D8]!"
             role="dialog"
             aria-label="알림 목록"
             data-testid="notification-dropdown"
           >
-            <div
-              className="flex items-center justify-between px-4 py-3"
-              style={{ borderBottom: "1px solid #E4E0D8" }}
-            >
-              <span
-                className="text-[13px] font-semibold"
-                style={{ color: "#16140F" }}
-              >
+            <div className="flex items-center justify-between px-4 py-3 [border-bottom:1px_solid_#E4E0D8]!">
+              <span className="text-[13px] font-semibold [color:var(--foreground)]!">
                 알림
               </span>
               <button
                 type="button"
-                className="text-[11px]"
-                style={{ color: "#A09B93" }}
+                className="text-[11px] [color:#A09B93]!"
                 onClick={() => setOpen(false)}
                 aria-label="알림 닫기"
               >
@@ -187,8 +177,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
 
             {notifications.length === 0 ? (
               <div
-                className="px-4 py-8 text-center text-[13px]"
-                style={{ color: "#A09B93" }}
+                className="px-4 py-8 text-center text-[13px] [color:#A09B93]!"
                 data-testid="notification-empty"
               >
                 아직 알림이 없어요
@@ -200,11 +189,8 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
                     key={n.id}
                     role="button"
                     tabIndex={0}
-                    className="flex cursor-pointer items-start gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset"
-                    style={{
-                      borderBottom: "1px solid #F0EDE8",
-                      background: n.read ? "transparent" : "#F2F8F4",
-                    }}
+                    className="flex cursor-pointer items-start gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset [border-bottom:1px_solid_#F0EDE8]!"
+                    style={{ background: n.read ? "transparent" : "#F2F8F4" }}
                     data-testid="notification-item"
                     onClick={() => handleNotificationClick(n)}
                     onKeyDown={(e) => {
@@ -218,16 +204,10 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
                       🍀
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p
-                        className="text-[13px] font-medium leading-snug"
-                        style={{ color: "#16140F" }}
-                      >
+                      <p className="text-[13px] font-medium leading-snug [color:var(--foreground)]!">
                         {notifText(n)}
                       </p>
-                      <p
-                        className="mt-0.5 text-[11px]"
-                        style={{ color: "#A09B93" }}
-                      >
+                      <p className="mt-0.5 text-[11px] [color:#A09B93]!">
                         {channelBadge(n)} ·{" "}
                         {new Date(n.created_at).toLocaleDateString("ko-KR", {
                           month: "short",
@@ -239,8 +219,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
                     </div>
                     {!n.read && (
                       <span
-                        className="mt-1 h-2 w-2 flex-shrink-0 rounded-full"
-                        style={{ background: "#14613A" }}
+                        className="mt-1 h-2 w-2 flex-shrink-0 rounded-full [background-color:var(--accent-foreground)]!"
                         aria-label="읽지 않음"
                       />
                     )}

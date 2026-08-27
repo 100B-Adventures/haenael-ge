@@ -40,7 +40,11 @@ function getCustomerKey() {
   return next;
 }
 
-export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPaymentButtonProps) {
+export function CheerPaymentButton({
+  goalId,
+  goalTitle,
+  goalSlug,
+}: CheerPaymentButtonProps) {
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
   const [open, setOpen] = useState(false);
   // 클로버 개수(개)가 진실원 — 결제 금액(원)은 항상 cloverAmount * KRW_PER_CLOVER로 파생.
@@ -145,7 +149,11 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
       }
 
       const order = await createOrder();
-      trackEvent("cheer_started", { goal_id: String(goalId), amount: order.amountKrw, currency: "KRW" });
+      trackEvent("cheer_started", {
+        goal_id: String(goalId),
+        amount: order.amountKrw,
+        currency: "KRW",
+      });
       const tossPayments = await loadTossPayments(clientKey);
       const payment = tossPayments.payment({ customerKey: order.customerKey });
       const appUrl = getAppUrl();
@@ -173,14 +181,7 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
     <div>
       <button
         type="button"
-        className="w-full flex items-center justify-center gap-2 rounded-[16px] font-extrabold"
-        style={{
-          padding: "17px",
-          fontSize: 16,
-          background: "#1B8A4F",
-          color: "#fff",
-          letterSpacing: 0,
-        }}
+        className="w-full flex items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]!"
         data-testid="cheer-cta"
         aria-label="조용히 응원 결제하기"
         onClick={openSheet}
@@ -192,29 +193,24 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4"
-          style={{ background: "rgba(22,20,15,0.32)" }}
+          className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4 [background-color:rgba(22,20,15,0.32)]!"
           data-testid="cheer-payment-sheet"
           role="dialog"
           aria-modal="true"
         >
-          <div
-            className="w-full max-w-[430px] rounded-[22px] p-5"
-            style={{ background: "#fff", border: "1px solid #E8E4DC" }}
-          >
+          <div className="w-full max-w-[430px] rounded-[22px] p-5 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[12px] font-extrabold" style={{ color: "#14613A" }}>
+                <p className="text-[12px] font-extrabold [color:var(--accent-foreground)]!">
                   조용한 응원
                 </p>
-                <h2 className="mt-1 text-[19px] font-black" style={{ color: "#16140F" }}>
+                <h2 className="mt-1 text-[19px] font-black [color:var(--foreground)]!">
                   친구의 목표에 클로버를 보냅니다
                 </h2>
               </div>
               <button
                 type="button"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-                style={{ color: "#6F6A60", background: "#F3F0EA" }}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full [color:var(--muted-foreground)]! [background-color:#F3F0EA]!"
                 aria-label="닫기"
                 onClick={closeSheet}
               >
@@ -232,9 +228,13 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
                     type="button"
                     className="flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-[14px] border px-3 py-2.5 text-[15px] font-extrabold"
                     style={{
-                      borderColor: selected ? "#1B8A4F" : "#E8E4DC",
-                      background: selected ? "#E7F4EC" : "#FBFAF7",
-                      color: selected ? "#14613A" : "#4a4640",
+                      borderColor: selected
+                        ? "var(--primary)"
+                        : "var(--border)",
+                      background: selected
+                        ? "var(--accent)"
+                        : "var(--background)",
+                      color: selected ? "var(--accent-foreground)" : "#4a4640",
                     }}
                     data-testid={`cheer-preset-${value}`}
                     onClick={() => selectPreset(value)}
@@ -245,7 +245,11 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
                     </span>
                     <span
                       className="text-[11px] font-semibold"
-                      style={{ color: selected ? "#14613A" : "#9C968B" }}
+                      style={{
+                        color: selected
+                          ? "var(--accent-foreground)"
+                          : "var(--faint)",
+                      }}
                     >
                       {(value * KRW_PER_CLOVER).toLocaleString("ko-KR")}원
                     </span>
@@ -255,22 +259,28 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
             </div>
 
             {/* 직접 입력 — 상한 없음(서버 상한 100,000클로버=1억원까지) */}
-            <label className="mt-3 block text-[13px] font-bold" style={{ color: "#4a4640" }}>
+            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">
               직접 입력 (클로버 개수)
               <div
                 className="mt-1 flex items-center gap-2 rounded-[13px] border px-3 py-2.5"
                 style={{
-                  borderColor: customInput !== "" ? "#1B8A4F" : "#E8E4DC",
-                  background: customInput !== "" ? "#E7F4EC" : "#FBFAF7",
+                  borderColor:
+                    customInput !== "" ? "var(--primary)" : "var(--border)",
+                  background:
+                    customInput !== "" ? "var(--accent)" : "var(--background)",
                 }}
               >
-                <Clover aria-hidden="true" size={16} strokeWidth={2.5} color="#14613A" />
+                <Clover
+                  aria-hidden="true"
+                  size={16}
+                  strokeWidth={2.5}
+                  color="var(--accent-foreground)"
+                />
                 <input
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  className="w-full bg-transparent text-[15px] font-bold outline-none"
-                  style={{ color: "#16140F" }}
+                  className="w-full bg-transparent text-[15px] font-bold outline-none [color:var(--foreground)]!"
                   placeholder="예: 100"
                   maxLength={6}
                   value={customInput}
@@ -278,7 +288,7 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
                   data-testid="cheer-custom-clover-input"
                   aria-label="클로버 개수 직접 입력"
                 />
-                <span className="text-[13px] font-bold" style={{ color: "#6F6A60" }}>
+                <span className="text-[13px] font-bold [color:var(--muted-foreground)]!">
                   클로버
                 </span>
               </div>
@@ -286,27 +296,28 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
 
             {/* 선택 요약: 클로버 개수(주) · 금액(보조) */}
             <p
-              className="mt-3 text-[13px] font-bold"
-              style={{ color: "#14613A" }}
+              className="mt-3 text-[13px] font-bold [color:var(--accent-foreground)]!"
               data-testid="cheer-selected-summary"
             >
-              🍀 {cloverAmount.toLocaleString("ko-KR")}클로버 · {amountKrw.toLocaleString("ko-KR")}원
+              🍀 {cloverAmount.toLocaleString("ko-KR")}클로버 ·{" "}
+              {amountKrw.toLocaleString("ko-KR")}원
             </p>
 
-            <label className="mt-4 block text-[13px] font-bold" style={{ color: "#4a4640" }}>
+            <label className="mt-4 block text-[13px] font-bold [color:#4a4640]!">
               이름
               <input
-                className="mt-1 w-full rounded-[13px] border px-3 py-3 text-[15px]"
-                style={{ borderColor: "#E8E4DC" }}
+                className="mt-1 w-full rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
                 maxLength={30}
                 value={displayName}
                 disabled={isAnonymous}
-                placeholder={isAnonymous ? "익명으로 보낼게요" : "친구에게 보일 이름"}
+                placeholder={
+                  isAnonymous ? "익명으로 보낼게요" : "친구에게 보일 이름"
+                }
                 onChange={(e) => setDisplayName(e.target.value)}
               />
             </label>
 
-            <label className="mt-3 flex items-center gap-2 text-[13px]" style={{ color: "#6F6A60" }}>
+            <label className="mt-3 flex items-center gap-2 text-[13px] [color:var(--muted-foreground)]!">
               <input
                 type="checkbox"
                 checked={isAnonymous}
@@ -315,11 +326,10 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
               익명으로 조용히 응원하기
             </label>
 
-            <label className="mt-3 block text-[13px] font-bold" style={{ color: "#4a4640" }}>
+            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">
               한 줄 응원
               <textarea
-                className="mt-1 w-full resize-none rounded-[13px] border px-3 py-3 text-[15px]"
-                style={{ borderColor: "#E8E4DC" }}
+                className="mt-1 w-full resize-none rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
                 maxLength={140}
                 rows={3}
                 value={message}
@@ -329,18 +339,15 @@ export function CheerPaymentButton({ goalId, goalTitle, goalSlug }: CheerPayment
             </label>
 
             {error && (
-              <p className="mt-3 text-[13px] font-semibold" style={{ color: "#B3261E" }}>
+              <p className="mt-3 text-[13px] font-semibold [color:#B3261E]!">
                 {error}
               </p>
             )}
 
             <button
               type="button"
-              className="mt-4 w-full rounded-[16px] py-4 text-[16px] font-extrabold"
-              style={{
-                background: canSubmit ? "#1B8A4F" : "#A8D0BC",
-                color: "#fff",
-              }}
+              className="mt-4 w-full rounded-[16px] py-4 text-[16px] font-extrabold [color:var(--card)]!"
+              style={{ background: canSubmit ? "var(--primary)" : "#A8D0BC" }}
               disabled={!canSubmit}
               data-testid="cheer-payment-submit"
               onClick={handlePayment}

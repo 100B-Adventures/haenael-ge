@@ -35,8 +35,7 @@ export function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={pending}
-      className="font-semibold disabled:opacity-50"
-      style={{ fontSize: 11, color: "#9C968B" }}
+      className="font-semibold disabled:opacity-50 [font-size:11px]! [color:var(--faint)]!"
       data-testid="logout-button"
       aria-label="로그아웃"
     >

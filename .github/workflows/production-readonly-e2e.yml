@@ -1,0 +1,57 @@
+name: Production Read-only E2E
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 21 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-readonly-e2e
+  cancel-in-progress: false
+
+jobs:
+  production-readonly:
+    name: 운영 공개·인증 읽기 경로
+    runs-on: ubuntu-latest
+    environment: production-readonly-qa
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - name: Chromium 설치
+        run: npx playwright install --with-deps chromium
+
+      - name: 공개 운영 경로 3건
+        run: npm run qa:verify-production
+
+      - name: 인증 운영 경로 읽기 전용 E2E
+        run: npm run qa:verify-production:auth
+        env:
+          QA_PRODUCTION_SUPABASE_URL: ${{ secrets.QA_PRODUCTION_SUPABASE_URL }}
+          QA_PRODUCTION_SUPABASE_ANON_KEY: ${{ secrets.QA_PRODUCTION_SUPABASE_ANON_KEY }}
+          QA_PRODUCTION_EMAIL: ${{ secrets.QA_PRODUCTION_EMAIL }}
+          QA_PRODUCTION_PASSWORD: ${{ secrets.QA_PRODUCTION_PASSWORD }}
+          QA_PRODUCTION_EXPECTED_USER_ID: ${{ secrets.QA_PRODUCTION_EXPECTED_USER_ID }}
+
+      - name: 읽기 전용 화면 증거 보관
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-readonly-e2e-evidence
+          path: web/test-results/**/production-auth-cashout.png
+          if-no-files-found: warn
+          retention-days: 7
