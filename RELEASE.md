@@ -11,7 +11,7 @@ ships:
   prd: 0.4.0        # docs/prd-haenael-ge-v0.4.0.md
   design: 2.0.0     # DESIGN.md
   fdd: 1.2.0        # 수동환전 계좌수집 계약
-  qa: awaiting-approval
+  qa: 1.0.0         # docs/core-cashout-qa-report-v1-gpt-codex.md (2026-08-27 승인)
 changelog: CHANGELOG.md#120
 ```
 
@@ -27,7 +27,18 @@ changelog: CHANGELOG.md#120
 무엇이냐"에 답할 수 없는 상태가 됐다. 하네스 §2.1 위반이다.
 
 8-27 에 반려 사유였던 시안 정합 세 곳을 고쳐 화면으로 확인했고, build 와 QA 를
-승인 대기로 되돌렸다. 정식 승인은 아직이다.
+승인 대기로 되돌렸고, 그날 build 와 QA 가 정식 승인됐다.
+
+8-28 에 남아 있던 design 과 plan 도 승인해 상류 다섯 단계를 전부 닫았다.
+design 의 마지막 잔여였던 안내문구 강조는 코드에 이미 반영돼 있었고,
+plan 의 미결 세 건 중 둘은 사실로 해소됐으며 하나는 앱 출시로 미뤘다.
+근거는 `pipeline-state.core.md` 승인 로그에 있다.
+
+같은 날 이 문서의 존재 이유를 깨뜨리는 결함을 하나 찾았다. 운영이 스스로
+보고하는 버전이 1.0.0 이었다. 이 문서는 1.2.0 이라고 적고 있었으니,
+"지금 운영에 뭐가 올라가 있나"에 대한 답이 두 곳에서 달랐다. Vercel 의
+`NEXT_PUBLIC_APP_VERSION` 이 40일 전 값에 멈춰 있던 것이 원인이고,
+1.2.0 으로 갱신했다.
 
 당시 남아 있던 QA 지적과 그 처리는 이렇다.
 
