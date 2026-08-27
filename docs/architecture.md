@@ -184,6 +184,25 @@ flowchart TD
 
 **이용료와 원천징수는 DB가 계산한다.** 실사용 RPC는 `create_cashout_request` 하나뿐이다(`request_manual_cashout`은 임포터 0건 사망 함수였고, B안 그대로 총량을 즉시 깎는 원장을 남겨 이중 차감 위험이 있어 20260822000000에서 `DROP FUNCTION`됐다 — 컨트롤러 재검증 MAJOR1, 2026-08-21). `create_cashout_request`에서 `이용료 = floor(gross × 10%)`, `부가세 = floor(이용료 × 10%)`, `원천징수 = floor((gross - 이용료 - 부가세) × 3.3%)`를 적용한다. 30,000원의 실수령은 25,819원이다(`20260821000000_cashout_service_fee_10pct.sql`). 이 마이그레이션은 로컬 검증 완료, **운영 DB 미적용** 상태다(`pipeline-state.core.md` 승인 로그 2026-08-21).
 
+## D-2. 시크릿은 어디에 사는가
+
+**값과 목록은 여기 두지 않는다.** 어떤 키가 어디에 왜 있는지는 `wiki/ops/인프라-시크릿-인벤토리.md`
+가 정본이다. 이 문서는 설계를 다루고, 그 문서는 운영 실태를 다룬다.
+
+여기서는 설계상 알아야 할 것만 적는다.
+
+**실행 위치가 둘이라 같은 키가 두 벌 필요하다.** 웹 서버 코드는 Vercel 에서 돌고 Edge Function
+은 Supabase 에서 돈다. 서로의 환경변수를 못 본다. 환전 신청 한 번이 Vercel 에서 시작해 Supabase
+함수를 부르고 그 함수가 다시 데이터베이스에 쓰므로, 각 구간마다 그곳의 키가 필요하다.
+
+**2026-08-25 에 이 구조 때문에 두 번 막혔다.** Vercel 쪽에 `SUPABASE_SERVICE_ROLE_KEY` 가
+없어 환전 신청이 데이터베이스에 닿지도 못했고, `notify` Edge Function 이 받은 토큰을 자기
+환경변수와 문자열로 대조하고 있어 Vercel 에서 부르는 알림이 전부 거부됐다. 후자는 전용
+`NOTIFY_INTERNAL_TOKEN` 방식으로 바꿨다.
+
+**Supabase 키가 네 종류다.** `anon` 과 `service_role` 이 구형이고 `publishable` 과 `secret`
+이 신형이다. 섞어 쓰면 조용히 거부당한다. 구분과 용도는 인벤토리 문서에 있다.
+
 ## E. 배포 단위 3개와 그 함정
 
 이 레포는 한 번의 커밋이 세 곳에 따로 나간다. **커밋 = 배포가 아니다.**
