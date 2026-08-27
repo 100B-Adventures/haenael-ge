@@ -7,7 +7,35 @@ pipeline_version: 1
 controller: claude             # 2026-07-17 user decision: Codex orchestration terminated; Claude owns all further orchestration.
 current_stage: qa   # 2026-08-24 환전 신청 로컬 실여정 QA 착수. 화면·DB 동시 관찰, 반려·금액·최소액·중복·loading·overflow·프로토타입 정합 검증. (구 eng-design) # 2026-08-21 회장 "쭉쭉 진행해 기술설계 개발 QA" + 표현안 A안 확정. design 반영 후 eng-design→build→qa 연속 진행. (구 design) # 2026-08-21 이용료 10% 슬라이스 진행: design(프로토타입 반영) → build(코드) → review → qa 순. (구: 2026-07-23 v2 design 진행 중(마이페이지·프라이버시설정 와이어). 병행: build 재개(7-21~23) 3종 정책링크·소식받기·응원클로버·웰컴·약관 코드·배포 완료(prod 실측 GREEN), 미검증 2건(클로버 개수 UI·로그아웃)·보안결함 1건(cheer_public 필터) 다음 슬라이스로.
 approved_stages: [plan, eng-design, build, qa]   # 플랫 인라인 리스트 — hook이 grep으로 읽는 단일 필드. /approve만 append.
-approved_artifacts: {prd: haenael-ge-v0.3.0, design: DESIGN-v1.6+, wireframes: 10화면-coverage0, fdd: haenael-ge-v0.1.0, eng-design: 6문서-1100줄-매핑갭0, build: build-log-privacy-terms-4차, qa: qa-privacy-terms-launch-ready-with-caveats}   # 게이트 통과 시 핀된 버전.
+approved_artifacts:   # 규약 = ~/.claude/standards/release-and-artifacts.md §1.1. 대시보드가 이걸 읽는다. 실물 없는 라벨 금지.
+  plan:
+    - { path: docs/prd-haenael-ge-v0.4.0.md, version: 0.4.0, status: approved, label: "PRD" }
+    - { path: docs/risks.md, version: unversioned, status: approved, label: "리스크 원장" }
+    - { path: docs/persona.md, version: unversioned, status: approved, label: "페르소나" }
+    - { path: docs/one-thing.md, version: unversioned, status: approved, label: "One Thing" }
+  design:
+    - { path: DESIGN.md, version: 2.0.0, status: approved, label: "디자인 시스템" }
+    - { path: docs/user-flow.md, version: 0.3.0, status: approved, label: "유저플로우" }
+    - { path: scratchpad/cashout-full-journey-v3-opus.html, version: 3.7, status: approved, label: "환전 프로토타입" }
+  eng-design:
+    - { path: docs/fdd-haenael-ge-cashout-clover-lock-v1.0.0-opus5.md, version: 1.0.0, status: approved, label: "FDD 환전 잠금" }
+    - { path: docs/fdd-haenael-ge-v0.1.0.md, version: 0.1.0, status: approved, label: "FDD 기저" }
+    - { path: docs/api-contract.md, version: unversioned, status: approved, label: "API 계약" }
+    - { path: docs/architecture.md, version: unversioned, status: approved, label: "아키텍처" }
+    - { path: docs/design-patterns.md, version: unversioned, status: approved, label: "설계 패턴" }
+    - { path: docs/folder-structure.md, version: unversioned, status: approved, label: "폴더 구조" }
+    - { path: docs/test-plan.md, version: unversioned, status: approved, label: "테스트 계획" }
+  build:
+    - { path: docs/build-log.md, version: unversioned, status: approved, label: "빌드 로그" }
+    - { path: "supabase/migrations/2026082*.sql", version: unversioned, status: approved, label: "환전 마이그레이션" }
+  qa:
+    - { path: docs/qa-tracker.md, version: unversioned, status: approved, label: "QA 트래커" }
+    - { path: docs/core-cashout-qa-report-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "환전 QA 리포트" }
+    - { path: docs/core-cashout-design-conformance-matrix-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "디자인 정합 대조표" }
+    - { path: "qa/contracts/*.json", version: unversioned, status: approved, label: "QA 계약 정의" }
+  ship:
+    - { path: RELEASE.md, version: 1.2.0, status: approved, label: "릴리즈 매니페스트" }
+    - { path: CHANGELOG.md, version: 1.2.0, status: approved, label: "변경 기록" }
 stages:
   plan:       { status: in-progress, artifacts_ok: partial }   # 2026-07-26 REOPENED→v0.4.0: 로그인 확장(카카오+구글) + 알림톡 phone(비즈앱 전환) + 본인인증=환전만 명문화. 회장 결정 3/3 확정. prd-architect 위임 중. (2026-07-21 v0.3.0 승인분은 유효, v0.4.0이 계승)
   design:     { status: awaiting-approval, artifacts_ok: true }   # 2026-08-22 A안(잠금 유지) 반영 완료: 프로토 v3.6 + DESIGN.md v1.12.0(§6-(d) 잔액 표기 규칙 신설·SplitBalanceCard 등록·A안 확정 이력) + user-flow §5.5. **화면 픽셀 대조 일치 판정**(컨트롤러가 모바일 390 실화면 me-390-locked-v5.png와 프로토 v3.6을 좌우 합성 qa-compare-v5.png로 직접 대조). 잔여 경미 1건: 안내문구 볼드 강조 미적용(리뷰 3차 지적과 함께 처리 예정). /approve design 대기. (구 2026-08-21 이용료 10% 반영 완료: 프로토타입 v3.4(회장 지적 3건 반영 — 차감표 1줄화·안내 2블록 분리·.u-side 갭 규칙 승격 5화면) + DESIGN.md v1.10.0 §8 UX 라이팅 신설. verify PASS(Score A−, RUBRIC 24/25), 컨트롤러 모바일 캡처 2장 직접 육안 대조. /approve design 대기. (구 REOPEN 사유: 이용료 10%: 승인 프로토타입 scratchpad/cashout-full-journey-v3-opus.html 541-546행 및 docs/WIREFRAMES/cashout.html 119-120행이 '수수료 미정' 플레이스홀더 — 10% 확정으로 정본이 어긋남. product-designer 위임. (구: 2026-07-22 프로토타입 완성(verify PASS·A-) — 회장 피드백 대기. 갈림길 2건(프라이버시진입·고객센터이메일) 미결. 재open 금지 규칙 적용(이미 1회 open하게 있음)
