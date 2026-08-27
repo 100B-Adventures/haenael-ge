@@ -5,6 +5,19 @@
 > 🔒 스택(2026-07-04): 서버리스 — Next.js/Vercel + Supabase(Postgres/Auth/RLS) + Edge Functions(돈). 테스트 = **Edge Function 로컬(`supabase functions serve`) + stage 배포** + RLS 정책 검증 + Vercel 프리뷰.
 > 레벨: [U]단위 [I]통합 [E]E2E. 우선순위: 🔴돈/규제(무관용) · 🟠콜드스타트 · 🟡일반.
 
+## 2026-08-27 운영 인증 읽기 전용 E2E 요구 추적표
+
+| 요청번호 | 요구 | 테스트번호 | 실행 계층 | 합격 기준 |
+|---|---|---|---|---|
+| QA-PROD-AUTH-01 | 운영에서 로그인 세션이 필요한 환전 화면까지 검증 | QA-PROD-AUTH-01 | Playwright + Supabase Auth | 실제 운영 로그인, `/cashout` 200, redirect 0, `cashout-page` 렌더 |
+| QA-PROD-AUTH-02 | 운영 제품 데이터 무오염 | QA-PROD-AUTH-02 | RLS read snapshot | QA 계정 `member` 0행, `cashout_request` 전후 동일, forbidden write 0 |
+| QA-PROD-AUTH-03 | 자격증명 안전 보관 | QA-PROD-AUTH-03 | 설정 검사 | local secret 600, GitHub Environment secret, 코드·로그 원문 0 |
+| QA-PROD-AUTH-04 | 공개 운영검증 보존 | QA-PROD-PUBLIC-01 | Node fetch | 홈·약관 10%·환전 화면 3건 통과 |
+| QA-PROD-AUTH-05 | 신청 접수·알림톡 경계 | QA-PROD-WRITE-01 | 문서·코드 게이트 | 자동 실행하지 않고 미검증으로 보고. PASS 승격 금지 |
+| QA-PROD-AUTH-06 | 자동 실행 | QA-PROD-SCHEDULE-01 | GitHub Actions | PR 미실행, 일일 schedule, contents read, trace·video·storageState artifact 0 |
+
+운영 QA 계정은 `auth.users`에만 존재하고 `user_metadata.purpose=production-readonly-e2e`여야 한다. 제품 `member` 행이 생기면 테스트를 실패시킨다. 운영 쓰기 E2E는 `is_test` 격리축과 cleanup 계약이 승인되기 전까지 범위 밖이다.
+
 ## 2026-08-25 운영 첫 환전 실패 QA 복구 요구 추적표
 
 | 요청번호 | 요구 | 테스트번호 | 실행 계층 | 합격 기준 |

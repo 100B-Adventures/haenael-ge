@@ -36,6 +36,7 @@ build/
 # ─── 작업 산출물 (세션 임시물 · 커밋 대상 아님) ─────────────────────────────
 scratchpad/
 web/playwright-report/
+web/playwright/.auth/
 web/test-results/
 .codex/logs/
 

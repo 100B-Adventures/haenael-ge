@@ -1,3 +1,154 @@
+## 후속65 (2026-08-28) — ★로컬 환경 복구 성공. Codex 2건 위임
+
+### ✅ 로컬 환경 복구 (이틀 막힌 것 해소)
+**1단계 — 도커.** `osascript -e 'quit app "Docker Desktop"'` + `open -a "Docker Desktop"` 으로 **컨트롤러가 직접 재시작**(회장께 넘기려 했으나 내가 할 수 있었다). 3회차 폴링에서 데몬 응답, `docker run` 컨테이너 실행 성공 확인.
+**2단계 — realtime.** 도커 복구 후에도 `supabase start` 가 `supabase_realtime_haenael-ge container is not ready: unhealthy` 로 실패.
+※ `npx supabase start` 는 오류를 `{"_tag":"Error","code":"PlatformError"}` 로 감싸 진짜 원인이 안 보였다. **바이너리 직접 실행**(`.../cli-darwin-x64/bin/supabase-go start`)해야 실제 로그가 나온다.
+→ `supabase/config.toml` `[realtime] enabled = false` 로 **임시 우회**(미커밋 1줄). 기동 성공.
+**3단계 — 스키마.** `db reset` 으로 마이그레이션 적용. **컨테이너 9개 / DB 정상 / `create_cashout_request` 존재 / public 테이블 19개.**
+
+### 🔄 Codex 병렬 2건 진행중
+**`bw8u2eyn6` qa-verifier — E2E 복구 + 시안 정합 픽셀 재검증**
+①`cashout-manual.spec.ts` 12건 실제 통과시키기(**테스트 약화 금지**, 특히 계좌 마스킹 단언) ②**realtime 되살리기**(unhealthy 원인 규명 후 `true` 복원, 못 고치면 config.toml 주석으로 이유 명시 — **조용히 꺼둔 채 넘기지 마라**) ③시안 정합 3건을 **실제 페이지 컨텍스트 390px 캡처**로 재검증(Storybook 은 컴포넌트 단독 렌더라 불충분). `standards/design.md` §14 Read 강제.
+
+**`bja23838q` plan-critic — 세무 질문지**
+`risks.md:16` 이 '원천징수 의무자가 **될 수 있음**'(추정, 법조항 없음)인데 운영 4건이 이미 3.3% 떼고 지급됐다. 개인정보보호법 24조의2 상 주민번호는 법률 근거가 서야 수집 가능.
+→ **세무사에게 보낼 질문지**를 만든다(우리가 답을 정하는 게 아님). 사업구조 설명 + 물을 것 3개(소득 성격/의무자 여부/주민번호 취급) + 별풍선 등 선례 공개자료 조사 + 지금 상태의 위험.
+
+### 지급대행 — 03:22 이라 불가
+토스 상담 평일 08:00~19:00. 요청문 준비완료.
+
+### ⛔ 남은 것
+①Codex 2건 검증 ②**`supabase/config.toml` realtime 원복**(임시 우회 미커밋 상태 — 방치 금지) ③토스 지급대행 해지(08:00 이후) ④운영 E2E 시험계정 자격증명 5개(회장 판단) ⑤세무 자문(질문지 나오면 회장이 세무사에게).
+
+## 후속64 (2026-08-28) — ★로컬 환경 장애 진짜 원인 = 도커. Supabase 가 아니었다
+
+### ★ 이틀째 막힌 로컬 환경, 원인 규명
+| 확인 | 결과 |
+|---|---|
+| 도커 데몬 | **정상**(`docker ps` 0.15초 응답, version 28.1.1) |
+| 호스트 디스크 | 여유 1.0Ti (사용 2%) |
+| 이미지 pull | **실패** |
+| **컨테이너 실행** | **멈춤** — 로컬 캐시 이미지로도 90초 초과 |
+
+오류 원문:
+```
+lookup http.docker.internal on 192.168.65.7:53: read: connection refused
+```
+**도커 내부 DNS 가 죽었다.** 데몬은 목록 조회까진 되는데 새 컨테이너를 못 띄운다.
+
+**교훈: 어제 2시간을 `supabase start` 만 반복했는데 원인은 한 층 아래 도커에 있었다.** 같은 명령을 반복하기 전에 의존 계층을 먼저 확인했어야 했다(회고서 2번째 뿌리 재발).
+→ 조치: **Docker Desktop 재시작 필요(회장 물리 조작)**. 급하지 않음 — Storybook 우회로로 화면 확인 가능.
+
+### 지급대행 — 오늘도 불가
+01:24. 토스 상담 평일 08:00~19:00. **오늘 08:00 이후 처리.**
+
+### ⛔ 남은 것
+①**토스 지급대행 해지** — 오늘 08:00~19:00. 요청문 `docs/requests/토스-지급대행-해지-요청문-2026-08-26.md` 준비완료. 제로원 `zeroon1zvn` 계약완료 존속, 미입금 25,991원.
+②**Docker Desktop 재시작**(회장) → 로컬 Supabase 복구 → 브라우저 E2E 정상화
+③**운영 E2E 시험계정 자격증명 5개**(회장 판단) — `QA_PRODUCTION_SUPABASE_URL`/`_ANON_KEY`/`_EMAIL`/`_PASSWORD`/`_EXPECTED_USER_ID`. `scripts/qa/provision-production-auth-account.mjs` 준비완료, 미실행. 쓰기 감시로 운영 오염 차단됨.
+④**세무 자문**(회장) — 3.3% 근거가 `risks.md` 상 "될 수 있음" 수준. 사용자 공개 전 필요.
+
+### 현재 배포 상태 (변동 없음)
+커밋 `a59c78e`, production URL 반영, `verify-production` 3건 통과. build·qa 승인 완료.
+
+## 후속63 (2026-08-28) — Codex 2건 완료·검증·배포. 디자인 토큰 + 운영 읽기 E2E
+
+### ✅ 디자인 토큰 정리 (커밋 `a59c78e`)
+| 항목 | 전 | 후 |
+|---|---|---|
+| 인라인 `style={{` | 233 | **21** |
+| 대상 raw hex | 282 | **0** |
+남은 21곳 = **런타임 좌표·상태·크기·회전 계산**(토큰화 불가). 남은 hex 56곳 = 카카오 브랜드색 `#FEE500`·워드맵 단계별 녹색 계조·공유 아이콘(브랜드 규정 또는 알고리즘 계산값, 대상 아님).
+**화면 무변경 픽셀 확인(컨트롤러 캡처 직접 열람):** 확인 371px / 로딩 403px — 작업 전과 동일. 색·간격 육안 동일.
+검증: 금지항목 무변경 grep 0 / 빌드 통과 / vitest 269-269 / test:qa-contracts 8/8.
+⚠️ Codex 보고서에 **내가 요구한 "DESIGN.md 에 없어 못 옮긴 색 목록"이 없었다.** 파일별 줄번호만 나열 → 컨트롤러가 직접 집계해 성격 판정.
+
+### ✅ 운영 읽기 전용 E2E (같은 커밋)
+qa 승인 시 잔여 갭이던 항목. 신설물:
+- `web/e2e/production-auth-readonly.spec.ts` — 시험계정으로 운영 로그인 → 환전 화면 읽기.
+- `web/playwright.production.config.ts` + `npm run qa:verify-production:auth`
+- `.github/workflows/production-readonly-e2e.yml` — 수동 실행 + 매일 cron `17 21 * * *`
+- `scripts/qa/provision-production-auth-account.mjs`, `qa/fixtures/production-auth.env.example`
+
+**컨트롤러 보안 검증:**
+①**자격증명 원문 노출 0건**(grep). example 파일 값 전부 비어 있음.
+②**운영 쓰기 0건** — `watchForbiddenWrites()`(spec:89-105)가 `/cashout` POST, `rpc/create_cashout_request`, `/rest/v1/` PATCH·DELETE 를 감시해 하나라도 잡히면 실패시킨다.
+③**자격증명 없으면 SKIP 아니라 FAIL**(spec:41). 실행해 확인 — `QA_PRODUCTION_* 미설정. 운영 인증 경로를 SKIP하지 않고 실패 처리한다.` **검사가 조용히 안 도는 것보다 낫다.**
+→ 필요 env 5개: `QA_PRODUCTION_SUPABASE_URL` / `_ANON_KEY` / `_EMAIL` / `_PASSWORD` / `_EXPECTED_USER_ID`. **아직 미설정이라 이 경로는 미가동.**
+
+### ✅ 배포 4조건 완주
+①빌드 성공 `a59c78e` 1분 ②production URL alias 반영 ③env 무변경 ④`verify-production` 3건 통과(환전화면 22,664바이트 — 토큰 전환으로 22,341에서 증가).
+
+### ⛔ 남은 것
+①**토스 지급대행 해지** — 오늘(금) 08:00~19:00. 요청문 준비완료. 제로원 `zeroon1zvn` 계약완료 존속, 미입금 25,991원.
+②**운영 E2E 시험계정 자격증명 5개 설정** — 회장 판단 필요(시험 계정을 운영에 만들지 여부). `provision-production-auth-account.mjs` 가 준비돼 있으나 아직 안 돌림.
+③로컬 Supabase 장애(Storybook 우회로 있어 급하지 않음)
+④세무 자문(회장 — 3.3% 근거 "될 수 있음" 수준, 사용자 공개 전 필요)
+
+## 후속63 (2026-08-28) 디자인 토큰 build 검증 통과
+
+- 정적 inline style을 utility class로 이동해 `style={{...}}` 233곳을 21곳으로 줄였다. 남은 21곳은 런타임 계산이라 유지했다.
+- 사용자 기준 토큰화 대상 raw hex 282곳은 0곳이다. 현재 HEAD 전체 raw hex는 349곳에서 DESIGN.md 미정의 61곳만 남았다.
+- 직접 증거: Next production build PASS, Vitest 269/269, QA 계약·거절·mutation 전부 PASS, 공개 4라우트 × 390px·1024px 전후 PNG 8/8 changedPixels=0.
+- `design-lint.sh web/src`는 신규 spacing 경고 0이다. 동적 inline style과 미정의 hex 두 범주는 의도적으로 남아 회장 판단 대기다.
+- 상세 산출물: `docs/core-design-token-build-report-v1-gpt-codex.md`. 제품 정본 `docs/제품현황.md`와 `docs/qa-tracker.md`를 갱신했다. 커밋·푸시·배포는 하지 않았다.
+
+## 후속62 (2026-08-27) — 백로그 Codex 병렬 위임 2건. 인프라 문서 정본 분리 완료
+
+### ✅ 인프라 문서 정본 분리 (커밋 `73ede51`)
+`docs/architecture.md`(579줄) vs `wiki/ops/인프라-시크릿-인벤토리.md`(127줄) 겹침 해소.
+| 무엇을 알고 싶나 | 정본 |
+|---|---|
+| 왜 이렇게 설계했나, 무엇이 어디서 도나 | `docs/architecture.md` |
+| **어떤 키가 어디에 있나, 없으면 무슨 일이 나나** | **인벤토리** |
+| 지금 운영에 무엇이 올라가 있나 | `RELEASE.md` |
+양쪽에 서로 가리키는 표 삽입. `architecture.md` 에 **§D-2 시크릿 설계 절** 신설(값·목록은 안 넣고 설계 사실만: 실행 위치가 둘이라 같은 키 두 벌 필요 / 08-25 두 번 막힌 경위 / Supabase 키 4종 혼용 주의).
+
+### 🔄 Codex 병렬 2건 진행중
+**`b6fn2fdsy` code-builder — 디자인 토큰 정리**
+인라인 style 233 · 원시 hex 282 → 토큰. **박은 조건**: ①화면에 보이는 색·간격 1px 도 변하면 안 됨 ②`DESIGN.md` v2.0.0 정본, 없는 색은 새로 만들지 말고 **목록으로 보고**(회장 판단) ③위험 낮은 순(정적 hex→유틸 클래스→**동적 계산 인라인은 건드리지 마라**). 전후 건수 숫자 보고 요구.
+
+**`biarv9ztj` qa-verifier — 운영 E2E 설계**
+qa 승인 시 잔여 갭 명시 항목. **박은 조건**: ①**운영 데이터 오염 금지**(회장 명시 제지 이력) ②시험계정 자격증명은 `~/.sj-agent-harness/secrets/*.env` 600, 원문 코드·문서 기재 금지 ③**불가능하면 억지로 만들지 말고 이유와 대안**(운영 DB 사후조회 등) ④못 하는 부분은 '미검증' 명시, '될 것이다' 금지.
+
+### 지급대행 — 오늘 불가
+23:50. 토스 상담 평일 08:00~19:00. 내일 아침 처리. 요청문 `docs/requests/토스-지급대행-해지-요청문-2026-08-26.md` 준비완료.
+
+### ⛔ 남은 것
+①Codex 2건 검증·커밋·배포 ②토스 지급대행 해지(내일 08:00) ③로컬 Supabase 장애(Storybook 우회로 있어 급하지 않음) ④세무 자문(회장 — 3.3% 근거 "될 수 있음" 수준, 사용자 공개 전 필요).
+
+## 후속61 (2026-08-27) — 산출물 목록 규약 스키마 전환. 드리프트 0 달성
+
+### ★ 회장 요청: "각 산출물들 다 정리되어있는지 확인. 100B 대시보드에서 잡히나 확인해볼거야"
+→ **정리 안 돼 있었다.** 대시보드가 읽는 `approved_artifacts` 가 자유텍스트였고 실물 없는 라벨이 섞여 파싱 불가 상태.
+
+### ✅ 조치 (커밋 `6085204`)
+**1) `approved_artifacts` 를 `release-and-artifacts.md` §1.1 스키마로 전면 재작성**
+구: `{prd: haenael-ge-v0.3.0, design: DESIGN-v1.6+, wireframes: 10화면-coverage0, ...}` — 자유텍스트 + **실물 없는 라벨**("10화면-coverage0", "6문서-1100줄-매핑갭0").
+신: 단계별 `{ path, version, status, label }` 구조. plan 4 / design 3 / eng-design 7 / build 2 / qa 4 / ship 2 = **22개 경로 전부 실물 확인**.
+버전 표기가 없는 문서는 `version: unversioned` 로 정직하게 표기(DESIGN.md 2.0.0, user-flow 0.3.0, 프로토타입 3.7, FDD 1.0.0 등은 실제 값).
+
+**2) 제품현황 정본 이름 교정 + 릴리스 반영**
+`docs/구현현황.md` → **`docs/제품현황.md`**(규약 이름). 대시보드가 이 이름으로 찾는다.
+릴리스 1.2.0 절 신설: 지금 되는 기능 7개 표(증거 포함) + 이번 릴리스 실린 것 + **아직 안 된 것 4건**(세금 근거·운영 실경로 검사·디자인 토큰·토스 지급대행).
+
+### ★ 하네스 검사기 결함 2건 수정 (`~/.claude/harness/bin/artifact-drift-check.sh`)
+검사기가 **경로 22개를 전부 "실물 없음"으로 오판**했다. 원인 2개:
+1. **BSD sed 에서 `\s` 가 안 먹는다.** `sed 's/path:\s*//'` 가 선행 공백을 못 지워 `$REPO/ docs/...` 로 조합돼 전부 실패. → `[[:space:]]` 로 교체 + 앞뒤 트림 추가.
+2. **`issues` 변수명에 깨진 바이트**가 섞여 `unbound variable` 로 스크립트가 마지막에 죽었다. → 판정 줄을 `${issues:-0}` 로 안전화.
+※ 이 결함 때문에 **지금까지 어느 벤처에서도 드리프트 검사가 제대로 안 돌았을 가능성**이 있다.
+
+### 최종 상태
+`artifact-drift-check` → **✅ 드리프트 없음.**
+`stage-gate` 훅 정상 동작 확인(rc=0), `approved_stages: [plan, eng-design, build, qa]` 파싱 정상.
+
+### ⚠️ state-file-lint 전역 경고 17건 (다른 벤처 소유)
+`blog-premium`·`postAGI` pipeline-state 없음, `100B session-state.md 2243줄(>300)` 롤오버 필요 등. **해낼게 건 아님** — 각 세션 소유(§8).
+
+### ⛔ 남은 것
+①토스 지급대행 해지(내일 08:00~19:00) ②디자인 토큰 정리 범위 결정(회장 — 인라인 233·hex 282, 전 화면 범위라 별도 슬라이스 권고) ③운영 E2E(로그인 경로) ④로컬 Supabase 장애 ⑤인프라 문서 정본 결정 ⑥세무 자문(회장).
+
 ## 후속60 (2026-08-27) — 전역 디자인 토큰 위반 실태 집계. 범위 판단 필요
 
 ### 실태 (컨트롤러 직접 집계)

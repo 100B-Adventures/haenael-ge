@@ -1,5 +1,58 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-28: 로컬 E2E 복구·realtime·시안 정합 3건 재검증
+
+**판정: ❌ NG 등록 / 로컬 실경로 재검증 진행 중**
+
+| 요청번호 | 요청 요지 | 테스트번호 | 판정 | 증거 |
+|---|---|---|---|---|
+| QA-LOCAL-RESTORE-01 | 로컬 DB를 쓰는 환전 E2E 12건 복구, 계좌 마스킹 단언 보존 | QA-LOCAL-PLAYWRIGHT-01 | ❌ NG | 착수 시점 직접 실행 전. 이전 실행은 로컬 DB 부재로 12/12 실패 |
+| QA-LOCAL-RESTORE-02 | Supabase realtime unhealthy 근본 원인 해소 후 enabled=true 복원 | QA-LOCAL-REALTIME-01 | ❌ NG | 착수 시점 `supabase_realtime_haenael-ge` stopped, `supabase/config.toml` enabled=false |
+| QA-LOCAL-RESTORE-03 | 실제 페이지 390px 확인·loading·워드맵 6개를 승인 시안과 재대조 | QA-LOCAL-DESIGN-01 | ❌ NG | Storybook 관찰만 존재. 실제 페이지 컨텍스트 신규 캡처 0/3 |
+| QA-LOCAL-RESTORE-04 | 회귀·seed·health·디자인 lint를 함께 재확인 | QA-LOCAL-REGRESSION-01 | ❌ NG | 착수 시점 이번 환경의 fresh 실행 증거 없음 |
+
+- canonical `pipeline-state.core.md`의 `current_stage`는 착수 시점 이미 `qa`라 단계 값은 변경하지 않았다.
+- 직접 관찰 증거가 채워질 때까지 PASS로 올리지 않는다. 테스트 단언 완화, 특히 계좌 마스킹 고정길이와 원문 비노출 단언 삭제는 금지한다.
+
+STAMP: 수정 시각 2026-08-28 03:25 KST | 모델 gpt-5.6-sol | 에이전트 qa-verifier | 스킬 qa | 상태 NG 등록·실행 중
+
+## 2026-08-28: 전역 디자인 토큰 부채 정리
+
+**판정: 🔧 build 검증 통과 / 동적 style·미정의 색은 회장 판단 대기**
+
+- 정적 inline style은 233곳에서 21곳으로 줄었다. 남은 21곳은 런타임 좌표·상태·크기·회전 계산이다.
+- 사용자 기준 토큰화 가능한 raw hex 282곳은 0곳이 됐다. 현재 HEAD 전수 기준은 349곳에서 DESIGN.md 미정의 61곳만 남았다.
+- 직접 증거: Next production build PASS, Vitest 269/269, QA 계약·거절·mutation 전부 PASS, 공개 4라우트 390px·1024px 전후 PNG 8/8 changedPixels=0.
+- design-lint는 spacing 신규 경고 0이다. 동적 inline style과 미정의 hex 두 범주는 정책대로 유지돼 경고가 남는다.
+- 상세: `docs/core-design-token-build-report-v1-gpt-codex.md`.
+
+STAMP: 수정 시각 2026-08-28 00:17 KST | 모델 gpt-5.6-sol | 에이전트 code-builder | 스킬 없음 | 상태 로컬 build 검증 통과, 미정의 색 결정 대기
+
+## 2026-08-28: 운영 인증 읽기 전용 E2E
+
+**판정: 🔧 운영 인증 읽기 경로 PASS / 운영 쓰기·알림톡·로컬 DB 회귀는 미검증 또는 NG**
+
+| 요청번호 | 요청 요지 | 테스트번호 | 판정 | 증거 |
+|---|---|---|---|---|
+| QA-PROD-AUTH-01 | 로그인 필요 운영 환전 화면 | QA-PROD-AUTH-01 | ✅ PASS | 운영 Supabase 로그인과 최종 `/cashout` 렌더, Playwright 1/1, PNG 113,713바이트 |
+| QA-PROD-AUTH-02 | 운영 데이터 무오염 | QA-PROD-AUTH-02 | ✅ PASS | 실행 후 member·goal·cashout_request·notification service-role 사후 조회 각 0행 |
+| QA-PROD-AUTH-03 | 자격증명 보관 | QA-PROD-AUTH-03 | ✅ PASS | auth-only secret과 기존 `.env.local` 권한 600, 값 원문 출력 0건 |
+| QA-PROD-AUTH-04 | 기존 공개 검증 보존 | QA-PROD-PUBLIC-01 | ✅ PASS | 홈 200, 약관 10% 10곳·5% 0곳, 환전 200·22,341바이트 |
+| QA-PROD-AUTH-05 | 신청 접수·알림톡 실수신 | QA-PROD-WRITE-01 | ⬜ 미검증 | 운영 쓰기와 외부 수신함이 필요해 자동 PASS 금지 |
+| QA-PROD-AUTH-06 | 일일 자동 실행 | QA-PROD-SCHEDULE-01 | 🔧 | workflow 구현, 미커밋·미푸시·GitHub Environment secret 미등록이라 활성화 전 |
+
+- 운영 Auth에 `purpose=production-readonly-e2e`인 전용 계정 1개를 만들었다. 제품 테이블 쓰기는 0건이다.
+- 운영 제품 쓰기: 0건. 테스트는 환전 신청 버튼을 누르지 않으며, 사후 4개 제품 테이블이 모두 0행이었다.
+- 인증 과정에서 허용되는 운영 변경은 전용 `auth.users.last_sign_in_at` 갱신뿐이다.
+- 회귀 PASS: Vitest 269/269, 환전 Playwright 12/12, Next production build, QA 계약 env 34/34·cashout 30/30·RAISE 13/13·notify 8/8·mutation 8/8.
+- 회귀 NG: local Supabase가 DB backup restore에서 3회 멈춰 seed와 pgTAP은 이번 실행에서 미검증이다. 볼륨 삭제 초기화는 하지 않았다.
+- 디자인 QA NG: `design-lint.sh web/src`가 inline style과 토큰 밖 hex 두 범주를 보고했다.
+- 모바일 typecheck와 Maestro는 모바일 앱이 없어 해당 없음이다.
+- 상세 설계: `docs/core-production-auth-e2e-v1-gpt-codex.md`.
+- 요청 정본: `docs/requests/core-production-auth-e2e-request-2026-08-27.md`.
+
+STAMP: 수정 시각 2026-08-28 KST | 모델 gpt-5.6-sol | 에이전트 qa-verifier | 스킬 qa | 상태 인증 read-only PASS·운영 write 미검증·로컬 DB NG
+
 ## 2026-08-25: 운영 첫 환전 실패 3계층 QA 복구
 
 **판정: 🔧 QA 복구 검사 통과 / 제품 릴리즈는 changes-requested 유지**
@@ -719,3 +772,11 @@ Status: **local readiness PASS / ship NG**
 - [테스트됨] `deno check` — `_shared/alimtalk.ts`, `notify/index.ts`, `toss-confirm/index.ts` 3개 import chain 통과. 대상 4개 TypeScript 파일 `deno fmt --check` 통과.
 - [근거 확인] 실행 코드·ENV 예시에서 레거시 `senderKey`, `templateCode`, `disableSms: false`, `from: pfId` 잔존 0건(제거 사실을 설명하는 주석·런북 언급만 유지).
 - [미검증] 실제 Solapi API 왕복, 카카오 실수신, 운영 secret·배포 후 결제 E2E. 이번 요청에 따라 배포하지 않았다.
+## 2026-08-27: 전역 디자인 토큰 부채 정리
+
+**판정: ❌ NG 등록 / build 수정 진행 중**
+
+- QA 재현: `bash ~/.claude/harness/bin/design-lint.sh web/src`가 인라인 style과 토큰 밖 hex 두 범주를 검출한다.
+- 수정 전 기준: 테스트·Storybook·`globals.css` 제외 시 `style={{...}}` 233곳. 승인 토큰으로 옮길 수 있는 raw hex는 사용자 실측 기준 282곳이다.
+- 허용 범위: `DESIGN.md` v2.0.0 기존 토큰으로 값이 같은 정적 색상만 치환하고, 반복 정적 style만 유틸리티 클래스로 이동한다. 런타임 좌표·상태·크기 계산과 DESIGN.md 미정의 색은 유지한다.
+- 종료 증거: web build, Vitest 전량, `test:qa-contracts`, design-lint 재실행, 공개 라우트 390px·1024px 전후 이미지 픽셀 대조를 모두 기록한 뒤 🔧로 전환한다.
