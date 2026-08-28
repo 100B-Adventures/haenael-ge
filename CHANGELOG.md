@@ -26,6 +26,20 @@
   이용료 표기, 환전 화면 생존을 본다. 옛 배포가 운영 주소에 붙어 있으면
   약관 수치에서 잡힌다.
 
+### 릴리스 정합
+
+- 릴리스 태그 `v1.2.0`이 가리키는 커밋은 `7435619`다. 릴리스 매니페스트도
+  같은 커밋과 승인된 환전 잠금 FDD 1.0.0을 가리키도록 맞췄다.
+- 기획, 디자인, 기술설계, 개발, QA 다섯 단계가 모두 승인됐다. 승인 산출물
+  핀 22개는 디스크 실물과 내부 버전을 대조했다.
+- Vercel의 앱 버전 표기는 1.0.0에서 1.2.0으로 바로잡았다. 최신 Production
+  배포는 1.2.0을 반환하지만 운영 대표 주소는 아직 1.0.0 배포에 연결돼 있다.
+  대표 주소 승격은 회장 결정 대기 상태다.
+- GitHub Actions 세 작업은 결제 차단으로 시작되지 않았다. 코드 실패로 판정하지
+  않지만 CI 통과로도 기록하지 않는다.
+
+<!-- STAMP: 수정 2026-08-28 20:53 KST | model gpt-5.6-sol | agent release-manager | skill ship | basis pipeline-state.core.md, RELEASE.md, git tag v1.2.0, docs/qa-tracker.md | decision 승인 정합과 미승격 운영 주소를 함께 기록 -->
+
 [1.2.0]: https://github.com/seong-jin-jo/haenael-ge/releases/tag/v1.2.0
 
 ## [1.1.0] - 2026-08-25

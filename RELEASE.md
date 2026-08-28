@@ -1,19 +1,31 @@
 # 릴리즈 매니페스트 — 해낼게
 
-무엇이 지금 운영에 올라가 있는지를 여기서 본다. 변경 내역은 `CHANGELOG.md`에 있다.
+릴리스 산출물 묶음과 운영 주소 연결 상태를 여기서 본다. 변경 내역은 `CHANGELOG.md`에 있다.
+
+<!-- STAMP: 수정 2026-08-28 20:53 KST | model gpt-5.6-sol | agent release-manager | skill ship | basis pipeline-state.core.md approved_artifacts 22개, git tag v1.2.0, Vercel 운영 실측 기록 | decision 릴리스 태그와 운영 대표 주소 승격을 별도 상태로 기록 -->
 
 ```yaml
 release: 1.2.0
 date: 2026-08-27
-url: https://haenaelge.vercel.app
-commit: 3bb36d0
+delivery: vercel
+canonical_url: https://haenael-ge.vercel.app
+canonical_url_version: 1.0.0
+verified_main_url: https://haenael-ge-git-main-100-b.vercel.app
+verified_main_version: 1.2.0
+deployment_status: awaiting-canonical-domain-promotion
+commit: 7435619
+tag: v1.2.0
 ships:
   prd: 0.4.0        # docs/prd-haenael-ge-v0.4.0.md
   design: 2.0.0     # DESIGN.md
-  fdd: 1.2.0        # 수동환전 계좌수집 계약
+  fdd: 1.0.0        # docs/fdd-haenael-ge-cashout-clover-lock-v1.0.0-opus5.md
+  fdd-base: 0.1.0   # docs/fdd-haenael-ge-v0.1.0.md
   qa: 1.0.0         # docs/core-cashout-qa-report-v1-gpt-codex.md (2026-08-27 승인)
 changelog: CHANGELOG.md#120
 ```
+
+이 저장소는 Vercel 서버리스 배포형이다. Dockerfile, Compose, 컨테이너 이미지 릴리스
+워크플로가 없으므로 Docker 이미지 태그는 적용 대상이 아니다.
 
 ## 이 릴리즈에 실린 것
 
@@ -38,7 +50,8 @@ plan 의 미결 세 건 중 둘은 사실로 해소됐으며 하나는 앱 출�
 보고하는 버전이 1.0.0 이었다. 이 문서는 1.2.0 이라고 적고 있었으니,
 "지금 운영에 뭐가 올라가 있나"에 대한 답이 두 곳에서 달랐다. Vercel 의
 `NEXT_PUBLIC_APP_VERSION` 이 40일 전 값에 멈춰 있던 것이 원인이고,
-1.2.0 으로 갱신했다.
+1.2.0 으로 갱신했다. 최신 Production 배포는 1.2.0 을 반환하지만 운영 대표
+주소는 아직 1.0.0 배포를 가리킨다. 대표 주소 승격은 회장 결정 대기 상태다.
 
 당시 남아 있던 QA 지적과 그 처리는 이렇다.
 
