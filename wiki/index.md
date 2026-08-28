@@ -1,57 +1,41 @@
-# haenael-ge — Wiki 진입점
-
-> 친구의 목표 선언에 조용히 돈(클로버)으로 응원하는 도네이션 플랫폼 — "응원은 돈으로 하는 겁니다"
-> 스캐폴드: 2026-07-02 (wiki-track, Tier 0 표준 — `~/.claude/harness/wiki-scaffold/README.md`)
-> 2026-07-10 전면 증설: 비개발(브랜딩·마케팅·기획) 실행층 정본화 — 하위모델이 읽고 그대로 실행 가능한 플레이북 구조.
-
-## ⚡ 새 세션/하위모델 진입 규칙 (여기부터)
-
-1. **마케팅·운영 작업이면** → [ops/agent-runbook.md](ops/agent-runbook.md) **하나만 먼저 읽어라** (진입 절차·주간 사이클·금지선·판단 위임 경계 전부 있음).
-2. 개발 작업이면 → 루트 `pipeline-state.core.md` + `docs/` 정본.
-3. 브랜드 판단이 필요하면 → [brand-marketing-strategy.md](brand-marketing-strategy.md) §1~2가 헌법. 모순되는 산출 금지.
-
-## SSOT 라우팅 (3줄)
-- **빌드 스펙 정본 = [`docs/`](../docs/)** — 게이트(stages.yaml)가 검사. 이동 금지, 여기서는 링크만.
-- **사업 지식(결정·교훈·마케팅 실행층) = 이 `wiki/`** — decisions.md·learnings/ledger.md + 아래 실행층.
-- **라이브 핸드오프 = 루트 `session-state.core.md`** / 단계 상태 = `pipeline-state.core.md`.
-
-## 브랜드/마케팅 실행층 (wiki 정본)
-
-### 전략 (헌법)
-- [브랜드 마케팅 전략 v0.3](brand-marketing-strategy.md) — 포지셔닝·톤 2층·사회적 증거 원칙·채널/90일 플랜·KPI + brain 핀 대조표. 확정 결정([D-001~](decisions.md)) 반영.
-
-### brand/ — 아이덴티티·카피·비주얼
-- [채널 아이덴티티 킷](brand/channel-identity-kit.md) — 계정명·바이오·해시태그·첫 9게시물 그리드·회장 5분 개설 가이드
-- [카피 뱅크](brand/voice-copy-bank.md) — 필러 P1~P4 후킹/CTA/마이크로카피 (층·면·심리 트리거 태그)
-- [스토리 정본](brand/story-canon.md) — 오리진(화이팅 인플레) 3층·서사 위계(주연=유저 관계 서사)·소재 태그 라우팅
-- [비주얼 가이드라인](brand/visual-guidelines.md) — 에셋 인벤토리·힉스필드 프롬프트 프리셋·재생성 절차
-- [디자인 벤치마크 뱅크](brand/design-benchmark-bank.md) — 레퍼런스 9선(베낄 것/금지)·화면 유형별 프로토콜·일관성 체크리스트
-- [채널 비주얼 자산 실물](../docs/brand-assets/) — 프로필 아이콘 C안 쿼트러포일 외 PNG 정본
-
-### content/ — 발행물
-- [90일 실행 캘린더](content/content-calendar-90d.md) — 주차×채널×원고ID
-- [S1 제작기 (스레드·주3)](content/series-s1-buildlog.md) · [S2 선언 로그 (공스타·주2)](content/series-s2-declaration-log.md) · [S3 마음 관찰기 (스레드·주1~2)](content/series-s3-mind-observation.md)
-
-### growth/ — 성장 엔진
-- [DM 아웃바운드 플레이북](growth/dm-outbound-playbook.md) — 타깃 추출·스크립트 5종·램프업·응답률 게이트
-- [DM 프리테스트 배치](growth/dm-pretest-batch.md) — 실결제 전 10~20명 반응검증용 메시지 A/B/C·판독 게이트
-- [첫 매출 전환 플레이북](growth/first-revenue-playbook.md) — 유입→선언→공유→첫 유료 응원 결제, 10건 4주 스프린트·앵커 3단
-- [KPI 런북](growth/kpi-runbook.md) — 주간 5칸 대시보드·kill-criteria 소집 조건
-
-### ops/ — 운영
-- [★에이전트 마스터 런북](ops/agent-runbook.md) — 하위모델용. 이번 주 할 일이 여기서 도출됨
-- [고객 피드백 루프](ops/feedback-loop.md) — 정성 신호 태그 8종·주간 다이제스트·즉시 회수 트리거·성장 루프 포트폴리오
-
-## 기획 정본 (docs/ 링크)
-- 기획: [승인 PRD v0.3.0](../docs/prd-haenael-ge-v0.3.0.md) · [미승인 증분안 v0.4.0](../docs/prd-haenael-ge-v0.4.0.md) · [one-thing](../docs/one-thing.md) · [persona](../docs/persona.md) · [bm](../docs/bm.md) · [risks](../docs/risks.md)
-- 디자인: [DESIGN.md](../DESIGN.md) · [user-flow](../docs/user-flow.md) · [WIREFRAMES/](../docs/WIREFRAMES/) · [coverage](../docs/WIREFRAMES/coverage.md)
-
-## 이 위키의 규칙
-- 결정은 [decisions.md](decisions.md)에 append (D-001…, 보류는 P0-P3 + 풀리는 조건).
-- 교훈은 [learnings/ledger.md](learnings/ledger.md)에 1줄 append — 같은 category 3회+ = 규칙 승격 제안.
-- 아이디어 캡처는 `/capture` → `raw/inbox/` (raw는 불변 — append만).
-- BRAIN 정본 핀은 `brain://` 표기 (BRAIN/ops/pin-notation.md). 실경로는 [전략 문서 말미 대조표](brand-marketing-strategy.md#brain-핀-대조표-2026-07-10-검증).
-
+---
+title: 해낼게 위키
+type: overview
+owner: "@sj"
+policy: living
+updated: 2026-08-28
+author: Codex
+change: "A안 6축 구조로 통일하고 코드·산출물·운영 실측을 반영"
+source: [../pipeline-state.core.md, ../session-state.core.md, ../docs/제품현황.md, ../RELEASE.md]
+links: ["[[0-meta/_index]]", "[[1-team-brand/_index]]", "[[2-product/_index]]", "[[3-operations/_index]]", "[[4-reference/_index]]", "[[5-hubs/_index]]"]
+visibility: private
 ---
 
-STAMP: 수정 시각 2026-08-22 14:22 KST | 모델 GPT-5 Codex | 근거 `pipeline-state.core.md`의 approved_artifacts, 루트 실제 파일 목록, `docs/prd-haenael-ge-v0.3.0.md`, `docs/prd-haenael-ge-v0.4.0.md`
+# 해낼게 위키
+
+친구가 선언한 목표에 클로버로 조용히 응원하고, 목표 주인이 모인 클로버를 환전하는 서비스의 팀 위키다.
+
+## 현재 한 줄 상태
+
+기획·디자인·기술설계·개발·QA는 승인됐고 배포 단계가 진행 중이다. 최신 main 배포는 1.2.0이지만 운영 대표 주소는 1.0.0을 가리킨다. 총 30개 중 지급 가능 27개를 신청하게 하는 마이그레이션도 운영 DB에 아직 적용되지 않았다. 자세한 근거는 [제품 현재 상태](2-product/current-state.md)에서 본다.
+
+## 6축 지도
+
+| 축 | 무엇을 찾는 곳 | 시작 |
+|---|---|---|
+| 0 · 메타 | 위키 구조, 정책, 이동 원칙 | [메타 목차](0-meta/_index.md) |
+| 1 · 팀·브랜드 | 포지셔닝, 스토리, 보이스, 채널 정체성 | [팀·브랜드 목차](1-team-brand/_index.md) |
+| 2 · 제품 | 현재 기능, 승인 산출물, 출시 상태 | [제품 목차](2-product/_index.md) |
+| 3 · 운영 | 결정, 런북, 미결, 사고와 교훈 | [운영 목차](3-operations/_index.md) |
+| 4 · 레퍼런스 | 공통 벤치마크와 참고자료 | [레퍼런스 목차](4-reference/_index.md) |
+| 5 · 직무 허브 | PM·개발·디자인·마케팅·온보딩 입구 | [직무 허브 목차](5-hubs/_index.md) |
+
+## 정본 경계
+
+- 제품 코드와 실제 기능: `web/src/`, `supabase/`
+- 단계와 승인 산출물: `pipeline-state.core.md`
+- 가장 최근 인계 상태: `session-state.core.md` 최상단
+- 기획·설계·QA 증거: `docs/`, `DESIGN.md`, `RELEASE.md`, `CHANGELOG.md`
+- 장기 사업 지식과 운영 맥락: 이 `wiki/`
+
+위키와 코드가 어긋나면 코드·승인 산출물·직접 관찰 증거를 먼저 확인하고, 위키를 최신화한다. 과거 사고 기록은 지우지 않고 현재 상태 문서에서 대체 여부를 명시한다.
