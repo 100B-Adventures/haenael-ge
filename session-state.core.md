@@ -1,3 +1,48 @@
+## 후속68 (2026-08-28 05:20) — 파이프라인 상류 5단계 전부 승인. 배포만 남았고 거기서 구조 결함 발견
+
+### ✅ design APPROVED
+잔여였던 "안내문구 볼드 강조 미적용"이 **이미 코드에 반영돼 있었다.** 컨트롤러 직접 확인:
+`web/src/components/cashout/CashoutRequestForm.tsx`:506 `<b>입금이 끝나면 그때 {cloverAmount}개가 빠져요.</b>`
+`web/src/components/goal/SplitBalanceCard.tsx`:120 `<b>{total}개는 그대로</b>`
+승인 프로토타입 v3.7 의 712행·632행 강조와 대응. 실화면 confirm 507.16px(시안 510) / submitting 614.94px(시안 617).
+
+### ✅ plan APPROVED (PRD v0.4.0, 595줄)
+미결 §10.7 Q9~Q11 처리:
+- **Q10 카카오 비즈앱 + phone_number = 해소.** `20260805010000_member_phone_alimtalk.sql` 로 member.phone 실재 + 운영 ALIMTALK 실발송 2종 확인.
+- **Q11 알림톡 템플릿 사전심사 = 해소.** 회장 2종 등록 확인.
+- **Q9 구글 provider 콘솔 활성 = 앱 출시로 defer.** `LoginSheet.tsx`:80 `SHOW_SOCIAL_LOGIN = false` 가 현 상태 진실원. 코드·테스트 보존돼 콘솔 설정만으로 부활. 가역·비차단이라 plan 승인 미차단.
+- §9 Q1~Q8 은 v0.3.0 승인분에서 처리 완료.
+
+### ⛔ ship 구조 결함 — 회장 결정 대기 (이번 턴 최대 발견)
+**운영 도메인이 main 을 따라가지 않는다.** 실측:
+
+| 주소 | 가리키는 배포 | 버전 |
+|---|---|---|
+| haenaelge.vercel.app | 40일 전 (302 → 아래) | |
+| haenael-ge.vercel.app | 4시간 전 `haenael-491v4v8t3` | 1.0.0 |
+| 최신 Production 배포 `haenael-p3ujw78nk` | 11분 전 | **1.2.0** |
+
+main push 는 매번 Production 배포를 **정상 생성**하고 `haenael-ge-git-main-100-b.vercel.app` 별칭만 자동 갱신된다. **배포는 되는데 운영 도메인이 그 배포를 안 가리킨다.**
+2026-08-25 회장 지적("운영 링크가 버젓이 있는데 새 주소를 만들었다")과 **같은 뿌리**. 그때는 `vercel alias set` 1회로 넘겼고 구조는 남았다.
+지금 대기분은 문서·테스트·버전 스탬프뿐이라 사용자 영향 0. **단 다음 진짜 수정은 소리 없이 운영에 안 나간다.**
+승격 = 운영 배포 행위(§2.1) → 회장 결정 사항으로 올림.
+
+### ✅ ship 결함 1건 수정
+운영 `/api/health` 가 `version:"1.0.0"` 인데 RELEASE.md 는 1.2.0. **릴리즈 매니페스트의 존재 이유("지금 운영에 뭐가 올라가 있나")가 깨져 있었다.** 원인 = Vercel `NEXT_PUBLIC_APP_VERSION` 이 40일 전 값 고정. 1.2.0 으로 갱신, 최신 배포에서 1.2.0 실응답 확인.
+
+### 재검증 (전부 컨트롤러 직접 실행)
+빌드 EXIT=0 / vitest 269-269 / Playwright 12-12 / test:qa-contracts 깨뜨리기 8건 전부 검출 / qa:verify-production 3건 통과.
+
+### 커밋
+`1be685e`(캡처 시안 정합+알림톡 문서 갱신+세무 질문지) → 후속67 기록 → design·plan 승인 + RELEASE 정정 → ship 구조 결함 기록. 전부 main push 완료.
+
+### 남은 것
+1. **운영 도메인 승격 여부 — 회장 결정.** (승인 시 컨트롤러 실행, 종료증거 = haenaelge.vercel.app 이 1.2.0 응답)
+2. **GitHub 결제** — CI 3잡 전부 미시작. 런 33157165191 포함 연속 실패, 전부 `recent account payments have failed or your spending limit needs to be increased`. 코드 무관.
+3. **토스 지급대행 해지** — 오늘 08:00 이후 컨트롤러 실행. 요청문 `docs/requests/토스-지급대행-해지-요청문-2026-08-26.md`.
+4. **세무 자문** — 질문지 `docs/requests/core-환전-원천징수-세무사-질문지-v1-gpt-codex-20260828-0342.md`. verify FAIL 이나 컨트롤러 확인 결과 오탐(출처 12개 실재).
+5. **운영 E2E 테스트 계정** — 환경변수 5종, `scripts/qa/provision-production-auth-account.mjs` 대기.
+
 ## 후속67 (2026-08-28 04:13) — 캡처 값을 시안에 맞춤. 남은 4건은 전부 회장 몫
 
 ### ✅ 커밋 `1be685e` push 완료 (main)
