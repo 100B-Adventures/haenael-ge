@@ -157,6 +157,18 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 2026-07-18 — 웰컴 클로버 + Vercel rosemallow95 이전 ship 실검증 완료(전부 관찰됨) — 회장이 Vercel을 code0to1→rosemallow95(팀 100-b)로 이전 지시. 컨트롤러가 브라우저로 rosemallow95 토큰 발급→VERCEL_TOKEN 배포. 프로젝트 haenael-ge rename, 도메인 haenaelge.vercel.app(+3개 alias), env 8개, 배포보호 해제(ssoProtection null). health {ok,1.0.0,db ok}. 카카오 REST키(1516450)에 redirect https://haenaelge.vercel.app/auth/kakao/callback 추가·저장. **prod 실왕복 관찰**: 새 도메인 온보딩→목표저장→LoginSheet→카카오 로그인(새 redirect+nonce)→콜백→세션→ShareLinkCard "해낼게 팀이 웰컴 클로버 3개 보냈어요" 배너 + 링크 haenaelge.vercel.app/g/bql9oe9g. home DOM "🍀 6개 ≈6,000원 상당"(원화 보조표시 신규UI 실서빙)+웰컴응원("첫 클로버는 저희가 먼저...")+워드맵 반영. 웰컴 트리거 prod 실발동 확증. 환전=CASHOUT_ENABLED off "준비중"(도달 미달, 안전). **웰컴 클로버 성장훅 + rosemallow95 이전 = prod 라이브 완료.** 잔여: 환전(legal 4건·PASS벤더·토스 지급대행 선결로 스텁), DM 발신계정, 토스 새상점(회장 다음주), 기존 haenael-ge.vercel.app(code0to1) 방치.
 
 ## Blocked / Notes
+### 2026-08-28 ★★ 회장이 신고한 30클로버 버그가 운영에서 아직 안 고쳐졌다 (미적용 마이그레이션 1건)
+**실측(`npx supabase migration list --linked`)**: 로컬 42개 중 `20260825020000_cashout_total_threshold_contract` **하나만 remote 가 비어 있다.** 나머지 41개(`20260821000000`·`20260822000000`·`20260825010000` 포함)는 전부 적용됨 → 8-25 BLOCKER "local-only gap 15개"는 이 1건만 남기고 해소됐다.
+
+**그런데 그 1건이 하필 회장이 직접 신고한 버그의 수정본이다.** 두 파일 실독 대조:
+- 운영에 살아 있는 `20260825010000`:73 = `IF p_clover_amount < v_min THEN RAISE cashout_below_minimum` → **신청 금액**이 30 미만이면 거부.
+- 미적용 `20260825020000`:73 = `IF p_clover_amount < 1` 로 완화하고, 167-174 행에서 `v_total >= v_min`(총보유 기준)과 `p_clover_amount <= v_payable` 를 따로 본다.
+
+→ 총 30개(개인적립 27 + 시스템 3)인 회원은 지급가능이 27 이라 27 을 신청하는데, 운영 함수가 `27 < 30` 으로 **여전히 거부한다.** 회장 신고 원문("30클로버면 환전이 되어야하는데 27로 인식돼 환전 불가")과 정확히 일치한다.
+
+**컨트롤러 실책**: 이 수정을 "개정 완료"로 보고했으나 운영 DB 반영을 확인하지 않았다. 로컬 pgTAP·E2E 통과를 대리지표로 삼았다(§3 위반).
+**해소 = `npx supabase db push`(운영 DB 스키마 변경) → 회장 승인 사항.** 적용 후 종료증거 = migration list 에서 remote 채워짐 + 총 30/지급가능 27 계정으로 27 신청 성공.
+
 ### 2026-08-25 환전 릴리즈 최종 QA NG
 - 로컬 관찰 통과: 계좌번호 오류 차단, 관리자 전체 계좌 열람, 10분 열람 만료 차단, 새 열람 뒤 지급 완료, 계좌 정보 오류 이체 실패 후 반려.
 - BLOCKER: 운영 migration history의 local-only gap 15개. 관련 `20260821000000`, `20260822000000`도 remote 미적용이라 새 웹과 운영 DB 금액 계약이 갈린다.
