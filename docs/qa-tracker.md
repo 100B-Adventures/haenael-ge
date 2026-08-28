@@ -1,5 +1,21 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-29: 대표 주소 1.2.0 운영 인증 읽기 전용 E2E 재검증
+
+**판정: ✅ PASS. 운영 인증·환전 화면·무오염 계약 직접 관찰**
+
+| 요청번호 | 요청 요지 | 테스트번호 | 판정 | 증거 |
+|---|---|---|---|---|
+| QA-PROD-RECHECK-01 | 저장된 운영 QA 자격증명으로 실제 세션 발급 | QA-PROD-AUTH-01 | ✅ PASS | Playwright 운영 로그인 성공, expected user id·purpose 일치 |
+| QA-PROD-RECHECK-02 | 대표 주소를 거쳐 `/cashout` 실렌더 | QA-PROD-AUTH-01 | ✅ PASS | HTTP 200, 최종 origin `haenael-ge.vercel.app`, `cashout-page` 표시 |
+| QA-PROD-RECHECK-03 | 운영 환전 기록 무오염 | QA-PROD-AUTH-01 | ✅ PASS | 실행 전후 `cashout_request` 스냅샷 동일, 금지 쓰기 요청 0건 |
+
+- 1차 실행은 secret wrapper를 빠뜨려 `QA_PRODUCTION_SUPABASE_URL 미설정`으로 ❌ NG였다. 계정이나 운영 앱 결함이 아니라 실행 환경 주입 누락으로 원인을 확정했다.
+- `SJ_LOCAL_SECRET_FILE=~/.sj-agent-harness/secrets/haenael-ge-qa-production.env`를 전용 wrapper에 지정해 재실행했고 `1 passed (13.7s)`를 직접 관찰했다.
+- 이 테스트는 읽기 전용이다. 실제 총보유 30·지급가능 27 계정의 환전 신청 성공은 별도 실사용 증거가 필요하다.
+
+STAMP: 수정 시각 2026-08-29 00:08 KST | 모델 GPT-5 Codex | 에이전트 root controller | 스킬 qa | 기반 운영 QA secret inventory, `production-auth-readonly.spec.ts`, 대표 주소 실응답 | 고민: 운영 기록을 오염시키지 않으면서 로그인과 환전 화면까지 실제 브라우저로 검증했다.
+
 ## 2026-08-28: 로컬 E2E 복구·realtime·시안 정합 3건 재검증
 
 **판정: ❌ NG 등록 / 로컬 실경로 재검증 진행 중**
