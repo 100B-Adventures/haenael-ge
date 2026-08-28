@@ -1,3 +1,79 @@
+## ★ CODEX 인계 (2026-08-28 21:20 KST) — Claude 토큰 소진, 여기서부터 Codex 가 이어받는다
+
+### 0. 이어받는 사람이 제일 먼저 알아야 할 것
+**회장이 신고한 30클로버 버그가 운영에서 아직 안 고쳐졌다.** 컨트롤러가 "개정 완료"로 보고했으나 운영 DB 반영을 확인하지 않았다. 로컬 테스트 통과를 대리지표로 삼은 §3 위반이다. 상세는 아래 §2.
+
+### 1. 파이프라인 현황
+| 단계 | 상태 |
+|---|---|
+| plan | approved (2026-08-28) |
+| design | approved (2026-08-28) |
+| eng-design | approved |
+| build | approved |
+| qa | approved |
+| ship | **in-progress — 아래 2건이 남았다** |
+
+`current_stage: ship` · `approved_stages: [plan, design, eng-design, build, qa]` · 산출물 드리프트 **0건**(`bash ~/.claude/harness/bin/artifact-drift-check.sh /Users/sj/sj_code_master/haenael-ge` 로 재확인 가능).
+
+### 2. ★★ 최우선: 미적용 마이그레이션 1건 = 회장 신고 버그 미수정
+**실측**: `npx supabase migration list --linked` → 로컬 42개 중 `20260825020000_cashout_total_threshold_contract` **하나만 remote 가 비어 있다.** 나머지 41개는 전부 적용됨.
+
+**왜 치명적인가.** 두 파일 실독 대조:
+- 운영에 살아 있는 `20260825010000_cashout_verified_minor_only.sql`:73
+  `IF p_clover_amount IS NULL OR p_clover_amount < v_min THEN RAISE 'cashout_below_minimum'`
+  → **신청 금액**이 30 미만이면 거부한다.
+- 미적용 `20260825020000_cashout_total_threshold_contract.sql`:73
+  `IF p_clover_amount IS NULL OR p_clover_amount < 1` 로 완화하고, 167-174 행에서
+  `v_total >= v_min`(총보유 기준)과 `p_clover_amount <= v_payable` 를 **따로** 본다.
+
+→ 총 30개(개인적립 27 + 시스템 3)를 모은 회원은 지급가능이 27 이라 27 을 신청하는데, 운영 함수가 `27 < 30` 으로 **여전히 거부한다.** 회장 신고 원문("30클로버 (개인적립27 + 시스템적립3) 이면 환전이 되어야하는데 환전시에는 27클로버로 인식되어서 환전 불가")과 정확히 일치한다.
+
+**해소 경로**: `npx supabase db push` (운영 DB 스키마 변경 → **회장 승인 필요**).
+**종료증거**: migration list 에서 `20260825020000` remote 채워짐 + 총30/지급가능27 계정으로 27 신청 성공.
+**주의**: 이 마이그레이션은 연령 게이트와 최소액 판정만 바꾼다. 함수 시그니처, advisory lock, request_key 멱등, 계좌 암호화·마스킹, `status='REQUESTED'` 중복 차단, A안 잠금, 수수료 계산은 `20260822000000` 정의를 그대로 유지한다(파일 주석 1-8행에 명시).
+
+### 3. ★ 운영 대표 주소가 최신 배포를 안 가리킨다 (회장 결정 대기)
+| 주소 | 가리키는 배포 | 버전 |
+|---|---|---|
+| `haenael-ge.vercel.app` (대표) | `haenael-491v4v8t3` | 1.0.0 |
+| `haenaelge.vercel.app` | 40일 전 배포, 302 로 위 주소로 넘김 | |
+| 최신 Production `haenael-p3ujw78nk` | 오늘 | **1.2.0** |
+
+main push 는 매번 Production 배포를 **정상 생성**하고 `haenael-ge-git-main-100-b.vercel.app` 별칭만 자동 갱신된다. **배포는 되는데 대표 주소가 그 배포를 안 가리킨다.** 2026-08-25 회장 지적("운영 링크가 버젓이 있는데 새 주소를 만들었다")과 같은 뿌리이고, 그때는 `vercel alias set` 1회로 넘겼을 뿐 구조는 남았다.
+**해소**: `npx vercel alias set haenael-p3ujw78nk-100-b.vercel.app haenael-ge.vercel.app --scope 100-b` (운영 배포 행위 → 회장 승인 필요. Claude 세션에서는 도구 분류기가 차단했다.)
+**주의**: §2 의 DB 마이그레이션을 먼저 적용하지 않고 웹만 승격하면 화면과 DB 계약이 또 갈린다. **DB 먼저, 그다음 주소 승격** 순서를 권한다.
+
+### 4. 회장 몫 (세션이 물리적으로 못 함)
+1. **GitHub 결제** — CI 3잡 전부 미시작. 런 33169750558 포함 연속 실패, 전부 `recent account payments have failed or your spending limit needs to be increased`. 코드 무관·플레이키 아님.
+2. **토스 지급대행 해지** — 콘솔에 해지 버튼 없음, 평일 08:00~19:00 라이브챗만. 요청문 `docs/requests/토스-지급대행-해지-요청문-2026-08-26.md` 준비됨. 계약 `zeroon1zvn`, 미지급 잔액 25,991원.
+3. **세무 자문** — 질문지 `docs/requests/core-환전-원천징수-세무사-질문지-v1-gpt-codex-20260828-0342.md`(334줄·10절·출처 12개).
+4. **운영 E2E 테스트 계정** — 환경변수 5종(`QA_PRODUCTION_SUPABASE_URL`·`_ANON_KEY`·`_EMAIL`·`_PASSWORD`·`_EXPECTED_USER_ID`), `scripts/qa/provision-production-auth-account.mjs` 대기. 운영에 계정을 만드는 행위라 승인 필요.
+
+### 5. 이번 세션에서 실제로 끝낸 것 (전부 커밋·push 완료)
+- **로컬 환경 복구 → 환전 E2E 12/12 통과.** 어제 12건 전패의 원인은 코드가 아니라 도커였다.
+- **시안 정합 실화면 대조**: confirm 507.16px(시안 510) / submitting 614.94px(시안 617).
+- **design·plan 승인.** design 잔여였던 안내문구 강조는 `CashoutRequestForm.tsx`:506 과 `SplitBalanceCard.tsx`:120 에 이미 반영돼 있었다. plan 미결 Q10(카카오 phone_number)·Q11(알림톡 템플릿)=해소, Q9(구글 provider)=앱 출시로 defer(`LoginSheet.tsx`:80 `SHOW_SOCIAL_LOGIN=false`).
+- **운영 버전 표기 수정**: Vercel `NEXT_PUBLIC_APP_VERSION` 이 40일 전 1.0.0 에 멈춰 있어 1.2.0 으로 갱신. 최신 배포에서 1.2.0 실응답 확인.
+- **Codex(release-manager) 위임으로 릴리스 정합 마감**: 산출물 22개를 디스크 실물·내부 버전과 대조(갱신할 핀 없음), RELEASE.md 의 fdd 를 1.2.0→실물 1.0.0 으로 정정, 운영 주소와 최신 배포를 분리 기록, CHANGELOG·제품현황 갱신. 드리프트 0건.
+- **하네스 수리**: `artifact-drift-check.sh` 가 산출물 22개를 전부 "실물 없음" 오탐하고 `unbound variable` 로 죽던 것을 고쳤다(BSD `\s` + `${issues}` 중괄호). 같은 버그가 이틀 연속 재발해 **회귀 테스트를 신설**했고, 오래 방치돼 있던 디자인 픽스처도 현행 규칙에 맞게 복원했다. `bash ~/.claude/harness/tests/run-fixtures.sh` 전건 통과.
+
+### 6. 재검증 명령 (Codex 가 이어받을 때 먼저 돌릴 것)
+```
+cd /Users/sj/sj_code_master/haenael-ge
+npx supabase migration list --linked          # 20260825020000 remote 비어 있는지 확인 (§2)
+bash ~/.claude/harness/bin/artifact-drift-check.sh /Users/sj/sj_code_master/haenael-ge
+cd web && npm run build && npm test -- --run && npm run test:qa-contracts && npm run qa:verify-production
+npx playwright test e2e/cashout-manual.spec.ts
+```
+직전 실측: 빌드 EXIT=0 / vitest 269-269 / Playwright 12-12 / qa-contracts mutation 8건 전부 검출 / verify-production 3건 통과.
+
+### 7. 손대면 안 되는 것
+- 계좌 마스킹 단언(`web/e2e/cashout-manual.spec.ts`, `supabase/tests/cashout_security_hardening.test.sql`) 약화·삭제 금지.
+- 수수료 계산식 변경 금지: `fee=floor(gross*10/100)`, `vat=floor(fee*10/100)`, `withhold=floor((gross-fee-vat)*33/1000)`, `net=gross-fee-vat-withhold`. 기준값 30,000→25,819 / 40,000→34,426.
+- A안 잠금 로직, advisory lock, `status='REQUESTED'` 조건, unique 제약 변경 금지.
+- 운영 DB 에 시험용 환전 신청 생성 금지(회장 "기록에 노이즈 생기는거아니야").
+- 릴리스 PR 머지·운영 배포는 회장이 한다(§2.1).
+
 ## 후속69 (2026-08-28 20:58 KST): 릴리스 1.2.0 문서와 승인 산출물 대조 마감
 
 ### 지금까지 한 것
