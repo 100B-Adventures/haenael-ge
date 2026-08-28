@@ -1,3 +1,65 @@
+## CODEX 후속 (2026-08-28 운영 DB 적용 및 대표 주소 승격)
+
+### 지금까지 한 것
+- 회장의 "쭉쭉 진행"을 운영 변경 승인으로 받아 `npx supabase db push --linked`를 실행했다. `20260825020000_cashout_total_threshold_contract.sql` 한 건이 운영에 적용됐다.
+- push 뒤 CLI의 pg-delta 카탈로그 캐시가 인증서 파일 누락 경고를 냈다. 성공 문구를 증거로 쓰지 않고 새 연결로 `migration list --linked`를 다시 실행해 `20260825020000` local=remote를 확인했다.
+- 운영 `public` 스키마를 새로 dump해 실제 함수 정의를 대조했다. `request_manual_cashout`은 `p_clover_amount < 1`만 입력 하한으로 검사하고, 이후 `v_total < v_min`과 `p_clover_amount > v_payable`을 분리 검사한다. 총보유 30·지급가능 27 계약이 운영 함수에 반영됐다.
+- 최신 Vercel Ready Production `haenael-qnsbl1ult-100-b.vercel.app`의 `/api/health`가 `version: 1.2.0`, `database: ok`임을 확인한 뒤 `haenael-ge.vercel.app` 별칭을 이 배포로 승격했다.
+- 승격 뒤 대표 주소를 새 요청으로 호출해 `version: 1.2.0`, `database: ok`를 확인했다. 보조 주소 `haenaelge.vercel.app`은 308로 대표 주소에 도착하고 최종 HTTP 200을 반환한다.
+- 최신 main CI 5건은 모두 completed/failure다. 직전 인계에서 확인한 GitHub 계정 결제 차단이 아직 남아 있으며 새 코드 푸시는 하지 않았다.
+
+### 남은 이슈
+1. 운영 함수 계약과 배포 주소는 반영됐지만 실제 사용자 계정으로 27클로버 환전 신청 성공은 아직 미검증이다. 운영 시험 신청 기록 노이즈 금지 때문에 임의 데이터를 만들지 않았다.
+2. GitHub Actions 결제 제한으로 CI가 실행 없이 실패한다. 계정 관리자 조치가 필요하다.
+3. 토스 지급대행 해지와 세무 자문은 회장 또는 외부 담당자 경로가 필요하다.
+
+### 다음 액션
+1. **소유자: 회장 또는 실제 대상 회원.** 총보유 30·지급가능 27 상태에서 정상 환전 27 신청. **종료증거:** 운영 신청 성공과 기존 지급 흐름 확인.
+2. **소유자: 회장 또는 계정 관리자.** GitHub Actions 결제 제한 해소. **종료증거:** CI가 실제 실행돼 전부 성공.
+3. **소유자: 회장.** 준비된 토스 해지 요청문을 평일 라이브챗에 제출하고 세무 질문지를 자문처에 전달. **종료증거:** 계약 상태 변경과 세무 의견서 수신.
+
+## CODEX 후속 (2026-08-28 하네스 동기화 감사 및 배포 사전점검)
+
+### 지금까지 한 것
+- Claude 정본과 Codex 미러를 실제 파일·등록 설정으로 대조했다. 기존 `sync-codex-hooks.sh` 자체 판정은 drift 0이었지만, 실제 `settings.json` 대 `hooks.json` 비교에서 최근 핵심 훅이 Codex에 등록되지 않은 구조적 갭을 발견했다.
+- 동기화 정문을 보강해 `deploy-ci-watch`, `artifact-sync-gate`, `harness-selfmod-gate`, `eval-capture-nudge`, `delegate-continue-gate`, `deploy-ci-mark`, `commit-untracked-guard`를 Codex에 지속 동기화하고 등록 검증하도록 했다.
+- Codex 명령 입력이 `tool_input.cmd`인 차이를 `deploy-ci-mark`와 `commit-untracked-guard` 포트에 반영했다. 임시 미추적 `.harness-probe.ts`를 만든 실험에서 커밋 훅이 `RC=2`로 실제 차단했고 시험 파일은 제거했다.
+- `jq empty ~/.codex/hooks.json`, 대상 훅 전부 `bash -n`, 재동기화 `drift/missing=0`, 전역 픽스처 `PASS 23 / FAIL 0`을 확인했다.
+- 동일 저장소 tmux pane을 확인했다. `%32`가 core 배포 트랙의 최신 주 세션이며 운영 DB 적용과 대표 주소 승격을 승인 대기로 남겼다. 중복 운영 실행은 하지 않았다.
+- `npx supabase db push --linked --dry-run`을 실행했다. 운영에 적용될 파일은 `20260825020000_cashout_total_threshold_contract.sql` 하나뿐임을 직접 확인했다. 실제 DB 변경은 없었다.
+
+### 남은 이슈
+1. 운영 DB 마이그레이션 실제 적용은 승인 대기다. dry-run으로 단일 파일 적용 범위는 확정됐다.
+2. 적용 후 총 30·지급가능 27 환전 계약의 운영 실경로 증거가 필요하다. 시험 신청 기록 노이즈 금지 조건을 지켜야 한다.
+3. 대표 주소 1.2.0 승격은 DB 적용과 검증 뒤 별도 운영 변경으로 진행해야 한다.
+4. Claude 전용 `read-budget`, `statusline-controller`, Agent 모델 지정 게이트는 Codex 도구·TUI가 달라 의도적 비적용이다. 나머지 공통 핵심 훅은 동기화와 등록 검증 대상에 포함됐다.
+
+### 다음 액션
+1. **소유자: 회장.** 운영 DB 마이그레이션 실제 적용 승인. **종료증거:** 승인 의사 확인.
+2. **소유자: Codex.** 승인 직후 DB push와 migration history 재확인. **종료증거:** `20260825020000` remote 기록 채움.
+3. **소유자: Codex.** 운영 계약 검증 후 대표 주소 승격을 별도 실행. **종료증거:** 허용된 환전 성공 증거와 대표 주소 `/api/health`의 `version: 1.2.0`.
+4. **소유자: 회장 또는 계정 관리자.** GitHub Actions 결제 제한 해소. **종료증거:** CI 작업이 실제 시작되어 전부 성공.
+
+## CODEX 후속 (2026-08-28 운영 재확인) - 배포 단계 최우선 작업 판정
+
+### 지금까지 한 것
+- `session-state.core.md`와 `pipeline-state.core.md` 최신 인계를 읽고 현재 공정이 `ship`임을 재확인했다.
+- `npx supabase migration list --linked`를 운영 연결로 다시 실행했다. 로컬 42개 중 `20260825020000_cashout_total_threshold_contract`만 remote 값이 비어 있어, 회장이 신고한 총 30클로버·지급가능 27클로버 환전 결함이 운영에서 아직 미해소임을 직접 관찰했다.
+- 작업 트리의 미추적 `docs/growth/*`와 세션 로그는 다른 트랙 소유로 판단해 변경하지 않았다.
+
+### 남은 이슈
+1. 운영 DB에 `20260825020000` 마이그레이션 적용이 필요하다. 운영 스키마 변경이므로 회장 승인 대기다.
+2. 운영 대표 주소 `haenael-ge.vercel.app`은 최신 1.2.0 Production이 아닌 1.0.0 배포를 가리킨다. DB 적용과 검증 후 별도 승격 승인이 필요하다.
+3. GitHub Actions는 계정 결제 제한 때문에 작업이 시작되지 않는다. 코드와 분리된 계정 관리자 조치 사항이다.
+4. 운영 실제 계정으로 총 30·지급가능 27 환전 성공을 확인하기 전에는 버그 수정 완료로 보고할 수 없다.
+
+### 다음 액션
+1. **소유자: 회장.** 운영 DB 마이그레이션 적용 승인. **종료증거:** 승인 의사 확인.
+2. **소유자: Codex.** 승인 직후 `npx supabase db push` 실행 및 migration history 재확인. **종료증거:** `20260825020000` remote 값 채움.
+3. **소유자: Codex.** 운영 경로에서 총 30·지급가능 27 계약을 검증하되 시험 신청 기록 노이즈를 만들지 않는 검증 경로를 먼저 확정. **종료증거:** 운영 함수 계약 확인과 허용된 실제 환전 성공 증거.
+4. **소유자: Codex.** DB 검증 후 대표 주소 승격 승인을 별도로 요청. 승인 시 별칭 변경과 health 재확인. **종료증거:** 대표 주소 `/api/health`가 `version: 1.2.0` 반환.
+5. **소유자: 회장 또는 계정 관리자.** GitHub 결제 제한 해소. **종료증거:** 빌드·테스트·E2E 작업 시작 및 전부 성공.
+
 ## ★ CODEX 인계 (2026-08-28 21:20 KST) — Claude 토큰 소진, 여기서부터 Codex 가 이어받는다
 
 ### 0. 이어받는 사람이 제일 먼저 알아야 할 것

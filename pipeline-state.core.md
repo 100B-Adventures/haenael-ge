@@ -157,6 +157,12 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 2026-07-18 — 웰컴 클로버 + Vercel rosemallow95 이전 ship 실검증 완료(전부 관찰됨) — 회장이 Vercel을 code0to1→rosemallow95(팀 100-b)로 이전 지시. 컨트롤러가 브라우저로 rosemallow95 토큰 발급→VERCEL_TOKEN 배포. 프로젝트 haenael-ge rename, 도메인 haenaelge.vercel.app(+3개 alias), env 8개, 배포보호 해제(ssoProtection null). health {ok,1.0.0,db ok}. 카카오 REST키(1516450)에 redirect https://haenaelge.vercel.app/auth/kakao/callback 추가·저장. **prod 실왕복 관찰**: 새 도메인 온보딩→목표저장→LoginSheet→카카오 로그인(새 redirect+nonce)→콜백→세션→ShareLinkCard "해낼게 팀이 웰컴 클로버 3개 보냈어요" 배너 + 링크 haenaelge.vercel.app/g/bql9oe9g. home DOM "🍀 6개 ≈6,000원 상당"(원화 보조표시 신규UI 실서빙)+웰컴응원("첫 클로버는 저희가 먼저...")+워드맵 반영. 웰컴 트리거 prod 실발동 확증. 환전=CASHOUT_ENABLED off "준비중"(도달 미달, 안전). **웰컴 클로버 성장훅 + rosemallow95 이전 = prod 라이브 완료.** 잔여: 환전(legal 4건·PASS벤더·토스 지급대행 선결로 스텁), DM 발신계정, 토스 새상점(회장 다음주), 기존 haenael-ge.vercel.app(code0to1) 방치.
 
 ## Blocked / Notes
+### 2026-08-28 운영 DB 누락 및 대표 주소 드리프트 해소
+- `20260825020000_cashout_total_threshold_contract.sql` 운영 적용 후 migration history local=remote 확인.
+- 운영 함수 실덤프에서 입력 하한 `p_clover_amount < 1`, 총보유 최소 기준 `v_total < v_min`, 지급가능 상한 `p_clover_amount > v_payable` 분리 판정 확인.
+- 대표 주소 `haenael-ge.vercel.app`을 최신 Ready Production `haenael-qnsbl1ult-100-b.vercel.app`으로 승격. 새 요청 `/api/health`에서 `version: 1.2.0`, `database: ok` 관찰.
+- 남은 ship 갭은 실제 대상 회원의 30·27 환전 성공 실경로, GitHub Actions 결제 제한, 토스 해지, 세무 자문이다.
+
 ### 2026-08-28 ★★ 회장이 신고한 30클로버 버그가 운영에서 아직 안 고쳐졌다 (미적용 마이그레이션 1건)
 **실측(`npx supabase migration list --linked`)**: 로컬 42개 중 `20260825020000_cashout_total_threshold_contract` **하나만 remote 가 비어 있다.** 나머지 41개(`20260821000000`·`20260822000000`·`20260825010000` 포함)는 전부 적용됨 → 8-25 BLOCKER "local-only gap 15개"는 이 1건만 남기고 해소됐다.
 
