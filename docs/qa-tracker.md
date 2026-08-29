@@ -1,5 +1,17 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-30: 성능(perf) 항목만 재측정 — 범위 한정
+
+**판정 범위: 성능 항목만.** 아래 2026-08-29 라운드의 다른 blocker(제품 PRD 공백·디자인 lint·eng/legal)는 이 갱신과 무관하게 그대로 남아있다. 전체 QA는 여전히 ❌ NG — 이 항목만 BLOCKED → 부분 PASS로 바뀐 것.
+
+| 영역 | 이전(08-29) | 갱신(08-30) | 근거 |
+|---|---|---|---|
+| 성능 | CWV·p95·인증 성능 없음 → BLOCKED | 비로그인 공개 경로(`/`,`/terms`,`/api/health`) LCP·CLS 실측 + read-only 반복부하 p50/p95/오류율 실측 → **부분 PASS**(진짜 INP 미측정·표본 3회 한계로 "완전 PASS" 아님) | `docs/perf-report.md`(2026-08-30 STAMP), `docs/qa/vitals-2026-08-30.json`, `docs/qa/loadtest-2026-08-30.csv` |
+
+미해소로 남긴 것: 인증 필요 경로(대시보드·환전 신청 화면 등)의 성능은 이번에도 범위 밖(운영 쓰기·로그인 금지 지시 준수). ship 단계에서 이 측정이 최신 배포 버전을 쳤는지 커밋 SHA 대조 필요.
+
+---
+
 ## 2026-08-29: core v1.2.0 QA 보정 라운드2
 
 **판정: ❌ NG. 회귀·build·dev 보안은 PASS지만 제품·디자인·성능·운영 배포 blocker가 남음**
