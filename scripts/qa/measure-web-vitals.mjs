@@ -17,7 +17,7 @@
  *     --paths /,/terms \
  *     --out /tmp/vitals.json
  */
-import { chromium } from "playwright-core";
+import { chromium } from "../../web/node_modules/playwright-core/index.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

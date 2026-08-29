@@ -1,0 +1,351 @@
+{
+  "measuredAt": "2026-08-29T16:52:26.640Z",
+  "base": "https://haenael-ge.vercel.app",
+  "runsPerCell": 3,
+  "summary": [
+    {
+      "path": "/",
+      "viewport": "mobile-390",
+      "samples": 3,
+      "okSamples": 3,
+      "lcpMs": {
+        "p50": 700,
+        "p95": 728,
+        "min": 624,
+        "max": 728
+      },
+      "cls": {
+        "p50": 0,
+        "p95": 0,
+        "min": 0,
+        "max": 0
+      },
+      "tbtApproxMs": {
+        "p50": 597,
+        "p95": 656,
+        "min": 564,
+        "max": 656
+      },
+      "ttfbMs": {
+        "p50": 41.8,
+        "p95": 160.4,
+        "min": 38.8,
+        "max": 160.4
+      },
+      "raw": [
+        {
+          "path": "/",
+          "viewport": "mobile-390",
+          "httpStatus": 200,
+          "wallMs": 3277,
+          "lcpMs": 728,
+          "cls": 0,
+          "tbtApproxMs": 597,
+          "longTaskCount": 7,
+          "ttfbMs": 160.4,
+          "domContentLoadedMs": 505.3,
+          "loadEventEndMs": 1250.9,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/",
+          "viewport": "mobile-390",
+          "httpStatus": 200,
+          "wallMs": 2918,
+          "lcpMs": 624,
+          "cls": 0,
+          "tbtApproxMs": 656,
+          "longTaskCount": 10,
+          "ttfbMs": 38.8,
+          "domContentLoadedMs": 340.7,
+          "loadEventEndMs": 904.3,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/",
+          "viewport": "mobile-390",
+          "httpStatus": 200,
+          "wallMs": 2723,
+          "lcpMs": 700,
+          "cls": 0,
+          "tbtApproxMs": 564,
+          "longTaskCount": 9,
+          "ttfbMs": 41.8,
+          "domContentLoadedMs": 372.6,
+          "loadEventEndMs": 705.6,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        }
+      ]
+    },
+    {
+      "path": "/",
+      "viewport": "desktop-1024",
+      "samples": 3,
+      "okSamples": 3,
+      "lcpMs": {
+        "p50": 672,
+        "p95": 720,
+        "min": 364,
+        "max": 720
+      },
+      "cls": {
+        "p50": 0,
+        "p95": 0,
+        "min": 0,
+        "max": 0
+      },
+      "tbtApproxMs": {
+        "p50": 694,
+        "p95": 787,
+        "min": 322,
+        "max": 787
+      },
+      "ttfbMs": {
+        "p50": 41.3,
+        "p95": 54.6,
+        "min": 39.9,
+        "max": 54.6
+      },
+      "raw": [
+        {
+          "path": "/",
+          "viewport": "desktop-1024",
+          "httpStatus": 200,
+          "wallMs": 2585,
+          "lcpMs": 364,
+          "cls": 0,
+          "tbtApproxMs": 322,
+          "longTaskCount": 4,
+          "ttfbMs": 39.9,
+          "domContentLoadedMs": 189.9,
+          "loadEventEndMs": 570.4,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/",
+          "viewport": "desktop-1024",
+          "httpStatus": 200,
+          "wallMs": 3482,
+          "lcpMs": 672,
+          "cls": 0,
+          "tbtApproxMs": 694,
+          "longTaskCount": 8,
+          "ttfbMs": 54.6,
+          "domContentLoadedMs": 347.2,
+          "loadEventEndMs": 1467.2,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/",
+          "viewport": "desktop-1024",
+          "httpStatus": 200,
+          "wallMs": 2880,
+          "lcpMs": 720,
+          "cls": 0,
+          "tbtApproxMs": 787,
+          "longTaskCount": 5,
+          "ttfbMs": 41.3,
+          "domContentLoadedMs": 297.8,
+          "loadEventEndMs": 866.3,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        }
+      ]
+    },
+    {
+      "path": "/terms",
+      "viewport": "mobile-390",
+      "samples": 3,
+      "okSamples": 3,
+      "lcpMs": {
+        "p50": 384,
+        "p95": 840,
+        "min": 364,
+        "max": 840
+      },
+      "cls": {
+        "p50": 0,
+        "p95": 0,
+        "min": 0,
+        "max": 0
+      },
+      "tbtApproxMs": {
+        "p50": 838,
+        "p95": 851,
+        "min": 830,
+        "max": 851
+      },
+      "ttfbMs": {
+        "p50": 38.3,
+        "p95": 42,
+        "min": 32.1,
+        "max": 42
+      },
+      "raw": [
+        {
+          "path": "/terms",
+          "viewport": "mobile-390",
+          "httpStatus": 200,
+          "wallMs": 3144,
+          "lcpMs": 384,
+          "cls": 0,
+          "tbtApproxMs": 838,
+          "longTaskCount": 6,
+          "ttfbMs": 42,
+          "domContentLoadedMs": 163.5,
+          "loadEventEndMs": 1130.1,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/terms",
+          "viewport": "mobile-390",
+          "httpStatus": 200,
+          "wallMs": 2732,
+          "lcpMs": 364,
+          "cls": 0,
+          "tbtApproxMs": 830,
+          "longTaskCount": 6,
+          "ttfbMs": 38.3,
+          "domContentLoadedMs": 157,
+          "loadEventEndMs": 717,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/terms",
+          "viewport": "mobile-390",
+          "httpStatus": 200,
+          "wallMs": 3285,
+          "lcpMs": 840,
+          "cls": 0,
+          "tbtApproxMs": 851,
+          "longTaskCount": 7,
+          "ttfbMs": 32.1,
+          "domContentLoadedMs": 328.1,
+          "loadEventEndMs": 1270.1,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        }
+      ]
+    },
+    {
+      "path": "/terms",
+      "viewport": "desktop-1024",
+      "samples": 3,
+      "okSamples": 3,
+      "lcpMs": {
+        "p50": 452,
+        "p95": 472,
+        "min": 372,
+        "max": 472
+      },
+      "cls": {
+        "p50": 0,
+        "p95": 0,
+        "min": 0,
+        "max": 0
+      },
+      "tbtApproxMs": {
+        "p50": 967,
+        "p95": 1119,
+        "min": 910,
+        "max": 1119
+      },
+      "ttfbMs": {
+        "p50": 45.8,
+        "p95": 50.3,
+        "min": 43.8,
+        "max": 50.3
+      },
+      "raw": [
+        {
+          "path": "/terms",
+          "viewport": "desktop-1024",
+          "httpStatus": 200,
+          "wallMs": 3282,
+          "lcpMs": 472,
+          "cls": 0,
+          "tbtApproxMs": 910,
+          "longTaskCount": 6,
+          "ttfbMs": 50.3,
+          "domContentLoadedMs": 219,
+          "loadEventEndMs": 1265.7,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/terms",
+          "viewport": "desktop-1024",
+          "httpStatus": 200,
+          "wallMs": 2906,
+          "lcpMs": 452,
+          "cls": 0,
+          "tbtApproxMs": 967,
+          "longTaskCount": 8,
+          "ttfbMs": 45.8,
+          "domContentLoadedMs": 172.2,
+          "loadEventEndMs": 885,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        },
+        {
+          "path": "/terms",
+          "viewport": "desktop-1024",
+          "httpStatus": 200,
+          "wallMs": 3428,
+          "lcpMs": 372,
+          "cls": 0,
+          "tbtApproxMs": 1119,
+          "longTaskCount": 9,
+          "ttfbMs": 43.8,
+          "domContentLoadedMs": 167.9,
+          "loadEventEndMs": 1412.7,
+          "errors": {
+            "lcp": null,
+            "cls": null,
+            "longtask": null
+          }
+        }
+      ]
+    }
+  ]
+}
