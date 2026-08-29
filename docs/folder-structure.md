@@ -1,161 +1,212 @@
-# Folder Structure — 해낼게 (haenael-ge)
+# Folder Structure: 해낼게 운영 v1.0.0
 
-> eng-design 산출물. 실제 디렉터리 트리 + 각 폴더 책임 + 관습.
-> 🔒 회장 확정(2026-07-04): **서버리스 스택**(Next.js/Vercel + Supabase Postgres/Auth/RLS + Edge Functions) · **독립 코드베이스**(commons/public 의존 없음, 패턴 참고만). Spring Boot/Java 트리 폐기.
-> ⚠️ 폴더/패턴 확정은 **메인세션 대화**(plan-eng-review·plan-devex-review)로 굴린다 — 아래는 **선택지+추천**.
+> 기준 시각: 2026-08-29 04:54 KST
+> 원칙: 아래 트리는 목표 구조가 아니라 `rg --files`로 확인한 실제 구조다. 일부 파일은 대표만 표시한다.
 
----
+## 목차
 
-## 0. 최상위 (repo = haenael-ge, monorepo 단일)
+- [1. Repository root](#1-repository-root)
+- [2. Web](#2-web)
+- [3. Supabase](#3-supabase)
+- [4. QA and operations scripts](#4-qa-and-operations-scripts)
+- [5. Eng-design artifacts](#5-eng-design-artifacts)
+- [6. Import boundaries](#6-import-boundaries)
+- [7. Known structure drift](#7-known-structure-drift)
+- [8. Benchmark and self-check](#8-benchmark-and-self-check)
 
-```
+## 1. Repository root
+
+```text
 haenael-ge/
-├── web/                     # Next.js(App Router) — Vercel 배포. 프론트 + Supabase 클라이언트
-├── supabase/                # Supabase 프로젝트 (DB + Edge Functions + Auth 설정)
-│   ├── migrations/          # Postgres 스키마·RLS 정책 SQL (버전관리 = 진실원)
-│   ├── functions/           # Edge Functions (Deno/TS) — 돈 로직
-│   └── config.toml          # 프로젝트 설정(리전 ap-northeast-2 등)
-├── docs/                    # PRD·DESIGN·user-flow·본 eng-design 세트
-├── docs/WIREFRAMES/         # 10화면 프로토 (design 산출)
-├── pipeline-state.md
-└── README.md
+├── web/                         Next.js application
+├── supabase/                    Postgres migrations, tests, Edge Functions
+├── scripts/                     QA and operations scripts
+├── docs/                        pipeline artifacts and runbooks
+├── scratchpad/                  decision prototypes, not canonical runtime
+├── .github/workflows/           CI and readonly production E2E
+├── DESIGN.md                    product design SSOT
+├── RELEASE.md                   release manifest
+├── CHANGELOG.md                 release history
+├── pipeline-state.core.md       stage controller state
+├── session-state.core.md        handoff state
+├── vercel.json                  root Vercel configuration
+└── VERSION                      product version
 ```
 
-> **결정 A(추천): monorepo 단일 repo**(web/ + supabase/). 근거 = 1인 CEO 컨텍스트 스위칭 최소 + 마이그레이션·EF·프론트를 한 커밋으로. ⊖ Vercel(web)·Supabase(functions) 배포 타깃 2개(둘 다 서버리스라 관리 경량).
-> **상주 서버 폴더 없음**(backend/ 자바 트리 폐기). mobile/ = phase2(안 만듦).
+## 2. Web
 
----
-
-## 1. `supabase/` — DB·RLS·Edge Functions (돈 로직의 집)
-
-### 1.1 migrations/ — Postgres 스키마 + RLS (진실원)
-```
-supabase/migrations/
-├── 0001_init_member_goal.sql       # member, goal(+slug 트리거, deleted_at), 기본 RLS
-├── 0002_cheer_payment.sql          # cheer(deleted_at), payment, payment_log + 멱등 UNIQUE(order_id)
-├── 0003_clover_ledger.sql          # clover_ledger(append-only), clover_balance(파생), 트리거
-├── 0004_cashout_kyc.sql            # cashout_request, kyc_verification(PASS·is_adult), risk_event(미사용 스키마)
-├── 0005_wordmap_share_notif.sql    # wordmap_render_cache, share_event, notification(알림톡 채널)
-├── 0006_report_moderation.sql      # report 테이블 + soft-delete RLS(신고→deleted_at 필터)
-├── 0007_views_rls.sql              # goal_public 뷰(금액3층 a·deleted_at 제외), RLS 정책 전수(§ patterns)
-└── 0008_storage_buckets.sql        # 워드맵 이미지 버킷 + 정책
-```
-관습: **1 마이그레이션 = 1 논리 변경**, 순번 프리픽스. **RLS 정책은 그 테이블 마이그레이션에 같이**(테이블 만들고 RLS 안 켜면 = 유출). 되돌릴 수 없는 데이터변경은 별도 파일.
-
-### 1.2 functions/ — Edge Functions (Deno/TS, service_role) = 돈 코어
-```
-supabase/functions/
-├── _shared/                # 공용(자체 구현 — commons 의존 X)
-│   ├── toss.ts             # TossClient(결제 confirm/cancel, 간편결제) — 자체
-│   ├── payout.ts           # TossPayoutClient(지급대행) — 자체
-│   ├── ledger.ts           # clover 원장 기입 헬퍼(EARN/HOLD/SETTLE/REVERSAL)
-│   ├── withholding.ts      # 3.3%·take-rate·최소환전 30,000원
-│   ├── risk.ts             # riskHook 인터페이스 + noOpRiskHook(항상 CLEAR)  ⚠️ rule deferred
-│   ├── idempotency.ts      # 멱등키·중복 차단
-│   ├── oauth-kakao.ts      # 카카오 커스텀 OAuth 토큰교환 → Supabase 세션
-│   ├── alimtalk.ts         # 카카오 알림톡 API 어댑터(정보성·템플릿)
-│   ├── pass.ts             # PASS 통합본인인증 어댑터(실명·나이·CI)
-│   └── region.ts           # x-region ap-northeast-2 핀 유틸(§ architecture 2.6)
-├── auth-kakao/             # 카카오 OAuth 콜백→토큰교환→Supabase 세션 발급
-├── cheer-order/            # POST: cheer=PENDING + payment 주문·멱등  [강모델]
-├── toss-confirm/           # POST: 서버승인 + payment DONE + cheer CONFIRMED + ledger EARN [강모델·리뷰]
-├── toss-webhook/           # POST: 경로 토큰+Toss API 재조회·상태 재동기(보상)  [강모델·리뷰]
-├── cashout/                # POST: 최소환전·PASS만19+·riskHook·HOLD + payout 트리거  [강모델·리뷰]
-├── cashout-payout/         # 지급대행 호출·SETTLED·지급명세·정산주기 D+n(⛔)  [강모델·리뷰]
-├── kyc-verify/             # PASS 본인인증·만19+·실명·CI 게이트
-├── notify/                 # 카카오 알림톡 발송(응원 도착 등 정보성) + 인앱 폴백
-├── report/                 # 신고 접수(RLS insert) + 수동 soft-delete 처리
-└── wordmap-render/         # 워드맵 이미지 렌더 → Storage
-```
-관습:
-- **돈 EF는 `service_role`** 로 RLS 우회 + 원장/결제를 **한 트랜잭션**(Postgres `rpc` DB 함수 호출로 원자성 보장 권장).
-- **토스 secret·payout 키 = Edge Function secret(env)**, 코드/브라우저에 하드코딩 금지.
-- `_shared/`는 **해낼게 자체 구현**. commons `payment-toss`(Java)는 설계 참고만(import X).
-- **[강모델·리뷰]** 표시 EF = build 시 강한 모델로 구현 + 코드리뷰 게이트(test-plan §0).
-
----
-
-## 2. `web/` — Next.js App Router (①②존 라우트그룹 분리)
-
-**DESIGN.md 절대규칙 = ①받는사람 존과 ②친구 목표페이지 존을 절대 섞지 않음** → 라우트 그룹으로 물리 분리.
-
-```
+```text
 web/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx              # 루트: Pretendard·토큰·Toaster(Sonner)
-│   │   ├── page.tsx                # ① 랜딩(landing-final) — 받는사람 존 입구
-│   │   │
-│   │   ├── (receiver)/             # ① 받는사람 존 (공급 acquisition)
-│   │   │   ├── onboarding/         # write-first: 목표쓰기→저장시 Supabase Auth
-│   │   │   ├── home/               # 받는사람 홈(워드맵 보기 단일 CTA, 🍀개수만)
-│   │   │   ├── wordmap/[goalId]/   # 워드맵 풀뷰→아이콘 공유
-│   │   │   └── cashout/            # 환전/정산(₩는 여기서만 현실화)
-│   │   │
-│   │   ├── g/[slug]/               # ② 친구 목표페이지 (공유 링크 타깃, 비로그인 SSR)
-│   │   │   └── page.tsx            # goal_public RLS 읽기 · 결제시트 · 마감
-│   │   │
-│   │   ├── auth/
-│   │   │   ├── kakao/callback/     # 카카오 커스텀 OAuth 콜백 → invoke('auth-kakao')
-│   │   │   └── (구글/애플=Supabase 네이티브)
-│   │   ├── payment/
-│   │   │   ├── success/            # 토스 successUrl → invoke('toss-confirm')
-│   │   │   └── fail/               # 토스 failUrl → ErrorState
-│   │   │
-│   │   └── privacy/  terms/  child-safety/   # 법정 고지
-│   │
+│   │   ├── (receiver)/
+│   │   │   ├── layout.tsx
+│   │   │   ├── onboarding/page.tsx
+│   │   │   ├── me/{page,loading,error}.tsx
+│   │   │   ├── wordmap/[goalId]/{page,not-found}.tsx
+│   │   │   └── cashout/
+│   │   │       ├── page.tsx
+│   │   │       ├── actions.ts
+│   │   │       ├── history/page.tsx
+│   │   │       └── status/page.tsx
+│   │   ├── g/[slug]/{page,error,not-found}.tsx
+│   │   ├── payment/{success,fail}/page.tsx
+│   │   ├── auth/kakao/{start,callback}/...
+│   │   ├── auth/{callback,logout}/...
+│   │   ├── admin/{page,actions}.tsx
+│   │   ├── api/health/route.ts
+│   │   ├── {how,terms,privacy,child-safety}/page.tsx
+│   │   ├── page.tsx
+│   │   ├── layout.tsx
+│   │   └── globals.css
 │   ├── components/
-│   │   ├── ui/                     # shadcn CLI 직접 생성 + 해낼게 토큰 (Button·Card·Sheet)
-│   │   ├── auth/                   # LoginSheet(카카오 primary + 구글/애플)
-│   │   ├── receiver/               # ① 전용: OnboardingGoalForm·ShareLinkCard·CashoutSheet·KycSheet(PASS)
-│   │   ├── goal/                   # ② 전용: GoalCard·CheerCount·Wordmap·EmptyState·ReportButton
-│   │   ├── payment/                # PaymentSheet·AmountChips(카카오페이/네이버페이/토스페이)·MessageField·AnonymityToggle
-│   │   └── common/                 # ErrorState·ConfirmToast·DdayChip·BrandMark
-│   │
+│   │   ├── auth/                LoginSheet, phone consent, logout
+│   │   ├── receiver/            ReceiverShell, onboarding, cheer list
+│   │   ├── goal/                goal card, owner bar, wordmap, split balance
+│   │   ├── cashout/             page view and request form
+│   │   ├── admin/               cashout queue
+│   │   ├── common/              report and shared interaction
+│   │   └── ui/                  local shadcn components
 │   ├── lib/
-│   │   ├── supabase/               # Supabase 클라이언트(browser anon / server) · 타입(gen)
-│   │   ├── toss/                   # 결제위젯 로더(간편결제)·ANONYMOUS 게스트
-│   │   ├── analytics/              # GA4 gtag 초기화·이벤트(수집=앱/분석=MARKETING 중앙)
-│   │   └── utils/                  # 포맷·slug·draft 로컬보존
-│   │
-│   ├── store/                      # 상태(경량 Zustand) — draft·게스트세션
-│   └── styles/                     # Tailwind 토큰 = DESIGN.md §3 매핑
-├── tailwind.config.ts              # DESIGN.md 토큰 theme.extend
-├── components.json                 # shadcn 설정
-└── package.json                    # 단일 앱. @postagi/* 워크스페이스 의존 없음(독립)
+│   │   ├── supabase/            browser/server/service clients and generated types
+│   │   ├── analytics/
+│   │   ├── auth/
+│   │   ├── clover/
+│   │   ├── toss/
+│   │   ├── cashout*.ts
+│   │   ├── phone.ts
+│   │   └── utils/
+│   ├── stories/
+│   ├── store/
+│   └── test/
+├── e2e/
+│   ├── cashout-manual.spec.ts
+│   └── production-auth-readonly.spec.ts
+├── public/
+├── package.json
+├── playwright.config.ts
+├── playwright.production.config.ts
+└── vercel.json
 ```
 
-### 폴더 관습 (web)
-- **①②존 컴포넌트 물리 분리**(`components/receiver/` vs `components/goal/`) — DESIGN.md 혼선 재발 방지를 폴더로 강제. 공용은 `common/`에만.
-- **읽기 = Supabase 클라이언트 직접**(`lib/supabase`, RLS가 보안). **돈 쓰기 = `supabase.functions.invoke('...')`**(Edge Function). 클라이언트가 원장·결제 테이블에 직접 쓰지 않는다.
-- ② `g/[slug]` = **비로그인 SSR**, `goal_public` 뷰만(금액 필드 부재). 인스타 링크 = `해낼게.app/g/{slug}`.
-- 토스 secret·카카오/PASS 키는 **web에 절대 없음**(Edge Function만). 결제 confirm은 `payment/success`에서 EF invoke.
-- **로그인**: 카카오=커스텀 OAuth(`auth/kakao/callback`→`auth-kakao` EF), 구글/애플=Supabase 네이티브. LoginSheet는 저장/결제 시점에만.
-- **GA4**: `lib/analytics`에서 gtag 수집만(app). 분석·대시보드는 MARKETING 중앙 테넌트(directive). 핵심 이벤트 = architecture §6.
-- **모더레이션**: ② `ReportButton` → `report` EF(신고). 삭제는 수동 soft-delete(admin UI=나중).
-- **독립**: `@postagi/*` 공유 패키지 import 금지. 401/세션은 Supabase Auth SDK가 관리(자체 인터셉터 불요).
+### Web ownership rules
 
----
+- Route-local Server Action은 해당 route 아래 `actions.ts`에 둔다.
+- provider/service secret loader는 `lib/supabase/service.ts`가 소유한다.
+- DB-generated types는 `lib/supabase/database.types.ts` 한 파일이다.
+- receiver 공통 shell은 `(receiver)/layout.tsx`와 `components/receiver/ReceiverShell.tsx`에 둔다.
+- 공개 goal component와 receiver component를 섞지 않는다.
+- test는 route/component 옆 `__tests__`, full browser flow는 `web/e2e`에 둔다.
 
-## 3. docs/ (eng-design 세트)
+## 3. Supabase
+
+```text
+supabase/
+├── config.toml
+├── migrations/
+│   ├── 20260705163137_init_schema.sql
+│   ├── ...
+│   ├── 20260802010000_cashout_security_hardening.sql
+│   ├── 20260821000000_cashout_service_fee_10pct.sql
+│   ├── 20260822000000_cashout_clover_lock_a1.sql
+│   ├── 20260825010000_cashout_verified_minor_only.sql
+│   └── 20260825020000_cashout_total_threshold_contract.sql
+├── functions/
+│   ├── _shared/                 toss, alimtalk, auth, error, risk helpers
+│   ├── auth-kakao/
+│   ├── cheer-order/
+│   ├── toss-confirm/
+│   ├── toss-webhook/
+│   ├── notify/
+│   ├── report/
+│   ├── wordmap-render/
+│   ├── lead-capture/
+│   ├── kyc-verify/
+│   ├── cashout/                 legacy 410 endpoint
+│   └── cashout-payout/          future 501 stub
+└── tests/
+    ├── cashout_manual.test.sql
+    ├── cashout_security_hardening.test.sql
+    ├── welcome_clover.test.sql
+    ├── welcome_reversal.test.sql
+    └── concurrency/
+        ├── cashout_double_request_race.sh
+        └── cashout_double_paid_race.sh
 ```
+
+### Supabase ownership rules
+
+- migration은 append-only다. 적용된 과거 migration을 수정하지 않는다.
+- 최종 함수 계약은 가장 늦은 `CREATE OR REPLACE` migration이 소유한다.
+- money mutation과 grant는 migration에 함께 둔다.
+- Edge Function 공통 helper만 `_shared`에 둔다. browser import 금지.
+- SQL contract는 `supabase/tests`, cross-process race는 `tests/concurrency`에 둔다.
+
+## 4. QA and operations scripts
+
+```text
+scripts/
+└── qa/
+    ├── check-deploy-env.mjs
+    ├── check-cashout-layer-contract.mjs
+    ├── check-cashout-raise-coverage.mjs
+    ├── check-cashout-notification-contract.mjs
+    ├── run-contract-mutations.mjs
+    └── verify-production.mjs
+```
+
+배포 env, 층간 계약, RAISE coverage, notification failure, mutation, production probe를 각각 분리한다. 한 script PASS가 다른 축을 대체하지 않는다.
+
+## 5. Eng-design artifacts
+
+```text
 docs/
-├── prd-haenael-ge-v0.2.0.md · one-thing.md · persona.md · bm.md · risks.md   (plan)
-├── DESIGN.md(루트) · user-flow.md · WIREFRAMES/                              (design)
-├── fdd-haenael-ge-v0.1.0.md
-├── architecture.md · folder-structure.md · design-patterns.md
-├── api-contract.md · test-plan.md
+├── prd-haenael-ge-v0.4.0.md
+├── user-flow.md
+├── erd.md
+├── fdd-haenael-ge-cashout-clover-lock-v1.1.0.md
+├── architecture.md
+├── api-contract.md
+├── design-patterns.md
+├── folder-structure.md
+├── test-plan.md
+├── test-cases.md
+├── qa-tracker.md
+└── WIREFRAMES/
 ```
+
+과거 FDD v1.0.0은 역사 보존이며 최신 build 입력은 v1.1.0이다.
+
+## 6. Import boundaries
+
+- `web/src`는 `supabase/functions`를 import하지 않는다.
+- Edge Functions는 browser-only module을 import하지 않는다.
+- payment/cashout DB mutation을 UI component에서 직접 호출하지 않는다.
+- 다른 벤처 repo 또는 `@postagi/*` runtime import를 추가하지 않는다.
+- `scratchpad`와 `docs/WIREFRAMES`는 runtime import 대상이 아니다.
+
+## 7. Known structure drift
+
+- generated DB type가 latest `my_cashout_status` 반환 2필드를 놓쳤다. 타입 재생성은 build task다.
+- 일부 docs와 release manifest가 과거 FDD v1.0.0을 가리킨다. ship에서 v1.1.0으로 pin한다.
+- untracked `docs/growth`는 별도 트랙 소유이며 eng-design이 수정하지 않는다.
+
+## 8. Benchmark and self-check
+
+Supabase 공식 Database Functions 구조는 DB function을 API로 호출할 수 있다고 명시한다. 이 repo는 function signature를 migration에, TypeScript view를 generated types에 두되 migration을 계약 우선순위로 삼는다. Stripe식 idempotency key는 application route가 아니라 돈 mutation boundary에 둔다.
+
+이 구조가 틀렸다면 route-local action이 늘어 공통 cashout logic이 분산된다는 이유일 수 있다. 현재 cashout member action과 admin action은 권한·secret·UI revalidation이 달라 분리 가치가 크고, 공통 domain 계산은 DB와 `lib/cashout*`에 둔다.
 
 ---
 
-## 4. ⛔ 회수/대화 필요 (메인세션 확정)
-- **폴더/패턴 스코어(plan-eng-review·plan-devex-review)는 대화로 확정** — 위는 추천안.
-- 결정 대기: (a) 프론트 호스팅 **Vercel vs CF Pages** → 회장이 "Vercel(또는 CF Pages)"로 열어둠 → **Vercel 추천**(Next.js 1급 지원), 최종 회장. (b) 원장 원자성 = EF 내 순차 vs **Postgres `rpc` DB 함수** → **DB 함수 추천**(트랜잭션 보장).
-- 🔒 확정: 독립 코드베이스(commons/public 의존 없음). "commons 실구현 검증" 태스크 불필요.
-- ⛔ **회수 필요: KYC·금융데이터 국외이전(Edge Function 국외 엣지 실행)** — architecture §2.6. legal 게이트 병합.
+🏷 STAMP | line: core | 생성: 2026-08-29 04:54 KST | model: gpt-5.6-sol | agent: tech-architect
+skills: 없음 | 근거: `rg --files` 실제 트리와 import/callsite scan
+고민: 과거 목표 트리에 있던 `/home`과 비어 있는 component 폴더를 제거하고 현재 `/me`, Server Action, 8 RPC 구조만 남겼다.
 
 SKILLS_USED: 없음
-SKILLS_SKIPPED: 매칭 스킬 없음(폴더구조 = 프로젝트 특정 설계, document-generate는 코드 역생성용 부적용)
+SKILLS_SKIPPED: 폴더 구조 전용 스킬이 없어 실제 파일 인벤토리를 사용했다.
 
-SOURCES/MODEL: opus-4-8[1m] · 근거=회장 확정 스택(coordinator relay) · Supabase 프로젝트 구조 관행(supabase/migrations·functions) · DESIGN.md ①② 분리 규칙 · architecture.md 자매 문서
+RUBRIC_SCORE: 완결성=5/5 정밀성=5/5 벤치마크반영=4/5 추적성=5/5 전문성·톤=5/5 total=24/25
+WEAKEST_LINE: 대표 트리는 탐색성을 위해 일부 테스트·정적 자산 파일을 생략했으므로 전체 파일 목록은 `rg --files`가 우선한다.
+
+SOURCES/MODEL: gpt-5.6-sol | `rg --files web/src supabase scripts docs`; `web/package.json`; `supabase/config.toml`; `docs/architecture.md`

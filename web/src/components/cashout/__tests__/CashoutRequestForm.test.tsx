@@ -327,12 +327,42 @@ describe("CashoutRequestForm", () => {
     const cloverInput = screen.getByLabelText("환전할 클로버") as HTMLInputElement;
 
     expect(cloverInput.value).toBe("27");
+    expect(screen.getByTestId("cashout-request-form")).toHaveTextContent(
+      "환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 27개",
+    );
+    expect(screen.getByTestId("cashout-request-form").textContent).not.toMatch(
+      /최소 30개|친구 응원분 30클로버부터|환전은 최소 30클로버부터/,
+    );
 
     fireEvent.change(screen.getByLabelText("은행"), { target: { value: "KB" } });
     fireEvent.change(screen.getByLabelText("계좌번호"), { target: { value: "123-456-789012" } });
     fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });
     fireEvent.click(screen.getByTestId("cashout-confirm-button"));
     expect(screen.getByTestId("cashout-confirm-step")).toBeInTheDocument();
+  });
+
+  it("QA-LOCAL-04 총보유 자격과 지급가능 0개 상태를 별도 안내한다", () => {
+    render(
+      <CashoutRequestForm
+        cashoutEnabled
+        reachedThreshold
+        payableAmount={0}
+        totalBalance={30}
+        minCashoutClover={30}
+        currentCashout={null}
+        history={[]}
+        initialPhone="01012345678"
+      />,
+    );
+
+    const disabledState = screen.getByTestId("cashout-confirm-disabled");
+    expect(disabledState).toHaveTextContent("친구 응원이 들어오면 신청할 수 있어요");
+    expect(disabledState).toHaveTextContent(
+      "웰컴 클로버는 환전되지 않아요. 친구 응원이 들어오면 지급 가능한 만큼 신청할 수 있어요.",
+    );
+    expect(disabledState.textContent).not.toMatch(
+      /최소 30개|친구 응원분 30클로버부터|환전은 최소 30클로버부터/,
+    );
   });
 
   it("진행 중 신청이 있으면 새 신청을 막고 상태 화면으로 연결한다", () => {

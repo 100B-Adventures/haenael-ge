@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 환전 30/27 경계 v1.0.0</title>
+  <style>
+    :root {
+      --bg: #fbfaf7;
+      --card: #ffffff;
+      --ink: #16140f;
+      --muted: #6f6a60;
+      --faint: #9c968b;
+      --line: #e8e4dc;
+      --primary: #1b8a4f;
+      --primary-ink: #14613a;
+      --accent: #e7f4ec;
+      --amber-soft: #fbf1dd;
+      --amber-line: #e8d3a6;
+      --amber-ink: #8a5a12;
+      --r-sm: 12px;
+      --r-md: 14px;
+      --font: Pretendard, "Apple SD Gothic Neo", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body { background: #26231f; color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+    button, input { font: inherit; }
+
+    .console { position: sticky; top: 0; z-index: 10; padding: 12px 16px; background: #1c1b19; color: #f4efe6; border-bottom: 1px solid #3c3832; }
+    .console-title { margin: 0 0 8px; font-size: 13px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+    .controls button { min-height: 32px; padding: 6px 10px; color: #d8d2c8; background: #292621; border: 1px solid #4a453e; border-radius: 8px; cursor: pointer; }
+    .controls button[aria-pressed="true"] { color: #fff; background: var(--primary); border-color: var(--primary); }
+    .stamp { margin: 8px 0 0; color: #aaa298; font-size: 10px; line-height: 1.5; }
+
+    .stage { display: flex; justify-content: center; padding: 32px 16px 64px; }
+    .frame { width: 390px; min-height: 844px; padding: 40px 22px; overflow: hidden; background: var(--bg); border-radius: 26px; box-shadow: 0 18px 60px rgb(0 0 0 / 35%); }
+    .stage[data-view="1024"] .frame { width: 1024px; min-height: 768px; border-radius: 14px; }
+    .screen { display: none; }
+    .screen.is-active { display: block; }
+
+    .brand { margin: 0 0 24px; font-size: 12.5px; font-weight: 800; letter-spacing: -.2px; }
+    .brand b { color: #1f9e5a; }
+    h1 { margin: 0 0 24px; font-size: 22px; line-height: 1.32; letter-spacing: -.4px; font-weight: 900; overflow-wrap: anywhere; }
+    .stage[data-view="1024"] h1 { font-size: 30px; }
+    h2, p { margin-top: 0; }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .stage[data-view="1024"] .layout { grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); align-items: start; }
+    .stage[data-view="1024"] .sticky { position: sticky; top: 24px; }
+    .stack { display: grid; gap: 16px; }
+    .card { min-width: 0; padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); }
+    .stage[data-view="1024"] .card { padding: 24px; }
+    .accent { background: var(--accent); border-color: transparent; }
+    .amber { background: var(--amber-soft); border-color: var(--amber-line); color: var(--amber-ink); }
+
+    .row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 8px 0; font-size: 13px; }
+    .row + .row { border-top: 1px solid var(--line); }
+    .row span:first-child { min-width: 0; color: var(--muted); }
+    .row strong { max-width: 58%; text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+    .row.total strong, .row.payable strong, .row.net strong { color: var(--primary-ink); }
+    .row.net { margin-top: 8px; padding-top: 16px; }
+    .row.net strong { font-size: 19px; }
+    .welcome { color: var(--faint) !important; }
+
+    .form { display: grid; gap: 16px; }
+    .field { display: grid; gap: 8px; }
+    .field label { font-size: 12.5px; font-weight: 800; }
+    .input { min-width: 0; width: 100%; min-height: 44px; padding: 12px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: var(--r-sm); }
+    .amount-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+    .unit { color: var(--primary-ink); font-size: 14px; font-weight: 800; }
+    .helper { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+    .preview { padding: 12px; color: var(--primary-ink); background: var(--accent); border-radius: var(--r-sm); font-size: 12px; line-height: 1.6; }
+    .button { width: 100%; min-height: 52px; padding: 14px 16px; color: #fff; background: var(--primary); border: 0; border-radius: var(--r-md); font-size: 15px; font-weight: 800; }
+    .button.secondary { min-height: 44px; color: var(--muted); background: var(--card); border: 1px solid var(--line); font-size: 13px; }
+    .button:disabled { color: var(--muted); background: #f4efe6; }
+
+    .center { max-width: 672px; margin-inline: auto; }
+    .success { padding: 24px; text-align: center; background: var(--accent); border: 1px solid rgb(27 138 79 / 30%); border-radius: var(--r-md); }
+    .success-mark { margin-bottom: 8px; font-size: 30px; }
+    .success h2 { margin-bottom: 8px; color: var(--primary-ink); font-size: 17px; }
+    .success p, .notice p { margin-bottom: 0; font-size: 12px; line-height: 1.65; }
+    .notice h2 { margin-bottom: 8px; font-size: 14px; }
+    .spinner { width: 24px; height: 24px; margin: 0 auto 16px; border: 3px solid var(--line); border-top-color: var(--primary); border-radius: 999px; animation: spin 900ms linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    body.clean { width: max-content; background: var(--bg); }
+    body.clean .console { display: none; }
+    body.clean .stage { padding: 0; }
+    body.clean .frame { border-radius: 0; box-shadow: none; }
+
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  </style>
+</head>
+<body>
+  <header class="console">
+    <p class="console-title">core · 환전 30/27 경계 · v1.0.0</p>
+    <div class="controls" aria-label="프로토타입 제어">
+      <button data-control="view" data-value="390">390</button>
+      <button data-control="view" data-value="1024">1024</button>
+      <button data-control="screen" data-value="form">신청</button>
+      <button data-control="screen" data-value="confirm">확인</button>
+      <button data-control="screen" data-value="submitting">제출 중</button>
+      <button data-control="screen" data-value="done">접수</button>
+      <button data-control="data" data-value="empty">0건</button>
+      <button data-control="data" data-value="boundary">30/27</button>
+      <button data-control="data" data-value="large">대량</button>
+    </div>
+    <p class="stamp">STAMP: line=core · generated=2026-08-29 04:34 KST · model=gpt-codex · agent=product-designer · skills=pipeline · sources=DESIGN.md v2.0.1, 운영 1.2.0 CashoutPageView/CashoutRequestForm, Stripe Connect balances · 고민=자격 30과 신청 27을 한 화면에서 서로 다른 이름과 위계로 읽히게 했다.</p>
+  </header>
+
+  <main class="stage" data-view="390">
+    <article class="frame" aria-live="polite">
+      <p class="brand">해낼게<b>.</b></p>
+
+      <section class="screen" data-screen="form">
+        <h1>환전 전에<br>정직하게 보여드릴게요</h1>
+        <div class="layout">
+          <div class="stack">
+            <section class="card" aria-label="클로버 분해">
+              <div class="row total"><span>모인 클로버 (웰컴 포함)</span><strong id="total">🍀 30개</strong></div>
+              <div class="row"><span class="welcome">− 해낼게 웰컴 (지급 대상 아님)</span><strong class="welcome" id="welcome">− 🍀 3개</strong></div>
+              <div class="row payable"><span>친구 응원분 (지급 대상)</span><strong id="payable">🍀 27개</strong></div>
+            </section>
+            <section class="card accent" aria-label="입금액 미리보기">
+              <div class="row"><span>환산 (🍀1개 = 1,000원)</span><strong id="gross">27,000원</strong></div>
+              <div class="row"><span>서비스 이용료 (부가세 포함)</span><strong id="fee">− 2,970원</strong></div>
+              <div class="row"><span>사업소득 원천징수 3.3%</span><strong id="withholding">− 792원</strong></div>
+              <div class="row net"><span>받으실 금액</span><strong id="net">23,238원</strong></div>
+            </section>
+          </div>
+
+          <form class="card form sticky" onsubmit="return false">
+            <div class="field">
+              <label for="amount">환전할 클로버</label>
+              <div class="amount-line"><input class="input" id="amount" type="text" value="27"><span class="unit">클로버</span></div>
+              <p class="helper" id="helper">환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 27개</p>
+            </div>
+            <div class="field"><label for="bank">은행</label><input class="input" id="bank" value="카카오뱅크" readonly></div>
+            <div class="field"><label for="account">계좌번호</label><input class="input" id="account" value="3333••••5678" readonly></div>
+            <div class="field"><label for="holder">예금주</label><input class="input" id="holder" value="박해낼" readonly></div>
+            <div class="preview" id="preview">27,000원 요청 → 이용료 2,970원 · 원천징수 792원 → <strong>23,238원 입금</strong></div>
+            <button class="button" id="form-cta" type="button" data-next="confirm">환전 신청하기</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="screen center" data-screen="confirm">
+        <h1>이 계좌가 맞나요?</h1>
+        <div class="stack">
+          <section class="card">
+            <div class="row"><span>보내는 곳</span><strong>카카오뱅크 3333••••5678</strong></div>
+            <div class="row"><span>예금주</span><strong>박해낼</strong></div>
+            <div class="row net"><span>받으실 금액</span><strong data-net-copy>23,238원</strong></div>
+          </section>
+          <section class="card amber notice">
+            <h2>신청하면 클로버 <span data-payable-copy>27</span>개가 잠겨요</h2>
+            <p>모은 <span data-total-copy>30</span>개는 그대로 남고, 그중 <span data-payable-copy>27</span>개에만 잠금이 걸려요. <strong>입금이 끝나면 그때 <span data-payable-copy>27</span>개가 빠져요.</strong> 반려되면 잠금이 풀립니다.</p>
+          </section>
+          <button class="button" type="button" data-next="submitting">이 계좌로 신청하기</button>
+          <button class="button secondary" type="button" data-next="form">계좌 다시 입력</button>
+        </div>
+      </section>
+
+      <section class="screen center" data-screen="submitting">
+        <h1>잠깐 기다리는 동안에도<br>지금 하는 일을 알려드려요</h1>
+        <section class="card notice">
+          <div class="spinner" aria-hidden="true"></div>
+          <h2>신청을 안전하게 보내고 있어요</h2>
+          <p>계좌와 금액을 다시 확인해 접수하고 있어요. 이 화면을 닫아도 같은 신청이 두 번 들어가지 않습니다.</p>
+        </section>
+      </section>
+
+      <section class="screen center" data-screen="done">
+        <div class="stack">
+          <section class="success">
+            <div class="success-mark">🍀</div>
+            <h2>환전 신청이 접수됐어요</h2>
+            <p>카카오뱅크 3333••••5678 (박해낼)<br><strong data-net-copy>23,238원</strong>을 1~3영업일 안에 보내드릴게요.</p>
+          </section>
+          <button class="button" type="button">진행 상태 보기</button>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const state = {
+      view: params.get("view") || "390",
+      screen: params.get("screen") || "form",
+      data: params.get("data") || "boundary",
+    };
+    const datasets = {
+      empty: { total: 0, welcome: 0, payable: 0 },
+      boundary: { total: 30, welcome: 3, payable: 27 },
+      large: { total: 999999, welcome: 3, payable: 999996 },
+    };
+    const won = (value) => `${value.toLocaleString("ko-KR")}원`;
+    const calc = (clover) => {
+      const gross = clover * 1000;
+      const fee = Math.floor(gross * .1) + Math.floor(Math.floor(gross * .1) * .1);
+      const withholding = Math.floor((gross - fee) * .033);
+      return { gross, fee, withholding, net: gross - fee - withholding };
+    };
+
+    function render() {
+      const data = datasets[state.data] || datasets.boundary;
+      const money = calc(data.payable);
+      document.querySelector(".stage").dataset.view = state.view;
+      document.querySelectorAll(".screen").forEach((node) => node.classList.toggle("is-active", node.dataset.screen === state.screen));
+      document.querySelectorAll("[data-control]").forEach((button) => button.setAttribute("aria-pressed", String(state[button.dataset.control] === button.dataset.value)));
+      document.querySelector("#total").textContent = `🍀 ${data.total.toLocaleString("ko-KR")}개`;
+      document.querySelector("#welcome").textContent = `− 🍀 ${data.welcome.toLocaleString("ko-KR")}개`;
+      document.querySelector("#payable").textContent = `🍀 ${data.payable.toLocaleString("ko-KR")}개`;
+      document.querySelector("#gross").textContent = won(money.gross);
+      document.querySelector("#fee").textContent = `− ${won(money.fee)}`;
+      document.querySelector("#withholding").textContent = `− ${won(money.withholding)}`;
+      document.querySelector("#net").textContent = won(money.net);
+      document.querySelector("#amount").value = data.payable;
+      document.querySelector("#helper").textContent = data.total < 30
+        ? `환전 기준까지 ${30 - data.total}개 남았어요`
+        : `환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 ${data.payable.toLocaleString("ko-KR")}개`;
+      document.querySelector("#preview").innerHTML = `${won(money.gross)} 요청 → 이용료 ${won(money.fee)} · 원천징수 ${won(money.withholding)} → <strong>${won(money.net)} 입금</strong>`;
+      const cta = document.querySelector("#form-cta");
+      cta.disabled = data.total < 30 || data.payable < 1;
+      cta.textContent = cta.disabled ? "조금만 더 모으면 신청할 수 있어요" : "환전 신청하기";
+      document.querySelectorAll("[data-total-copy]").forEach((node) => { node.textContent = data.total.toLocaleString("ko-KR"); });
+      document.querySelectorAll("[data-payable-copy]").forEach((node) => { node.textContent = data.payable.toLocaleString("ko-KR"); });
+      document.querySelectorAll("[data-net-copy]").forEach((node) => { node.textContent = won(money.net); });
+    }
+
+    document.querySelectorAll("[data-control]").forEach((button) => button.addEventListener("click", () => {
+      state[button.dataset.control] = button.dataset.value;
+      render();
+    }));
+    document.querySelectorAll("[data-next]").forEach((button) => button.addEventListener("click", () => {
+      state.screen = button.dataset.next;
+      render();
+    }));
+    if (params.get("clean") === "1") document.body.classList.add("clean");
+    render();
+  </script>
+</body>
+</html>

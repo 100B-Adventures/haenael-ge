@@ -1,121 +1,182 @@
-# Design Patterns — 해낼게 (haenael-ge)
+# Design Patterns: 해낼게 운영 v1.0.0
 
-> eng-design 산출물. 이 프로젝트에서 **쓸 패턴 / 안 쓸 것**을 명시. 임의 개발 진입 시 "빈틈"의 원천을 사전 차단.
-> 근거: postAGI(Romeo) 설계 *참고* + risks.md(돈·규제) + DESIGN.md(금액 3층). 확정은 메인세션 대화.
-> 🔒 회장 확정(2026-07-04): **서버리스 스택**(Next.js/Vercel + Supabase Postgres/RLS + Edge Functions) · **독립 코드베이스**(Romeo/commons 코드 import 아님, *참고해 자체 구현*).
+> 기준 시각: 2026-08-29 04:54 KST
+> 범위: 현재 코드에 실제로 적용된 패턴과 의도적 배제를 기록한다.
 
----
+## 목차
 
-## 1. 실행 경로 분리 — 읽기(RLS) vs 돈 쓰기(Edge Function)
-서버리스엔 Controller-Service-Repository 3계층이 없다. 대신 **경로를 둘로 가른다**:
+- [1. Read/write 분리](#1-read-surface와-write-surface-분리)
+- [2. Database transaction script](#2-database-transaction-script)
+- [3. Append-only ledger](#3-append-only-ledger-with-snapshot)
+- [4. Idempotency](#4-idempotency-key-and-fingerprint)
+- [5. State machine](#5-state-machine-and-transition-guard)
+- [6. Lock hierarchy](#6-lock-hierarchy)
+- [7. Defense in depth](#7-defense-in-depth)
+- [8. Snapshot read model](#8-snapshot-read-model)
+- [9. Best-effort side effect](#9-best-effort-side-effect-after-commit)
+- [10. Adapter boundary](#10-adapter-boundary-for-external-providers)
+- [11. Server Action boundary](#11-server-action-as-secret-boundary)
+- [12. Soft delete](#12-soft-delete-and-sanitized-read-model)
+- [13. Role-separated UI](#13-role-separated-ui)
+- [14. Excluded patterns](#14-intentionally-excluded-patterns)
+- [15. Decision tests](#15-pattern-decision-tests)
+- [16. Benchmark and red-team](#16-benchmark-and-red-team)
 
-| 경로 | 무엇 | 어떻게 | 금지 |
-|---|---|---|---|
-| **읽기** | 목표 열람·워드맵·잔액·알림 | Next.js에서 Supabase 클라이언트 직접 쿼리(anon/authed) — **RLS가 보안** | 금액 필드를 공개 뷰에 노출 |
-| **돈 쓰기** | 결제확정·원장·환전·지급대행 | **Edge Function(service_role)** — 멱등·검증·원장 트랜잭션 | 클라이언트가 payment/clover_ledger 직접 write |
-| **비돈 쓰기** | 목표 생성·삭제·재공유 이벤트 | RLS insert/update(본인) + DB 트리거(slug 등) | RLS 없이 열어두기 |
-| **외부 I/O** | 토스·KYC | Edge Function `_shared/` 어댑터(자체 구현) | 브라우저에 secret |
+## 1. Read surface와 write surface 분리
 
-- **트랜잭션 경계 = Edge Function 안**(결제확정 payment+cheer+ledger를 Postgres `rpc` DB 함수 1커밋으로 원자화 권장).
-- **도메인 간 참조**: cheer→clover 적립은 `toss-confirm` EF가 `_shared/ledger.ts`로 기입(테이블 직접 크로스 write 금지, 헬퍼 경유).
+- 공개·본인 읽기: Supabase SSR client, PostgREST, RLS, sanitized view.
+- 돈 쓰기: Edge Function 또는 Vercel Server Action에서 privileged RPC 호출.
+- 원칙: 브라우저가 `payment`, `clover_ledger`, `create_cashout_request`를 직접 쓰지 않는다.
 
-## 2. RLS 패턴 (defense-in-depth) — DB가 최후 방어선
-- **모든 테이블 RLS ON.** 서버 코드 버그가 있어도 DB가 행 접근을 막는다(조사: Supabase RLS best practice = defense-in-depth).
-- 정책 관습: **SELECT/INSERT/UPDATE 정책을 짝으로**, RLS 컬럼(`member_id` 등)에 **인덱스**(누락 = 성능 킬러).
-- 핵심 정책:
-  - `goal_public` **뷰**(SELECT anon/게스트) = 금액 필드 부재(3층 a를 스키마로 강제).
-  - `goal`·`clover_balance`·`cashout_request` = `auth.uid() = member_id` 인 행만(본인).
-  - `payment`·`clover_ledger` = **클라 write 정책 없음**(service_role EF만). 본인 read만 허용.
-  - 게스트(`is_anonymous=true`) = 목표 read + cheer-order EF invoke만.
+## 2. Database transaction script
 
-## 3. 금액 3층 — DB 뷰/응답으로 분리 (타입·스키마로 강제)
-DESIGN.md §6을 **Postgres 뷰 + EF 응답 스키마**로 박는다(문서 규칙이 아니라 구조):
-- `goal_public` (②·공개) — **₩·클로버개수 컬럼 자체가 없음**, `cheer_count`(N명)만.
-- `clover_balance` (본인) — `clover_count`만, **₩ 없음**.
-- `cashout` EF 응답 — 여기서만 `grossKrw·feeKrw·withholdingKrw·netKrw`.
-- 입력검증: Edge Function에서 zod 등 스키마 검증(min 1,000원·D-day 미래·필수).
+결제 확정과 환전 전이는 DB function이 입력 검증, 상태 가드, row/advisory lock, 원장 기록을 한 트랜잭션에서 소유한다. Server Action은 transaction 경계를 흉내 내지 않는다.
 
-## 4. 원장 패턴 (Ledger, event-sourcing-lite) — 클로버
-- **`clover_ledger` = append-only** Postgres 테이블. 적립/홀드/정산/환원을 이벤트로 기입. 삭제·수정 금지. **Edge Function(service_role)만 write**(RLS로 클라 write 차단).
-- 잔액 = 원장 합계(SUM). `clover_balance`는 **성능용 파생 캐시**(원장에서 재계산 가능 = source of truth는 원장). 파생은 트리거 or EF.
-- 근거: Romeo `PointWallet`+`PointLog`+`PointLogType` **설계 참고**(코드 복사·의존 X, Postgres+EF 자체 재구현).
-- entry_type: `EARN`(결제확정) · `CASHOUT_HOLD` · `CASHOUT_SETTLED` · `CASHOUT_REVERSAL`(환전실패 복원) · `REFUND_REVERSAL`(응원환불).
+적용:
 
-## 5. 멱등성 (Idempotency) — 돈은 무관용
-- **결제 confirm·환전 payout은 멱등 필수.** Edge Function에서 `orderId`/`cashoutRequestId` UNIQUE 제약 + (필요 시) Postgres advisory lock으로 동시성 차단(Redis 없음 — DB로).
-- `payment` UNIQUE(order_id), `cashout_request` 상태머신으로 이중 지급대행 차단.
-- user-flow §2.2 "이중탭·중복결제" = 버튼잠금(UI) + EF 멱등(2중 방어).
+- `confirm_cheer_payment`
+- `create_cashout_request`
+- `admin_mark_cashout_paid`
+- `admin_reject_cashout`
 
-## 6. 상태머신 (State Machine) — payment·cheer·cashout
-명시적 상태전이만 허용, 역행·건너뜀 금지(불법전이는 EF에서 거절). Postgres CHECK/enum + EF 검증.
-- `payment`: READY → DONE / FAILED / CANCELED
-- `cheer`: PENDING → CONFIRMED / REFUNDED (결제 성공 시 CONFIRMED, 워드맵 반영)
-- `cashout`: REQUESTED → KYC_PENDING → APPROVED → PAYOUT_SENT → PAID / REJECTED / FAILED(→REVERSAL)
-- `goal`: ACTIVE → CLOSED(D-day) → (적립형이라 CLOSED도 응원 가능) / DELETED
+## 3. Append-only ledger with snapshot
 
-## 7. Adapter/Port (외부 격리) — 토스·KYC
-- 토스·KYC·알림은 `supabase/functions/_shared/`에 **어댑터(자체 구현, Deno/TS)**: `toss.ts`·`payout.ts`·`risk.ts`. EF 핸들러는 이 모듈에만 의존.
-- 근거: (a) 단위테스트 mock 교체 (b) 벤더 교체 여지(지급대행 개인 지급 불가 시 대안 — architecture §9).
-- ⚠️ **E2E·QA는 실제 토스 stage/test 키로** 친다(mock 아님, 헌법 §3 prod-parity).
+`clover_ledger`는 사건과 `balance_after`를 남긴다. `clover_balance`는 빠른 읽기용 캐시다.
 
-## 8. ⚠️ Deferred-Rule Hook 패턴 — 셀프후원 차단 (ACCEPTED-RISK)
-- 🔒 회장 결정(2026-07-04): 셀프후원·자금세탁 **차단 룰 미구현**(자연억제 — KYC·최소환전 30,000원·수수료·토스 모니터링). architecture §2.5.
-- 패턴: `cashout` Edge Function이 확정 전 `riskHook(request)` 호출. **기본 구현 = `_shared/risk.ts`의 `noOpRiskHook`(항상 `CLEAR`)**. 호출지점은 지금 심고, 룰 구현은 나중에 함수 교체만(재수술 X).
-- **`hook exists, rule deferred`** — 코드 주석·test-plan에 명시. 결제는 애초에 안 막음(환전측 훅만).
+- EARN: 실제 증가.
+- CASHOUT_HOLD: A1에서는 delta 0인 잠금 표식.
+- CASHOUT_SETTLED: 지급 완료 시 -N.
+- CASHOUT_REVERSAL: 반려 시 delta 0인 잠금 해제 표식.
+- WELCOME_GRANT/REVERSAL: 자격에는 포함하고 지급가능에서는 제외.
 
-## 9. 게스트 세션 패턴 (Supabase anonymous)
-- 무가입 응원자 = `supabase.auth.signInAnonymously()` → authenticated 역할(`is_anonymous=true` JWT). PG customerKey `ANONYMOUS`. 신원은 PG에만(환불·법적).
-- 게스트 권한 = `cheer-order`/`toss-confirm` EF invoke + 목표 read만. 조회(잔액)/환전/목표생성 불가(RLS·EF 검증).
+잠금량은 delta 합계가 아니라 `cashout_request.status='REQUESTED'`의 amount 합이다.
 
-## 10. 웹 상태관리 (경량)
-- **서버상태 = Supabase JS 클라이언트 + React Query(또는 SWR)** — 캐시·리페치. Supabase Auth SDK가 세션/리프레시 관리(자체 인터셉터 불요). @postagi 의존 X.
-- **로컬 draft(write-first)** = localStorage(로그인 실패해도 글 보존, user-flow §1.2). Zustand 경량.
-- **안 쓸 것**: Redux/무거운 전역스토어. 복잡 상태기계 라이브러리.
+## 4. Idempotency key and fingerprint
 
-## 11. 에러 처리
-- Edge Function: 통일 JSON 에러 형태(`{ error: { code, message } }`) 자체 정의 + 토스 예외 캐치 → 사용자 친화 코드. Supabase 클라 에러는 `.error` 체크.
-- 프론트: ErrorState 컴포넌트(사유 한 줄 + 재시도 + 대안). **dead-end 0**(user-flow) = 모든 에러에 다음 경로. 침묵 금지(로딩·실패 항상 표시, DESIGN.md §6).
+- 결제: order/request key와 request fingerprint.
+- 환전: `request_key` 부분 unique index와 normalized account HMAC을 포함한 fingerprint.
+- 같은 키와 같은 입력: 최초 결과 replay.
+- 같은 키와 다른 입력: conflict.
+- 네트워크 재시도가 새 돈 사건을 만들지 않는다.
 
-## 11a. 인증 패턴 — 카카오 커스텀 OAuth (Supabase 네이티브 미지원)
-- 🔒 로그인 = **카카오 primary** + 구글/애플. 구글/애플=`supabase.auth.signInWithOAuth`(네이티브). **카카오는 네이티브 미지원** → Edge Function `auth-kakao`가 인가코드→토큰교환→사용자정보→**Supabase 세션 발급**(admin API로 유저 upsert). PASS 본인인증은 로그인과 별개(환전 게이트에서만).
+## 5. State machine and transition guard
 
-## 11b. Soft-delete + 모더레이션 패턴 (MVP=신고+수동삭제)
-- 🔒 MVP 모더레이션 = **신고 버튼 + 수동 삭제**(사전 AI필터·admin UI=나중). `report` insert(RLS) → 운영자 수동 검토 → 대상 `goal`/`cheer`의 **`deleted_at` set**(soft-delete).
-- **RLS·뷰가 `deleted_at IS NULL`만 노출**(삭제 즉시 ②·워드맵에서 사라짐, 물리삭제 아님=감사·복구). `goal_public` 뷰에 `deleted_at IS NULL` 필수. cheer soft-delete → 워드맵 read-model 자동 제외. 원장은 불변(결제·정산 이력 유지).
+상태 변경은 허용된 이전 상태를 WHERE 조건으로 포함한다. 조회 후 애플리케이션에서 상태를 검사하고 별도 UPDATE하지 않는다.
 
-## 11c. 알림 패턴 — 카카오 알림톡(정보성)
-- 🔒 응원 도착 등 **정보성** 알림 = Edge Function `notify` → `_shared/alimtalk.ts`. **템플릿 사전심사·건당비·정보성만(마케팅 금지)**. 발송 실패 시 **인앱 알림(notification 테이블) 폴백**. "조용함" 에토스 = 빈도 최소.
+현재 수동 환전:
 
----
+```text
+none -> REQUESTED -> PAID
+                  -> REJECTED
+```
 
-## 12. 🚫 안 쓸 패턴 (의식적 배제 — slop·과설계 방지)
-| 배제 | 이유 |
+예약 enum인 KYC_PENDING, APPROVED, PAYOUT_SENT, FAILED는 전이 코드가 생기기 전까지 active state로 취급하지 않는다.
+
+## 6. Lock hierarchy
+
+1. 회원별 신청: transaction advisory lock.
+2. 해당 회원 balance row: `FOR UPDATE`.
+3. 요청별 관리자 전이: request advisory lock.
+4. 지급 확정 balance row: `FOR UPDATE`.
+
+모든 호출부가 같은 순서를 지켜 deadlock 가능성을 줄인다.
+
+## 7. Defense in depth
+
+- RLS 및 view column absence.
+- SECURITY DEFINER `search_path=''`.
+- explicit REVOKE/GRANT.
+- service-role browser exclusion.
+- account encryption, masking, HMAC fingerprint.
+- 최근 10분 계좌 열람 감사 gate.
+- state guard와 unique ledger guard.
+- public error code와 internal log 분리.
+
+## 8. Snapshot read model
+
+UI가 `total - locked`를 재계산하지 않는다. `clover_eligibility`가 한 스냅샷에서 다섯 값을 반환한다.
+
+PAID 화면도 라이브 total로 전후 값을 역산하지 않는다. `CASHOUT_SETTLED.balance_after`에서 확정 시점 전후 값을 읽는다. 지급 후 새 EARN이 들어와도 과거 설명이 바뀌지 않는다.
+
+## 9. Best-effort side effect after commit
+
+CASHOUT_REQUESTED와 CASHOUT_PAID 알림은 DB 성공 뒤 실행한다. 알림 실패가 돈 거래 성공을 뒤집지 않는다. 대신 notification channel/status와 server log가 실패를 관찰 가능하게 만든다.
+
+## 10. Adapter boundary for external providers
+
+- Toss payment logic: `supabase/functions/_shared/toss*`.
+- Kakao OAuth: `_shared/oauth-kakao.ts`.
+- Alimtalk: `_shared/alimtalk.ts`.
+- PASS/payout helper는 존재하지만 현재 환전 신청 선행조건 또는 자동 지급으로 활성화하지 않는다.
+
+Provider payload를 UI와 DB domain object에 직접 퍼뜨리지 않는다.
+
+## 11. Server Action as secret boundary
+
+환전 계좌번호와 암호화 key는 Vercel Server Action에서만 만난다. 폐기 `cashout` Edge Function은 410으로 body를 처리하지 않는다. 책임은 다음으로 제한한다.
+
+- session 인증
+- input normalization
+- phone owner update
+- local secret load
+- service-role RPC
+- post-commit notification
+- cache revalidation
+
+원자적 돈 규칙은 DB가 소유한다.
+
+## 12. Soft delete and sanitized read model
+
+goal과 cheer는 `deleted_at`과 status로 노출을 중단한다. ledger와 payment audit는 삭제하지 않는다. 공개 화면은 `goal_public`, `cheer_public`, wordmap filter만 사용한다.
+
+## 13. Role-separated UI
+
+- receiver: `(receiver)` route group과 `components/receiver`.
+- friend: `/g/[slug]`와 goal/payment components.
+- admin: `/admin`와 admin actions/components.
+
+받는 사람 acquisition과 친구 결제 화면을 같은 dashboard로 합치지 않는다.
+
+## 14. Intentionally excluded patterns
+
+| excluded | reason |
 |---|---|
-| **상주 백엔드 서버·마이크로서비스** | 🔒 서버리스(Edge Functions). 관리할 상주 앱 0. 고정비·운영부담 제거 |
-| **자체 Redis·세션 인프라** | Supabase(Postgres/Auth)로 충분. 멱등=DB UNIQUE, 세션=Supabase Auth |
-| **CQRS 풀분리·이벤트소싱 전면** | 원장(clover)만 append-only. 나머지는 CRUD. 전면 도입 과설계 |
-| **선불 지갑/사전충전** | 잠김결정 = 사전충전 X(전금법 회피). 충전형 클로버 지갑 패턴 금지 |
-| **자체 자금 보유·에스크로 직영** | architecture §2 = 자금 무보유. 우리 계좌로 자금 통과 금지(규제) |
-| **admin 풀 UI·RBAC 프레임워크** | 스코프 밖(MVP=수동/내부). 확장점만 |
-| **pledge 조건부 에스크로·달성판정 엔진** | 스코프 밖(phase2). cheer 서브타입 확장점만 |
-| **친구그래프·피드·팔로우 자료구조** | phase2. 단 goal/member FK가 **막지 않게** 설계(확장 허용) |
-| **무거운 전역 상태관리(Redux)·GraphQL** | 규모 대비 과분. Supabase 클라 + 서버상태 캐시 |
-| **랭킹·리더보드·과시 카운트** | DESIGN.md §5 anti-slop = 조용함 위반 |
-| **commons/public shared 의존(gradle·npm import)** | 🔒 독립 코드베이스. Romeo/DC와 결합·blast-radius 제거. 패턴은 *참고*만 |
-| **셀프후원 차단 룰(velocity·CI매칭·한도)** | ⚠️ ACCEPTED-RISK(§8). no-op 훅 자리만, 룰 deferred. 토스 문제제기 시 구현 |
-| **클라이언트에서 돈 테이블 직접 write** | RLS로 차단. payment·clover_ledger는 service_role EF만 |
+| 자동 지급 saga | `cashout-payout`이 501 stub이고 사업·법률 승인이 없음 |
+| 신청 시 PASS mandatory gate | 최신 정책은 미확인 가입자 허용, 확인된 미성년만 차단 |
+| event bus | 단일 제품 규모에서 DB transaction과 post-commit side effect로 충분 |
+| repository/ORM abstraction | generated Supabase types와 직접 RPC가 계약을 더 명확히 보존 |
+| runtime commons dependency | 독립 제품. 다른 벤처 코드 결합 금지 |
+| client-side ledger calculation | snapshot drift와 돈 오류 위험 |
+
+## 15. Pattern decision tests
+
+- privileged write가 browser client에 추가되면 reject.
+- 돈 상태 변경이 DB transaction 밖에서 여러 쿼리로 나뉘면 reject.
+- request key 없이 재시도 가능한 POST를 추가하면 reject.
+- HOLD나 REVERSAL을 음수·양수 delta로 되돌리면 A1 회귀.
+- 예약 cashout enum을 locked 집합에만 추가하고 종결 RPC를 안 넓히면 영구 잠금 회귀.
+- PASS가 신청 화면 선행 조건으로 다시 들어오면 최신 정책 회귀.
+
+## 16. Benchmark and red-team
+
+- [Supabase Database Functions](https://supabase.com/docs/guides/database/functions): privileged logic과 function security.
+- [PostgreSQL Explicit Locking](https://www.postgresql.org/docs/current/explicit-locking.html): advisory/row lock의 역할과 transaction 수명.
+- [Stripe Idempotent Requests](https://docs.stripe.com/api/idempotent_requests): retry-safe mutation.
+
+이 패턴 선택이 틀렸다면 DB function이 너무 비대해져 테스트와 변경이 어렵다는 이유일 것이다. 그러나 환전의 입력, lock, state, ledger가 서로 다른 계층으로 갈라지면 원자성을 잃는다. 계산 helper와 public error mapping은 분리하되 transaction boundary는 한 함수에 둔다.
+
+레드팀: SECURITY DEFINER가 RLS를 우회하므로 실수 한 번이 전 회원 데이터에 닿을 수 있다. 빈 search path만으로 충분하지 않다. auth.uid/service-role 검사, 최소 grant, schema qualification, pgTAP 권한 테스트를 함께 유지한다.
 
 ---
 
-## 13. 셀프심문 (CoVe)
-- **"이 패턴 세트가 틀렸다면 왜?"** → 원장을 안 쓰고 잔액 컬럼만 두면 빠르나 환불·감사에서 무너짐(돈). ⇒ 원장 유지(§4).
-- **"서버리스에 RLS 안 걸고 EF만 믿으면?"** → EF 버그 시 유출. ⇒ RLS ON 필수(§2, defense-in-depth). 방어됨.
-- **"과설계 아닌가?"** → §12로 상주서버·CQRS전면·pledge엔진 명시 배제. 원장·멱등·상태머신·RLS만 = 돈 다루는 최소 필수. 방어됨.
-- **레드팀(까다로운 시니어 리뷰어)**: "DTO 3층 분리는 보일러플레이트 아닌가?" → 금액 노출 = 제품 정체성(조용함) 위반 = 치명. 타입으로 막는 비용 < 유출 사고. 유지.
-- **"독립 코드베이스가 중복 아닌가?"** → 구현비용 agent≈0이라 DRY의 절감명분 소멸, 대신 결합·blast-radius 제거·배포독립이 이김(회장 결정). 패턴은 참고로 품질 유지. 방어됨.
-- **"셀프후원 훅 no-op = 구멍 아닌가?"** → 맞다(ACCEPTED-RISK, 회장 인지). 단 훅 자리를 지금 심어 나중 주입만으로 활성화 → 리스크 발현 시 재수술 없이 대응. 자연억제(KYC·최소환전·수수료)로 1차 방어.
+🏷 STAMP | line: core | 생성: 2026-08-29 04:54 KST | model: gpt-5.6-sol | agent: tech-architect
+skills: 없음 | 근거: 현재 migration, Server Action, Edge Function, 공식문서
+고민: 원장 패턴을 유지하면서도 A1의 delta 0 잠금을 원장 합계로 오해하지 않도록 snapshot read model을 별도 패턴으로 고정했다.
 
 SKILLS_USED: 없음
-SKILLS_SKIPPED: 매칭 스킬 없음(설계 패턴 결정 문서 — document-generate는 코드 역생성용 부적용)
+SKILLS_SKIPPED: 설계패턴 전용 스킬이 없어 현행 코드와 공식문서를 직접 대조했다.
 
-SOURCES/MODEL: opus-4-8[1m] · 근거=DESIGN.md §6(금액3층)·user-flow(dead-end0)·risks.md(돈/규제) · Supabase RLS defense-in-depth(WebSearch: supabase.com/docs database RLS, makerkit RLS best practices) · Romeo payment 도메인 구조(참고, 의존 X)
+RUBRIC_SCORE: 완결성=5/5 정밀성=5/5 벤치마크반영=4/5 추적성=5/5 전문성·톤=5/5 total=24/25
+WEAKEST_LINE: provider adapter의 인터페이스는 코드 경계로 설명했지만 별도 타입 다이어그램까지는 포함하지 않았다.
+
+SOURCES/MODEL: gpt-5.6-sol | `docs/architecture.md`; `docs/erd.md`; `supabase/migrations`; `web/src`; `supabase/functions`; https://supabase.com/docs/guides/database/functions; https://www.postgresql.org/docs/current/explicit-locking.html; https://docs.stripe.com/api/idempotent_requests

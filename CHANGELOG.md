@@ -3,6 +3,60 @@
 이 파일은 운영에 나간 것만 적는다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/),
 버전은 [유의적 버전](https://semver.org/lang/ko/)을 따른다.
 
+## [1.2.1] - 2026-08-29
+
+운영에는 반영됐지만 릴리스 문서에 남지 않았던 환전 기준 수정, 대표 주소 승격,
+운영 인증 검증을 하나의 패치 릴리스 후보로 묶었다.
+
+### 수정
+
+- 환전 최소 기준을 지급가능액이 아니라 총보유액으로 판단한다. 신청액의 상한은
+  지급가능액으로 유지하고 입력 하한은 1클로버로 분리했다. 총보유 30개 중
+  시스템 적립 3개를 제외한 27개를 신청하는 계약이 운영 함수에 반영됐다.
+- 릴리스 문서가 대표 주소를 1.0.0으로 기록하던 상태를 바로잡았다. 현재 대표
+  주소의 `/api/health`는 1.2.0과 데이터베이스 정상 상태를 반환한다.
+
+### 추가
+
+- 운영 전용 QA 계정으로 실제 Supabase 로그인 뒤 `/cashout`을 여는 읽기 전용
+  Playwright 검증. 환전 신청을 만들지 않고 실행 전후 요청 기록이 같은지 확인한다.
+- main에서 실행되는 운영 공개·인증 읽기 전용 GitHub Actions workflow. 자격증명은
+  `production-readonly-qa` Environment secret으로만 주입한다.
+
+### 변경
+
+- 정적 인라인 스타일과 사용자 화면의 토큰화 가능한 원시 색상을 디자인 토큰으로
+  옮겼다. 공개 4개 경로의 390px·1024px 전후 이미지 8쌍은 변경 픽셀 0이었다.
+- 릴리스 버전을 1.2.1 PATCH로 올렸다. 기존 외부 계약을 깨지 않는 운영 판정
+  수정과 검증 보강이라는 변경 규모를 SemVer 기준으로 반영했다.
+
+### 검증
+
+- 운영 Supabase migration 42/42 local·remote 일치. `20260825020000` 포함.
+- 대표 주소 HTTP 200, `version=1.2.0`, `database=ok`.
+- 운영 인증 E2E Playwright 1/1 통과, 13.7초, 환전 쓰기 요청 0건.
+- 기술설계 산출물 8/8과 RPC 8개 계약 대조 통과. 유저플로우 매핑 누락 0건.
+- QA 계약 env 34/34, cashout 33/33, RAISE 13/13, notify 8/8,
+  mutation 8/8 통과.
+- 선행 로컬 회귀는 Vitest 269/269, 환전 Playwright 12/12, Next build 통과.
+- 최신 Vitest는 build worker 격리 실행 270/270이 통과했지만 QA 병렬
+  환경은 269/270 timeout이어서 QA 독립 전량 PASS는 미확정이다.
+- GitHub Actions run `33190515509`는 세 job 모두 steps 0개다. 무료 2,000분
+  소진과 Actions budget `$0` 때문에 실행 전 차단됐으므로 green으로 기록하지 않는다.
+
+### 알려진 경계
+
+- 운영에는 총보유 30·지급가능 27 상태의 실제 계정이 0개다. 함수 계약은 확인했지만
+  실제 회원의 27클로버 신청 성공은 미검증이다.
+- QA v1.1.0은 전체 디자인 대조와 디자인 lint, 프로덕션 의존성 40건과 보안
+  헤더, 인증 Firefox·WebKit, 사용자 체감 성능·부하를 릴리스 차단으로 판정했다.
+- `v1.2.1` 태그와 운영 앱 버전 1.2.1 표기는 최종 릴리스 때 생성해야 한다.
+- FDD v1.1.0과 QA 산출물 v1.1.0 세트는 감사 결과에 맞춘 새 승인 핀으로 등록돼야 한다.
+
+<!-- STAMP: 수정 2026-08-29 05:18 KST | model gpt-5.6-sol | agent release-manager | skills pipeline, ship | basis 운영 DB·대표 주소·운영 E2E·GitHub Billing·QA v1.1.0 실측 | decision 기존 계약을 깨지 않는 운영 버그 수정이라 1.2.1 PATCH 선언 -->
+
+[1.2.1]: https://github.com/seong-jin-jo/haenael-ge/releases/tag/v1.2.1
+
 ## [1.2.0] - 2026-08-27
 
 승인 시안과 어긋나 개발 승인과 QA 승인을 반려 상태로 붙잡고 있던 화면 세 곳을

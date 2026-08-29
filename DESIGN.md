@@ -1,5 +1,5 @@
 ---
-version: alpha
+version: "2.0.1"
 name: 해낼게
 description: 친구의 목표에 조용히 돈으로 응원하는 링크 인 바이오형 모바일 웹 디자인 시스템
 colors:
@@ -113,8 +113,8 @@ motion:
 
 # DESIGN.md: 해낼게 (haenael-ge) 디자인 시스템 contract
 
-> **버전 v2.0.0.** 갱신 2026-08-23. 이 파일은 제품 디자인 시스템의 단일 진실원(SSOT)이다.
-> **STAMP.** 생성시각 2026-08-23 22:43 KST · 모델 gpt-5 Codex(런타임 세부 ID 비노출) · 에이전트 product-designer · 스킬 없음 · 기반 `DESIGN.md` v1.14.0 + 현재 프론트 구현 + 정본 프로토타입 v3.6 + Google Labs DESIGN.md 공개 스펙 · 고민 한 줄: 값은 프론트매터에서 기계가 읽고, 본문은 왜 그 값을 쓰는지 설명해야 재창조와 파서 오류를 함께 막는다.
+> **버전 v2.0.1.** 갱신 2026-08-29. 이 파일은 제품 디자인 시스템의 단일 진실원(SSOT)이다.
+> **STAMP.** 생성시각 2026-08-29 04:34 KST · 모델 gpt-codex · 에이전트 product-designer · 스킬 pipeline · 기반 `DESIGN.md` v2.0.0 + 운영 1.2.0 프론트 구현 + 운영 환전 계약 마이그레이션 + 전체 여정 프로토타입 v3.7 + Stripe Connect balance 문서 · 출고=`docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · 고민 한 줄: "30개"를 자격 임계와 신청량 하한으로 동시에 부르면 30/27 사용자가 화면에서 다시 막히므로 두 값을 이름부터 분리했다.
 > **Path B로 시작한 시스템.** 현재는 구현과 프로토타입이 존재하므로 백지에서 재창조하지 않는다. 본문의 역할값과 Colors, Typography, Layout의 역할↔코드 대조표를 함께 따른다.
 > 브랜드 **해낼게** · 슬로건 "응원은 돈으로 하는 겁니다." · One Thing "친구가 선언한 목표에, 조용히 돈으로 응원하고 간다."
 > 토대: shadcn/ui + Radix primitives + Tailwind 토큰. commons/PostAGI-public 결제·인증 컴포넌트 재사용 전제(PRD §9).
@@ -195,6 +195,7 @@ motion:
 | [Atlassian Design Tokens](https://atlassian.design/foundations/tokens/design-tokens/) | 토큰은 반복 디자인 결정을 이름과 값으로 묶는 SSOT이며, 모양이 아니라 의미에 따라 선택 | §3.8에서 역할, 칠 값, 실제 값, 사용처를 연결 | Atlassian 토큰 이름. 현재 해낼게 코드 이름을 우선 실측했다 |
 | [Carbon Typography Code](https://carbondesignsystem.com/elements/typography/code/) | 개별 `font-size`를 매번 쓰기보다 역할형 type style과 helper를 사용 | §3.8.2에서 현행 raw utility를 역할 단위로 모으고, 미구현 semantic class를 이탈로 표시 | Carbon 패키지와 IBM Plex 값 |
 | [Material 3 States](https://m3.material.io/foundations/interaction/states/overview) | enabled, disabled, hover, focus, pressed 같은 상태를 일관되게 정의 | §9 착수 순서에서 정상 상태만 그리지 않고 loading·error·disabled까지 확인 | Material의 색·모양 토큰 |
+| [Stripe Connect account balances](https://docs.stripe.com/connect/account-balances) | 하나의 잔액을 `pending`과 `available`로 분리하고 실제 지급은 available에서만 가능하다고 명시 | 총보유 자격과 지급가능 신청 상한을 별도 값·별도 라벨로 보여주는 §6-(c) 계약 | Stripe 용어·색·대시보드 외형 |
 
 **차별화.** 세 외부 시스템은 토큰화가 이미 끝난 코드베이스를 전제로 한다. 해낼게는 문서 별칭(`--ink`, `--clover`)과 실제 코드(`--foreground`, `--primary`, hex literal)가 섞여 있으므로, 이상형 표만 만들지 않고 현행 리터럴과 이탈까지 한 표에 남긴다.
 
@@ -348,24 +349,24 @@ motion:
 
 ### 3.7 Layout Grid (v1.13.0 신설. 발명이 아니라 정본 프로토가 이미 쓰는 값의 박제)
 
-> [실측 `scratchpad/cashout-full-journey-v3-opus.html`:72-87,397-399 · `web/src/app/(receiver)/cashout/page.tsx`:40-42]
+> [실측 `web/src/app/globals.css` `.receiver-page-frame` · `web/src/components/cashout/CashoutPageView.tsx` · `docs/prototype/core-cashout-30-27-v1-gpt-codex.html`:38-55]
 
 | | 모바일 | 데스크톱 |
 |---|---|---|
-| 기준 폭 | **390px** (프레임 폭 고정) | **1024px** (프레임 폭 고정) |
-| 칼럼 | **단일 컬럼 1개.** 4/8칼럼 격자를 쓰지 않는다 | **2단.** 본문 + 사이드 레일 |
-| 좌우 여백(정렬선) | **22px** (§3.3 고정값) | **56px** |
-| 상하 여백 | 상 34 / 하 30 | 상 38 / 하 46 |
-| 2단 비율 | 해당 없음 | `minmax(0, 1.15fr) minmax(0, .85fr)` |
-| 단 사이 gap | 해당 없음 | **32px** |
-| 사이드 레일 | 본문 아래로 접힘. 위 블록과 간격 **24px** | `position: sticky; top: 20px` |
+| 기준 폭 | **390px** 검수 기준, 실제는 가용 폭 100% | **1024px max-width** |
+| 칼럼 | **단일 컬럼 1개.** 4/8칼럼 격자를 쓰지 않는다 | 환전 신청만 **2단**, 나머지 받는사람 화면은 1단 |
+| 좌우 여백(정렬선) | **22px** (§3.3 기존 셸 호환값) | **22px** |
+| 상하 여백 | 상·하 **40px** | 상·하 **40px** |
+| 환전 신청 2단 비율 | 해당 없음 | `minmax(0, 1.08fr) minmax(0, .92fr)` |
+| 단 사이 gap | 해당 없음 | **24px** |
+| 사이드 레일 | 본문 아래로 접힘 | `position: sticky; top: 24px` |
 
-- **정렬선은 화면이 바뀌어도 안 움직인다.** 모바일 22px, 데스크톱 56px. 화면마다 다른 좌우 패딩 = §5-6 위반.
-- **주축 방향을 명시한다**(개발이 뒤집지 못하게). 모바일 = `flex-direction: column`, 데스크톱 = `display: grid` 2열. 1100px 미만에서는 데스크톱 프레임도 1열로 접는다(프로토 397~399행).
-- **본문 최대 폭.** 1024px 초과 뷰포트에서 본문을 무한히 늘리지 않는다. 컨테이너 상한을 두고 가운데 정렬한다. `cashout` = `max-w-5xl`(1024px), `cashout/status` = `max-w-4xl`(896px).
+- **정렬선은 화면이 바뀌어도 안 움직인다.** 받는사람 셸은 모바일·데스크톱 모두 좌우 22px이다. 22px은 운영 호환을 위한 명명된 예외이며 새 화면에서 다른 임의값을 추가하지 않는다.
+- **주축 방향을 명시한다.** 모바일 = 단일 column. 데스크톱 환전 신청 = `display:grid` 2열. 확인·제출중·접수는 단일 column, 최대 672px로 가운데 정렬한다.
+- **본문 최대 폭.** 1024px 초과 뷰포트에서 본문을 무한히 늘리지 않는다. `.receiver-page-frame`은 1024px 상한과 가운데 정렬을 공유한다.
 - **홈만의 예외 1개**: `/me`(홈)는 모바일에서 사이드 레일(잔액 카드)이 **본문보다 위**로 온다(`order: -1`, 아래 간격 0). 잔액이 이 화면의 첫 결정 대상이기 때문이다. 다른 화면은 전부 레일이 아래로 간다.
 
-⛔ **현재 코드의 이탈 (다음 build 슬라이스 정리 대상, §7.2)**: `web/src/app/(receiver)/me/page.tsx` 224~232행의 `<main>`에 최대 폭 컨테이너가 없다(`max-w`·`mx-auto` 0건). 데스크톱에서 본문이 화면 폭 전체로 늘어나 같은 라인의 `cashout`(max-w-5xl)·`status`(max-w-4xl)와 정렬선이 어긋난다. 세 화면이 서로 다른 상한을 쓰는 것도 함께 정리한다.
+✅ **운영 1.2.0 정렬선 수렴:** `ReceiverPageShell`이 `.receiver-page-frame`을 공유하고, CSS가 `width:100%`, `max-width:64rem`, `margin-inline:auto`, 상하 40px·좌우 22px을 한곳에서 적용한다. `/me`, `/cashout`, `/cashout/status`, `/cashout/history`가 이 셸을 사용한다. 새 화면은 페이지별 `max-w-*`를 다시 만들지 않는다.
 
 #### 3.8.3 Spacing 역할 ↔ 코드
 
@@ -439,6 +440,7 @@ motion:
 | **OnboardingGoalForm** | 목표·일정·왜 입력(①) | 작성·검증·저장 | Form+Input |
 | **GoalListCard** (v2) | 다중 목표 홈의 목표 카드: 제목·칩·응원 N명·미확인 배지·카드 내 링크복사/워드맵/응원보기 | 진행중·마감(past)·미확인 배지 | Card |
 | **SplitBalanceCard** (v3.6) | 환전 잠김 상태의 클로버 잔액. 총량(주) + 분할 막대 + 사용 가능·잠김 2행. §6-(d) 정본 | 잠김 없음(블록 소멸)·잠김 있음·입금 완료 직후 | Card |
+| **CashoutRequestForm** (전체 여정 v3.8, 경계 정본 v1.0.0) | 신청량(1~지급가능)·은행·계좌·예금주 입력 → 확인 → 접수. 자격 기준 총보유 30과 신청 상한 지급가능을 분리 | 입력·30/27 경계·에러·확인·제출중·성공·중복차단 | Form+Input+Alert+Button |
 | **AccountBalanceCard** (v2) | 계정 전체 클로버 잔액 1개(목표별 모금액 없음, §6-b 원화 보조 병기) | 기본·웰컴만 | Card |
 | **NewGoalButton** (v2) | 대시드 "＋ 새 목표 만들기" (상한 3 도달 시 disabled+이유) | 활성·비활성 | Button |
 | **SettingsRow** (v2) | 마이페이지 리스트 행: 아이콘·제목·설명·chevron/“준비중”칩 | 기본·준비중(disabled) | (custom) |
@@ -457,20 +459,16 @@ motion:
 | 층 | 정의 | 현재 소유 |
 |---|---|---|
 | **① 문서 셸** | `<html lang="ko">` + Pretendard 변수 + `bg-background` + Footer + Toaster(Sonner, `position="top-center"`, `richColors`) | ✅ 공유. `web/src/app/layout.tsx` |
-| **② 페이지 셸** | `<main className="min-h-svh">` + 배경 `#FBFAF7` + §3.7 좌우 여백 22px + 상하 여백 + 최대 폭 컨테이너 | ❌ **공유 아님.** 화면마다 각자 씀 |
-| **③ 상단 바** | 좌 = "해낼게." 워드마크(닷 = `--clover-bright`, 12.5px/800), 우 = NotificationBadge + LogoutButton. 아래 여백 20px | ❌ **공유 아님.** `/me`에만 있음 |
-| **④ 하단 회수 링크** | 하위 화면은 상단 바 대신 본문 끝에 "홈으로 돌아가기"(12px, `--faint`) 1개 | ❌ 관용으로만 존재 |
+| **② 페이지 셸** | `<main className="min-h-svh">` + 배경 `#FBFAF7` + §3.7 좌우 여백 22px + 상하 여백 + 최대 폭 컨테이너 | ✅ `ReceiverPageShell` + `.receiver-page-frame` 공유 |
+| **③ 상단 바** | 좌 = "해낼게." 워드마크(닷 = `--clover-bright`, 12.5px/800), 우 = NotificationBadge + LogoutButton. 아래 여백 20px | ✅ `ReceiverTopBar`의 `home`·`detail` 변형 |
+| **④ 하단 회수 링크** | 하위 화면은 본문 끝에 "홈으로 돌아가기"(12px, `--faint`) 1개 | ✅ `BackHomeLink` 공유 |
 
 **규칙 (신규 화면은 이걸 상속한다).**
 - 받는사람 라인의 모든 화면은 ②를 그대로 상속하고 본문만 채운다. 배경색·좌우 여백·상하 여백을 화면에서 새로 정하지 않는다.
-- 홈(`/me`) = ③ 상단 바. 홈에서 진입하는 하위 화면(`/cashout`, `/cashout/status`, `/wordmap/*`) = ④ 하단 회수 링크. **둘을 한 화면에 같이 두지 않는다.** 어느 쪽도 없는 화면은 dead-end이므로 §6 "dead-end 0" 위반이다.
+- 홈(`/me`) = ③ `home` 상단 바. 홈에서 진입하는 하위 화면(`/cashout`, `/cashout/status`, `/wordmap/*`) = ③ `detail` 상단 바 + ④ 하단 회수 링크. detail 상단 바는 현재 위치를, 하단 링크는 다음 경로를 담당하므로 함께 쓴다. 어느 쪽도 없는 하위 화면은 dead-end이므로 §6 "dead-end 0" 위반이다.
 - 친구가 보는 목표 페이지(`/g/[slug]`)는 ③·④ 둘 다 없다. 로그인한 주인이 자기 목표를 볼 때만 owner bar가 뜬다(§6-(b′)). 이건 shell 이탈이 아니라 §0이 정한 화면 분리다.
 
-⛔ **현재 결함: shell이 컴포넌트로 잠겨 있지 않다** (표면화만. 고치는 것은 다음 build 슬라이스).
-- `web/src/app/` 아래 `layout.tsx`는 **루트 1개뿐**이다. `(receiver)` 라우트 그룹에 layout이 없어서 ②③④가 공유 컴포넌트로 존재하지 않는다.
-- 그 결과 세 화면이 같은 값을 각자 손으로 다시 쓴다: `me/page.tsx:225`(`min-h-svh pb-[80px]` + inline style 배경 + `px-[22px] pt-10`, 최대 폭 없음), `cashout/page.tsx:40`(`min-h-svh bg-[#FBFAF7] px-[22px] py-10` + `max-w-5xl`), `cashout/status/page.tsx:44·80`(같은 클래스 + `max-w-xl` / `max-w-4xl`). 한 화면에서 두 가지 상한을 쓰고 있다.
-- 위험: 여백 하나를 바꾸려면 세 파일을 고쳐야 하고, 한 곳을 빠뜨리면 그 화면만 어긋난다. §3.7의 정렬선 이탈이 실제로 이렇게 생겼다.
-- 정리 방향(제안): `web/src/app/(receiver)/layout.tsx`를 만들어 ②를 잠그고, ③은 `<ReceiverTopBar>`, ④는 `<BackHomeLink>` 컴포넌트로 뽑는다. 페이지는 본문만 반환한다.
+✅ **운영 1.2.0에서 shell 공유 완료.** route layout을 추가하지 않고 `web/src/components/receiver/ReceiverShell.tsx`의 세 컴포넌트와 `globals.css`의 `.receiver-page-frame`으로 수렴했다. 이 방식은 로딩 화면까지 같은 셸을 재사용하며, 페이지별 본문 상태만 달라진다.
 
 ---
 
@@ -516,11 +514,11 @@ motion:
 
 | 자리 | 입력 상한 | 표시 상한 | 넘치면 | 현재 코드 |
 |---|---|---|---|---|
-| 목표 제목 | 60자 | **2줄 clamp**, 넘으면 말줄임 | 전체는 목표 수정 시트에서 확인 | `OnboardingGoalForm.tsx:321` · `GoalEditSheet.tsx:223` maxLength 60. **표시 clamp 없음** ⛔ |
+| 목표 제목 | 60자 | **2줄 clamp**, 넘으면 말줄임 | 전체는 목표 수정 시트에서 확인 | `/me`의 `.receiver-goal-title`은 2줄 clamp ✅. 공개 `GoalCard` 제목은 clamp 없음 ⛔ |
 | 목표 "왜" | 200자 | 3줄 clamp | 더 보기로 펼침 | maxLength 200 (`:395` / `:283`). 표시 clamp 없음 ⛔ |
 | 응원 메시지 (`/me` 목록 행) | 140자 | **1줄 말줄임** | 행을 눌러 전체 열람 | `me/page.tsx:96` `truncate` ✅ (지금 "…곧 친"에서 잘리는 그 규칙) |
-| 응원 목록 (`/me`) | 없음 | **8행** | 9번째부터 "더 보기"로 펼침 | `me/page.tsx:206` `.limit(8)`. **더 보기 없음** ⛔ 9번째 응원이 화면에서 사라진다 |
-| 워드맵 미니 프리뷰 (`/me`) | 단어 6자 | **6단어** | 워드맵 풀뷰로 이동 | `me/page.tsx:211` `.slice(0, 6)` ✅ 풀뷰 링크 있음 |
+| 응원 목록 (`/me`) | 없음 | **8행 미니, 20행 펼침** | 9번째부터 같은 자리에서 펼치고, 21번째부터 검색 | `CheerList.tsx`의 8/20 상한·검색·전체 개수 요약 ✅ |
+| 워드맵 미니 프리뷰 (`/me`) | 단어 6자 | **6단어** | 초과 개수 요약 + 워드맵 풀뷰로 이동 | `me/page.tsx`의 6개 preview와 `wordmap-overflow-summary` ✅ |
 | 워드맵 풀뷰 | 단어 6자 | **12단어** | 13번째부터 표시 안 함 | `Wordmap.tsx:115` `.slice(0, 12)`. 잘린다는 안내 없음 ⛔ |
 | 환전 내역 (신청 폼 안) | 없음 | **3행** | 환전 내역 화면으로 이동 | `CashoutRequestForm.tsx:386` `.slice(0, 3)` ✅ |
 | 환전 내역 화면 | 없음 | 20행 | 페이지네이션 | `cashout/page.tsx:21` `p_limit: 20` |
@@ -535,10 +533,7 @@ motion:
 
 **격자 상한**: 워드맵은 `flex-wrap` + 중앙 정렬이라 칸수를 세지 않는다. 대신 12단어 상한과 단어 6자 상한이 폭을 막는다(390px에서 최장 케이스 = 6자 단어 12개). 고정 칸 격자를 새로 도입하면 그때 `뷰포트 폭 ÷ 최소 칸폭`으로 상한을 정하고 이 절에 등록한다.
 
-⛔ **프로토타입에 overflow 상태가 없다** (상위 §1-5는 empty·정상·overflow 세 상태 렌더를 요구한다).
-- `scratchpad/cashout-full-journey-v3-opus.html` v3.6 전수 확인(2026-08-23): 데이터 상태 토글은 `below`(미달)·`reached`·`pending`·`paid`·`rejected`·`failed`·`blocked` 7종이고 전부 **환전 진행 상태**이지 데이터량 구간이 아니다. `empty`는 관리자 큐 빈 상태 1곳(876행)에만 있다. **과다(overflow) 상태 화면은 0개다.**
-- 따라서 위 표의 상한값들은 **아직 렌더로 검증된 적이 없다.** 응원 100건·60자 제목·140자 메시지가 동시에 들어온 화면을 아무도 본 적이 없다.
-- 다음 design 라운드 작업: 프로토에 데이터량 토글(0개 / 3개 / 10개 / 과다 100개)을 추가하고 `/me`를 세 구간으로 렌더한다. 이번 턴 범위는 DESIGN.md 규칙 명문화까지다(프로토 수정 안 함).
+✅ **환전 경계 프로토타입 데이터량 검증:** `docs/prototype/core-cashout-30-27-v1-gpt-codex.html`은 0건, 30/27 경계, 대량(총 999,999·지급가능 999,996) 토글을 제공한다. 390/1024에서 값 열 최대 58%, `minmax(0, …)`, `overflow-wrap:anywhere`를 적용했고 clean frame에서 수평 overflow 0을 실측했다. 응원 목록과 워드맵 전체 화면의 과다 데이터 검증은 해당 화면 정본의 관할이며, 워드맵 풀뷰 13번째 이후 회수 경로는 아직 ⛔다.
 
 ---
 
@@ -555,8 +550,11 @@ motion:
   - (b′) **본인 한정 개별 금액 노출 🔒(2026-07-19 회장 결정 B)**: 받는사람 **본인**은 `/home` 응원 목록에서 응원별 **클로버 개수(🍀 N)** 를 확인할 수 있다(v1.2.0의 "개별 후원자별 금액 비노출"을 본인에 한해 대체). Discreet 유지 장치 4개가 함께 잠김: ①목록은 **시간순 고정**(금액순 정렬·랭킹·리더보드·합계 비교 UI 금지) ②개수는 행 우측 메타(작게, clover-ink)로 두고 이름·메시지가 주 ③₩ 환산 병기 금지(원화는 (c) 환전에서만) ④익명 응원도 개수는 표시(익명=신원 은닉, 본인 수입 은닉 아님). **제3자·친구·공개 화면(/g, 워드맵, 공유이미지)은 종전대로 완전 비노출.** 프로토: `WIREFRAMES/haenael-receiver-manage-v1-fable.html`.
   - (c) **원화(₩) 실수령 확정 계산은 환전(cashout) 플로우에서만.** 차감은 **두 층**이고 이 순서를 화면이 지킨다 🔒(2026-08-21 회장 확정):
     - **계산식(정본).** `이용료 = floor(환산액 × 10%)` · `부가세 = floor(이용료 × 10%)` · `원천징수 = floor((환산액 − 이용료 − 부가세) × 3.3%)` · `받으실 금액 = 환산액 − 이용료 − 부가세 − 원천징수`. **절사(floor)는 세 지점 각각에 적용**하고, 원천징수의 모수는 환산액이 아니라 **이용료(부가세 포함) 차감 후 금액**이다. 검산: 30,000원 → 이용료합계 3,300 / 원천징수 881 / **25,819원**. 40,000원 → 4,400 / 1,174 / **34,426원**.
-    - **최소 환전액 = 30,000원(🍀 30개)** 🔒(코드·약관·프로토 반영 완료. `supabase/functions/_shared/withholding.ts` `MIN_CASHOUT_KRW`). 미달 화면은 dead-end가 아니라 대기 상태로 그린다(user-flow.md §1.2 "조금만 더 모이면").
-    - **웰컴 클로버 처리 🔒(2026-07-18 확정).** 환전 도달판정(30클로버)에는 웰컴을 포함하고, 실제 지급 계산에서는 웰컴을 제외한다(친구 응원분만 지급). 분해표(친구 응원분 / 웰컴 제외분)를 확정 CTA 전에 정직하게 노출한다.
+    - **환전 자격 기준 = 총보유 30,000원 상당(🍀 30개)** 🔒. 이것은 신청량 하한이 아니다. `총보유(웰컴 포함) ≥ 30`이면 자격에 도달하고, 미달 화면은 dead-end가 아니라 대기 상태로 그린다(user-flow.md §1.2 "조금만 더 모이면").
+    - **신청량 계약 = 지급가능 클로버 1개 이상, 지급가능 잔액 이하** 🔒. 지급가능은 웰컴과 진행 중 잠김을 제외한 값이다. 총보유 30·웰컴 3·지급가능 27이면 입력 기본값과 최댓값은 27이며 신청 가능하다. "최소 30개"나 "친구 응원분 30개부터"라는 카피는 자격과 신청량을 다시 섞으므로 금지한다.
+    - **웰컴 클로버 처리 🔒(2026-07-18 확정).** 환전 도달판정(30클로버)에는 웰컴을 포함하고, 실제 지급 계산에서는 웰컴을 제외한다(친구 응원분만 지급). 분해표(총보유 / 웰컴 제외 / 지급가능)를 확정 CTA 전에 정직하게 노출한다.
+    - **경계 예시 30/27.** `총보유 30 = 친구 응원 27 + 웰컴 3` → 신청량 27 → 환산 27,000원 → 이용료 합계 2,970원 → 원천징수 792원 → 실지급 23,238원. 화면 상단은 "환전 기준을 채웠어요", 입력 힌트는 "환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 27개"로 쓴다.
+    - **심리근거.** Stripe의 pending/available 분리 원칙처럼 성격이 다른 잔액을 한 숫자로 합치지 않는다. Fogg의 Ability 관점에서는 사용자가 통제할 수 없는 웰컴 제외분 때문에 막혔다고 느끼지 않도록 자격과 신청 상한을 한 화면에서 설명한다.
     - **금액 계층 분리.** 잔액 카드의 "≈N원 상당"은 (b) 등가 표기이므로 이용료를 반영하지 않는다. 실수령 확정은 (c) 환전 화면에서만 한다.
     - **표기·위계·안내 문구 규칙은 §8.3이 정본이다**(라벨 단어·행 구성·글자 크기·안내 순서). 여기 §6은 무엇을 계산하고 무엇을 어디서 보여주는가(UX 규칙)까지만 관할한다.
   - (d) **환전 중 잔액 표기 = 총량 유지 + 분할 표시 🔒(2026-08-21 회장 확정 A안).** 환전을 신청해도 **모은 클로버 총량은 줄지 않는다.** 신청한 만큼에 잠금이 걸리고, 총량에서 실제로 빠지는 시점은 **입금이 완료된 때** 하나뿐이다. 반려·이체실패는 잠금만 풀고 총량은 애초에 변하지 않았으므로 되돌릴 것이 없다.
@@ -713,23 +711,22 @@ motion:
 > v1.14.0의 §7.1 회장 결정 대기와 §7.2 작업 대기를 이동했다. 닫힌 결정은 다음 Decisions Log에 둔다.
 
 
-> 디자인이 드러낸 갭. 시안으로 *열어서* 보여주되 결정은 회장.
-> user-flow.md §5는 아직 구판(확정분이 섞여 있고 최소환전액 확정이 미반영)이다. **열린 항목의 정본은 이 절이다.** user-flow.md 동기화는 다음 design 라운드 작업.
+> 디자인이 드러낸 갭. 정책 결정과 구현 대기를 분리한다. `docs/user-flow.md` v0.3.1과 이 절은 2026-08-29 기준으로 동기화했다.
 
 ### 7.1 회장 결정 대기 (상류 정책)
 
-1. **미성년 연령게이트**: 만 몇 세부터 목표를 만들고 환전할 수 있는가. 화면 자리는 확보돼 있다(`cashout.html` defer 배너). 결정 전까지 온보딩에 연령 입력이 없으므로 KYC 단계에서 처음 드러난다.
-2. **환불 정책**: 응원 결제 취소·환불 가능 기간과 범위. 결정 전까지 게스트 결제 화면의 "환불·문의 경로 명시"(§6 실수 방지)가 문의 폼으로만 연결된다.
+1. **환불 정책**: 응원 결제 취소·환불 가능 기간과 범위. 결정 전까지 게스트 결제 화면의 "환불·문의 경로 명시"(§6 실수 방지)가 문의 폼으로만 연결된다.
+
+미성년 환전 정책은 2026-08-25 회장 결정과 `20260825010000_cashout_verified_minor_only.sql`로 닫혔다. 연령 확인 기록이 없거나 최신 기록이 성인이면 신청을 허용하고, 최신 기록이 미성년인 계정만 차단한다.
 
 ### 7.2 작업 대기 (결정은 끝났고 반영만 남음)
 
 1. **약관·개인정보 용어 드리프트** ⛔: 정본(§8.2)과 어긋난 표기가 코드에 남아 있다. build 라인 정리 대상.
    - `web/src/app/terms/page.tsx`: "서비스 이용수수료" 9회 → "서비스 이용료"로 통일하고 최초 1회만 "(이하 이용료)"로 정의.
    - `web/src/app/privacy/page.tsx`: "응원(후원)"(126행) · "환전(정산)"(55·136행) → 괄호 병기 제거. 약관 원문 인용 자리에서만 "정산" 허용(§8.2).
-2. **shell이 공유 컴포넌트가 아니다** ⛔ (v1.13.0에서 표면화, 상세 = §4.1). `(receiver)` 라우트 그룹에 layout이 없어 페이지 셸·상단 바·회수 링크를 세 화면이 각자 다시 쓴다. 정리 = `(receiver)/layout.tsx` + `ReceiverTopBar` + `BackHomeLink`.
-3. **정렬선 이탈** ⛔ (상세 = §3.7). `me/page.tsx`에 최대 폭 컨테이너 없음, `cashout`(max-w-5xl)·`status`(max-w-4xl/max-w-xl)가 서로 다른 상한 사용. 2번과 함께 정리한다.
-4. **오버플로 미구현 4건** ⛔ (상세 = §6.1 표). ①목표 제목 2줄 clamp 없음 ②목표 "왜" 3줄 clamp 없음 ③`/me` 응원 목록 9번째부터 사라짐("더 보기" 없음) ④워드맵 풀뷰 13번째 단어가 안내 없이 잘림.
-5. **프로토타입에 overflow 상태 없음** ⛔ (상세 = §6.1 하단). v3.6에 데이터량 구간(0/3/10/과다) 토글이 없다. 다음 design 라운드에서 `/me` 세 구간 렌더 추가.
+2. **텍스트 오버플로 잔여 3건** ⛔ (상세 = §6.1 표). ①공개 `GoalCard` 목표 제목 2줄 clamp ②목표 "왜" 3줄 clamp와 펼침 ③워드맵 풀뷰 13번째 이후 안내·회수 경로. `/me` 목표 제목, 응원 8/20/검색, 미니 워드맵 6개+초과 요약은 운영 1.2.0에서 해소됐다.
+
+✅ **이번 30/27 슬라이스의 디자인 작업 대기 없음.** `CashoutRequestForm.tsx`의 helper와 자격 도달·지급가능 0 카피가 §6-(c)와 일치하도록 현재 작업트리에서 수정됐고, focused canonical prototype·수치 규격·clean frame도 출고했다. 코드 테스트와 운영 실계정 관찰은 build·QA 관할이다.
 
 
 ## Decisions Log
@@ -741,7 +738,7 @@ motion:
 2. ~~① 가입 방식~~ **✅ 확정: write-first** (시작하기 → 목표쓰기 → 저장 시 로그인). draft 로컬보존 필수.
 3. ~~① 랜딩 포지셔닝~~ **✅ 확정: C 미니멀 + 워드맵 프리뷰 하이브리드** (`landing-final.html`).
 4. ~~게스트 결제 허용 범위~~ **✅ 확정(2026-07-01): 게스트 결제 허용**(앱가입 X, 간편결제). 응원자 익명표시 가능("익명의 누군가"), PG엔 신원 남음. 어뷰징은 환전 KYC·이상거래에서 차단.
-5. ~~최소환전액 수치~~ **✅ 확정: 30,000원(🍀 30개)**. 코드(`MIN_CASHOUT_KRW`)·약관 제7조의2(KYC 절차)·프로토 v3.4에 반영 완료. 상세는 §6-(c).
+5. ~~환전 자격 기준 수치~~ **✅ 확정: 총보유 30,000원 상당(🍀 30개)**. 이것은 신청량 하한이 아니다. 실제 신청은 지급가능분 1개 이상이며, 총보유 30·웰컴 3·지급가능 27이면 27개 신청 가능. 운영 계약 `20260825020000_cashout_total_threshold_contract.sql`과 프로토 v3.8이 정본이다. 상세는 §6-(c).
 6. ~~환전 중 클로버 표시~~ **✅ 확정(2026-08-21): A안 = 잠금 유지, 실지급 시 차감.** 회장 원문 "A안이지 실제로 빠져나갔을때 빠져나가야지". 근거 = 프로토 v3.5 8번 화면에서 두 표현안을 나란히 렌더해 회장이 선택. **선택의 의미**: 신청은 총량을 건드리지 않고 잠금만 건다. 총량이 줄어드는 유일한 시점은 입금 완료다. 반려는 잠금 해제이지 복원이 아니다. **이것은 문구 수정이 아니라 잔액 계산 방식 변경**이므로 상류(기술설계)로 넘어간다. 화면 규칙 = §6-(d), 반영 프로토 = `scratchpad/cashout-full-journey-v3-opus.html` v3.6(8번 표현안 화면은 결정 종결로 삭제).
 
 ---
@@ -756,7 +753,8 @@ motion:
 
 | 상태 | 파일 | 적용 범위·판정 근거 |
 |---|---|---|
-| **현행 화면 정본, 승인 대기** | `scratchpad/cashout-full-journey-v3-opus.html` v3.6 | 환전 전체 여정 7화면, 사용자·관리자, 390/1024, 잠금 A안. [실측 파일:6,406-460,983-987] `pipeline-state.core.md`:13에서 design `awaiting-approval`로 핀됨 |
+| **현행 경계 정본, 승인 대상** | `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 | 총보유 30·웰컴 3·지급가능 27 신청·확인·제출중·접수. 390/1024, 0건·경계·대량 토글, clean export 지원. 수치 정본=`docs/design-spec-core-cashout-30-27-v1-gpt-codex.md` |
+| **전체 여정 보조, 개정안** | `scratchpad/cashout-full-journey-v3-opus.html` v3.8 | v3.7 전체 여정에 30/27 경계와 신청량 입력 계약을 추가했다. 사용자·관리자, 390/1024, 잠금 A안 계승 |
 | **현행 화면 정본** | `docs/WIREFRAMES/landing-final.html` | 받는 사람 가입 랜딩 v2. [실측 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
 | **현행 화면 정본** | `docs/WIREFRAMES/goal-page.html` | 친구가 보는 목표 페이지 v2. [실측 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
 | **현행 화면 정본** | `docs/WIREFRAMES/payment-flow.html` | 게스트 결제 전체 v2. [실측 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
@@ -767,11 +765,12 @@ motion:
 | **폐기, 보존만** | `docs/WIREFRAMES/archive/landing-final-v1.html` · `archive/goal-page-v1.html` · `archive/payment-flow-v1.html` | v2 승격으로 폐기. [실측 각 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
 | **폐기, 보존만** | `scratchpad/cashout-manual-flow-v2-opus.html` | 수동환전 v2. v3.6 전체 여정으로 대체됨. [실측 파일:6, 정본 v3.6 파일:6] |
 
-⛔ **회수 필요:** v3.6은 현재 design 산출물의 화면 정본이지만 `pipeline-state.core.md`:13에서 아직 `awaiting-approval`이다. 다음 stage 진입 근거로 쓰려면 `/approve design`을 통한 게이트 통과가 필요하다. 또한 v3.6에는 데이터량 `0/정상/과다` 토글이 없어 overflow 렌더는 §7.2의 다음 design 라운드 대상이다.
+**회수 필요: 없음.** 이번 30/27 경계의 디자인 계약은 문서, canonical prototype, 수치 규격, clean frame, 현재 작업트리 UI 카피가 일치한다. 운영 DB에 실제 30/27 회원이 없어 실계정 신청은 QA에서 별도 검증해야 한다.
 
 ---
 
 > **변경 이력**
+> v2.0.1 (2026-08-29) 운영 1.2.0의 총보유 임계 계약을 디자인 정본에 반영했다. ①§6-(c)에서 총보유 30개 자격과 지급가능 1개 이상 신청을 분리했다. ②총보유 30·웰컴 3·지급가능 27·실지급 23,238원 경계 예시를 고정했다. ③`CashoutRequestForm` 인벤토리에 신청량과 30/27 상태를 추가했다. ④Stripe Connect의 pending/available 분리 원칙과 Fogg Ability를 근거로 기록했다. ⑤`docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0, 31행 수치 규격, clean frame 4장을 출고했다. ⑥운영 1.2.0에서 이미 해소된 shell·정렬선·응원 목록·미니 워드맵 결함을 현행 상태로 갱신했고, 남은 오버플로 3건만 보존했다.
 > v2.0.0 (2026-08-23) Google Labs 공개 DESIGN.md 원본 스펙 순서로 문서 구조를 전면 재편했다. ①YAML 프론트매터에 코드·정본 프로토타입 실측 색, 타이포그래피, 간격, 모서리, 그림자, 모션 토큰을 구조화했다. ②본문의 표준 8섹션을 Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts 순서로 고정했다. ③v1.14.0의 Archetype, 브랜드 형용사, 레퍼런스, 토큰 설명, 역할↔코드 대조표, 컴포넌트, 금지 패턴을 해당 표준 섹션으로 이동했다. ④Motion, 오버플로, 금액 표기, UX 라이팅, 에이전트 가이드, 미해결, Decisions Log, 유효 프로토타입은 원본 스펙이 허용하는 제품 고유 절로 8섹션 뒤에 보존했다. ⑤코드와 프로토타입은 수정하지 않았다.
 > v1.14.0 (2026-08-23) 전역 `standards/design.md` §15 필수 목차 감사 반영. ①§3.8에 색 15역할, 타이포 13역할, 간격 13역할의 `역할 / 칠 값 또는 클래스 / 실제 값(파일:행) / 쓰는 곳` 개발용 정본표를 코드·프로토 실측으로 신설했다. 문서 역할명과 하드코딩 구현의 차이를 숨기지 않고 semantic 변수 없음·`[신설·미구현]`을 분리했다. ②§9에 새 화면 착수 8단계와 잔액 카드 6항목 자가검증을 추가했고 못 찾은 줄 0건을 확인했다. ③§10에 현행 정본·유효 보조·결정용·폐기 프로토타입을 분리했다. 환전 v3.6은 화면 정본이지만 design 승인 대기임을 명시했다. ④전역 필수 목차 14절 대조표를 §15.1과 정확히 맞추고 오버플로·용어 사전 누락을 정정했다. ⑤코드·프로토타입은 수정하지 않았다.
 > v1.13.0 (2026-08-23) 회장 지적 "DESIGN.md에 뭘 넣어야 하는지 표준도 알지?" → 전역 표준(`standards/design.md` §1·§5·§9, `ux-writing.md` §8)이 요구하는데 빠져 있던 **필수 4항목**을 채웠다. 신규 원칙 발명 없이 **이미 쓰고 있는 값을 실측해 박제**한 것이 전부다. ①**§6.1 오버플로 방지 규칙 신설**(미정의 = 실격 항목): 목표 제목·"왜"·응원 메시지·응원 목록·워드맵·환전 내역·관리자 큐·식별자·링크 URL 9개 자리의 입력 상한·표시 상한·초과 시 행동을 코드 실측(`me/page.tsx:96·206·211`, `Wordmap.tsx:115`, `CashoutRequestForm.tsx:386`, `admin/page.tsx:140~142`, `OnboardingGoalForm.tsx:321·395`)으로 표에 고정 + 넘칠 때 규칙 3개. ②**§3.7 Layout Grid 신설**: 모바일 390 단일 컬럼 / 데스크톱 1024 2단(1.15fr·0.85fr, gap 32), 정렬선 22px·56px을 프로토 v3.6 CSS 72~87행에서 실측 박제. ③**§4.1 Shell 신설**: 문서 셸·페이지 셸·상단 바·하단 회수 링크 4층 정의(GNB 없음이 §0 귀결). ④**§3.2 서체 선택 근거**: Pretendard가 §1 형용사 3개를 어떻게 만드는지 + system-ui·Inter·전용 서체를 안 쓰는 이유. **선택 시점 근거는 저장소에 없어 "미기록"으로 명시하고 소급 정당화임을 밝혔다**(지어내지 않음). ⑤표면화한 결함 4건을 §7.2에 등록: shell 미공유, 정렬선 이탈(`/me` 최대 폭 없음), 오버플로 미구현 4건, 프로토 v3.6에 overflow 상태 0개. 코드·프로토 수정은 하지 않았다(다음 슬라이스).
@@ -790,17 +789,18 @@ motion:
 
 ---
 
-SKILLS_USED: 없음. 현재 설치된 스킬 목록에 제품 DESIGN.md 구조 재편과 Google 스펙 lint를 직접 수행하는 스킬이 없다.
-SKILLS_SKIPPED: imagegen은 래스터 이미지 생성용이라 이번 `DESIGN.md` 단일 문서 정합 작업에 부적합. 그 밖의 매칭 스킬 없음.
+SKILLS_USED: pipeline. design 단계 산출물 최신성 감사와 하류 회수 판정에 사용.
+SKILLS_SKIPPED: 제품 UI 전용 design-shotgun·design-review 스킬은 현재 세션에 제공되지 않았다. 기존 승인 시안을 계승한 계약 보정이라 신규 스타일 샷건은 적용하지 않았다.
 
 SOURCES/MODEL:
-- MODEL: gpt-5 Codex 런타임. 세부 배포 ID는 세션에 노출되지 않음. 역할 product-designer.
+- MODEL: gpt-codex 런타임. 역할 product-designer.
 - 품질헌법: `/Users/sj/.claude/CLAUDE.md` · `/Users/sj/.claude/standards/design.md` §1·§3·§5·§9·§11·§15 · `/Users/sj/.claude/standards/doc-review.md` · `/Users/sj/.claude/standards/benchmarks.md` · `/Users/sj/.claude/standards/artifact-stamp.md`.
 - 기존 구현: `web/src/app/(receiver)/me/page.tsx` · `cashout/page.tsx` · `cashout/status/page.tsx` · `web/src/components/goal/SplitBalanceCard.tsx` · `Wordmap.tsx` · `GoalEditSheet.tsx` · `web/src/components/cashout/CashoutRequestForm.tsx` · `web/src/components/admin/CashoutQueue.tsx` · `web/src/app/admin/page.tsx` · `web/src/app/layout.tsx` · `web/src/app/globals.css`.
-- 기존 정본·wiki: `scratchpad/cashout-full-journey-v3-opus.html` v3.6 · `pipeline-state.core.md` · `docs/구현현황.md` · `wiki/brand/visual-guidelines.md` · `wiki/brand/story-canon.md` · `wiki/brand-marketing-strategy.md`.
+- 기존 정본·wiki: `scratchpad/cashout-full-journey-v3-opus.html` v3.8 · `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · `docs/design-spec-core-cashout-30-27-v1-gpt-codex.md` · `pipeline-state.core.md` · `docs/구현현황.md` · `wiki/brand/visual-guidelines.md` · `wiki/brand/story-canon.md` · `wiki/brand-marketing-strategy.md`.
 - 문서 골격 실물: `/Users/sj/sj_code_master/zero-one/DESIGN.md` · `/Users/sj/sj_code_master/haejo-danta/DESIGN.md` · `/Users/sj/sj_code_master/openclaw-auto/DESIGN.md`.
 - Google DESIGN.md 원본: https://github.com/google-labs-code/design.md/blob/main/docs/spec.md · https://github.com/google-labs-code/design.md/blob/main/PHILOSOPHY.md · https://github.com/google-labs-code/design.md/blob/main/examples/paws-and-paths/DESIGN.md.
 - 기존 웹 실조사: https://atlassian.design/foundations/tokens/design-tokens/ · https://carbondesignsystem.com/elements/typography/code/ · https://m3.material.io/foundations/interaction/states/overview.
+- 2026-08-29 최신성 조사: https://docs.stripe.com/connect/account-balances · https://developer.apple.com/design/human-interface-guidelines/buttons · https://developer.apple.com/design/human-interface-guidelines/progress-indicators.
 
 RUBRIC_SCORE: 완결성=5/5 정밀성=5/5 벤치마크반영=5/5 추적성=5/5 전문성·톤=4/5 total=24/25
 WEAKEST_LINE: "문서형 품질 판정: Design Score B+ 상당"은 화면 렌더용 design-review 스킬 결과가 아니라 문서 정합 자가평가다. 그래서 본문에서 기존 프로토타입의 A- 기록과 이번 작업의 미재실행 범위를 분리했다.

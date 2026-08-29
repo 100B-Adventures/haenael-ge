@@ -4,45 +4,55 @@
 project: haenael-ge
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
-controller: claude             # 2026-07-17 user decision: Codex orchestration terminated; Claude owns all further orchestration.
-current_stage: ship   # 2026-08-28 상류 5단계 전부 승인 완료(plan·design 이번 턴 마감). ship 만 남았다. # 2026-08-24 환전 신청 로컬 실여정 QA 착수. 화면·DB 동시 관찰, 반려·금액·최소액·중복·loading·overflow·프로토타입 정합 검증. (구 eng-design) # 2026-08-21 회장 "쭉쭉 진행해 기술설계 개발 QA" + 표현안 A안 확정. design 반영 후 eng-design→build→qa 연속 진행. (구 design) # 2026-08-21 이용료 10% 슬라이스 진행: design(프로토타입 반영) → build(코드) → review → qa 순. (구: 2026-07-23 v2 design 진행 중(마이페이지·프라이버시설정 와이어). 병행: build 재개(7-21~23) 3종 정책링크·소식받기·응원클로버·웰컴·약관 코드·배포 완료(prod 실측 GREEN), 미검증 2건(클로버 개수 UI·로그아웃)·보안결함 1건(cheer_public 필터) 다음 슬라이스로.
-approved_stages: [plan, design, eng-design, build, qa]   # 플랫 인라인 리스트 — hook이 grep으로 읽는 단일 필드. /approve만 append.
+controller: claude             # 2026-08-30 Codex 사용량 소진으로 컨트롤러 복귀. 동일 루트 하네스와 단계 게이트를 적용한다.
+current_stage: qa   # 2026-08-30 회장이 지급 신원·세무정보 결정을 보류(유저 확보 우선)해 eng-design 의 유일한 blocker 가 범위 밖으로 이동. eng-design·build 재승인, qa 는 최신 배포 사후검증 대기.
+approved_stages: [plan, design, eng-design, build]   # 2026-08-30 eng-design 범위한정 승인 + build 재승인. qa·ship 은 배포 사후검증 전까지 미승인.
 approved_artifacts:   # 규약 = ~/.claude/standards/release-and-artifacts.md §1.1. 대시보드가 이걸 읽는다. 실물 없는 라벨 금지.
+  # 2026-08-30 전 단계 최신본 재핀. 갱신 = eng-design 7건(FDD v1.1.0 승격 + ERD·테스트케이스 신규), qa 5건(보안·성능·교차브라우저 리포트 신규), build 1건(구현현황 신규).
   plan:
     - { path: docs/prd-haenael-ge-v0.4.0.md, version: 0.4.0, status: approved, label: "PRD" }
+    - { path: docs/bm.md, version: unversioned, status: approved, label: "비즈니스 모델" }
     - { path: docs/risks.md, version: unversioned, status: approved, label: "리스크 원장" }
     - { path: docs/persona.md, version: unversioned, status: approved, label: "페르소나" }
     - { path: docs/one-thing.md, version: unversioned, status: approved, label: "One Thing" }
   design:
-    - { path: DESIGN.md, version: 2.0.0, status: approved, label: "디자인 시스템" }
-    - { path: docs/user-flow.md, version: 0.3.0, status: approved, label: "유저플로우" }
-    - { path: scratchpad/cashout-full-journey-v3-opus.html, version: 3.7, status: approved, label: "환전 프로토타입" }
+    - { path: DESIGN.md, version: 2.0.1, status: approved, label: "디자인 시스템" }
+    - { path: docs/user-flow.md, version: 0.3.1, status: approved, label: "유저플로우" }
+    - { path: docs/prototype/core-cashout-30-27-v1-gpt-codex.html, version: 1.0.0, status: approved, label: "30·27 환전 프로토타입" }
+    - { path: docs/design-spec-core-cashout-30-27-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "30·27 디자인 수치 명세" }
+    - { path: docs/design/clean-frames/core-cashout-30-27-clean-frames-v1-gpt-codex.stamp.md, version: 1.0.0, status: approved, label: "30·27 기준 프레임" }
   eng-design:
-    - { path: docs/fdd-haenael-ge-cashout-clover-lock-v1.0.0-opus5.md, version: 1.0.0, status: approved, label: "FDD 환전 잠금" }
+    - { path: docs/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md, version: 1.1.0, status: approved, label: "FDD 환전 잠금" }
     - { path: docs/fdd-haenael-ge-v0.1.0.md, version: 0.1.0, status: approved, label: "FDD 기저" }
+    - { path: docs/erd.md, version: unversioned, status: approved, label: "ERD" }
     - { path: docs/api-contract.md, version: unversioned, status: approved, label: "API 계약" }
     - { path: docs/architecture.md, version: unversioned, status: approved, label: "아키텍처" }
     - { path: docs/design-patterns.md, version: unversioned, status: approved, label: "설계 패턴" }
     - { path: docs/folder-structure.md, version: unversioned, status: approved, label: "폴더 구조" }
     - { path: docs/test-plan.md, version: unversioned, status: approved, label: "테스트 계획" }
+    - { path: docs/test-cases.md, version: unversioned, status: approved, label: "테스트 케이스" }
   build:
     - { path: docs/build-log.md, version: unversioned, status: approved, label: "빌드 로그" }
+    - { path: "docs/구현현황.md", version: unversioned, status: approved, label: "구현 현황" }
     - { path: "supabase/migrations/2026082*.sql", version: unversioned, status: approved, label: "환전 마이그레이션" }
   qa:
     - { path: docs/qa-tracker.md, version: unversioned, status: approved, label: "QA 트래커" }
     - { path: docs/core-cashout-qa-report-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "환전 QA 리포트" }
-    - { path: docs/core-cashout-design-conformance-matrix-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "디자인 정합 대조표" }
+    - { path: docs/design-conformance-matrix.md, version: unversioned, status: approved, label: "디자인 정합 대조표" }
+    - { path: docs/security-report.md, version: unversioned, status: approved, label: "보안 리포트" }
+    - { path: docs/perf-report.md, version: unversioned, status: approved, label: "성능 리포트" }
+    - { path: docs/cross-browser-matrix.md, version: unversioned, status: approved, label: "교차 브라우저 대조표" }
     - { path: "qa/contracts/*.json", version: unversioned, status: approved, label: "QA 계약 정의" }
   ship:
-    - { path: RELEASE.md, version: 1.2.0, status: approved, label: "릴리즈 매니페스트" }
-    - { path: CHANGELOG.md, version: 1.2.0, status: approved, label: "변경 기록" }
+    - { path: RELEASE.md, version: 1.2.1, status: approved, label: "릴리즈 매니페스트" }
+    - { path: CHANGELOG.md, version: 1.2.1, status: approved, label: "변경 기록" }
 stages:
   plan:       { status: approved, artifacts_ok: true }   # 2026-08-28 APPROVED (v0.4.0, 595줄). 미결이던 §10.7 Q9~Q11 처리: Q10(카카오 비즈앱+phone_number)=해소(member.phone 컬럼 20260805010000 + 운영 ALIMTALK 실발송 CASHOUT_REQUESTED·CASHOUT_PAID 각 1건), Q11(템플릿 사전심사)=해소(회장 2종 등록 확인), Q9(구글 provider 콘솔 활성)=**앱 출시로 defer**(LoginSheet.tsx:80 SHOW_SOCIAL_LOGIN=false 가 현 상태를 기록, 가역·비차단). §9 Q1~Q8 은 v0.3.0 승인분에서 이미 처리됨. (구 2026-07-26 REOPENED→v0.4.0: 로그인 확장(카카오+구글) + 알림톡 phone(비즈앱 전환) + 본인인증=환전만 명문화. 회장 결정 3/3 확정. prd-architect 위임 중. (2026-07-21 v0.3.0 승인분은 유효, v0.4.0이 계승)
   design:     { status: approved, artifacts_ok: true }   # 2026-08-28 APPROVED. 잔여였던 안내문구 볼드 강조가 코드에 반영된 것을 컨트롤러가 직접 확인(CashoutRequestForm.tsx:506 `<b>입금이 끝나면 그때 N개가 빠져요.</b>`, SplitBalanceCard.tsx:120 `<b>{total}개는 그대로</b>`). 실화면 대조 confirm 507.16px(시안 510)·submitting 614.94px(시안 617). (구 2026-08-22 A안(잠금 유지) 반영 완료: 프로토 v3.6 + DESIGN.md v1.12.0(§6-(d) 잔액 표기 규칙 신설·SplitBalanceCard 등록·A안 확정 이력) + user-flow §5.5. **화면 픽셀 대조 일치 판정**(컨트롤러가 모바일 390 실화면 me-390-locked-v5.png와 프로토 v3.6을 좌우 합성 qa-compare-v5.png로 직접 대조). 잔여 경미 1건: 안내문구 볼드 강조 미적용(리뷰 3차 지적과 함께 처리 예정). /approve design 대기. (구 2026-08-21 이용료 10% 반영 완료: 프로토타입 v3.4(회장 지적 3건 반영 — 차감표 1줄화·안내 2블록 분리·.u-side 갭 규칙 승격 5화면) + DESIGN.md v1.10.0 §8 UX 라이팅 신설. verify PASS(Score A−, RUBRIC 24/25), 컨트롤러 모바일 캡처 2장 직접 육안 대조. /approve design 대기. (구 REOPEN 사유: 이용료 10%: 승인 프로토타입 scratchpad/cashout-full-journey-v3-opus.html 541-546행 및 docs/WIREFRAMES/cashout.html 119-120행이 '수수료 미정' 플레이스홀더 — 10% 확정으로 정본이 어긋남. product-designer 위임. (구: 2026-07-22 프로토타입 완성(verify PASS·A-) — 회장 피드백 대기. 갈림길 2건(프라이버시진입·고객센터이메일) 미결. 재open 금지 규칙 적용(이미 1회 open하게 있음)
-  eng-design: { status: approved, artifacts_ok: true }   # 2026-08-01 수동환전 계좌수집 계약 v1.2 승인(492줄·매핑갭0·코드0건). (2026-07-31 ⟲ REOPEN(수동환전 계좌수집 슬라이스): design 승인 완료(회장 "플로우 OK", 프로토타입 cashout-full-journey-v3-opus.html, verify PASS Score A− + 컨트롤러 실측 줄표0·배치분기23). 이제 계좌 저장/암호화 스키마·RPC 계약을 회장과 티키타카(§6.3.5)로 확정해야 함. 기저 6문서 승인분(2026-07-05)은 유효.
-  build:      { status: approved, artifacts_ok: true }   # 2026-08-27 반려 사유 전부 해소. 시안정합 3건(확인화면 1346→371px·로딩화면 1505→403px·워드맵 12→6개) 수정 후 컨트롤러가 Storybook 캡처를 직접 열어 육안 확인, 회장 확인 완료. 빌드 통과·vitest 269/269·test:qa-contracts 깨뜨리기 8건 전부 검출. 환전 실동작은 운영 4건 지급·알림톡 2종 발송으로 확인됨. **2026-08-27 승인 완료.** (구 2026-08-26 부분 해소: 환전 실동작 확보(운영 5건 처리·알림톡 2종 발송 확인). 해소분=본인인증 게이트 완화(20260825010000)·최소기준 총보유 판정·오류사유 보존·notify 인증 교체·관리자 Slack 통지. **미해소=2026-08-22 code-review MAJOR 4건 중 시안정합 잔여(전용 확인단계·loading 전환·워드맵 미리보기 개수)**. 이 잔여가 남아 changes-requested 유지. (구 2026-08-22 2차 code-review 또 BLOCK(MAJOR 4건, 전부 "계산은 A안인데 그 계산을 설명하는 화면들이 B안 그대로"). ①status:55 beforeBalance를 라이브 총량에서 역산 → PAID 배너가 계속 떠서 이후 응원분이 얹힘("60개에서 30개" 같은 존재한적없는 수) ②CashoutRequestForm:333-334가 §6-(d)① 예고 누락 + 폐기어 "돌아옵니다" + 죽은 라벨 "환전 진행중"(프로토 v3.6 문구가 코드에 안 옴) ③관리자 admin/page:316,57,59 + CashoutQueue:243 "반려하고 복원"이 허위(A안 반려는 delta=0, 복원할 것 없음) ④status:97-105가 잠김 화면인데 SplitBalanceCard 미적용(사용가능 행·분할막대 없음). 컨트롤러 코드 직접 확인 4/4 사실. **MAJOR 4건 중 테스트가 잡는 것 0건** — 246 PASS와 무관. 1차 BLOCK 3건은 라인대조로 실제 해소 확인. (구 3건 수정 완료. 컨트롤러 직접 확인: DROP FUNCTION request_manual_cashout(:21) / 게이트 3종 복원(:426 actor NULL, :448 reveal_required, :462 account_purged_at) / ManualCashoutForm.tsx 삭제됨 / pgTAP 재실행 Files=10 Tests=246 PASS. 부수성과: cashout_security_hardening.test.sql이 안 돌던 진짜 원인 = pgtap에 최상위 like() 없음(alike가 정답), 교체 후 첫 통과. (구 BLOCK 3건. ①B안 함수 request_manual_cashout이 authenticated GRANT 살아있어 사용자 직접 호출 시 이중 차감(20260821:108, 20260822에서 미조치) ②admin_mark_cashout_paid 재정의가 20260802 보안게이트 3개 삭제(계좌열람 10분게이트/actor NULL거부/account_purged_at) — 컨트롤러 grep 직접 확인, 신규 파일에 3항목 등장 0회 ③입금완료 화면이 DESIGN §6-(d) 필수문장(감소 전후 대조+회수경로) 누락. 재위임 중. (구 재작업 완료, code-review 진행중. 컨트롤러 직접 재실행 증거: next build EXIT=0 / vitest 227-227 / Playwright 11-11(개발자 실행) / 인증세션 실렌더 캡처 2장 직접 열람(52유지+분할, 지급후 52→12+블록소멸) / 마스킹 단언 변경 0건. 운영 DB 미적용·미커밋. (구 1차 반려·재작업 중. 반려사유 3건: ①next build 실패를 "기존 결함"으로 오진(실제로는 database.types.ts 재생성이 update_goal p_reason을 string|null→string으로 좁혀 GoalEditSheet.tsx:102를 깬 것 = 이번 변경이 원인) ②Playwright 미실행(typecheck만) ③인증 세션 화면 미확인(307 리다이렉트만). 컨트롤러 직접 재실행 확인분: vitest 227/227 PASS. 산출: supabase/migrations/20260822000000_cashout_clover_lock_a1.sql, web/src/components/goal/SplitBalanceCard.tsx. (구 2026-08-21 이용료 10% 구현 완료. 두 RPC 모두 30000→25819 로컬 실행 확인, pgTAP 235/235, vitest 223/223(컨트롤러 직접 재실행), Playwright 11/11, build PASS. 운영 DB 미적용·미커밋. /approve build 대기. (구 REOPEN: 이용료 10% 슬라이스: 약관·환전화면·withholding 모듈·RPC·E2E 5곳 계산식 일원화. code-builder 위임 실행 중. 이후 code-reviewer(돈코드) → qa-verifier 필수. (구: 2026-07-17 6차 승인: /how 페이지 신설. (5차: 리드폼 정책링크·wordmap 404·GA4 배선 4종·Slack 커버리지. verify PASS + 컨트롤러 직접 재확인(web 98/98·build PASS)
-  qa:         { status: approved, artifacts_ok: true }   # 2026-08-27 시안정합 3건 해소 확인(위 build 참조). QA 계층 신설분 유지: `npm run test:qa-contracts`(production env var 존재·DB↔UI 판정기준 대조·notify 계약·DB RAISE 13개 전수·시험데이터 가입직후 기준) + 깨뜨리기 8건 전부 검출 + `npm run qa:verify-production` 3건 통과. **잔여 갭: 운영 E2E 부재**(playwright baseURL 이 localhost, 로컬 Supabase 미기동). Storybook 우회로 화면은 확인 가능해짐. **2026-08-27 승인 완료(잔여 갭 회장 인지분 명시).** (구 2026-08-26 QA 계층 복구: `npm run test:qa-contracts` 신설(production env var 존재·DB↔UI 판정기준 대조·notify 계약·DB RAISE 13개 전수·시험데이터 가입직후 기준). **깨뜨리기 시험 8건 전부 검출(failures=0).** 단위 263/263·빌드 통과. **미해소=시안정합 잔여 + 운영 E2E 부재**(playwright baseURL 이 localhost. 운영 1바퀴 자동검증 경로 없음). changes-requested 유지. (구 2026-08-24 로컬 실여정: 신청→관리자 계좌 열람→지급, 신청→반려, 금액 30K·40K, 중복, loading, 101건 너머 검색은 화면+실로컬 DB 관찰 통과. 승인 프로토타입 v3.7의 전용 확인·loading 전환과 dev가 불일치하고 워드맵 미리보기 6→12도 불일치해 디자인 정합 FAIL. 최소액 영어 native 문구·전역 design-lint 경고도 남아 changes-requested. 증거 `docs/core-cashout-qa-report-v1-gpt-codex.md`, `docs/core-cashout-design-conformance-matrix-v1-gpt-codex.md`. (구 2026-08-22 A안 백엔드 QA 통과(관찰됨, 로컬 db reset 후 실 RPC 호출+원장 직접조회): 신청 직후 총량 52 불변/잠김 40, 지급완료에 52→12 감소, 반려 시 52 불변(처음과 동일), 중복신청·최소액미달 거부, 불변식 I1·I2 전 시점 성립, 30000→25819·40000→34426 실호출 일치. **화면 픽셀 대조는 미검증** — qa-verifier 도구셋에 브라우저 없음(하네스 갭, open-decisions 등록). QA 독립 발견 결함 2건(CashoutQueue:243 "복원" 금지어=2차 리뷰 MAJOR3과 교차확증, status:64 "잠금이 풀렸어요" 안내 누락). build 2차 재작업 대기. (구 2026-08-21 ⟲ REOPEN(이용료 10%): 기준값 4종(30000→25819 등) 재현 + 환전 한 바퀴 실행이 증거. (구: 2026-07-17 prod 직접 관찰: 정책링크·브랜딩404 실서빙, 리드 E2E(DB row+Slack 실수신), GA4 /g/collect 발화+Realtime 실수신. 신규 P2(/how 데드링크) 백로그
-  ship:       { status: in-progress, artifacts_ok: partial }  # 2026-08-28 컨트롤러 교대(Claude 토큰 소진 → Codex). 상류 5단계 전부 approved, 산출물 드리프트 0건. ship 잔여 2건 = ①미적용 마이그레이션 20260825020000(회장 신고 30클로버 버그의 수정본, 운영 미반영 → db push 승인 필요) ②운영 대표 주소가 최신 배포 미지정(alias set 승인 필요). 순서는 DB 먼저, 그다음 주소 승격. 인계 정본 = session-state.core.md 최상단 "CODEX 인계". # 2026-07-18 rosemallow95 이전+웰컴클로버 prod 실검증 완료(haenaelge.vercel.app). 환전/DM/토스만 잔여         # GA4·Slack·리드·카카오 로그인 = 운영 실검증 완료(2026-07-17). 남은 partial 사유=Toss 실키 1건
+  eng-design: { status: approved, artifacts_ok: true }  # 2026-08-30 APPROVED(범위 한정). 30/27·A1·RPC8·ERD·TC·Mermaid 매핑 gap 0. 유일 잔여였던 PRD §10.3 지급 신원·세무정보 처리계약은 **회장 결정(2026-08-29)으로 이번 스프린트 범위 밖**(open-decisions 등재, 재개조건=실제 환전 지급 직전 또는 토스 대체 업체 선정 시). FDD v1.1.0 이 해당 범위의 build 진입 불가를 명시해 격리하므로 나머지 설계는 승인 가능.
+  build:      { status: approved, artifacts_ok: true }  # 2026-08-30 APPROVED. 컨트롤러 직접 재검증: vitest 279/279(44 files), qa-contracts 전량 PASS(env·cashout·RAISE·notify + mutation 8/8 검출), `npm audit --omit=dev` 0건(구 40건 해소), 프로덕션 빌드 통과. 지급 신원·세무 범위는 미착수(범위 밖).
+  qa:         { status: changes-requested, artifacts_ok: partial }  # 2026-08-30 소스는 PASS 인데 **운영 배포가 구번들**이라 닫히지 않는다. 보안 헤더(CSP·nosniff·referrer·permissions)와 Firefox 콘솔 오류 5건은 소스 보정이 이미 있고 배포만 하면 해소되는 SHIP_VERIFY 항목이다. 성능(Web Vitals·p95)은 별도 실측 진행 중. → 해제 경로 = ①main push 로 배포 ②대표주소에서 헤더·콘솔 재확인.
+  ship:       { status: todo, artifacts_ok: false }  # 2026-08-30 release-candidate 1.2.1. qa 해소 후 태그·운영 버전 표기 정합까지 하고 released 선언.
 override: false               # 게이트가 build 단계 소스쓰기를 정상 허용하도록 hook 수정(2026-07-06) → override 불필요
 override_reason: ""
 override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장

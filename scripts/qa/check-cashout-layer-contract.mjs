@@ -29,6 +29,9 @@ let db = readFileSync(join(migrationsDir, latestMigration), "utf8");
 let eligibility = source("supabase/migrations/20260822000000_cashout_clover_lock_a1.sql");
 let form = source("web/src/components/cashout/CashoutRequestForm.tsx");
 let page = source("web/src/app/(receiver)/cashout/page.tsx");
+let statusPage = source("web/src/app/(receiver)/cashout/status/page.tsx");
+let errors = source("web/src/lib/cashout-errors.ts");
+let terms = source("web/src/app/terms/page.tsx");
 let fee = source("web/src/lib/cashout-fee.ts");
 
 if (mutation === "ui-payable-threshold") {
@@ -52,6 +55,18 @@ const checks = [
   ["minimum.web-payable-upper-bound", form, /if \(cloverAmount > payableAmount\)/],
   ["minimum.web-input-min", form, /min=\{1\}/],
   ["minimum.web-custom-validity-lower-bound", form, /nextAmount < 1/],
+  ["copy.web-separated-threshold-and-payable", form, /환전 기준: 모인 클로버 \$\{minCashoutClover\}개 이상 · 지금 지급 가능 \$\{payableAmount\}개/],
+  ["copy.web-zero-payable-explains-welcome", form, /웰컴 클로버는 환전되지 않아요\. 친구 응원이 들어오면 지급 가능한 만큼 신청할 수 있어요\./],
+  ["copy.error-total-threshold", errors, /cashout_below_minimum:\s*\n?\s*"모인 클로버가 30개 이상이면/],
+  ["copy.error-request-lower-bound", errors, /cashout_below_minimum:\s*\n?\s*"[^"]*지급 가능한 클로버를 1개 이상 신청할 수 있어요\."/],
+  ["copy.status-total-threshold", statusPage, /모인 클로버가 \{minCashoutClover\}개 이상이면 환전 자격을 채워요\./],
+  ["copy.status-request-lower-bound", statusPage, /신청량은 지금 지급 가능한 클로버 안에서 1개 이상 선택할 수/],
+  ["terms.cashout-active", terms, /환전하는\s+기능은 현재 운영 중입니다/],
+  ["terms.total-threshold-and-request-range", terms, /모인 클로버가\s+30개 이상이면 환전 자격[\s\S]*지급 가능한 클로버 안에서 1개 이상/],
+  ["terms.kyc-absence-allowed", terms, /본인인증 기록이 없는 회원도 신청할 수 있습니다/],
+  ["terms.verified-minor-blocked", terms, /미성년으로 확인된 회원은 신청할 수\s+없습니다/],
+  ["terms.manual-account-payout", terms, /계좌정보를 확인하고 계좌이체를 수동으로 처리합니다/],
+  ["terms.tax-boundary", terms, /소득 구분[\s\S]*확정된 세무 판단이\s+아닙니다[\s\S]*전문가 검토 결과/],
   ["balance.db-total", eligibility, /v_total,\s+v_welcome,\s+v_locked,/],
   ["balance.db-available", eligibility, /GREATEST\(v_total - v_locked, 0\)/],
   ["balance.db-payable", eligibility, /GREATEST\(v_total - v_welcome - v_locked, 0\)/],
@@ -74,7 +89,12 @@ const checks = [
 const forbidden = [
   ["minimum.db-must-not-use-request-as-threshold", db, /p_clover_amount IS NULL OR p_clover_amount < v_min/],
   ["minimum.web-must-not-use-payable-as-threshold", form, /payableAmount >= minCashoutClover/],
-  ["minimum.web-custom-validity-must-not-use-threshold", form, /nextAmount < minCashoutClover/]
+  ["minimum.web-custom-validity-must-not-use-threshold", form, /nextAmount < minCashoutClover/],
+  ["copy.web-must-not-call-threshold-request-minimum", form, /최소 \$\{minCashoutClover\}개 · 현재 지급 가능|친구 응원분 30클로버부터|환전은 최소 30클로버부터/],
+  ["copy.error-must-not-map-request-lower-bound-to-thirty", errors, /cashout_below_minimum:\s*\n?\s*"[^"]*(?:친구 응원분 30클로버부터|신청량 최소 30)/],
+  ["copy.status-must-not-use-friend-thirty-as-eligibility", statusPage, /친구 응원분이 30클로버 이상이면 신청/],
+  ["terms.must-not-promise-disabled-or-future-kyc", terms, /현재 버전에서 명시적으로 비활성화|향후\s+활성화되는 경우|본인인증\(KYC\) 절차를\s+완료해야/],
+  ["terms.must-not-promise-nonexistent-verification", terms, /본인인증\(휴대폰 PASS|예금주 조회\(계좌실명확인\) API/]
 ];
 
 let failures = 0;

@@ -1,5 +1,97 @@
 # QA Tracker — haenael-ge
 
+## 2026-08-29: core v1.2.0 QA 보정 라운드2
+
+**판정: ❌ NG. 회귀·build·dev 보안은 PASS지만 제품·디자인·성능·운영 배포 blocker가 남음**
+
+발견: 라운드1의 dependency 40건과 dev CSP는 해소됐다. 동시에 실제 dev 13화면 전수 관찰에서 친구 결제가 kill switch로 닫혀 있고, PRD F-A~F-F 대부분이 없으며, 아동 안전은 placeholder이고 사용법은 환전 오픈 전 문구를 유지하는 것이 드러났다.
+
+의미: 코드가 안전하게 빌드되는 것과 제품이 PRD대로 출고 가능한 것은 다르다. 현재 build 품질은 올라갔지만 전체 제품 릴리즈는 NG다.
+
+| 영역 | fresh 관찰 | 판정 |
+|---|---|---|
+| Vitest | 44 files, 279/279 | PASS |
+| Next build | 16.3.3, TypeScript, static 16/16 | PASS |
+| QA contracts | env34, cashout47, RAISE13, notify8, mutation8 | PASS |
+| npm audit prod | 전 severity 0 | PASS |
+| dev 13화면×2폭 | 26/26 200, console/pageerror 0, 제품 hash 동일 | PASS_SMOKE |
+| 운영 auth 3엔진 | 모두 `/cashout` 표시, 쓰기 0 | PASS_RENDER |
+| 운영 Firefox console | GA cookie·Kakao prefetch error 5 | FAIL_UNTIL_DEPLOY |
+| PRD F-A~F-F | 설정·privacy·응원자·다중목표·mypage·category 공백 | FAIL |
+| 친구 결제 | `응원 결제 준비 중` disabled | FAIL |
+| child safety | `내용 준비 중입니다` | FAIL |
+| 사용법 | `환전은 오픈 예정입니다` | FAIL |
+| 디자인 lint | 승인 inline 3, 승인 hex 1. 비승인 inline 5·hex 7 | FAIL |
+| 성능 | CWV·p95·인증 성능 없음 | BLOCKED |
+| eng/legal | 지급 신원·세무정보 처리주체 미결정 | BLOCKED |
+
+요청번호 QA-PROD-AUTH-01~06과 QA-RECOVERY-01~06의 실행 승계는 v1.1.0 표를 유지한다. 운영 write·실알림 수신은 여전히 미검증이며 제품 쓰기를 만들지 않았다.
+
+상세: `docs/design-conformance-matrix.md`, `docs/cross-browser-matrix.md`, `docs/security-report.md`, `docs/perf-report.md` 모두 v1.2.0.
+
+셀프심문: 279 테스트와 26화면 smoke가 모두 통과했는데 NG가 과한가. 아니다. 테스트가 없는 PRD 기능과 명시적 disabled·placeholder는 green 회귀로 상쇄되지 않는다.
+
+STAMP: 2026-08-29 07:37 KST | model gpt-5.6-sol | agent qa-verifier | skill qa | basis PRD v0.4.0, DESIGN v2.0.1, FDD v1.1.0, dev fixture
+
+## 2026-08-29: core v1.1.0 fresh QA 게이트
+
+**판정: ❌ NG. 기능 회귀와 운영 인증은 관찰됐지만 보안·전체 디자인·성능·인증 교차브라우저가 릴리즈 차단**
+
+발견: 이전 최상단 기록은 운영 인증 1건을 PASS로 적어 제품 전체 QA PASS처럼 오독될 수 있었다. 또한 회장 원문의 `QA-PROD-AUTH-06`은 미커밋 요구인데 일일 자동 실행으로 잘못 승계됐다. 이번 블록은 기능, 운영, 디자인, 보안, 성능, CI를 분리하고 요청번호를 원문대로 복원했다.
+
+의미: 회장은 "환전 핵심 경로가 테스트됐는가"와 "지금 릴리즈해도 되는가"를 같은 질문으로 볼 필요가 없다. 핵심 경로는 다수 통과했지만, 사용자에게 내보내는 릴리즈 게이트는 현재 NG다.
+
+| 요청번호 | 요청 요지 | 테스트번호 | 판정 | 증거 |
+|---|---|---|---|---|
+| QA-PROD-AUTH-01 | 운영 로그인 후 환전 화면 | QA-AUTH-01 | PASS | 운영 Playwright 1/1, 실제 `/cashout` 렌더 |
+| QA-PROD-AUTH-02 | 운영 데이터 무오염 | QA-AUTH-02 | PASS | `cashout_request` 전후 동일, 금지 쓰기 0 |
+| QA-PROD-AUTH-03 | 자격증명 비노출·권한 | QA-AUTH-03 | PASS | 전용 secret wrapper 사용, 값 출력 0 |
+| QA-PROD-AUTH-04 | 운영 직접 관찰 | QA-PROD-01 | PASS | `/api/health` 200, version 1.2.0, database ok |
+| QA-PROD-AUTH-05 | 접수·알림톡 안전 자동화 경계 | QA-PROD-WRITE-01 | 미검증 | 운영 쓰기 금지, 실제 30/27 계정과 수신함 증거 없음 |
+| QA-PROD-AUTH-06 | 변경만 남기고 미커밋 | QA-PROVENANCE-01 | PASS | QA 에이전트 커밋 0 |
+| OPS-PROD-READONLY-DAILY | 별도 운영 read-only 일일 실행 | QA-OPS-01 | BLOCKED | GitHub Actions 2,000/2,000분, 예산 $0로 CI 실행 차단 |
+| QA-RECOVERY-01 | 환경변수 존재 검사 | QA-CONTRACT-01 | PASS | 34/34 |
+| QA-RECOVERY-02 | 30/27 층간 계약 | QA-CONTRACT-02 | PASS | cashout 30/30 |
+| QA-RECOVERY-03 | 가입 직후·RAISE 전건 | QA-DB-01 | PASS | pgTAP 260, RAISE 13/13 |
+| QA-RECOVERY-04 | 알림 0건·실패 구분 | QA-NOTIFY-01 | PASS | notify 8/8, Deno 58/58 |
+| QA-RECOVERY-05 | 마스킹·수수료 보존 | QA-E2E-01 | PASS | cashout Playwright 12/12 |
+| QA-RECOVERY-06 | 결함 주입 | QA-MUTATION-01 | PASS | mutation 8/8 |
+
+| QA 영역 | fresh 증거 | 판정 |
+|---|---|---|
+| 전체 Vitest | 병렬 부하 중 269/270, 실패 1건은 5초 timeout. 별도 build worker 격리 실행 270/270 PASS | QA 자체 격리 재실행 대기 |
+| Next build | production build, 정적 페이지 16/16 | PASS |
+| 로컬 DB | pgTAP 10파일 260 | PASS |
+| Edge Function | Deno 58 | PASS |
+| 환전 E2E | Chromium 12 | PASS |
+| 운영 공개 | 홈·약관·환전 검증 3, health 200 | PASS |
+| 운영 인증 | read-only 1, 제품 쓰기 0 | PASS |
+| 반응형 | 환전 390x844 실렌더, confirm 507px·submitting 615px | PASS, 환전 범위 |
+| 교차브라우저 | 공개 3브라우저×2폭, 인증은 Chromium만 | BLOCKED |
+| 디자인 정합 | cashout spec 31/31·24조합 PASS, 전체 화면 미대조, lint 경고 2범주 | FAIL |
+| 보안 | DB·번들 통제 PASS, npm audit 40건·보안 헤더 누락 | FAIL |
+| 성능 | 운영 전송 5표본 기준선만, CWV·부하·인증 화면 없음 | BLOCKED |
+| CI | GitHub 무료량 소진으로 실행 0 | BLOCKED |
+
+### 릴리즈 차단과 소유자
+
+| 소유 | 차단 | 정확한 위치·명령·수치 | 해제 증거 |
+|---|---|---|---|
+| build | 30 자격과 신청량 1 오류문구 충돌 | `web/src/lib/cashout-errors.ts:3`, `web/src/app/(receiver)/cashout/actions.ts:107`, `scripts/qa/check-cashout-layer-contract.mjs:30`; 계약 검사는 33/33이어도 오류맵을 검사하지 않음 | 오류 조건·문구 분리 후 mutation과 full Vitest |
+| build | 전체 회귀 QA 독립 격리 실행 미완 | `cd web && npm test -- --reporter=dot`; QA 병렬 실행 269/270, build worker 격리 270/270 | 모든 소스 변경 종료 뒤 QA 소유 fresh 270/270 |
+| design | 전체 화면 8속성 대조와 lint | `docs/design-conformance-matrix.md`; `bash ~/.claude/harness/bin/design-lint.sh web/src`; 환전 31/31·24/24만 PASS, lint 경고 2범주 | 전 화면 390·1024 캡처, 미검증 행 0, lint 위반 0 |
+| build/security | 프로덕션 의존성 취약점·헤더 | `cd web && npm audit --omit=dev --json`; 40건(low 2, moderate 8, high 29, critical 1), 운영 보안 헤더 4종 미관찰 | 안전 버전·의존성 분리·헤더 배포 후 audit 0 또는 승인된 예외 |
+| QA | 인증 교차브라우저 | `docs/cross-browser-matrix.md`; 인증은 Chromium 1/1, Firefox·WebKit 0 | 세 브라우저 인증 `/cashout` 실렌더·콘솔 오류 0 |
+| QA/perf | 사용자 체감·부하 성능 | `docs/perf-report.md`; curl 5표본만 존재 | CWV 390·1024, 인증 경로, 부하·오류율 측정 |
+| infra | GitHub Actions 실행량 | Actions 2,000/2,000분·예산 $0, CI steps 0 | 예산/러너 정책 확정 후 최신 workflow green |
+| QA/운영 | 실제 30/27 접수·알림 수신 | 운영 DB natural 계정 0, 제품 쓰기 금지 | 승인된 안전한 실계정 또는 운영자 관찰로 접수·수신 증거 |
+
+상세 산출물: `docs/design-conformance-matrix.md` v1.1.0, `docs/cross-browser-matrix.md` v1.1.0, `docs/security-report.md` v1.1.0, `docs/perf-report.md` v1.1.0.
+
+셀프심문: 이 NG가 지나치게 엄격하다면 가장 그럴듯한 이유는 기능 회귀 270/270과 운영 인증이 이미 핵심 사용자 위험을 대부분 줄였다는 점이다. 그러나 dependency critical 1건과 전체 디자인 미대조는 기능 테스트로 상쇄할 수 없어 NG를 유지했다.
+
+STAMP: 수정 시각 2026-08-29 05:11 KST | 모델 gpt-5.6-sol | 에이전트 qa-verifier | 스킬 qa | 기반 PRD v0.4.0, DESIGN v2.0.1, FDD v1.1.0, 운영 1.2.0
+
 ## 2026-08-29: 대표 주소 1.2.0 운영 인증 읽기 전용 E2E 재검증
 
 **판정: ✅ PASS. 운영 인증·환전 화면·무오염 계약 직접 관찰**
@@ -55,7 +147,8 @@ STAMP: 수정 시각 2026-08-28 00:17 KST | 모델 gpt-5.6-sol | 에이전트 co
 | QA-PROD-AUTH-03 | 자격증명 보관 | QA-PROD-AUTH-03 | ✅ PASS | auth-only secret과 기존 `.env.local` 권한 600, 값 원문 출력 0건 |
 | QA-PROD-AUTH-04 | 기존 공개 검증 보존 | QA-PROD-PUBLIC-01 | ✅ PASS | 홈 200, 약관 10% 10곳·5% 0곳, 환전 200·22,341바이트 |
 | QA-PROD-AUTH-05 | 신청 접수·알림톡 실수신 | QA-PROD-WRITE-01 | ⬜ 미검증 | 운영 쓰기와 외부 수신함이 필요해 자동 PASS 금지 |
-| QA-PROD-AUTH-06 | 일일 자동 실행 | QA-PROD-SCHEDULE-01 | 🔧 | workflow 구현, 미커밋·미푸시·GitHub Environment secret 미등록이라 활성화 전 |
+| QA-PROD-AUTH-06 | 변경만 남기고 커밋하지 않음 | QA-PROVENANCE-01 | ✅ PASS | 해당 QA 작업에서 커밋 0 |
+| OPS-PROD-READONLY-DAILY | 별도 read-only 일일 실행 | QA-PROD-SCHEDULE-01 | 🔧 | workflow 구현, 미커밋·미푸시·GitHub Environment secret 미등록이라 활성화 전 |
 
 - 운영 Auth에 `purpose=production-readonly-e2e`인 전용 계정 1개를 만들었다. 제품 테이블 쓰기는 0건이다.
 - 운영 제품 쓰기: 0건. 테스트는 환전 신청 버튼을 누르지 않으며, 사후 4개 제품 테이블이 모두 0행이었다.

@@ -4,7 +4,7 @@
 // vitest(jsdom/node) 환경에서 그대로 import해 실행 가능하다.
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { TossClient } from "../../../../supabase/functions/_shared/toss.ts";
+import { TossClient } from "../../../../supabase/functions/_shared/toss";
 
 const PAYMENT_KEY = "test_payment_key_123";
 

@@ -169,6 +169,7 @@ export default async function GoalPublicPage({ params }: Props) {
             내 목표가 있으신가요?{" "}
             <Link
               href="/auth/kakao/start?redirect=/me"
+              prefetch={false}
               className="font-semibold underline underline-offset-2 [color:var(--muted-foreground)]!"
               data-testid="relogin-link"
             >

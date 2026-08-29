@@ -36,6 +36,42 @@ describe("/cashout/status", () => {
     vi.useRealTimers();
   });
 
+  it("TC-STATUS-00 신청 전에는 총보유 자격과 지급가능 신청량을 분리해 안내한다", async () => {
+    mockSupabase((name) => {
+      if (name === "my_cashout_status") {
+        return { data: [], error: null };
+      }
+      if (name === "clover_eligibility") {
+        return {
+          data: [
+            {
+              total_balance: 30,
+              welcome_amount: 3,
+              locked_amount: 0,
+              available_amount: 30,
+              payable_amount: 27,
+              min_cashout_clover: 30,
+              reached_threshold: true,
+            },
+          ],
+          error: null,
+        };
+      }
+      return { data: [], error: null };
+    });
+
+    const { default: CashoutStatusPage } = await import("../page");
+    render(await CashoutStatusPage());
+
+    const emptyPage = screen.getByTestId("cashout-status-empty-page");
+    expect(emptyPage).toHaveTextContent(
+      "모인 클로버가 30개 이상이면 환전 자격을 채워요. 신청량은 지금 지급 가능한 클로버 안에서 1개 이상 선택할 수 있어요.",
+    );
+    expect(emptyPage.textContent).not.toMatch(
+      /친구 응원분이 30클로버 이상이면 신청|최소 30클로버부터/,
+    );
+  });
+
   it("MAJOR1: PAID 배너는 라이브 총량 역산이 아니라 원장 스냅샷(settled_balance_before/after)을 쓴다", async () => {
     // 지급 후 응원이 더 도착해 라이브 총량(clover_eligibility)이 12가 아니라 22로
     // 늘어난 상황을 재현한다. beforeBalance를 "라이브 총량 + clover_amount"로

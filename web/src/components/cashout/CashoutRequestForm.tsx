@@ -274,7 +274,7 @@ export function CashoutRequestForm({
               </span>
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              최소 {minCashoutClover}개 · 현재 지급 가능 {payableAmount}개
+              {`환전 기준: 모인 클로버 ${minCashoutClover}개 이상 · 지금 지급 가능 ${payableAmount}개`}
             </p>
           </div>
 
@@ -575,11 +575,16 @@ export function CashoutRequestForm({
           <p className="text-sm font-bold text-foreground">
             {!cashoutEnabled
               ? "환전 기능을 준비하고 있어요"
-              : "친구 응원분 30클로버부터 신청할 수 있어요"}
+              : reachedThreshold
+                ? "친구 응원이 들어오면 신청할 수 있어요"
+                : "조금만 더 모으면 환전할 수 있어요"}
           </p>
           <p className="mt-1 max-w-64 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">
-            환전은 최소 30클로버부터 가능해요. 지금 쌓인 클로버는 그대로
-            보관됩니다.
+            {!cashoutEnabled
+              ? "환전 기능이 열리면 여기에서 바로 알려드릴게요."
+              : reachedThreshold
+                ? "웰컴 클로버는 환전되지 않아요. 친구 응원이 들어오면 지급 가능한 만큼 신청할 수 있어요."
+                : `환전 기준은 모인 클로버 ${minCashoutClover}개 이상이에요. 지금 모인 클로버는 그대로 보관됩니다.`}
           </p>
         </div>
       )}

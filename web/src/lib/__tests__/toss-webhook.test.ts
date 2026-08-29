@@ -12,7 +12,7 @@ import {
   handleTossWebhook,
   type TossWebhookDeps,
   type TossPaymentResponse,
-} from "../../../../supabase/functions/_shared/toss-webhook-handler.ts";
+} from "../../../../supabase/functions/_shared/toss-webhook-handler";
 
 const TOKEN = "test_webhook_token_abc123";
 const PAYMENT_KEY = "test_payment_key_123";

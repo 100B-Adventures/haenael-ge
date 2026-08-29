@@ -567,7 +567,11 @@ test.describe("수동 환전: happy + edge", () => {
     await expect(requestForm.getByRole("alert")).toHaveText(
       "환전할 클로버를 한 개 이상 입력해 주세요.",
     );
-    expect(await cloverAmountInput.evaluate((input) => input.validationMessage)).toBe(
+    expect(
+      await cloverAmountInput.evaluate(
+        (input) => (input as HTMLInputElement).validationMessage,
+      ),
+    ).toBe(
       "환전할 클로버를 한 개 이상 입력해 주세요.",
     );
 

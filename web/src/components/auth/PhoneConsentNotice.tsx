@@ -74,6 +74,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
       </p>
       <Link
         href={`/auth/kakao/start?redirect=${encodeURIComponent(redirectPath)}`}
+        prefetch={false}
         onClick={() => {
           window.sessionStorage.setItem(
             PHONE_CONSENT_PENDING_KEY,

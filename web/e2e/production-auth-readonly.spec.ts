@@ -7,7 +7,7 @@
  */
 
 import { createBrowserClient } from "@supabase/ssr";
-import { expect, test, type BrowserContext, type Cookie, type Page } from "@playwright/test";
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
 const APP_ENTRY_ORIGIN = "https://haenaelge.vercel.app";
 const ALLOWED_APP_ORIGINS = new Set([
@@ -35,6 +35,8 @@ type CashoutSnapshot = {
   rejected_at: string | null;
 };
 
+type CookieToAdd = Parameters<BrowserContext["addCookies"]>[0][number];
+
 function requiredEnv(name: string) {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -56,7 +58,7 @@ async function addCapturedCookies(
   appOrigins: string[],
 ) {
   const nowSeconds = Math.floor(Date.now() / 1000);
-  const activeCookies: Cookie[] = appOrigins.flatMap((appOrigin) =>
+  const activeCookies: CookieToAdd[] = appOrigins.flatMap((appOrigin) =>
     cookies
       .filter(({ value, options }) => value && options?.maxAge !== 0)
       .map(({ name, value, options }) => ({

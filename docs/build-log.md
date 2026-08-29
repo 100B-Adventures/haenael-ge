@@ -5,6 +5,91 @@
 
 ---
 
+## 최신 보안 보정: Next 16.3.3·강제 CSP·런타임 감사 0건 (2026-08-29)
+
+### 발견과 의미
+
+보안 QA에서 프로덕션 의존성 40건과 브라우저 방어 헤더 부재가 릴리즈 차단으로 확인됐다. 원인을 분해한 결과 대부분은 Vercel과 shadcn CLI가 런타임 의존성으로 잘못 분류되어 따라온 도구 체인이었고, 실제 서비스 런타임에는 Next.js 16.2.10의 PostCSS·Sharp 취약점이 별도로 남아 있었다. 응답에는 CSP·nosniff·referrer·permissions 정책이 없고 Next.js 기술 헤더도 노출됐다.
+
+이번 보정으로 CLI를 개발 의존성으로 격리하고 Next 공식 2026년 8월 보안 수정판 16.3.3을 적용했다. 회장과 사업 관점에서는 감사 숫자를 숨긴 것이 아니라 운영 설치 트리를 0건으로 만들었고, 외부 실행·연결 대상을 제품이 실제 사용하는 Supabase, Toss Payments, GA4로 제한했다. 동일한 이탈은 설정 계약과 Chromium 실화면 스모크가 함께 잡는다.
+
+### 구현과 검증 증거
+
+| 등급 | 대상 | 결과 |
+|---|---|---|
+| 테스트됨 | `npm audit --omit=dev --json` | 취약점 0건 |
+| 테스트됨 | 전체 Vitest | 44 files, 279/279 PASS, 실패 0 |
+| 테스트됨 | `npm run build` | Next.js 16.3.3 compile·TypeScript·static generation 16/16 PASS |
+| 관찰됨 | localhost Next dev 홈 | HTTP 200, 제목 `해낼게`, 응원 본문 렌더, CSP·nosniff·referrer·permissions·frame deny 관찰, `x-powered-by` 부재 |
+| 관찰됨 | localhost `/api/health` | HTTP 200, status ok, database ok |
+| 테스트됨 | Chromium 보안 스모크 | 1/1 PASS, 콘솔 오류 0, page error 0 |
+
+첫 개발 스모크를 127.0.0.1로 열었을 때 Next.js 개발 리소스의 교차 출처 보호가 403으로 차단했다. 이를 제품 성공으로 각색하지 않고 표준 동일 출처인 localhost로 재실행해 1/1 PASS를 관찰했다. 운영은 HTTPS 단일 출처라 이 개발 전용 보호와 충돌하지 않는다.
+
+### 경계와 레드팀
+
+가장 강한 반론은 CLI를 devDependency로 옮겨 감사 결과만 낮춘 것 아니냐는 점이다. Next.js 자체 취약점은 16.3.3으로 별도 제거했고, 두 CLI는 런타임 모듈로 import되지 않으며 빌드 도구로만 사용된다. production build와 실제 서버 렌더를 모두 통과시켜 분류 변경이 실행 산출물을 깨지 않았음을 확인했다.
+
+실제 운영 Toss 결제창 끝단은 거래 생성 금지 정책 때문에 미검증이다. Toss 공식 v2 SDK 호스트와 `*.tosspayments.com`, `*.toss.im`의 프레임·연결은 CSP에 허용했지만, 배포 후 기존 결제 E2E로 실제 결제창 로드를 다시 검증해야 한다.
+
+STAMP: line=core · 갱신=2026-08-29 07:20 KST · model=gpt-5.6-sol · agent=code-builder · skills=없음 · 근거=Next.js 보안 릴리스·headers 문서, Google CSP 가이드, Supabase Realtime, Toss v2 SDK · 고민=외부 결제를 깨지 않으면서 실행 가능한 출처를 실제 연동 범위로 제한했다.
+
+SOURCES: https://nextjs.org/blog · https://nextjs.org/docs/app/api-reference/config/next-config-js/headers · https://developers.google.com/tag-platform/security/guides/csp · https://supabase.com/docs/guides/realtime/protocol · https://docs.tosspayments.com/guides/v2/get-started/llms-quick-reference
+MODEL: gpt-codex/gpt-5.6-sol
+SKILLS_USED: 없음
+SKILLS_SKIPPED: 이 보안 build 보정에 직접 대응하는 전용 스킬이 없어 개발 품질헌법과 공식 문서를 적용했다.
+
+---
+
+## 최신 구현 상태: 1.2.1 환전 임계 카피 정합화 (2026-08-29)
+
+### 발견과 의미
+
+운영 RPC와 프론트 판정은 이미 `총보유 >= 30`과 `1 <= 신청량 <= 지급가능`을 분리하고 있었지만, 신청 폼은 "최소 30개", 비활성 화면은 "친구 응원분 30클로버부터"라고 표시했다. 이 문구는 총보유 30개가 친구 응원 27개와 웰컴 3개로 구성된 회원에게 27개 신청이 가능하면서도 불가능한 것처럼 보이게 했다.
+
+이번 보정으로 환전 자격과 신청 상한을 같은 화면에서 별도 라벨로 보여준다. 회장과 운영 관점에서는 실제 지급 로직을 바꾸지 않고도 30/27 경계 회원의 이탈과 고객문의 원인을 제거했고, 같은 오도가 다시 들어오면 단위 테스트와 계층 계약 검사가 함께 실패한다.
+
+### 구현
+
+| 대상 | 변경 | 현재 계약 |
+|---|---|---|
+| `CashoutRequestForm.tsx` | 입력 힌트를 승인 프로토타입 v3.8 문구로 교체 | `환전 기준: 모인 클로버 30개 이상`, `지금 지급 가능 N개` |
+| 비활성 상태 | 자격 미달과 자격 도달 후 지급가능 0개를 분리 | 총보유 미달은 대기 안내, 지급가능 0개는 웰컴 제외와 친구 응원 필요 안내 |
+| 환전 상태 빈 화면 | 구계약 "친구 응원분 30개" 안내 제거 | 총보유 자격과 지급가능 신청량 1개 하한을 별도 문장으로 안내 |
+| 공개 오류 매핑 | `cashout_below_minimum`의 중의성을 양쪽 조건으로 설명 | 모인 클로버 30개 자격과 지급가능 클로버 1개 신청 하한을 함께 안내 |
+| 이용약관 | 비활성 환전, 필수 KYC, 미구현 실명확인 API 약속 제거 | 환전 운영 중, KYC 기록 없음 신청 허용, 확인 미성년 차단, 계좌정보 수집 후 수동 지급, 세무 판단 미확정 |
+| 컴포넌트 테스트 | `QA-LOCAL-03`, `QA-LOCAL-04` 보강 | 30/27 신청 가능, 금지 문구 부재, 지급가능 0개 안내 고정 |
+| 계층 계약 검사 | 환전·상태·오류·약관 정합 검사를 추가 | 총 47개 계약으로 DB 임계, UI, 오류 매핑, 운영 약관 드리프트를 함께 검사 |
+| 운영 migration | 사후 변경 금지 원칙 적용 | `20260825020000` diff 0, 설명은 build 문서에만 유지 |
+| 패키지 버전 | `web/package.json`, lockfile 루트 | 1.2.1 |
+
+### 검증 증거
+
+| 등급 | 실행 | 결과 |
+|---|---|---|
+| 테스트됨 | `npx vitest run --maxWorkers=1 --testTimeout=15000` | 44 files, 279 tests PASS. 기본 병렬 실행의 자원경합 시간초과 3건은 격리 6/6 PASS 후 직렬 전체로 재판정 |
+| 테스트됨 | `npm run test:qa-contracts` | 환경 34/34, 환전 계층 47/47, DB RAISE 13/13, 알림 8/8, 깨뜨리기 8/8 PASS |
+| 미검증 | 최종 production build | Next.js 16.3.3 보안 보정과 TS 수정은 security agent 소유. 최종 합본 build는 컨트롤러 재검증 대기 |
+| 관찰됨 | Next dev 3017 스모크 | `/` 200, `/api/health` 200, 비로그인 `/cashout` 307 후 `/` 회수, 서버 오류 0 |
+| 테스트됨 | `design-lint.sh web/src/components/cashout` | 토큰, 임의 px, 인라인 style 위반 0 |
+
+전역 `web/src` 디자인 lint에는 기존 다른 컴포넌트의 인라인 style과 토큰 밖 hex 경고가 남아 있다. 이번 변경 디렉터리에는 위반이 없으며, 전역 경고는 QA 디자인 정합 단계에서 별도 추적한다. 인증 세션의 실제 30/27 브라우저 화면과 운영 쓰기 경로는 이 build 단계에서 다시 실행하지 않았고 QA 단계 소유로 남긴다.
+
+### 레드팀과 셀프심문
+
+가장 까다로운 반론은 문구만 고치고 로직 경계를 놓쳤을 가능성이다. 이를 막기 위해 27개가 입력 기본값과 최댓값이 되는 컴포넌트 테스트뿐 아니라, DB 하한 1개, 총보유 임계, 지급가능 상한을 소스 계층 검사로 함께 고정했다.
+
+이 결론이 틀렸다면 가장 그럴듯한 이유는 자격 도달 후 지급가능 0개 상태가 기존 자격 미달 문구로 합쳐지는 것이다. 그래서 해당 상태를 독립 테스트 `QA-LOCAL-04`로 추가하고 웰컴 제외 사유와 다음 행동을 명시했다.
+
+STAMP: line=core · 갱신=2026-08-29 07:12 KST · model=gpt-5.6-sol · agent=code-builder · skills=없음 · 근거=DESIGN.md v2.0.1, user-flow v0.3.1, cashout prototype v3.8, PRD v0.4.0, risks, 운영 migration · 고민=환전의 총보유 자격, 신청량, 신원, 지급, 세무 경계를 화면·오류·약관·검사에서 같은 사실로 맞췄다.
+
+SOURCES: `DESIGN.md` v2.0.1 · `docs/user-flow.md` v0.3.1 · `scratchpad/cashout-full-journey-v3-opus.html` v3.8 · `supabase/migrations/20260825020000_cashout_total_threshold_contract.sql` · https://testing-library.com/docs/user-event/intro/ · https://nextjs.org/docs/app/guides/production-checklist
+MODEL: gpt-5.6-sol
+SKILLS_USED: 없음
+SKILLS_SKIPPED: 전용 build 구현 스킬이 없다. Stage Controller의 pipeline 위임 범위 안에서 기존 승인 계약만 보정했다.
+
+---
+
 ## 슬라이스 #1 — Scaffold (완료 2026-07-06)
 
 ### 무엇을 세웠나

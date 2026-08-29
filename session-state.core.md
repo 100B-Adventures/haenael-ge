@@ -1,3 +1,58 @@
+## CODEX 후속 (2026-08-29 GitHub CI 실제 차단 원인 브라우저 확인)
+
+### 지금까지 한 것
+- Chrome 로그인 쿠키를 브라우저 자동화에 가져와 GitHub Billing 실화면을 직접 확인했다.
+- Billing Overview에서 Actions 무료 포함량이 `2,000 min used / 2,000 min included`, 초기화까지 4일임을 확인했다. 총 billable usage는 $0이며 결제 실패가 아니라 무료 분 소진 상태다.
+- Budgets and alerts에서 Actions account budget이 `$0 budget`, `Stop usage: Yes`로 설정돼 있음을 확인했다. 이 조합 때문에 포함량 소진 뒤 모든 Actions job이 steps 0개로 차단된다.
+- 앞선 API만 보고 payment failure라고 좁힌 판정은 불완전했다. check-run 공통 문구가 payment failure와 spending limit을 함께 표현했고, 실제 원인은 후자인 $0 budget이었다.
+
+### 남은 이슈
+1. CI를 지금 열려면 Actions budget을 0보다 크게 바꿔 유료 사용을 허용해야 한다. 비용 결정이라 회장 승인 없이 변경하지 않았다.
+2. 비용 없이 기다리면 4일 뒤 무료 2,000분이 초기화된다. 그때 workflow 재실행이 필요하다.
+3. self-hosted runner는 무료 대안이지만 이 Mac에 외부 저장소 코드를 실행시키는 보안·운영 변경이라 임의 도입하지 않는다.
+
+### 다음 액션
+1. **소유자: 회장.** 즉시 CI가 필요하면 Actions 월 budget 금액 결정. 추천 최소 예산 $1, Stop usage 유지. **종료증거:** budget 저장 후 CI jobs에 실제 steps 생성.
+2. **소유자: Codex.** 유료 승인 시 budget 변경과 CI 재실행·green 확인. 비용 미승인 시 무료량 초기화 뒤 재실행. **종료증거:** 세 작업 success.
+
+## CODEX 후속 (2026-08-29 운영 실계정·GitHub 결제 원인 추가 조사)
+
+### 지금까지 한 것
+- GitHub의 구 billing endpoint가 410으로 이동된 것을 확인하고 새 `users/{username}/settings/billing/usage` API로 다시 조회했다.
+- 2026년 Actions 사용량은 전부 할인 적용돼 netAmount 0원이며, 저장소 Actions 권한도 enabled/all이다. 현재 CI 차단은 이 저장소의 분 사용량 초과가 아니라 계정 payment failure 계층으로 좁혀졌다.
+- 운영 서비스 역할로 `clover_balance` 전체 2개 계정을 읽고 각 계정의 `clover_eligibility`를 호출해 익명 집계했다. `reached_threshold=0`, 정확히 total 30·payable 27인 계정 0, threshold 도달 후 payable이 최소액 미만인 계정 0이다.
+- 따라서 현재 운영에는 회장이 신고한 30·27 상태를 재현할 실제 대상 계정이 없다. 임의 계정이나 시험 환전 신청을 만들지 않았다.
+- 첫 집계 시도는 서비스 역할 키 파일을 잘못 선택해 요청 생성 전 실패했다. 키가 있는 `haenael-ge.env`를 값 비노출로 확인한 뒤 읽기 전용 집계를 재실행했다.
+
+### 남은 이슈
+1. 30·27 실제 신청 성공은 현재 그 상태의 운영 계정이 0개라 즉시 재현할 수 없다. DB 함수 계약, 운영 화면, 무오염 E2E 증거까지만 확보됐다.
+2. GitHub Actions 사용량은 net 0원인데도 payment failure로 차단된다. 저장소나 workflow 수정으로 해소할 수 없고 계정 Billing의 미납·결제수단 상태 확인이 필요하다.
+
+### 다음 액션
+1. **소유자: Codex.** 실제 회원이 threshold에 도달하면 운영 로그를 감시해 30·27 신청 결과를 확인. **종료증거:** 자연 발생 실제 신청 성공과 후속 지급 흐름.
+2. **소유자: 회장 또는 GitHub 계정 관리자.** 계정 Billing의 payment failure 해소. **종료증거:** CI 세 작업이 실제 steps를 실행하고 success.
+
+## CODEX 후속 (2026-08-29 최종 완료 범위 판정)
+
+### 지금까지 한 것
+- Claude와 Codex 하네스의 실제 등록·입력 계약을 대조해 누락된 핵심 보호 훅을 동기화했다. 전역 픽스처 23건과 Codex 미추적 소스 커밋 차단 실험을 통과했다.
+- 회장이 신고한 총보유 30·지급가능 27 환전 계약 마이그레이션을 운영 DB에 적용했다. migration history와 운영 함수 실덤프로 반영을 확인했다.
+- 대표 주소 `haenael-ge.vercel.app`을 최신 Ready Production에 연결하고 `/api/health`의 `version: 1.2.0`, `database: ok`를 직접 확인했다.
+- 저장된 운영 auth-only QA 계정으로 실제 Supabase 로그인과 `/cashout` 실렌더를 Playwright로 재검증했다. 첫 실행은 secret wrapper 누락으로 실패했고, 주입 경로를 바로잡아 `1 passed (13.7s)`를 확인했다.
+- 운영 E2E 전후 `cashout_request` 스냅샷이 동일하고 금지 쓰기 요청이 0건임을 확인했다. 운영 기록에 시험 환전 노이즈를 만들지 않았다.
+- 상태·제품현황·QA 트래커를 갱신하고 `9c3cd5d`, `fb6f871` 두 커밋을 main에 push했다. 산출물 드리프트는 0건이다.
+- 최신 CI run `33190515509`의 check-run annotation을 확인했다. 세 작업은 steps 0개로 종료됐고 원인은 GitHub 계정 payment failure 또는 spending limit이다.
+
+### 남은 이슈
+1. 실제 총보유 30·지급가능 27 회원이 27클로버 신청에 성공하는 쓰기 경로는 미검증이다. 가짜 운영 거래를 만들지 말라는 기존 지시 때문에 자동 시험 신청을 생성하지 않았다.
+2. GitHub Actions는 계정 결제 계층에서 작업 시작 전 차단된다. 저장소 Actions는 enabled/all이며 코드·workflow로 해소할 수 없다.
+3. 따라서 제품 코드·DB·대표 주소·운영 로그인 화면은 반영됐지만, 배포 전체를 완료로 닫을 CI green과 실제 환전 성공 증거가 없다.
+
+### 다음 액션
+1. **소유자: 실제 대상 회원.** 총보유 30·지급가능 27 상태에서 27클로버 환전 신청. **종료증거:** 운영 신청 성공과 후속 지급 흐름 확인.
+2. **소유자: 회장 또는 GitHub 계정 관리자.** Billing & plans의 payment failure 또는 spending limit 해소. **종료증거:** CI 세 작업에 실제 steps가 생기고 전부 success.
+3. **소유자: Codex.** 두 외부 증거가 생기면 pipeline ship 상태와 제품현황을 최종 마감. **종료증거:** CI green, 실제 환전 성공, 산출물 드리프트 0.
+
 ## CODEX 후속 (2026-08-29 운영 인증 읽기 전용 E2E 재검증)
 
 ### 지금까지 한 것
@@ -3838,3 +3893,112 @@ KAKAO_ALIMTALK_API_URL / KAKAO_ALIMTALK_PFID / KAKAO_ALIMTALK_FROM. API_KEY·API
 3. 솔라피 템플릿 검수 결과 및 templateId 회수.
 4. secrets 6종 운영 등록 → 실결제 1건 E2E(카카오 실수신 + 솔라피 메시지 ID + DB notification.channel='ALIMTALK').
 5. Supabase 고정 IP 확보 시 신규 키에 CIDR 제한 적용 검토.
+## CODEX 파이프라인 전면 최신화 진행 (2026-08-29)
+
+### 지금까지 한 것
+- plan·design·eng-design·build·QA·ship 산출물을 운영 1.2.0과 코드 기준으로 전수 감사했다. PRD 기능 누락, 디자인 30/27 계약 혼동, 기술설계 필수 ERD·test-cases 누락, QA 5종 부재, 릴리스 매니페스트 드리프트를 발견했다.
+- plan은 PRD v0.4.0·BM·One Thing·persona·risks를 현행화했고 feature-drop-check 13/13과 plan-critic GO를 확보했다.
+- design은 DESIGN v2.0.1, user-flow v0.3.1, canonical prototype/spec v1.0.0, 390·1024 clean frame 4장과 24조합 증거를 만들었다.
+- eng-design은 FDD v1.1.0과 ERD·test-cases 포함 8종을 재작성했다. RPC 8개 JSON 요청·응답 16블록, Mermaid 3종, 30/27·A1 잠금·수동지급 계약은 독립 리뷰에서 해소 확인됐다.
+- build는 환전 폼·상태·공개 오류·약관의 구계약을 바로잡고 Next 16.3.3, runtime audit 0, CSP·보안헤더, CLI devDependency 격리를 반영했다. fresh Vitest 279/279, QA contracts 47+13+8+mutation8, production build 16/16이 통과했다. 운영 적용 migration은 사후 수정하지 않아 diff 0이다.
+- QA 라운드2에서 dev 13화면×2폭 26/26 HTTP 200, console/pageerror 0, 제품 6테이블 hash 불변, 운영 auth Firefox·WebKit 환전 렌더와 쓰기 0, 전체 회귀 279/279를 확보했다. QA 5종 v1.2.0 문서 갱신을 qa-verifier가 마감 중이다.
+- RELEASE·CHANGELOG·제품현황은 1.2.1 release-candidate로 최신화했다. 정식 released·tag·prod 승격은 아직 하지 않았다.
+
+### 남은 이슈
+1. PRD §10.3의 지급 단계 주민등록번호·신원·세무정보를 제품이 저장할지, 외부 지급·세무 수탁사가 직접 수집할지 결정이 없다. eng-design mapping gap 1이며 전체 게이트 NO-GO다. 추천은 제품 저장 0, 외부 보안 채널·법정 증빙 시스템 처리다.
+2. 결제 kill switch가 dev와 운영에서 off라 친구 결제 CTA가 비활성이다. 실제 결제 기능을 이번 릴리스 범위로 켤지 결정과 실 Toss 왕복 증거가 필요하다.
+3. child-safety 경로는 존재하지만 본문이 placeholder다. QA 최종 매트릭스에서 실제 blocker로 남는지 확정 후 콘텐츠·법률 보정이 필요하다.
+4. GitHub Actions 무료 2,000분 소진·budget $0 때문에 CI green은 초기화 전까지 물리적으로 수집 불가하다.
+
+### 다음 액션
+1. **소유자: 회장.** 지급 신원정보 처리 경계를 확정한다. 추천안 승인 시 tech-architect가 제품 저장 0 계약으로 FDD·ERD·API·test-cases를 보정하고 eng reviewer가 재승인한다.
+2. **소유자: qa-verifier.** 라운드2 증거를 QA 5종 v1.2.0에 반영하고 결제·child-safety·성능의 최종 PASS/FAIL을 확정한다.
+3. **소유자: Codex.** 결정 반영 후 pipeline-state 최신 핀·critic cycles·승인 로그를 갱신하고 1.2.1 commit/tag/deploy, prod smoke를 수행한다. CI는 무료량 초기화 또는 예산 승인 뒤 green을 회수한다.
+## CODEX 파이프라인 전면 최신화 진행 (2026-08-29 08:00 KST)
+
+### 후속 진행 (2026-08-29)
+- 독립 code-reviewer fresh 리뷰는 `REVIEW_VERDICT: BLOCK`이다. MAJOR 4건: 홈의 Kakao OAuth Link만 `prefetch={false}`가 빠져 Firefox production probe에서 background OAuth GET 2건·CSP console error 2건 재현, `my_cashout_status` 생성 타입에 settled snapshot 2필드가 없어 이중 강제 cast 사용, 약관에 금지 용어 `서비스 이용수수료` 잔존, 전체 Vitest가 1차 278/279 timeout 뒤 단독 3/3·2차 279/279로 흔들리는 재현성 문제. MINOR 1건은 CSP helper가 development 인자 대신 전역값을 혼용한다.
+- fresh build 증거: Next 16.3.3 production build 16/16 PASS, QA 계약 47+13+8+8 PASS, audit 0, pgTAP 260 PASS, 병렬 신청·지급 레이스 각각 1승·1차단 PASS, Chromium 보안 헤더 E2E 1/1 PASS. 이 green 증거는 위 MAJOR와 상류 gap을 상쇄하지 않으므로 build 승인은 유지하지 않는다.
+- eng-design 재개 게이트를 유지한 채 하류의 읽기 전용 감사를 계속했다. build 역할은 `/how` 구문구 2곳, `/child-safety` placeholder 1곳, 비승인 inline 5파일·hex 7파일을 특정했으며 승인된 동적 스타일 3파일은 제외했다. 소스 수정은 eng-design 승인 전이라 실행하지 않았다.
+- QA 역할이 Chromium Navigation Timing을 warmup 제외 20회씩 총 120 navigation으로 측정했다. 120/120 HTTP 200, error 0%, console/page error 0, forbidden write 0, 운영·로컬 `cashout_request` 전후 snapshot unchanged다.
+- 측정된 candidate·production 홈과 인증 `/cashout` 6개 경로는 `PASS_SCOPED`다. 전체 CWV, LCP·CLS·INP, Firefox/WebKit 성능, 동시부하, 확정 SLO는 아직 미검증이다. 원시 증거는 `artifacts/qa-round2/browser-navigation-results.json`이며 SHA256은 `c726f8c6d78a58d097f0ebdefa37c8a4b520d103cf763750f67542c05d41b9c1`이다.
+- 개인정보 처리 계약 결정 전에는 eng-design을 승인하거나 build override를 쓰지 않는다. 결정 직후 FDD/API/ERD/test 계약을 보정하고 독립 리뷰를 재실행한다.
+
+### 지금까지 한 것
+- 회장 목표를 `전 단계 산출물 최신화, 누락 단계 재수행, 검증·승인·ship 마감`으로 고정하고 plan부터 ship까지 전수 감사했다.
+- plan과 design은 최신 정본으로 보정했고 독립 비평·렌더 검증을 통과했다. 승인 핀은 PRD v0.4.0, DESIGN v2.0.1, user-flow v0.3.1, 30·27 프로토타입·수치명세 v1.0.0으로 갱신했다.
+- eng-design 8종, build 코드·보안, QA 5종, RELEASE/CHANGELOG를 1.2.1 후보 수준까지 갱신했다. fresh 증거는 Vitest 279/279, Next build 16/16, audit production dependency 0, QA 계약 전항 PASS, 개발 화면 26/26 HTTP 200·콘솔오류 0, 운영 인증 3브라우저 읽기 전용 PASS다.
+- 기술설계 독립 리뷰에서 PRD §10.3의 지급 신원·세무정보 수집 주체와 저장·보존·파기 계약이 비어 있음을 발견했다. 이를 덮고 하류를 승인하지 않고 `current_stage: eng-design`, `approved_stages: [plan, design]`으로 정식 재개했다.
+
+### 남은 이슈
+1. 회장 결정 필요: 지급 신원·세무정보를 외부 지급·세무 채널이 직접 수집하고 제품에는 참조번호·처리상태만 저장할지, 제품이 암호화 원문을 직접 보관할지 확정해야 한다. 추천은 전자다.
+2. 릴리즈 범위 결정 필요: PRD의 F-A~F-F 전체를 1.2.1에 구현할지, 1.2.1을 30·27 환전·보안 정합 패치로 닫고 F-A~F-F와 실결제 활성화를 다음 제품 라인으로 분리할지 확정해야 한다. 추천은 후자다.
+3. 결정 후 eng-design 재설계·독립 재리뷰, build 최신 산출물 준수 리뷰, QA blocker 재판정, RELEASE 최신 증거 반영, 배포·운영 사후검증이 남았다.
+4. GitHub Actions는 무료 2,000분 소진과 Actions budget $0 때문에 job steps 생성 전 차단된다. self-hosted runner는 이 Vercel·Supabase 배포 구조에 도입하지 않는다. 무료량 초기화 또는 예산 변경 뒤 CI green을 실측해야 한다.
+
+### 다음 액션
+1. 회장 결정 2건을 받으면 tech-architect 역할로 eng-design 계약을 보정하고 독립 리뷰를 재실행한다.
+2. eng-design 승인 뒤 build·QA를 순차 재검증한다. 1.2.1 패치 범위 선택 시 F-A~F-F는 다음 라인의 버전핀 백로그로 분리한다.
+3. QA green과 GitHub CI 실행 가능 시점이 맞으면 RELEASE 1.2.1을 확정하고 Vercel 배포, Supabase 드리프트, 운영 인증·환전 실경로를 사후검증한다.
+
+## CLAUDE 상황파악 (2026-08-29, 회장 "codex에서 작업 좀 하고 왔어. 상황 다시 파악해봐")
+
+> 주의: 이 블록은 파일 끝에 append 했다. Codex 세션이 동시에 이 파일 상단을 쓰고 있어(§8 동시편집=append) 상단 삽입 시 서로 덮을 위험이 있었다.
+
+### 지금까지 한 것 (이 턴 = 읽기 전용 현황 파악)
+- 지난 Claude 세션이 인계한 3건 중 2건이 Codex 에서 해소된 것을 확인했다. 운영 DB 마이그레이션 `20260825020000` 반영, 대표 주소 `haenael-ge.vercel.app` → 최신 Ready Production 승격(`/api/health` version 1.2.0, database ok).
+- 파이프라인이 `eng-design` 으로 reopen 된 것을 확인했다. 사유 = PRD §10.3 지급 신원·세무정보의 수집주체·저장·보존·파기 계약 미결정(mapping gap 1). build·qa·ship 재잠금.
+- GitHub CI 차단 원인 정정을 확인했다. 지난 Claude 보고의 "결제 실패"는 부정확했고, 실제는 Actions 무료 2,000분 소진 + account budget `$0` + Stop usage Yes 조합이다(Codex 브라우저 실화면 확인). 총 청구액 0원, 무료분 초기화까지 4일.
+- 작업 미완 상태를 확인했다. 미커밋 59건 / 3,432 insertions, Codex 세션 다수 실행 중, 신규 산출물(FDD v1.1.0, erd.md, test-cases.md, security-report.md, perf-report.md, cross-browser-matrix.md, design-conformance-matrix.md, prototype/, design/clean-frames/) 미추적.
+- 세션 격리(§8)에 따라 코드·상태 파일을 편집하지 않았다. 읽기만 했다.
+
+### 남은 이슈
+1. **지급 신원·세무정보 처리 주체 미결정** — eng-design 재개의 직접 원인. 선택지 3(자체 수집·암호화 보관 / 지급대행사 위탁 / 세무대리인 경유)은 개인정보 책임범위·보관의무가 상이. 토스 지급대행 해지가 걸려 있어 위탁안은 대체 업체 선정이 선행.
+2. QA v1.2.0 NG — 보안 헤더 누락, `npm audit --omit=dev` 40건, 전체 화면 디자인 미대조, 인증 교차브라우저·성능 미측정.
+3. CI green 증거 없음 — 코드 실패 아님. 무료분 초기화(4일) 또는 예산 상향 전까지 생성 불가.
+4. 총보유 30·지급가능 27 실계정이 운영에 0개 — 실제 신청 성공은 자연 발생 전까지 미검증.
+5. 릴리스 1.2.1 은 release-candidate. `v1.2.1` 태그·운영 버전 표기 미생성.
+
+### 다음 액션
+1. **소유자: 회장.** 지급 신원·세무정보 처리 주체 결정(세무사 자문 선행 권장). **종료증거:** eng-design 재설계·독립 재리뷰 후 재승인.
+2. **소유자: 회장.** 세무 질문지(`docs/requests/core-환전-원천징수-세무사-질문지-v1-gpt-codex-20260828-0342.md`) 전달. **종료증거:** 자문 의견 수신.
+3. **소유자: 회장.** GitHub Actions 예산 결정(최소 $1) 또는 무료분 초기화 대기. **종료증거:** CI 세 작업에 실제 steps 생성 후 success.
+4. **소유자: 진행 중 Codex 세션.** 미커밋 59건 정리와 QA NG 해소. **종료증거:** QA 재판정 PASS, 드리프트 0.
+
+## CLAUDE 스프린트 마감 계획 (2026-08-29, 회장 "쭉 진행해서 산출물 최신화·스프린트 마무리")
+
+> 이 블록도 파일 끝에 append 했다(§8 동시편집). Codex 세션이 상단을 쓰는 중.
+
+### 지금까지 한 것
+- 회장 결정 접수: **세무 처리(지급 신원·세무정보 처리 주체)는 보류.** `~/.claude/harness/open-decisions.md` 에 선택지 3안과 재개 조건(실제 환전 지급 직전 또는 토스 대체 업체 선정 시)까지 기록. **이번 스프린트 범위에서 제외** → eng-design 재개의 유일한 blocker 가 범위 밖으로 이동.
+- 회장 질의 "GitHub Actions 를 왜 쓰나"에 워크플로 파일 실측으로 답했다. **Flyway 아님**(저장소에 Flyway 설정·의존성 없음, 스키마 적용은 `supabase db push` 를 사람이 실행). **Supabase 는 CI 를 제공하지 않음.**
+- `ci.yml` 잡 3개 확인: qa-contracts / unit-and-build / e2e-cashout. **`npm run build` 가 두 잡에 중복 실행되고 Vercel 이 또 빌드한다(총 3회).** 이것이 무료 분 소모의 주범.
+- `production-readonly-e2e.yml` = 매일 21:17 UTC 운영 읽기 전용 점검(수동+스케줄).
+- pgTAP DB 정책 테스트 63건은 도커 요구로 CI 미포함(ci.yml 헤더 주석 명시).
+
+### 남은 이슈
+1. **CI 축소 미실행** — 회장 승인 대기. 안: ①중복 build 제거 ②main push 트리거 축소. 비용 0원, 가역.
+2. 미커밋 59건 / 3,432 insertions 미정리. 신규 산출물(FDD v1.1.0, erd.md, test-cases.md, security-report.md, perf-report.md, cross-browser-matrix.md, design-conformance-matrix.md, prototype/, design/clean-frames/) 미추적.
+3. QA v1.2.0 NG: 운영 보안 헤더 누락, `npm audit --omit=dev` 40건, 전체 화면 390·1024 미대조, 성능·부하 미측정.
+4. 릴리스 1.2.1 은 release-candidate. `v1.2.1` 태그·운영 버전 표기 미생성.
+5. CI green 증거 없음(무료 2,000분 소진 + Actions budget $0). 4일 뒤 초기화.
+
+### 스프린트 마감 계획 (Claude 전용, Codex 사용량 0)
+| 단계 | 담당 | 모델 |
+|---|---|---|
+| 대화·게이트·위임결과 재검증 | 컨트롤러 | Opus 5 |
+| 1. eng-design 마감(세무 범위 제외 명시 + 신판 설계 검수) | tech-architect | Opus 5 |
+| 1b. 설계 독립 리뷰 | eng-design-reviewer | Sonnet 5 |
+| 2. 미커밋 59건 분류·커밋 | 컨트롤러 | Opus 5 |
+| 3a. 보안 헤더·의존성 40건 | code-builder | Sonnet 5 |
+| 3b. 전체 화면 390·1024 대조 | product-designer | Fable 5 |
+| 3c. QA 재검증 | qa-verifier | Sonnet 5 |
+| 4. 릴리스 1.2.1 마감·태그 | release-manager | Sonnet 5 |
+| 문서 스캔 등 잡일 | 범용 | Haiku 4.5 |
+
+배정 원칙: 되돌리기 비싼 계약 설계에만 Opus, 답이 정해진 기계적 수정은 Sonnet, 시각 판단은 Fable.
+
+### 다음 액션
+1. **소유자: 회장.** CI 축소 승인(중복 build 제거 + main push 트리거 축소). **종료증거:** 워크플로 수정 커밋, 잡 수 감소.
+2. **소유자: 컨트롤러.** 승인 즉시 1단계 eng-design 마감 착수. **종료증거:** eng-design 재승인, 하류 3단계 해잠.
+3. **소유자: 회장.** 토스 지급대행 해지(평일 08:00~19:00 라이브챗). **종료증거:** 계약 상태 변경.

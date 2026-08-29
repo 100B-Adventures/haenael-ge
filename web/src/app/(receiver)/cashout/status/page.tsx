@@ -69,6 +69,7 @@ export default async function CashoutStatusPage() {
   const totalBalance = eligibility?.total_balance ?? 0;
   const lockedAmount = eligibility?.locked_amount ?? 0;
   const availableAmount = eligibility?.available_amount ?? totalBalance;
+  const minCashoutClover = eligibility?.min_cashout_clover ?? 30;
 
   if (!cashout) {
     return (
@@ -79,7 +80,9 @@ export default async function CashoutStatusPage() {
             아직 환전 신청이 없어요
           </h1>
           <p className="mt-2 text-xs text-muted-foreground">
-            친구 응원분이 30클로버 이상이면 신청할 수 있어요.
+            모인 클로버가 {minCashoutClover}개 이상이면 환전 자격을 채워요.
+            신청량은 지금 지급 가능한 클로버 안에서 1개 이상 선택할 수
+            있어요.
           </p>
           <Link
             href="/cashout"
@@ -100,7 +103,7 @@ export default async function CashoutStatusPage() {
   // DESIGN.md v1.12.0 §6-(d) 필수 3단: ①이유("잠겨 있던 N개는 이 돈으로 바뀌었어요")
   // ②감소 전후 대조("모인 클로버가 A개에서 B개가 됐어요") ③회수 경로(환전 내역) 안내.
   // 컨트롤러 재검증 MAJOR1: A·B는 라이브 총량에서 역산(totalBalance + clover_amount)하지 않는다
-  // — 지급 후 새 응원이 도착하면 존재한 적 없는 숫자가 나온다. my_cashout_status가 실어 내리는
+  // 지급 후 새 응원이 도착하면 존재한 적 없는 숫자가 나온다. my_cashout_status가 실어 내리는
   // CASHOUT_SETTLED 원장 스냅샷(settled_balance_before/after)이 확정 시점 값의 유일한 진실원이다.
   const beforeBalance = cashout.settled_balance_before ?? null;
   const afterBalance = cashout.settled_balance_after ?? null;

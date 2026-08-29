@@ -1,6 +1,7 @@
 export const PUBLIC_ERRORS: Readonly<Record<string, string>> = {
   cashout_disabled: "환전 기능을 준비하고 있어요.",
-  cashout_below_minimum: "최소 30클로버부터 환전할 수 있어요.",
+  cashout_below_minimum:
+    "모인 클로버가 30개 이상이면 지급 가능한 클로버를 1개 이상 신청할 수 있어요.",
   cashout_insufficient_balance: "지급 가능한 친구 응원분을 다시 확인해주세요.",
   cashout_already_requested: "이미 처리 중인 환전 신청이 있어요.",
   cashout_kyc_required: "환전 신청 기준을 반영하고 있어요. 잠시 후 다시 시도해주세요.",
