@@ -4,9 +4,9 @@
 project: haenael-ge
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
-controller: claude             # 2026-08-30 Codex 사용량 소진으로 컨트롤러 복귀. 동일 루트 하네스와 단계 게이트를 적용한다.
-current_stage: qa   # 2026-08-30 회장이 지급 신원·세무정보 결정을 보류(유저 확보 우선)해 eng-design 의 유일한 blocker 가 범위 밖으로 이동. eng-design·build 재승인, qa 는 최신 배포 사후검증 대기.
-approved_stages: [plan, design, eng-design, build]   # 2026-08-30 eng-design 범위한정 승인 + build 재승인. qa·ship 은 배포 사후검증 전까지 미승인.
+controller: claude             # 2026-08-30 컨트롤러 Claude. 동일 루트 하네스와 단계 게이트를 적용한다.
+current_stage: done   # 2026-08-30 릴리즈 1.2.1 released. 전 단계 승인 완료. 잔여는 비차단 3건(환전 폼 캡처·대표주소 자동승격 확인·CI 결제).
+approved_stages: [plan, design, eng-design, build, qa, ship]   # 2026-08-30 ship 승인. 스프린트 종료.
 approved_artifacts:   # 규약 = ~/.claude/standards/release-and-artifacts.md §1.1. 대시보드가 이걸 읽는다. 실물 없는 라벨 금지.
   # 2026-08-30 전 단계 최신본 재핀. 갱신 = eng-design 7건(FDD v1.1.0 승격 + ERD·테스트케이스 신규), qa 5건(보안·성능·교차브라우저 리포트 신규), build 1건(구현현황 신규).
   plan:
@@ -45,14 +45,14 @@ approved_artifacts:   # 규약 = ~/.claude/standards/release-and-artifacts.md §
     - { path: "qa/contracts/*.json", version: unversioned, status: approved, label: "QA 계약 정의" }
   ship:
     - { path: RELEASE.md, version: 1.2.1, status: approved, label: "릴리즈 매니페스트" }
-  ship:       { status: blocked, artifacts_ok: false }  # 2026-08-30 ★배포 실패. push a888ae3 → Vercel `haenael-a7qvrf5md` **Error**. 빌드는 53초에 정상 완료(16화면 생성)했고 **출력 배포 단계**에서 죽었다: "Cannot patch preview comments when immutable static file upload is enabled. Upgrade to next@v16.3.0-canary.32 or newer." 실제 next 는 16.3.3(그 canary 보다 최신)이므로 버전 자체는 조건 충족 — **Vercel 이 next 버전을 못 읽는 것이 진짜 원인**(CLI redeploy 도 "No Next.js version detected"). 프로젝트 Root Directory 가 비어 있고 package.json 은 web/ 에 있어서다(구 6b23fd7 이 buildCommand·outputDirectory 로 우회했을 뿐 탐지는 계속 실패). 16.2.10 에서는 immutable static upload 가 없어 안 터졌다. **되돌리기 불가**: next 16.2.10 로 내리면 운영 의존성 high 3건이 되살아난다(실측). → 해제 = Vercel 프로젝트 Root Directory 를 `web` 으로 설정(회장 콘솔). API PATCH 는 세션 분류기가 차단.
+    - { path: CHANGELOG.md, version: 1.2.1, status: approved, label: "변경 기록" }
 stages:
   plan:       { status: approved, artifacts_ok: true }   # 2026-08-28 APPROVED (v0.4.0, 595줄). 미결이던 §10.7 Q9~Q11 처리: Q10(카카오 비즈앱+phone_number)=해소(member.phone 컬럼 20260805010000 + 운영 ALIMTALK 실발송 CASHOUT_REQUESTED·CASHOUT_PAID 각 1건), Q11(템플릿 사전심사)=해소(회장 2종 등록 확인), Q9(구글 provider 콘솔 활성)=**앱 출시로 defer**(LoginSheet.tsx:80 SHOW_SOCIAL_LOGIN=false 가 현 상태를 기록, 가역·비차단). §9 Q1~Q8 은 v0.3.0 승인분에서 이미 처리됨. (구 2026-07-26 REOPENED→v0.4.0: 로그인 확장(카카오+구글) + 알림톡 phone(비즈앱 전환) + 본인인증=환전만 명문화. 회장 결정 3/3 확정. prd-architect 위임 중. (2026-07-21 v0.3.0 승인분은 유효, v0.4.0이 계승)
   design:     { status: approved, artifacts_ok: true }   # 2026-08-28 APPROVED. 잔여였던 안내문구 볼드 강조가 코드에 반영된 것을 컨트롤러가 직접 확인(CashoutRequestForm.tsx:506 `<b>입금이 끝나면 그때 N개가 빠져요.</b>`, SplitBalanceCard.tsx:120 `<b>{total}개는 그대로</b>`). 실화면 대조 confirm 507.16px(시안 510)·submitting 614.94px(시안 617). (구 2026-08-22 A안(잠금 유지) 반영 완료: 프로토 v3.6 + DESIGN.md v1.12.0(§6-(d) 잔액 표기 규칙 신설·SplitBalanceCard 등록·A안 확정 이력) + user-flow §5.5. **화면 픽셀 대조 일치 판정**(컨트롤러가 모바일 390 실화면 me-390-locked-v5.png와 프로토 v3.6을 좌우 합성 qa-compare-v5.png로 직접 대조). 잔여 경미 1건: 안내문구 볼드 강조 미적용(리뷰 3차 지적과 함께 처리 예정). /approve design 대기. (구 2026-08-21 이용료 10% 반영 완료: 프로토타입 v3.4(회장 지적 3건 반영 — 차감표 1줄화·안내 2블록 분리·.u-side 갭 규칙 승격 5화면) + DESIGN.md v1.10.0 §8 UX 라이팅 신설. verify PASS(Score A−, RUBRIC 24/25), 컨트롤러 모바일 캡처 2장 직접 육안 대조. /approve design 대기. (구 REOPEN 사유: 이용료 10%: 승인 프로토타입 scratchpad/cashout-full-journey-v3-opus.html 541-546행 및 docs/WIREFRAMES/cashout.html 119-120행이 '수수료 미정' 플레이스홀더 — 10% 확정으로 정본이 어긋남. product-designer 위임. (구: 2026-07-22 프로토타입 완성(verify PASS·A-) — 회장 피드백 대기. 갈림길 2건(프라이버시진입·고객센터이메일) 미결. 재open 금지 규칙 적용(이미 1회 open하게 있음)
   eng-design: { status: approved, artifacts_ok: true }  # 2026-08-30 APPROVED(범위 한정). 30/27·A1·RPC8·ERD·TC·Mermaid 매핑 gap 0. 유일 잔여였던 PRD §10.3 지급 신원·세무정보 처리계약은 **회장 결정(2026-08-29)으로 이번 스프린트 범위 밖**(open-decisions 등재, 재개조건=실제 환전 지급 직전 또는 토스 대체 업체 선정 시). FDD v1.1.0 이 해당 범위의 build 진입 불가를 명시해 격리하므로 나머지 설계는 승인 가능.
   build:      { status: approved, artifacts_ok: true }  # 2026-08-30 APPROVED. 컨트롤러 직접 재검증: vitest 279/279(44 files), qa-contracts 전량 PASS(env·cashout·RAISE·notify + mutation 8/8 검출), `npm audit --omit=dev` 0건(구 40건 해소), 프로덕션 빌드 통과. 지급 신원·세무 범위는 미착수(범위 밖).
-  qa:         { status: changes-requested, artifacts_ok: partial }  # 2026-08-30 소스는 PASS 인데 **운영 배포가 구번들**이라 닫히지 않는다. 보안 헤더(CSP·nosniff·referrer·permissions)와 Firefox 콘솔 오류 5건은 소스 보정이 이미 있고 배포만 하면 해소되는 SHIP_VERIFY 항목이다. 성능(Web Vitals·p95)은 별도 실측 진행 중. → 해제 경로 = ①main push 로 배포 ②대표주소에서 헤더·콘솔 재확인.
-  ship:       { status: todo, artifacts_ok: false }  # 2026-08-30 release-candidate 1.2.1. qa 해소 후 태그·운영 버전 표기 정합까지 하고 released 선언.
+  qa:         { status: approved, artifacts_ok: true }  # 2026-08-30 APPROVED. 배포 후 대표 주소 직접 실측으로 잔여 blocker 전부 해소: 보안 헤더 4/4 관찰(CSP·nosniff·referrer·permissions), `x-powered-by` 0건, **Firefox·WebKit 콘솔 error 0·pageerror 0**, `qa:verify-production` 3/3, 운영 인증 읽기 E2E 1/1(제품 쓰기 0), `/api/health` version 1.2.1·database ok. 성능은 부분 PASS(LCP 384~840ms, CLS 0, 반복부하 오류 0/30, p95 0.166~1.229s / 실사용자 상호작용 지연은 읽기전용 측정 불가로 근사 대체). **잔여 1건(비차단): 환전 폼 상태 캡처가 증거 묶음에 없어 시안 대조 미완** — kill switch 켠 상태 재촬영 필요.
+  ship:       { status: approved, artifacts_ok: true }  # 2026-08-30 APPROVED. 배포 3연속 성공(`haenael-6f48v643p` 최종). ★구조 결함 2건 동시 해소: ①Vercel Root Directory 를 `web` 으로 설정(미설정을 buildCommand 우회로 덮던 구 `6b23fd7` 청산, 루트 vercel.json → web/vercel.json 이관) ②운영 버전 표기를 Vercel 환경변수 수기 관리에서 package.json 진실원 빌드 주입으로 전환(40일 stale 사고의 근본 원인 제거). QA 검증 대상 주소도 302 redirect 되는 `haenaelge.vercel.app` 에서 대표 주소로 교정 — 대표 주소 헤더가 오래 미검증이던 이유였다. 잔여: 대표 주소 alias 가 여전히 수동 승격(프로젝트 도메인 미등록, API 차단).
 override: false               # 게이트가 build 단계 소스쓰기를 정상 허용하도록 hook 수정(2026-07-06) → override 불필요
 override_reason: ""
 override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장

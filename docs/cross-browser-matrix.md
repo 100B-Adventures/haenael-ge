@@ -1,5 +1,24 @@
 # Cross-browser Matrix: haenael-ge core v1.2.0
 
+STAMP: 2026-08-30 15:10 KST | model: claude-opus-5 | agent: 컨트롤러 직접 | basis: 배포 후 대표 주소 Firefox·WebKit 실측 | concern: 소스 보정은 배포되기 전까지 운영 수정이 아니다.
+
+## 2026-08-30 배포 후 재판정: **PASS**
+
+| 대상 | 폭 | 상태 | 콘솔 | 판정 |
+|---|---:|---|---|---|
+| 운영 Firefox `/` | 1280x800 | HTTP 200 | **error 0, pageerror 0** | PASS |
+| 운영 WebKit `/` | 1280x800 | HTTP 200 | **error 0, pageerror 0** | PASS |
+| 운영 Chromium 인증 `/cashout` | desktop | 화면 표시 | 실행 오류 0, 제품 쓰기 0 | PASS |
+
+이전 판정의 GA cookie invalid-domain 은 배포로 사라졌다. 대신 카카오 OAuth
+prefetch 가 CSP `connect-src` 에 막히는 오류가 새로 드러나 랜딩 링크의
+`prefetch` 를 끄고 재배포해 0건을 확인했다.
+
+셀프심문: 공개 랜딩만 봤는데 전 화면 PASS 라 할 수 있는가. 없다. 이번 판정
+범위는 공개 랜딩과 인증 환전 읽기 경로다. 나머지 화면의 엔진별 콘솔은 다음
+라운드 범위로 남긴다.
+
+
 STAMP: 2026-08-29 07:37 KST | model: gpt-5.6-sol | agent: qa-verifier | skill: qa | basis: dev fixture and production read-only Playwright | concern: source fixes are not production fixes until deployment.
 
 ## 판정

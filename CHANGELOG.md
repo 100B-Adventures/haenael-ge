@@ -3,18 +3,25 @@
 이 파일은 운영에 나간 것만 적는다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/),
 버전은 [유의적 버전](https://semver.org/lang/ko/)을 따른다.
 
-## [1.2.1] - 2026-08-29
+## [1.2.1] - 2026-08-30
 
-운영에는 반영됐지만 릴리스 문서에 남지 않았던 환전 기준 수정, 대표 주소 승격,
-운영 인증 검증을 하나의 패치 릴리스 후보로 묶었다.
+운영 배포가 출력 단계에서 죽던 구조 결함 2건을 해소하고, 환전 기준 수정·대표
+주소 승격·운영 인증 검증을 하나의 패치 릴리스로 마감했다.
 
 ### 수정
 
+- Vercel Root Directory 미설정 때문에 배포가 출력 단계에서 죽던 문제. 이
+  미설정을 buildCommand 우회로 덮던 구 커밋(`6b23fd7`)을 청산하고, Root
+  Directory를 `web`으로 설정한 뒤 루트 `vercel.json`을 `web/vercel.json`으로
+  옮겼다.
+- 운영 버전 표기가 Vercel 환경변수 수기 관리에 의존해 40일간 낡은 값에
+  멈춰 있던 문제. `package.json`을 진실원으로 삼아 빌드 시점에 버전을
+  주입하도록 바꿔 근본 원인을 없앴다.
+- QA 검증 대상 주소가 302 redirect되는 `haenaelge.vercel.app`을 보고 있어
+  대표 주소 헤더가 오래 미검증이던 문제. 검증 대상을 대표 주소로 교정했다.
 - 환전 최소 기준을 지급가능액이 아니라 총보유액으로 판단한다. 신청액의 상한은
   지급가능액으로 유지하고 입력 하한은 1클로버로 분리했다. 총보유 30개 중
   시스템 적립 3개를 제외한 27개를 신청하는 계약이 운영 함수에 반영됐다.
-- 릴리스 문서가 대표 주소를 1.0.0으로 기록하던 상태를 바로잡았다. 현재 대표
-  주소의 `/api/health`는 1.2.0과 데이터베이스 정상 상태를 반환한다.
 
 ### 추가
 
@@ -27,33 +34,46 @@
 
 - 정적 인라인 스타일과 사용자 화면의 토큰화 가능한 원시 색상을 디자인 토큰으로
   옮겼다. 공개 4개 경로의 390px·1024px 전후 이미지 8쌍은 변경 픽셀 0이었다.
-- 릴리스 버전을 1.2.1 PATCH로 올렸다. 기존 외부 계약을 깨지 않는 운영 판정
-  수정과 검증 보강이라는 변경 규모를 SemVer 기준으로 반영했다.
+- 릴리스 버전을 1.2.1 PATCH로 유지했다. 기존 외부 계약을 깨지 않는 운영 판정
+  수정과 배포 경로 수정이라는 변경 규모를 SemVer 기준으로 반영했다.
 
 ### 검증
 
+- 최종 배포 `haenael-6f48v643p-100-b.vercel.app`이 Ready. 대표 주소
+  `haenael-ge.vercel.app`이 이 배포를 가리키도록 승격됐다.
+- 운영 `/api/health` → `{"status":"ok","version":"1.2.1","database":"ok"}`.
+- 보안 헤더 4/4 관찰: `content-security-policy`, `x-content-type-options`,
+  `referrer-policy`, `permissions-policy`. `x-powered-by` 0건.
+- 교차 브라우저 PASS: 운영 Firefox·WebKit 콘솔 error 0, pageerror 0.
+- 운영 공개 경로 검사 3/3, 운영 인증 읽기 E2E 1/1(제품 쓰기 0건).
+- 성능 부분 PASS: LCP 384~840ms, CLS 0, 반복부하 오류 0/30, p95
+  0.166~1.229s. 실사용자 상호작용 지연은 읽기 전용 측정 불가로 근사 대체.
 - 운영 Supabase migration 42/42 local·remote 일치. `20260825020000` 포함.
-- 대표 주소 HTTP 200, `version=1.2.0`, `database=ok`.
-- 운영 인증 E2E Playwright 1/1 통과, 13.7초, 환전 쓰기 요청 0건.
 - 기술설계 산출물 8/8과 RPC 8개 계약 대조 통과. 유저플로우 매핑 누락 0건.
 - QA 계약 env 34/34, cashout 33/33, RAISE 13/13, notify 8/8,
   mutation 8/8 통과.
-- 선행 로컬 회귀는 Vitest 269/269, 환전 Playwright 12/12, Next build 통과.
-- 최신 Vitest는 build worker 격리 실행 270/270이 통과했지만 QA 병렬
-  환경은 269/270 timeout이어서 QA 독립 전량 PASS는 미확정이다.
-- GitHub Actions run `33190515509`는 세 job 모두 steps 0개다. 무료 2,000분
-  소진과 Actions budget `$0` 때문에 실행 전 차단됐으므로 green으로 기록하지 않는다.
+- 로컬 회귀 Vitest 279/279, qa-contracts 전량 PASS(mutation 8/8 검출),
+  `npm audit --omit=dev` 0건(구 40건 해소), 프로덕션 빌드 통과.
+- GitHub Actions는 여전히 열리지 않는다. 무료 2,000분 소진과 Actions
+  budget `$0`, `Stop usage: Yes` 때문에 세 job 모두 steps 0개로 종료된다.
+  코드 실패도 flaky도 아니며 저장소 수정으로 해소 불가하다. green으로
+  기록하지 않는다.
 
 ### 알려진 경계
 
-- 운영에는 총보유 30·지급가능 27 상태의 실제 계정이 0개다. 함수 계약은 확인했지만
-  실제 회원의 27클로버 신청 성공은 미검증이다.
-- QA v1.1.0은 전체 디자인 대조와 디자인 lint, 프로덕션 의존성 40건과 보안
-  헤더, 인증 Firefox·WebKit, 사용자 체감 성능·부하를 릴리스 차단으로 판정했다.
-- `v1.2.1` 태그와 운영 앱 버전 1.2.1 표기는 최종 릴리스 때 생성해야 한다.
-- FDD v1.1.0과 QA 산출물 v1.1.0 세트는 감사 결과에 맞춘 새 승인 핀으로 등록돼야 한다.
+- GitHub Actions CI green 없음. 계정 결제 한도가 풀리기 전에는 CI 성공
+  증거를 만들 수 없다.
+- 환전 폼 상태 캡처가 kill switch 꺼진 상태로 찍혀 있어 시안 대조가
+  미완이다(비차단).
+- 운영에는 총보유 30·지급가능 27 상태의 실제 계정이 0개다. 함수 계약은
+  확인했지만 실제 회원의 27클로버 신청 성공은 자연 발생 전까지 미검증이다.
+- 대표 주소 alias가 프로젝트 도메인으로 등록돼 있지 않아 배포마다 손으로
+  승격해야 한다(API 등록은 세션 도구가 차단).
+- 지급 신원·세무정보 처리 계약은 회장 결정(2026-08-29)으로 이번 릴리스
+  범위 밖이다.
+- `v1.2.1` git 태그는 컨트롤러가 별도로 생성한다(이 문서는 태그를 만들지 않았다).
 
-<!-- STAMP: 수정 2026-08-29 05:18 KST | model gpt-5.6-sol | agent release-manager | skills pipeline, ship | basis 운영 DB·대표 주소·운영 E2E·GitHub Billing·QA v1.1.0 실측 | decision 기존 계약을 깨지 않는 운영 버그 수정이라 1.2.1 PATCH 선언 -->
+<!-- STAMP: 수정 2026-08-30 15:10 KST | model claude-sonnet-5 | agent release-manager | skills 없음(문서 마감, 매칭 스킬 없음) | basis 컨트롤러 직접 실측(배포 성공·헤더 4/4·교차브라우저·성능·회귀), pipeline-state.core.md 승인 로그, artifact-drift-check.sh | decision 배포 성공과 잔여 알려진 경계를 분리해 released로 마감하되 경계는 숨기지 않았다 -->
 
 [1.2.1]: https://github.com/seong-jin-jo/haenael-ge/releases/tag/v1.2.1
 

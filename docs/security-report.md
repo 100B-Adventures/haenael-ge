@@ -1,5 +1,30 @@
 # Security Report: haenael-ge core v1.2.0
 
+STAMP: 2026-08-30 15:10 KST | model: claude-opus-5 | agent: 컨트롤러 직접 | basis: 배포 후 대표 주소 실측 | concern: 이전 판정이 구 번들을 근거로 열려 있었다.
+
+## 2026-08-30 배포 후 재판정: **PASS**
+
+이전 `SHIP_VERIFY` 두 항목이 배포로 닫혔다. 대표 주소에서 직접 관찰했다.
+
+| 통제 | 이전 | 이번 실측 | 판정 |
+|---|---|---|---|
+| 운영 보안 헤더 | 구배포에서 미관찰 | `content-security-policy`·`x-content-type-options`·`referrer-policy`·`permissions-policy` 4/4 관찰 | PASS |
+| `x-powered-by` 노출 | 노출 | 0건 | PASS |
+| 운영 Firefox 콘솔 | error 5 | **error 0, pageerror 0** | PASS |
+| 운영 WebKit 콘솔 | 미수집 | **error 0, pageerror 0** | PASS |
+| production dependency | 0건 | `npm audit --omit=dev` 0건 유지 | PASS |
+| 운영 인증 읽기 E2E | 1/1 | 1/1, 제품 쓰기 0 | PASS |
+
+배포 직후 1차 실측에서는 Firefox·WebKit 콘솔에 CSP `connect-src` 위반이 새로
+찍혔다. 랜딩의 카카오 로그인 링크만 `prefetch` 가 켜져 있어 Next 가 그 경로를
+미리 가져갔고, 서버가 카카오로 302 하면서 크로스 오리진 요청이 우리 CSP 에
+막힌 것이다. CSP 를 여는 대신 `prefetch` 를 껐다(카카오는 최상위 리다이렉트로만
+쓴다). 재배포 후 0건을 확인했다.
+
+셀프심문: 헤더 4종이 보이면 보안 PASS 인가. 그것만으로는 아니다. 의존성·인증
+경로·콘솔을 함께 봤고, 이번 판정 범위는 배포된 번들의 전송 계층 통제까지다.
+
+
 STAMP: 2026-08-29 07:37 KST | model: gpt-5.6-sol | agent: qa-verifier | skill: qa | basis: Next 16.3.3, local build, npm audit, contracts, DB and production read-only auth | concern: dev security PASS does not prove undeployed production headers.
 
 ## 판정

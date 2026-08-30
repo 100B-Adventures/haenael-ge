@@ -1,3 +1,29 @@
+## CLAUDE 배포 성공·QA 승인 (2026-08-30, 회장 "vercel root 디렉토리 너가 해야지")
+
+### 지금까지 한 것
+- **Vercel Root Directory 를 `web` 으로 설정**(API PATCH 성공). 루트 `vercel.json` 제거 → `web/vercel.json` 이관(framework·regions·kakao-review 헤더만). 구 `6b23fd7` 의 buildCommand 우회 청산.
+- **배포 성공.** `haenael-ma17op5kd`(Ready) → `haenael-e1rbeonxz` → 최종 `haenael-6f48v643p`. 각 배포마다 `vercel alias set` 으로 대표 주소 수동 승격.
+- **운영 버전 진실원 전환.** `/api/health` 의 version 이 Vercel 환경변수 수기 관리였고 40일 stale 사고의 원인이었다. `next.config.ts` 에서 `package.json` 을 읽어 빌드 시각 주입하도록 변경(환경변수는 더 이상 읽지 않는다). 결과 `/api/health` = **version 1.2.1**.
+- **QA 검증 대상 주소 교정.** `scripts/qa/verify-production.mjs` 와 `web/playwright.production.config.ts` 가 302 redirect 되는 `haenaelge.vercel.app` 을 보고 있었다. 대표 주소 `haenael-ge.vercel.app` 로 교정. **대표 주소 헤더가 오래 미검증이던 이유였다.**
+- **카카오 prefetch 차단.** 배포 후 Firefox·WebKit 콘솔에 CSP connect-src 위반이 새로 떴다. 랜딩(`app/page.tsx`)의 카카오 로그인 Link 만 prefetch 가 켜져 있었다(목표 페이지·전화동의 안내는 이미 꺼져 있었음). CSP 를 여는 대신 prefetch 를 껐다.
+- **최종 실측(전부 컨트롤러 직접):** 보안 헤더 **4/4** 관찰, `x-powered-by` **0건**, Firefox·WebKit 콘솔 **error 0·pageerror 0**, `qa:verify-production` **3/3**, 운영 인증 읽기 E2E **1/1**(제품 쓰기 0), `/api/health` version **1.2.1**·database ok, vitest **279/279**, 프로덕션 빌드 통과.
+- **qa·ship APPROVED.** `pipeline-state.core.md` 갱신. `docs/security-report.md`·`docs/cross-browser-matrix.md` 에 배포 후 재판정 PASS 스탬프 추가. `docs/제품현황.md` 갱신.
+- **회고 확장.** `wiki/3-operations/2026-08-30-환전-스프린트-회고.md` 에 "회고를 쓴 그날 같은 병을 다시 앓았다" 절과 "증상 대신 구조를 고친 것" 대조표 추가. 브라우저로 띄웠다.
+- 커밋 push: `8db3558`(vercel 구성 이관) `30f98a0`(버전 진실원·QA 주소) `de109a6`(prefetch).
+
+### 남은 이슈
+1. **환전 폼 캡처 미확보(비차단).** 시안 대조 실화면이 `CASHOUT_ENABLED` 꺼진 상태로 찍혀 대기 카드만 나온다. 재촬영 필요(`web/src/lib/supabase/service.ts`:86 `isCashoutEnabled`).
+2. **대표 주소 자동 승격 안 됨.** 프로젝트 도메인 목록에 `haenael-ge.vercel.app` 이 없다(등록된 건 `web-two-theta-bmil2ljwdg.vercel.app` 뿐). 그래서 배포마다 수동 alias 가 필요하다. API 로 도메인 추가 시도 → **세션 도구 분류기 차단.** 회장 콘솔에서 Domains 에 추가하면 자동 추적된다.
+3. **CI green 없음.** Actions 무료 2,000분 소진 + budget $0 + Stop usage Yes. 축소안(중복 build 제거·트리거 축소) 미승인.
+4. 총보유 30·지급가능 27 실계정 0명. 실제 신청 성공 미검증.
+5. 지급 신원·세무정보 처리 계약 = 회장 보류(범위 밖).
+
+### 다음 액션
+1. **소유자: 회장.** Vercel Domains 에 `haenael-ge.vercel.app` 추가해 자동 추적으로 전환. **종료증거:** 다음 배포 후 수동 alias 없이 대표 주소가 최신을 가리킴.
+2. **소유자: 컨트롤러.** 환전 폼 캡처 재촬영·시안 대조. **종료증거:** 좌우 합성 대조 이미지.
+3. **소유자: 회장.** CI 축소 승인 또는 무료분 초기화 대기. **종료증거:** CI job 에 실제 steps 생성.
+4. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+
 ## CLAUDE 턴 종료 시점 상태 (2026-08-30 03:40 KST)
 
 - push 완료: `fb6f871..a659f1f` (커밋 5건). 작업트리 clean(growth 트랙 제외).
