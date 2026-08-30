@@ -15,6 +15,12 @@ visibility: private
 
 친구가 선언한 목표에 클로버로 조용히 응원하고, 목표 주인이 모인 클로버를 환전하는 서비스의 팀 위키다.
 
+## SSOT 라우팅
+
+- 요청·결정·실수의 지속 지식: [거버넌스](거버넌스/_index.md)
+- 단계별 버전핀 산출물: [docs](../docs/)
+- 브랜드·제품·마케팅·운영 지식: [brand](brand/_index.md), [product](product/_index.md), [marketing](marketing/_index.md), [ops](ops/_index.md)
+
 ## 현재 한 줄 상태
 
 기획·디자인·기술설계·개발·QA는 승인됐고 배포 단계가 진행 중이다. 최신 main 배포는 1.2.0이지만 운영 대표 주소는 1.0.0을 가리킨다. 총 30개 중 지급 가능 27개를 신청하게 하는 마이그레이션도 운영 DB에 아직 적용되지 않았다. 자세한 근거는 [제품 현재 상태](2-product/current-state.md)에서 본다.
