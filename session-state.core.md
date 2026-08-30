@@ -13,7 +13,7 @@
 
 ### 남은 이슈
 1. **환전 폼 캡처 미확보(비차단).** 시안 대조 실화면이 `CASHOUT_ENABLED` 꺼진 상태로 찍혀 대기 카드만 나온다. 재촬영 필요(`web/src/lib/supabase/service.ts`:86 `isCashoutEnabled`).
-2. **대표 주소 자동 승격 안 됨.** 프로젝트 도메인 목록에 `haenael-ge.vercel.app` 이 없다(등록된 건 `web-two-theta-bmil2ljwdg.vercel.app` 뿐). 그래서 배포마다 수동 alias 가 필요하다. API 로 도메인 추가 시도 → **세션 도구 분류기 차단.** 회장 콘솔에서 Domains 에 추가하면 자동 추적된다.
+2. ~~대표 주소 자동 승격 안 됨~~ → **해소(관찰됨).** `vercel domains add` 결과 이미 프로젝트에 assign 돼 있었고, Root Directory 수정 후 태그 push 로 만들어진 배포 `haenael-72ps8djpd` 에 **수동 alias 없이** `haenael-ge.vercel.app` 이 자동으로 붙은 것을 `vercel inspect` 로 확인했다. 2026-08-25 부터 반복되던 alias 수동 승격 문제의 뿌리도 Root Directory 미설정이었다.
 3. **CI green 없음.** Actions 무료 2,000분 소진 + budget $0 + Stop usage Yes. 축소안(중복 build 제거·트리거 축소) 미승인.
 4. 총보유 30·지급가능 27 실계정 0명. 실제 신청 성공 미검증.
 5. 지급 신원·세무정보 처리 계약 = 회장 보류(범위 밖).
