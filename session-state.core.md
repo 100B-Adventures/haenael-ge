@@ -1,3 +1,28 @@
+## CLAUDE 배포 시도와 차단 (2026-08-30, 회장 "쭉 진행")
+
+### 지금까지 한 것
+- 회장 승인으로 **main push 실행** (`fb6f871..a888ae3`). 커밋 4건 반영.
+- **Vercel 배포 실패.** `haenael-a7qvrf5md` = Error. 빌드는 53초에 정상 완료(16화면 생성)했고 **출력 배포 단계**에서 죽었다: `Cannot patch preview comments when immutable static file upload is enabled. Upgrade to next@v16.3.0-canary.32 or newer.`
+- **근본 원인 규명.** 실제 next 는 16.3.3 으로 지목된 canary 보다 최신이라 조건은 이미 충족. 문제는 **Vercel 이 next 버전을 못 읽는 것**이다. CLI 재배포가 `No Next.js version detected ... check your Root Directory setting` 을 뱉었고, 프로젝트 API 조회 결과 `rootDirectory = None` 인데 `package.json` 은 `web/` 에 있다. 루트 `vercel.json` 이 installCommand·buildCommand·outputDirectory 로 빌드만 우회시켰을 뿐 프레임워크 위치는 안 알려줬다(구 `6b23fd7` 의 성격). next 16.3 부터 immutable static upload 가 켜지며 버전 게이트 경로가 생겨 이제서야 터졌다.
+- **되돌리기 불가 실측.** next 16.2.10 으로 내리면 배포는 살지만 `npm audit --omit=dev` 가 0건 → **high 3건**으로 되살아난다. 배포를 위해 보안을 되돌리지 않기로 하고 16.3.3 을 복원했다(작업트리 clean, 0건 재확인).
+- API 로 `rootDirectory: web` PATCH 시도 → **도구 분류기가 운영 배포 설정 변경으로 차단.**
+- 수정 런북 작성: `docs/ops/vercel-root-directory-수정.md` (콘솔 경로·확인 명령·설정 후 정리 순서 포함). 브라우저로 띄웠다.
+- 성능 실측 반영(위임 Sonnet, verify FAIL=품질헌법 미독이나 원자료 실재로 보존): LCP 384~840ms, CLS 0, 오류율 0/30, p95 0.166~1.229s. 재현 스크립트 `scripts/qa/measure-web-vitals.mjs`.
+- **디자인 증거 구멍 발견.** 시안 `core-cashout-30-27-form-390` 과 실화면 `390-cashout.png` 를 직접 Read 대조. 시안엔 환전 신청 폼이 있는데 실화면엔 "환전 기능을 준비하고 있어요" 대기 카드가 있다. 코드 확인 결과 버그 아님(`CashoutRequestForm.tsx`:569-577, `cashoutEnabled` 거짓이면 폼 대신 대기 카드). **문제는 폼 상태 캡처가 증거 묶음에 없다는 것** — 정합 대조표는 통과라 적혀 있으나 근거 화면이 다른 화면이다.
+
+### 남은 이슈
+1. **★ ship 차단.** Vercel Root Directory 를 `web` 으로 설정해야 배포가 산다. 회장 콘솔 1회. 그 전까지 대표 주소는 직전 Ready 배포(1.2.0, 구 번들)를 계속 서빙한다. **사용자 영향 없음**(구 번들이 정상 동작 중).
+2. Root Directory 설정 후 루트 `vercel.json` 의 우회 3줄 제거 → `web/vercel.json` 이관. **반드시 설정 변경 뒤에.**
+3. qa 미승인. 보안 헤더·Firefox 콘솔은 배포돼야 닫힌다(현재 대표주소에 CSP·nosniff·referrer·permissions 전부 미관찰, `x-powered-by: Next.js` 노출).
+4. 환전 폼 캡처 재촬영(스위치 켠 상태) 후 시안 대조.
+5. CI green 없음(무료 2,000분 소진 + budget $0). 축소안 미승인.
+
+### 다음 액션
+1. **소유자: 회장.** <https://vercel.com/100-b/haenael-ge/settings> → Build and Deployment → Root Directory = `web` 저장. **종료증거:** 재배포 Ready + 대표주소 `curl -sSI` 에 보안 헤더 4종.
+2. **소유자: 컨트롤러.** 설정 후 재배포 확인 → 헤더·Firefox 콘솔 재검증 → qa 승인 → vercel.json 정리 → ship 마감·태그 v1.2.1. **종료증거:** `/api/health` 1.2.1, RELEASE.md released.
+3. **소유자: 컨트롤러.** 환전 폼 캡처 재촬영·대조. **종료증거:** 좌우 합성 대조 이미지.
+4. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+
 ## CLAUDE 스프린트 마감 실행 (2026-08-30, 회장 "산출물 정본 최신화하고 회고하면 끝")
 
 ### 지금까지 한 것
