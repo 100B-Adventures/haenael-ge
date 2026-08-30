@@ -1,3 +1,11 @@
+## CLAUDE 턴 종료 시점 상태 (2026-08-30 03:40 KST)
+
+- push 완료: `fb6f871..a659f1f` (커밋 5건). 작업트리 clean(growth 트랙 제외).
+- **Vercel 배포 Error 지속.** 해제 = 회장 콘솔에서 Root Directory=`web`. 런북 `docs/ops/vercel-root-directory-수정.md`.
+- **CI run `33286007123` 도 세 job 전부 steps 0개로 종료.** annotation = 계정 결제 실패 또는 spending limit. 코드 실패·flaky 아님. Actions 무료 2,000분 소진 + budget $0(2026-08-29 브라우저 실화면 확인). green 증거 생성 불가.
+- 위임 검증: 성능 측정(Sonnet) verify FAIL — `~/.claude/standards/doc-review.md` Read 0회. 측정 스크립트·원자료 실재하고 컨트롤러가 직접 확인해 **경고 라벨 붙여 출고**(회장 2026-07-11 규약). 재위임 시 프롬프트에 doc-review.md Read 필수 명시할 것.
+- 실수원장 2건 추가: [proxy] 의존성 변경을 배포 확인 없이 push / [struct] Root Directory 미설정을 우회로 덮은 구조 문제 재발(count 2).
+
 ## CLAUDE 배포 시도와 차단 (2026-08-30, 회장 "쭉 진행")
 
 ### 지금까지 한 것
