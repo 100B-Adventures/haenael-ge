@@ -223,8 +223,13 @@ export default async function LandingPage() {
             "로그인"임을 명확히 읽히게: 라벨(muted)+동사(강조 underline)로 분리 */}
         <p className="w-full text-center [font-size:12.5px]! [color:var(--faint)]! p-[10px_6px_4px]! [display:flex]! [align-items:center]! [justify-content:center]! gap-[4px]!">
           <span>이미 계정이 있으신가요?</span>
+          {/* prefetch 를 끈다. Next 가 이 경로를 미리 가져가면 서버가 302 로
+              kauth.kakao.com 을 가리키고, 그 크로스 오리진 요청이 우리 CSP
+              connect-src 에 막혀 모든 방문자 콘솔에 에러가 찍힌다. 카카오는
+              최상위 리다이렉트로만 쓰므로 CSP 를 여는 대신 prefetch 를 끈다. */}
           <Link
             href="/auth/kakao/start?redirect=/me"
+            prefetch={false}
             className="font-bold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--accent-foreground)]!"
             data-testid="landing-relogin-link"
           >
