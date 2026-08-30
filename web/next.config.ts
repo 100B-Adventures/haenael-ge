@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
 
@@ -65,8 +66,18 @@ export const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
 ] as const;
 
+// 운영 /api/health 의 version 은 Vercel 환경변수를 손으로 관리했다. 그 값이 40일간
+// 1.0.0 에 멈춘 채 릴리즈 매니페스트만 앞서가는 사고가 2026-08-28 에 있었다
+// (매니페스트의 존재 이유가 "지금 운영에 뭐가 올라가 있나"인데 그 답이 틀렸다).
+// package.json 을 유일한 진실원으로 삼아 빌드 시각에 주입한다. 환경변수는 더 이상
+// 읽지 않는다. 읽으면 낡은 값이 다시 이겨서 같은 사고가 반복된다.
+const APP_VERSION = (
+  JSON.parse(readFileSync(path.join(__dirname, "package.json"), "utf8")) as { version: string }
+).version;
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
   async headers() {
     return [
       {

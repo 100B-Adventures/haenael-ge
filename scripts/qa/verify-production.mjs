@@ -15,12 +15,12 @@
  *
  * 쓰는 법
  *   node scripts/qa/verify-production.mjs
- *   node scripts/qa/verify-production.mjs --url https://haenaelge.vercel.app
+ *   node scripts/qa/verify-production.mjs --url https://haenael-ge.vercel.app
  */
 
 const BASE = (() => {
   const i = process.argv.indexOf("--url");
-  return i > -1 ? process.argv[i + 1] : "https://haenaelge.vercel.app";
+  return i > -1 ? process.argv[i + 1] : "https://haenael-ge.vercel.app";
 })();
 
 const results = [];

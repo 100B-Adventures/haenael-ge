@@ -10,7 +10,7 @@ export default defineConfig({
   reporter: "list",
   timeout: 45_000,
   use: {
-    baseURL: "https://haenaelge.vercel.app",
+    baseURL: "https://haenael-ge.vercel.app",
     ...devices["Desktop Chrome"],
     trace: "off",
     screenshot: "off",
