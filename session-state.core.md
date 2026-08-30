@@ -1,3 +1,39 @@
+## CLAUDE 스프린트 종료 (2026-08-30 22:45 KST)
+
+### 지금까지 한 것 (이 턴 추가분)
+- **환전 폼 시안 대조 완료 = 마지막 QA 잔여 해소.** kill switch 켠 E2E 로 재캡처(`artifacts/qa-cashout-core-20260824/build-fix/cashout-390.png`) 후 시안 `core-cashout-30-27-form-390-v1-gpt-codex.png` 과 2장을 나란히 Read 육안 대조. 타이틀·분해카드 3행·환산카드 4행·폼 필드 순서·요약박스·버튼 **일치**. 핵심인 **자격·상한 분리 문구**(`환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 N개`)도 일치. `docs/design-conformance-matrix.md` 에 스탬프 기록.
+- **E2E 12/12 통과.** 처음엔 12건 전부 실패했는데 내 코드 회귀가 아니라, 앞서 버전 주입 확인용으로 돌린 **가짜 Supabase 주소 빌드 결과물을 E2E 가 재사용**한 탓이었다(세션 쿠키 이름 불일치 → 전부 로그아웃 판정). 올바른 env 로 재빌드 후 12/12. 이 교훈을 회고에 추가했다.
+- **대표 주소 자동 추적 복구 확인(관찰됨).** 태그 push 배포 `haenael-72ps8djpd` 에 수동 alias 없이 `haenael-ge.vercel.app` 이 붙었다. 2026-08-25 부터 반복되던 수동 승격 문제도 Root Directory 미설정이 뿌리였다.
+- **릴리즈 v1.2.1 released.** 태그 생성·push 완료. RELEASE.md·CHANGELOG.md 는 release-manager 위임(verify FAIL=벤치마크 근거 부족, 내용은 컨트롤러 실측과 대조해 사실 확인 후 보존).
+- **pipeline-state 자체 오류 복구.** 내가 줄 번호로 패치하다 approved_artifacts 의 ship 핀 2줄을 덮어쓰고 stages 블록은 안 고쳐 자기모순이 났다. release-manager 가 지적해 복구했다.
+
+### 최종 실측 (전부 컨트롤러 직접)
+| 확인 | 결과 |
+|---|---|
+| `/api/health` | version **1.2.1**, database ok |
+| 보안 헤더 | **4/4** (CSP·nosniff·referrer·permissions) |
+| `x-powered-by` | **0건** |
+| Firefox / WebKit 콘솔 | error 0, pageerror 0 |
+| `qa:verify-production` | 3/3 |
+| 운영 인증 읽기 E2E | 1/1, 제품 쓰기 0 |
+| 환전 E2E | **12/12** |
+| vitest | 279/279 |
+| qa-contracts | 전량 PASS, mutation 8/8 검출 |
+| `npm audit --omit=dev` | 0건 |
+| artifact-drift-check | 드리프트 0 |
+
+### 남은 이슈 (전부 비차단)
+1. **CI green 없음.** Actions 무료 2,000분 소진 + budget $0 + Stop usage Yes. 코드·워크플로로 해소 불가. 축소안(중복 build 제거·트리거 축소) 미승인.
+2. **총보유 30·지급가능 27 실계정 0명.** 실제 회원의 27클로버 신청 성공 미검증. 30·27 값 그대로의 실화면 캡처도 같은 이유로 없다(구조·문구 대조로 대체).
+3. 지급 신원·세무정보 처리 계약 = 회장 보류(범위 밖, open-decisions 등재).
+4. 토스 지급대행 해지 미실행.
+
+### 다음 액션
+1. **소유자: 회장.** 대시보드에서 산출물·배포 결과 확인. **종료증거:** 회장 확인.
+2. **소유자: 회장.** GitHub Actions 예산 결정 또는 무료분 초기화 대기. **종료증거:** CI job 에 실제 steps 생성 후 success.
+3. **소유자: 회장.** 토스 지급대행 해지(평일 08:00~19:00 라이브챗). **종료증거:** 계약 상태 변경.
+4. **소유자: 실제 회원.** 총 30·지급가능 27 상태에서 27클로버 신청. **종료증거:** 운영 신청 성공.
+
 ## CLAUDE 배포 성공·QA 승인 (2026-08-30, 회장 "vercel root 디렉토리 너가 해야지")
 
 ### 지금까지 한 것
