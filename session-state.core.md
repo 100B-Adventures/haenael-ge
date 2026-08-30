@@ -1,3 +1,28 @@
+## CLAUDE 100B 대시보드 산출물 노출 점검 (2026-08-31, 회장 "누락된 것도 있고 병신같은 것도 있다")
+
+### 지금까지 한 것 (진단 = 컨트롤러 직접 실측)
+- `dashboard-sync.sh manual` 실행. 수집 정상 종료(9벤처·19트랙).
+- **haenael-ge 합성키가 19개뿐**이고 승인 핀 37건 중 대부분이 누락. 누락 예: security-report, perf-report, cross-browser-matrix, RELEASE.md, CHANGELOG.md, 구현현황.md, design-spec, clean-frames stamp, migrations 글롭, qa/contracts 글롭, fdd v0.1.0, folder-structure, core-cashout-qa-report.
+- **오탐**: `haenael-ge::main::prototype` = `docs/brand-assets/feed/_src/feed-02-carousel.html`(인스타 마케팅 캐러셀). `::main::wireframes` = 구 v2 허브. `design-conformance-matrix` 가 core/main 에 서로 다른 파일로 중복.
+- **근본 원인 ① 확증(직접 실행 검증).** `collect-artifacts.mjs`:270 이 `/^approved_artifacts:\s*\{(.*)\}/m` 로 **인라인 한 줄 객체만** 파싱한다. 우리는 release-and-artifacts.md §1.1 **블록/리스트 스키마**를 쓴다. node 로 직접 돌려 **매치 X** 확인. → 승인 핀 37건이 전부 무시되고 파일명 추측(discoverRepoArtifacts)으로 떨어진다. `pipeline-live.generated.ts` 의 `HaenaelGe.approvedArtifacts` 도 **`[]`** 로 같은 증상(해조단타는 인라인 스키마라 값이 있음).
+- **근본 원인 ② 확증.** 유령 `main` 트랙의 출처 = `.claude/worktrees/pay-open` 워크트리에 **루트 `pipeline-state.md`** 가 있어 `lineOf()` 가 'main' 을 반환. 그 워크트리는 브랜치 `wt-pay-open`(마지막 커밋 2026-08-02, **main 에 이미 병합됨**)이고 상태파일은 "2026-07-23 v2 design 진행 중"으로 낡았다. 구 PRD·구 와이어·마케팅 캐러셀이 여기서 올라온다.
+- 우리 쪽 핀은 이상 없음: 37건 실물 전량 존재(글롭 2건도 각각 4파일·1파일 해석), 대시보드가 잡은 haenael 엔트리 45건의 import 대상 **실재 45/45·실패 0**(즉 "안 열리는" 문제는 아니고 "엉뚱한 것이 열리는" 문제다).
+- **Codex 위임 진행 중**: `codex-delegate.sh code-builder` 로 수집기 수정 발주(블록 스키마 1급 파싱 + 라인 귀속 누수 + 글롭 처리 + before/after 숫자 + 타 벤처 회귀 금지).
+- 워크트리 처리는 미커밋 59건(25파일 945줄 + 미추적 34) 유실 위험이 있어 **임의 제거하지 않고** open-decisions 에 선택지 4개로 등재.
+
+### 남은 이슈
+1. **수집기 수정 회수 대기(Codex).** 종료증거 = 재수집 후 haenael 승인 핀 37건 중 잡힌 수, 유령 main 트랙 소멸, 타 벤처 합성키 수 미감소.
+2. **워크트리 `pay-open` 처리 = 회장 결정.** 추천 = 미커밋분 커밋 후 worktree 제거.
+3. `pipeline-live` 의 `lastApprovalStage` 가 `eng-design`(2026-08-01)로 낡았고 stageTimestamps 에 ship 이 없다. 수집기 수정 후 재확인.
+4. CI green 없음(Actions 무료분 소진 + budget $0).
+5. 총보유 30·지급가능 27 실계정 0명.
+
+### 다음 액션
+1. **소유자: Codex.** 수집기 블록 스키마 파싱·라인 귀속 수정. **종료증거:** before/after 표, 승인 핀 커버리지 숫자.
+2. **소유자: 회장.** worktree `pay-open` 처리 방식 결정. **종료증거:** worktree 제거 후 대시보드에 `haenael-ge::main` 트랙 소멸.
+3. **소유자: 회장.** GitHub Actions 예산 또는 무료분 초기화 대기. **종료증거:** CI job 에 실제 steps 생성.
+4. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+
 ## CLAUDE 스프린트 종료 (2026-08-30 22:45 KST)
 
 ### 지금까지 한 것 (이 턴 추가분)
