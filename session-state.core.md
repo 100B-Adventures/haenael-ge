@@ -1,3 +1,55 @@
+## CLAUDE 대시보드 클릭 열람까지 검증 완료 (2026-08-31 07:10 KST)
+
+### 지금까지 한 것
+- 수집기 파싱 수정분(SJ_BRAIN_wiki `cff9d55`)을 컨트롤러가 재검증: 단위 테스트 **16/16**, 재수집 후 haenael 합성키 **31개 전량 `core`**(유령 `main` 소멸), import 실재 **31/31**, missingReason **0**, `pipeline-live` 의 `approvedArtifacts` **31건**(이전 `[]`).
+- **private 대시보드 빌드가 깨져 있던 것을 찾아 고쳤다(SJ_BRAIN_wiki `d9985a2`).** 앞선 수정이 emit 하는 타입 선언에서 "실물 없음" 변형에 실제로는 없는 `load` 가 적혀 있어 타입 좁히기가 무력화되고 `DashboardView.tsx:415` 가 TS2322 로 깨졌다. 공개 빌드만 확인했으면 못 잡았을 결함이다.
+- **클릭 열람 실검증 통과.** `npx tsc -b` exit 0 → `vite build --mode private` ✓ built → `node scripts/headless-artifact-smoke.mjs` **PASS(모달에 원문 표시)**.
+- 빌드된 번들에 security-report·perf-report·cross-browser-matrix·design-spec·clean-frames·구현현황·RELEASE·CHANGELOG **전부 포함** 확인, `feed-02-carousel`(마케팅 캐러셀 오탐) **0건** 확인.
+- **회귀 없음(정정된 실측).** before/after: romeo 23→25, dark 15→15, zero-one 64→97, d-edu 97→117, openclaw-auto 20→30, haenael-ge 19→31, haejo-danta 17→17, verse 8→8, blog-premium 33→34. **감소 0.**
+  - ★내 앞선 보고의 "타 벤처 개수 동일"은 **오측정**이었다. 이미 수정이 적용된 뒤 상태를 before 로 잡았다. 결론(무회귀)은 같으나 근거 숫자가 틀렸고 회장께 정정 보고했다.
+- 전체 missingReason 36→41 증가는 회귀가 아니라 **표면화**(해조단타·blog-premium 이 승인 핀에 경로 대신 설명 라벨을 적어둔 것이 이제 읽혀 드러남). 그 벤처 소유라 미수정.
+- 빌드 도중 `collect-harness-changelog.mjs`(다른 트랙 소유)가 35분 이상 진행 없이 멈춰 prebuild 를 막았다. 해당 프로세스를 종료하고 `tsc -b` + `vite build` 를 직접 실행해 우회했다. 이 스크립트의 행 자체는 그 트랙 몫으로 남긴다.
+
+### 남은 이슈
+1. **`pay-open` worktree 처리 = 회장 결정.** 브랜치 `wt-pay-open` 은 main 에 병합됨, 마지막 커밋 2026-08-02. 미커밋 59건(25파일 945줄 + 미추적 34) 때문에 임의 제거하지 않았다. 수집기 수정으로 대시보드 오염은 이미 사라졌다. open-decisions 에 선택지 4안 등재(추천 = 미커밋분 커밋 후 제거).
+2. **CI green 없음.** run `33318783524` 포함 전부 세 job 이 2초 만에 steps 0개 종료. Actions 무료 2,000분 소진 + budget $0. 코드 실패도 flaky 도 아니며 `--log-failed` 로 열 로그가 없다. 저장소 수정으로 해소 불가.
+3. **`collect-harness-changelog.mjs` 행(hang)** 이 남아 있으면 다음 private 빌드도 막힌다. 다른 트랙 소유.
+4. 총보유 30·지급가능 27 실계정 0명. 실제 신청 성공 미검증.
+5. 지급 신원·세무정보 처리 계약 = 회장 보류(범위 밖).
+
+### 다음 액션
+1. **소유자: 회장.** `pay-open` worktree 처리 방식 결정. **종료증거:** 폴더 정리 후 저장소 clean.
+2. **소유자: 회장.** GitHub Actions 예산 결정 또는 무료분 초기화 대기. **종료증거:** CI job 에 실제 steps 생성 후 success.
+3. **소유자: 100B/openclaw-auto 트랙.** `collect-harness-changelog.mjs` 행 원인 규명. **종료증거:** prebuild:private 이 끊김 없이 완주.
+4. **소유자: 회장.** 토스 지급대행 해지(평일 08:00~19:00 라이브챗). **종료증거:** 계약 상태 변경.
+5. **소유자: 실제 회원.** 총 30·지급가능 27 상태에서 27클로버 신청. **종료증거:** 운영 신청 성공.
+
+## CODEX 100B 대시보드 수집기 수정 회수 (2026-08-31 05:45 KST)
+
+### 지금까지 한 것
+- 100B 수집기가 `pipeline-state.core.md`의 표준 block/list `approved_artifacts`를 1급 파싱하도록 수정했다. 기존 inline 객체와 legacy block map도 유지했다.
+- 승인 핀의 정확 path를 파일명 추측보다 우선하고, 표준 핀이 모두 실재하면 discovery와 worktree fallback을 억제했다.
+- 루트 `pipeline-state.md`가 없는 레포는 실제 정식 라인에만 귀속하도록 고쳐 유령 `main`을 제거했다. 낡은 `pay-open` worktree는 유실 위험 때문에 삭제하지 않았다.
+- glob 핀은 대표 실파일 1건과 `globMatchCount`를 기록한다. migration 4건, QA contract 1건을 확인했다.
+- 현재 진실원의 승인 핀은 37건이 아니라 목록 항목 31건이다. 단계 제목 6개를 합치면 하위 YAML 행이 37개다. 수집 결과는 pin 31/31, glob 전개 실파일 34/34다.
+- `dashboard-sync.sh manual` exit 0 후 `haenael-ge` 합성키는 `core=31`, `main=0`, `missingReason=0`, 실파일 `load()` 31/31이다. 기존 인스타 캐러셀·구 wireframe·중복 matrix 오탐은 합성키에서 사라졌다.
+- 9개 벤처 합성키는 감소 0이다. before/after: romeo 23→25, dark 15→15, zero-one 64→97, d-edu 97→117, openclaw-auto 20→30, haenael-ge 19→31, haejo-danta 17→17, verse 8→8, blog-premium 33→34.
+- 검증: artifact 계약 테스트 16/16, 대상 ESLint, `npm run build` 통과. private Dashboard 전항목 실클릭은 QA 미검증이다.
+- 공유 BRAIN 저장소에서 다른 동시 작업이 05:26 KST에 수집기 1차 변경을 `cff9d55`로 커밋했다. 이 Codex 세션은 commit·push를 실행하지 않았다. 현재 로컬 원격 추적 브랜치에는 해당 커밋이 없다.
+
+### 남은 이슈
+1. private Dashboard에서 `haenael-ge core` 31개 모달 실클릭과 브라우저 콘솔 오류 0 검증이 남았다.
+2. 전역 기존 `missingReason` 36건과 새로 표면화된 ZERO-ONE의 비파일 worktree 핀 1건은 별도 벤처 정본 정리가 필요하다. `haenael-ge` 누락은 0이다.
+3. GitHub CI run `33318783524`는 세 job 모두 steps 0개로 실패했다. 코드 실행 전 계정 Actions 무료분 소진 + budget $0에서 차단된 기존 외부 조건이다. `gh run view --log-failed`도 실행 로그가 없어 실패했다. 코드 결함이나 플레이키 증거는 아니다.
+4. BRAIN 저장소가 여러 세션의 대규모 dirty 상태다. 이 작업은 관련 8파일 외 사용자 변경을 건드리지 않았다.
+
+### 다음 액션
+1. **소유자: qa-verifier.** `npm run build:private` 후 `node scripts/headless-artifact-smoke.mjs` 실행, `haenael-ge core` 31개 모달 확인. **종료증거:** 31/31 원문 표시, 콘솔 error 0.
+2. **소유자: 회장 또는 GitHub 계정 관리자.** Actions budget 승인 또는 무료분 초기화 대기. **종료증거:** run `33318783524` 재실행 시 세 job에 실제 steps가 생기고 success.
+3. **소유자: 각 벤처 세션.** 전역 `missingReason` 37건의 정본 path 보정. **종료증거:** 해당 벤처 생성키 missing 0 또는 의도적 missing 사유 확정.
+
+---
+
 ## CLAUDE 100B 대시보드 산출물 노출 점검 (2026-08-31, 회장 "누락된 것도 있고 병신같은 것도 있다")
 
 ### 지금까지 한 것 (진단 = 컨트롤러 직접 실측)
@@ -353,4 +405,3 @@
 3. **소유자: Codex.** 운영 경로에서 총 30·지급가능 27 계약을 검증하되 시험 신청 기록 노이즈를 만들지 않는 검증 경로를 먼저 확정. **종료증거:** 운영 함수 계약 확인과 허용된 실제 환전 성공 증거.
 4. **소유자: Codex.** DB 검증 후 대표 주소 승격 승인을 별도로 요청. 승인 시 별칭 변경과 health 재확인. **종료증거:** 대표 주소 `/api/health`가 `version: 1.2.0` 반환.
 5. **소유자: 회장 또는 계정 관리자.** GitHub 결제 제한 해소. **종료증거:** 빌드·테스트·E2E 작업 시작 및 전부 성공.
-
