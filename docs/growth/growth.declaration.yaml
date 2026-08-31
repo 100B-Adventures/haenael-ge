@@ -1,0 +1,155 @@
+# 해낼게 그로스 관문 정의서
+#
+# 규격: apps/100b-won/docs/growth-schema/growth-measurement-schema-v1-opus5.md
+# 계단·채널·원천은 사람이 쓰고, 값은 수집기가 채운다.
+# 표·컬럼 이름은 docs/growth/gates-v1.0.0.md 에서 옮겼다(그 문서가 실 스키마 조사 결과).
+
+service:
+  key: haenael-ge
+  label: 해낼게
+  schema_version: 1.0.0
+  declaration_version: 1.0.0
+  stage: prelaunch
+  stage_reason: 수집기가 아직 없다. 정의만 있고 관측이 시작되지 않았다
+  timezone: Asia/Seoul
+
+topology:
+  linear: [awareness, acquisition, activation, retention, revenue]
+  loops:
+    - { from: retention, to: activation, kind: reentry, label: "응원이 목표 재개로" }
+    - { from: referral,  to: awareness,  kind: seeding, label: "인증 공유가 인지도로" }
+
+# 계단: 제품 안에서 사람이 밟는 행동
+steps:
+  - id: signup
+    label: 가입
+    gate: acquisition
+    order: 10
+    entity: person
+    definition: 회원 표에 행이 생긴 시점
+    binding: { source: product_db, table: member, condition: "created_at 존재" }
+
+  - id: goal_create
+    label: 목표 만들기
+    gate: activation
+    order: 20
+    entity: person
+    definition: 가입 후 첫 활성 목표를 만든 시점
+    binding: { source: product_db, table: goal, condition: "status='ACTIVE' 최초 1건" }
+
+  - id: cheer_confirm
+    label: 응원 받기
+    gate: retention
+    order: 30
+    entity: person
+    definition: 만든 목표에 확정된 응원이 붙은 시점
+    binding: { source: product_db, table: cheer, condition: "status='CONFIRMED' 최초 1건" }
+
+  - id: payment
+    label: 결제
+    gate: revenue
+    order: 40
+    entity: person
+    definition: 승인된 결제
+    binding: { source: product_db, table: payment, condition: "status='DONE'" }
+
+  - id: share
+    label: 인증 공유
+    gate: referral
+    order: 50
+    entity: event
+    definition: 목표 인증을 밖으로 공유한 사건. 이미지·스토리·링크 세 면이 있다
+    binding: { source: product_db, table: share_event, condition: "channel IN ('IMAGE','STORY','LINK')" }
+
+channels:
+  - id: instagram
+    label: 인스타그램
+    kind: social
+    owned: false
+    account: "@haenaelge"
+    state: live
+    tag: null
+    cost: []
+    contributions:
+      - { gate: acquisition, role: new, measure: m_instagram_arrivals, separable: true }
+
+  - id: threads
+    label: 스레드
+    kind: social
+    owned: false
+    account: "@haenaelge"
+    state: not_adopted
+    tag: null
+    cost: []
+    contributions:
+      - { gate: acquisition, role: new, measure: m_threads_arrivals, separable: true }
+
+  - id: youtube
+    label: 유튜브
+    kind: video
+    owned: false
+    account: "@haenaelge"
+    state: not_adopted
+    tag: null
+    cost: []
+    contributions:
+      - { gate: acquisition, role: new, measure: m_youtube_arrivals, separable: true }
+
+sources:
+  - { id: product_db, label: 제품 데이터베이스, state: unverified, period: cumulative, note: "수집기 미작성. 표 이름은 관문 정의서에서 옮겼고 실조회는 아직 안 했다" }
+  - { id: ga4,        label: 방문 분석,       state: not_adopted, period: 28d,        note: "미도입" }
+
+measures:
+  - { id: m_reach, label: 발행 도달, gate: awareness, subject: {kind: channel, ref: instagram}, unit: impressions, period: month, source: ga4, slice: {by: none}, value: null, state: blocked, state_reason: "발행 성과를 받을 통로가 없다. 인스타 계정만 살아 있고 보고 양식이 안 돈다", collected_at: null }
+
+  - { id: m_instagram_arrivals, label: 인스타그램에서 들어온 사람, gate: acquisition, subject: {kind: channel, ref: instagram}, unit: people, period: 28d, source: ga4, slice: {by: none}, value: null, state: pending, state_reason: "프로필 링크에 출처 표시가 없다. 방문 분석도 미도입", unblock: {owner: chairman, action: "프로필 링크에 출처 표시 부착", reversible: true}, collected_at: null }
+  - { id: m_threads_arrivals,   label: 스레드에서 들어온 사람,     gate: acquisition, subject: {kind: channel, ref: threads},   unit: people, period: 28d, source: ga4, slice: {by: none}, value: null, state: blocked, state_reason: "계정이 아직 없다. 링크를 붙일 대상 자체가 없다", collected_at: null }
+  - { id: m_youtube_arrivals,   label: 유튜브에서 들어온 사람,     gate: acquisition, subject: {kind: channel, ref: youtube},   unit: people, period: 28d, source: ga4, slice: {by: none}, value: null, state: blocked, state_reason: "계정이 아직 없다", collected_at: null }
+  - { id: m_signups,  label: 가입한 사람,   gate: acquisition, subject: {kind: step, ref: signup},    unit: people, period: cumulative, source: product_db, slice: {by: cohort}, value: null, state: pending, state_reason: "수집기가 아직 없다", unblock: {owner: session, action: "제품 DB 수집기 작성", reversible: true}, collected_at: null }
+
+  - { id: m_goals,    label: 목표를 만든 사람, gate: activation, subject: {kind: step, ref: goal_create}, unit: people, period: cumulative, source: product_db, slice: {by: cohort}, value: null, state: pending, state_reason: "수집기가 아직 없다", unblock: {owner: session, action: "제품 DB 수집기 작성", reversible: true}, collected_at: null }
+
+  - { id: m_cheered,  label: 응원 받은 목표, gate: retention, subject: {kind: step, ref: cheer_confirm}, unit: people, period: cumulative, source: product_db, slice: {by: cohort}, value: null, state: proxy, proxy_of: 회원의 재방문, population_note: "회원이 다시 온 것이 아니라 남이 응원을 남긴 것이다. 로그인 이력 표가 없어 대신 본다", collected_at: null }
+
+  - { id: m_paid,     label: 돈 낸 사람,   gate: revenue,   subject: {kind: step, ref: payment}, unit: people, period: cumulative, source: product_db, slice: {by: cohort}, value: null, state: pending, state_reason: "수집기가 아직 없다", unblock: {owner: session, action: "제품 DB 수집기 작성", reversible: true}, collected_at: null }
+
+  - { id: m_shares,   label: 공유한 횟수, gate: referral, subject: {kind: step, ref: share}, unit: events, period: cumulative, source: product_db, slice: {by: none}, value: null, state: proxy, proxy_of: 데려온 사람 수, population_note: "공유 버튼을 누른 횟수이지 그로 인해 온 사람 수가 아니다. 공유자와 신규 가입을 잇는 값이 없다", collected_at: null }
+
+ratios:
+  - { id: r_activation, label: 활성화율, numerator: m_goals, denominator: m_signups, min_sample: 30 }
+  - { id: r_paid,       label: 결제 전환율, numerator: m_paid, denominator: m_goals, min_sample: 10 }
+
+cohort_axis:
+  unit: month
+  anchor_step: signup
+  min_size: 30
+  note: 월 단위. 표본이 쌓이면 주 단위로 좁힌다
+
+attribution:
+  model: first_touch
+  storage: { source: product_db, table: member, column: null }
+  state: blocked
+  state_reason: 회원 표에 첫 유입 통로를 담을 칸이 없다
+  retroactive: false
+  backfill_note: 소급 불가. 칸을 만들어도 그 전 가입자는 영원히 미상이다
+  unblock: { owner: product_session, action: "member 표에 첫 유입 통로 칸 추가", reversible: false }
+
+stage_policy:
+  prelaunch:
+    verdict_label: 아직 판정할 단계가 아니다
+    treat_signups_as: 대기 명단
+    suppress_alerts: [activation_cliff, revenue_zero]
+    reason: 수집기가 없어 관측 자체가 시작되지 않았다. 빈칸은 결함이 아니라 미착수다
+  early:
+    verdict_label: 초기 관측
+    suppress_alerts: []
+  operating:
+    verdict_label: 운영 중
+    suppress_alerts: []
+
+# STAMP
+# 작성 2026-08-20 · claude-opus-5 (그로스 트랙 컨트롤러)
+# 기반: docs/growth/gates-v1.0.0.md(표·컬럼 이름) · docs/growth/channels.md(채널 3개)
+# 고민: 공유(share_event)를 추천 관문 계단으로 둘지 채널로 둘지. 우리 DB에 남으므로 계단이 맞다.
+#       단 "공유 횟수"는 "데려온 사람 수"가 아니라 대리 지표다. 그 구분을 population_note에 적었다.
+# 미검증: 표·컬럼 실조회 안 함. 수집기 작성 시 information_schema로 대조해야 한다.

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>해낼게 · 수동환전 전체 여정 (v3.8)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#FFFFFF; --line:#E8E4DC; --warm:#F4EFE6;
+    --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; /* 대비 2.81:1, WCAG 미달. DESIGN.md v1.11.0 §3.1로 읽는 글자엔 금지. 현재 사용처 0 */
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+    --danger:#D9483B; --danger-soft:#FBEAE7;
+    --amber:#B4791F; --amber-soft:#FBF1DD; --amber-line:#E8D3A6;
+    /* v3.5: 채움·테두리용 원색과 별개로, 글자용 어두운 짝을 둔다(clover/clover-ink와 같은 패턴).
+       --amber 12.5px 본문은 amber-soft 위 3.29:1로 WCAG AA 미달이었다. --amber-ink는 5.27:1. */
+    --amber-ink:#8A5A12; --danger-ink:#B23225;
+    --r-sm:12px; --r-md:14px; --r-lg:20px;
+    --font:"Pretendard","Apple SD Gothic Neo",-apple-system,sans-serif;
+    --motion-standard:180ms;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--font);background:#2b2926;color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+  /* ══ prototype console (chrome, not product) ══ */
+  .console{position:sticky;top:0;z-index:60;background:#1c1b19;color:#e9e5dd;padding:12px 18px;border-bottom:1px solid #35322d;}
+  .console h1{font-size:13px;font-weight:800;letter-spacing:-.2px;display:flex;gap:8px;align-items:center;}
+  .console h1 .dot{color:#39c07a;}
+  .console .row{display:flex;flex-wrap:wrap;gap:14px;margin-top:11px;align-items:center;}
+  .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .grp .lbl{font-size:10.5px;color:#8a857c;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-right:2px;}
+  .console button{font-family:var(--font);font-size:11.5px;font-weight:700;border:1px solid #3f3b35;background:#2a2823;color:#cfc9bf;
+    padding:6px 11px;border-radius:9px;cursor:pointer;transition:all .12s ease-out;}
+  .console button:hover{border-color:#5a554c;}
+  .console button.on{background:#1B8A4F;border-color:#1B8A4F;color:#fff;}
+  .console button.admin.on{background:#4a453d;border-color:#6b6459;color:#fff;}
+  .console button.vw{border-color:#544e44;}
+  .console button.vw.on{background:#c98a2b;border-color:#c98a2b;color:#1c1b19;}
+  .console .hint{font-size:10.5px;color:#7d786f;margin-top:9px;line-height:1.5;}
+  .console .sep{width:1px;height:20px;background:#3f3b35;}
+
+  .stage{display:flex;justify-content:center;padding:34px 18px 70px;min-height:100vh;}
+  .screen{display:none;}
+  .screen.active{display:block;animation:fade .18s ease-out;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* ══ adaptive frame: viewport toggle changes LAYOUT, not just width ══ */
+  .frame{background:var(--bg);overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.4);margin:0 auto;font-size:15px;}
+  .stage[data-vw="390"] .frame{width:390px;border-radius:26px;border:1px solid #000;}
+  .stage[data-vw="1024"] .frame{width:1024px;border-radius:14px;}
+
+  .caption{margin:0 auto 16px;color:#cfc9bf;font-size:12px;line-height:1.6;}
+  .stage[data-vw="390"] .caption{max-width:390px;}
+  .stage[data-vw="1024"] .caption{max-width:1024px;}
+  .caption b{color:#fff;}
+  .caption .tag{display:inline-block;background:#33302b;color:#c7f0d8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:6px;}
+  .caption .tag.adm{background:#3a352d;color:#e8cf9a;}
+  .cap-m,.cap-d{display:none;}
+  .stage[data-vw="390"] .cap-m{display:inline;}
+  .stage[data-vw="1024"] .cap-d{display:inline;}
+
+  /* ══ user screens ══ */
+  .u-head{display:flex;align-items:center;justify-content:space-between;}
+  .brand{font-size:12.5px;font-weight:800;letter-spacing:-.2px;}
+  .brand .d{color:var(--clover-bright);}
+  .goal-title{font-weight:800;letter-spacing:-.4px;line-height:1.32;}
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:4px 12px;border-radius:var(--r-sm);background:var(--warm);color:var(--clover-ink);}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);}
+  .sub{font-size:11.5px;font-weight:700;color:var(--muted);margin:20px 0 8px;}
+  .page-h{font-weight:900;letter-spacing:-.4px;line-height:1.34;}
+  .page-k{font-size:13px;font-weight:800;color:var(--clover-ink);}
+
+  .u-body{padding:34px 22px 32px;}
+  .u-grid{display:block;}
+  .stage[data-vw="1024"] .u-body{padding:38px 56px 46px;}
+  .stage[data-vw="1024"] .u-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:32px;align-items:start;}
+  .stage[data-vw="1024"] .u-side{position:sticky;top:20px;}
+  .stage[data-vw="1024"] .goal-title{font-size:22px;}
+  .stage[data-vw="390"] .goal-title{font-size:22px;}
+  .stage[data-vw="1024"] .page-h{font-size:30px;}
+  .stage[data-vw="390"] .page-h{font-size:22px;}
+  .stage[data-vw="1024"] .u-head{margin-bottom:24px;}
+  .stage[data-vw="390"] .u-head{margin-bottom:16px;}
+  .only-d{display:none;} .stage[data-vw="1024"] .only-d{display:block;}
+  /* MOBILE /me: balance + cashout entry is the primary action, so it leads.
+     On desktop it sits in the right rail instead. */
+  .stage[data-vw="390"] #home .u-grid{display:flex;flex-direction:column;}
+  .stage[data-vw="390"] #home .u-side{order:-1;margin-bottom:8px;} /* 6px was off the 4px grid */
+
+  .bal{display:flex;align-items:center;justify-content:space-between;padding:16px;gap:12px;}
+  .stage[data-vw="1024"] .bal{padding:22px 24px;}
+  .bal .meta{font-size:10.5px;color:var(--muted);margin-bottom:4px;}
+  .bal .count{font-size:20px;font-weight:800;color:var(--clover-ink);}
+  .stage[data-vw="1024"] .bal .count{font-size:30px;}
+  .bal .count small{font-size:11.5px;font-weight:700;color:var(--muted);margin-left:4px;}
+  .bal .krw{font-size:10.5px;color:var(--muted);margin-top:4px;}
+  .cta-cash{display:inline-flex;flex-direction:column;align-items:center;gap:4px;background:var(--clover);color:var(--surface);
+    font-size:12px;font-weight:800;padding:12px 16px;border-radius:var(--r-md);text-decoration:none;white-space:nowrap;cursor:pointer;}
+  .stage[data-vw="1024"] .cta-cash{font-size:15px;padding:16px 22px;}
+  .cta-cash small{font-size:10.5px;font-weight:700;opacity:.85;}
+  .cta-cash.locked{background:var(--warm);color:var(--muted);}
+  .cta-cash.pending{background:var(--amber-soft);color:var(--amber-ink);border:1px solid var(--amber-line);}
+
+  /* v3.6 분할 잔액 (회장 2026-08-21 A안 확정: 잠금 유지, 실지급 시 차감).
+     A안의 알려진 약점 = 총량 52개인데 쓸 수 있는 건 12개라 숫자 하나가 두 뜻을 갖는 것.
+     해법: 총량 아래에 언제나 "분할 막대 + 두 라벨"을 붙여 전체가 눈에 보이게 쪼갠다.
+     은행 앱의 current balance / available balance 2단 표기와 같은 구조이고,
+     막대는 두 값의 비율을 한눈에 줘서 "52는 총량, 12는 쓸 수 있는 양"을 읽지 않아도 알게 한다.
+     잠김이 0이면 이 블록 전체가 사라진다(평시 화면을 어지럽히지 않는다). */
+  .splitbar{display:flex;height:8px;border-radius:var(--r-lg);overflow:hidden;background:var(--warm);margin:0 16px 12px;gap:4px;}
+  .stage[data-vw="1024"] .splitbar{margin:0 24px 16px;}
+  .splitbar i{display:block;height:100%;}
+  .splitbar i.free{background:var(--clover);border-radius:var(--r-lg);}
+  .splitbar i.lock{background:var(--amber-line);border-radius:var(--r-lg);}
+  .splitrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0 16px 12px;}
+  .stage[data-vw="1024"] .splitrow{padding:0 24px 12px;}
+  .splitrow .l{font-size:11.5px;font-weight:700;color:var(--ink);padding-top:4px;}
+  .splitrow .l i{font-style:normal;margin-right:4px;}
+  .splitrow.lock .l{color:var(--amber-ink);}
+  .splitrow .v{font-size:13px;font-weight:800;color:var(--clover-ink);white-space:nowrap;text-align:right;}
+  .stage[data-vw="1024"] .splitrow .v{font-size:15px;}
+  .splitrow.lock .v{color:var(--amber-ink);}
+  .splitrow .sub{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:4px;}
+  .splitsep{height:1px;background:var(--line);margin:0 16px 12px;}
+  .stage[data-vw="1024"] .splitsep{margin:0 24px 12px;}
+  .splitnote{font-size:11.5px;color:var(--muted);line-height:1.55;padding:0 16px 16px;word-break:keep-all;}
+  .stage[data-vw="1024"] .splitnote{font-size:12px;padding:0 24px 16px;}
+
+  .prog{height:8px;background:var(--warm);border-radius:var(--r-lg);overflow:hidden;margin:12px 0 8px;}
+  .prog i{display:block;height:100%;background:var(--clover);border-radius:var(--r-lg);}
+
+  .banner{border-radius:var(--r-md);padding:12px 16px;}
+  .stage[data-vw="1024"] .banner{padding:16px 22px;}
+  .banner .t{font-size:13px;font-weight:800;}
+  .banner .s{font-size:11.5px;margin-top:4px;line-height:1.55;}
+  .stage[data-vw="1024"] .banner .t{font-size:15px;}
+  .stage[data-vw="1024"] .banner .s{font-size:12.5px;}
+  .banner.ok{background:var(--clover-soft);border:1px solid var(--clover);}
+  .banner.ok .t{color:var(--clover-ink);} .banner.ok .s{color:var(--clover-ink);}
+  .banner.wait{background:var(--amber-soft);border:1px solid var(--amber-line);}
+  .banner.wait .t{color:var(--amber-ink);} .banner.wait .s{color:var(--amber-ink);}
+  .banner.bad{background:var(--danger-soft);border:1px solid var(--danger);}
+  .banner.bad .t{color:var(--danger-ink);} .banner.bad .s{color:var(--danger-ink);}
+
+  .steps{display:flex;align-items:flex-start;margin:16px 0 4px;}
+  .step{flex:1;text-align:center;position:relative;}
+  .step .bull{width:22px;height:22px;border-radius:9999px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;font-weight:800;background:var(--warm);color:var(--muted);border:1px solid var(--line);}
+  .stage[data-vw="1024"] .step .bull{width:30px;height:30px;font-size:13px;}
+  .step .nm{font-size:11.5px;font-weight:700;color:var(--muted);line-height:1.35;}
+  .stage[data-vw="1024"] .step .nm{font-size:13px;}
+  .step .tm{font-size:10.5px;color:var(--muted);margin-top:4px;}
+  .step.done .bull{background:var(--clover);color:var(--surface);border-color:var(--clover);}
+  .step.done .nm{color:var(--clover-ink);}
+  .step.now .bull{background:var(--surface);color:var(--amber-ink);border:2px solid var(--amber);}
+  .step.now .nm{color:var(--amber-ink);}
+  .step.fail .bull{background:var(--danger);color:var(--surface);border-color:var(--danger);}
+  .step.fail .nm{color:var(--danger-ink);}
+  .step::before{content:"";position:absolute;top:12px;left:-50%;width:100%;height:2px;background:var(--line);z-index:-1;}
+  .stage[data-vw="1024"] .step::before{top:16px;}
+  .step:first-child::before{display:none;}
+  .steps-wrap{position:relative;z-index:0;}
+
+  .rows{padding:4px 16px;}
+  .stage[data-vw="1024"] .rows{padding:8px 24px;}
+  .kv{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:12.5px;gap:12px;}
+  .stage[data-vw="1024"] .kv{font-size:15px;padding:12px 0;}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{color:var(--muted);}
+  .kv .v{font-weight:700;text-align:right;white-space:nowrap;}
+  .kv .v.big{color:var(--clover-ink);font-size:15px;font-weight:800;}
+  .stage[data-vw="1024"] .kv .v.big{font-size:19px;}
+  /* NET row: two deduction lines now sit above it, so the payout figure is
+     re-weighted to stay the first thing read. */
+  .kv.net-row{border-bottom:none;border-top:1px solid var(--line);align-items:baseline;padding-top:12px;}
+  .kv.net-row .k{color:var(--ink);font-weight:800;font-size:13px;}
+  .kv.net-row .v.big{font-size:19px;}
+  .stage[data-vw="1024"] .kv.net-row{padding-top:16px;}
+  .stage[data-vw="1024"] .kv.net-row .k{font-size:15px;}
+  .stage[data-vw="1024"] .kv.net-row .v.big{font-size:20px;}
+  /* Withholding is not our money. Roblox DevEx states it plainly ("withholding
+     taxes are not fees"), so the value is lighter. The custodial explanation now
+     lives BELOW the table (v3.4): the table compares numbers, the note persuades. */
+  .kv .v.pass{color:var(--muted);font-weight:600;}
+  .note-soft{font-size:11.5px;color:var(--muted);line-height:1.6;margin:8px 0 0;padding-left:4px;}
+  .stage[data-vw="1024"] .note-soft{font-size:12px;}
+
+  /* v3.4 fee explainer: one idea per line so the reader lands on the answer in
+     steps (why 34,426 → a coffee → what it runs → what it builds → tax is custodial). */
+  .why{background:var(--warm);border-radius:var(--r-sm);padding:12px 16px;}
+  .stage[data-vw="1024"] .why{padding:16px 20px;}
+  .why .ln{display:flex;gap:8px;font-size:11.5px;color:var(--muted);line-height:1.6;word-break:keep-all;}
+  .stage[data-vw="1024"] .why .ln{font-size:12.5px;}
+  .why .ln + .ln{margin-top:8px;}
+  .why .ln i{font-style:normal;flex:none;width:16px;text-align:center;opacity:.9;}
+  .why .ln.lead{color:var(--ink);font-weight:700;}
+  .why .ln.lead b{color:var(--clover-ink);}
+  .why .sep{height:1px;background:var(--line);margin:12px 0;}
+
+  /* MOBILE: every .u-grid collapses to one column, so the side rail lands directly
+     under the main column. Without this it butts against the card above (gap 0).
+     Rule lives on .u-side itself, not per-screen, so new screens inherit it. */
+  .stage[data-vw="390"] .u-side{margin-top:24px;}
+  .stage[data-vw="390"] #home .u-side{margin-top:0;}
+
+  .btn-full{display:block;width:100%;text-align:center;font-family:var(--font);font-size:15px;font-weight:800;
+    padding:16px;border-radius:var(--r-md);border:1px solid transparent;cursor:pointer;}
+  .stage[data-vw="1024"] .btn-full{padding:16px;font-size:15px;}
+  .btn-full.pri{background:var(--clover);color:var(--surface);}
+  .btn-full.sec{background:var(--surface);color:var(--ink);border-color:var(--line);}
+  .btn-full.dis{background:var(--warm);color:var(--muted);cursor:not-allowed;}
+  .btn-full.dis .why{display:block;font-size:10.5px;font-weight:600;margin-top:4px;}
+
+  .noti{display:flex;gap:8px;background:var(--warm);border-radius:var(--r-sm);padding:12px 16px;font-size:11.5px;color:var(--muted);line-height:1.55;}
+  .stage[data-vw="1024"] .noti{font-size:12.5px;padding:16px 20px;}
+  .link-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;}
+  .stage[data-vw="1024"] .link-row{padding:16px 24px;}
+  .link-row .l{font-size:13px;font-weight:700;}
+  .link-row .r{font-size:11.5px;color:var(--muted);}
+
+  .cheer{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:flex-start;min-width:0;}
+  .cheer:last-child{border-bottom:none;}
+  .cheer .av{width:24px;height:24px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex:0 0 auto;}
+  .cheer .nm{font-size:12.5px;font-weight:700;}
+  .cheer .ms{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .cheer .amt{text-align:right;white-space:nowrap;}
+  .cheer .amt b{font-size:11.5px;font-weight:700;color:var(--clover-ink);}
+  .cheer .amt span{font-size:10.5px;color:var(--muted);}
+
+  .hrow{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);gap:12px;}
+  .stage[data-vw="1024"] .hrow{padding:16px 0;align-items:center;}
+  .hrow:last-child{border-bottom:none;}
+  .hrow .d{font-size:10.5px;color:var(--muted);}
+  .hrow .t{font-size:13px;font-weight:700;margin-top:4px;}
+  .stage[data-vw="1024"] .hrow .t{font-size:15px;}
+  .hrow .s{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .hst{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:var(--r-lg);white-space:nowrap;}
+  .hst.paid{background:var(--clover-soft);color:var(--clover-ink);}
+  .hst.wait{background:var(--amber-soft);color:var(--amber-ink);}
+  .hst.rej{background:var(--danger-soft);color:var(--danger-ink);}
+  .hstat{display:grid;gap:12px;}
+  .stage[data-vw="1024"] .hstat{grid-template-columns:repeat(3,1fr);}
+  .stage[data-vw="390"] .hstat{grid-template-columns:1fr;}
+  .hstat .b{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 20px;}
+  .hstat .b .l{font-size:11.5px;color:var(--muted);}
+  .hstat .b .v{font-size:19px;font-weight:800;color:var(--clover-ink);margin-top:4px;}
+
+  /* ══ admin screens ══ */
+  .a-top{background:var(--surface);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-end;gap:12px;}
+  .stage[data-vw="1024"] .a-top{padding:20px 32px;}
+  .stage[data-vw="390"] .a-top{padding:22px 16px 16px;flex-direction:column;align-items:flex-start;}
+  .a-top .k{font-size:12px;font-weight:800;color:var(--clover-ink);}
+  .a-top h2{font-weight:900;letter-spacing:-.6px;margin-top:4px;}
+  .stage[data-vw="1024"] .a-top h2{font-size:30px;}
+  .stage[data-vw="390"] .a-top h2{font-size:19px;}
+  .a-top .fresh{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  .a-top .fresh .live{width:8px;height:8px;border-radius:9999px;background:var(--clover-bright);border:1px solid var(--surface);}
+  .stage[data-vw="1024"] .a-body{padding:24px 32px 40px;}
+  .stage[data-vw="390"] .a-body{padding:16px 16px 32px;}
+  .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .fbtn{font-family:var(--font);font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:8px 12px;border-radius:var(--r-lg);cursor:pointer;}
+  .fbtn.on{background:var(--ink);color:var(--surface);border-color:var(--ink);}
+  .fbtn .n{opacity:.7;margin-left:4px;font-weight:800;}
+
+  .qtable{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+  .qtable th{font-size:11.5px;font-weight:700;color:var(--muted);text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg);}
+  .qtable td{padding:16px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .qtable tr:last-child td{border-bottom:none;}
+  .qtable tr.wait{background:var(--amber-soft);}
+  .qtable .who{font-weight:700;}
+  .qtable .id{font-family:var(--font);font-size:10.5px;color:var(--muted);margin-top:4px;}
+  .qtable .num{text-align:right;white-space:nowrap;}
+  .qtable .net{font-weight:800;color:var(--clover-ink);}
+  /* 9th column (service fee) added: money columns tighten so 1024 never scrolls. */
+  .stage[data-vw="1024"] .qtable{font-size:12.5px;}
+  .stage[data-vw="1024"] .qtable th,.stage[data-vw="1024"] .qtable td{padding:12px 8px;}
+  .stage[data-vw="1024"] .qtable th:first-child,.stage[data-vw="1024"] .qtable td:first-child{padding-left:16px;}
+  .stage[data-vw="1024"] .qtable th:last-child,.stage[data-vw="1024"] .qtable td:last-child{padding-right:16px;}
+  .stage[data-vw="1024"] .qtable .num .id{text-align:right;}
+  /* MOBILE: table re-flows into a card list, no horizontal scrolling */
+  .stage[data-vw="390"] .qtable{border:none;background:transparent;}
+  .stage[data-vw="390"] .qtable thead{display:none;}
+  .stage[data-vw="390"] .qtable tbody,.stage[data-vw="390"] .qtable tr,.stage[data-vw="390"] .qtable td{display:block;width:100%;}
+  .stage[data-vw="390"] .qtable tr{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:12px;overflow:hidden;}
+  .stage[data-vw="390"] .qtable tr.wait{border-color:var(--amber-line);}
+  .stage[data-vw="390"] .qtable td{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);text-align:right;}
+  .stage[data-vw="390"] .qtable td:last-child{border-bottom:none;background:var(--bg);justify-content:flex-end;}
+  .stage[data-vw="390"] .qtable td::before{content:attr(data-l);font-size:11.5px;font-weight:700;color:var(--muted);flex:0 0 auto;text-align:left;}
+  .stage[data-vw="390"] .qtable .id{text-align:right;}
+
+  .stage[data-vw="390"] .fbtn{padding:12px 16px;min-height:44px;}
+  .stage[data-vw="390"] .qtable td:last-child{padding:0;}
+  .stage[data-vw="390"] .qtable td:last-child .rowlink{display:block;width:100%;padding:16px;text-align:center;text-decoration:none;}
+  .st{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;padding:4px 8px;border-radius:var(--r-lg);}
+  .st.wait{background:var(--amber-soft);color:var(--amber-ink);}
+  .st.paid{background:var(--clover-soft);color:var(--clover-ink);}
+  .st.rej{background:var(--danger-soft);color:var(--danger-ink);}
+  .st .d{width:8px;height:8px;border-radius:9999px;background:currentColor;}
+  .rowlink{font-size:11.5px;font-weight:700;color:var(--clover-ink);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+  .empty{padding:56px 20px;text-align:center;}
+  .empty .big{font-size:15px;font-weight:700;color:var(--muted);}
+  .empty .s{font-size:12.5px;margin-top:8px;color:var(--muted);}
+
+  .detail{display:block;}
+  .stage[data-vw="1024"] .detail{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;}
+  .stage[data-vw="390"] .dcard + .dcard{margin-top:12px;}
+  .dcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:20px 22px;}
+  .stage[data-vw="390"] .dcard{padding:16px;}
+  .dcard h3{font-size:13px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .drow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;gap:12px;}
+  .drow:last-child{border-bottom:none;}
+  .drow .l{color:var(--muted);} .drow .v{font-weight:700;white-space:nowrap;}
+  .drow.total .v{font-size:15px;color:var(--clover-ink);font-weight:800;}
+  .acct{background:var(--bg);border:1px dashed var(--line);border-radius:var(--r-sm);padding:16px;}
+  .acct .masked{font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:.5px;overflow-wrap:anywhere;}
+  .acct .reveal{font-size:11.5px;font-weight:700;color:var(--clover-ink);background:none;border:none;cursor:pointer;margin-top:8px;text-decoration:underline;padding:0;font-family:var(--font);}
+  .acct .warn{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5;display:flex;gap:8px;}
+  .ledger-tag{font-family:var(--font);font-size:10.5px;background:var(--warm);color:var(--muted);padding:4px 8px;border-radius:var(--r-sm);}
+  .hold-badge{display:inline-flex;align-items:center;gap:8px;background:var(--warm);border-radius:var(--r-lg);padding:8px 12px;font-size:11.5px;font-weight:700;color:var(--clover-ink);flex-wrap:wrap;}
+  .memo{width:100%;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;font-family:var(--font);font-size:12.5px;color:var(--ink);caret-color:var(--ink);outline-color:var(--clover);resize:none;}
+  .act-btns{display:flex;gap:12px;margin-top:12px;}
+  .stage[data-vw="390"] .act-btns{flex-direction:column;}
+  .btn{flex:1;font-family:var(--font);font-size:13px;font-weight:800;padding:16px;border-radius:var(--r-md);cursor:pointer;border:1px solid transparent;}
+  .btn.pay{background:var(--clover);color:var(--surface);}
+  .btn.rej{background:var(--surface);color:var(--danger-ink);border-color:var(--danger);}
+  .btn.ghost{background:var(--surface);color:var(--muted);border-color:var(--line);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  .modal-wrap{background:rgba(22,20,15,.5);display:flex;justify-content:center;}
+  .stage[data-vw="1024"] .modal-wrap{padding:56px 20px;align-items:flex-start;}
+  .stage[data-vw="390"] .modal-wrap{padding:24px 12px 16px;align-items:flex-end;}
+  .modal{background:var(--surface);box-shadow:0 8px 30px rgba(0,0,0,.12);width:100%;border-radius:var(--r-lg);}
+  .stage[data-vw="1024"] .modal{max-width:420px;padding:24px;}
+  .stage[data-vw="390"] .modal{padding:20px 16px;}
+  .modal .mh{font-size:19px;font-weight:900;letter-spacing:-.3px;}
+  .modal .recap{background:var(--warm);border-radius:var(--r-sm);padding:12px 16px;margin:16px 0;}
+  .modal .recap .r{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;gap:12px;}
+  .modal .recap .r .v{font-weight:800;text-align:right;}
+  .modal .recap .r.big .v{color:var(--clover-ink);font-size:15px;}
+  .modal .cfm-warn{font-size:12px;color:var(--danger-ink);font-weight:700;display:flex;gap:8px;line-height:1.5;background:var(--danger-soft);padding:12px;border-radius:var(--r-sm);}
+  .modal .checkline{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:16px 0;line-height:1.5;}
+  .modal .checkline input{margin-top:4px;width:16px;height:16px;accent-color:var(--clover);border-color:var(--line);color:var(--ink);font-family:var(--font);font-size:15px;}
+  .modal .mbtns{display:flex;gap:12px;}
+  .stage[data-vw="390"] .modal .mbtns{flex-direction:column-reverse;}
+
+  /* ══ flow map ══ */
+  .stage[data-vw="1024"] .map-body{padding:24px 32px 32px;}
+  .stage[data-vw="390"] .map-body{padding:16px 16px 24px;}
+  .map-h{font-size:19px;font-weight:900;letter-spacing:-.4px;}
+  .map-s{font-size:12.5px;color:var(--muted);margin-top:4px;margin-bottom:22px;line-height:1.6;}
+  .lane,.lane-head{display:grid;grid-template-columns:104px repeat(4,1fr);}
+  .lane-lbl{display:flex;align-items:center;font-size:11.5px;font-weight:800;padding:0 12px 0 0;line-height:1.4;}
+  .lane-lbl.user{color:var(--clover-ink);}
+  .lane-lbl.adm{color:var(--amber-ink);}
+  .lane-lbl.db{color:var(--muted);}
+  .cellwrap{padding:8px;}
+  .cell{border-radius:var(--r-sm);padding:12px;height:100%;font-size:11.5px;line-height:1.5;border:1px solid var(--line);background:var(--surface);cursor:pointer;transition:transform .12s ease-out,border-color .12s;}
+  .cell:hover{border-color:var(--clover);transform:translateY(-1px);}
+  .cell .cn{font-size:12.5px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+  .cell .cs{color:var(--muted);}
+  .cell.u{background:var(--clover-soft);border-color:var(--clover);}
+  .cell.u .cn{color:var(--clover-ink);}
+  .cell.a{background:var(--amber-soft);border-color:var(--amber-line);}
+  .cell.a .cn{color:var(--amber-ink);}
+  .cell.d{background:var(--bg);}
+  .cell.d .cn{font-family:var(--font);font-size:11.5px;color:var(--ink);}
+  .cell.dim{opacity:.42;cursor:default;} .cell.dim:hover{transform:none;border-color:var(--line);}
+  .cell.bad{background:var(--danger-soft);border-color:var(--danger);} .cell.bad .cn{color:var(--danger-ink);}
+  .lane-head div{padding:0 8px 8px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:center;}
+  .lane-head div:first-child{text-align:left;}
+  /* MOBILE map: lanes stack vertically, each cell gets its step label back */
+  .stage[data-vw="390"] .lane-head{display:none;}
+  .stage[data-vw="390"] .lane{grid-template-columns:1fr;border:1px solid var(--line);border-radius:var(--r-md);padding:8px;margin-bottom:12px;background:var(--bg);}
+  .stage[data-vw="390"] .lane-lbl{padding:8px 8px 4px;font-size:12.5px;}
+  .stage[data-vw="390"] .cellwrap{padding:4px;}
+  .stage[data-vw="390"] .cell .cn::after{content:attr(data-step);font-size:10.5px;font-weight:700;color:var(--muted);margin-left:auto;}
+  .branch{margin-top:16px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:16px;}
+  .branch .bh{font-size:12.5px;font-weight:800;margin-bottom:12px;}
+  .bgrid{display:grid;gap:12px;}
+  .stage[data-vw="1024"] .bgrid{grid-template-columns:1fr 1fr;}
+  .stage[data-vw="390"] .bgrid{grid-template-columns:1fr;}
+  .maplegend{margin-top:16px;font-size:11.5px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;}
+  .maplegend i{display:inline-block;width:10px;height:10px;border-radius:9999px;margin-right:4px;vertical-align:-1px;}
+
+  /* v3.7 state coverage. Mobile is one column; desktop inherits the existing 2-column u-grid. */
+  .state-card{padding:20px;}
+  .stage[data-vw="1024"] .state-card{padding:24px;}
+  .state-label{font-size:10.5px;font-weight:800;color:var(--clover-ink);letter-spacing:.2px;}
+  .state-title{font-size:19px;font-weight:900;letter-spacing:-.3px;margin-top:8px;line-height:1.34;}
+  .state-copy{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:8px;word-break:keep-all;}
+  .loading-action{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--clover);color:var(--surface);min-height:56px;border-radius:var(--r-md);font-size:15px;font-weight:800;margin-top:20px;}
+  .spinner{width:20px;height:20px;border:2px solid var(--clover-soft);border-top-color:var(--surface);border-radius:9999px;animation:spin calc(var(--motion-standard) * 4) ease-out infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .skeleton{background:var(--warm);border-radius:var(--r-sm);min-height:12px;}
+  .skeleton.amount{width:56%;min-height:22px;margin-top:8px;}
+  .skeleton.note{width:80%;margin-top:8px;}
+  .loading-balance{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;}
+  .loading-balance .spinner{border-color:var(--line);border-top-color:var(--clover);}
+  .loading-note{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:12px 16px;background:var(--warm);border-radius:var(--r-sm);font-size:11.5px;color:var(--muted);line-height:1.55;}
+  .overflow-title{font-size:22px;font-weight:900;line-height:1.32;letter-spacing:-.4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;}
+  .overflow-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;}
+  .limit-badge{font-size:10.5px;font-weight:800;color:var(--amber-ink);background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:var(--r-lg);padding:4px 8px;white-space:nowrap;}
+  .overflow-cheers{padding:4px 16px;}
+  .overflow-cheers .cheer:nth-child(n+9){display:none;}
+  .overflow-cheers.is-full .cheer:nth-child(-n+20){display:flex;}
+  .overflow-cheers.is-full .cheer:nth-child(n+21){display:none;}
+  .overflow-cheers .cheer-main{flex:1;min-width:0;}
+  .overflow-cheers .ms{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .overflow-cheers.is-full .cheer:first-child .ms{white-space:normal;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;}
+  .overflow-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);}
+  .overflow-footer b{color:var(--clover-ink);}
+  .wordmap{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .wordmap .word{font-size:11.5px;font-weight:700;color:var(--clover-ink);background:var(--clover-soft);border:1px solid var(--clover);border-radius:var(--r-lg);padding:8px 12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .wordmap .word:nth-child(n+7){display:none;}
+  .wordmap.is-full .word:nth-child(-n+12){display:inline-block;}
+  .wordmap.is-full .word:nth-child(n+13){display:none;}
+  .overflow-rule{font-size:11.5px;color:var(--muted);line-height:1.55;margin-top:12px;}
+  @media(prefers-reduced-motion:reduce){.spinner{animation:none;}.screen.active{animation:none;}}
+
+  /* revision panel: inspection shell only. Never inside .frame (product screen). */
+  .sc-chg{border-left:2px solid #c98a2b;background:#232120;border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:10px 0 16px;font-size:11.5px;color:#b7b1a7;line-height:1.65;}
+  .sc-chg .ch{font-size:10.5px;font-weight:800;color:#e8cf9a;letter-spacing:.3px;margin-bottom:4px;}
+  .sc-chg li{list-style:none;margin-top:3px;}
+  .sc-chg li::before{content:"·";margin-right:6px;color:#7d786f;}
+  .sc-chg b{color:#e9e5dd;}
+  .stage[data-vw="390"] .sc-chg{max-width:390px;margin-left:auto;margin-right:auto;}
+  .stage[data-vw="1024"] .sc-chg{max-width:1024px;margin-left:auto;margin-right:auto;}
+  .stamp{max-width:1024px;margin:30px auto 0;background:#1c1b19;color:#8a857c;border-radius:12px;padding:16px 20px;font-size:11px;line-height:1.7;}
+  .stamp b{color:#c7c1b6;}
+
+
+  @media(max-width:1100px){
+    .stage[data-vw="1024"] .frame,.stage[data-vw="1024"] .caption{width:100%;max-width:100%;}
+    .stage[data-vw="1024"] .u-grid,.stage[data-vw="1024"] .detail{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="console">
+  <h1>해낼게 · 수동환전 <span class="dot">●</span> 전체 여정 통합 프로토타입 v3.8</h1>
+  <div class="row">
+    <div class="grp"><span class="lbl">뷰포트</span>
+      <button class="vw" data-vw="390">📱 모바일 390</button>
+      <button class="vw on" data-vw="1024">🖥 데스크톱 1024</button>
+    </div>
+    <div class="sep"></div>
+    <div class="grp"><span class="lbl">지도</span>
+      <button class="nav on" data-screen="map">🗺 전체 플로우</button>
+    </div>
+    <div class="sep"></div>
+    <div class="grp"><span class="lbl">사용자</span>
+      <button class="nav" data-screen="home">1. /me 홈</button>
+      <button class="nav" data-screen="request">2. /cashout 신청</button>
+      <button class="nav" data-screen="status">3. 신청 이후</button>
+      <button class="nav" data-screen="history">4. 환전 이력</button>
+      <button class="nav" data-screen="loading">5. loading</button>
+      <button class="nav" data-screen="overflow">6. overflow</button>
+    </div>
+    <div class="sep"></div>
+    <div class="grp"><span class="lbl">관리자</span>
+      <button class="nav admin" data-screen="queue">7. 처리 큐</button>
+      <button class="nav admin" data-screen="detail">8. 신청 상세</button>
+      <button class="nav admin" data-screen="modal">9. 확인 모달</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="grp state-home stategrp" style="display:none"><span class="lbl">홈 상태</span>
+      <button class="st-btn on" data-state="reached">도달(42🍀)</button>
+      <button class="st-btn" data-state="below">미달(18🍀)</button>
+      <button class="st-btn" data-state="pending">신청 진행중</button>
+      <button class="st-btn" data-state="paid">입금 완료 직후</button>
+    </div>
+    <div class="grp state-request stategrp" style="display:none"><span class="lbl">신청 화면</span>
+      <button class="st-btn on" data-state="form">계좌 입력</button>
+      <button class="st-btn" data-state="boundary">경계(총30·지급27)</button>
+      <button class="st-btn" data-state="confirm">최종 확인</button>
+      <button class="st-btn" data-state="done">접수 완료</button>
+      <button class="st-btn" data-state="blocked">진행중 차단</button>
+    </div>
+    <div class="grp state-status stategrp" style="display:none"><span class="lbl">시간축 상태</span>
+      <button class="st-btn on" data-state="received">① 접수됨(당일)</button>
+      <button class="st-btn" data-state="checking">② 확인중(D+1)</button>
+      <button class="st-btn" data-state="paid">③ 입금완료</button>
+      <button class="st-btn" data-state="rejected">④ 반려</button>
+      <button class="st-btn" data-state="failed">⑤ 이체실패</button>
+    </div>
+    <div class="grp state-loading stategrp" style="display:none"><span class="lbl">기다림 지점</span>
+      <button class="st-btn on" data-state="submitting">환전 제출 중</button>
+      <button class="st-btn" data-state="balance">잔액 조회 중</button>
+    </div>
+    <div class="grp state-overflow stategrp" style="display:none"><span class="lbl">과다 데이터</span>
+      <button class="st-btn on" data-state="preview">미니 상한</button>
+      <button class="st-btn" data-state="full">전체 상한</button>
+    </div>
+    <div class="grp state-queue stategrp" style="display:none"><span class="lbl">큐</span>
+      <button class="st-btn on" data-state="has">신청 있음</button>
+      <button class="st-btn" data-state="empty">비어있음</button>
+    </div>
+    <div class="grp state-detail stategrp" style="display:none"><span class="lbl">계좌</span>
+      <button class="st-btn on" data-state="masked">마스킹</button>
+      <button class="st-btn" data-state="revealed">복호화 표시</button>
+    </div>
+    <div class="grp state-modal stategrp" style="display:none"><span class="lbl">모달</span>
+      <button class="st-btn on" data-state="pay">지급완료 확인</button>
+      <button class="st-btn" data-state="reject">반려 확인</button>
+    </div>
+  </div>
+  <p class="hint">뷰포트 토글은 프레임 폭만 바꾸는 게 아니라 배치를 바꿉니다. 데스크톱은 2단(본문＋사이드 레일), 모바일은 단일 컬럼이며 관리자 테이블은 카드 리스트로, 확인 모달은 바텀시트로 재배치됩니다. 실데이터(도경·서연·민준·하늘).</p>
+</div>
+
+<div class="stage" data-vw="1024">
+
+<!-- ═══════ 0. 전체 플로우 지도 ═══════ -->
+<section class="screen active" id="map">
+  <p class="caption"><span class="tag">한 장 지도</span>사용자가 보는 것, 회장이 하는 것, DB에 남는 것을 같은 시간축에 놓았습니다. <b>칸을 클릭하면 그 화면으로 갑니다.</b>
+    <span class="cap-m">모바일에서는 3개 레인이 세로로 분리되고 각 칸에 시점 라벨이 붙습니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.6 이번 개정 (회장 A안 확정 반영)</p><ul><li data-changelog-item><b>A안 확정 반영.</b> 범례·레인·DB 칸에 흩어져 있던 "HOLD로 빠지고 / −40🍀" 표기를 전부 A안으로 맞췄습니다. <b>모은 총량은 신청해도 줄지 않고</b>, 총량에서 실제로 빠지는 시점은 입금이 끝난 때입니다. <b>회장 원문</b>: "A안이지 실제로 빠져나갔을때 빠져나가야지" (2026-08-21)</li><li data-changelog-item>④ 완료 칸에 <b>총량 52→12 확정 차감</b>을 명시했습니다. A안에서 총량이 줄어드는 순간은 여기 한 곳뿐이라 지도에 못박았습니다.</li><li data-changelog-item>반려 칸 문구를 "클로버 40개 그대로 돌아왔어요"에서 <b>"40개에 걸려 있던 잠금이 풀렸어요"</b>로 바꿨습니다. A안에서는 총량이 애초에 줄지 않으므로 되돌릴 잔액 자체가 없습니다.</li><li data-changelog-item><b>8번 표현안 A/B 화면을 삭제했습니다.</b> 결정이 끝났는데 검수 셸에 남겨 두면 다음 사람이 같은 것을 다시 고민합니다. 결정과 근거는 DESIGN.md §7.3 확정 이력으로 옮겼습니다.</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.5 레인 헤더·칸 라벨 대비 상향, 상태색 글자용 토큰 신설 · v3.3 이용료 10% 반영</li></ul></div>
+  <div class="frame">
+    <div class="a-top">
+      <div><p class="k">해낼게 수동환전</p><h2>전체 플로우 한 장</h2></div>
+      <div class="fresh">지급대행 승인 전 임시 운영 (회장 직접 이체)</div>
+    </div>
+    <div class="map-body">
+      <p class="map-h">해피패스: 신청부터 입금까지</p>
+      <p class="map-s">사용자는 신청하고 <b>나갔다가 며칠 뒤 돌아옵니다.</b> 그 사이 상태가 화면에 남아 있어야 불안하지 않습니다. <b>모은 클로버 총량은 신청해도 줄지 않습니다.</b> 신청한 만큼에 잠금이 걸리고, 총량에서 실제로 빠지는 시점은 <b>입금이 끝난 때</b>입니다. 그래서 잔액 카드는 총량 아래에 사용 가능분과 잠긴 분을 나눠 보여줍니다.</p>
+
+      <div class="lane-head">
+        <div></div><div>① 신청 (D-day)</div><div>② 접수·대기 (D+0~1)</div><div>③ 회장 처리 (D+1~3)</div><div>④ 입금 완료</div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-lbl user">🙋 사용자<br>화면</div>
+        <div class="cellwrap"><div class="cell u" data-go="request" data-st="form"><p class="cn" data-step="① 신청">환전 신청</p><p class="cs">분해표 확인, 계좌·예금주 입력, 최종 확인</p></div></div>
+        <div class="cellwrap"><div class="cell u" data-go="status" data-st="received"><p class="cn" data-step="② 대기">접수됨</p><p class="cs">"1~3영업일 안에 입금" 안내. 총량 52🍀 유지, 그중 40🍀 잠김으로 분할 표시. 재신청 막힘</p></div></div>
+        <div class="cellwrap"><div class="cell u" data-go="status" data-st="checking"><p class="cn" data-step="③ 처리">확인중</p><p class="cs">단계 표시가 2번째로 이동. 사용자가 할 일 없음을 명시</p></div></div>
+        <div class="cellwrap"><div class="cell u" data-go="status" data-st="paid"><p class="cn" data-step="④ 완료">입금 완료</p><p class="cs">얼마·어느 계좌·언제 표시. 총량이 52→12로 줄어든 이유를 함께 안내. 카톡 알림. 이력에 영구 보관</p></div></div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-lbl adm">🧑‍💼 회장<br>액션</div>
+        <div class="cellwrap"><div class="cell dim d"><p class="cn" data-step="① 신청">해당 없음</p><p class="cs">사용자 단독 행동</p></div></div>
+        <div class="cellwrap"><div class="cell a" data-go="queue" data-st="has"><p class="cn" data-step="② 대기">큐에 뜸</p><p class="cs">대기 건 상단 정렬. 실지급액·계좌 한눈에</p></div></div>
+        <div class="cellwrap"><div class="cell a" data-go="detail" data-st="masked"><p class="cn" data-step="③ 처리">상세 확인 후 이체</p><p class="cs">계좌 복호화, 은행앱 이체, 금액·예금주 재확인</p></div></div>
+        <div class="cellwrap"><div class="cell a" data-go="modal" data-st="pay"><p class="cn" data-step="④ 완료">지급완료 확정</p><p class="cs">"이체 마쳤다" 체크해야 활성. 이후 버튼 소멸</p></div></div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-lbl db">🗄 DB<br>상태</div>
+        <div class="cellwrap"><div class="cell d dim"><p class="cn" data-step="① 신청">해당 없음</p><p class="cs">입력 중</p></div></div>
+        <div class="cellwrap"><div class="cell d"><p class="cn" data-step="② 대기">REQUESTED</p><p class="cs">cashout_request 생성<br>ledger +CASHOUT_HOLD (잠금 40🍀)<br>총량 불변, 사용 가능만 −40</p></div></div>
+        <div class="cellwrap"><div class="cell d"><p class="cn" data-step="③ 처리">REQUESTED</p><p class="cs">변화 없음. 이체는 은행에서 일어나고 DB는 확정 시에만 움직입니다</p></div></div>
+        <div class="cellwrap"><div class="cell d"><p class="cn" data-step="④ 완료">PAID</p><p class="cs">paid_at 기록<br>ledger +CASHOUT_SETTLED<br>이때 총량 52→12로 확정 차감</p></div></div>
+      </div>
+
+      <div class="branch">
+        <p class="bh">갈라지는 길: 여기서 막히면 사용자가 이탈합니다</p>
+        <div class="bgrid">
+          <div class="cell bad" data-go="status" data-st="rejected"><p class="cn">반려 (회장이 거절)</p><p class="cs">사용자: 사유와 함께 <b>"40개에 걸려 있던 잠금이 풀렸어요"</b> 안심, 바로 다시 신청 버튼 / DB: REVERSED, ledger +CASHOUT_REVERSAL(잠금 해제 40🍀). 총량은 애초에 줄지 않아 되돌릴 것이 없습니다</p></div>
+          <div class="cell bad" data-go="status" data-st="failed"><p class="cn">이체 실패 (계좌 오류)</p><p class="cs">사용자: 계좌 다시 확인 요청, 잠금 해제 안내 / 회장: "지급완료"를 누르지 않았으므로 상태는 REQUESTED 유지 후 반려로 정리</p></div>
+          <div class="cell u" data-go="home" data-st="below"><p class="cn">미달 (30🍀 미만)</p><p class="cs">신청 폼 대신 진행바와 "쌓인 클로버는 그대로 보관" 안내. 빈 화면으로 방치하지 않습니다</p></div>
+          <div class="cell u" data-go="request" data-st="blocked"><p class="cn">진행중 재신청 시도</p><p class="cs">"이미 처리 중인 신청이 있어요"와 진행 상태로 이동하는 버튼. 막고 끝내지 않고 갈 곳을 줍니다</p></div>
+        </div>
+      </div>
+
+      <div class="maplegend">
+        <span><i style="background:var(--clover-soft);border:1px solid var(--clover)"></i>사용자 화면</span>
+        <span><i style="background:var(--amber-soft);border:1px solid var(--amber-line)"></i>회장 액션</span>
+        <span><i style="background:var(--bg);border:1px solid var(--line)"></i>DB·원장</span>
+        <span><i style="background:var(--danger-soft);border:1px solid var(--danger)"></i>분기·실패</span>
+        <span>모은 클로버 총량은 신청해도 줄지 않습니다. 신청분에 잠금이 걸렸다가, 입금이 끝난 때 총량에서 빠지고, 반려되면 잠금이 풀립니다.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 1. /me 홈 ═══════ -->
+<section class="screen" id="home">
+  <p class="caption"><span class="tag">사용자</span><b>/me 마이페이지</b>
+    <span class="cap-m">모바일은 단일 컬럼입니다. 환전 진입은 클로버 잔액 카드 안에 둡니다(별도 섹션 없음).</span>
+    <span class="cap-d">데스크톱은 2단입니다. 좌측에 목표와 응원한 사람, 우측 레일에 잔액·환전 진입·내역을 고정합니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.6 이번 개정 (회장 A안 확정 반영)</p><ul><li data-changelog-item><b>진행중 상태에서 총량이 52개로 유지됩니다.</b> 이전에는 신청 직후 12개로 떨어졌습니다. <b>회장 원문</b>: "A안이지 실제로 빠져나갔을때 빠져나가야지" (2026-08-21)</li><li data-changelog-item><b>분할 잔액 컴포넌트 신설(이번 턴의 실질 과제).</b> A안의 약점은 "총량 52인데 쓸 수 있는 건 12"라 숫자 하나가 두 뜻을 갖는 것입니다. 총량 아래에 <b>분할 막대 + 두 줄 라벨</b>("지금 쓸 수 있어요 🍀 12개" / "🔒 환전으로 잠김 🍀 40개")을 붙여 전체를 눈에 보이게 쪼갰습니다. 은행 앱의 current balance / available balance 2단 표기와 같은 구조이고, 막대가 비율을 먼저 주기 때문에 글을 읽지 않아도 관계가 잡힙니다. 잠김이 0이면 이 블록은 통째로 사라집니다.</li><li data-changelog-item>진행중일 때 총량 옆 원화 등가("≈52,000원 상당")를 감춥니다. 잠긴 40개는 이미 실수령 34,426원으로 확정돼 있어서, 등가와 실수령이 같은 카드에 나란히 뜨면 금액 계층이 섞입니다(DESIGN.md §6-c). 대신 등가는 분할 행 각각에 붙였습니다.</li><li data-changelog-item><b>입금 완료 배너를 다시 썼습니다.</b> A안에서는 이때 총량이 52→12로 줄어듭니다. 놀람이 되지 않게 "잠겨 있던 40개는 이 돈으로 바뀌었어요. 그래서 모인 클로버가 52개에서 12개가 됐어요"로 <b>이유를 먼저</b> 말하고, 사라진 것이 아니라 환전 내역에 남는다는 회수 경로를 붙였습니다.</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.5 저대비 <code>--faint</code> 텍스트 제거 · v3.3 홈 배너 금액 34,426원 동기화</li></ul></div>
+  <div class="frame">
+    <div class="u-body">
+      <div class="u-head">
+        <span class="brand">해낼게<span class="d">.</span></span>
+        <span style="font-size:19px">🔔</span>
+      </div>
+      <div class="u-grid">
+        <div>
+          <p class="goal-title">토익 900<br>해낼게</p>
+          <div style="margin-top:12px"><span class="chip">🗓 D-12</span></div>
+          <p class="sub">응원한 사람</p>
+          <div class="card" style="padding:4px 16px">
+            <div class="cheer">
+              <div class="av" style="background:var(--clover-soft);color:var(--clover-ink)">서</div>
+              <div style="flex:1"><p class="nm">서연</p><p class="ms">끝까지 응원할게 🍀</p></div>
+              <div class="amt"><b>🍀 5</b><br><span>나만 보임</span></div>
+            </div>
+            <div class="cheer">
+              <div class="av" style="background:var(--warm);color:var(--muted)">?</div>
+              <div style="flex:1"><p class="nm">익명의 누군가</p><p class="ms">화이팅!</p></div>
+              <div class="amt"><b>🍀 3</b><br><span>나만 보임</span></div>
+            </div>
+            <div class="cheer">
+              <div class="av" style="background:var(--clover-soft);color:var(--clover-ink)">민</div>
+              <div style="flex:1"><p class="nm">민준</p><p class="ms">시험 끝나고 밥 사줘</p></div>
+              <div class="amt"><b>🍀 10</b><br><span>나만 보임</span></div>
+            </div>
+          </div>
+          <div class="only-d" style="margin-top:16px">
+            <div class="noti">🍀 <span>응원은 시간순으로 쌓입니다. 금액순 정렬이나 순위는 만들지 않습니다.</span></div>
+          </div>
+        </div>
+        <div class="u-side">
+          <div class="card" style="overflow:hidden">
+            <div class="bal">
+              <div>
+                <p class="meta" id="hMeta">모인 클로버</p>
+                <p class="count" id="hCount">🍀 42<small>개</small></p>
+                <p class="krw" id="hKrw">≈42,000원 상당</p>
+              </div>
+              <span class="cta-cash" id="hCta" data-go="request"><span id="hCtaMain">환전</span><small id="hCtaSub">신청 가능</small></span>
+            </div>
+            <div id="hSplit" style="display:none">
+            <div class="splitbar"><i class="free" style="width:23%"></i><i class="lock" style="width:77%"></i></div>
+            <div class="splitrow"><span class="l">지금 쓸 수 있어요</span><span class="v">🍀 12개<span class="sub">≈12,000원 상당</span></span></div>
+            <div class="splitsep"></div>
+            <div class="splitrow lock"><span class="l"><i>🔒</i>환전으로 잠김</span><span class="v">🍀 40개<span class="sub">34,426원 입금 예정</span></span></div>
+              <p class="splitnote">모은 <b>52개는 그대로</b>예요. 그중 40개에 잠금이 걸려 있어요. 입금이 끝나면 그때 40개가 총량에서 빠지고, 반려되면 잠금만 풀려요.</p>
+            </div>
+          </div>
+          <div id="hBanner" style="margin-top:12px"></div>
+          <div class="card link-row" id="hHistory" style="margin-top:12px" data-go="history">
+            <span class="l">환전 내역</span>
+            <span class="r" id="hHistMeta">2건 · 최근 7/31 ›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 2. /cashout 신청 ═══════ -->
+<section class="screen" id="request">
+  <p class="caption"><span class="tag">사용자</span><b>/cashout 신청</b>
+    <span class="cap-m">모바일은 분해표를 먼저 읽고 아래로 계좌를 입력합니다.</span>
+    <span class="cap-d">데스크톱은 좌측에 금액 분해와 실수령, 우측에 계좌 입력과 확정 버튼을 나란히 둡니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.8 이번 개정 (운영 1.2.0 총보유 임계 계약 반영)</p><ul><li data-changelog-item><b>30/27 경계 상태를 추가했습니다.</b> 총보유 30개가 친구 응원 27개와 웰컴 3개로 구성돼도 환전 자격은 도달합니다. 신청 기본값과 최댓값은 지급가능 27개입니다.</li><li data-changelog-item><b>자격 기준과 신청량을 분리했습니다.</b> "최소 30개" 대신 "환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 N개"로 표시합니다. 신청량은 1개 이상, 지급가능 이하입니다.</li><li data-changelog-item><b>운영 1.2.0 구현에는 있으나 승인 v3.7에서 빠진 신청량 입력을 정본 프로토에 복원했습니다.</b> 사용자가 일부만 신청할 수 있다는 구현 계약을 계좌 입력 위에 보입니다.</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.7 loading·overflow · v3.6 잠금 A안 · v3.4 차감표와 모바일 간격 · v3.3 이용료 행</li></ul></div>
+  <div class="frame">
+    <div class="u-body">
+      <p class="page-k">해낼게.</p>
+      <h1 class="page-h" id="reqH" style="margin:8px 0 20px">환전 전에 정직하게 보여드릴게요</h1>
+
+      <div id="reqForm">
+        <div class="u-grid">
+          <div>
+            <div class="card rows" style="margin-bottom:12px">
+              <div class="kv"><span class="k">모인 클로버 (웰컴 포함)</span><span class="v" id="reqTotal">🍀 52개</span></div>
+              <div class="kv"><span class="k" style="color:var(--muted)">− 해낼게 웰컴 (지급 대상 아님)</span><span class="v" id="reqWelcome" style="color:var(--muted);font-weight:600">− 🍀 12개</span></div>
+              <div class="kv"><span class="k" style="color:var(--ink);font-weight:700">친구 응원분 (지급 대상)</span><span class="v big" id="reqPayable">🍀 40개</span></div>
+            </div>
+            <div style="background:var(--clover-soft);border-radius:var(--r-md);padding:4px 16px">
+              <div class="kv" style="border-color:var(--line)"><span class="k" style="color:var(--clover-ink)">환산 (🍀1개 = 1,000원)</span><span class="v" id="reqGross" style="color:var(--clover-ink)">40,000원</span></div>
+              <div class="kv" style="border-color:var(--line)"><span class="k" style="color:var(--clover-ink)">서비스 이용료 (부가세 포함)</span><span class="v" id="reqFee" style="color:var(--clover-ink)">− 4,400원</span></div>
+              <div class="kv" style="border-color:var(--line)"><span class="k" style="color:var(--clover-ink)">사업소득 원천징수 3.3%</span><span class="v pass" id="reqTax">− 1,174원</span></div>
+              <div class="kv net-row"><span class="k">받으실 금액</span><span class="v big" id="reqNet">34,426원</span></div>
+            </div>
+            <div style="margin-top:16px">
+              <div class="why">
+                <p class="ln lead"><i>🧾</i><span>서비스 이용료는 <b>커피 한 잔 값</b>이에요.</span></p>
+                <p class="ln"><i>·</i><span>카드 결제 수수료, 응원 알림 발송, 계좌 확인과 송금에 쓰여요.</span></p>
+                <p class="ln"><i>·</i><span>남는 몫은 더 많은 사람이 목표를 걸고 응원받게 하는 데 씁니다.</span></p>
+                <div class="sep"></div>
+                <p class="ln lead"><i>🏛</i><span>원천징수 3.3%는 저희가 가져가는 돈이 아니에요.</span></p>
+                <p class="ln"><i>·</i><span>도경님 대신 국세청에 내드리는 소득세예요.</span></p>
+                <p class="ln"><i>·</i><span>다음 해 5월에 종합소득세를 신고하면 돌려받을 수도 있어요.</span></p>
+              </div>
+              <p class="note-soft">실제 지급액은 신청 시점에 다시 확정합니다.</p>
+            </div>
+          </div>
+          <div class="u-side">
+            <p class="sub" style="margin-top:0">환전할 클로버</p>
+            <div class="card" style="padding:16px;margin-bottom:16px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div id="reqAmountInput" style="flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;font-size:15px;font-weight:700">40</div>
+                <span style="font-size:13px;font-weight:800;color:var(--clover-ink)">클로버</span>
+              </div>
+              <p id="reqAmountHint" style="font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px">환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 40개</p>
+            </div>
+            <p class="sub" style="margin-top:0">입금받을 계좌</p>
+            <div class="card" style="padding:16px">
+              <p style="font-size:11.5px;font-weight:700;color:var(--muted)">은행</p>
+              <div style="border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;margin:8px 0 12px;font-size:15px;font-weight:700">국민은행</div>
+              <p style="font-size:11.5px;font-weight:700;color:var(--muted)">계좌번호</p>
+              <div style="border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;margin:8px 0 12px;font-size:15px;font-family:var(--font)">812201-04-448421</div>
+              <p style="font-size:11.5px;font-weight:700;color:var(--muted)">예금주</p>
+              <div style="border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;margin:8px 0 4px;font-size:15px;font-weight:700">조도경</div>
+              <p style="font-size:10.5px;color:var(--muted);line-height:1.55;margin-top:8px">본인 명의 계좌만 입금할 수 있어요. 예금주가 다르면 반려돼요.</p>
+            </div>
+            <div class="noti" style="margin-top:12px">🛡 <span>계좌는 암호화해 보관하고, 입금 처리에만 사용해요. 지급이 끝나면 열람 기록이 남습니다.</span></div>
+            <div style="margin-top:16px"><button class="btn-full pri" data-go="request" data-st="confirm">환전 신청하기</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="reqConfirm" style="display:none">
+        <div class="u-grid">
+          <div>
+            <div class="card rows">
+              <div class="kv"><span class="k">보내는 곳</span><span class="v">국민 812201-04-448421</span></div>
+              <div class="kv"><span class="k">예금주</span><span class="v">조도경</span></div>
+              <div class="kv"><span class="k">받으실 금액</span><span class="v big" id="reqConfirmNet">34,426원</span></div>
+            </div>
+          </div>
+          <div class="u-side">
+            <div class="banner wait"><p class="t" id="reqConfirmTitle">신청하면 클로버 40개가 잠겨요</p><p class="s" id="reqConfirmCopy">모은 52개는 그대로 남고, 그중 40개에만 잠금이 걸려요. <b>입금이 끝나면 그때 40개가 빠져요.</b> 반려되면 잠금이 풀립니다.</p></div>
+            <div style="margin-top:16px"><button class="btn-full pri" data-go="request" data-st="done">이 계좌로 신청하기</button></div>
+            <div style="margin-top:12px"><button class="btn-full sec" data-go="request" data-st="form">계좌 다시 입력</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="reqDone" style="display:none">
+        <div class="u-grid">
+          <div>
+            <div class="banner ok" style="text-align:center;padding:24px 20px">
+              <p style="font-size:30px">🍀</p>
+              <p class="t" style="font-size:19px;margin-top:8px">환전 신청이 접수됐어요</p>
+              <p class="s">국민 ***-**-**8421 (조도경). <b id="reqDoneNet" style="color:var(--clover-ink);font-size:15px">34,426원</b>을 <b>1~3영업일</b> 안에 보내드릴게요.</p>
+            </div>
+          </div>
+          <div class="u-side">
+            <div class="noti">💬 <span>입금이 끝나면 <b>카카오톡 알림</b>으로 알려드려요. 앱에 들어와서 확인할 필요 없어요.</span></div>
+            <div style="margin-top:16px"><button class="btn-full sec" data-go="status" data-st="received">진행 상태 보기</button></div>
+            <div style="margin-top:12px"><button class="btn-full sec" data-go="home" data-st="pending">홈으로</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="reqBlocked" style="display:none">
+        <div class="u-grid">
+          <div>
+            <div class="banner wait"><p class="t">이미 처리 중인 신청이 있어요</p><p class="s">7월 31일에 신청하신 <b>34,426원</b> 건을 확인하고 있어요. 한 번에 한 건씩만 신청할 수 있어요. 이 건이 끝나면 다시 신청할 수 있어요.</p></div>
+          </div>
+          <div class="u-side">
+            <button class="btn-full pri" data-go="status" data-st="checking">진행 상태 보기</button>
+            <div style="margin-top:12px"><button class="btn-full sec" data-go="home" data-st="pending">홈으로</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 3. 신청 이후 시간축 ═══════ -->
+<section class="screen" id="status">
+  <p class="caption"><span class="tag">사용자</span><b>/cashout 진행 상태</b>
+    <span class="cap-m">모바일은 상태·단계·금액·클로버를 세로로 쌓습니다.</span>
+    <span class="cap-d">데스크톱은 좌측에 상태와 단계·금액, 우측 레일에 클로버 잔액·알림·다음 행동을 고정합니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.6 이번 개정 (회장 A안 확정 반영)</p><ul><li data-changelog-item><b>좌측 클로버 카드를 분할 구조로 교체.</b> 상단은 "모인 클로버 🍀 52개"(총량 유지), 그 아래 분할 막대와 두 줄로 사용 가능 12개 / 잠김 40개를 나눕니다. 홈과 같은 컴포넌트라 화면을 오가도 같은 숫자를 같은 방식으로 봅니다. <b>회장 원문</b>: "A안이지 실제로 빠져나갔을때 빠져나가야지" (2026-08-21)</li><li data-changelog-item>반려·입금 실패 문구를 <b>"보류됐던 40개가 잔액으로 돌아왔어요"에서 "40개에 걸려 있던 잠금이 풀렸어요"</b>로 바꿨습니다. 총량은 처음부터 줄지 않았습니다.</li><li data-changelog-item>입금 완료 상태에서만 총량이 12개로 내려가고, 그 줄 바로 아래에서 <b>"52개에서 12개가 된 이유"</b>를 설명합니다.</li><li data-changelog-item>상태 라벨 색 3곳을 <code>--amber</code>·<code>--danger</code> 원색에서 글자용 <code>--amber-ink</code>·<code>--danger-ink</code>로 마저 옮겼습니다. v3.5에서 빠뜨린 잔여분입니다.</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.5 신청 시각·단계 라벨 대비 상향 · v3.4 모바일 갭 24px · v3.3 5개 상태 금액 동기화</li></ul></div>
+  <div class="frame">
+    <div class="u-body">
+      <p class="page-k">해낼게.</p>
+      <h1 class="page-h" style="margin:8px 0 4px">환전 진행 상태</h1>
+      <p style="font-size:11.5px;color:var(--muted);margin-bottom:16px">7월 31일 오전 9:12 신청 · 신청번호 #3041</p>
+
+      <div class="u-grid">
+        <div>
+          <div id="stBanner"></div>
+          <div class="card steps-wrap" style="padding:16px;margin-top:12px">
+            <div class="steps">
+              <div class="step" id="sp1"><div class="bull">1</div><p class="nm">접수됨</p><p class="tm" id="sp1t">7/31 09:12</p></div>
+              <div class="step" id="sp2"><div class="bull">2</div><p class="nm">확인중</p><p class="tm" id="sp2t">예정</p></div>
+              <div class="step" id="sp3"><div class="bull">3</div><p class="nm" id="sp3n">입금완료</p><p class="tm" id="sp3t">예정</p></div>
+            </div>
+            <p id="stStepNote" style="font-size:11.5px;color:var(--muted);line-height:1.55;text-align:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+              지금은 <b style="color:var(--amber-ink)">확인 대기 중</b>이에요. 따로 하실 일은 없어요.
+            </p>
+          </div>
+          <div class="card rows" style="margin-top:12px">
+            <div class="kv"><span class="k" id="stAmtK">받으실 금액</span><span class="v big">34,426원</span></div>
+            <div class="kv"><span class="k">입금 계좌</span><span class="v">국민 ***-**-**8421</span></div>
+            <div class="kv"><span class="k">예금주</span><span class="v">조도경</span></div>
+            <div class="kv" id="stPaidAtRow" style="display:none"><span class="k">입금 완료</span><span class="v">8월 1일 오후 2:40</span></div>
+          </div>
+        </div>
+
+        <div class="u-side">
+          <div class="card" style="overflow:hidden">
+            <div class="bal" style="padding:16px">
+              <div><p class="meta" id="stCloverMeta">모인 클로버</p><p class="count" id="stCloverCount">🍀 52<small>개</small></p></div>
+            </div>
+            <div id="stSplit">
+            <div class="splitbar"><i class="free" style="width:23%"></i><i class="lock" style="width:77%"></i></div>
+            <div class="splitrow"><span class="l">지금 쓸 수 있어요</span><span class="v">🍀 12개<span class="sub">≈12,000원 상당</span></span></div>
+            <div class="splitsep"></div>
+            <div class="splitrow lock"><span class="l"><i>🔒</i>환전으로 잠김</span><span class="v">🍀 40개<span class="sub">34,426원 입금 예정</span></span></div>
+            </div>
+            <p id="stCloverNote" class="splitnote">
+              모은 52개는 그대로예요. 그중 40개에 <b>잠금</b>이 걸려 있어서 지금은 12개를 쓸 수 있어요.
+            </p>
+          </div>
+          <div id="stNoti" style="margin-top:12px"></div>
+          <div id="stActions" style="margin-top:16px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 4. 환전 이력 ═══════ -->
+<section class="screen" id="history">
+  <p class="caption"><span class="tag">사용자</span><b>/cashout/history 환전 내역</b>
+    <span class="cap-m">모바일은 요약 1장과 목록입니다. /me 잔액 카드 아래 "환전 내역" 행에서 진입합니다.</span>
+    <span class="cap-d">데스크톱은 상단에 누적 지급·건수·진행중을 3분할 통계로 펼치고, 목록은 넓은 행으로 읽힙니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.6 이번 개정 (회장 A안 확정 반영)</p><ul><li data-changelog-item><b>이번 개정에서 바뀐 것이 없습니다.</b> 이 화면은 원화 실지급액만 다루고 클로버 총량을 표시하지 않아 A안의 영향을 받지 않습니다.</li><li data-changelog-item>다만 이 화면이 <b>입금 완료 시점의 상실감을 받는 자리</b>입니다. 총량 52→12로 사라진 40개는 여기 "지금까지 받은 금액 61,106원"으로 형태를 바꿔 남아 있습니다. 홈 완료 배너가 이 화면을 가리키는 이유입니다.</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.5 "지급완료"→"입금완료" 용어 교정 · v3.3 과거 4건 실지급액 재계산</li></ul></div>
+  <div class="frame">
+    <div class="u-body">
+      <p class="page-k">해낼게.</p>
+      <h1 class="page-h" style="margin:8px 0 16px">환전 내역</h1>
+
+      <div class="hstat" style="margin-bottom:16px">
+        <div class="b"><p class="l">지금까지 받은 금액</p><p class="v">61,106원</p></div>
+        <div class="b only-d"><p class="l">입금 완료</p><p class="v">2건</p></div>
+        <div class="b only-d"><p class="l">진행중</p><p class="v" style="color:var(--amber-ink)">1건</p></div>
+      </div>
+
+      <div class="card" style="padding:4px 20px">
+        <div class="hrow" data-go="status" data-st="checking" style="cursor:pointer">
+          <div><p class="d">7월 31일 · #3041</p><p class="t">34,426원</p><p class="s">국민 ***-**-**8421 · 확인중</p></div>
+          <span class="hst wait">진행중 ›</span>
+        </div>
+        <div class="hrow">
+          <div><p class="d">6월 12일 · #2810</p><p class="t">33,565원</p><p class="s">국민 ***-**-**8421 · 7/12 입금</p></div>
+          <span class="hst paid">입금완료</span>
+        </div>
+        <div class="hrow">
+          <div><p class="d">5월 30일 · #2604</p><p class="t">27,541원</p><p class="s">국민 ***-**-**8421 · 5/31 입금</p></div>
+          <span class="hst paid">입금완료</span>
+        </div>
+        <div class="hrow">
+          <div><p class="d">5월 2일 · #2401</p><p class="t">25,819원</p><p class="s">예금주 불일치로 반려. 클로버 잠금 해제됨</p></div>
+          <span class="hst rej">반려</span>
+        </div>
+      </div>
+
+      <div class="noti" style="margin-top:16px">🧾 <span>서비스 이용료(부가세 포함)와 원천징수 3.3%가 제외된 실지급액이에요. 연말정산이나 종합소득세 신고에 필요하면 고객센터로 문의해 주세요.</span></div>
+      <div style="margin-top:16px;max-width:320px"><button class="btn-full sec" data-go="home" data-st="pending">홈으로</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 5. loading 상태 ═══════ -->
+<section class="screen" id="loading">
+  <p class="caption"><span class="tag">사용자 상태</span><b>loading</b>
+    <span class="cap-m">모바일은 현재 작업과 기다림 이유, 비활성 액션을 한 흐름으로 쌓습니다.</span>
+    <span class="cap-d">데스크톱은 실제 작업 화면과 상태 설명을 2단으로 나눕니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.7 신규 상태</p><ul><li data-changelog-item><b>환전 신청 제출 중</b>과 <b>잔액 조회 중</b>을 기존 상태 토글로 전환합니다. 제출 중에는 중복 신청을 막고, 잔액 조회 중에는 확정되지 않은 숫자를 보여주지 않습니다.</li></ul></div>
+  <div class="frame">
+    <div class="u-body" aria-live="polite">
+      <p class="page-k">해낼게.</p>
+      <h1 class="page-h" style="margin:8px 0 20px">잠깐 기다리는 동안에도 지금 하는 일을 알려드려요</h1>
+
+      <div id="loadSubmitting">
+        <div class="u-grid">
+          <div>
+            <div class="card rows">
+              <div class="kv"><span class="k">입금 계좌</span><span class="v">국민 ***-**-**8421</span></div>
+              <div class="kv"><span class="k">예금주</span><span class="v">조도경</span></div>
+              <div class="kv net-row"><span class="k">받으실 금액</span><span class="v big">34,426원</span></div>
+            </div>
+          </div>
+          <div class="u-side">
+            <div class="card state-card" role="status" aria-busy="true">
+              <p class="state-label">환전 신청 제출 중</p>
+              <p class="state-title">신청을 안전하게 보내고 있어요</p>
+              <p class="state-copy">계좌와 금액을 다시 확인해 접수하고 있어요. 이 화면을 닫아도 같은 신청이 두 번 들어가지 않습니다.</p>
+              <div class="loading-action" aria-disabled="true"><span class="spinner" aria-hidden="true"></span><span>신청을 보내는 중이에요</span></div>
+            </div>
+            <div class="loading-note"><span>🔒</span><span>제출이 끝날 때까지 이전 화면과 재신청 버튼은 잠겨요. 성공 또는 오류 결과가 나오면 다음 행동을 바로 보여줍니다.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="loadBalance" style="display:none">
+        <div class="u-grid">
+          <div>
+            <p class="goal-title">토익 900<br>해낼게</p>
+            <p class="sub">응원한 사람</p>
+            <div class="card" style="padding:4px 16px">
+              <div class="cheer"><div class="av" style="background:var(--clover-soft);color:var(--clover-ink)">서</div><div style="flex:1"><p class="nm">서연</p><p class="ms">끝까지 응원할게 🍀</p></div><div class="amt"><b>🍀 5</b></div></div>
+              <div class="cheer"><div class="av" style="background:var(--warm);color:var(--muted)">?</div><div style="flex:1"><p class="nm">익명의 누군가</p><p class="ms">화이팅!</p></div><div class="amt"><b>🍀 3</b></div></div>
+            </div>
+          </div>
+          <div class="u-side">
+            <div class="card" role="status" aria-busy="true">
+              <div class="loading-balance">
+                <div style="flex:1;min-width:0">
+                  <p class="meta" style="font-size:10.5px;color:var(--muted)">모인 클로버</p>
+                  <div class="skeleton amount" aria-hidden="true"></div>
+                  <div class="skeleton note" aria-hidden="true"></div>
+                </div>
+                <span class="spinner" aria-hidden="true"></span>
+              </div>
+              <p class="splitnote">클로버 잔액을 불러오는 중이에요. 확인 전에는 환전 가능 여부와 금액을 추정해 보여주지 않습니다.</p>
+            </div>
+            <div class="loading-note"><span>↻</span><span>조회가 실패하면 마지막 숫자를 유지하지 않고 오류 상태와 다시 시도 버튼을 보여줍니다.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 6. overflow 상태 ═══════ -->
+<section class="screen" id="overflow">
+  <p class="caption"><span class="tag">사용자 상태</span><b>overflow</b>
+    <span class="cap-m">모바일은 60자 목표, 100개 응원, 140자 메시지, 100개 워드맵이 가로 넘침 없이 한 열에 놓입니다.</span>
+    <span class="cap-d">데스크톱은 기존 2단 레이아웃에서 목록과 워드맵 상한을 함께 검수합니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.7 신규 상태</p><ul><li data-changelog-item>실데이터 <b>응원 100개</b>와 <b>워드 100개</b>를 만들고 미니 상한 8행·6개, 전체 상한 20행·12개를 적용했습니다. 긴 목표는 60자·2줄, 긴 응원은 미리보기 1줄·전체 상태 4줄까지 보입니다.</li></ul></div>
+  <div class="frame">
+    <div class="u-body">
+      <div class="u-head"><span class="brand">해낼게<span class="d">.</span></span><span class="limit-badge">DATA × 100</span></div>
+      <div class="u-grid">
+        <div>
+          <p class="overflow-title" title="토익 900점과 영어 인터뷰 자신감을 함께 만들고 올해 안에 해외 고객 앞에서 당당하게 발표하는 목표를 반드시 해낼게">토익 900점과 영어 인터뷰 자신감을 함께 만들고 올해 안에 해외 고객 앞에서 당당하게 발표하는 목표를 반드시 해낼게</p>
+          <div class="overflow-meta"><span class="chip">🗓 D-12</span><span class="limit-badge">목표 60자 · 2줄 상한</span></div>
+          <p class="sub">응원한 사람 <span style="color:var(--clover-ink)">100명</span></p>
+          <div class="card">
+            <div class="overflow-cheers" id="overflowCheers" aria-label="응원 100개 중 상한에 맞춰 표시"></div>
+            <div class="overflow-footer"><span id="overflowCheerRule">미니 목록은 8개까지 보여줘요</span><b id="overflowCheerRest">92개 더 있음</b></div>
+          </div>
+        </div>
+        <div class="u-side">
+          <div class="card state-card">
+            <p class="state-label">워드맵 과다 데이터</p>
+            <p class="state-title">100개가 쌓여도 의미가 큰 단어부터 읽혀요</p>
+            <p class="state-copy">빈도순으로 정렬하고 같은 빈도에서는 가나다순을 따릅니다. 미니에서는 6개, 전체에서는 12개까지만 한 번에 보여줍니다.</p>
+            <div class="wordmap" id="overflowWords" aria-label="워드 100개 중 상한에 맞춰 표시"></div>
+            <p class="overflow-rule"><b id="overflowWordRule" style="color:var(--clover-ink)">6개 표시</b><span id="overflowWordRest"> · 94개는 전체 워드맵에서 확인</span></p>
+          </div>
+          <div class="noti" style="margin-top:12px">↔ <span>긴 제목과 메시지는 컨테이너 안에서 줄바꿈 또는 말줄임 처리돼요. 390px에서도 가로 스크롤은 생기지 않습니다.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 7. 관리자 큐 ═══════ -->
+<section class="screen" id="queue">
+  <p class="caption"><span class="tag adm">관리자</span><b>/admin 환전 처리 큐</b>
+    <span class="cap-d">데스크톱이 주 사용 환경입니다. 대기 건 상단 정렬과 데이터 신선도 표시.</span>
+    <span class="cap-m">모바일에서는 테이블을 가로로 밀지 않고 신청 건별 카드 리스트로 재배치합니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.6 이번 개정 (회장 A안 확정 반영)</p><ul><li data-changelog-item><b>이번 개정에서 바뀐 것이 없습니다.</b> 큐는 원화 실지급액과 계좌만 다루고 신청자의 클로버 총량을 표시하지 않습니다.</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.5 이용료 칸 2줄 분리 · v3.3 이용료 열 신설과 폭 압축</li></ul></div>
+  <div class="frame">
+    <div class="a-top">
+      <div><p class="k">해낼게 운영</p><h2>환전 처리 큐</h2></div>
+      <div class="fresh"><span class="live"></span>실시간 · 방금 갱신</div>
+    </div>
+    <div class="a-body">
+      <div class="filters" id="qFilters">
+        <button class="fbtn on">지급 대기<span class="n">2</span></button>
+        <button class="fbtn">전체<span class="n">14</span></button>
+        <button class="fbtn">지급 완료<span class="n">11</span></button>
+        <button class="fbtn">반려<span class="n">1</span></button>
+      </div>
+      <div id="queueHas">
+        <table class="qtable">
+          <thead><tr><th>신청일</th><th>신청자</th><th class="num">친구 응원분</th><th class="num">이용료<br>(VAT 포함)</th><th class="num">원천징수</th><th class="num">실지급액</th><th>계좌(예금주)</th><th>상태</th><th></th></tr></thead>
+          <tbody>
+            <tr class="wait">
+              <td data-l="신청일">7/31 09:12<div class="id">#3041</div></td>
+              <td data-l="신청자"><div class="who">도경</div><div class="id">a1f4c2e8…7b90</div></td>
+              <td class="num" data-l="친구 응원분">🍀 40<div class="id">40,000원</div></td>
+              <td class="num" data-l="이용료(VAT 포함)">−4,000원<div class="id">부가세 −400원</div></td>
+              <td class="num" data-l="원천징수">−1,174원</td>
+              <td class="num net" data-l="실지급액">34,426원</td>
+              <td data-l="계좌">국민 ***-**-**8421<div class="id">조도경</div></td>
+              <td data-l="상태"><span class="st wait"><span class="d"></span>지급 대기</span></td>
+              <td data-l=""><span class="rowlink" data-go="detail" data-st="masked">처리하기 →</span></td>
+            </tr>
+            <tr class="wait">
+              <td data-l="신청일">7/31 08:47<div class="id">#3040</div></td>
+              <td data-l="신청자"><div class="who">민준</div><div class="id">c8d2b1a0…4f31</div></td>
+              <td class="num" data-l="친구 응원분">🍀 55<div class="id">55,000원</div></td>
+              <td class="num" data-l="이용료(VAT 포함)">−5,500원<div class="id">부가세 −550원</div></td>
+              <td class="num" data-l="원천징수">−1,615원</td>
+              <td class="num net" data-l="실지급액">47,335원</td>
+              <td data-l="계좌">토스뱅크 ***-****-**02<div class="id">이민준</div></td>
+              <td data-l="상태"><span class="st wait"><span class="d"></span>지급 대기</span></td>
+              <td data-l=""><span class="rowlink" data-go="detail" data-st="masked">처리하기 →</span></td>
+            </tr>
+            <tr>
+              <td data-l="신청일">7/30 21:05<div class="id">#3038</div></td>
+              <td data-l="신청자"><div class="who">서연</div><div class="id">9b3e7f11…2c88</div></td>
+              <td class="num" data-l="친구 응원분">🍀 32<div class="id">32,000원</div></td>
+              <td class="num" data-l="이용료(VAT 포함)">−3,200원<div class="id">부가세 −320원</div></td>
+              <td class="num" data-l="원천징수">−939원</td>
+              <td class="num net" data-l="실지급액">27,541원</td>
+              <td data-l="계좌">카카오뱅크 ***-**-**7712<div class="id">김서연</div></td>
+              <td data-l="상태"><span class="st paid"><span class="d"></span>지급 완료</span><div class="id">7/31 10:20</div></td>
+              <td data-l=""><span style="font-size:11.5px;color:var(--muted)">이체확인 완료</span></td>
+            </tr>
+            <tr>
+              <td data-l="신청일">7/30 14:33<div class="id">#3035</div></td>
+              <td data-l="신청자"><div class="who">하늘</div><div class="id">2e9a5c74…8d10</div></td>
+              <td class="num" data-l="친구 응원분">🍀 30<div class="id">30,000원</div></td>
+              <td class="num" data-l="이용료(VAT 포함)">−3,000원<div class="id">부가세 −300원</div></td>
+              <td class="num" data-l="원천징수">−881원</td>
+              <td class="num net" data-l="실지급액">25,819원</td>
+              <td data-l="계좌">신한 ***-***-**5590<div class="id">불일치 예금주</div></td>
+              <td data-l="상태"><span class="st rej"><span class="d"></span>반려</span><div class="id">7/30 16:00</div></td>
+              <td data-l=""><span style="font-size:11.5px;color:var(--muted)">예금주 불일치</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="queueEmpty" style="display:none">
+        <div class="card empty"><p class="big">지급 대기 중인 신청이 없어요</p><p class="s">새 환전 신청이 들어오면 이 위에 대기 순서대로 쌓여요. 아무 것도 하지 않아도 됩니다.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 6. 관리자 상세 ═══════ -->
+<section class="screen" id="detail">
+  <p class="caption"><span class="tag adm">관리자</span><b>/admin 신청 상세 #3041</b>
+    <span class="cap-d">데스크톱은 좌측 금액 분해와 원장 확인, 우측 계좌·처리 액션 2단입니다.</span>
+    <span class="cap-m">모바일은 금액을 먼저 읽고 계좌·처리를 아래로 쌓으며, 처리 버튼은 세로로 분리해 오탭을 막습니다.</span>
+  </p>
+  <div class="sc-chg"><p class="ch">v3.6 이번 개정 (회장 A안 확정 반영)</p><ul><li data-changelog-item><b>잠금 배지 문구 교정.</b> "친구 응원분 40🍀 원장 HOLD 확인됨"에 <b>(총량 52🍀 유지)</b>를 붙였습니다. 회장이 이체 전에 보는 화면이라 사용자 화면과 같은 사실을 말해야 합니다. <b>회장 원문</b>: "A안이지 실제로 빠져나갔을때 빠져나가야지" (2026-08-21)</li><li data-changelog-item>계좌 카드 아래 설명을 "신청 시점에 잔액에서 이미 차감(보류)됐어요"에서 <b>"신청 시점에 잠금이 걸렸습니다. 총량은 그대로이고 사용 가능분만 줄어 있어요. 지급완료를 누르면 그때 총량에서 확정 차감됩니다"</b>로 바꿨습니다.</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.5 관리자 표 꼬리표 제거, 원천징수 모수 각주화</li></ul></div>
+  <div class="frame">
+    <div class="a-top">
+      <div><p class="k">환전 처리 큐 › 상세</p><h2>도경님 환전 신청 <span style="font-family:var(--font);font-size:15px;color:var(--muted)">#3041</span></h2></div>
+      <span class="st wait" style="font-size:12px"><span class="d"></span>지급 대기</span>
+    </div>
+    <div class="a-body">
+      <div style="margin-bottom:16px"><span class="rowlink" data-go="queue" data-st="has">← 큐로 돌아가기</span></div>
+      <div class="detail">
+        <div class="dcard">
+          <h3>💰 금액 분해 <span class="ledger-tag">clover_eligibility 기준</span></h3>
+          <div class="drow"><span class="l">모인 클로버 (웰컴 포함)</span><span class="v">🍀 52개</span></div>
+          <div class="drow"><span class="l">− 해낼게 웰컴 (지급 대상 아님)</span><span class="v" style="color:var(--muted)">− 🍀 12개</span></div>
+          <div class="drow"><span class="l" style="font-weight:700;color:var(--ink)">친구 응원분 (지급 대상)</span><span class="v" style="color:var(--clover-ink)">🍀 40개</span></div>
+          <div class="drow"><span class="l">환산 (🍀1개 = 1,000원)</span><span class="v">40,000원</span></div>
+          <div class="drow"><span class="l">서비스 이용료 10%</span><span class="v">− 4,000원</span></div>
+          <div class="drow"><span class="l">이용료 부가세 10%</span><span class="v">− 400원</span></div>
+          <div class="drow"><span class="l">사업소득 원천징수 3.3%</span><span class="v">− 1,174원</span></div>
+          <div class="drow total"><span class="l" style="font-weight:800;color:var(--ink)">실지급액</span><span class="v">34,426원</span></div>
+          <p class="note-soft">원천징수 3.3%의 모수는 환산액 40,000원이 아니라 이용료를 뺀 35,600원이에요. 분쟁이 나는 지점이라 표 밖에 따로 적습니다.</p>
+          <div style="margin-top:16px">
+            <div class="hold-badge">🔒 친구 응원분 40🍀 잠금 확인됨 (총량 52🍀 유지) <span class="ledger-tag">CASHOUT_HOLD · #3041</span></div>
+            <p style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5">신청 시점에 잠금이 걸렸습니다. 총량은 그대로이고 사용 가능분만 줄어 있어요. 지급완료를 누르면 그때 총량에서 확정 차감되고, 반려하면 잠금이 풀립니다.</p>
+          </div>
+        </div>
+        <div class="dcard">
+          <h3>🏦 입금 계좌 <span class="ledger-tag" id="acctSrc">복호화 필요</span></h3>
+          <div class="acct">
+            <p class="masked" id="acctNo">국민은행 ***-**-**8421</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:8px">예금주 <b style="color:var(--ink)">조도경</b> · 신청자 닉네임 <b>도경</b> <span style="color:var(--clover-ink)">✓ 일치</span></p>
+            <button class="reveal" id="revealBtn">전체 계좌 보기</button>
+            <p class="warn"><span>🛡</span><span>계좌 원문은 암호화 저장되고 이 열람은 감사 로그에 기록돼요. 이체창에 붙여넣은 뒤 다시 가려주세요.</span></p>
+          </div>
+          <div style="margin-top:16px">
+            <p style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px">처리 메모 <span style="color:var(--muted);font-weight:400">(반려 시 필수. 신청자에게 사유로 전달)</span></p>
+            <textarea class="memo" rows="2" placeholder="예: 7/31 10:20 국민 이체 완료 또는 반려 사유"></textarea>
+            <div class="act-btns">
+              <button class="btn pay" data-go="modal" data-st="pay">지급 완료 처리</button>
+              <button class="btn rej" data-go="modal" data-st="reject">반려</button>
+            </div>
+            <p style="font-size:10.5px;color:var(--muted);margin-top:12px;line-height:1.5">⚠️ 되돌릴 수 없는 액션이에요. 은행 앱에서 <b>실제 이체를 마친 뒤에만</b> 지급 완료를 누르세요. 이미 처리된 건은 버튼이 사라져 이중지급이 막혀요.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 7. 확인 모달 ═══════ -->
+<section class="screen" id="modal">
+  <p class="caption"><span class="tag adm">관리자</span><b>확인 모달</b>
+    <span class="cap-d">데스크톱은 중앙 다이얼로그입니다.</span>
+    <span class="cap-m">모바일은 바텀시트로 붙고 버튼이 세로로 쌓여 취소가 아래에 옵니다.</span>
+    지급완료와 반려 모두 되돌릴 수 없어 금액·계좌·예금주를 다시 보여주고 "이체를 실제로 마쳤다" 체크를 받습니다.
+  </p>
+  <div class="sc-chg"><p class="ch">v3.6 이번 개정 (회장 A안 확정 반영)</p><ul><li data-changelog-item><b>반려 확인 문구 교정.</b> "보류했던 40🍀가 신청자 잔액으로 복원돼요"에서 <b>"40🍀에 걸린 잠금이 풀려요. 총량은 애초에 줄지 않았으므로 되돌릴 잔액이 없습니다"</b>로 바꿨습니다. 회장이 반려를 누를 때 무슨 일이 일어나는지 정확해야 합니다. <b>회장 원문</b>: "A안이지 실제로 빠져나갔을때 빠져나가야지" (2026-08-21)</li></ul><p class="ch" style="margin-top:9px">이전 이력</p><ul><li data-changelog-item>v3.5 "정산 확정"→"지급으로 확정" 용어 교정</li></ul></div>
+  <div class="frame">
+    <div class="a-top"><div><p class="k">환전 처리 큐 › 상세 › 확인</p><h2>처리 확정</h2></div></div>
+    <div class="a-body" style="padding:0">
+      <div class="modal-wrap" id="modalPay">
+        <div class="modal">
+          <p class="mh">이 건을 <span style="color:var(--clover-ink)">지급 완료</span>로 확정할까요?</p>
+          <div class="recap">
+            <div class="r"><span>신청자</span><span class="v">도경 (조도경)</span></div>
+            <div class="r"><span>입금 계좌</span><span class="v">국민 812201-**-448421</span></div>
+            <div class="r big"><span>실지급액</span><span class="v">34,426원</span></div>
+          </div>
+          <label class="checkline"><input type="checkbox" id="payCheck"><span>은행 앱에서 위 계좌로 <b>34,426원 이체를 실제로 마쳤습니다.</b> 확정하면 친구 응원분 40🍀가 지급으로 확정되고, 신청자에게 카톡 알림이 갑니다.</span></label>
+          <div class="mbtns">
+            <button class="btn ghost" data-go="detail" data-st="masked">취소</button>
+            <button class="btn pay" id="payConfirm" disabled data-go="status" data-st="paid">지급 완료 확정</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-wrap" id="modalReject" style="display:none">
+        <div class="modal">
+          <p class="mh">이 건을 <span style="color:var(--danger-ink)">반려</span>할까요?</p>
+          <div class="cfm-warn"><span>↩</span><span>반려하면 친구 응원분 40🍀에 걸린 <b>잠금이 풀려요.</b> 총량은 애초에 줄지 않았으므로 되돌릴 잔액이 없습니다. 신청자는 사유를 보고 다시 신청할 수 있어요.</span></div>
+          <div style="margin-top:16px">
+            <p style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px">반려 사유 <span style="color:var(--danger-ink)">*필수</span> <span style="color:var(--muted);font-weight:400">(신청자 화면에 그대로 보여요)</span></p>
+            <textarea class="memo" rows="2">예금주 이름이 신청자와 달라요. 본인 명의 계좌로 다시 신청해 주세요.</textarea>
+          </div>
+          <div class="mbtns" style="margin-top:16px">
+            <button class="btn ghost" data-go="detail" data-st="masked">취소</button>
+            <button class="btn rej" data-go="status" data-st="rejected">반려하고 잠금 해제</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="stamp">
+  <b>STAMP</b> · line core · cashout-full-journey-v3.8 · 생성 2026-08-29 04:34 KST · 모델 gpt-codex · 에이전트 product-designer · 스킬 pipeline · 기반 프로토타입 본 파일 v3.7 · 기반 DESIGN.md <b>v2.0.1</b> · 기반 운영 구현 <code>web/src/components/cashout/CashoutRequestForm.tsx</code>, <code>web/src/components/cashout/CashoutPageView.tsx</code> · 기반 계약 <code>20260825020000_cashout_total_threshold_contract.sql</code> · 자체 design-review <b>Design Score B+</b><br>
+  <b>v3.8 반영</b> ①총보유 30·웰컴 3·지급가능 27 경계 상태를 추가했습니다. ②환전 자격(총보유 30 이상)과 신청량(1~지급가능)을 분리했습니다. ③현재 1.2.0 구현에는 있으나 v3.7에서 빠졌던 신청량 입력을 계좌 입력 위에 복원했습니다. ④현재 작업트리 `CashoutRequestForm.tsx`의 helper와 지급가능 0 안내가 같은 계약으로 보정된 것을 대조했습니다.<br>
+  <b>v3.7 반영</b> ①제품 프레임의 미등록 색, 글자 크기, 간격, 고정폭 서체, 그림자를 DESIGN.md v2.0.0 토큰으로 정렬했습니다. 검수 콘솔과 기기 프레임은 의도대로 유지했습니다. ②등록 색으로 바꾸면 모달 계층 의미가 깨지는 <code>rgba(22,20,15,.5)</code>는 오버레이 토큰 등록 후보로 남겼습니다. ③<b>loading</b> 화면에 환전 신청 제출 중과 잔액 조회 중을 기존 상태 토글로 추가했습니다. ④<b>overflow</b> 화면에 응원 100개, 60자 목표, 140자 응원 메시지, 워드 100개를 넣고 미니와 전체 상한을 실제 렌더에 적용했습니다.<br>
+  <b>v3.6 반영</b> 회장 확정 A안인 잠금 유지와 실지급 시 차감을 전 화면에 반영하고, 총량 아래에 사용 가능분과 잠긴 분을 분리한 잔액 컴포넌트를 추가했습니다.<br>
+  <b>벤치마크 적용</b> Stripe Connect는 하나의 잔액을 pending과 available로 분리하고 실제 지급은 available에서만 가능하다고 명시합니다. 이를 총보유 자격과 지급가능 신청 상한을 별도 라벨로 보여주는 구조로 바꿨습니다. Apple HIG는 버튼 라벨이 행동을 설명하고 처리 중 상태를 일관되게 알려야 한다고 권합니다. 기존 제출 중 상태를 유지했습니다.<br>
+  <b>레드팀</b> 까다로운 고객은 "기준은 30개인데 왜 27개를 신청할 수 있느냐"고 묻습니다. 숫자를 숨기지 않고 총보유 30, 웰컴 제외 3, 지급가능 27을 같은 분해표에 두고 입력 힌트에서 자격과 상한을 한 문장으로 분리했습니다. 경쟁자는 단일 최소액이 더 단순하다고 공격할 수 있지만, 그 단순화는 실제 계약과 다른 거부 메시지를 만들기 때문에 채택하지 않았습니다.<br>
+  <b>셀프심문</b> 이 결론이 틀렸다면 가장 그럴듯한 이유는 27개 신청이 기술적으로만 가능하고 사용자는 화면의 "30개"를 신청량 하한으로 읽는다는 점입니다. 이를 막기 위해 30/27 상태를 별도 토글로 렌더하고 "환전 기준"과 "지금 지급 가능"을 각각 이름 붙였습니다.<br>
+  <b>고민 한 줄</b> 숫자를 줄여 단순하게 보이는 것보다, 자격과 지급가능액의 차이를 정직하게 설명하는 것이 돈 화면의 신뢰를 지킵니다.<br>
+  <b>SKILLS_USED:</b> pipeline, 디자인 단계 최신성 감사와 하류 회수 판정. <b>SKILLS_SKIPPED:</b> 제품 UI 전용 design-shotgun·design-review 스킬은 현재 세션에 제공되지 않았습니다. 기존 정본의 계약 보정이라 신규 스타일 샷건은 적용하지 않았습니다.<br>
+  <b>SOURCES:</b> <code>/Users/sj/sj_code_master/haenael-ge/DESIGN.md v2.0.1</code> · <code>/Users/sj/.claude/standards/design.md §1, §10, §14, §15</code> · <code>web/src/components/cashout/CashoutRequestForm.tsx</code> · <code>supabase/migrations/20260825020000_cashout_total_threshold_contract.sql</code> · <code>https://docs.stripe.com/connect/account-balances</code> · <code>https://developer.apple.com/design/human-interface-guidelines/buttons</code><br>
+  <b>MODEL:</b> gpt-codex
+</div>
+
+<script>
+  const screens=document.querySelectorAll('.screen');
+  const navs=document.querySelectorAll('.nav');
+  const stategrps=document.querySelectorAll('.stategrp');
+  const stage=document.querySelector('.stage');
+  const $=id=>document.getElementById(id);
+  let requestBoundary=false;
+
+  document.querySelectorAll('.vw').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.vw').forEach(x=>x.classList.toggle('on',x===b));
+      stage.setAttribute('data-vw',b.dataset.vw);
+    });
+  });
+
+  function showScreen(id){
+    screens.forEach(s=>s.classList.toggle('active',s.id===id));
+    navs.forEach(b=>b.classList.toggle('on',b.dataset.screen===id));
+    stategrps.forEach(g=>g.style.display='none');
+    const grp=document.querySelector('.state-'+id);
+    if(grp) grp.style.display='flex';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  navs.forEach(b=>b.addEventListener('click',()=>{
+    showScreen(b.dataset.screen);
+    const grp=document.querySelector('.state-'+b.dataset.screen);
+    if(grp){const on=grp.querySelector('.st-btn.on')||grp.querySelector('.st-btn'); applyState(b.dataset.screen,on.dataset.state);}
+  }));
+
+  function bindGo(root){
+    (root||document).querySelectorAll('[data-go]').forEach(el=>{
+      el.onclick=e=>{e.preventDefault();showScreen(el.dataset.go);if(el.dataset.st)applyState(el.dataset.go,el.dataset.st);};
+    });
+  }
+  bindGo();
+
+  function applyState(screen,state){
+    const grp=document.querySelector('.state-'+screen);
+    if(grp) grp.querySelectorAll('.st-btn').forEach(b=>b.classList.toggle('on',b.dataset.state===state));
+
+    if(screen==='home'){
+      const hold=$('hSplit'),banner=$('hBanner'),cta=$('hCta'),sub=$('hCtaSub'),main=$('hCtaMain');
+      hold.style.display='none'; cta.className='cta-cash'; cta.dataset.go='request';
+      $('hMeta').textContent='모인 클로버'; $('hKrw').style.display='block'; $('hHistory').style.display='flex';
+      if(state==='reached'){
+        $('hCount').innerHTML='🍀 42<small>개</small>'; $('hKrw').textContent='≈42,000원 상당';
+        main.textContent='환전'; sub.textContent='신청 가능';
+        banner.innerHTML='<div class="banner ok"><p class="t">🍀 환전할 수 있어요</p><p class="s">친구들이 모아준 응원, 이제 실제 계좌로 받을 수 있어요. 웰컴 클로버를 뺀 <b>친구 응원분만</b> 정직하게 계산해 드릴게요.</p></div>';
+      }
+      if(state==='below'){
+        $('hCount').innerHTML='🍀 18<small>개</small>'; $('hKrw').textContent='≈18,000원 상당';
+        cta.className='cta-cash locked'; main.textContent='환전'; sub.textContent='12개 남음';
+        banner.innerHTML='<div class="card" style="padding:16px"><p style="font-size:12.5px;font-weight:800">환전까지 조금 남았어요</p><div class="prog"><i style="width:60%"></i></div><p style="font-size:11.5px;color:var(--muted);line-height:1.55">지금 🍀 18개예요. 최소 환전 30개까지 <b style="color:var(--clover-ink)">12개</b> 남았어요. 쌓인 클로버는 그대로 보관돼요.</p></div>';
+        $('hHistory').style.display='none';
+      }
+      if(state==='pending'){
+        // A안(회장 2026-08-21): 신청해도 총량은 그대로 52개. 잠긴 40개는 아래 분할 블록이 받는다.
+        // 총량 옆 원화 등가는 감춘다. 잠긴 40개는 이미 실수령 34,426원으로 확정돼 있어
+        // 52,000원 등가를 같이 띄우면 두 계층(등가 / 실수령)이 섞인다(DESIGN.md §6-c 금액 계층 분리).
+        $('hCount').innerHTML='🍀 52<small>개</small>'; $('hKrw').style.display='none';
+        hold.style.display='block';
+        cta.className='cta-cash pending'; main.textContent='진행중'; sub.textContent='상태 보기'; cta.dataset.go='status';
+        banner.innerHTML='<div class="banner wait"><p class="t">⏳ 환전 확인중이에요</p><p class="s">7/31 신청하신 <b>34,426원</b>은 1~3영업일 안에 입금돼요. 끝나면 카톡으로 알려드릴게요.</p></div>';
+      }
+      if(state==='paid'){
+        // 총량이 52에서 12로 줄어드는 유일한 순간. 놀람이 되지 않게 배너가 그 이유를 먼저 말한다.
+        $('hCount').innerHTML='🍀 12<small>개</small>'; $('hKrw').textContent='≈12,000원 상당';
+        cta.className='cta-cash locked'; main.textContent='환전'; sub.textContent='18개 더 필요';
+        banner.innerHTML='<div class="banner ok"><p class="t">💸 34,426원이 입금됐어요</p><p class="s">8월 1일 오후 2:40 · 국민 ***-**-**8421 (조도경). <b>잠겨 있던 40개는 이 돈으로 바뀌었어요.</b> 그래서 모인 클로버가 52개에서 12개가 됐어요. 받은 금액은 환전 내역에 남아 있어요.</p></div>';
+        $('hHistMeta').textContent='3건 · 최근 8/1 ›';
+      }
+      bindGo();
+    }
+
+    if(screen==='request'){
+      ['reqForm','reqConfirm','reqDone','reqBlocked'].forEach(i=>$(i).style.display='none');
+      if(state==='boundary') requestBoundary=true;
+      if(state==='form') requestBoundary=false;
+      const map={form:'reqForm',boundary:'reqForm',confirm:'reqConfirm',done:'reqDone',blocked:'reqBlocked'};
+      $(map[state]).style.display='block';
+      const h={form:'환전 전에 정직하게 보여드릴게요',boundary:'환전 기준을 채웠어요',confirm:'이 계좌가 맞나요?',done:'',blocked:'환전 신청'};
+      $('reqH').innerHTML=h[state]; $('reqH').style.display=state==='done'?'none':'block';
+      const d=requestBoundary
+        ? {total:30,welcome:3,payable:27,gross:'27,000원',fee:'− 2,970원',tax:'− 792원',net:'23,238원'}
+        : {total:52,welcome:12,payable:40,gross:'40,000원',fee:'− 4,400원',tax:'− 1,174원',net:'34,426원'};
+      $('reqTotal').textContent=`🍀 ${d.total}개`;
+      $('reqWelcome').textContent=`− 🍀 ${d.welcome}개`;
+      $('reqPayable').textContent=`🍀 ${d.payable}개`;
+      $('reqGross').textContent=d.gross;
+      $('reqFee').textContent=d.fee;
+      $('reqTax').textContent=d.tax;
+      $('reqNet').textContent=d.net;
+      $('reqAmountInput').textContent=d.payable;
+      $('reqAmountHint').textContent=`환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 ${d.payable}개`;
+      $('reqConfirmNet').textContent=d.net;
+      $('reqConfirmTitle').textContent=`신청하면 클로버 ${d.payable}개가 잠겨요`;
+      $('reqConfirmCopy').innerHTML=`모은 ${d.total}개는 그대로 남고, 그중 ${d.payable}개에만 잠금이 걸려요. <b>입금이 끝나면 그때 ${d.payable}개가 빠져요.</b> 반려되면 잠금이 풀립니다.`;
+      $('reqDoneNet').textContent=d.net;
+      bindGo($('request'));
+    }
+
+    if(screen==='status'){
+      const b=$('stBanner'),act=$('stActions'),noti=$('stNoti');
+      ['sp1','sp2','sp3'].forEach(i=>$(i).className='step');
+      $('stPaidAtRow').style.display='none';
+      $('stAmtK').textContent='받으실 금액';
+      $('sp3n').textContent='입금완료'; $('sp2t').textContent='예정'; $('sp3t').textContent='예정';
+      // A안: 처리 중에는 총량 52개가 유지되고, 분할 블록이 12 / 40을 나눠 보여준다.
+      $('stCloverMeta').textContent='모인 클로버';
+      $('stCloverCount').innerHTML='🍀 52<small>개</small>';
+      $('stSplit').style.display='block';
+      $('stCloverNote').innerHTML='모은 52개는 그대로예요. 그중 40개에 <b>잠금</b>이 걸려 있어서 지금은 12개를 쓸 수 있어요.';
+
+      if(state==='received'){
+        $('sp1').className='step done'; $('sp2').className='step now';
+        b.innerHTML='<div class="banner wait"><p class="t">신청이 접수됐어요</p><p class="s">1~3영업일 안에 입금해 드릴게요. 오늘 신청하셨으니 <b>8월 3일(월)</b>까지는 도착해요.</p></div>';
+        $('stStepNote').innerHTML='지금은 <b style="color:var(--amber-ink)">확인 대기 중</b>이에요. 따로 하실 일은 없어요.';
+        noti.innerHTML='<div class="noti">💬 <span>입금이 끝나면 <b>카카오톡 알림</b>으로 알려드려요. 매일 들어와서 확인하지 않으셔도 돼요.</span></div>';
+        act.innerHTML='<button class="btn-full dis" disabled>새 환전 신청하기<span class="why">이 건이 끝나면 다시 신청할 수 있어요</span></button><div style="margin-top:12px"><button class="btn-full sec" data-go="home" data-st="pending">홈으로</button></div>';
+      }
+      if(state==='checking'){
+        $('sp1').className='step done'; $('sp2').className='step now'; $('sp2t').textContent='8/1 10:05';
+        b.innerHTML='<div class="banner wait"><p class="t">계좌를 확인하고 있어요</p><p class="s">담당자가 입금 계좌를 확인 중이에요. 오늘 안에 보내드릴 예정이에요.</p></div>';
+        $('stStepNote').innerHTML='<b style="color:var(--amber-ink)">확인중</b>이에요. 문제가 있으면 사유와 함께 알려드리고 잠금을 풀어드려요.';
+        noti.innerHTML='<div class="noti">💬 <span>입금이 끝나면 <b>카카오톡 알림</b>이 가요. 문의는 고객센터로 신청번호 <b>#3041</b>을 알려주세요.</span></div>';
+        act.innerHTML='<button class="btn-full dis" disabled>새 환전 신청하기<span class="why">이 건이 끝나면 다시 신청할 수 있어요</span></button><div style="margin-top:12px"><button class="btn-full sec" data-go="history">환전 내역 보기</button></div>';
+      }
+      if(state==='paid'){
+        $('sp1').className='step done'; $('sp2').className='step done'; $('sp3').className='step done';
+        $('sp2t').textContent='8/1 10:05'; $('sp3t').textContent='8/1 14:40';
+        $('stAmtK').textContent='입금된 금액'; $('stPaidAtRow').style.display='flex';
+        b.innerHTML='<div class="banner ok" style="text-align:center;padding:22px 20px"><p style="font-size:30px">💸</p><p class="t" style="font-size:19px;margin-top:8px">34,426원이 입금됐어요</p><p class="s">8월 1일 오후 2:40 · 국민 ***-**-**8421 (조도경). 통장에 <b>해낼게</b>로 찍혀요.</p></div>';
+        $('stStepNote').innerHTML='끝났어요. 이 내역은 <b>환전 내역</b>에 계속 남아 있어요.';
+        $('stCloverCount').innerHTML='🍀 12<small>개</small>'; $('stSplit').style.display='none';
+        $('stCloverNote').innerHTML='잠겨 있던 40개는 <b>34,426원으로 바뀌어 입금</b>됐어요. 그래서 모인 클로버가 52개에서 12개가 됐어요. 남은 12개는 30개를 더 모으면 환전할 수 있어요.';
+        noti.innerHTML='<div class="noti">💬 <span>방금 <b>카카오톡</b>으로도 알림을 보냈어요. 인앱 알림함에서도 다시 볼 수 있어요.</span></div>';
+        act.innerHTML='<button class="btn-full sec" data-go="history">환전 내역에서 보기</button><div style="margin-top:12px"><button class="btn-full sec" data-go="home" data-st="paid">홈으로</button></div>';
+      }
+      if(state==='rejected'){
+        $('sp1').className='step done'; $('sp2').className='step done'; $('sp2t').textContent='8/1 10:05';
+        $('sp3').className='step fail'; $('sp3n').textContent='반려됨'; $('sp3t').textContent='8/1 11:20';
+        b.innerHTML='<div class="banner bad"><p class="t">환전이 반려됐어요</p><p class="s"><b>사유:</b> 예금주 이름이 신청자와 달라요. 본인 명의 계좌로 다시 신청해 주세요.</p></div>';
+        $('stStepNote').innerHTML='<b style="color:var(--danger-ink)">반려</b>됐어요. 돈은 나가지 않았고, 클로버 잠금은 풀렸어요.';
+        $('stAmtK').textContent='신청했던 금액';
+        $('stCloverCount').innerHTML='🍀 52<small>개</small>'; $('stSplit').style.display='none';
+        $('stCloverNote').innerHTML='<b style="color:var(--clover-ink)">40개에 걸려 있던 잠금이 풀렸어요.</b> 총량은 처음부터 줄지 않았고, 52개를 다시 전부 쓸 수 있어요.';
+        noti.innerHTML='<div class="noti">🙇 <span>불편을 드려 죄송해요. 계좌가 헷갈리면 고객센터로 신청번호 <b>#3041</b>과 함께 문의해 주세요.</span></div>';
+        act.innerHTML='<button class="btn-full pri" data-go="request" data-st="form">계좌 고쳐서 다시 신청하기</button><div style="margin-top:12px"><button class="btn-full sec" data-go="home" data-st="reached">홈으로</button></div>';
+      }
+      if(state==='failed'){
+        $('sp1').className='step done'; $('sp2').className='step done'; $('sp2t').textContent='8/1 10:05';
+        $('sp3').className='step fail'; $('sp3n').textContent='입금 실패'; $('sp3t').textContent='8/1 15:10';
+        b.innerHTML='<div class="banner bad"><p class="t">입금이 반송됐어요</p><p class="s"><b>사유:</b> 계좌번호가 맞지 않아 은행에서 돌아왔어요. 번호를 다시 확인하고 신청해 주세요.</p></div>';
+        $('stStepNote').innerHTML='<b style="color:var(--danger-ink)">입금 실패</b>예요. 돈은 빠져나가지 않았고 클로버 잠금도 풀렸어요.';
+        $('stAmtK').textContent='신청했던 금액';
+        $('stCloverCount').innerHTML='🍀 52<small>개</small>'; $('stSplit').style.display='none';
+        $('stCloverNote').innerHTML='<b style="color:var(--clover-ink)">40개에 걸려 있던 잠금이 풀렸어요.</b> 계좌번호만 고치면 52개 그대로 다시 신청할 수 있어요.';
+        noti.innerHTML='<div class="noti">🏦 <span>은행 앱에서 <b>계좌번호와 예금주</b>를 한 번 확인해 주세요. 같은 문제가 반복되면 고객센터로 문의해 주세요.</span></div>';
+        act.innerHTML='<button class="btn-full pri" data-go="request" data-st="form">계좌 고쳐서 다시 신청하기</button><div style="margin-top:12px"><button class="btn-full sec" data-go="history">환전 내역 보기</button></div>';
+      }
+      bindGo($('status'));
+    }
+
+    if(screen==='queue'){
+      $('queueHas').style.display=state==='has'?'block':'none';
+      $('queueEmpty').style.display=state==='empty'?'block':'none';
+      $('qFilters').style.opacity=state==='empty'?'.5':'1';
+    }
+    if(screen==='loading'){
+      $('loadSubmitting').style.display=state==='submitting'?'block':'none';
+      $('loadBalance').style.display=state==='balance'?'block':'none';
+    }
+    if(screen==='overflow'){
+      const full=state==='full';
+      $('overflowCheers').classList.toggle('is-full',full);
+      $('overflowWords').classList.toggle('is-full',full);
+      $('overflowCheerRule').textContent=full?'전체 목록도 20개까지 보여줘요':'미니 목록은 8개까지 보여줘요';
+      $('overflowCheerRest').textContent=full?'80개는 검색으로 찾기':'92개 더 있음';
+      $('overflowWordRule').textContent=full?'12개 표시':'6개 표시';
+      $('overflowWordRest').textContent=full?' · 88개는 검색으로 찾기':' · 94개는 전체 워드맵에서 확인';
+    }
+    if(screen==='detail'){
+      const rev=state==='revealed';
+      $('acctNo').textContent=rev?'국민은행 812201-04-448421':'국민은행 ***-**-**8421';
+      $('acctSrc').textContent=rev?'복호화됨 · 감사기록':'복호화 필요';
+      $('revealBtn').textContent=rev?'다시 가리기':'전체 계좌 보기';
+    }
+    if(screen==='modal'){
+      $('modalPay').style.display=state==='pay'?'flex':'none';
+      $('modalReject').style.display=state==='reject'?'flex':'none';
+    }
+  }
+
+  document.querySelectorAll('.st-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const screen=b.closest('.grp').className.match(/state-(\w+)/)[1];
+      applyState(screen,b.dataset.state);
+    });
+  });
+  $('revealBtn').addEventListener('click',()=>{
+    applyState('detail',$('acctNo').textContent.includes('*')?'revealed':'masked');
+  });
+  $('payCheck').addEventListener('change',e=>{$('payConfirm').disabled=!e.target.checked;});
+
+  const cheerNames=['서연','민준','하늘','지우','수빈','도윤','예린','현우','나영','태민'];
+  const cheerMessages=[
+    '매일 쌓아 온 시간이 결국 도경님 편이 될 거예요. 점수가 잠깐 흔들려도 지금처럼 오답을 끝까지 확인하고, 발표 전에는 한 문장씩 천천히 말해 봐요. 멀리서도 계속 응원할게요. 이번 목표는 혼자 버티는 일이 아니라 함께 도착하는 약속이에요.',
+    '오늘 한 페이지가 내일의 자신감이 될 거예요 🍀',
+    '끝까지 응원할게요. 이미 충분히 잘하고 있어요.',
+    '틀린 문제 하나가 다음 정답을 만들어요.',
+    '꾸준한 사람이 결국 해내는 걸 믿어요.'
+  ];
+  $('overflowCheers').innerHTML=Array.from({length:100},(_,i)=>{
+    const name=cheerNames[i%cheerNames.length];
+    const message=cheerMessages[i%cheerMessages.length];
+    const initial=name.slice(0,1);
+    return `<div class="cheer"><div class="av" style="background:${i%3===0?'var(--warm)':'var(--clover-soft)'};color:${i%3===0?'var(--muted)':'var(--clover-ink)'}">${initial}</div><div class="cheer-main"><p class="nm">${name}</p><p class="ms" title="${message}">${message}</p></div><div class="amt"><b>🍀 ${(i%10)+1}</b><br><span>${i+1}번째</span></div></div>`;
+  }).join('');
+
+  const wordAdjectives=['꾸준한','용감한','단단한','따뜻한','빛나는','차분한','성실한','유연한','선명한','멋진'];
+  const wordNouns=['도전','성장','집중','용기','연습','발표','영어','자신감','완주','내일'];
+  $('overflowWords').innerHTML=wordAdjectives.flatMap(a=>wordNouns.map(n=>`<span class="word">${a} ${n}</span>`)).join('');
+
+  applyState('status','received');
+  applyState('home','reached');
+  applyState('loading','submitting');
+  applyState('overflow','preview');
+</script>
+</body>
+</html>

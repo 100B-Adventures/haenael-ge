@@ -37,7 +37,7 @@
 6. **대기/수신** — 친구 응원 도착 → 🔒 은은한 알림(감사답장 의무 없음). 누가 응원했는지 봄(🔒 익명 강제 아님), 금액은 안 봄(🔒).
 7. **워드맵 → 공유(확산 고리)** — 홈은 "워드맵 보기" 단일 CTA → **워드맵 풀뷰**(꽉 찬) → **아이콘 공유**(텍스트 X): 이미지 저장 / 인스타 스토리(목표 링크 스티커 얹힘) / 링크 복사 → 친구가 스토리 보고 링크 탭 → ② 목표페이지 도착 = 🔒 확산 고리 닫힘. 워드맵은 단어·"익명의 누군가"만, 개별 후원 금액 X. (프로토 `wordmap-share.html`)
 8. **환전**: 🔒 **총보유 클로버(웰컴 포함)가 30개 이상이면 환전 자격에 도달**한다. 실제 신청량은 웰컴을 뺀 **지급가능 클로버 1개 이상, 지급가능 잔액 이하**다. 따라서 총보유 30개가 `친구 응원분 27 + 웰컴 3`으로 구성된 회원은 **27개를 신청할 수 있다.** 신청량을 원화로 환산한 뒤 서비스 이용료 10%와 그 부가세, 사업소득 원천징수 3.3%를 차감한다(계산식 정본 = DESIGN.md §6-(c)). (적립형=달성 무관 환전 🔒)
-   - 🔒 **신청해도 클로버 총량은 줄지 않는다(2026-08-21 회장 확정 A안).** 신청분에 **잠금**이 걸릴 뿐이고, 총량에서 실제로 빠지는 시점은 **입금이 완료된 때** 하나뿐이다. 반려·이체실패는 잠금만 풀며, 총량은 애초에 변하지 않았으므로 되돌릴 것이 없다. 화면은 총량 아래에 "지금 쓸 수 있어요 / 🔒 환전으로 잠김"을 분할해 보여주고(DESIGN.md §6-(d)), 총량이 줄어드는 입금 완료 시점에는 그 이유를 먼저 설명한다. 전체 여정 프로토=`scratchpad/cashout-full-journey-v3-opus.html` v3.8, 30/27 경계 정본=`docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0.
+   - 🔒 **신청해도 클로버 총량은 줄지 않는다(2026-08-21 회장 확정 A안).** 신청분에 **잠금**이 걸릴 뿐이고, 총량에서 실제로 빠지는 시점은 **입금이 완료된 때** 하나뿐이다. 반려·이체실패는 잠금만 풀며, 총량은 애초에 변하지 않았으므로 되돌릴 것이 없다. 화면은 총량 아래에 "지금 쓸 수 있어요 / 🔒 환전으로 잠김"을 분할해 보여주고(DESIGN.md §6-(d)), 총량이 줄어드는 입금 완료 시점에는 그 이유를 먼저 설명한다. 전체 여정 프로토=`docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.8, 30/27 경계 정본=`docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0.
    - 🔒 **금액 표기 3층(2026-07-02 확정):** 친구/공개=비노출("N명"), 받는사람 본인 홈·워드맵=클로버 **개수(🍀 N개)만**(₩ 환산 X), **원화는 환전 플로우에서만** 현실화(진입=개수, 환전 눌러야 ₩·수수료 등장). DESIGN.md §6 정본.
 
 ### 1.2 ① 분기·상태 (dead-end 0)
@@ -141,7 +141,7 @@
 | ② 친구 결제 전 과정 | `WIREFRAMES/payment-flow.html` | 금액→메시지→익명→간편결제(게스트)→처리중→완료·영수증→확산전환 |
 | 받는사람 로그인 후 | `WIREFRAMES/receiver-home.html` | 내목표홈(워드맵보기만)·수신알림·누가응원(익명)·empty |
 | 워드맵 공유·확산 고리 | `WIREFRAMES/wordmap-share.html` | 풀뷰→아이콘공유(이미지/스토리)→친구 링크탭→② 도착 |
-| 환전/정산 | `WIREFRAMES/cashout.html` (구판) · 전체 여정=`scratchpad/cashout-full-journey-v3-opus.html` v3.8 · **30/27 경계 정본=`docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0** | 잔액(총량+잠김 분할)·미달·30/27 경계·신청량 1~지급가능·이용료·원천징수 분해·확인·접수·중복차단·진행 5상태·이력·관리자 큐/상세/모달 · 390/1024 토글 |
+| 환전/정산 | `WIREFRAMES/cashout.html` (구판) · 전체 여정=`docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.8 · **30/27 경계 정본=`docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0** | 잔액(총량+잠김 분할)·미달·30/27 경계·신청량 1~지급가능·이용료·원천징수 분해·확인·접수·중복차단·진행 5상태·이력·관리자 큐/상세/모달 · 390/1024 토글 |
 | **받는사람 재방문·관리 진입 + 개별 금액 (2026-07-19)** | `WIREFRAMES/haenael-receiver-manage-v1-fable.html` | /g/[slug] owner bar(본인·비로그인·타인·세션만료)·/me 개별 클로버 목록(기본·empty·error)·진입동선 맵 · 390/1024 토글 |
 | 환전 이력 | 실구현 `/cashout/history` | 신청 이력 목록 |
 | 환전 진행 상태 | 실구현 `/cashout/status` | 신청별 처리 상태 |
@@ -230,4 +230,4 @@ STAMP: line=core · 생성=2026-08-29 04:34 KST · model=gpt-codex · agent=prod
 SKILLS_USED: pipeline, 디자인 산출물 최신성·게이트 회수 판단에 사용
 SKILLS_SKIPPED: 제품 UI 전용 design-shotgun·design-review 스킬은 현재 세션에 제공되지 않음. 기존 정본을 보정하는 감사라 신규 스타일 샷건은 불필요
 
-SOURCES/MODEL: gpt-codex · `docs/prd-haenael-ge-v0.4.0.md` v0.4.0 · `DESIGN.md` v2.0.1 · `scratchpad/cashout-full-journey-v3-opus.html` v3.8 · `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · `web/src/components/cashout/CashoutRequestForm.tsx` · `web/src/components/cashout/CashoutPageView.tsx` · `supabase/migrations/20260825010000_cashout_verified_minor_only.sql` · `supabase/migrations/20260825020000_cashout_total_threshold_contract.sql` · https://docs.stripe.com/connect/account-balances · https://developer.apple.com/design/human-interface-guidelines/buttons
+SOURCES/MODEL: gpt-codex · `docs/prd-haenael-ge-v0.4.0.md` v0.4.0 · `DESIGN.md` v2.0.1 · `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.8 · `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · `web/src/components/cashout/CashoutRequestForm.tsx` · `web/src/components/cashout/CashoutPageView.tsx` · `supabase/migrations/20260825010000_cashout_verified_minor_only.sql` · `supabase/migrations/20260825020000_cashout_total_threshold_contract.sql` · https://docs.stripe.com/connect/account-balances · https://developer.apple.com/design/human-interface-guidelines/buttons

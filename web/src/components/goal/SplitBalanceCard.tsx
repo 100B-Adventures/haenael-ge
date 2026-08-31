@@ -1,6 +1,6 @@
 // components/goal/SplitBalanceCard.tsx: 환전 잠금(A안) 분할 잔액 카드.
 // DESIGN.md v1.12.0 §6-(d) 정본 · §4 SplitBalanceCard.
-// 프로토타입: scratchpad/cashout-full-journey-v3-opus.html v3.6.
+// 프로토타입: docs/prototype/core-cashout-full-journey-v3.8-opus5.html v3.6.
 //
 // 규칙(§6-(d), 임의 재해석 금지):
 //   - 잠김이 0이면 분할 블록은 통째로 사라진다(평시 화면에 상시 두 값을 두지 않는다).

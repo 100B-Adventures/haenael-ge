@@ -244,7 +244,7 @@ motion:
 ```
 ✅ `--bg`부터 `--danger-soft`까지의 실제 값은 globals의 shadcn 변수 또는 custom var에 존재한다. [실측 `web/src/app/globals.css`:54-95]
 
-⛔ `--amber`, `--amber-soft`, `--amber-line`, `--amber-ink`, `--danger-ink`는 정본 프로토타입에는 있으나 globals에는 없다. 제품 코드는 같은 값을 hex 리터럴로 사용한다. 이름만 문서에 있는 상태이므로 변수 자체는 `[신설·미구현]`이다. [실측 `scratchpad/cashout-full-journey-v3-opus.html`:14-18, `web/src/components/goal/SplitBalanceCard.tsx`:70,95-99, `web/src/app/(receiver)/cashout/status/page.tsx`:76-77]
+⛔ `--amber`, `--amber-soft`, `--amber-line`, `--amber-ink`, `--danger-ink`는 정본 프로토타입에는 있으나 globals에는 없다. 제품 코드는 같은 값을 hex 리터럴로 사용한다. 이름만 문서에 있는 상태이므로 변수 자체는 `[신설·미구현]`이다. [실측 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:14-18, `web/src/components/goal/SplitBalanceCard.tsx`:70,95-99, `web/src/app/(receiver)/cashout/status/page.tsx`:76-77]
 
 `--faint`(2.81:1)는 **읽혀야 하는 글자에 쓰지 않는다.** placeholder·구분선 대용·비의미 장식만. 읽혀야 하는 보조 텍스트는 전부 `--muted`(4.71:1) 이상. 돈 설명은 예외 없이 `--muted` 이상(§8.4).
 
@@ -278,7 +278,7 @@ motion:
 | 대기 배경 | `bg-[#FBF1DD]` + `border-[#E8D3A6]` | 배경 `#FBF1DD`, 선 `#E8D3A6`, semantic 변수 없음 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:65-71, `web/src/app/(receiver)/cashout/status/page.tsx`:76-77] | 환전 잠김, 확인 중 |
 | 대기 글자 | `text-[#8A5A12]` 또는 inline `#8A5A12` | `#8A5A12`, semantic 변수 없음 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:91-100, `web/src/app/(receiver)/me/page.tsx`:323-327] | 잠김 라벨, 진행 중 버튼. `[신설·미구현] --amber-ink` |
 
-⛔ **색 이탈:** `--danger-ink`, `--amber-soft`, `--amber-line`, `--amber-ink`는 프로토타입에는 이름이 있으나 `globals.css`에는 없다. 개발은 같은 hex를 직접 쓰고 있다. 다음 토큰 정리 전까지 새 별칭을 더 만들지 않는다. [실측 `scratchpad/cashout-full-journey-v3-opus.html`:9-18, `web/src/app/globals.css`:51-110]
+⛔ **색 이탈:** `--danger-ink`, `--amber-soft`, `--amber-line`, `--amber-ink`는 프로토타입에는 이름이 있으나 `globals.css`에는 없다. 개발은 같은 hex를 직접 쓰고 있다. 다음 토큰 정리 전까지 새 별칭을 더 만들지 않는다. [실측 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:9-18, `web/src/app/globals.css`:51-110]
 
 
 ## Typography
@@ -343,7 +343,7 @@ motion:
 > v1.14.0의 §3.3 Spacing, §3.7 Layout Grid, §3.8.3 Spacing 역할↔코드를 이동했다.
 
 ### 3.3 Spacing (현행 4px grid, 8pt 전환 미완)
-`4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 56`. 화면 좌우 패딩 = **22**(현행 고정). 섹션 간 = 24~32. **화면마다 다른 간격 금지.** [실측 `scratchpad/cashout-full-journey-v3-opus.html`:72-76,89-90,109-126, `web/src/app/(receiver)/me/page.tsx`:231,299-301]
+`4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 56`. 화면 좌우 패딩 = **22**(현행 고정). 섹션 간 = 24~32. **화면마다 다른 간격 금지.** [실측 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:72-76,89-90,109-126, `web/src/app/(receiver)/me/page.tsx`:231,299-301]
 
 ⛔ 상위 품질 계약의 8pt scale과 현행 12·20·22px가 충돌한다. 이번 과제는 코드와 프로토타입 수정이 금지돼 기존 값을 8pt 배수로 바꾸지 않았다. §3.8.3은 현행을 개발용 정본으로 기록하되, **새 값 추가 허가가 아니라 이탈 인벤토리**로 사용한다. 마이그레이션 결정은 §7.2에 회수한다.
 
@@ -382,11 +382,11 @@ motion:
 | 일반 행 간격 | `gap-3` | 12px [실측 `web/src/components/goal/SplitBalanceCard.tsx`:75-100, `web/src/app/(receiver)/me/page.tsx`:240] | 분할 잔액, 헤더 아이콘 |
 | 카드 사이 간격 | `mb-4`, `space-y-4` | 16px [실측 `web/src/app/(receiver)/me/page.tsx`:287-296, `web/src/components/cashout/CashoutRequestForm.tsx`:209] | 주요 카드·폼 블록 사이 |
 | 데스크톱 2열 간격 | `gap-6` 또는 `gap-5` | 24px 또는 20px [실측 `web/src/app/(receiver)/cashout/page.tsx`:58, `web/src/app/(receiver)/cashout/status/page.tsx`:86] | 환전 신청·상태 2열 |
-| 프로토타입 데스크톱 정렬선 | `.u-body{padding:38px 56px 46px}` | 좌우 56px, 상 38px, 하 46px [실측 `scratchpad/cashout-full-journey-v3-opus.html`:72-76] | 1024px 정본 시안 셸 |
-| 프로토타입 데스크톱 열 간격 | `.u-grid{gap:32px}` | 32px [실측 `scratchpad/cashout-full-journey-v3-opus.html`:74-76] | 1024px 본문·사이드 레일 |
+| 프로토타입 데스크톱 정렬선 | `.u-body{padding:38px 56px 46px}` | 좌우 56px, 상 38px, 하 46px [실측 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:72-76] | 1024px 정본 시안 셸 |
+| 프로토타입 데스크톱 열 간격 | `.u-grid{gap:32px}` | 32px [실측 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:74-76] | 1024px 본문·사이드 레일 |
 | 분할 잔액 내부 리듬 | `mt-3`, `mt-2`, `pt-2`, `gap-3` | 12px, 8px, 8px, 12px [실측 `web/src/components/goal/SplitBalanceCard.tsx`:54-57,75-76,91-95,112] | 막대, 두 값 행, 설명 |
 
-⛔ **간격 이탈:** 현행 22px 정렬선, 10px 행 패딩, 20px·38px·46px·56px이 전역 8pt 스케일 밖이다. 이것은 실제 화면을 재현하기 위한 인벤토리이지 신규 값 허가가 아니다. 새 화면은 기존 셸 정렬선을 승계하고, 셸 마이그레이션은 §7.2의 별도 build 결정으로 묶는다. [실측 `web/src/app/(receiver)/me/page.tsx`:66,231, `scratchpad/cashout-full-journey-v3-opus.html`:72-76]
+⛔ **간격 이탈:** 현행 22px 정렬선, 10px 행 패딩, 20px·38px·46px·56px이 전역 8pt 스케일 밖이다. 이것은 실제 화면을 재현하기 위한 인벤토리이지 신규 값 허가가 아니다. 새 화면은 기존 셸 정렬선을 승계하고, 셸 마이그레이션은 §7.2의 별도 build 결정으로 묶는다. [실측 `web/src/app/(receiver)/me/page.tsx`:66,231, `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:72-76]
 
 ---
 
@@ -498,7 +498,7 @@ motion:
 
 ### 3.6 Motion
 
-- 전이 120~200ms ease-out. 정본 프로토타입의 화면 전환은 180ms fade, 검수 셸 버튼은 120ms다. [실측 `scratchpad/cashout-full-journey-v3-opus.html`:31-44]
+- 전이 120~200ms ease-out. 정본 프로토타입의 화면 전환은 180ms fade, 검수 셸 버튼은 120ms다. [실측 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:31-44]
 - 바텀시트 slide-up 220ms는 `[신설·미구현]`이다. 현재 `GoalEditSheet` 코드에 진입·퇴장 transition이 없다. [실측 `web/src/components/goal/GoalEditSheet.tsx`:156-175]
 - 완료 = toast 1회 + 살짝 페이드. 폭죽·confetti·큰 애니메이션 금지(조용함 위반). 느린/과한 인터랙션 = reject(design-review 항목).
 
@@ -655,7 +655,7 @@ motion:
 2. **정본을 고정한다.** `pipeline-state.core.md`의 현재 design 상태와 §10의 유효 프로토타입을 대조한다. 같은 화면이 여러 파일에 있으면 §10의 우선순위를 따른다.
 3. **기존 부품으로 조립한다.** §4 인벤토리에서 먼저 고른다. 새 부품이 필요하면 DESIGN.md에 역할·상태·토큰을 `[신설·미구현]`으로 먼저 등재하고, 기존 부품으로 해결할 수 없는 이유를 남긴다.
 4. **실제 칠 값을 고른다.** 색·타이포·간격은 §3.8 개발용 정본표에서 `역할 → 칠 값 또는 클래스 → 실제 값` 순서로 찾는다. 문서 역할명만 보고 `--ink`, `h1` 같은 미구현 이름을 코드에 쓰지 않는다.
-5. **레이아웃 계약을 적는다.** 모바일 390은 주축 `column`, 데스크톱 1024는 본문+사이드 레일 2열이다. 열수, 순서, 접힘 규칙, 최대 폭, 정렬선을 화면 주석과 와이어프레임에 같이 적는다. [실측 `scratchpad/cashout-full-journey-v3-opus.html`:72-87,397-399]
+5. **레이아웃 계약을 적는다.** 모바일 390은 주축 `column`, 데스크톱 1024는 본문+사이드 레일 2열이다. 열수, 순서, 접힘 규칙, 최대 폭, 정렬선을 화면 주석과 와이어프레임에 같이 적는다. [실측 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`:72-87,397-399]
 6. **상태를 먼저 그린다.** happy·empty·loading·error·disabled·overflow를 빠짐없이 정의한다. 데이터가 쌓이는 자리에는 최소 0·정상·과다 3상태를 렌더한다. 잘린 데이터에는 전체로 가는 경로를 둔다(§6.1).
 7. **전환 이유를 붙인다.** 결제·환전·저장·공유 화면에는 Fogg, Hick, Fitts, Nielsen 중 최소 1개와 실제 화면 발현을 1:1로 적는다. 돈 화면은 과정 가시성을 줄이지 않는다.
 8. **자가검증 후 갱신한다.** §9.1 예제를 문서만 보고 다시 만들 수 있는지 확인한다. 새 값·새 컴포넌트·새 패턴이 생겼다면 프로토타입과 같은 턴에 DESIGN.md를 갱신한다. 엠대시, 신규 임의 px, dead-end, 숨은 overflow가 하나라도 있으면 출고하지 않는다.
@@ -739,7 +739,7 @@ motion:
 3. ~~① 랜딩 포지셔닝~~ **✅ 확정: C 미니멀 + 워드맵 프리뷰 하이브리드** (`landing-final.html`).
 4. ~~게스트 결제 허용 범위~~ **✅ 확정(2026-07-01): 게스트 결제 허용**(앱가입 X, 간편결제). 응원자 익명표시 가능("익명의 누군가"), PG엔 신원 남음. 어뷰징은 환전 KYC·이상거래에서 차단.
 5. ~~환전 자격 기준 수치~~ **✅ 확정: 총보유 30,000원 상당(🍀 30개)**. 이것은 신청량 하한이 아니다. 실제 신청은 지급가능분 1개 이상이며, 총보유 30·웰컴 3·지급가능 27이면 27개 신청 가능. 운영 계약 `20260825020000_cashout_total_threshold_contract.sql`과 프로토 v3.8이 정본이다. 상세는 §6-(c).
-6. ~~환전 중 클로버 표시~~ **✅ 확정(2026-08-21): A안 = 잠금 유지, 실지급 시 차감.** 회장 원문 "A안이지 실제로 빠져나갔을때 빠져나가야지". 근거 = 프로토 v3.5 8번 화면에서 두 표현안을 나란히 렌더해 회장이 선택. **선택의 의미**: 신청은 총량을 건드리지 않고 잠금만 건다. 총량이 줄어드는 유일한 시점은 입금 완료다. 반려는 잠금 해제이지 복원이 아니다. **이것은 문구 수정이 아니라 잔액 계산 방식 변경**이므로 상류(기술설계)로 넘어간다. 화면 규칙 = §6-(d), 반영 프로토 = `scratchpad/cashout-full-journey-v3-opus.html` v3.6(8번 표현안 화면은 결정 종결로 삭제).
+6. ~~환전 중 클로버 표시~~ **✅ 확정(2026-08-21): A안 = 잠금 유지, 실지급 시 차감.** 회장 원문 "A안이지 실제로 빠져나갔을때 빠져나가야지". 근거 = 프로토 v3.5 8번 화면에서 두 표현안을 나란히 렌더해 회장이 선택. **선택의 의미**: 신청은 총량을 건드리지 않고 잠금만 건다. 총량이 줄어드는 유일한 시점은 입금 완료다. 반려는 잠금 해제이지 복원이 아니다. **이것은 문구 수정이 아니라 잔액 계산 방식 변경**이므로 상류(기술설계)로 넘어간다. 화면 규칙 = §6-(d), 반영 프로토 = `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.6(8번 표현안 화면은 결정 종결로 삭제).
 
 ---
 
@@ -754,7 +754,7 @@ motion:
 | 상태 | 파일 | 적용 범위·판정 근거 |
 |---|---|---|
 | **현행 경계 정본, 승인 대상** | `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 | 총보유 30·웰컴 3·지급가능 27 신청·확인·제출중·접수. 390/1024, 0건·경계·대량 토글, clean export 지원. 수치 정본=`docs/design-spec-core-cashout-30-27-v1-gpt-codex.md` |
-| **전체 여정 보조, 개정안** | `scratchpad/cashout-full-journey-v3-opus.html` v3.8 | v3.7 전체 여정에 30/27 경계와 신청량 입력 계약을 추가했다. 사용자·관리자, 390/1024, 잠금 A안 계승 |
+| **전체 여정 보조, 개정안** | `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.8 | v3.7 전체 여정에 30/27 경계와 신청량 입력 계약을 추가했다. 사용자·관리자, 390/1024, 잠금 A안 계승 |
 | **현행 화면 정본** | `docs/WIREFRAMES/landing-final.html` | 받는 사람 가입 랜딩 v2. [실측 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
 | **현행 화면 정본** | `docs/WIREFRAMES/goal-page.html` | 친구가 보는 목표 페이지 v2. [실측 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
 | **현행 화면 정본** | `docs/WIREFRAMES/payment-flow.html` | 게스트 결제 전체 v2. [실측 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
@@ -774,10 +774,10 @@ motion:
 > v2.0.0 (2026-08-23) Google Labs 공개 DESIGN.md 원본 스펙 순서로 문서 구조를 전면 재편했다. ①YAML 프론트매터에 코드·정본 프로토타입 실측 색, 타이포그래피, 간격, 모서리, 그림자, 모션 토큰을 구조화했다. ②본문의 표준 8섹션을 Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts 순서로 고정했다. ③v1.14.0의 Archetype, 브랜드 형용사, 레퍼런스, 토큰 설명, 역할↔코드 대조표, 컴포넌트, 금지 패턴을 해당 표준 섹션으로 이동했다. ④Motion, 오버플로, 금액 표기, UX 라이팅, 에이전트 가이드, 미해결, Decisions Log, 유효 프로토타입은 원본 스펙이 허용하는 제품 고유 절로 8섹션 뒤에 보존했다. ⑤코드와 프로토타입은 수정하지 않았다.
 > v1.14.0 (2026-08-23) 전역 `standards/design.md` §15 필수 목차 감사 반영. ①§3.8에 색 15역할, 타이포 13역할, 간격 13역할의 `역할 / 칠 값 또는 클래스 / 실제 값(파일:행) / 쓰는 곳` 개발용 정본표를 코드·프로토 실측으로 신설했다. 문서 역할명과 하드코딩 구현의 차이를 숨기지 않고 semantic 변수 없음·`[신설·미구현]`을 분리했다. ②§9에 새 화면 착수 8단계와 잔액 카드 6항목 자가검증을 추가했고 못 찾은 줄 0건을 확인했다. ③§10에 현행 정본·유효 보조·결정용·폐기 프로토타입을 분리했다. 환전 v3.6은 화면 정본이지만 design 승인 대기임을 명시했다. ④전역 필수 목차 14절 대조표를 §15.1과 정확히 맞추고 오버플로·용어 사전 누락을 정정했다. ⑤코드·프로토타입은 수정하지 않았다.
 > v1.13.0 (2026-08-23) 회장 지적 "DESIGN.md에 뭘 넣어야 하는지 표준도 알지?" → 전역 표준(`standards/design.md` §1·§5·§9, `ux-writing.md` §8)이 요구하는데 빠져 있던 **필수 4항목**을 채웠다. 신규 원칙 발명 없이 **이미 쓰고 있는 값을 실측해 박제**한 것이 전부다. ①**§6.1 오버플로 방지 규칙 신설**(미정의 = 실격 항목): 목표 제목·"왜"·응원 메시지·응원 목록·워드맵·환전 내역·관리자 큐·식별자·링크 URL 9개 자리의 입력 상한·표시 상한·초과 시 행동을 코드 실측(`me/page.tsx:96·206·211`, `Wordmap.tsx:115`, `CashoutRequestForm.tsx:386`, `admin/page.tsx:140~142`, `OnboardingGoalForm.tsx:321·395`)으로 표에 고정 + 넘칠 때 규칙 3개. ②**§3.7 Layout Grid 신설**: 모바일 390 단일 컬럼 / 데스크톱 1024 2단(1.15fr·0.85fr, gap 32), 정렬선 22px·56px을 프로토 v3.6 CSS 72~87행에서 실측 박제. ③**§4.1 Shell 신설**: 문서 셸·페이지 셸·상단 바·하단 회수 링크 4층 정의(GNB 없음이 §0 귀결). ④**§3.2 서체 선택 근거**: Pretendard가 §1 형용사 3개를 어떻게 만드는지 + system-ui·Inter·전용 서체를 안 쓰는 이유. **선택 시점 근거는 저장소에 없어 "미기록"으로 명시하고 소급 정당화임을 밝혔다**(지어내지 않음). ⑤표면화한 결함 4건을 §7.2에 등록: shell 미공유, 정렬선 이탈(`/me` 최대 폭 없음), 오버플로 미구현 4건, 프로토 v3.6에 overflow 상태 0개. 코드·프로토 수정은 하지 않았다(다음 슬라이스).
-> v1.12.0 (2026-08-21) 회장 확정 **"A안이지 실제로 빠져나갔을때 빠져나가야지"**(환전 중 클로버 = 잠금 유지, 실지급 시 차감) 반영. ①**§6-(d) 신설**: 잔액 표기 규칙. 총 클로버·잠긴 클로버·사용 가능 클로버 세 값과 항등식(`사용 가능 = 총량 − 잠김`), 잠김이 있을 때 분할 막대 + 두 줄 라벨 강제, 잠김 0이면 블록 소멸, 총량 옆 등가 은닉, 총량 감소 시점의 예고·설명·회수 경로 3단. ②§4에 `SplitBalanceCard` 등록. ③§7.3-6에 A안 확정 이력 박제(재논의 금지, 8번 표현안 화면 삭제). ④§8.2 용어 사전에 "잠금" 행 추가("보류·차감·복원" 폐기). ⑤§3.1에 상태색 글자 짝 `--amber-ink #8A5A12`(5.27:1)·`--danger-ink #B23225`(5.34:1) 등록과 원색·ink 사용 규칙 명문화. ⑥§3.1 `--clover` 대비값 오기 정정(4.5 ✅ → 실측 **4.38 ⚠️ AA 미달**), 회장 보류 표시(임의 변경 금지). 반영 프로토 = `scratchpad/cashout-full-journey-v3-opus.html` v3.6.
+> v1.12.0 (2026-08-21) 회장 확정 **"A안이지 실제로 빠져나갔을때 빠져나가야지"**(환전 중 클로버 = 잠금 유지, 실지급 시 차감) 반영. ①**§6-(d) 신설**: 잔액 표기 규칙. 총 클로버·잠긴 클로버·사용 가능 클로버 세 값과 항등식(`사용 가능 = 총량 − 잠김`), 잠김이 있을 때 분할 막대 + 두 줄 라벨 강제, 잠김 0이면 블록 소멸, 총량 옆 등가 은닉, 총량 감소 시점의 예고·설명·회수 경로 3단. ②§4에 `SplitBalanceCard` 등록. ③§7.3-6에 A안 확정 이력 박제(재논의 금지, 8번 표현안 화면 삭제). ④§8.2 용어 사전에 "잠금" 행 추가("보류·차감·복원" 폐기). ⑤§3.1에 상태색 글자 짝 `--amber-ink #8A5A12`(5.27:1)·`--danger-ink #B23225`(5.34:1) 등록과 원색·ink 사용 규칙 명문화. ⑥§3.1 `--clover` 대비값 오기 정정(4.5 ✅ → 실측 **4.38 ⚠️ AA 미달**), 회장 보류 표시(임의 변경 금지). 반영 프로토 = `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.6.
 > v1.11.0 (2026-08-21) 회장 지시 "design.md, ux-writing.md 정리 제대로 해놓고" → 정본 정합 정리(신규 원칙 없음). ①변경 이력 전 항목 최신순 재정렬(v1.10.0→v1.0.0). ②§7을 3소절로 분리: 7.1 회장 결정 대기(미성년 연령게이트·환불 정책만) / 7.2 작업 대기(§8.2에 서술돼 있던 약관·개인정보 용어 드리프트를 파일·행 단위로 이관) / 7.3 확정 이력(1~4 + 최소환전액 30,000원 확정으로 이동). ③§6-(c)와 §8.3 중복 해소: 계산식·수치는 §6-(c), 표기·위계·안내 문구는 §8.3 정본으로 관할 분리(§8.3에 6번 행 구성 규칙 흡수, "네 가지"→"여섯 가지" 개수 불일치 수정). ④§8.5를 상위 ux-writing.md §4 상속 + 해낼게 고유 금지 5종으로 축소(일반론 중복 서술 제거). ⑤§3.1 --faint 대비값 오기 수정(3:1 → 실측 2.81:1, WCAG 미달 명시)으로 §8.4와 정합. ⑥문서 전역 엠대시 제거.
 > v1.10.0 (2026-08-21) 회장 지시 "디자인시스템 UX라이팅기준 정리좀해라" → **§8 UX 라이팅 신설**(보이스·용어 사전 7종·돈 차감 표기 5규칙·실제 GOOD/BAD·금지). 상위 기준 `standards/ux-writing.md` 상속, 해낼게 고유분만 수록. 회장 지적 반영으로 정본 프로토 v3.4(차감표 1줄화 + 안내 단계화 + 모바일 `.u-side` 갭 24px 공통화). 용어 드리프트 표면화: 약관 "서비스 이용수수료", 개인정보 "응원(후원)"·"환전(정산)" → build 라인 정리 대상.
-> v1.9.0 (2026-08-21) 회장 확정 "환전 서비스 이용료 10%"를 §6-(c)에 계산식·표기·위계로 박제(수수료 미정 플레이스홀더 폐기). 정본 프로토 `scratchpad/cashout-full-journey-v3-opus.html` v3.3, 구 와이어 `WIREFRAMES/cashout.html` 동기화.
+> v1.9.0 (2026-08-21) 회장 확정 "환전 서비스 이용료 10%"를 §6-(c)에 계산식·표기·위계로 박제(수수료 미정 플레이스홀더 폐기). 정본 프로토 `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.3, 구 와이어 `WIREFRAMES/cashout.html` 동기화.
 > v1.8.0 (2026-07-22) v2 신규 화면(PRD v0.3.0 확정 8건): 컴포넌트 10종 추가(GoalListCard·AccountBalanceCard·NewGoalButton·SettingsRow·PrivacySwitch·PrivacyPreview·ThanksComposer·UpgradeCard·InquiryForm 등). 원칙 추가: ①잔액은 계정 전체 1개, 목표 카드는 인원수만(금액 3층 유지) ②응원 금액은 설정 항목이 아니라 잠긴 상수로 그린다 ③승격 유도는 결제 완료 화면 1곳만 ④감사 미전송에 배지·카운트·독촉 금지. 프로토: `WIREFRAMES/haenael-v2-hub-v1-claude-fable.html`.
 > v1.7.0 (2026-07-19) 받는사람 본인 관리 경험 보완(회장 승인): §6-(b′) 신설. 본인=개별 클로버 개수 노출(회장 결정 B), 제3자 비노출·랭킹 금지 유지. 재방문 진입 동선 확정 (a)세션 라우팅+(b)/g/[slug] owner bar (user-flow.md §1.3). 프로토 `haenael-receiver-manage-v1-fable.html`.
 > v1.6.0 (2026-07-02) 회장 확정: v2 3종 **정본 승격**: landing-final·goal-page·payment-flow 정본명 승계, v1은 `WIREFRAMES/archive/*-v1.html` 보존. 리테이크가 누락한 상태를 정본에 복원(결제 실패=payment-flow 5b, 마감 목표=goal-page 3) → coverage ❌0 유지. ⛔ 정책 4건 eng-design/legal DEFER 확정(화면 자리 확보). **design 단계 산출물 마감.**
@@ -796,7 +796,7 @@ SOURCES/MODEL:
 - MODEL: gpt-codex 런타임. 역할 product-designer.
 - 품질헌법: `/Users/sj/.claude/CLAUDE.md` · `/Users/sj/.claude/standards/design.md` §1·§3·§5·§9·§11·§15 · `/Users/sj/.claude/standards/doc-review.md` · `/Users/sj/.claude/standards/benchmarks.md` · `/Users/sj/.claude/standards/artifact-stamp.md`.
 - 기존 구현: `web/src/app/(receiver)/me/page.tsx` · `cashout/page.tsx` · `cashout/status/page.tsx` · `web/src/components/goal/SplitBalanceCard.tsx` · `Wordmap.tsx` · `GoalEditSheet.tsx` · `web/src/components/cashout/CashoutRequestForm.tsx` · `web/src/components/admin/CashoutQueue.tsx` · `web/src/app/admin/page.tsx` · `web/src/app/layout.tsx` · `web/src/app/globals.css`.
-- 기존 정본·wiki: `scratchpad/cashout-full-journey-v3-opus.html` v3.8 · `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · `docs/design-spec-core-cashout-30-27-v1-gpt-codex.md` · `pipeline-state.core.md` · `docs/구현현황.md` · `wiki/brand/visual-guidelines.md` · `wiki/brand/story-canon.md` · `wiki/brand-marketing-strategy.md`.
+- 기존 정본·wiki: `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` v3.8 · `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · `docs/design-spec-core-cashout-30-27-v1-gpt-codex.md` · `pipeline-state.core.md` · `docs/구현현황.md` · `wiki/brand/visual-guidelines.md` · `wiki/brand/story-canon.md` · `wiki/brand-marketing-strategy.md`.
 - 문서 골격 실물: `/Users/sj/sj_code_master/zero-one/DESIGN.md` · `/Users/sj/sj_code_master/haejo-danta/DESIGN.md` · `/Users/sj/sj_code_master/openclaw-auto/DESIGN.md`.
 - Google DESIGN.md 원본: https://github.com/google-labs-code/design.md/blob/main/docs/spec.md · https://github.com/google-labs-code/design.md/blob/main/PHILOSOPHY.md · https://github.com/google-labs-code/design.md/blob/main/examples/paws-and-paths/DESIGN.md.
 - 기존 웹 실조사: https://atlassian.design/foundations/tokens/design-tokens/ · https://carbondesignsystem.com/elements/typography/code/ · https://m3.material.io/foundations/interaction/states/overview.
