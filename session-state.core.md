@@ -1,3 +1,30 @@
+## CLAUDE 승인 산출물 내용 최신성 감사 (2026-09-02 06:20 KST, 회장 "제대로 된거 가져와")
+
+### 지금까지 한 것
+개수·연결만 보던 앞선 점검을 **내용 최신성**까지 내려 다시 감사했다. 결함 2건을 찾아 둘 다 닫았다.
+
+- **결함1: 정본 프로토타입이 gitignore 안에 있었다.** 전체 여정 프로토타입 v3.8 이 `scratchpad/`(gitignore 37행)에 있는데, DESIGN.md·user-flow.md·`SplitBalanceCard.tsx` 주석 등 **10개 파일이 이걸 정본으로 인용**하고 있었다. 저장소 밖·미추적·백업 없음 = 지우면 영구 소실. → `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` 로 승격, 추적 편입, design 승인 핀 등록, **살아있는 인용 22곳 경로 교정**(DESIGN.md 13 / user-flow.md 3 / pipeline-state 5 / 소스 1). 과거 로그(build-log·qa-tracker·구 리포트)는 그 시점 사실이라 미수정. vitest 279/279 유지 확인.
+- **결함2: 승인된 qa 단계가 NG 문서를 가리키고 있었다.** 핀된 `core-cashout-qa-report-v1-gpt-codex.md`(8-24)가 `status: changes-requested`, 판정 `❌ NG`, Design Score `C, FAIL`, basis 는 DESIGN.md v2.0.0·FDD v1.0.0·구 프로토타입. 회장이 대시보드에서 열면 **NG 를 본다.** → qa-verifier 위임으로 `core-cashout-qa-report-v2-claude-sonnet.md` 신규 작성(v1 supersedes, 구본 보존). 위임이 8개 실측 명령을 직접 재실행: vitest 279/279, mutation 8/8, E2E 12/12, audit 0, 보안헤더 4종, health 1.2.1, qa:verify-production 3/3.
+- **위임이 미검증으로 남긴 1건을 컨트롤러가 닫았다.** v1 의 NG 4번(토큰 위반)은 이 저장소에 `design-lint` 스크립트가 **없어서** 검증 불가였다. 지목된 3파일(`SplitBalanceCard.tsx`·`CashoutQueue.tsx`·`MyLinkCard.tsx`)을 직접 검사 → 하드코딩 hex **0건**, inline `style={{` **0건**. **v1 NG 4건 전부 해소.** 리포트에 컨트롤러 후속 실측 표로 삽입.
+- 승인 핀 **31 → 32건**(전체 여정 프로토타입 추가), QA 리포트 핀 v1 → v2 교체. `artifact-drift-check.sh` **드리프트 0**.
+- 대시보드 재수집 확인: haenael 합성키 **32개**, `qa-report` 가 **v2** 를 가리킴, `prototype-2` 로 전체 여정 프로토타입 노출, missingReason **0**.
+- 커밋 `e4928fe`(프로토타입 승격) `fb162b5`(QA 리포트 v2·핀 교체) push 완료.
+
+### 남은 이슈
+1. **전역 토큰 준수 검사기 부재.** 이번엔 3파일 수동 확인으로 닫았으나 자동 검사가 없다. 다음 스프린트 항목.
+2. **스프린트 종료 판정 = 회장.** 공정은 6단계 승인·v1.2.1 released 로 닫혔으나 총30·지급가능27 실계정 0명이라 실제 회원 환전 성공은 미검증.
+3. **`pay-open` worktree = 회장 결정.** 미커밋 59건 때문에 임의 제거 불가. 추천 = 미커밋분 커밋 후 제거.
+4. **CI green 없음.** Actions 무료 2,000분 소진 + budget $0. 코드 실패도 flaky 도 아님.
+5. 지급 신원·세무정보 처리 계약 = 회장 보류(범위 밖).
+6. 토스 지급대행 해지 미실행.
+
+### 다음 액션
+1. **소유자: 회장.** 스프린트 종료 판정. **종료증거:** 판정 발화 후 pipeline-state 반영.
+2. **소유자: 회장.** `pay-open` worktree 처리. **종료증거:** 저장소 clean.
+3. **소유자: 회장.** GitHub Actions 예산 또는 무료분 초기화 대기. **종료증거:** CI job 에 실제 steps 생성 후 success.
+4. **소유자: 다음 스프린트.** 전역 토큰 준수 검사기 신설. **종료증거:** 검사 스크립트와 위반 0 리포트.
+5. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+
 ## CLAUDE 스프린트 정리 완료·종료 판정 대기 (2026-08-31 21:55 KST)
 
 ### 지금까지 한 것
