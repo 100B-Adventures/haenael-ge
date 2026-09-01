@@ -38,7 +38,7 @@ approved_artifacts:   # 규약 = ~/.claude/standards/release-and-artifacts.md §
     - { path: "supabase/migrations/2026082*.sql", version: unversioned, status: approved, label: "환전 마이그레이션" }
   qa:
     - { path: docs/qa-tracker.md, version: unversioned, status: approved, label: "QA 트래커" }
-    - { path: docs/core-cashout-qa-report-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "환전 QA 리포트" }
+    - { path: docs/core-cashout-qa-report-v2-claude-sonnet.md, version: 2.0.0, status: approved, label: "환전 QA 리포트" }
     - { path: docs/design-conformance-matrix.md, version: unversioned, status: approved, label: "디자인 정합 대조표" }
     - { path: docs/security-report.md, version: unversioned, status: approved, label: "보안 리포트" }
     - { path: docs/perf-report.md, version: unversioned, status: approved, label: "성능 리포트" }
