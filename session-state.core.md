@@ -3,7 +3,7 @@
 ### 지금까지 한 것
 - **GitHub Actions 무료분이 복구됐다.** 8-31 까지 전 job 이 steps 0개로 즉시 종료되던 것과 달리, `33566526828`(9-01 22:29) 은 **success**, 이후 push 도 정상 실행. 종전 "CI green 없음"의 원인(무료 2,000분 소진)이 해소됨.
 - **★ 예약 워크플로 `Production Read-only E2E` 가 실패 중이다(`33570347606`, 9-01 23:17).** 원인은 제품 결함이 아니라 **저장소 시크릿 전무**: `gh secret list` **0건**인데 `production-readonly-e2e.yml:44-48` 이 `QA_PRODUCTION_SUPABASE_URL`·`_ANON_KEY`·`_EMAIL`·`_PASSWORD`·`_EXPECTED_USER_ID` 5종을 요구한다. 실패 메시지 = `QA_PRODUCTION_SUPABASE_URL 미설정. 운영 인증 경로를 SKIP하지 않고 실패 처리한다.`(spec:43 `requiredEnv`). 값은 로컬 `~/.sj-agent-harness/secrets/haenael-ge-qa-production.env` 에 이미 있다(§4.5 이중 관리의 GitHub 쪽만 비어 있음). **시크릿 등록은 회장 승인 사항이라 미실행.**
-- 직전 push `87cd14f` 의 CI 런 `33646162280` 은 폴링해 결과 확인.
+- **직전 push `87cd14f` 의 CI 런 `33646162280` = 결론 success.** 3개 job 전부 통과(`단위 테스트 + 빌드`·`배포 환경·환전 층간 계약`·`환전 브라우저 E2E`). **이 저장소에서 CI green 을 실제로 관찰한 것은 이번이 처음이다**(종전엔 무료분 소진으로 steps 0개 종료).
 
 ### 남은 이슈
 1. **스프린트 종료 판정 = 회장.** 실제 회원 환전 성공은 회장 직접 확인으로 닫힘.
