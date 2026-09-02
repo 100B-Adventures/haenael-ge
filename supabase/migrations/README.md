@@ -13,6 +13,7 @@
 | `20260708001000_payment_rpc_qualify_columns.sql` | 결제 승인 RPC 컬럼 명시 보정 + payment_key 멱등 검증 |
 | `20260710035000_payment_hardening.sql` | payment_key 유니크·DONE 멱등·amount 검증·수취자 잔액 직렬화 |
 | `20260710042000_payment_compensation_audit.sql` | PG 승인 후 DB 반영 실패 보상 기록 + payment raw row 직접 SELECT 차단 |
+| `20260802010000_cashout_security_hardening.sql` | 수동환전 계좌 HMAC/키링·최근 열람 지급 게이트·bigint·90일 파기·감사로그 ACL |
 | `20260710050000_payment_expiry_enum.sql` | payment_status_enum에 EXPIRED 추가 |
 | `20260710051000_cheer_order_abuse_guard.sql` | cheer-order 남용 방지 — request_key 멱등 + customer_key/goal rate-limit + stale 정리 |
 | `20260713180819_cheer_order_concurrency_fix.sql` | create_cheer_order 동시성 blocker 2건 수정 — advisory lock 기반 rate-limit 직렬화 + request_key INSERT ON CONFLICT 동시성 안전 |

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "brain": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/sj/brain-mcp/index.js"
+      ],
+      "env": {
+        "BRAIN_ALLOW_PRIVATE": "1",
+        "BRAIN_VAULT": "/Users/sj/Documents/SJ_BRAIN_wiki"
+      }
+    }
+  }
+}

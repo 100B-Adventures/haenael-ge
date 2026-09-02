@@ -43,8 +43,10 @@ VALUES
   ('27777777-a000-0000-0000-000000000001', '수정A', 'NONE'),
   ('27777777-a000-0000-0000-000000000002', '수정B', 'NONE');
 
-INSERT INTO goal (member_id, slug, title, reason, due_date, status)
+INSERT INTO goal (id, member_id, slug, title, reason, due_date, status)
+OVERRIDING SYSTEM VALUE
 VALUES (
+  277777770001,
   '27777777-a000-0000-0000-000000000001',
   'update-goal-a',
   '원래 목표 해낼게',
@@ -98,7 +100,7 @@ SELECT set_config(
 
 SELECT throws_ok(
   $$SELECT public.update_goal(
-    (SELECT id FROM public.goal WHERE slug = 'update-goal-a'),
+    277777770001,
     '남의 목표',
     '바꾸기',
     DATE '2026-10-31'
@@ -108,6 +110,9 @@ SELECT throws_ok(
   'UG5: 비소유자는 목표 수정을 거부당함'
 );
 
+-- 비소유자 RLS에서는 goal 행 자체가 보이지 않으므로, 저장값 검증은 migration
+-- owner 권한으로 전환한다. 그래야 NULL 가시성 검사가 아니라 실제 행 보존을 검증한다.
+RESET ROLE;
 SELECT is(
   (SELECT title FROM public.goal WHERE slug = 'update-goal-a'),
   '체력 만들기 해낼게',
@@ -115,6 +120,7 @@ SELECT is(
 );
 
 -- #3 빈 title 및 2자 미만 경계 거부.
+SET LOCAL ROLE authenticated;
 SELECT set_config(
   'request.jwt.claims',
   '{"role":"authenticated","sub":"27777777-a000-0000-0000-000000000001","iss":"supabase-demo"}',

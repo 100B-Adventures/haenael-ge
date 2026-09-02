@@ -139,3 +139,22 @@ SKILLS_USED: 없음
 SKILLS_SKIPPED: 매칭 스킬 없음(테스트 계획 = 프로젝트 특정, document-generate는 코드 역생성용 부적용)
 
 SOURCES/MODEL: opus-4-8[1m] · 근거=user-flow(dead-end0)·fdd·api-contract 자매문서 · Supabase Edge Functions 로컬테스트/리전(WebSearch: supabase.com/docs/functions) · 헌법 §3(실키 prod-parity)
+
+## 2026-08-02 수동환전 보안 경계 추가
+
+| # | 케이스 | 기대 |
+|---|---|---|
+| SEC-C1 | 8자리/20자리 계좌 저장 | 동일 길이 마스크, 평문 SHA 필드 0, 별도 키 HMAC 일치 |
+| SEC-C2 | 저장 key_version이 키링에 없음 | 복호화 fail closed |
+| SEC-C3 | 계좌 열람 없이 지급완료 | DB가 `cashout_account_reveal_required`로 거부 |
+| SEC-C4 | 다른 관리자가 계좌 열람 | 지급 처리 관리자에게 열람 자격 승계 안 됨 |
+| SEC-C5 | 같은 관리자 최근 열람 후 지급 | 전체 계좌 확인 모달 + PAID 1회 전이 |
+| SEC-C6 | PAID/REJECTED 계좌 재열람 | 종결 즉시 거부 |
+| SEC-C7 | 65,076클로버 | gross 65,076,000·withholding 2,147,508·net 62,928,492 정확 |
+| SEC-C8 | 종결 89일/90일+1초 | 89일 유지, 90일 경과 파기, 재실행 0건 |
+| SEC-C9 | 감사로그 service_role 권한 | UPDATE/DELETE 모두 false |
+| SEC-C10 | 예상 밖 DB 오류 | 클라이언트에는 고정 코드만 반환, 원문 0 |
+
+실행 파일: `supabase/tests/cashout_security_hardening.test.sql` 30 assertions. 기존 188 + 신규 30 = 전체 정적 plan 218. 실제 PASS 숫자는 `supabase test db` 실행 성공 후에만 확정한다.
+
+MODEL/SOURCES: gpt-5.6 · 신규 migration/RPC/UI diff · PostgreSQL/Supabase/Next.js 공식문서

@@ -118,12 +118,14 @@ test.describe("goal page (실 DB, slug 있을 때만)", () => {
     expect(pageText).not.toMatch(/₩|[0-9]+원/);
   });
 
-  test("goal page: 결제 CTA 비활성 ('곧' 표시)", async ({ page }) => {
+  test("goal page: 결제 CTA 활성 + 응원 시트 열림", async ({ page }) => {
     await page.goto(`/g/${E2E_SLUG}`);
-    const cta = page.getByTestId("cheer-cta-disabled");
+    const cta = page.getByTestId("cheer-cta");
     await expect(cta).toBeVisible();
-    await expect(cta).toBeDisabled();
-    await expect(cta).toContainText("곧");
+    await expect(cta).toBeEnabled();
+    await cta.click();
+    await expect(page.getByTestId("cheer-payment-sheet")).toBeVisible();
+    await expect(page.getByTestId("cheer-payment-submit")).toBeVisible();
   });
 
   test("goal page: role-transition '나도 해낼게 만들래' 링크", async ({ page }) => {

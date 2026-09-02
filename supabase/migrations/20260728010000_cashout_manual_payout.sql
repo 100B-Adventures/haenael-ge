@@ -9,6 +9,25 @@
 
 BEGIN;
 
+-- clover_ledger의 공용 AFTER INSERT 트리거는 호출자 search_path에 의존하면 안 된다.
+-- 신규 환전 RPC는 의도적으로 빈 search_path를 사용하므로, 트리거 자체가 모든
+-- 영속 객체와 pg_catalog 함수를 한정해 어떤 호출 경로에서도 동일하게 동작하게 한다.
+CREATE OR REPLACE FUNCTION public.sync_clover_balance()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  INSERT INTO public.clover_balance (member_id, clover_count, updated_at)
+  VALUES (NEW.member_id, NEW.balance_after, pg_catalog.now())
+  ON CONFLICT (member_id) DO UPDATE
+    SET clover_count = EXCLUDED.clover_count,
+        updated_at   = EXCLUDED.updated_at;
+  RETURN NEW;
+END;
+$$;
+
 ALTER TABLE public.cashout_request
   ADD COLUMN IF NOT EXISTS account_holder text,
   ADD COLUMN IF NOT EXISTS account_masked text,
@@ -172,7 +191,7 @@ BEGIN
     'g'
   );
   v_account_holder := pg_catalog.regexp_replace(
-    pg_catalog.btrim(pg_catalog.normalize(COALESCE(p_account_holder, ''), NFKC)),
+    pg_catalog.btrim(normalize(COALESCE(p_account_holder, ''), NFKC)),
     '[[:space:]]+',
     ' ',
     'g'

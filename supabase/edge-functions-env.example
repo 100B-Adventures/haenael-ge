@@ -12,7 +12,8 @@
 
 # ─── 운영 기능 스위치·알림 ──────────────────────────────────────────────────
 PAYMENTS_ENABLED=false
-# 수동환전 CASHOUT_ENABLED·CASHOUT_ACCOUNT_ENCRYPTION_KEY는 Vercel Production 전용이다.
+# 수동환전 CASHOUT_ENABLED·CASHOUT_ACCOUNT_ENCRYPTION_KEYS·
+# CASHOUT_ACCOUNT_ACTIVE_KEY_VERSION·CASHOUT_ACCOUNT_FINGERPRINT_KEY는 Vercel Production 전용이다.
 # Edge Function에는 등록하지 않는다(W-12).
 SLACK_WEBHOOK_URL=
 LEAD_RATE_LIMIT_SALT=

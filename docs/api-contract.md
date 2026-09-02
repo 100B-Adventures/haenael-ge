@@ -282,3 +282,14 @@ SKILLS_USED: 없음
 SKILLS_SKIPPED: 매칭 스킬 없음(API 계약·ERD·매핑표 = 프로젝트 특정 설계, document-generate는 코드 역생성용 부적용)
 
 SOURCES/MODEL: opus-4-8[1m] · 근거=user-flow §1~3 전수·coverage.md·DESIGN.md §6(금액3층) · Supabase RLS/anonymous auth(WebSearch: supabase.com/docs) · 회장 확정 결정 7건(coordinator relay)
+
+## 2026-08-02 수동환전 보안 계약 보강
+
+- 신청 RPC는 계좌 암호화 활성 키 버전·활성 키·별도 fingerprint 키를 받는다. 계좌 멱등 fingerprint는 평문 SHA-256이 아니라 `HMAC-SHA-256`이며 암호화 키와 fingerprint 키를 분리한다.
+- 계좌 표시값은 원 계좌 자릿수와 무관한 `••••••` + 마지막 4자리 고정 길이다.
+- 계좌 복호화 RPC는 `REQUESTED`이면서 미파기인 요청만 허용하고, 저장된 `key_version`에 해당하는 키링 항목으로만 복호화한다.
+- 지급완료 RPC는 같은 요청을 같은 관리자가 10분 안에 성공적으로 열람한 감사로그가 있어야 `REQUESTED → PAID` 전이를 허용한다. 관리자 확인 모달은 그 성공 응답의 전체 계좌를 표시한다.
+- 원화 4컬럼과 관련 RPC 반환형은 `bigint`; 원천징수 곱셈은 cast 후 실행한다.
+- `PAID`/`REJECTED` 종결 90일 뒤 계좌 암호문·마스크·예금주·계좌 HMAC을 멱등 파기한다. 감사로그는 service role 직접 UPDATE/DELETE 불가다.
+
+MODEL/SOURCES: gpt-5.6 · `20260802010000_cashout_security_hardening.sql` · PostgreSQL pgcrypto HMAC/REVOKE 공식문서 · Next.js Server Actions 보안 가이드

@@ -47,5 +47,5 @@ export function formatCashoutKrw(value: number) {
 }
 
 export function maskAccountNumber(accountNo: string) {
-  return `${"*".repeat(Math.max(accountNo.length - 4, 0))}${accountNo.slice(-4)}`;
+  return `${"•".repeat(6)}${accountNo.slice(-4)}`;
 }

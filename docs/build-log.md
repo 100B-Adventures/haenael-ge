@@ -817,3 +817,29 @@ prod web (haenael-ge.vercel.app):
 - 실제 카카오 이미지·닉네임을 공개 목표에 연결하는 계약은 미구현. 1차 베타 중립 폴백 채택 여부가 결정 필요.
 - 인증된 `/home`에서 Copy 아이콘의 실제 clipboard와 `나만 보임`을 눈으로 보는 운영 검증은 남음.
 - 수정 코드는 아직 prod 미배포. 따라서 “운영 완료”로 기록하지 않는다.
+
+## 2026-08-02 — 수동환전 배포차단 보안 7건 hardening
+
+- 신규 migration `20260802010000_cashout_security_hardening.sql`: 별도 키 HMAC-SHA-256, 고정 마스크, bigint 원화 계산/반환, 관리자별 최근 성공 열람 지급 게이트, 버전별 keyring, 종결 90일 멱등 파기, 감사로그 ACL 회수.
+- Server Actions/UI: 버전별 서버 키링과 별도 fingerprint 키 전달, 허용 목록 밖 DB 오류 고정 코드화, 지급 확인 모달의 전체 계좌 표시.
+- 테스트: 기존 cashout pgTAP과 동시성 호출을 새 RPC 시그니처/열람 게이트에 맞추고 신규 보안 pgTAP 30건 추가.
+- 직접 증거: Web Vitest 35 files/207 tests PASS, Deno cashout 관련 6/6 PASS, webpack production build 20 routes PASS, `git diff --check`와 동시성 shell syntax PASS.
+- 미검증: sandbox가 Docker socket·localhost DB·PostgreSQL shared memory를 모두 거부해 migration 실제 적용과 pgTAP 정적 plan 218, 동시성 2건은 실행하지 못했다. 프로덕션 DB 적용·배포 0건.
+- 교차리뷰: Claude CLI 2회 호출은 바이너리 버전만 반환하고 리뷰 본문 0바이트여서 cross-model 판정 미검증. 출고 게이트를 통과 처리하지 않는다.
+
+SKILLS_USED: 없음
+SKILLS_SKIPPED: 매칭 코드 스킬 없음
+SOURCES/MODEL: gpt-5.6 · 기반=`pipeline-state.md`, `docs/{architecture,api-contract,test-plan}.md`, 기존 수동환전 migration/UI · PostgreSQL pgcrypto/REVOKE · Supabase secrets · Next.js Server Actions
+
+## 2026-08-02 — 수동환전 보안 RPC 호출부 회귀 보정
+
+- 근본원인: `create_cashout_request`의 7번째 인자가 `smallint`로 바뀌었지만 SQL 호출부가 `1`/`2` 정수 리터럴을 전달했다. PostgreSQL 함수 해석에서 `integer` 호출 후보가 없어 본문 실행 전 `function does not exist`로 중단됐다.
+- 구현: 커밋 `8462a59`. `cashout_manual.test.sql` 8곳, 보안 hardening pgTAP 4곳, 동시성 fixture 2곳을 9인자 시그니처에 맞췄고 키 버전을 명시적 `smallint`로 고정했다. 동시성 스크립트는 서로 다른 테스트 전용 암호화 키/HMAC 키를 상단 상수로 단일 주입한다.
+- 웹 확인: `(receiver)/cashout/actions.ts`는 이미 9개 named parameter, `getCashoutAccountEncryptionConfig()`, `getCashoutAccountFingerprintKey()`를 사용한다. 관리자 액션도 같은 버전별 키링으로 1건 복호화한다. 변경 없이 보존했다.
+- 직접 증거: Web Vitest 35 files/207 tests PASS, Next.js webpack production build 20 routes PASS, 두 concurrency shell `bash -n` PASS, `git diff --check` PASS.
+- DB 차단: pgtap 설치와 `PGOPTIONS='-c search_path=public,extensions' psql -f` 8파일은 모두 TCP 정책 `Operation not permitted`로 SQL 실행 전 exit 2. `DO_NOT_TRACK=1 supabase db reset` exit 1(Docker socket), `supabase test db` exit 1(`LegacyDbConnectError`). 동시 신청은 `success=0 blocked=0`, 동시 지급은 `success=0 blocked=0`; 둘 다 DB 미접속 결과라 기능 판정에 쓰지 않는다.
+- 판정: 정적 plan은 188+30=218이나 실제 218/218 및 동시성 1/1 두 건은 미검증. 프로덕션 DB 적용·배포 0건, QA NG 유지.
+
+SKILLS_USED: 없음
+SKILLS_SKIPPED: 매칭 코드 스킬 없음
+SOURCES/MODEL: gpt-5.6 · `pipeline-state.md`·`docs/{architecture,api-contract,test-plan}.md`·PostgreSQL 함수 타입 해석 공식문서·Supabase pgTAP 공식문서

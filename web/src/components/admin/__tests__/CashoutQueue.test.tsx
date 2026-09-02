@@ -62,7 +62,9 @@ describe("CashoutQueue", () => {
     );
     expect((await screen.findAllByText(/123456789012/)).length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getAllByRole("button", { name: "다시 가리기" })[0]);
+    const hideButton = screen.getAllByRole("button", { name: "다시 가리기" })[0];
+    await waitFor(() => expect(hideButton).toBeEnabled());
+    fireEvent.click(hideButton);
     expect(screen.queryByText("123456789012")).not.toBeInTheDocument();
     expect(screen.getAllByText(/••••••9012/).length).toBeGreaterThan(0);
   });

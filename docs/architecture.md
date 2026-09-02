@@ -309,3 +309,13 @@ SOURCES/MODEL: opus-4-8[1m] · 근거=docs/{prd,risks,bm,persona,user-flow,DESIG
 ---
 
 > **§2.4 legal 갱신 STAMP(2026-07-21)**: 회장 제공 구글 AI(Gemini) 전자금융거래법 자문 요지 반영 + FSC/김·장/a-fin 면제기준 WebSearch 교차확인(발행잔액 30억 AND 연 500억 미만 = 등록 면제). 최근 정책결정 6종(수수료 5%·클로버 1000원·웰컴·목표수정·라이브키 zeroon1zvn·KYC출금강제) 정본화(§9.5). ⚠️ AI 자문은 방향 근거 — 최종은 변호사 확인 권고(§2.4-D). 근거 URL: fsc.go.kr/no010101/82339·83004, tosspayments.com/blog/articles/amendment, kimchang.com Finance Legal Update, a-fin.co.kr/insights/prepaid-registration-exemption-2024.
+
+## 2026-08-02 수동환전 계좌 보안 addendum
+
+- Vercel 서버 전용 키는 `CASHOUT_ACCOUNT_ENCRYPTION_KEYS`(버전별 JSON keyring), `CASHOUT_ACCOUNT_ACTIVE_KEY_VERSION`, `CASHOUT_ACCOUNT_FINGERPRINT_KEY`로 분리한다. 이전 버전 암호문을 모두 파기하기 전에는 과거 키를 키링에서 제거하지 않는다.
+- DB에는 AES-256 PGP 암호문 + `key_version` + 별도 키 HMAC-SHA-256만 저장한다. 표시용 마스크는 원 길이를 숨긴다.
+- 복호화는 service-role Server Action의 행별 호출만 허용하고, DB 함수가 신청 상태·파기 상태·키 버전을 다시 검증한 뒤 성공 감사로그를 남긴다.
+- 지급완료는 사용자 체크박스만 믿지 않고 DB가 같은 관리자·같은 요청·최근 10분 성공 열람을 원자적으로 요구한다.
+- 90일 파기는 pg_cron 일 1회가 기본이며, cron 미가용 환경은 신규 신청 진입 시 opportunistic 정리로 수렴한다.
+
+MODEL/SOURCES: gpt-5.6 · PostgreSQL pgcrypto/REVOKE · Supabase secrets 공식문서 · Next.js 16.2.10 로컬 Server Actions 가이드

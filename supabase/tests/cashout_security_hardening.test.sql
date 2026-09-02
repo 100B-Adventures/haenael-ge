@@ -16,7 +16,7 @@ SELECT ok(
   'sync_clover_balance는 호출자와 무관한 빈 search_path를 고정'
 );
 
-SELECT like(
+SELECT alike(
   (
     SELECT p.prosrc
     FROM pg_catalog.pg_proc AS p
