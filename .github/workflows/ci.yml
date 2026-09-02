@@ -55,6 +55,9 @@ jobs:
 
       - run: npm ci
 
+      - name: 디자인 토큰 준수
+        run: npm run qa:design-tokens
+
       - name: 단위 테스트
         run: npm test
 

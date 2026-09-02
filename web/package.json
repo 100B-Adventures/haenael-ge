@@ -16,7 +16,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "qa:verify-production": "node ../scripts/qa/verify-production.mjs",
-    "qa:verify-production:auth": "playwright test --config=playwright.production.config.ts"
+    "qa:verify-production:auth": "playwright test --config=playwright.production.config.ts",
+    "qa:design-tokens": "node ../scripts/qa/design-token-lint.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

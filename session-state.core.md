@@ -1,3 +1,26 @@
+## CLAUDE 스프린트 종결 + 백로그 3건 실행 (2026-09-03 02:05 KST, 회장 "진행해")
+
+### 지금까지 한 것
+- **스프린트 종결 기록.** `pipeline-state.core.md` `current_stage: done` 주석에 종결 근거를 박았다. 마지막 미검증이던 실제 회원 환전 성공은 **회장 직접 확인**(2026-09-02)으로 닫혔고, CI 도 최초 green(run `33646162280`, 3 job 전부 success).
+- **`pay-open` worktree 정리 완료.** 미커밋 59건을 `wt-pay-open` 브랜치에 커밋(`6b6c40d`)해 보존한 뒤 `git worktree remove` 로 제거. **아무것도 지우지 않았다** — 브랜치에 그대로 살아 있다. `git worktree list` 는 이제 main 하나뿐.
+- **★전역 디자인 토큰 검사기 신설** `scripts/qa/design-token-lint.mjs`. 색상 리터럴(hex·rgb·hsl)과 인라인 `style={{` 를 web/src 전역 130파일에서 검사. **기존 81건은 기준선(baseline)에 기록하고 "신규 위반"만 실패**시킨다(전면 금지는 매번 빨간불이라 아무도 안 보게 된다). 영구 예외는 `design-token-lint-allow: <사유>` 주석으로만 허용 — 사유 없는 예외는 통과 못 한다.
+  - **동작 실증:** 일부러 `#ff0000` 파일을 심어 exit 1·해당 줄 지목 확인, 제거 후 통과 확인.
+  - `npm run qa:design-tokens` 로 등록하고 **CI `단위 테스트 + 빌드` job 에 단계 추가**(`.github/workflows/ci.yml`, `npm test` 앞).
+- **운영 점검 시크릿 등록은 실행 못 했다.** `gh secret set` 이 auto mode classifier 에 차단됐다. 회장이 직접 등록하거나 권한을 열어야 한다.
+
+### 남은 이슈
+1. **운영 점검 시크릿 5종 미등록.** `QA_PRODUCTION_SUPABASE_URL`·`_ANON_KEY`·`_EMAIL`·`_PASSWORD`·`_EXPECTED_USER_ID`. `gh secret list` 0건. 값은 `~/.sj-agent-harness/secrets/haenael-ge-qa-production.env` 에 존재. 등록 전까지 예약 워크플로 `Production Read-only E2E` 는 매일 실패한다.
+2. 토스 지급대행 해지 미실행(평일 08:00~19:00 라이브챗).
+3. 지급 신원·세무정보 처리 계약 = 회장 보류.
+4. 대시보드 벤처 경로가 수집기·뷰 두 곳에 중복 하드코딩(100b 트랙 몫). 이번엔 `venture-paths.test.mjs` 로 막아뒀다.
+5. 토큰 위반 기존 81건은 기준선에 담긴 상태 — 줄여나갈 대상.
+
+### 다음 액션
+1. **소유자: 회장.** 운영 점검 시크릿 5종 등록. **종료증거:** `Production Read-only E2E` 예약 런 success.
+2. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+3. **소유자: 100b 트랙.** 벤처 경로 단일 진실원화. **종료증거:** 수집기와 뷰가 같은 상수를 참조.
+4. **소유자: 다음 작업 세션.** 토큰 위반 81건 축소. **종료증거:** 기준선 갱신으로 건수 감소.
+
 ## CLAUDE CI 실측 + 운영 E2E 시크릿 부재 발견 (2026-09-03 00:15 KST)
 
 ### 지금까지 한 것

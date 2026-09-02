@@ -5,7 +5,7 @@ project: haenael-ge
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude             # 2026-08-30 컨트롤러 Claude. 동일 루트 하네스와 단계 게이트를 적용한다.
-current_stage: done   # 2026-08-30 릴리즈 1.2.1 released. 전 단계 승인 완료. 잔여는 비차단 3건(환전 폼 캡처·대표주소 자동승격 확인·CI 결제).
+current_stage: done   # 2026-09-03 스프린트 종결. 릴리즈 1.2.1 released, 전 단계 승인 완료. ★마지막 미검증이던 '실제 회원 환전 성공'을 회장이 직접 확인(2026-09-02). CI 도 최초로 green(run 33646162280, 3 job 전부 success). 종전 실패는 Actions 무료분 소진이 원인이었고 해소됨. 잔여 비차단 1건 = 예약 워크플로 Production Read-only E2E 가 저장소 시크릿 5종 미등록으로 실패 중(회장 승인 대기, 값은 로컬 secrets 에 존재).
 approved_stages: [plan, design, eng-design, build, qa, ship]   # 2026-08-30 ship 승인. 스프린트 종료.
 approved_artifacts:   # 규약 = ~/.claude/standards/release-and-artifacts.md §1.1. 대시보드가 이걸 읽는다. 실물 없는 라벨 금지.
   # 2026-08-30 전 단계 최신본 재핀. 갱신 = eng-design 7건(FDD v1.1.0 승격 + ERD·테스트케이스 신규), qa 5건(보안·성능·교차브라우저 리포트 신규), build 1건(구현현황 신규).
