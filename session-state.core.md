@@ -1,3 +1,27 @@
+## CLAUDE 목표 잔여 정리: 타입 정합 + 라벨 핀 후보 귀띔 (2026-09-06 05:45 KST)
+
+### 지금까지 한 것
+- **멈춰 있던 백그라운드 13건 전부 종료.** 전부 오래전 Vercel 배포 확인용 `until` 루프였고 그 배포는 이미 끝나 조건이 영원히 안 맞는 상태였다. 내가 걸고 끄지 않은 것이 목표 평가를 367분 붙잡았다.
+- **★`tsc -b` 통과 복구(SJ_BRAIN_wiki `726d828`).** ①`collect-harness-details.mjs` 가 `callers` 를 내보내면서 타입에는 안 넣어 `TS2353` 3건+ ②내가 만든 `audit` 슬롯이 `ArtifactSlotKey` 유니온에 없어 `TS2322` 3건. **둘 다 해소, `npx tsc -b` exit 0.** 근본 수정은 생성기 쪽에 했다(생성 파일 직접 편집 아님).
+- **라벨 핀에 디스크 후보 귀띔 추가.** 값이 라벨이라 못 찾은 핀은 이제 미해결 사유에 `후보: <경로>` 를 함께 적는다. 실제로 3건이 유효 후보를 얻었다.
+  - `haejo-danta::core::prototype`(`core-v7-proto-hub-v1`) → `docs/prototype/haejo-mvp-proto-hub-v1-fable5.html`
+  - `blog-premium::launch-mvp::eng-design-adr`(`launch-v4-vercel-neon-auth`) → `docs/launch-mvp/eng-design-decision-record-v4-vercel-neon-auth.md`
+  - `blog-premium::launch-mvp::plan-review` 는 후보가 어긋나(`wongoryo-launch-phase-roadmap-v1.md`) 참고용.
+  - **자동 선택은 하지 않았다.** 무엇을 정본으로 삼을지는 그 벤처가 정할 일이고, 이름 비슷하다고 대신 고르면 이번에 고친 그 사고(라벨≠파일명 오탐)가 되돌아온다.
+- 검증: `artifact-discovery.test.mjs` **16/16**, `venture-paths.test.mjs` **2/2**, `vite build --mode private` exit 0, 스모크 **PASS**(버튼 연인원 1,311·유니크 310).
+
+### 남은 이슈
+1. **P0 환전 접근 범위 = 회장 결정 대기.** D-017(세무 자문 전 회장 계정 한정) 집행 여부. 회장이 실제 회원 성공을 확인한 것과 충돌해 임의로 닫지 않았다.
+2. P1 16건 = build 단계 작업(감사 세션 소유). 제품 UI·스키마 변경이라 디자인·설계 합의가 앞선다.
+3. 라벨 핀 10건 = 각 벤처 세션이 후보를 보고 확정.
+4. 토스 지급대행 해지 미실행(회장 물리 영역).
+
+### 다음 액션
+1. **소유자: 회장.** 환전 접근 범위 결정. **종료증거:** 결정 기록 후 코드 반영 또는 D-017 개정.
+2. **소유자: 감사·build 담당 세션.** P1 16건 처리. **종료증거:** 감사 재실행에서 해당 항목 소멸.
+3. **소유자: 각 벤처 세션.** 라벨 핀을 후보 경로로 확정. **종료증거:** 수집기 미해결 0.
+4. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+
 ## CLAUDE 감사 보고서 대시보드 노출 + 산출물 목표 완결 (2026-09-06 01:30 KST)
 
 ### 지금까지 한 것
