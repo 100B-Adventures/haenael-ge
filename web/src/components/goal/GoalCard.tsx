@@ -71,6 +71,7 @@ export function GoalCard({
 }: GoalCardProps) {
   const normalizedNickname = nickname?.trim() || null;
   const displayName = normalizedNickname ?? "해낼게 사용자";
+  const [reasonExpanded, setReasonExpanded] = useState(false);
 
   return (
     <article className="w-full" data-testid="goal-card">
@@ -97,8 +98,10 @@ export function GoalCard({
       </div>
 
       {/* 목표 제목 */}
+      {/* 긴 제목이 카드를 밀어내 아래 칩과 왜 블록을 화면 밖으로 보내던 것을 막는다.
+          DESIGN.md §6.1 이 제목 2줄을 요구한다. */}
       <h1
-        className="font-black leading-tight mb-3 [font-size:27px]! [letter-spacing:-0.8px]! [line-height:1.28]! [color:var(--foreground)]!"
+        className="font-black leading-tight mb-3 line-clamp-2 [font-size:27px]! [letter-spacing:-0.8px]! [line-height:1.28]! [color:var(--foreground)]!"
         data-testid="goal-title"
       >
         {title} <span className="[color:var(--clover-bright)]!">해낼게</span>
@@ -119,9 +122,24 @@ export function GoalCard({
           >
             WHY
           </p>
-          <p className="text-[14px] leading-relaxed [color:#4a4640]!">
+          {/* 왜는 3줄까지 보이고 나머지는 펼쳐 본다. 길다고 잘라 버리면 목표를
+              세운 이유가 사라지고, 다 펼쳐 두면 응원 버튼이 화면 밖으로 밀린다.
+              design-token-lint-allow: 기존 본문 색상 유지(토큰화는 별도 작업). */}
+          <p
+            className={`text-[14px] leading-relaxed [color:#4a4640]! ${reasonExpanded ? "" : "line-clamp-3"}`}
+            data-testid="goal-reason"
+          >
             {reason}
           </p>
+          <button
+            type="button"
+            className="mt-2 text-[13px] font-bold [color:var(--accent-foreground)]!"
+            aria-expanded={reasonExpanded}
+            data-testid="goal-reason-toggle"
+            onClick={() => setReasonExpanded((prev) => !prev)}
+          >
+            {reasonExpanded ? "접기" : "더 보기"}
+          </button>
         </div>
       )}
     </article>

@@ -111,8 +111,9 @@ export function Wordmap({ words, ownerName }: WordmapProps) {
   const minCount = Math.min(...counts);
   const maxCount = Math.max(...counts);
   const visibleWords = normalizedWords.slice(0, 12);
+  const hiddenWords = normalizedWords.slice(12);
 
-  return (
+  const cloud = (
     <div
       className="flex min-h-[200px] w-full flex-wrap content-center justify-center gap-x-3 gap-y-2.5 rounded-[18px] px-4 py-5 [background-image:radial-gradient(90%_90%_at_50%_45%,_var(--accent),_#EEF6F0_72%,_transparent)]!"
       data-testid="wordmap"
@@ -138,6 +139,40 @@ export function Wordmap({ words, ownerName }: WordmapProps) {
           </span>
         );
       })}
+    </div>
+  );
+
+  if (hiddenWords.length === 0) {
+    return cloud;
+  }
+
+  // 13번째부터는 구름에 넣으면 글자가 뭉개진다. 그렇다고 말없이 자르면 응원해 준
+  // 사람의 말이 사라진 것처럼 보인다. 잘렸다는 사실과 나머지를 여는 길을 함께 둔다.
+  // details 를 쓰는 이유는 이 컴포넌트가 서버 컴포넌트라서다(상단 주석 참고).
+  return (
+    <div className="flex w-full flex-col gap-2">
+      {cloud}
+      <details className="w-full rounded-[14px] border border-border bg-card px-4 py-3">
+        <summary
+          className="cursor-pointer list-none text-[length:var(--text-label-small)]! text-muted-foreground"
+          data-testid="wordmap-overflow-toggle"
+        >
+          <strong className="text-accent-foreground">
+            {visibleWords.length}개 표시
+          </strong>{" "}
+          · 나머지 {hiddenWords.length}개 보기
+        </summary>
+        <ul
+          className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 text-[length:var(--text-label-small)]! text-foreground"
+          data-testid="wordmap-overflow-list"
+        >
+          {hiddenWords.map((item) => (
+            <li key={item.word} className="[overflow-wrap:anywhere]!">
+              {item.word}
+            </li>
+          ))}
+        </ul>
+      </details>
     </div>
   );
 }

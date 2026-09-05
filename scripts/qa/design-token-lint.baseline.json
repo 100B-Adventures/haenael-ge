@@ -52,7 +52,6 @@
   "web/src/components/goal/DdayChip.tsx\t색상 리터럴\tACTIVE: { background: \"var(--muted)\", color: \"#7a7363\" }, // --warm",
   "web/src/components/goal/DdayChip.tsx\t색상 리터럴\tCLOSED: { background: \"#EFEDE8\", color: \"#8a857a\" },",
   "web/src/components/goal/DdayChip.tsx\t색상 리터럴\tDELETED: { background: \"#EFEDE8\", color: \"#8a857a\" },",
-  "web/src/components/goal/GoalCard.tsx\t색상 리터럴\t<p className=\"text-[14px] leading-relaxed [color:#4a4640]!\">",
   "web/src/components/goal/GoalEditSheet.tsx\t인라인 스타일\tstyle={{",
   "web/src/components/goal/GoalEditSheet.tsx\t색상 리터럴\tclassName=\"fixed inset-0 z-50 flex items-end justify-center px-4 pb-4 [background-color:rgba(22,20,1",
   "web/src/components/goal/GoalEditSheet.tsx\t색상 리터럴\tclassName=\"flex h-10 w-10 shrink-0 items-center justify-center rounded-full [color:var(--muted-foreg",

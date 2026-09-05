@@ -111,7 +111,15 @@ describe("Wordmap", () => {
     const spans = wm.querySelectorAll("span");
     expect(spans).toHaveLength(12);
     expect(screen.getByText("단어12")).toBeInTheDocument();
-    expect(screen.queryByText("단어11")).not.toBeInTheDocument();
+    // 구름에는 12개까지만 넣는다. 다만 13번째부터를 문서에서 아예 지우면
+    // 응원한 사람의 말이 사라진 것처럼 보인다. 구름 밖 펼침 목록으로 남긴다.
+    expect(wm.textContent).not.toContain("단어11");
+    expect(screen.getByTestId("wordmap-overflow-toggle")).toHaveTextContent(
+      "나머지 1개 보기",
+    );
+    expect(
+      screen.getByTestId("wordmap-overflow-list"),
+    ).toHaveTextContent("단어11");
     expect(wm).toHaveAttribute(
       "aria-label",
       "응원 메시지 워드맵, 전체 13개 중 12개 표시",
