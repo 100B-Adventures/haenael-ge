@@ -21,7 +21,7 @@ export default async function CashoutHistoryPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data } = await supabase.rpc(
+  const { data, error: historyError } = await supabase.rpc(
     "my_cashout_history" as never,
     { p_limit: 100 } as never,
   );
@@ -61,7 +61,21 @@ export default async function CashoutHistoryPage() {
       </div>
 
       <section className="mt-5 rounded-md border border-border bg-card px-4">
-        {history.length === 0 ? (
+        {/* 조회 실패를 "내역 없음"으로 그리면 돈 처리 이력이 사라진 것처럼 보인다.
+            실패와 빈 상태는 다른 말이다(감사 P1, 오류 처리). */}
+        {historyError ? (
+          <div className="py-14 text-center">
+            <p
+              className="text-sm font-bold text-muted-foreground"
+              data-testid="cashout-history-load-error"
+            >
+              환전 내역을 불러오지 못했어요
+            </p>
+            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--faint)]">
+              내역이 없다는 뜻이 아니에요. 잠시 뒤 새로고침 해주세요.
+            </p>
+          </div>
+        ) : history.length === 0 ? (
           <div className="py-14 text-center">
             <p className="text-sm font-bold text-muted-foreground">
               아직 환전 내역이 없어요

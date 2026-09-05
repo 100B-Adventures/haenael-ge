@@ -53,7 +53,7 @@ export default async function CashoutStatusPage() {
   // FDD §12 매핑 3 갭: clover_balance 직접 조회를 clover_eligibility로 교체.
   // 총량·잠김이 같은 스냅샷에서 나와야 I1(available = total - locked)이 보장된다.
   const [
-    { data: statusRaw },
+    { data: statusRaw, error: statusError },
     { data: eligibilityRaw, error: eligibilityError },
   ] = await Promise.all([
     supabase.rpc("my_cashout_status" as never),
@@ -70,6 +70,27 @@ export default async function CashoutStatusPage() {
   const lockedAmount = eligibility?.locked_amount ?? 0;
   const availableAmount = eligibility?.available_amount ?? totalBalance;
   const minCashoutClover = eligibility?.min_cashout_clover ?? 30;
+
+  // 조회가 실패했는데 "신청이 없어요"를 그리면, 돈 신청을 해 둔 사람이 자기
+  // 신청이 사라진 것으로 읽는다. 실패는 실패로 그린다(감사 P1, 오류 처리).
+  if (statusError) {
+    return (
+      <ReceiverPageShell testId="cashout-status-error-page">
+        <ReceiverTopBar variant="detail" />
+        <div className="rounded-md border border-border bg-card p-6 text-center">
+          <h1 className="text-xl font-black text-foreground">
+            환전 상태를 불러오지 못했어요
+          </h1>
+          <p
+            className="mt-2 text-sm text-muted-foreground"
+            data-testid="cashout-status-load-error"
+          >
+            신청이 없다는 뜻이 아니에요. 잠시 뒤 새로고침 해주세요.
+          </p>
+        </div>
+      </ReceiverPageShell>
+    );
+  }
 
   if (!cashout) {
     return (
