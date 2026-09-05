@@ -30,8 +30,17 @@ function collect() {
   const files = globSync("web/src/**/*.{ts,tsx}", { cwd: repoRoot }).sort();
   for (const rel of files) {
     const lines = readFileSync(resolve(repoRoot, rel), "utf8").split("\n");
+    // 예외 주석은 자기 줄과 뒤따르는 몇 줄에 적용한다. JSX 는 여는 태그 안에
+    // 주석을 넣을 수 없어서, 여러 줄짜리 <path fill=...> 같은 요소는 주석을
+    // 요소 위에 달 수밖에 없다. 그래서 바로 윗줄만 보면 예외가 안 먹는다.
+    const ALLOW_SPAN = 6;
+    let allowUntil = -1;
     lines.forEach((line, i) => {
-      if (ALLOW.test(line) || (i > 0 && ALLOW.test(lines[i - 1]))) return;
+      if (ALLOW.test(line)) {
+        allowUntil = i + ALLOW_SPAN;
+        return;
+      }
+      if (i <= allowUntil) return;
       if (COLOR_LITERAL.test(line)) found.push(`${rel}\t색상 리터럴\t${line.trim().slice(0, 100)}`);
       if (INLINE_STYLE.test(line)) found.push(`${rel}\t인라인 스타일\t${line.trim().slice(0, 100)}`);
     });
