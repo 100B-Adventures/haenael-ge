@@ -1,3 +1,30 @@
+## CLAUDE 라벨 핀 정리 완료 — 미해결 34 → 1 (2026-09-06 06:05 KST)
+
+### 지금까지 한 것
+- **대시보드 미해결이 실질 1건으로 줄었다**(세션 시작 시점 34건).
+  - **실경로화 5건** — 이름표였던 핀을 같은 대상의 실제 파일로 교체. 정본을 바꾼 게 아니라 가리키는 방식만 고쳤다.
+    - haejo-danta `design: core-v7-proto-hub-v1` → `docs/prototype/v7/core-hub-v7-opus5.html`(2026-09-05 승인된 v7 허브)
+    - haejo-danta `discovery: v1.1.0-11종` → `docs/discovery/시장경쟁분석.md`
+    - blog-premium `eng-design-adr: launch-v4-vercel-neon-auth` → `docs/launch-mvp/eng-design-decision-record-v4-vercel-neon-auth.md`
+    - blog-premium `plan-review: launch-v1.1` → `docs/launch-mvp/blog-premium-launch-plan-review-v1-claude-opus.md`
+    - blog-premium `home: A-curated-trustline` → `prototypes/glutmat-home-variants/index.html`(회장 홈 픽 A)
+  - **결함 아님으로 분리 4건** — 상태파일이 스스로 "이름표·파일 없음"이라 적은 3건(d-edu prd_v1_0·user-flow·measurement)과 도커 이미지 태그 1건(d-edu release_image). 결함과 같이 세면 진짜 고칠 것이 묻힌다. 수집기에 `labelOnly` 분류 추가.
+  - **남은 실제 결함 1건** = `d-edu::mvp-e::qa_smoke`. 핀이 가리키는 `scripts/qa/prod-smoke.sh` 가 d-edu 저장소에 없다(deep find 0건). 파일 미커밋이거나 핀 오류이며 **d-edu 세션이 판단할 사안**이라 대체 후보를 임의로 넣지 않았다.
+- **`tsc -b` 통과 복구.** `collect-harness-details.mjs` 방출 타입에 `callers?: string[]` 추가, `ArtifactSlotKey` 유니온에 `'audit'` 추가. 근본 수정은 생성기 쪽.
+- 검증: `artifact-discovery.test.mjs` **16/16**, `venture-paths.test.mjs` **2/2**, `npx tsc -b` exit 0, `vite build --mode private` exit 0, 스모크 **PASS**(버튼 연인원 1,310·유니크 309).
+
+### 남은 이슈
+1. **P0 환전 접근 범위 = 회장 결정 대기.** D-017 집행 여부. 회장이 실제 회원 성공을 확인한 것과 충돌해 임의로 닫지 않았다.
+2. P1 16건 = build 단계 작업(감사 세션 소유). 스키마·화면 동시 변경이라 설계 합의가 앞선다.
+3. `d-edu::mvp-e::qa_smoke` 핀 = d-edu 세션.
+4. 토스 지급대행 해지 미실행(회장 물리 영역).
+
+### 다음 액션
+1. **소유자: 회장.** 환전 접근 범위 결정. **종료증거:** 결정 기록 후 코드 반영 또는 D-017 개정.
+2. **소유자: 감사·build 담당 세션.** P1 16건 처리. **종료증거:** 감사 재실행에서 해당 항목 소멸.
+3. **소유자: d-edu 세션.** `prod-smoke.sh` 커밋 또는 핀 교정. **종료증거:** 수집기 실제 결함 0.
+4. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+
 ## CLAUDE 목표 잔여 정리: 타입 정합 + 라벨 핀 후보 귀띔 (2026-09-06 05:45 KST)
 
 ### 지금까지 한 것
