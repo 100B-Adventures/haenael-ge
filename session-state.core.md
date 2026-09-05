@@ -1,3 +1,26 @@
+## CLAUDE 대시보드 산출물 노출 정비 (2026-09-05 19:25 KST, 목표 "모든 산출물 최신 정본으로 100B 대시보드에 박고 마무리")
+
+### 지금까지 한 것
+- **해낼게 몫 완결.** 대시보드 haenael 합성키 **35건**(승인 핀 32 + 마이그레이션 glob 확장 3), **missingReason 0**, **로더 35/35**. `artifact-drift-check.sh` **드리프트 0**(`docs/제품현황.md` 갱신으로 해소).
+- **★대시보드 결함 3건 발견·수정**(SJ_BRAIN_wiki `64b8355`).
+  1. **경로형 핀이 표기 때문에 미검색되던 것.** `shouldResolveApprovedArtifactExactly` 가 `block-list`·`block-map` 만 정확해석하고 `inline` 은 라벨로 봐 이름 유사도 탐색으로 넘겼다. d-edu mvp-e 처럼 inline 에 실제 경로를 적은 라인이 **한글 파일명 때문에 전부 미검색**. 표기 무관 경로 모양이면 정확해석하도록 바꾸고, 값 뒤 사람용 주석(`(rev.7)`·중첩 괄호 포함)을 떼는 `pinnedPathOf` 신설. **미해결 34 → 10건.** 남은 10건은 파일 부재(`prod-smoke.sh`)·도커 태그·이름표(`v1.1.0-11종` 등)라 그 벤처 몫.
+  2. **진행노트가 프로토타입 슬롯을 차지.** `docs/prototype/*/PROGRESS.md` 가 경로에 prototype 이 있다는 이유로 시안 html 을 밀어냈다(romeo main). PROGRESS·README·NOTES·TODO·CHANGELOG 를 슬롯 후보에서 제외.
+  3. **스모크가 접힌 행 도트에서 멎던 것.** 안 보이는 도트를 건너뛰고 세며, 모달 검증도 특정 인덱스 대신 버튼이 뜰 때까지 훑도록 개정.
+- **`HarnessView.tsx:1020` 타입 에러 해소.** 콜백 안에서 `row.jumpTo` 좁히기가 풀리던 것을 지역 상수로 받아 해결. `npx tsc -b` **exit 0**(종전 실패).
+- **회귀 테스트 정비.** `artifact-discovery.test.mjs` **16/16 pass**(직전 5건은 zero-one 개명·데이터 드리프트로 이미 실패 중이던 것). 파일명을 못박던 단언을 계약 단언으로 바꾸고, `zeroOne` 경로를 `zto1-it-edu-community` 로 교정. `venture-paths.test.mjs` 2/2.
+- **검증:** `vite build --mode private` **exit 0**, `check-public-bundle.mjs` OK, `headless-artifact-smoke.mjs` **PASS**(서비스 행 11, 도트 145, 산출물 버튼 연인원 620·유니크 299, 모달 body 23,890자).
+
+### 남은 이슈
+1. **다른 벤처 미해결 10건.** d-edu 4(파일 부재·도커 태그·이름표), haejo-danta 2(이름표), blog-premium 3(이름표), d-edu mvp-e user-flow 1. 핀 값을 실경로로 바꾸는 것은 그 벤처 세션 몫.
+2. 토스 지급대행 해지 미실행(회장 물리 영역).
+3. 디자인 토큰 위반 75건 = 기준선 등재, 디자인 검토 동반 축소 대상.
+4. `docs/discovery/research-20260905/` 미추적 2건 = 다른 세션 산출물.
+
+### 다음 액션
+1. **소유자: 각 벤처 세션.** 이름표형 핀을 실경로로 교체. **종료증거:** 수집기 미해결 0.
+2. **소유자: 회장.** 토스 지급대행 해지. **종료증거:** 계약 상태 변경.
+3. **소유자: 디자인 검토 동반 작업.** 토큰 위반 75건 축소. **종료증거:** 기준선 감소와 시각 회귀 없음.
+
 ## CLAUDE 대시보드 경로 구조 개선 + 토큰 예외 정비 (2026-09-05 10:35 KST, 회장 "너가 직접해")
 
 ### 지금까지 한 것
