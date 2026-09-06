@@ -33,6 +33,7 @@ approved_artifacts:
     - { path: docs/folder-structure.md, version: unversioned, status: approved, label: "폴더 구조" }
     - { path: docs/test-plan.md, version: unversioned, status: approved, label: "테스트 계획" }
     - { path: docs/test-cases.md, version: unversioned, status: approved, label: "테스트 케이스" }
+    - { path: docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md, version: 1.0.0, status: pending-review, label: "다중목표·공개범위·응원자 설계안" }
   build:
     - { path: docs/build-log.md, version: unversioned, status: approved, label: "빌드 로그" }
     - { path: docs/구현현황.md, version: unversioned, status: approved, label: "구현 현황" }
