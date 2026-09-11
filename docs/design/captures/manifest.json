@@ -1,0 +1,13 @@
+{
+  "kind": "ui-capture-manifest",
+  "product": "haenael-ge",
+  "status": "file-observed",
+  "captured_at": "2026-09-12",
+  "screens": [
+    {"id": "CASHOUT-CONFIRM", "file": "baseline-20260912/cashout-confirm-390x844.png", "viewport": "390x844"},
+    {"id": "CASHOUT-FORM", "file": "baseline-20260912/cashout-form-390x844.png", "viewport": "390x844"},
+    {"id": "CASHOUT-STATUS", "file": "baseline-20260912/cashout-status-390x844.png", "viewport": "390x844"},
+    {"id": "RECEIVER-ME", "file": "baseline-20260912/receiver-me-390x844.png", "viewport": "390x844"}
+  ],
+  "verification": "PNG file format verified; runtime reproduction and console errors are unverified"
+}
