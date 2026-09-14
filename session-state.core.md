@@ -1,3 +1,61 @@
+## CLAUDE 모바일앱(React Native) 전환 논의 — 반대 의견 제시 (2026-09-14 20:05 KST)
+
+### 상황
+회장이 "기획·프로토타입 설계 그대로 React Native 로 iOS·안드로이드 앱을 만들까, 개발자 계정은 있다"며 논의를 요청했다. 아이데이션 모드라 문서·코드를 만들지 않고 대화로만 응답했다(§6.5).
+
+### 발견 (조사·기존 기록 대조로 드러난 것)
+1. **응원자는 전원 계정이 없다.** 2026-09-05 감사가 `supporter_member_id`·응원자 마이페이지·감사 메시지가 **스키마부터 없음**을 확인했고, 설계안 §13 D3 도 손님 결제 유지를 추천안으로 뒀다. 즉 링크를 받아 응원하는 쪽은 앱을 깔 이유가 구조적으로 없다.
+2. **이용료 10% 구조에서 앱 내 결제 수수료가 치명적이다.** D-014 로 확정된 이용료는 10%(3만원 → 우리 몫 3천원). 앱 내 결제가 디지털 재화로 판정되면 플랫폼 수수료가 우리 몫을 크게 상회한다. **단 현행 정책·국내 제3자 결제 실태는 조사하지 않았다(미검증).**
+3. **React Native 는 화면 재사용이 안 된다.** React 지식만 이어지고 웹 컴포넌트는 넘어가지 않는다. 프로토타입은 설계 참고물로만 쓰이고 UI 는 전면 재작성이다.
+4. **현재 웹이 정리 안 된 상태다.** `pipeline-state.core.md:8` 기준 `current_stage: build`(감사 P0 1건·P1 16건으로 재오픈). 두 번째 클라이언트를 시작하면 둘 다 반쯤 된다.
+5. **앱 심사 선결 결함이 이미 있다.** `web/src/app/child-safety/page.tsx` 본문이 "내용 준비 중입니다" 한 줄이다. 미성년에게 돈이 가는 서비스의 법정 고지라 심사 거부 소지가 크다.
+
+### 의미
+앱은 유통을 넓히는 수단이 아니라 **루프의 절반(목표 세우는 쪽)만 덮으면서 작업량을 두 배로 만드는 선택**이다. 그리고 앱 내 결제 판정이 불리하게 나오면 사업 모델 자체가 성립하지 않으므로, **기술 선택(RN 여부)은 그 판정 뒤에 오는 질문**이다. 순서가 뒤집히면 만들고 나서 못 파는 상태가 된다.
+
+### 남은 이슈
+1. **회장 답 대기**: 앱으로 무엇을 풀려는가(재방문·푸시·신뢰감·스토어 유입 중 무엇인가). 답에 따라 결론이 갈린다.
+2. 앱 내 결제 판정과 국내 제3자 결제 수수료 실조사 미실시.
+3. 아동 안전 고지 문안 = 회장(앱 진행 시 선결).
+4. 환전 접근 범위(D-017) = 회장, 별개 사안.
+5. 감사 스키마 3갈래 구현 = 별도 스프린트.
+
+### 다음 액션
+1. **소유자: 회장.** 앱의 목적 한 문장. **종료증거:** 답변 후 그에 맞는 선택지 재산출.
+2. **소유자: 세션.** 앱 내 결제 판정·수수료 실조사. **착수조건:** 회장이 앱 방향을 택할 때. **종료증거:** 출처 있는 수수료율과 후원 서비스 판정 사례.
+3. **소유자: 회장.** 아동 안전 고지 문안 방향. **종료증거:** 문안 확정 후 페이지 교체.
+4. **소유자: 회장.** 환전 접근 범위 결정. **종료증거:** 결정 기록 후 코드 반영 또는 D-017 개정.
+
+## CLAUDE 버전업 세션 개시 (2026-09-12 KST, 회장 "해낼게 버젼업 세션으로 만드려고해. state 새로 만들고, 이전에 논의된 향후 아이디어 저장되었나?")
+
+### 세션 목적
+v1.x(운영 중)에서 **다음 버전**으로 올린다. 라인은 기존 `core` 계속(같은 src 를 두 라인이 동시 빌드하면 충돌 — §6). 이번 세션은 아직 **기획/설계 확정 단계**이고 구현 착수는 회장이 버전업 범위를 확정한 뒤다.
+
+### 지금까지 한 것 (이 세션)
+- State 새로 열었다(이 블록). 향후 아이디어 저장 여부 확인 완료(아래).
+- **컨트롤러 실수: 설계안(eng-design) 원문을 넘겨짚어 표출.** 회장 "누가 설계안을 띄우래 디스커버리부터 하자". 버전업은 **discovery 부터** 시작한다. 설계안 직행 철회. (실수원장 기록.)
+
+### 버전업 = discovery 부터 (회장 지시)
+이번 버전업의 진입은 설계안이 아니라 **디스커버리**다. 이전에 논의된 것이 이미 산출물로 남아 있고, discovery 를 여기서부터 다시 연다:
+- **v2 아이디어 전수 원장**: `docs/plan/haenael-v2-idea-ledger-v1-gpt-codex.md` — 회장 원발화 17건 + 반영/이월/폐기 판정. 미결 4건(안돼요·좋아요 1탭 신호 / 프라이버시 설정 진입 위치 / 고객센터 이메일 / 프로토타입 화면 피드백). **v3 이월**: 친구목록·진행 pull(#11), 공개 탐색 커뮤니티(#14).
+- **시장조사**: `docs/discovery/research-20260905/research-haenael-ge-v1.1.0.md`(경쟁 106개, One Thing 확정, 3축 경쟁범위). v1.0.0 도 보존.
+
+### 저장돼 있던 향후 아이디어 (착수 안 하고 확인만)
+- **다음 버전 핵심 설계안**: `docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md` (629줄, pending-review). 다중 목표·공개범위·응원자 경험 3갈래. 감사 P1 대응, tech-architect 출고. **마이그레이션·코드 미작성 = 이번 버전업 개발 대상.**
+- **phase2 defer**: 앱/친구피드 확장, pledge("해내면 쏜다"), 소급 연결 안 함.
+- **회장 미결 2건**(open-decisions): 환전 접근 범위(D-017 집행), 아동 안전 고지 문안.
+
+### 남은 이슈 (버전업 범위 확정 전 회장 몫)
+1. 버전업에 어떤 기능을 담을지(설계안 3갈래 전부 vs 일부 vs 신규). = 회장.
+2. 환전 접근 범위(D-017). = 회장.
+3. 아동 안전 고지 문안. = 회장.
+
+### 다음 액션
+1. **소유자: 회장.** 버전업 범위 확정(설계안 3갈래 채택 여부). **종료증거:** 범위 결정 기록 후 pipeline eng-design→build 진행.
+2. **소유자: 세션.** 범위 확정 시 설계안 재검토→마이그레이션·화면 구현 위임. **종료증거:** 3x3 공개조합 pgTAP·다중목표 E2E 통과.
+
+---
+
 ## CLAUDE 하네스 개정본 대조 — 놓친 것 4건 수정 (2026-09-10 22:40 KST, 회장 "하네스 개정된거 다읽어보고 너가 놓친거 확인해봐")
 
 ### 지금까지 한 것
@@ -5,7 +63,7 @@
 
 - **① `dashboard-contract.md` §2-1 위반(신설 2026-09-06).** "목록은 실물에서 파싱한다. 화면 코드에 하드코딩하지 않는다." 그런데 내가 `DashboardView.tsx` 에 `VENTURE_PIPELINE_STATE` **손코딩 표**를 새로 넣었다. 죽은 import 를 glob 으로 바꾸면서 표는 그대로 둔 것이다. → 수집기(`collect-pipeline-live.mjs`)가 이미 primary 상태파일을 고르고 있으므로 `statePath` 를 방출하게 하고, 화면은 그걸 파생해 쓴다. 손코딩 0.
 - **② 임시 폴더 파일을 정본으로 잡던 것.** 다른 세션의 `scratchpad/` 파일이 산출물로 잡혀 **private 빌드가 두 번 연속 죽었다**. 임시 폴더는 세션이 끝나면 사라지고, 사라지면 다른 벤처 산출물까지 전부 안 열린다(8-31 프로토타입 사고와 같은 계열). → 수집기가 `scratchpad`·`/tmp`·`/private/tmp` 경로를 정본에서 제외하고 사유를 적는다.
-- **③ 회귀 테스트 2건이 폴더 경로를 못박아 깨져 있었다.** zero-one 이 `docs/prototype` → `docs/design/prototype` 로 재편하고 `docs/build` 를 없애면서 red. 계약("그 라인의 확정 app 시안 html 하나", "빌드로그 하나, 공유물 아님")을 검사하도록 고쳤다. **16/16 통과.**
+- **③ 회귀 테스트 2건이 폴더 경로를 못박아 깨져 있었다.** zero-one 이 `docs/design/prototypes/legacy` → `docs/design/prototype` 로 재편하고 `docs/build` 를 없애면서 red. 계약("그 라인의 확정 app 시안 html 하나", "빌드로그 하나, 공유물 아님")을 검사하도록 고쳤다. **16/16 통과.**
 - **④ `commit-and-push.md` §5 이빨이 잡아낸 미추적 의존.** `DashboardView.tsx` 가 import 하는 `design-captures.generated.ts`·`collect-design-captures.mjs` 가 미추적이었다. 로컬엔 있어 빌드·테스트는 통과하고 **운영 빌드만 죽는** 상태. 함께 추적에 넣었다.
 
 **검증:** `npx tsc -b` exit 0, `vite build --mode private` exit 0(운영 서버가 dist 를 잡고 있어 별도 디렉터리로 빌드 후 제거), `artifact-discovery.test.mjs` 16/16, `venture-paths.test.mjs` 2/2, 스모크 PASS.
@@ -27,7 +85,7 @@
 
 ## CLAUDE 목표 범위 정정 — 산출물까지, 구현은 범위 밖 (2026-09-07 09:35 KST)
 
-### 회장 지시 (원문 박제 = docs/requests/inbox/chairman-2026-09.md)
+### 회장 지시 (원문 박제 = docs/_archive/requests/inbox/chairman-2026-09.md)
 > 구현할게왜있는건지 기존에 해놓은거 산출물만 잘만들고 닫으면되는데
 
 **이번 `/goal` 의 범위는 산출물이다.** 감사가 남긴 스키마 구현(다중 목표·공개범위·응원자 경험)은 이 목표의 범위가 아니다. 컨트롤러가 "부족한건 진행"을 구현 착수로 넓게 읽어 설계 위임까지 민 것이 **과확장**이다. 설계안 자체는 산출물로 남기되, 구현 착수를 회장 결정 항목으로 올린 것은 철회한다.
@@ -123,7 +181,7 @@
 ### 지금까지 한 것
 - **대시보드 미해결이 실질 1건으로 줄었다**(세션 시작 시점 34건).
   - **실경로화 5건** — 이름표였던 핀을 같은 대상의 실제 파일로 교체. 정본을 바꾼 게 아니라 가리키는 방식만 고쳤다.
-    - haejo-danta `design: core-v7-proto-hub-v1` → `docs/prototype/v7/core-hub-v7-opus5.html`(2026-09-05 승인된 v7 허브)
+    - haejo-danta `design: core-v7-proto-hub-v1` → `docs/design/prototypes/legacy/v7/core-hub-v7-opus5.html`(2026-09-05 승인된 v7 허브)
     - haejo-danta `discovery: v1.1.0-11종` → `docs/discovery/시장경쟁분석.md`
     - blog-premium `eng-design-adr: launch-v4-vercel-neon-auth` → `docs/launch-mvp/eng-design-decision-record-v4-vercel-neon-auth.md`
     - blog-premium `plan-review: launch-v1.1` → `docs/launch-mvp/blog-premium-launch-plan-review-v1-claude-opus.md`
@@ -151,7 +209,7 @@
 - **멈춰 있던 백그라운드 13건 전부 종료.** 전부 오래전 Vercel 배포 확인용 `until` 루프였고 그 배포는 이미 끝나 조건이 영원히 안 맞는 상태였다. 내가 걸고 끄지 않은 것이 목표 평가를 367분 붙잡았다.
 - **★`tsc -b` 통과 복구(SJ_BRAIN_wiki `726d828`).** ①`collect-harness-details.mjs` 가 `callers` 를 내보내면서 타입에는 안 넣어 `TS2353` 3건+ ②내가 만든 `audit` 슬롯이 `ArtifactSlotKey` 유니온에 없어 `TS2322` 3건. **둘 다 해소, `npx tsc -b` exit 0.** 근본 수정은 생성기 쪽에 했다(생성 파일 직접 편집 아님).
 - **라벨 핀에 디스크 후보 귀띔 추가.** 값이 라벨이라 못 찾은 핀은 이제 미해결 사유에 `후보: <경로>` 를 함께 적는다. 실제로 3건이 유효 후보를 얻었다.
-  - `haejo-danta::core::prototype`(`core-v7-proto-hub-v1`) → `docs/prototype/haejo-mvp-proto-hub-v1-fable5.html`
+  - `haejo-danta::core::prototype`(`core-v7-proto-hub-v1`) → `docs/design/prototypes/legacy/haejo-mvp-proto-hub-v1-fable5.html`
   - `blog-premium::launch-mvp::eng-design-adr`(`launch-v4-vercel-neon-auth`) → `docs/launch-mvp/eng-design-decision-record-v4-vercel-neon-auth.md`
   - `blog-premium::launch-mvp::plan-review` 는 후보가 어긋나(`wongoryo-launch-phase-roadmap-v1.md`) 참고용.
   - **자동 선택은 하지 않았다.** 무엇을 정본으로 삼을지는 그 벤처가 정할 일이고, 이름 비슷하다고 대신 고르면 이번에 고친 그 사고(라벨≠파일명 오탐)가 되돌아온다.
@@ -216,7 +274,7 @@
 - **해낼게 몫 완결.** 대시보드 haenael 합성키 **35건**(승인 핀 32 + 마이그레이션 glob 확장 3), **missingReason 0**, **로더 35/35**. `artifact-drift-check.sh` **드리프트 0**(`docs/제품현황.md` 갱신으로 해소).
 - **★대시보드 결함 3건 발견·수정**(SJ_BRAIN_wiki `64b8355`).
   1. **경로형 핀이 표기 때문에 미검색되던 것.** `shouldResolveApprovedArtifactExactly` 가 `block-list`·`block-map` 만 정확해석하고 `inline` 은 라벨로 봐 이름 유사도 탐색으로 넘겼다. d-edu mvp-e 처럼 inline 에 실제 경로를 적은 라인이 **한글 파일명 때문에 전부 미검색**. 표기 무관 경로 모양이면 정확해석하도록 바꾸고, 값 뒤 사람용 주석(`(rev.7)`·중첩 괄호 포함)을 떼는 `pinnedPathOf` 신설. **미해결 34 → 10건.** 남은 10건은 파일 부재(`prod-smoke.sh`)·도커 태그·이름표(`v1.1.0-11종` 등)라 그 벤처 몫.
-  2. **진행노트가 프로토타입 슬롯을 차지.** `docs/prototype/*/PROGRESS.md` 가 경로에 prototype 이 있다는 이유로 시안 html 을 밀어냈다(romeo main). PROGRESS·README·NOTES·TODO·CHANGELOG 를 슬롯 후보에서 제외.
+  2. **진행노트가 프로토타입 슬롯을 차지.** `docs/design/prototypes/legacy/*/PROGRESS.md` 가 경로에 prototype 이 있다는 이유로 시안 html 을 밀어냈다(romeo main). PROGRESS·README·NOTES·TODO·CHANGELOG 를 슬롯 후보에서 제외.
   3. **스모크가 접힌 행 도트에서 멎던 것.** 안 보이는 도트를 건너뛰고 세며, 모달 검증도 특정 인덱스 대신 버튼이 뜰 때까지 훑도록 개정.
 - **`HarnessView.tsx:1020` 타입 에러 해소.** 콜백 안에서 `row.jumpTo` 좁히기가 풀리던 것을 지역 상수로 받아 해결. `npx tsc -b` **exit 0**(종전 실패).
 - **회귀 테스트 정비.** `artifact-discovery.test.mjs` **16/16 pass**(직전 5건은 zero-one 개명·데이터 드리프트로 이미 실패 중이던 것). 파일명을 못박던 단언을 계약 단언으로 바꾸고, `zeroOne` 경로를 `zto1-it-edu-community` 로 교정. `venture-paths.test.mjs` 2/2.
@@ -267,7 +325,7 @@
 - P0: `wiki/거버넌스/결정.md` D-017은 세무 자문 전 환전을 회장 계정에만 제한했지만, `web/src/lib/supabase/service.ts`와 cashout action은 전역 스위치가 켜지면 모든 인증 사용자의 신청을 허용한다. 서버 allowlist가 없다.
 - 주요 P1: 승인 PRD v0.4의 다중 목표·visibility·응원자 My Page·감사 메시지가 구현되지 않았고, 환전 3화면은 DB 오류를 0원·신청 없음·이력 없음으로 위장한다. 개인정보처리방침은 운영 실발송 기록이 있는 카카오·솔라피를 비활성으로 고지한다.
 - 직접 실측: 운영 보호 API 3개 무인증 HTTP 401, Supabase migration local·remote 42/42 일치, Vitest 279/279 PASS, production dependency audit 0건. 기존 390/1280 캡처는 재촬영하지 않았고 auth-only 리다이렉트 이미지는 기능 정상 증거에서 제외했다.
-- 종료 훅의 QA 핀 결함을 실물과 대조했다. `docs/qa-tracker.md`와 `docs/design-conformance-matrix.md`는 이미 qa 핀에 존재했지만 `pipeline-state.core.md:10`의 inline comment 때문에 linter가 블록 전체를 읽지 못했다. comment를 분리하고 glob 핀을 실파일 5개로 펼쳐 검사기가 실제 블록을 읽게 했다.
+- 종료 훅의 QA 핀 결함을 실물과 대조했다. `docs/qa/qa-tracker.md`와 `docs/design/design-conformance-matrix.md`는 이미 qa 핀에 존재했지만 `pipeline-state.core.md:10`의 inline comment 때문에 linter가 블록 전체를 읽지 못했다. comment를 분리하고 glob 핀을 실파일 5개로 펼쳐 검사기가 실제 블록을 읽게 했다.
 - 현재 감사가 BLOCK이고 독립 regression 산출물도 없으므로 QA 승인을 꾸며 유지하지 않았다. `build`를 재오픈하고 build·qa·ship을 승인 목록에서 제거했다. `pipeline-artifact-lint.sh`는 exit 0으로 통과했고, STAMP 결손 위생 경고 11건은 별도 후속으로 남았다.
 
 ### 남은 이슈
@@ -404,7 +462,7 @@
 ## CLAUDE 스프린트 잔여 확인·종료 판정 대기 (2026-09-02 07:20 KST, 회장 "할거 다했어?")
 
 ### 지금까지 한 것
-- 컨트롤러 몫 잔여 없음을 실측 확인. `git status --porcelain` 미커밋 **1건**뿐이며, 그것은 훅 `chairman-request-capture.sh` 가 회장 발화를 자동 박제하는 `docs/requests/inbox/chairman-2026-09.md` 로 작업 잔여물이 아니다.
+- 컨트롤러 몫 잔여 없음을 실측 확인. `git status --porcelain` 미커밋 **1건**뿐이며, 그것은 훅 `chairman-request-capture.sh` 가 회장 발화를 자동 박제하는 `docs/_archive/requests/inbox/chairman-2026-09.md` 로 작업 잔여물이 아니다.
 - `git log --oneline -3` = `eaf5af0` `fb162b5` `e4928fe`, origin 동기 확인.
 - 직전 감사(승인 산출물 내용 최신성) 결과 그대로 유지: 승인 핀 **32건**, 드리프트 **0**, 대시보드 32/32 missingReason 0.
 - 백로그 재훑음 결과 **컨트롤러가 집을 항목 0건**. 남은 6건은 회장 결정 4 / 실제 회원 1 / 다음 스프린트 1.
@@ -430,7 +488,7 @@
 ### 지금까지 한 것
 개수·연결만 보던 앞선 점검을 **내용 최신성**까지 내려 다시 감사했다. 결함 2건을 찾아 둘 다 닫았다.
 
-- **결함1: 정본 프로토타입이 gitignore 안에 있었다.** 전체 여정 프로토타입 v3.8 이 `scratchpad/`(gitignore 37행)에 있는데, DESIGN.md·user-flow.md·`SplitBalanceCard.tsx` 주석 등 **10개 파일이 이걸 정본으로 인용**하고 있었다. 저장소 밖·미추적·백업 없음 = 지우면 영구 소실. → `docs/prototype/core-cashout-full-journey-v3.8-opus5.html` 로 승격, 추적 편입, design 승인 핀 등록, **살아있는 인용 22곳 경로 교정**(DESIGN.md 13 / user-flow.md 3 / pipeline-state 5 / 소스 1). 과거 로그(build-log·qa-tracker·구 리포트)는 그 시점 사실이라 미수정. vitest 279/279 유지 확인.
+- **결함1: 정본 프로토타입이 gitignore 안에 있었다.** 전체 여정 프로토타입 v3.8 이 `scratchpad/`(gitignore 37행)에 있는데, DESIGN.md·user-flow.md·`SplitBalanceCard.tsx` 주석 등 **10개 파일이 이걸 정본으로 인용**하고 있었다. 저장소 밖·미추적·백업 없음 = 지우면 영구 소실. → `docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html` 로 승격, 추적 편입, design 승인 핀 등록, **살아있는 인용 22곳 경로 교정**(DESIGN.md 13 / user-flow.md 3 / pipeline-state 5 / 소스 1). 과거 로그(build-log·qa-tracker·구 리포트)는 그 시점 사실이라 미수정. vitest 279/279 유지 확인.
 - **결함2: 승인된 qa 단계가 NG 문서를 가리키고 있었다.** 핀된 `core-cashout-qa-report-v1-gpt-codex.md`(8-24)가 `status: changes-requested`, 판정 `❌ NG`, Design Score `C, FAIL`, basis 는 DESIGN.md v2.0.0·FDD v1.0.0·구 프로토타입. 회장이 대시보드에서 열면 **NG 를 본다.** → qa-verifier 위임으로 `core-cashout-qa-report-v2-claude-sonnet.md` 신규 작성(v1 supersedes, 구본 보존). 위임이 8개 실측 명령을 직접 재실행: vitest 279/279, mutation 8/8, E2E 12/12, audit 0, 보안헤더 4종, health 1.2.1, qa:verify-production 3/3.
 - **위임이 미검증으로 남긴 1건을 컨트롤러가 닫았다.** v1 의 NG 4번(토큰 위반)은 이 저장소에 `design-lint` 스크립트가 **없어서** 검증 불가였다. 지목된 3파일(`SplitBalanceCard.tsx`·`CashoutQueue.tsx`·`MyLinkCard.tsx`)을 직접 검사 → 하드코딩 hex **0건**, inline `style={{` **0건**. **v1 NG 4건 전부 해소.** 리포트에 컨트롤러 후속 실측 표로 삽입.
 - 승인 핀 **31 → 32건**(전체 여정 프로토타입 추가), QA 리포트 핀 v1 → v2 교체. `artifact-drift-check.sh` **드리프트 0**.
@@ -456,7 +514,7 @@
 
 ### 지금까지 한 것
 - **저장소 정리 완료.** 잔여 미커밋은 성장 트랙 7건뿐(다른 세션 소유, §8 로 미수정).
-  - `docs/requests/inbox/` 추적 편입(`5790aa6`). 훅 `chairman-request-capture.sh` 가 회장 발화를 원문 박제하는 파일인데 미추적이라 세션 교대 시 소실 위험이 있었다(§4.6 request-provenance).
+  - `docs/_archive/requests/inbox/` 추적 편입(`5790aa6`). 훅 `chairman-request-capture.sh` 가 회장 발화를 원문 박제하는 파일인데 미추적이라 세션 교대 시 소실 위험이 있었다(§4.6 request-provenance).
   - SJ_BRAIN_wiki `d1f387a`: 승인 핀이 파일명 추측보다 우선한다는 계약을 테스트로 고정 + 수집 결과 갱신. `node --test` **16/16**. 이번 수정이 다음 세션에 조용히 증발하지 않게 하는 회귀 장치.
 - **최종 실측 재확인:** `/api/health` = `{"status":"ok","version":"1.2.1","database":"ok"}`, 태그 `v1.2.1` 존재, `artifact-drift-check.sh` **드리프트 0**, main push 완료(origin 동기).
 
@@ -540,7 +598,7 @@
 ### 지금까지 한 것 (진단 = 컨트롤러 직접 실측)
 - `dashboard-sync.sh manual` 실행. 수집 정상 종료(9벤처·19트랙).
 - **haenael-ge 합성키가 19개뿐**이고 승인 핀 37건 중 대부분이 누락. 누락 예: security-report, perf-report, cross-browser-matrix, RELEASE.md, CHANGELOG.md, 구현현황.md, design-spec, clean-frames stamp, migrations 글롭, qa/contracts 글롭, fdd v0.1.0, folder-structure, core-cashout-qa-report.
-- **오탐**: `haenael-ge::main::prototype` = `docs/brand-assets/feed/_src/feed-02-carousel.html`(인스타 마케팅 캐러셀). `::main::wireframes` = 구 v2 허브. `design-conformance-matrix` 가 core/main 에 서로 다른 파일로 중복.
+- **오탐**: `haenael-ge::main::prototype` = `docs/growth/assets/brand-assets/feed/_src/feed-02-carousel.html`(인스타 마케팅 캐러셀). `::main::wireframes` = 구 v2 허브. `design-conformance-matrix` 가 core/main 에 서로 다른 파일로 중복.
 - **근본 원인 ① 확증(직접 실행 검증).** `collect-artifacts.mjs`:270 이 `/^approved_artifacts:\s*\{(.*)\}/m` 로 **인라인 한 줄 객체만** 파싱한다. 우리는 release-and-artifacts.md §1.1 **블록/리스트 스키마**를 쓴다. node 로 직접 돌려 **매치 X** 확인. → 승인 핀 37건이 전부 무시되고 파일명 추측(discoverRepoArtifacts)으로 떨어진다. `pipeline-live.generated.ts` 의 `HaenaelGe.approvedArtifacts` 도 **`[]`** 로 같은 증상(해조단타는 인라인 스키마라 값이 있음).
 - **근본 원인 ② 확증.** 유령 `main` 트랙의 출처 = `.claude/worktrees/pay-open` 워크트리에 **루트 `pipeline-state.md`** 가 있어 `lineOf()` 가 'main' 을 반환. 그 워크트리는 브랜치 `wt-pay-open`(마지막 커밋 2026-08-02, **main 에 이미 병합됨**)이고 상태파일은 "2026-07-23 v2 design 진행 중"으로 낡았다. 구 PRD·구 와이어·마케팅 캐러셀이 여기서 올라온다.
 - 우리 쪽 핀은 이상 없음: 37건 실물 전량 존재(글롭 2건도 각각 4파일·1파일 해석), 대시보드가 잡은 haenael 엔트리 45건의 import 대상 **실재 45/45·실패 0**(즉 "안 열리는" 문제는 아니고 "엉뚱한 것이 열리는" 문제다).
@@ -563,7 +621,7 @@
 ## CLAUDE 스프린트 종료 (2026-08-30 22:45 KST)
 
 ### 지금까지 한 것 (이 턴 추가분)
-- **환전 폼 시안 대조 완료 = 마지막 QA 잔여 해소.** kill switch 켠 E2E 로 재캡처(`artifacts/qa-cashout-core-20260824/build-fix/cashout-390.png`) 후 시안 `core-cashout-30-27-form-390-v1-gpt-codex.png` 과 2장을 나란히 Read 육안 대조. 타이틀·분해카드 3행·환산카드 4행·폼 필드 순서·요약박스·버튼 **일치**. 핵심인 **자격·상한 분리 문구**(`환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 N개`)도 일치. `docs/design-conformance-matrix.md` 에 스탬프 기록.
+- **환전 폼 시안 대조 완료 = 마지막 QA 잔여 해소.** kill switch 켠 E2E 로 재캡처(`artifacts/qa-cashout-core-20260824/build-fix/cashout-390.png`) 후 시안 `core-cashout-30-27-form-390-v1-gpt-codex.png` 과 2장을 나란히 Read 육안 대조. 타이틀·분해카드 3행·환산카드 4행·폼 필드 순서·요약박스·버튼 **일치**. 핵심인 **자격·상한 분리 문구**(`환전 기준: 모인 클로버 30개 이상 · 지금 지급 가능 N개`)도 일치. `docs/design/design-conformance-matrix.md` 에 스탬프 기록.
 - **E2E 12/12 통과.** 처음엔 12건 전부 실패했는데 내 코드 회귀가 아니라, 앞서 버전 주입 확인용으로 돌린 **가짜 Supabase 주소 빌드 결과물을 E2E 가 재사용**한 탓이었다(세션 쿠키 이름 불일치 → 전부 로그아웃 판정). 올바른 env 로 재빌드 후 12/12. 이 교훈을 회고에 추가했다.
 - **대표 주소 자동 추적 복구 확인(관찰됨).** 태그 push 배포 `haenael-72ps8djpd` 에 수동 alias 없이 `haenael-ge.vercel.app` 이 붙었다. 2026-08-25 부터 반복되던 수동 승격 문제도 Root Directory 미설정이 뿌리였다.
 - **릴리즈 v1.2.1 released.** 태그 생성·push 완료. RELEASE.md·CHANGELOG.md 는 release-manager 위임(verify FAIL=벤치마크 근거 부족, 내용은 컨트롤러 실측과 대조해 사실 확인 후 보존).
@@ -605,7 +663,7 @@
 - **QA 검증 대상 주소 교정.** `scripts/qa/verify-production.mjs` 와 `web/playwright.production.config.ts` 가 302 redirect 되는 `haenaelge.vercel.app` 을 보고 있었다. 대표 주소 `haenael-ge.vercel.app` 로 교정. **대표 주소 헤더가 오래 미검증이던 이유였다.**
 - **카카오 prefetch 차단.** 배포 후 Firefox·WebKit 콘솔에 CSP connect-src 위반이 새로 떴다. 랜딩(`app/page.tsx`)의 카카오 로그인 Link 만 prefetch 가 켜져 있었다(목표 페이지·전화동의 안내는 이미 꺼져 있었음). CSP 를 여는 대신 prefetch 를 껐다.
 - **최종 실측(전부 컨트롤러 직접):** 보안 헤더 **4/4** 관찰, `x-powered-by` **0건**, Firefox·WebKit 콘솔 **error 0·pageerror 0**, `qa:verify-production` **3/3**, 운영 인증 읽기 E2E **1/1**(제품 쓰기 0), `/api/health` version **1.2.1**·database ok, vitest **279/279**, 프로덕션 빌드 통과.
-- **qa·ship APPROVED.** `pipeline-state.core.md` 갱신. `docs/security-report.md`·`docs/cross-browser-matrix.md` 에 배포 후 재판정 PASS 스탬프 추가. `docs/제품현황.md` 갱신.
+- **qa·ship APPROVED.** `pipeline-state.core.md` 갱신. `docs/qa/security-report.md`·`docs/qa/cross-browser-matrix.md` 에 배포 후 재판정 PASS 스탬프 추가. `docs/제품현황.md` 갱신.
 - **회고 확장.** `wiki/3-operations/2026-08-30-환전-스프린트-회고.md` 에 "회고를 쓴 그날 같은 병을 다시 앓았다" 절과 "증상 대신 구조를 고친 것" 대조표 추가. 브라우저로 띄웠다.
 - 커밋 push: `8db3558`(vercel 구성 이관) `30f98a0`(버전 진실원·QA 주소) `de109a6`(prefetch).
 
@@ -625,7 +683,7 @@
 ## CLAUDE 턴 종료 시점 상태 (2026-08-30 03:40 KST)
 
 - push 완료: `fb6f871..a659f1f` (커밋 5건). 작업트리 clean(growth 트랙 제외).
-- **Vercel 배포 Error 지속.** 해제 = 회장 콘솔에서 Root Directory=`web`. 런북 `docs/ops/vercel-root-directory-수정.md`.
+- **Vercel 배포 Error 지속.** 해제 = 회장 콘솔에서 Root Directory=`web`. 런북 `docs/ship/ops/legacy/vercel-root-directory-수정.md`.
 - **CI run `33286007123` 도 세 job 전부 steps 0개로 종료.** annotation = 계정 결제 실패 또는 spending limit. 코드 실패·flaky 아님. Actions 무료 2,000분 소진 + budget $0(2026-08-29 브라우저 실화면 확인). green 증거 생성 불가.
 - 위임 검증: 성능 측정(Sonnet) verify FAIL — `~/.claude/standards/doc-review.md` Read 0회. 측정 스크립트·원자료 실재하고 컨트롤러가 직접 확인해 **경고 라벨 붙여 출고**(회장 2026-07-11 규약). 재위임 시 프롬프트에 doc-review.md Read 필수 명시할 것.
 - 실수원장 2건 추가: [proxy] 의존성 변경을 배포 확인 없이 push / [struct] Root Directory 미설정을 우회로 덮은 구조 문제 재발(count 2).
@@ -638,7 +696,7 @@
 - **근본 원인 규명.** 실제 next 는 16.3.3 으로 지목된 canary 보다 최신이라 조건은 이미 충족. 문제는 **Vercel 이 next 버전을 못 읽는 것**이다. CLI 재배포가 `No Next.js version detected ... check your Root Directory setting` 을 뱉었고, 프로젝트 API 조회 결과 `rootDirectory = None` 인데 `package.json` 은 `web/` 에 있다. 루트 `vercel.json` 이 installCommand·buildCommand·outputDirectory 로 빌드만 우회시켰을 뿐 프레임워크 위치는 안 알려줬다(구 `6b23fd7` 의 성격). next 16.3 부터 immutable static upload 가 켜지며 버전 게이트 경로가 생겨 이제서야 터졌다.
 - **되돌리기 불가 실측.** next 16.2.10 으로 내리면 배포는 살지만 `npm audit --omit=dev` 가 0건 → **high 3건**으로 되살아난다. 배포를 위해 보안을 되돌리지 않기로 하고 16.3.3 을 복원했다(작업트리 clean, 0건 재확인).
 - API 로 `rootDirectory: web` PATCH 시도 → **도구 분류기가 운영 배포 설정 변경으로 차단.**
-- 수정 런북 작성: `docs/ops/vercel-root-directory-수정.md` (콘솔 경로·확인 명령·설정 후 정리 순서 포함). 브라우저로 띄웠다.
+- 수정 런북 작성: `docs/ship/ops/legacy/vercel-root-directory-수정.md` (콘솔 경로·확인 명령·설정 후 정리 순서 포함). 브라우저로 띄웠다.
 - 성능 실측 반영(위임 Sonnet, verify FAIL=품질헌법 미독이나 원자료 실재로 보존): LCP 384~840ms, CLS 0, 오류율 0/30, p95 0.166~1.229s. 재현 스크립트 `scripts/qa/measure-web-vitals.mjs`.
 - **디자인 증거 구멍 발견.** 시안 `core-cashout-30-27-form-390` 과 실화면 `390-cashout.png` 를 직접 Read 대조. 시안엔 환전 신청 폼이 있는데 실화면엔 "환전 기능을 준비하고 있어요" 대기 카드가 있다. 코드 확인 결과 버그 아님(`CashoutRequestForm.tsx`:569-577, `cashoutEnabled` 거짓이면 폼 대신 대기 카드). **문제는 폼 상태 캡처가 증거 묶음에 없다는 것** — 정합 대조표는 통과라 적혀 있으나 근거 화면이 다른 화면이다.
 
