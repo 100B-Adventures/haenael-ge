@@ -1,3 +1,23 @@
+## CLAUDE v2 친구 레이어 프로토타입 회수·표출 (2026-09-16 08:07 KST)
+
+### 무엇을 어디까지
+- product-designer 위임 프로토타입 회수: `docs/design/prototypes/friends-invite-v1-opus48.html`(3화면 친구목록·연락처초대·초대보상, 각 3상태). show-artifact로 표출(포커스 유지).
+- 회장 아이디어 보존 + 안전판: 초대 보상=환전불가 "부스트 클로버"(신개념, 아이데이션), 초대=카카오 공유/딥링크(#13 준수), 재응원푸시 없음(#12), 랭킹 금액순 배제·사적 관계배지(D-003).
+
+### 검증했나
+- design-review A-(서브에이전트 headless). 컨트롤러 독립 headless 실측(Playwright 390폭): console_errors=0, clicks_ok=6/click_content_delta=1539(인터랙션 동작), scrollHeight=2123/scrollY=1279(스크롤됨), horizontal_overflow=0.
+- verify-agent-quality: **FAIL 1건**(토큰 진실원 global.css Read 증거 부족). 개념 검토용 prototype이라 ⛔라벨 출고, build 착수 시 재위임으로 닫음. hand-patch 안 함.
+
+### 남은 이슈 (회장 판단)
+1. 초대 보상 형태 (a)부스트만[기본] /(b)소액 실클로버+상한 /(c)보상없이 관계연결만.
+2. v2 정체성 A/B.
+3. 부스트 클로버(환전불가 통화) 개념 채택 여부(채택 시 결정원장·아이디어원장 박제).
+
+### 다음 액션
+1. **소유자: 회장.** (a)/(b)/(c) + A/B 택. **종료증거:** open-decisions 응답.
+2. **소유자: 세션.** 택 후 PRD·DESIGN 반영, 프로토타입 결함분 재위임. **종료증거:** 산출물 버전 갱신.
+
+---
 ## CLAUDE v2 초대→클로버→친구목록 아이디어 판정 + 프로토타입 위임 (2026-09-16 07:52 KST, 회장 "연락처 초대로 클로버 모으는 기능 어때, 대답하고 프로토타입 만들어봐")
 
 ### v2 범위 회장 수렴
