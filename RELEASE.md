@@ -32,31 +32,31 @@ ships:
   qa: 1.1.0
 changelog: CHANGELOG.md#121
 artifact_to_release:
-  docs/prd-haenael-ge-v0.4.0.md:
+  docs/plan/prd-haenael-ge-v0.4.0.md:
     release: v1.2.1
     tag: released_in
-  docs/one-thing.md:
+  docs/plan/one-thing.md:
     release: v1.2.1
     tag: released_in
-  docs/persona.md:
+  docs/plan/persona.md:
     release: v1.2.1
     tag: released_in
-  docs/bm.md:
+  docs/plan/bm.md:
     release: v1.2.1
     tag: released_in
-  docs/risks.md:
+  docs/plan/risks.md:
     release: v1.2.1
     tag: released_in
   DESIGN.md:
     release: v1.2.1
     tag: released_in
-  docs/user-flow.md:
+  docs/design/user-flow.md:
     release: v1.2.1
     tag: released_in
-  docs/design-spec-core-cashout-30-27-v1-gpt-codex.md:
+  docs/design/design-spec-core-cashout-30-27-v1-gpt-codex.md:
     release: v1.2.1
     tag: released_in
-  docs/prototype/core-cashout-30-27-v1-gpt-codex.html:
+  docs/design/prototypes/legacy/core-cashout-30-27-v1-gpt-codex.html:
     release: v1.2.1
     tag: released_in
   docs/design/clean-frames/core-cashout-30-27-form-390-v1-gpt-codex.png:
@@ -74,52 +74,52 @@ artifact_to_release:
   docs/design/clean-frames/core-cashout-30-27-clean-frames-v1-gpt-codex.stamp.md:
     release: v1.2.1
     tag: released_in
-  docs/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md:
+  docs/eng-design/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md:
     release: v1.2.1
     tag: released_in
-  docs/fdd-haenael-ge-v0.1.0.md:
+  docs/eng-design/fdd-haenael-ge-v0.1.0.md:
     release: v1.2.1
     tag: released_in
-  docs/api-contract.md:
+  docs/eng-design/api-contract.md:
     release: v1.2.1
     tag: released_in
-  docs/architecture.md:
+  docs/eng-design/architecture.md:
     release: v1.2.1
     tag: released_in
-  docs/design-patterns.md:
+  docs/design/design-patterns.md:
     release: v1.2.1
     tag: released_in
-  docs/folder-structure.md:
+  docs/eng-design/folder-structure.md:
     release: v1.2.1
     tag: released_in
-  docs/test-plan.md:
+  docs/qa/test-plan.md:
     release: v1.2.1
     tag: released_in
-  docs/erd.md:
+  docs/eng-design/erd.md:
     release: v1.2.1
     tag: released_in
-  docs/test-cases.md:
+  docs/qa/test-cases.md:
     release: v1.2.1
     tag: released_in
-  docs/build-log.md:
+  docs/eng-design/build-log.md:
     release: v1.2.1
     tag: released_in
   docs/구현현황.md:
     release: v1.2.1
     tag: released_in
-  docs/qa-tracker.md:
+  docs/qa/qa-tracker.md:
     release: v1.2.1
     tag: released_in
-  docs/design-conformance-matrix.md:
+  docs/design/design-conformance-matrix.md:
     release: v1.2.1
     tag: released_in
-  docs/cross-browser-matrix.md:
+  docs/qa/cross-browser-matrix.md:
     release: v1.2.1
     tag: released_in
-  docs/security-report.md:
+  docs/qa/security-report.md:
     release: v1.2.1
     tag: released_in
-  docs/perf-report.md:
+  docs/qa/perf-report.md:
     release: v1.2.1
     tag: released_in
 ```
@@ -209,11 +209,11 @@ GitHub Actions는 이번 릴리스에서도 열리지 않았다. 코드 실패�
 ---
 
 🏷 STAMP | line: core | 생성: 2026-08-30 15:10 KST | model: claude-sonnet-5 | agent: release-manager
-skills: 없음(문서 마감 작업, 매칭 스킬 없음 — 아래 SKILLS_SKIPPED 참조) | 근거: `pipeline-state.core.md`, 컨트롤러 위임 프롬프트의 실측 근거(배포 성공·헤더 4/4·교차브라우저·성능·회귀 수치), `docs/qa-tracker.md`, `artifact-drift-check.sh`, git log, `web/package.json`, SemVer, Keep a Changelog
+skills: 없음(문서 마감 작업, 매칭 스킬 없음 — 아래 SKILLS_SKIPPED 참조) | 근거: `pipeline-state.core.md`, 컨트롤러 위임 프롬프트의 실측 근거(배포 성공·헤더 4/4·교차브라우저·성능·회귀 수치), `docs/qa/qa-tracker.md`, `artifact-drift-check.sh`, git log, `web/package.json`, SemVer, Keep a Changelog
 고민: 위임 프롬프트가 이미 컨트롤러 직접 관찰 증거로 채워져 있어 이 문서는 그 증거를 재조사하지 않고 매니페스트·CHANGELOG로 정직하게 번역하는 역할에 집중했다. 임의로 "완전 해결"로 과장하지 않고, GitHub Actions·환전 폼 캡처·실계정 미검증 3건은 released 판정과 별개로 알려진 경계에 남겼다.
 
 SKILLS_USED: 없음
 SKILLS_SKIPPED: doc-review.md는 PRD/FDD/QA 문서 전용 채점 헌법(§0 적용 대상 role: prd/tech/qa)이라 릴리스 매니페스트 자체에는 RUBRIC_SCORE 채점을 적용하지 않았다. release-and-artifacts.md §5·§7 스키마를 그대로 따르는 것으로 대체했다.
 
-SOURCES/MODEL: claude-sonnet-5 | `pipeline-state.core.md`(approved_stages: plan,design,eng-design,build,qa / ship 승인 로그); `docs/qa-tracker.md`; `~/.claude/standards/release-and-artifacts.md`; `~/.claude/standards/doc-review.md`; git log(`de109a6`); `web/package.json`(version 1.2.1); `bash ~/.claude/harness/bin/artifact-drift-check.sh`; <https://semver.org/>; <https://keepachangelog.com/en/1.1.0/>; <https://docs.github.com/en/billing/concepts/product-billing/github-actions>
+SOURCES/MODEL: claude-sonnet-5 | `pipeline-state.core.md`(approved_stages: plan,design,eng-design,build,qa / ship 승인 로그); `docs/qa/qa-tracker.md`; `~/.claude/standards/release-and-artifacts.md`; `~/.claude/standards/doc-review.md`; git log(`de109a6`); `web/package.json`(version 1.2.1); `bash ~/.claude/harness/bin/artifact-drift-check.sh`; <https://semver.org/>; <https://keepachangelog.com/en/1.1.0/>; <https://docs.github.com/en/billing/concepts/product-billing/github-actions>
 PRESENTATION_CHECK: 내부 태그 잔재 없음 확인 / Markdown 구조·표 가독성 확인

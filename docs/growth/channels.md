@@ -20,7 +20,7 @@
 ## 확인 근거
 
 - `wiki/brand/channel-identity-kit.md`: 3플랫폼 역할, 핸들, Instagram 실개설 상태.
-- `docs/instagram-launch-runbook-2026-07-29.md`: Instagram과 Threads 실행 순서.
+- `docs/growth/instagram-launch-runbook-2026-07-29.md`: Instagram과 Threads 실행 순서.
 - BRAIN `ops/inventory/서드파티-계정-인벤토리.md`: 해낼게 SNS 계정 식별자는 미기재 상태.
 
 ---
@@ -33,4 +33,4 @@ STAMP
 
 SKILLS_USED: 없음
 SKILLS_SKIPPED: 매칭 스킬 없음
-SOURCES/MODEL: gpt-5.6 / `zero-one/docs/growth/channels.md`, `haenael-ge/wiki/brand/channel-identity-kit.md`, `haenael-ge/docs/instagram-launch-runbook-2026-07-29.md`, BRAIN 서드파티 계정 인벤토리
+SOURCES/MODEL: gpt-5.6 / `zero-one/docs/growth/channels.md`, `haenael-ge/wiki/brand/channel-identity-kit.md`, `haenael-ge/docs/growth/instagram-launch-runbook-2026-07-29.md`, BRAIN 서드파티 계정 인벤토리

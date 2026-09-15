@@ -72,17 +72,17 @@ cd web && npm run test:e2e
 - Vercel·Supabase 운영 환경은 구성됐고, 카카오 로그인 실제 왕복이 확인됐다.
 - 무료 코어 루프, GA4, Slack, 리드, 카카오 로그인은 운영 검증 이력이 있다.
 - 이용료 10% 마이그레이션은 운영 DB 미적용이다. 환전 한 바퀴 실행과 실지급은 미검증이다.
-- Toss 결제는 운영 환경에서 kill switch로 제어한다. 운영 적용·환전 QA·외부 연동의 최종 상태는 `pipeline-state.core.md`와 `docs/qa-tracker.md`를 따른다.
+- Toss 결제는 운영 환경에서 kill switch로 제어한다. 운영 적용·환전 QA·외부 연동의 최종 상태는 `pipeline-state.core.md`와 `docs/qa/qa-tracker.md`를 따른다.
 
 ## 주요 문서
 
-- `docs/prd-haenael-ge-v0.3.0.md` — 승인된 제품 요구사항 (`approved_artifacts` 핀)
-- `docs/prd-haenael-ge-v0.4.0.md` — 재개된 plan 증분안(미승인)
-- `docs/fdd-haenael-ge-v0.1.0.md` — 기능 설계 (슬라이스별 구현 명세)
-- `docs/architecture.md` — 기술 아키텍처
-- `docs/api-contract.md` — API 계약
+- `docs/plan/prd-haenael-ge-v0.3.0.md` — 승인된 제품 요구사항 (`approved_artifacts` 핀)
+- `docs/plan/prd-haenael-ge-v0.4.0.md` — 재개된 plan 증분안(미승인)
+- `docs/eng-design/fdd-haenael-ge-v0.1.0.md` — 기능 설계 (슬라이스별 구현 명세)
+- `docs/eng-design/architecture.md` — 기술 아키텍처
+- `docs/eng-design/api-contract.md` — API 계약
 - `DESIGN.md` — 디자인 시스템 (색상·타이포·컴포넌트 규칙)
 
 ---
 
-STAMP: 수정 시각 2026-08-22 14:22 KST | 모델 GPT-5 Codex | 근거 `pipeline-state.core.md`, `docs/qa-tracker.md`, `web/src/app/**`, `web/src/components/**`, `supabase/migrations/20260821000000_cashout_service_fee_10pct.sql`, `supabase/migrations/20260822000000_cashout_clover_lock_a1.sql`
+STAMP: 수정 시각 2026-08-22 14:22 KST | 모델 GPT-5 Codex | 근거 `pipeline-state.core.md`, `docs/qa/qa-tracker.md`, `web/src/app/**`, `web/src/components/**`, `supabase/migrations/20260821000000_cashout_service_fee_10pct.sql`, `supabase/migrations/20260822000000_cashout_clover_lock_a1.sql`

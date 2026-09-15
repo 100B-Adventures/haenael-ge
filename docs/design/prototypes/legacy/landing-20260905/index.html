@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 사전수요 랜딩 3안 비교 · 2026-09-05</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root{
+    --bg:#F4F2EE; --panel:#FFFFFF; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B;
+    --line:#E2DED5; --clover:#1B8A4F; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+    --amber-soft:#FBF1DD; --amber-line:#E8D3A6; --amber-ink:#8A5A12;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif;background:var(--bg);color:var(--ink);
+    word-break:keep-all;-webkit-font-smoothing:antialiased}
+  /* ── 검수 셸 (제품 화면 아님) ── */
+  .shell{display:grid;grid-template-columns:236px 1fr 372px;height:100vh}
+  aside{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:22px 18px}
+  .logo{font-size:15px;font-weight:900;letter-spacing:-.4px;margin-bottom:4px}
+  .logo span{color:var(--clover)}
+  .sub{font-size:11.5px;color:var(--faint);font-weight:600;line-height:1.6;margin-bottom:22px}
+  .nav-label{font-size:10.5px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
+  .nav-item{display:block;width:100%;text-align:left;border:1px solid var(--line);background:transparent;cursor:pointer;
+    font-family:inherit;padding:12px 13px;border-radius:12px;margin-bottom:8px;transition:all .12s ease}
+  .nav-item:hover{border-color:var(--clover)}
+  .nav-item.on{background:var(--clover-soft);border-color:var(--clover);}
+  .nav-item b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.3px}
+  .nav-item i{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;line-height:1.5}
+
+  main{position:relative;overflow:auto;padding:18px;background:
+    repeating-linear-gradient(45deg,#EDEBE6 0 8px,#F4F2EE 8px 16px)}
+  .bar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+  .seg button{border:0;background:transparent;font-family:inherit;font-size:12px;font-weight:800;color:var(--muted);
+    padding:8px 15px;cursor:pointer}
+  .seg button.on{background:var(--ink);color:#fff}
+  .barnote{font-size:11.5px;color:var(--faint);font-weight:600}
+  .frame-wrap{display:flex;justify-content:center}
+  iframe{border:1px solid var(--line);background:#fff;border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.09);display:block}
+
+  .insp{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:24px 22px}
+  .insp h2{font-size:19px;font-weight:900;letter-spacing:-.6px}
+  .insp .tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--clover-ink);background:var(--clover-soft);padding:5px 10px;border-radius:999px;margin-bottom:10px}
+  .blk{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+  .blk h3{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+  .blk p,.blk li{font-size:13px;line-height:1.72;color:var(--muted);font-weight:500}
+  .blk ul{padding-left:16px}
+  .blk li{margin-bottom:6px}
+  .blk b{color:var(--ink);font-weight:800}
+  .chg{background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:12px;padding:14px 15px;margin-top:10px}
+  .chg li{color:var(--amber-ink);font-weight:600}
+  .axes{display:grid;grid-template-columns:74px 1fr;gap:6px 10px;font-size:12.5px}
+  .axes dt{font-weight:800;color:var(--ink)}
+  .axes dd{color:var(--muted);line-height:1.6}
+
+  .vote{margin-top:22px;padding-top:18px;border-top:2px solid var(--ink)}
+  .vote label{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;font-weight:700;padding:9px 0;cursor:pointer}
+  .vote input{margin-top:3px}
+  textarea{width:100%;min-height:110px;font-family:inherit;font-size:13px;line-height:1.6;padding:12px;
+    border:1px solid var(--line);border-radius:12px;resize:vertical;background:#FBFAF7;color:var(--ink)}
+  textarea:focus{outline:none;border-color:var(--clover)}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .row button{flex:1;font-family:inherit;font-size:12.5px;font-weight:800;padding:12px;border-radius:999px;cursor:pointer;border:0}
+  .b-main{background:var(--clover);color:#fff}
+  .b-sub{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .saved{font-size:11.5px;color:var(--clover-ink);font-weight:700;margin-top:8px;min-height:16px}
+  .out{width:100%;min-height:150px;margin-top:10px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.6;
+    padding:12px;border:1px solid var(--line);border-radius:12px;background:#FBFAF7;display:none}
+  .out.on{display:block}
+  .stamp-bar{grid-column:1/-1}
+  @media (max-width:1280px){ .shell{grid-template-columns:200px 1fr 330px} }
+  @media (max-width:1000px){
+    .shell{display:block;height:auto}
+    aside,.insp{border:0;border-bottom:1px solid var(--line)}
+    main{padding:16px}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside>
+    <div class="logo">해낼게<span>.</span> 사전수요 랜딩</div>
+    <p class="sub">3안 비교 보드 · 2026-09-05<br>고르실 것: 어느 방향으로 갈지 하나.</p>
+
+    <div class="nav-label">안 고르기</div>
+    <button class="nav-item on" data-k="a"><b>A · 조용한 종이</b><i>지금 배포 톤 그대로. 응원 워드클라우드가 3D로 내려앉음</i></button>
+    <button class="nav-item" data-k="b"><b>B · 유리병 저금통</b><i>다크 그린 + 명조. 코인이 병에 실제로 쌓임</i></button>
+    <button class="nav-item" data-k="c"><b>C · 선언 전광판</b><i>모노 + 각진 라인. 선언 문장이 원통에 감겨 돎</i></button>
+
+    <div class="nav-label">보는 법</div>
+    <p class="sub" style="margin:0">위 세 개를 눌러 가며 오른쪽 설명과 함께 보십시오. 가운데 화면은 실제로 스크롤·클릭·드래그가 됩니다. 폭 토글로 폰과 데스크톱을 바꿔 봅니다.</p>
+  </aside>
+
+  <main>
+    <div class="bar">
+      <div class="seg" id="vp">
+        <button data-w="390" class="on">모바일 390</button>
+        <button data-w="768">태블릿 768</button>
+        <button data-w="1280">데스크톱 1280</button>
+      </div>
+      <a class="barnote" id="openraw" href="variant-a.html" target="_blank" style="color:var(--clover-ink);font-weight:800">새 탭에서 크게 보기 ↗</a>
+      <span class="barnote" id="vpnote">3D는 실제로 돌아갑니다. WebGL이 없거나 느린 기기에서는 자동으로 정지 화면으로 바뀝니다.</span>
+    </div>
+    <div class="frame-wrap"><iframe id="fr" src="variant-a.html" width="390" height="820" title="랜딩 시안"></iframe></div>
+  </main>
+
+  <div class="insp" id="insp"></div>
+
+  <div class="stamp-bar" style="background:#16140F;color:#9C968B;font-size:11px;line-height:1.8;padding:14px 22px;font-family:ui-monospace,monospace">
+🏷 STAMP | line: core | 생성: 2026-09-05 12:05 KST | model: claude-opus-5[1m] | agent: product-designer | skills: design-consultation, design-shotgun, design-html, design-review | 근거: docs/discovery/research-20260905/research-haenael-ge-v1.1.0.md, DESIGN.md v2.0.1, web/src/app/page.tsx(실배포), wiki/거버넌스/결정.md D-009·D-014·D-017, standards/design.md 1·4·11절 | 고민: 세 안을 나란히 축소해 붙일지 하나씩 원본 크기로 볼지. design.md §6.6.1 "원본보다 줄이지 않는다"에 따라 원본 크기 라우팅 허브로 갔다.
+  </div>
+</div>
+
+<script>
+/* 화면 레지스트리. chg = 이번 개정(실배포 랜딩 대비) 변경점. 검수 셸에만 렌더한다. */
+var REG = {
+  a:{
+    name:'A · 조용한 종이',
+    file:'variant-a.html',
+    one:'지금 배포된 랜딩의 톤을 그대로 두고, 워드맵 프리뷰만 3D로 승격했다.',
+    axes:{
+      '서체':'Pretendard 단독. 헤드라인 64px 대 본문 16px = 4.0배 대비',
+      '형태':'종이 카드. radius 0 / 20 / 999, 그림자 없음, 1px 헤어라인',
+      '색':'웜 페이퍼 #FBFAF7 바탕에 클로버 그린 단색 악센트',
+      '모션':'스크롤 진행률에 따라 응원 단어 16개가 목표 문장 위로 내려앉음'
+    },
+    d3:'Three.js 스프라이트 워드클라우드. 구면에 흩어진 응원 단어가 스크롤에 비례해 목표 카드 위 더미로 lerp 착지한다. 착지율에 따라 캡션 문구도 바뀐다.',
+    psy:['Zeigarnik: 흩어진 응원이 아직 안 모인 상태 = 미완성 긴장','손실회피: 휘발되는 말 대 남는 것의 대비를 화면이 직접 보여줌','Fitts: 하단 고정 폭 CTA 1개'],
+    bench:[
+      '실배포 web/src/app/page.tsx 워드맵 프리뷰: 은유와 단어 팔레트를 그대로 계승',
+      '토스(One page One thing): 한 화면 한 결정, 부가 설명 제거',
+      'Buy Me a Coffee: 무부담 응원 카피, 금액 앵커는 빼고 문장만 차용'
+    ],
+    chg:[
+      '히어로: 정지 워드맵 → 스크롤 반응 3D 워드클라우드. 실배포의 "그게 무슨 말이냐면 ↓" 궁금증 훅을 대체',
+      '문제 공감 절 신설: 블라인드 원문 2건 직접 인용(조사 v1.1.0 4.1절). 실배포에는 없던 절',
+      '수수료 비교표 신설: 10%가 국내 최저 구간임을 처음으로 화면에 노출(조사 7.1절, D-014)',
+      'CTA: "시작하기" → "내 목표 선언하고 링크 받기". 무의미 CTA 금지 규칙 적용',
+      '사회적 증거 자리: 후기를 지어내지 않고 "없다"를 정직하게 적는 블록으로 대체(D-009 안전선)'
+    ],
+    risk:'가장 안전하지만 가장 안 튄다. "우와"가 필요하면 약하다.'
+  },
+  b:{
+    name:'B · 유리병 저금통',
+    file:'variant-b.html',
+    one:'응원이 쌓이는 것을 은유가 아니라 물리로 보여준다. 눌러야 진도가 나간다.',
+    axes:{
+      '서체':'고운바탕 명조 헤드라인 + Pretendard 본문. A와 서체 축이 다름',
+      '형태':'곡선과 원. radius 28 / 999, 병 실루엣, 카드에 테두리 없음',
+      '색':'딥 그린 #0F2A1D 다크 바탕 + 크림 + 골드. A와 색 운용이 반전',
+      '모션':'코인 낙하와 적층, 카운터 실제 증가(rAF), 병 자체가 천천히 회전'
+    },
+    d3:'Three.js 유리 실린더 + 코인 메시. 스크롤 진행률로 자동 투입되고, 병이나 버튼을 누르면 즉시 하나가 떨어져 더미에 쌓인다. 물리엔진 없이 낙하와 정지만 계산해 60fps 를 지킨다.',
+    psy:['Fogg B=MAP: 유발=빈 병, 능력=클릭 1회, 동기=쌓이는 것이 눈에 보임','Hook 가변보상: 코인이 튀는 위치가 매번 달라 한 번 더 누르게 됨','사회적 증거를 인원수로만 표기(D-009 금액 비노출 안전선 준수)'],
+    bench:[
+      'Duolingo 스트릭 애니메이션: "이 애니메이션 때문에 계속 쓴다"는 실제 반응. 보상 모션을 핵심 동작에 붙이는 방식 차용',
+      'Cash App 비주얼 아이덴티티(Buck): 어두운 바탕 위 단색 강조로 돈을 무겁지 않게 다루는 톤',
+      'Awwwards Three.js 스크롤 사례(mesh3d·Razorpay): 스크롤 진행이 곧 서사 진행'
+    ],
+    chg:[
+      '브랜드 팔레트를 랜딩 한정으로 다크 확장. 실배포의 웜 페이퍼와 정면으로 다름. 채택 시 DESIGN.md에 다크 팔레트 등록 필요',
+      '히어로 CTA가 페이지를 떠나지 않는 상호작용 버튼("클로버 하나 넣어보기"). 실배포는 곧장 가입으로 보냈음',
+      '카운터를 실제로 세는 로직 포함(standards/design.md 11.1절 "숫자 변하는 연출은 세는 로직까지")',
+      '병 위 숫자가 실제 이용자 수가 아니라는 고지를 정직 블록에 명시'
+    ],
+    risk:'다크 팔레트가 DESIGN.md "웜 페이퍼"와 충돌한다. 브랜드 형용사 조용한·따뜻한은 지켜지지만 토큰 확장 결정이 필요하다.'
+  },
+  c:{
+    name:'C · 선언 전광판',
+    file:'variant-c.html',
+    one:'선언이 계속 흘러가는 공적인 판을 만든다. 세 안 중 가장 공격적이다.',
+    axes:{
+      '서체':'JetBrains Mono 라벨·숫자 + Pretendard 헤드라인 900. 대문자 트래킹',
+      '형태':'각진 0px. 2px 굵은 괘선으로 구획, 카드 대신 표와 줄',
+      '색':'오프화이트 + 잉크 블랙 + 형광 클로버 #00E06A 한 점',
+      '모션':'원통 티커 자동 회전 + 드래그 제어 + 스크롤 속도 부스트'
+    },
+    d3:'Three.js 실린더 3개에 선언 문장을 캔버스 텍스처로 감아 눕혀서 돌린다. 자동으로 돌고, 드래그하면 손으로 돌릴 수 있고, 스크롤이 빠르면 함께 빨라진다.',
+    psy:['Zeigarnik: 문장이 끊긴 채 흘러 다음 문장을 기다리게 만듦','Jakob: 전광판·티커는 이미 아는 패턴이라 학습 비용이 0','Hick: 히어로 결정 1개, 보조 링크 1개로 선택지 축소'],
+    bench:[
+      'Forfeit 랜딩("Complete your habits, or lose money"): 한 문장에 기전 전체를 담는 문법. 우리는 기전을 두 문장으로 쪼갬',
+      'Venmo 피드: 남의 거래가 흐르는 것이 곧 사회적 증거라는 구조. 다만 우리는 금액을 절대 안 붙임',
+      '토스 디자인 아티클(간결한 화면이 다음 행동을 안내): 괘선 구획으로 스캔 경로 고정'
+    ],
+    chg:[
+      '실배포 랜딩의 워드맵을 버리고 선언 문장 티커로 교체. 응원(결과)이 아니라 선언(입구)을 앞세운 것이 방향 전환',
+      '히어로 카피를 기프티콘 대체 축으로 교체(조사 13절 "돈 걸고 목표 언어를 쓰지 않는다")',
+      '수수료 표에 막대 시각화 추가. 상한 기준 비교임을 각주로 명시',
+      '흐르는 문장이 실제 사용자 글이 아니라는 고지를 캡션과 정직 블록 두 곳에 배치'
+    ],
+    risk:'브랜드 형용사 조용한과 가장 멀다. 전광판은 본질적으로 시끄럽다. 예시 문장을 실사용자로 오해할 위험도 가장 크다.'
+  }
+};
+
+var cur='a';
+function render(k){
+  cur=k;
+  var r=REG[k];
+  document.getElementById('fr').src=r.file;
+  document.getElementById('openraw').href=r.file;
+  document.querySelectorAll('.nav-item').forEach(function(b){b.classList.toggle('on',b.dataset.k===k);});
+  var ax='';
+  for(var key in r.axes){ ax+='<dt>'+key+'</dt><dd>'+r.axes[key]+'</dd>'; }
+  document.getElementById('insp').innerHTML =
+    '<span class="tag">검수 패널 · 제품 화면 아님</span>'+
+    '<h2>'+r.name+'</h2>'+
+    '<div class="blk" style="border:0;padding-top:10px;margin-top:0"><p><b>'+r.one+'</b></p></div>'+
+
+    '<div class="blk"><h3>이번 개정 변경점 (실배포 랜딩 대비)</h3><div class="chg"><ul>'+
+      r.chg.map(function(x){return '<li data-changelog-item>'+x+'</li>';}).join('')+'</ul></div></div>'+
+
+    '<div class="blk"><h3>다른 축 4가지</h3><dl class="axes">'+ax+'</dl></div>'+
+    '<div class="blk"><h3>3D 인터랙션</h3><p>'+r.d3+'</p></div>'+
+    '<div class="blk"><h3>심리 근거</h3><ul>'+r.psy.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
+    '<div class="blk"><h3>무엇을 어디서 훔쳤나</h3><ul>'+r.bench.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
+    '<div class="blk"><h3>이 안의 약점 (레드팀)</h3><p>'+r.risk+'</p></div>'+
+
+    '<div class="vote">'+
+      '<h3 style="font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--faint);margin-bottom:6px">회장 판정</h3>'+
+      '<label><input type="radio" name="pick" value="a"> A · 조용한 종이로 간다</label>'+
+      '<label><input type="radio" name="pick" value="b"> B · 유리병으로 간다</label>'+
+      '<label><input type="radio" name="pick" value="c"> C · 전광판으로 간다</label>'+
+      '<label><input type="radio" name="pick" value="mix"> 섞는다 (아래에 어떻게 섞을지)</label>'+
+      '<label><input type="radio" name="pick" value="none"> 셋 다 아니다 (아래에 이유)</label>'+
+      '<textarea id="memo" placeholder="왜 그렇게 골랐는지, 대신 어떻게 하면 좋을지 자유롭게 적어 주십시오."></textarea>'+
+      '<div class="row">'+
+        '<button class="b-main" onclick="copyOut()">결정 복사</button>'+
+        '<button class="b-sub" onclick="resetAll()">초기화</button>'+
+      '</div>'+
+      '<p class="saved" id="saved"></p>'+
+      '<textarea class="out" id="out" readonly></textarea>'+
+    '</div>';
+  restore();
+}
+
+function restore(){
+  try{
+    var s=JSON.parse(localStorage.getItem('haenael-landing-20260905')||'{}');
+    if(s.pick){ var el=document.querySelector('input[value="'+s.pick+'"]'); if(el) el.checked=true; }
+    if(s.memo) document.getElementById('memo').value=s.memo;
+  }catch(e){}
+  document.querySelectorAll('input[name=pick]').forEach(function(i){i.addEventListener('change',save);});
+  document.getElementById('memo').addEventListener('input',save);
+}
+function save(){
+  var p=document.querySelector('input[name=pick]:checked');
+  localStorage.setItem('haenael-landing-20260905',JSON.stringify({
+    pick:p?p.value:'', memo:document.getElementById('memo').value
+  }));
+  document.getElementById('saved').textContent='자동 저장됨 · '+new Date().toLocaleTimeString('ko-KR');
+}
+function copyOut(){
+  var p=document.querySelector('input[name=pick]:checked');
+  var memo=document.getElementById('memo').value.trim();
+  var names={a:'A 조용한 종이',b:'B 유리병 저금통',c:'C 선언 전광판',mix:'섞기',none:'셋 다 아님'};
+  var md='## 해낼게 사전수요 랜딩 3안 판정 (2026-09-05)\n\n'+
+    '- 고른 안: '+(p?names[p.value]:'(미선택)')+'\n'+
+    (memo?'- 메모: '+memo+'\n':'')+
+    '- 산출물: docs/design/prototypes/legacy/landing-20260905/\n';
+  var out=document.getElementById('out');
+  out.value=md; out.classList.add('on');
+  out.select();
+  try{ document.execCommand('copy'); document.getElementById('saved').textContent='복사됨. 프롬프트창에 붙여넣으십시오.'; }
+  catch(e){ document.getElementById('saved').textContent='아래 칸을 직접 복사하십시오.'; }
+}
+function resetAll(){
+  localStorage.removeItem('haenael-landing-20260905');
+  document.querySelectorAll('input[name=pick]').forEach(function(i){i.checked=false;});
+  document.getElementById('memo').value='';
+  document.getElementById('out').classList.remove('on');
+  document.getElementById('saved').textContent='초기화됨';
+}
+
+document.querySelectorAll('.nav-item').forEach(function(b){
+  b.addEventListener('click',function(){ render(b.dataset.k); });
+});
+document.querySelectorAll('#vp button').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('#vp button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    var w=+b.dataset.w, fr=document.getElementById('fr');
+    fr.width=w; fr.height = w<500?820:900;
+  });
+});
+render('a');
+</script>
+</body>
+</html>

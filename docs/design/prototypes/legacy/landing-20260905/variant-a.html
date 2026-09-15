@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 · A안 조용한 종이</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root{
+    --bg:#FBFAF7; --ink:#16140F; --surface:#FFFFFF; --line:#E8E4DC; --warm:#F4EFE6;
+    --muted:#6F6A60; --faint:#9C968B;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+    --amber-soft:#FBF1DD; --amber-ink:#8A5A12; --amber-line:#E8D3A6;
+    --r-flat:0px; --r-card:20px; --r-full:9999px;
+    --t-fast:120ms; --t-base:200ms; --t-slow:320ms; --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif;
+    background:var(--bg); color:var(--ink);
+    word-break:keep-all; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  /* ── nav ── */
+  nav{position:sticky;top:0;z-index:40;background:rgba(251,250,247,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{font-size:16px;font-weight:800;letter-spacing:-.4px}
+  .brand span{color:var(--clover-bright)}
+  .nav-cta{font-size:13.5px;font-weight:700;color:var(--clover-ink);background:var(--clover-soft);
+    display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:var(--r-full);text-decoration:none;transition:background var(--t-fast) var(--ease)}
+  .nav-cta:hover{background:#D6EBDF}
+
+  /* ── hero ── */
+  .hero{position:relative;padding:48px 0 36px;text-align:center}
+  .kicker{display:inline-block;font-size:13.5px;font-weight:700;color:var(--amber-ink);
+    background:var(--amber-soft);border:1px solid var(--amber-line);padding:7px 15px;border-radius:var(--r-full);margin-bottom:28px}
+  h1{font-size:66px;line-height:1.02;letter-spacing:-3.2px;font-weight:900}
+  h1 .g{color:var(--clover)}
+  .sub{margin-top:18px;font-size:19px;line-height:1.62;color:var(--muted);font-weight:500;max-width:520px;margin-left:auto;margin-right:auto}
+  .canvas-stage{position:relative;height:230px;margin:8px auto 0;max-width:760px}
+  .canvas-stage canvas{display:block;width:100%;height:100%}
+  .stage-caption{position:absolute;left:0;right:0;bottom:6px;font-size:11.5px;color:var(--faint);font-weight:600}
+  /* 정적 폴백: WebGL 실패, 저사양, prefers-reduced-motion */
+  .fallback{display:none;position:relative;height:100%;width:100%}
+  .fallback.on{display:block}
+  .fallback span{position:absolute;white-space:nowrap;font-weight:800;color:var(--clover);opacity:.85}
+  .goalline{margin:0 auto;max-width:520px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r-card);padding:22px 24px;text-align:left}
+  .goalline .who{font-size:11.5px;font-weight:700;color:var(--faint);letter-spacing:.2px}
+  .goalline .what{margin-top:8px;font-size:24px;font-weight:800;letter-spacing:-.8px;line-height:1.34}
+  .goalline .meta{margin-top:14px;display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);font-weight:600}
+  .dot{width:4px;height:4px;border-radius:var(--r-full);background:var(--line)}
+
+  .cta-row{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn{border:0;font-family:inherit;cursor:pointer;font-size:16px;font-weight:800;letter-spacing:-.3px;
+    padding:17px 30px;border-radius:var(--r-full);transition:transform var(--t-fast) var(--ease),box-shadow var(--t-base) var(--ease),background var(--t-fast)}
+  .btn-primary{background:var(--clover);color:#fff;box-shadow:0 6px 18px rgba(27,138,79,.24)}
+  .btn-primary:hover{background:var(--clover-bright);transform:translateY(-2px);box-shadow:0 10px 26px rgba(27,138,79,.3)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--ink)}
+  .cta-note{margin-top:14px;font-size:13.5px;color:var(--faint);font-weight:600}
+
+  /* ── sections ── */
+  section{padding:88px 0}
+  .eyebrow{font-size:13.5px;font-weight:800;color:var(--clover);letter-spacing:.4px;margin-bottom:14px}
+  h2{font-size:38px;line-height:1.24;letter-spacing:-1.4px;font-weight:900}
+  .lead{margin-top:16px;font-size:16px;line-height:1.68;color:var(--muted);font-weight:500;max-width:560px}
+
+  .quotes{margin-top:40px;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .quote{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:26px}
+  .quote p{font-size:16px;line-height:1.62;font-weight:700;letter-spacing:-.3px}
+  .quote cite{display:block;margin-top:14px;font-size:11.5px;color:var(--faint);font-style:normal;font-weight:600}
+
+  .steps{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+  .step{padding:28px 24px 28px 0;border-right:1px solid var(--line)}
+  .step:last-child{border-right:0}
+  .step b{display:block;font-size:11.5px;color:var(--clover);font-weight:800;margin-bottom:10px}
+  .step h3{font-size:19px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px}
+  .step p{font-size:13.5px;line-height:1.66;color:var(--muted);font-weight:500}
+
+  .fee{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+  .fee table{width:100%;border-collapse:collapse}
+  .fee th,.fee td{padding:15px 22px;text-align:left;font-size:13.5px;border-bottom:1px solid var(--line)}
+  .fee th{background:var(--warm);font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.2px}
+  .fee tr:last-child td{border-bottom:0}
+  .fee .us{background:var(--clover-soft)}
+  .fee .us td{font-weight:800;color:var(--clover-ink)}
+  .fee td.num{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+  .fee-note{margin-top:12px;font-size:11.5px;color:var(--faint);line-height:1.7;font-weight:500}
+
+  details{border-bottom:1px solid var(--line)}
+  details summary{list-style:none;cursor:pointer;padding:22px 0;font-size:19px;font-weight:800;letter-spacing:-.5px;
+    display:flex;justify-content:space-between;align-items:center;gap:16px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+";font-size:19px;font-weight:400;color:var(--faint);transition:transform var(--t-base) var(--ease)}
+  details[open] summary::after{transform:rotate(45deg)}
+  details p{padding:0 0 22px;font-size:16px;line-height:1.74;color:var(--muted);font-weight:500;max-width:640px}
+
+  .signup{background:var(--clover);border-radius:var(--r-card);padding:52px 44px;text-align:center;color:#fff}
+  .signup h2{color:#fff;font-size:38px}
+  .signup p{margin-top:14px;font-size:16px;color:rgba(255,255,255,.82);font-weight:500;line-height:1.6}
+  .form{margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .form input{font-family:inherit;font-size:16px;font-weight:600;padding:16px 20px;border:0;border-radius:var(--r-full);
+    width:300px;max-width:100%;background:#fff;color:var(--ink)}
+  .form input::placeholder{color:var(--faint)}
+  .form button{background:var(--ink);color:#fff}
+  .form button:hover{background:#000}
+  .form-msg{margin-top:16px;font-size:13.5px;font-weight:700;min-height:22px;color:#fff}
+  .honest{margin-top:36px;background:var(--warm);border:1px dashed var(--amber-line);border-radius:var(--r-card);padding:24px 26px}
+  .honest b{display:block;font-size:13.5px;font-weight:800;margin-bottom:8px}
+  .honest p{font-size:13.5px;line-height:1.7;color:var(--muted);font-weight:500}
+
+  footer{padding:44px 0 60px;border-top:1px solid var(--line);font-size:11.5px;color:var(--faint);line-height:1.9;font-weight:500}
+
+  @media (max-width:860px){
+    .quotes,.steps{grid-template-columns:1fr}
+    .step{border-right:0;border-bottom:1px solid var(--line);padding-right:0}
+    .step:last-child{border-bottom:0}
+  }
+  @media (max-width:520px){
+    .wrap{padding:0 20px}
+    .hero{padding:44px 0 24px}
+    h1{font-size:38px;letter-spacing:-1.8px}
+    .sub{font-size:16px;margin-top:18px}
+    h2{font-size:24px;letter-spacing:-1px}
+    .canvas-stage{height:200px}
+    .signup{padding:36px 22px}
+    .signup h2{font-size:19px}
+    .form input{width:100%}
+    .form button{width:100%}
+    .btn{width:100%}
+    .cta-row{flex-direction:column}
+    .fee th,.fee td{padding:13px 14px;font-size:13.5px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <div class="brand">해낼게<span>.</span></div>
+  <a class="nav-cta" href="#signup">사전 신청</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="kicker">아직 정식 오픈 전입니다. 먼저 쓸 사람을 찾는 중이에요</span>
+  <h1>화이팅 말고,<br><span class="g">진짜로.</span></h1>
+  <p class="sub">친구가 선언한 목표에 조용히 돈을 두고 갑니다.<br>답장 안 해도 됩니다.</p>
+
+  <div class="canvas-stage" id="stage">
+    <canvas id="gl"></canvas>
+    <div class="fallback" id="fb">
+      <span style="left:8%;top:14%;font-size:19px">멋지다</span>
+      <span style="left:56%;top:8%;font-size:19px">곧된다</span>
+      <span style="left:30%;top:30%;font-size:24px;color:var(--clover-ink)">할수있어</span>
+      <span style="left:70%;top:36%;font-size:16px">응원해</span>
+      <span style="left:12%;top:48%;font-size:19px">고생많아</span>
+      <span style="left:48%;top:56%;font-size:16px">존경</span>
+      <span style="left:74%;top:60%;font-size:19px">힘내</span>
+      <span style="left:24%;top:66%;font-size:13.5px">화이팅</span>
+    </div>
+    <p class="stage-caption" id="cap">스크롤하면 응원이 목표 위로 내려앉습니다</p>
+  </div>
+
+  <div class="goalline">
+    <div class="who">아는 동생 · 편입 준비 8개월차</div>
+    <div class="what">“편입 영어 하루 3시간, 12월까지 해낼게.”</div>
+    <div class="meta"><span>13명이 조용히 함께</span><i class="dot"></i><span>선언 후 62일</span></div>
+  </div>
+
+  <div class="cta-row">
+    <button class="btn btn-primary" onclick="document.getElementById('signup').scrollIntoView()">내 목표 선언하고 링크 받기</button>
+    <a class="btn btn-ghost" href="#how" style="text-decoration:none;display:inline-block">어떻게 되는지 먼저 보기</a>
+  </div>
+  <p class="cta-note">이메일만 남기면 됩니다. 결제 정보는 지금 받지 않습니다.</p>
+</div></header>
+
+<section style="background:var(--warm)"><div class="wrap">
+  <div class="eyebrow">지금 벌어지는 일</div>
+  <h2>하트 47개는 0원이고,<br>기프티콘은 부담입니다.</h2>
+  <p class="lead">응원할 방법이 두 개뿐입니다. 3초 만에 사라지는 댓글이거나, 받는 사람이 눈치를 봐야 하는 선물이거나.</p>
+  <div class="quotes">
+    <blockquote class="quote">
+      <p>“받고 싶지도 않은 선물 오는 거 부담스럽고 별론데”</p>
+      <cite>블라인드 「카카오톡 선물 거부 못하나요?」 원문</cite>
+    </blockquote>
+    <blockquote class="quote">
+      <p>“선물받는 입장에서 브랜드 선택 X, 주문시 배달비 전부를 선물 받은 사람이 부담”</p>
+      <cite>블라인드 「카카오톡 기프티콘은 좋은 점을 못느끼겠네..」 원문</cite>
+    </blockquote>
+  </div>
+  <p class="lead" style="margin-top:28px">
+    새벽 6시 도서관 오픈런을 8개월 한 사람에게 하트 47개가 남습니다. 따뜻했지만 3초 뒤에 사라졌고, 손에 남은 건 없었습니다.
+  </p>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="eyebrow">해낼게가 하는 일</div>
+  <h2>선언 한 줄, 링크 하나.<br>나머지는 친구가 합니다.</h2>
+  <div class="steps">
+    <div class="step"><b>1단계</b><h3>목표를 한 줄로 선언</h3><p>“편입 영어 하루 3시간”처럼 한 문장이면 됩니다. 쪼개서 등록할 일도, 매일 인증할 일도 없습니다.</p></div>
+    <div class="step"><b>2단계</b><h3>친구가 클로버로 응원</h3><p>링크를 열면 아무것도 요구하지 않습니다. 익명으로 보낼 수 있고, 얼마를 보냈는지는 아무에게도 보이지 않습니다.</p></div>
+    <div class="step"><b>3단계</b><h3>쌓인 응원을 현금으로</h3><p>포인트가 아니라 원화 계좌 입금입니다. 목표를 이뤘는지 판정하지 않습니다. 못 이뤄도 그대로 내 돈입니다.</p></div>
+  </div>
+  <div class="honest" style="margin-top:36px">
+    <b>이 서비스가 하지 않는 것</b>
+    <p>본인이 돈을 걸고 실패하면 잃는 구조가 아닙니다. 사진 인증도, 달성 판정도 없습니다. 판정을 안 하니까 판정 시비도 없습니다. 돈이 흐르는 방향이 챌린저스·StickK·Forfeit과 반대입니다.</p>
+  </div>
+</div></section>
+
+<section style="background:var(--warm)"><div class="wrap">
+  <div class="eyebrow">돈 이야기</div>
+  <h2>친구가 보낸 돈에서<br>우리가 떼는 몫은 10%입니다.</h2>
+  <p class="lead">국내 후원 서비스 중 가장 낮은 구간입니다. 그동안 이걸 아무 데서도 말하지 않았습니다.</p>
+  <div class="fee"><table>
+    <thead><tr><th>서비스</th><th style="text-align:right">플랫폼이 가져가는 몫</th></tr></thead>
+    <tbody>
+      <tr class="us"><td>해낼게</td><td class="num">10% + 부가세</td></tr>
+      <tr><td>와디즈</td><td class="num">9%</td></tr>
+      <tr><td>Patreon</td><td class="num">10% + 결제수수료</td></tr>
+      <tr><td>투네이션</td><td class="num">5.3 ~ 35%</td></tr>
+      <tr><td>유튜브 슈퍼챗</td><td class="num">30%</td></tr>
+      <tr><td>틱톡</td><td class="num">50% 이상</td></tr>
+    </tbody>
+  </table></div>
+  <p class="fee-note">출처: 각 서비스 공개 요금 정책(2026-09 조사분). 표의 숫자는 플랫폼 이용료만 비교한 것이고 세금은 포함하지 않았습니다. 환전 시점의 세금 처리는 안내 화면에서 따로 보여드립니다.</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="eyebrow">자주 묻는 것</div>
+  <h2>궁금할 만한 것부터.</h2>
+  <div style="margin-top:32px;border-top:1px solid var(--line)">
+    <details open><summary>목표를 못 이루면 돈은 어떻게 되나요?</summary>
+      <p>그대로 친구 것입니다. 해낼게는 달성 여부로 돈을 뺏거나 주는 서비스가 아닙니다. 결제되는 순간 친구에게 적립됩니다.</p></details>
+    <details><summary>얼마를 보냈는지 다른 사람이 보나요?</summary>
+      <p>못 봅니다. 개별 금액은 설정으로도 공개할 수 없게 시스템이 잠가 뒀습니다. 원하면 이름도 숨길 수 있습니다.</p></details>
+    <details><summary>내기나 도박 아닌가요?</summary>
+      <p>본인이 돈을 걸고 실패하면 잃는 구조가 아닙니다. 친구가 보내는 것이고 조건이 없습니다. 돈이 흐르는 방향이 반대입니다.</p></details>
+    <details><summary>구걸처럼 보일까 봐 걱정됩니다.</summary>
+      <p>목표를 나만 보기로 두고 시작할 수 있습니다. 금액은 아무에게도 안 보이고, 응원자 이름과 메시지도 항목별로 잠급니다.</p></details>
+    <details><summary>친구한테 부담 주는 거 아닌가요?</summary>
+      <p>링크를 열어도 아무것도 요구하지 않습니다. 보내는 사람은 익명을 고를 수 있고, 받는 사람은 답장할 의무가 없습니다.</p></details>
+  </div>
+</div></section>
+
+<section id="signup" style="padding-top:24px"><div class="wrap">
+  <div class="signup">
+    <h2>먼저 써 볼 사람을 찾습니다.</h2>
+    <p>정식 오픈 때 가장 먼저 링크를 보내드립니다. 지금은 이메일만 받습니다.</p>
+    <form class="form" onsubmit="return submitLead(event)">
+      <input type="email" id="email" placeholder="이메일 주소" required aria-label="이메일 주소">
+      <button class="btn" type="submit">사전 신청하고 링크 먼저 받기</button>
+    </form>
+    <p class="form-msg" id="msg" role="status"></p>
+  </div>
+  <div class="honest">
+    <b>사회적 증거 대신 드리는 사실</b>
+    <p>아직 이용자 후기가 없습니다. 그래서 후기를 지어내지 않고 비워 뒀습니다. 지금 보이는 목표 문장은 서비스를 만들게 된 실제 계기를 각색한 예시이고, 사람 이름과 계정은 쓰지 않았습니다.</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  해낼게 · 응원은 돈으로 하는 겁니다.<br>
+  상호: 정성컴퍼니 · 대표: 조성진 · 사업자등록번호: 798-31-01774<br>
+  서울시 강남구 역삼동 620-17 203호 · haenaelge.official@gmail.com
+</div></footer>
+
+<div class="stamp-bar" style="background:#16140F;color:#9C968B;font-size:11.5px;line-height:1.8;padding:14px 24px;font-family:ui-monospace,monospace">
+🏷 STAMP | line: core | 생성: 2026-09-05 11:20 KST | model: claude-opus-5[1m] | agent: product-designer | skills: design-consultation, design-shotgun, design-html, design-review | 근거: docs/discovery/research-20260905/research-haenael-ge-v1.1.0.md 4.1절·7.1절·10절, DESIGN.md v2.0.1, web/src/app/page.tsx, 결정.md D-009·D-014·D-017 | 고민: 실배포 워드맵 프리뷰를 버리고 3D를 새로 그릴지, 그 프리뷰를 3D로 승격할지. 후자를 골랐다.
+</div>
+
+<!-- ═══ STAMP ═══
+파일: docs/design/prototypes/legacy/landing-20260905/variant-a.html
+라인: core · 버전: v1.0.0 · 생성: 2026-09-05 KST
+model: claude-opus-5[1m] · agent: product-designer
+skills: design-consultation, design-shotgun, design-html, design-review
+기반 포맷: DESIGN.md v2.0.1 토큰 + web/src/app/page.tsx 실배포 랜딩(워드맵 프리뷰·브랜드마크 계승)
+근거: research-haenael-ge-v1.1.0.md §4.1 블라인드 원문 · §7.1 수수료표 · §10 카피 3안 / 결정.md D-009·D-014·D-017
+고민 한 줄: 실배포 워드맵 프리뷰를 버리고 3D를 새로 그릴지, 그 프리뷰 자체를 3D로 승격할지. 후자를 골랐다. 이미 있는 은유를 키우는 편이 재창조보다 브랜드 축적이 크다.
+═══════════════ -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ── 폼: 수집 엔드포인트 자리표시자 (실제 발송·저장 없음) ── */
+function submitLead(e){
+  e.preventDefault();
+  var v = document.getElementById('email').value;
+  document.getElementById('msg').textContent = '신청 접수됨: ' + v + ' (프로토타입이라 실제로 저장되지 않습니다)';
+  return false;
+}
+
+/* ── 3D 인터랙션: 응원 워드클라우드가 스크롤에 따라 목표 위로 내려앉는다 ──
+   심리 근거: Zeigarnik(반쯤 흩어진 응원 = 미완성 긴장) + 손실회피(휘발되는 말 vs 남는 것)
+   폴백: WebGL 미지원 / prefers-reduced-motion / 저사양(첫 1초 평균 프레임 30 미만) */
+(function(){
+  var stage=document.getElementById('stage'), cv=document.getElementById('gl'),
+      fb=document.getElementById('fb'), cap=document.getElementById('cap');
+  function goStatic(reason){
+    cv.style.display='none'; fb.classList.add('on');
+    cap.textContent='응원이 이렇게 쌓입니다 (' + reason + ')';
+  }
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ goStatic('모션 최소화 설정'); return; }
+  if(typeof THREE==='undefined'){ goStatic('정적 보기'); return; }
+  var probe=document.createElement('canvas');
+  if(!(probe.getContext('webgl')||probe.getContext('experimental-webgl'))){ goStatic('WebGL 미지원'); return; }
+  try{
+    var renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
+  }catch(err){ goStatic('WebGL 미지원'); return; }
+
+  var W=stage.clientWidth, H=stage.clientHeight;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(W,H,false);
+  var scene=new THREE.Scene();
+  var cam=new THREE.PerspectiveCamera(50,W/H,0.1,100); cam.position.z=10.4;
+
+  var WORDS=['멋지다','화이팅','곧된다','할수있어','응원해','존경','고생많아','힘내',
+             '잘하고있어','대단해','믿는다','응원할게','파이팅','최고야','버텨','수고했어'];
+  var TONE=['#8BB79F','#57A178','#1A8150'];
+  function sprite(text,i){
+    var c=document.createElement('canvas'), s=4; c.width=256*s/2; c.height=64*s/2;
+    var g=c.getContext('2d');
+    g.font='800 '+(46)+'px Pretendard, sans-serif';
+    g.fillStyle=TONE[i%3]; g.textAlign='center'; g.textBaseline='middle';
+    g.fillText(text,c.width/2,c.height/2);
+    var tex=new THREE.CanvasTexture(c); tex.minFilter=THREE.LinearFilter;
+    var m=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,opacity:.92}));
+    var k=[1.0,1.18,1.4][i%3];
+    m.scale.set(3.6*k,0.9*k,1); return m;
+  }
+  var SX=Math.min(1.75,Math.max(1,W/420));
+  var items=[];
+  WORDS.forEach(function(w,i){
+    var sp=sprite(w,i);
+    var phi=Math.acos(-1+(2*i)/WORDS.length), theta=Math.sqrt(WORDS.length*Math.PI)*phi;
+    var R=4.3;
+    var start=new THREE.Vector3(R*Math.cos(theta)*Math.sin(phi), R*Math.sin(theta)*Math.sin(phi)*0.62, R*Math.cos(phi));
+    // 착지 지점: 목표 문장 위 얕은 더미
+    var col=i%4, row=Math.floor(i/4);
+    var jx=((i*37)%7-3)*0.2, jy=((i*53)%5-2)*0.13;
+    var land=new THREE.Vector3(((col-1.5)*2.75+(row%2?0.55:-0.55)+jx)*SX, 1.62-row*0.98+jy, (i%3-1)*0.4);
+    sp.position.copy(start);
+    scene.add(sp);
+    items.push({sp:sp,start:start,land:land,spin:0.2+ (i%5)*0.06});
+  });
+
+  var settle=0, frames=0, t0=performance.now(), degraded=false, bad=0;
+  var fpsGuard = location.search.indexOf('fps=off')<0;
+  function onScroll(){
+    var r=stage.getBoundingClientRect();
+    // 스테이지가 화면 위로 밀려 올라간 비율을 0..1 로
+    var p=(window.innerHeight*0.55 - r.top)/(r.height*0.9);
+    settle=Math.max(0,Math.min(1,p));
+    cap.textContent = settle>0.75 ? '응원 16개가 목표 위에 남았습니다'
+                    : settle>0.15 ? '내려앉는 중' : '스크롤하면 응원이 목표 위로 내려앉습니다';
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',function(){
+    W=stage.clientWidth;H=stage.clientHeight;
+    cam.aspect=W/H;cam.updateProjectionMatrix();renderer.setSize(W,H,false);onScroll();
+  });
+  onScroll();
+
+  function ease(x){return 1-Math.pow(1-x,3);}
+  function loop(now){
+    if(degraded) return;
+    frames++;
+    if(now-t0>1200){
+      var fps=frames/((now-t0)/1000);
+      bad = fps<24 ? bad+1 : 0;
+      if(fpsGuard && bad>=2){ degraded=true; goStatic('저사양 기기 감지'); return; }
+      t0=now; frames=0;
+    }
+    var k=ease(settle), tt=now*0.001;
+    items.forEach(function(it,i){
+      var drift=new THREE.Vector3(
+        it.start.x+Math.sin(tt*it.spin+i)*0.5,
+        it.start.y+Math.cos(tt*it.spin*0.8+i)*0.4,
+        it.start.z);
+      it.sp.position.lerpVectors(drift,it.land,k);
+      it.sp.material.opacity=0.35+0.6*(0.4+0.6*k);
+    });
+    scene.rotation.y=(1-k)*Math.sin(tt*0.12)*0.35;
+    renderer.render(scene,cam);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

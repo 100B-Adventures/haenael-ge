@@ -1,6 +1,6 @@
 # Core Cashout 30/27 Clean Frames v1.0.0
 
-STAMP: line=core · 생성=2026-08-29 04:34 KST · model=gpt-codex · agent=product-designer · skills=pipeline · source=`docs/prototype/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · query=`clean=1&data=boundary` · 고민=QA가 프로토타입 콘솔이나 설명 주석을 제품 UI로 오인하지 않도록 순수 화면만 고정했다.
+STAMP: line=core · 생성=2026-08-29 04:34 KST · model=gpt-codex · agent=product-designer · skills=pipeline · source=`docs/design/prototypes/legacy/core-cashout-30-27-v1-gpt-codex.html` v1.0.0 · query=`clean=1&data=boundary` · 고민=QA가 프로토타입 콘솔이나 설명 주석을 제품 UI로 오인하지 않도록 순수 화면만 고정했다.
 
 | 파일 | 화면 | 실제 픽셀 | SHA-256 |
 |---|---|---:|---|
@@ -15,4 +15,4 @@ SKILLS_USED: pipeline, clean frame 게이트 계약 적용
 
 SKILLS_SKIPPED: design-review 스킬이 현재 세션에 제공되지 않아 Chromium 실렌더, DOM 치수, 육안 대조로 검증
 
-SOURCES/MODEL: gpt-codex · `docs/prototype/core-cashout-30-27-v1-gpt-codex.html` · `docs/design-spec-core-cashout-30-27-v1-gpt-codex.md` · `DESIGN.md` v2.0.1
+SOURCES/MODEL: gpt-codex · `docs/design/prototypes/legacy/core-cashout-30-27-v1-gpt-codex.html` · `docs/design/design-spec-core-cashout-30-27-v1-gpt-codex.md` · `DESIGN.md` v2.0.1

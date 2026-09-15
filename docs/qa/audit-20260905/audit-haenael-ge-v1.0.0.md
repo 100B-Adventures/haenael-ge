@@ -15,9 +15,9 @@ skills:
 
 ## 읽은 것 / 안 읽은 것
 
-- 읽음: `wiki/거버넌스/결정.md`, `wiki/거버넌스/실수.md`, `README.md`, `pipeline-state.core.md`, 승인 핀 `docs/prd-haenael-ge-v0.4.0.md`, `DESIGN.md`, `docs/user-flow.md`, 환전 프로토타입 2종, 수치 스펙, burst BRIEF와 INPUTS-MANIFEST, 요청 원장, 코드·QA·시크릿 표준, `web/src` 134개 파일, Supabase 마이그레이션·Edge Function, `wiki/**/*.md` 53개.
-- 100KB 초과 입력: `docs/prototype/core-cashout-full-journey-v3.8-opus5.html`은 지시대로 처음 200줄만 읽음.
-- 안 읽음: 레포 루트 `CLAUDE.md`는 파일이 없어 읽을 수 없었음. `docs/**/requests-*.md` 패턴 파일도 없음. 대신 실제 요청 정본인 `docs/requests/inbox/chairman-2026-09.md`, `wiki/거버넌스/요청.md`, burst `REQUEST-PROVENANCE.md`를 읽음.
+- 읽음: `wiki/거버넌스/결정.md`, `wiki/거버넌스/실수.md`, `README.md`, `pipeline-state.core.md`, 승인 핀 `docs/plan/prd-haenael-ge-v0.4.0.md`, `DESIGN.md`, `docs/design/user-flow.md`, 환전 프로토타입 2종, 수치 스펙, burst BRIEF와 INPUTS-MANIFEST, 요청 원장, 코드·QA·시크릿 표준, `web/src` 134개 파일, Supabase 마이그레이션·Edge Function, `wiki/**/*.md` 53개.
+- 100KB 초과 입력: `docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html`은 지시대로 처음 200줄만 읽음.
+- 안 읽음: 레포 루트 `CLAUDE.md`는 파일이 없어 읽을 수 없었음. `docs/**/requests-*.md` 패턴 파일도 없음. 대신 실제 요청 정본인 `docs/_archive/requests/inbox/chairman-2026-09.md`, `wiki/거버넌스/요청.md`, burst `REQUEST-PROVENANCE.md`를 읽음.
 - 범위 제한: 운영 인증 계정이 필요한 화면의 내용은 기존 무인증 캡처만으로 정상 판정하지 않음. 운영 DB는 스키마 덤프나 데이터 조회 없이 마이그레이션 이력 일치만 읽기 전용으로 확인함.
 
 ## 요약
@@ -147,7 +147,7 @@ skills:
 | 심각도 | 위치 | 지적 | 승인 계약·근거 | 교정안 | 예상 공수 |
 |---|---|---|---|---|---|
 | P0 MAJOR | `web/src/lib/supabase/service.ts:86` | [문서·코드 불일치][보안][회귀 위험] 환전은 `CASHOUT_ENABLED` 전역값만 검사하고, 신청 액션 `web/src/app/(receiver)/cashout/actions.ts:94-104`는 인증 사용자면 누구나 통과시킨다. 회장 계정 allowlist가 없다. 기능이 켜진 운영에서 일반 사용자가 미확정 3.3% 세금 계약으로 신청할 수 있다. | 거버넌스 D-017 `wiki/거버넌스/결정.md:43-50`은 소득 성격·원천징수 의무가 미확정이며 세무 자문 전 "환전은 회장 계정으로만 시험했고 사용자에게 열지 않는다"고 결정했다. `docs/제품현황.md:84-88`은 환전과 알림을 운영 중으로 적는다. | 세무 결론 전에는 전역 스위치를 끄거나 서버에서 회장 계정 allowlist를 강제한다. 세무 결론, 개인정보 처리 근거, 약관·개인정보처리방침을 맞춘 뒤 별도 승인으로 일반 사용자에게 연다. | S 긴급 |
-| P1 MAJOR | `pipeline-state.core.md:8` | [문서·코드 불일치][승인 시안 이탈] 전 단계 완료, 차단 잔여 없음이라고 선언했지만 승인 PRD의 다중 목표·공개범위·응원자 My Page·감사 메시지와 DESIGN의 장문 회수 상태가 코드에 없다. | 승인 핀 PRD `docs/prd-haenael-ge-v0.4.0.md:124-196,232-301`과 본 보고서 축 1의 코드 대조 7건이 반증한다. | 파이프라인을 실제 누락이 시작된 plan 또는 build 범위로 reopen하고, 구현하거나 이번 릴리스에서 제외한다는 새 승인 결정을 남긴 뒤에만 `done`을 복구한다. | M |
+| P1 MAJOR | `pipeline-state.core.md:8` | [문서·코드 불일치][승인 시안 이탈] 전 단계 완료, 차단 잔여 없음이라고 선언했지만 승인 PRD의 다중 목표·공개범위·응원자 My Page·감사 메시지와 DESIGN의 장문 회수 상태가 코드에 없다. | 승인 핀 PRD `docs/plan/prd-haenael-ge-v0.4.0.md:124-196,232-301`과 본 보고서 축 1의 코드 대조 7건이 반증한다. | 파이프라인을 실제 누락이 시작된 plan 또는 build 범위로 reopen하고, 구현하거나 이번 릴리스에서 제외한다는 새 승인 결정을 남긴 뒤에만 `done`을 복구한다. | M |
 | P1 MAJOR | `web/src/app/privacy/page.tsx:201` | [문서·코드 불일치][보안] 개인정보처리방침은 카카오와 솔라피 알림톡 처리를 "현재 비활성"이라고 고지한다. | `pipeline-state.core.md:51,102,110`은 운영에서 `CASHOUT_REQUESTED`, `CASHOUT_PAID` 알림톡 각 1건의 실제 발송을 확인했다고 기록한다. 실제 처리업체와 목적을 비활성이라고 고지하는 법정 문서가 운영과 어긋난다. | 실제 활성일, 처리 항목, 보유·위탁 조건을 확인해 방침을 갱신하고 변경 이력을 남긴다. 알림을 끌 경우에는 운영 발송을 중단했음을 별도 확인한다. | S |
 | P2 MINOR | `README.md:48` | [문서·코드 불일치] 검증 상태가 2026-08-22의 Vitest 227건, pgTAP 246건, Playwright 11건에 멈췄다. | 이번 직접 실행은 Vitest 279/279이고 `pipeline-state.core.md:54-55`도 build·QA 최신 증거를 279건과 운영 E2E로 기록한다. | 숫자 복제를 없애고 최신 검증 문서나 CI run으로 연결한다. 숫자를 유지하면 생성 스크립트로 갱신한다. | S |
 | P2 MINOR | `wiki/2-product/current-state.md:20` | [문서·코드 불일치] 배포 진행 중, 대표 주소 1.0.0, 마이그레이션 미적용, CI 성공 없음이라는 상태가 최신 정본과 반대다. | `pipeline-state.core.md:8,54-56`은 release 1.2.1, migration 정렬, CI green, ship 완료를 선언한다. 이번 `supabase migration list --linked`도 42/42 일치를 관찰했다. | 현재 상태 문서를 파이프라인 정본에서 생성하거나 상단에 만료시각·대체 정본 링크를 표시한다. | S |
@@ -225,7 +225,7 @@ HITS_REJECTED: BRAIN `wiki/business/index.md`의 사업 레버리지·마케팅 
 
 CONFLICTS: 승인 PRD v0.4는 다중 목표·공개범위·응원자 경험을 요구하지만 코드와 `done` 상태가 충돌한다. 거버넌스 D-017은 세무 자문 전 사용자 환전 금지를 요구하지만 운영 가능 코드와 제품현황이 충돌한다. 개인정보처리방침은 알림톡 업체를 비활성이라고 고지하지만 파이프라인은 운영 실발송을 기록한다. 외부 보안 기준과 회장 정본 사이 직접 충돌은 없었다.
 
-SOURCES: 로컬 `wiki/거버넌스/결정.md`, `wiki/거버넌스/실수.md`, `pipeline-state.core.md`, `docs/prd-haenael-ge-v0.4.0.md`, `DESIGN.md`, `docs/user-flow.md`, 승인 프로토타입, `web/src`, `supabase/migrations`, `supabase/functions`, `wiki/**/*.md`, `/Users/sj/.claude/standards/dev.md`, `/Users/sj/.claude/standards/qa-methodology.md`, `/Users/sj/.claude/standards/secret-management.md`, `/Users/sj/.claude/standards/benchmarks.md`; [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/), [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys), [Next.js Authentication](https://nextjs.org/docs/app/guides/authentication), [Next.js Backend for Frontend](https://nextjs.org/docs/app/guides/backend-for-frontend).
+SOURCES: 로컬 `wiki/거버넌스/결정.md`, `wiki/거버넌스/실수.md`, `pipeline-state.core.md`, `docs/plan/prd-haenael-ge-v0.4.0.md`, `DESIGN.md`, `docs/design/user-flow.md`, 승인 프로토타입, `web/src`, `supabase/migrations`, `supabase/functions`, `wiki/**/*.md`, `/Users/sj/.claude/standards/dev.md`, `/Users/sj/.claude/standards/qa-methodology.md`, `/Users/sj/.claude/standards/secret-management.md`, `/Users/sj/.claude/standards/benchmarks.md`; [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/), [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys), [Next.js Authentication](https://nextjs.org/docs/app/guides/authentication), [Next.js Backend for Frontend](https://nextjs.org/docs/app/guides/backend-for-frontend).
 
 MODEL: gpt-codex/GPT-5, runtime exact build identifier는 노출되지 않음.
 

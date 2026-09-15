@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 v2 — 신규 화면 프로토타입 허브 (다중목표·마이페이지·프라이버시·고객센터·승격·감사·탈퇴)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --ink:#16140F; --muted:#6F6A60; --faint:#9C968B; --line:#E8E4DC;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A; --warm:#F4EFE6;
+    --danger:#D9483B; --danger-soft:#FBEAE7;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  button,input,textarea,select{font-family:inherit}
+  body{font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       background:#ECEAE4; color:var(--ink); -webkit-font-smoothing:antialiased; padding:20px 20px 64px}
+
+  /* ── hub controls ─────────────────────────────── */
+  .hub{max-width:1220px; margin:0 auto}
+  h1.board{font-size:18px; margin-bottom:4px}
+  p.board{font-size:12.5px; color:#555; margin-bottom:14px; line-height:1.6}
+  .ctrl{position:sticky; top:0; z-index:50; background:#ECEAE4; padding:10px 0 12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; border-bottom:1px solid #dcd8cf; margin-bottom:22px}
+  .ctrl .grp{display:flex; gap:5px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:11px; padding:4px; flex-wrap:wrap}
+  .ctrl .lbl{font-size:10.5px; color:var(--faint); padding:0 6px; font-weight:600}
+  .ctrl button{border:none; background:transparent; font-size:12px; font-weight:600; color:var(--muted); padding:6px 10px; border-radius:8px; cursor:pointer}
+  .ctrl button.on{background:var(--clover); color:#fff}
+  .ctrl button.on2{background:var(--warm); color:var(--clover-ink)}
+
+  .screen-wrap{display:none}
+  .screen-wrap.show{display:block}
+  .note{font-size:12px; color:#666; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; line-height:1.65; margin-bottom:18px; max-width:920px}
+  .note b{color:var(--clover-ink)}
+  .note .route{font-family:ui-monospace,monospace; font-size:11px; background:var(--warm); padding:1px 6px; border-radius:6px; color:#6b6455}
+
+  /* ── phone frame ──────────────────────────────── */
+  .stage{display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap}
+  .stepcol{flex:0 0 auto; text-align:center}
+  .ph{width:250px; background:var(--bg); border:1px solid #d9d5cc; border-radius:28px; box-shadow:0 6px 22px rgba(0,0,0,.10); overflow:hidden; position:relative; text-align:left}
+  .ph .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:96px; height:18px; background:#000; border-radius:0 0 12px 12px; z-index:5}
+  .sc{height:520px; overflow-y:auto; padding:34px 16px 18px; position:relative}
+  .sc::-webkit-scrollbar{display:none}
+  .cap{font-size:11px; color:var(--muted); font-weight:600; text-align:center; margin:8px 0 6px; line-height:1.4; max-width:250px}
+  .cap b{color:var(--clover-ink)}
+
+  /* ── desktop frame ────────────────────────────── */
+  .dk{width:100%; max-width:900px; background:var(--bg); border:1px solid #d9d5cc; border-radius:14px; box-shadow:0 6px 22px rgba(0,0,0,.08); overflow:hidden; margin-bottom:14px}
+  .dk .bar{background:#EFEDE8; padding:7px 12px; font-size:10px; color:#999; display:flex; gap:6px; align-items:center}
+  .dk .bar .dot3{width:8px;height:8px;border-radius:50%;background:#d8d4ca}
+  .dk .inner{padding:32px 44px 40px; display:grid; grid-template-columns:1fr 300px; gap:38px}
+  .vp390 .dk{display:none}
+  .vp1024 .ph, .vp1024 .cap{display:none}
+  .vp1024 .stage{flex-direction:column}
+
+  /* ── shared atoms (receiver-home / manage-hub 톤 상속) ── */
+  .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+  .brand{font-size:11.5px; font-weight:800}
+  .brand .dot{color:var(--clover-bright)}
+  .bell{font-size:13px; position:relative}
+  .bell .dot2{position:absolute; top:-2px; right:-3px; width:7px; height:7px; border-radius:50%; background:var(--clover-bright)}
+  .gear{font-size:13px; color:var(--muted); text-decoration:none}
+  .goal-t{font-size:18px; font-weight:800; line-height:1.32; letter-spacing:-.4px; margin:4px 0 8px}
+  .chips{display:flex; gap:5px; margin-bottom:10px}
+  .chip{font-size:10.5px; font-weight:500; padding:3px 9px; border-radius:20px}
+  .chip.dday{background:var(--clover-soft); color:var(--clover-ink)}
+  .chip.live{background:var(--warm); color:#7a7363}
+  .chip.closed{background:#EFEDE8; color:#8a857a}
+  .chip.priv{background:#EFEDE8; color:#6F6A60}
+  .bal{background:#fff; border:1px solid var(--line); border-radius:12px; padding:13px 14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between}
+  .bal .k{font-size:10.5px; color:var(--faint); margin-bottom:3px}
+  .bal .v{font-size:18px; font-weight:800; color:var(--clover-ink)}
+  .bal .v small{font-size:11px; color:var(--muted); font-weight:600}
+  .bal .krw{font-size:10px; color:var(--faint); margin-top:2px}
+  .bal .go{font-size:11px; font-weight:700; color:#fff; background:var(--clover); padding:8px 12px; border-radius:9px; cursor:pointer; white-space:nowrap; flex:0 0 auto; margin-left:10px}
+  .sec{font-size:11px; font-weight:700; color:var(--muted); margin:6px 0 8px}
+  .btn{display:block; width:100%; text-align:center; padding:11px; border-radius:11px; font-size:12.5px; font-weight:700; border:none; cursor:pointer; margin-top:8px}
+  .btn-primary{background:var(--clover); color:#fff}
+  .btn-line{background:#fff; color:var(--ink); border:1px solid var(--line)}
+  .btn-ghost{background:transparent; color:var(--clover-ink); border:none; font-weight:600}
+  .btn[disabled]{opacity:.45; cursor:not-allowed}
+  .privline{font-size:10px; color:var(--faint); text-align:center; margin-top:10px; line-height:1.5}
+  .empty{background:#fff; border:1px dashed #cdd9cf; border-radius:12px; padding:20px 14px; text-align:center; margin:10px 0}
+  .empty .b{font-size:13px; font-weight:700; margin-bottom:5px}
+  .empty .s{font-size:11px; color:var(--muted); line-height:1.55}
+  .errcard{background:var(--danger-soft); border:1px solid #f0cdc8; border-radius:12px; padding:14px; text-align:center; margin:10px 0}
+  .errcard .b{font-size:12.5px; font-weight:700; color:var(--danger); margin-bottom:4px}
+  .errcard .s{font-size:11px; color:#8a5f59; line-height:1.5}
+  .wordmap{background:var(--clover-soft); border-radius:12px; padding:13px 10px; text-align:center; line-height:1.9; margin-bottom:12px}
+  .wordmap span{display:inline-block; margin:0 4px; color:#2c7a4f}
+
+  /* v2 신규: 목표 카드(다중) */
+  .gcard{background:#fff; border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px}
+  .gcard .t{font-size:13.5px; font-weight:800; letter-spacing:-.3px; line-height:1.35}
+  .gcard .row{display:flex; align-items:center; gap:5px; margin-top:6px; flex-wrap:wrap}
+  .gcard .meta{font-size:10.5px; color:var(--muted); margin-top:7px; display:flex; align-items:center; gap:8px}
+  .gcard .meta .new{color:var(--clover-ink); font-weight:700}
+  .gcard .acts{display:flex; gap:6px; margin-top:9px}
+  .gcard .acts button{flex:1; padding:8px 0; border-radius:9px; font-size:11px; font-weight:700; border:1px solid var(--line); background:#fff; cursor:pointer}
+  .gcard .acts button.cp{background:var(--clover-soft); color:var(--clover-ink); border-color:transparent}
+  .gcard.past{opacity:.75; background:var(--bg)}
+  .pastfold{display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:700; color:var(--muted); padding:8px 2px; cursor:pointer}
+  .newgoal{border:1.5px dashed #bcd6c6; background:transparent; color:var(--clover-ink); border-radius:14px; padding:12px; width:100%; font-size:12.5px; font-weight:700; cursor:pointer; margin-top:2px}
+  .capbar{background:var(--warm); border-radius:11px; padding:10px 12px; font-size:10.5px; color:#7a7363; line-height:1.55; margin-top:6px}
+  .capbar b{color:var(--clover-ink)}
+
+  /* v2 신규: 설정 리스트 행 */
+  .setrow{display:flex; align-items:center; gap:11px; padding:13px 2px; border-bottom:1px solid var(--line); cursor:pointer}
+  .setrow .ic{width:30px; height:30px; border-radius:10px; background:var(--warm); display:flex; align-items:center; justify-content:center; font-size:14px; flex:0 0 30px}
+  .setrow .tx{flex:1; min-width:0}
+  .setrow .tx .n{font-size:12.5px; font-weight:600}
+  .setrow .tx .d{font-size:10.5px; color:var(--faint); margin-top:1px}
+  .setrow .chev{color:#c9c4ba; font-size:13px}
+  .setrow .soon{font-size:9.5px; font-weight:700; color:#8a857a; background:#EFEDE8; padding:2px 7px; border-radius:20px}
+  .profile{display:flex; align-items:center; gap:12px; padding:6px 0 14px}
+  .profile .pav{width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#cfe9da,#a9d8bf); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--clover-ink); font-weight:800}
+  .profile .pn{font-size:15px; font-weight:800}
+  .profile .pk{font-size:10.5px; color:var(--faint); margin-top:2px}
+
+  /* v2 신규: 스위치 */
+  .sw{width:38px; height:22px; border-radius:20px; background:#D8D4CA; position:relative; flex:0 0 38px; transition:background .15s; cursor:pointer}
+  .sw::after{content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s; box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .sw.on{background:var(--clover)}
+  .sw.on::after{left:18px}
+  .sw.lock{background:#EFEDE8; cursor:not-allowed}
+  .sw.lock::after{content:"🔒"; font-size:10px; display:flex; align-items:center; justify-content:center; box-shadow:none; background:transparent}
+  .swrow{display:flex; align-items:flex-start; gap:11px; padding:12px 2px; border-bottom:1px solid var(--line)}
+  .swrow .tx{flex:1}
+  .swrow .tx .n{font-size:12.5px; font-weight:600}
+  .swrow .tx .d{font-size:10.5px; color:var(--faint); margin-top:2px; line-height:1.5}
+
+  /* v2 신규: 미리보기 프레임 (프라이버시) */
+  .preview{border:1.5px solid var(--line); border-radius:12px; overflow:hidden; margin-top:10px}
+  .preview .ph2{background:var(--warm); font-size:9.5px; font-weight:700; color:#7a7363; padding:5px 10px}
+  .preview .pb{padding:11px 12px; background:var(--bg)}
+  .preview .pt{font-size:12.5px; font-weight:800; letter-spacing:-.3px}
+  .preview .pc{font-size:10px; color:var(--muted); margin:5px 0}
+  .preview .pwm{background:var(--clover-soft); border-radius:9px; padding:8px 6px; text-align:center; line-height:1.8; margin-top:6px}
+  .preview .pwm span{display:inline-block; margin:0 3px; color:#2c7a4f; font-size:10px}
+  .preview .pgone{background:#EFEDE8; border-radius:9px; padding:12px 8px; text-align:center; font-size:10px; color:#8a857a; margin-top:6px; line-height:1.5}
+
+  /* 고객센터 폼 */
+  .field{margin-bottom:10px}
+  .field .fl{font-size:11px; font-weight:700; color:var(--muted); margin-bottom:5px}
+  .field select,.field textarea{width:100%; border:1px solid var(--line); border-radius:12px; padding:10px 11px; font-size:12px; background:#fff; color:var(--ink); resize:none}
+  .field textarea{height:110px; line-height:1.6}
+  .field .cnt{font-size:10px; color:var(--faint); text-align:right; margin-top:3px}
+  .faq{border-bottom:1px solid var(--line); padding:11px 2px}
+  .faq .q{font-size:12px; font-weight:600; display:flex; justify-content:space-between; gap:8px}
+  .faq .a{font-size:11px; color:var(--muted); line-height:1.6; margin-top:6px}
+  .oneway{background:var(--warm); border-radius:11px; padding:9px 11px; font-size:10.5px; color:#7a7363; line-height:1.55; margin-bottom:8px}
+  .oneway b{color:var(--clover-ink)}
+
+  /* 결제 완료 (payment-flow 톤) */
+  .done{padding-top:36px; text-align:center}
+  .done .halo{width:64px; height:64px; margin:0 auto 14px; border-radius:50%; background:radial-gradient(circle, #E7F4EC 0%, rgba(231,244,236,0) 70%); display:flex; align-items:center; justify-content:center; font-size:26px}
+  .done .t{font-size:17px; font-weight:800; letter-spacing:-.4px; margin-bottom:8px}
+  .done .d{font-size:12px; color:var(--muted); line-height:1.65; margin-bottom:12px}
+  .done .receipt{font-size:10px; color:var(--faint); line-height:1.6; margin-bottom:14px}
+  .upgrade{background:#fff; border:1px solid var(--line); border-radius:14px; padding:13px 14px; text-align:left; margin:0 0 10px}
+  .upgrade .ut{font-size:12.5px; font-weight:700; margin-bottom:3px}
+  .upgrade .ud{font-size:10.5px; color:var(--muted); line-height:1.55; margin-bottom:9px}
+  .upgrade .kakao{display:flex; align-items:center; justify-content:center; gap:7px; background:#FEE500; color:#1A1A1A; border:none; border-radius:10px; width:100%; padding:10px; font-size:12px; font-weight:700; cursor:pointer}
+  .upgrade .skip{display:block; text-align:center; font-size:10.5px; color:var(--faint); margin-top:8px; background:none; border:none; width:100%; cursor:pointer}
+
+  /* 감사 */
+  .thanks-sheet{background:#fff; border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-top:10px}
+  .thanks-sheet .tt{font-size:12.5px; font-weight:700; margin-bottom:6px}
+  .thanks-badge{font-size:9.5px; font-weight:700; color:var(--clover-ink); background:var(--clover-soft); padding:2px 7px; border-radius:20px}
+  .who{display:flex; align-items:flex-start; gap:9px; padding:10px 0; border-bottom:1px solid var(--line)}
+  .who .a2{width:26px; height:26px; border-radius:50%; background:#d8e8dd; flex:0 0 26px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--clover-ink)}
+  .who .a2.anon{background:#ECEAE4; color:#9C968B}
+  .who .nm{font-size:12px; font-weight:600}
+  .who .msg{font-size:10.5px; color:var(--muted); margin-top:1px}
+  .who > div:not(.a2):not(.meta2){flex:1; min-width:0}
+  .who .meta2{margin-left:auto; text-align:right; flex:0 0 auto}
+  .who .clv{font-size:11px; font-weight:600; color:var(--clover-ink)}
+  .who .when{font-size:9.5px; color:var(--faint); margin-top:1px}
+  .who .tbtn{font-size:10px; color:var(--clover-ink); background:none; border:none; cursor:pointer; padding:0; margin-top:4px; font-weight:600}
+  .who .tsent{font-size:10px; color:var(--faint); margin-top:4px}
+
+  .flowmap{background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; max-width:900px; font-size:12px; line-height:1.7}
+  .flowmap pre{font-family:ui-monospace,monospace; font-size:11px; line-height:1.75; color:#444; overflow-x:auto}
+  .flowmap b{color:var(--clover-ink)}
+
+  .stamp{max-width:1220px; margin:36px auto 0; font-size:10.5px; color:#888; background:#fff; border:1px solid var(--line); border-radius:10px; padding:11px 14px; line-height:1.7}
+</style>
+</head>
+<body>
+<div class="hub">
+  <h1 class="board">해낼게 v2 — 신규 화면 프로토타입 허브 <small style="font-weight:400;color:#888">(PRD v0.3.0 · 회장 확정 8건 반영)</small></h1>
+  <p class="board">기반: prd-haenael-ge-v0.3.0(§9 확정 8건) + DESIGN.md v1.7.0 토큰 상속 + 기존 WIREFRAMES 관례 · 다중목표(상한 3)·계정단위 잔액·프라이버시 2스위치(금액은 영구 나만)·마이페이지·고객센터 일방향·계정 승격·감사 1회·탈퇴 차단</p>
+
+  <div class="ctrl">
+    <div class="grp"><span class="lbl">화면</span>
+      <button data-s="s1" class="on">1 홈·다중목표</button>
+      <button data-s="s2">2 새 목표 진입</button>
+      <button data-s="s3">3 마이페이지</button>
+      <button data-s="s4">4 프라이버시</button>
+      <button data-s="s5">5 고객센터</button>
+      <button data-s="s6">6 결제완료·승격</button>
+      <button data-s="s7">7 감사 보내기</button>
+      <button data-s="s8">8 탈퇴 차단</button>
+      <button data-s="s9">9 플로우 맵</button>
+    </div>
+    <div class="grp"><span class="lbl">뷰포트</span>
+      <button data-v="vp390" class="on2">390</button>
+      <button data-v="vp1024">1024</button>
+    </div>
+    <div class="grp"><span class="lbl">상태</span>
+      <button data-st="default" class="on2">기본</button>
+      <button data-st="empty">empty</button>
+      <button data-st="error">error</button>
+    </div>
+  </div>
+
+  <!-- ══════════ 1. 받는사람 홈 — 다중 목표 (F-D) ══════════ -->
+  <div class="screen-wrap show vp390" id="s1">
+    <div class="note">
+      <b>F-D 다중 목표 — "어느 링크를 공유하나" 인지부하를 카드 안에서 끝낸다.</b>
+      잔액 카드는 <b>계정 전체 1개</b>(확정 4)·목표 카드엔 금액 대신 <b>응원 인원수</b>만. 카드마다 <b>"링크 복사"가 카드 안에</b> 있어 "인스타 바이오에 뭘 걸지"는 <b>지금 밀고 싶은 목표의 카드에서 복사</b>하는 행동으로 치환된다(별도 대표 링크 없음 — PRD §4.3-5). 정렬 = 최근 응원 도착순, 미확인 응원 배지 = 손실회피(돌아올 이유). 목표 1개면 현행 홈과 시각적으로 동일(§11-Q1 kill 대비). 마감 목표는 "지난 목표"로 접힘 — 상한(3) 계산에서 제외. 상한 도달 시 "새 목표 만들기"는 비활성 + 이유를 그 자리에서 말한다.
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div style="display:flex;gap:10px;align-items:center"><span class="bell">🔔<span class="dot2"></span></span><span class="gear">☰</span></div></div>
+          <div class="bal">
+            <div><div class="k">내 클로버 (계정 전체)</div><div class="v">🍀 128<small>개</small></div><div class="krw">≈128,000원 상당</div></div>
+            <div class="go">환전</div>
+          </div>
+          <div class="gcard">
+            <div class="t">나 편입 평점 4.0 해낼게</div>
+            <div class="row"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>13명이 응원</span><span class="new">새 응원 2</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <button class="newgoal">＋ 새 목표 만들기</button>
+          <div class="privline">목표 1개일 땐 지금 홈과 똑같이 보여요</div>
+        </div></div>
+        <div class="cap"><b>1a. 목표 1개</b> — 현행과 시각 동일<br>(리스트 구조지만 카드 1장)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div style="display:flex;gap:10px;align-items:center"><span class="bell">🔔<span class="dot2"></span></span><span class="gear">☰</span></div></div>
+          <div class="bal">
+            <div><div class="k">내 클로버 (계정 전체)</div><div class="v">🍀 173<small>개</small></div><div class="krw">≈173,000원 상당 · 목표별 합산 표시는 없어요</div></div>
+            <div class="go">환전</div>
+          </div>
+          <div class="gcard">
+            <div class="t">나 편입 평점 4.0 해낼게</div>
+            <div class="row"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>13명이 응원</span><span class="new">새 응원 2</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <div class="gcard">
+            <div class="t">재수하면서 -8kg 해낼게</div>
+            <div class="row"><span class="chip dday">D-45</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>4명이 응원</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <button class="newgoal">＋ 새 목표 만들기 <span style="font-weight:500;color:var(--faint)">(3개까지)</span></button>
+          <div class="pastfold">지난 목표 1개 <span>▾</span></div>
+          <div class="gcard past">
+            <div class="t">정보처리기사 실기 해낼게</div>
+            <div class="row"><span class="chip closed">마감됨</span></div>
+            <div class="meta"><span>21명이 응원 · 응원은 계속 받을 수 있어요</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button></div>
+          </div>
+        </div></div>
+        <div class="cap"><b>1b. 목표 2개 + 마감 1개</b><br>정렬=최근 응원순 · 지난 목표는 접힘</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div style="display:flex;gap:10px;align-items:center"><span class="bell">🔔</span><span class="gear">☰</span></div></div>
+          <div class="bal">
+            <div><div class="k">내 클로버 (계정 전체)</div><div class="v">🍀 214<small>개</small></div><div class="krw">≈214,000원 상당</div></div>
+            <div class="go">환전</div>
+          </div>
+          <div class="gcard">
+            <div class="t">나 편입 평점 4.0 해낼게</div>
+            <div class="row"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>13명이 응원</span><span class="new">새 응원 2</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <div class="gcard">
+            <div class="t">재수하면서 -8kg 해낼게</div>
+            <div class="row"><span class="chip dday">D-45</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>4명이 응원</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <div class="gcard">
+            <div class="t">아침 6시 기상 30일 해낼게</div>
+            <div class="row"><span class="chip dday">D-27</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>2명이 응원</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <button class="newgoal" disabled>＋ 새 목표 만들기</button>
+          <div class="capbar"><b>동시에 3개까지</b> 해낼 수 있어요.<br>새 목표를 만들려면 먼저 하나를 마감해 주세요. 마감해도 받은 응원과 클로버는 그대로예요.</div>
+        </div></div>
+        <div class="cap"><b>1c. 상한 3개 도달</b><br>비활성 + 이유 + 해소 경로(dead-end 0)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><div style="display:flex;gap:10px;align-items:center"><span class="bell">🔔</span><span class="gear">☰</span></div></div>
+          <div class="bal st-default st-error">
+            <div><div class="k">내 클로버 (계정 전체)</div><div class="v">🍀 30<small>개</small></div><div class="krw">≈30,000원 상당 (웰컴 클로버)</div></div>
+            <div class="go">환전</div>
+          </div>
+          <div class="st-default st-empty">
+            <div class="empty">
+              <div class="b">아직 목표가 없어요</div>
+              <div class="s">"○○ 해낼게" 한 줄이면 시작돼요.<br>친구들이 조용히 밀어줄 거예요.</div>
+            </div>
+            <button class="btn btn-primary">첫 목표 만들기</button>
+          </div>
+          <div class="errcard st-error" style="display:none">
+            <div class="b">목표 목록을 못 불러왔어요</div>
+            <div class="s">네트워크가 불안정해요. 잔액은 정상이에요.</div>
+            <button class="btn btn-line" style="margin-top:8px">다시 불러오기</button>
+          </div>
+        </div></div>
+        <div class="cap"><b>1d. 목표 0개 / 로드 실패</b><br>(상태 토글: empty=목표0 · error=로드 실패)</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/home</div>
+      <div class="inner">
+        <div>
+          <div class="sec">내 목표 <span style="font-weight:400;color:var(--faint)">· 최근 응원순 · 3개까지</span></div>
+          <div class="gcard">
+            <div class="t" style="font-size:15px">나 편입 평점 4.0 해낼게</div>
+            <div class="row"><span class="chip dday">D-14</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>13명이 응원</span><span class="new">새 응원 2</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <div class="gcard">
+            <div class="t" style="font-size:15px">재수하면서 -8kg 해낼게</div>
+            <div class="row"><span class="chip dday">D-45</span><span class="chip live">진행 중</span></div>
+            <div class="meta"><span>4명이 응원</span></div>
+            <div class="acts"><button class="cp">링크 복사</button><button>워드맵</button><button>응원 보기</button></div>
+          </div>
+          <div class="pastfold">지난 목표 1개 <span>▾</span></div>
+          <div class="gcard past">
+            <div class="t" style="font-size:14px">정보처리기사 실기 해낼게</div>
+            <div class="row"><span class="chip closed">마감됨</span></div>
+            <div class="meta"><span>21명이 응원 · 응원은 계속 받을 수 있어요</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="bal" style="display:block">
+            <div class="k">내 클로버 (계정 전체)</div><div class="v">🍀 173<small>개</small></div><div class="krw">≈173,000원 상당</div>
+            <button class="btn btn-primary" style="margin-top:10px">환전하기</button>
+          </div>
+          <button class="newgoal">＋ 새 목표 만들기</button>
+          <div class="privline" style="text-align:left; margin-top:12px">데스크톱 = 목표 리스트 + 우측 잔액·액션 레일.<br>잔액은 계정 전체 하나 — 목표별 모금액 없음(확정 4).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 2. 새 목표 만들기 진입 (F-D 진입로) ══════════ -->
+  <div class="screen-wrap vp390" id="s2">
+    <div class="note">
+      <b>진입로 갭 해소 — 현행 <span class="route">/</span>는 목표 有면 무조건 <span class="route">/home</span>이라 온보딩 재진입이 불가능했다</b>(PRD §4.2-2). v2: 홈의 "＋ 새 목표 만들기" → <span class="route">/onboarding</span> 재진입(write-first 그대로). 저장 화면 = 링크 발급 + <b>기본 전체공개</b>(확정 1) + <b>"나만 보기로 전환" 보조 버튼을 눈에 띄게 병기</b>. 상한 검사는 <b>저장 시점</b>에만 — 쓴 글을 입구에서 막지 않는다(write-first: 쓴 글을 날리지 않는 원칙, PRD §4.6).
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">✕</span></div>
+          <div class="sec">두 번째 목표</div>
+          <div class="goal-t">뭘 해낼 거예요?</div>
+          <div class="field"><textarea style="height:64px" placeholder="">재수하면서 -8kg 해낼게</textarea></div>
+          <div class="field"><div class="fl">언제까지</div><select><option>2026년 9월 5일 (D-45)</option></select></div>
+          <div class="field"><div class="fl">왜 (친구들에게 보여요)</div><textarea style="height:56px">수능이랑 건강 둘 다 놓치기 싫어서.</textarea></div>
+          <button class="btn btn-primary">저장하고 내 링크 받기</button>
+          <div class="privline">이미 로그인돼 있어요 · 저장하면 바로 링크가 나와요</div>
+        </div></div>
+        <div class="cap"><b>2a. 온보딩 재진입</b> — 기존 write-first 폼 그대로<br>(홈 "＋ 새 목표"에서 진입)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div></div>
+          <div class="goal-t" style="font-size:16px">링크가 나왔어요 🍀</div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px">
+            <div style="font-size:10.5px;color:var(--faint);margin-bottom:3px">재수하면서 -8kg 해낼게</div>
+            <div style="font-size:12px;font-weight:700;color:var(--clover-ink);word-break:break-all">haenael.app/g/jaesu-8kg</div>
+            <button class="btn btn-primary" style="margin-top:10px">링크 복사하기</button>
+          </div>
+          <div class="capbar" style="margin-bottom:8px">지금은 <b>링크 아는 사람 모두</b> 볼 수 있어요.<br>아직 보여주고 싶지 않다면 —</div>
+          <button class="btn btn-line">🔒 나만 보기로 전환</button>
+          <div class="privline">나만 보기여도 목표는 지워지지 않아요 · 언제든 다시 공개할 수 있어요</div>
+        </div></div>
+        <div class="cap"><b>2b. 링크 발급 — 기본 전체공개(확정 1)</b><br>"나만 보기로 전환" 보조 버튼 병기</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">✕</span></div>
+          <div class="sec">네 번째 목표</div>
+          <div class="goal-t" style="opacity:.5">토익 900 해낼게</div>
+          <div class="capbar" style="background:var(--danger-soft); color:#8a5f59">
+            <b style="color:var(--danger)">지금은 3개가 진행 중이라 저장할 수 없어요.</b><br>
+            쓴 글은 그대로 보관해 둘게요. 목표 하나를 마감하면 이어서 저장할 수 있어요.
+          </div>
+          <button class="btn btn-line">내 목표 보러 가기 (하나 마감하기)</button>
+          <button class="btn btn-ghost">글 보관하고 나가기</button>
+          <div class="privline">보관한 글은 다음에 "새 목표 만들기"를 누르면 그대로 있어요</div>
+        </div></div>
+        <div class="cap"><b>2c. 상한 도달 — 저장 시점 안내</b><br>draft 보존(손실회피) · dead-end 0</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/onboarding</div>
+      <div class="inner">
+        <div>
+          <div class="sec">두 번째 목표</div>
+          <div class="goal-t" style="font-size:22px">뭘 해낼 거예요?</div>
+          <div class="field"><textarea style="height:64px">재수하면서 -8kg 해낼게</textarea></div>
+          <div class="field"><div class="fl">언제까지</div><select><option>2026년 9월 5일 (D-45)</option></select></div>
+          <div class="field"><div class="fl">왜 (친구들에게 보여요)</div><textarea style="height:56px">수능이랑 건강 둘 다 놓치기 싫어서.</textarea></div>
+          <button class="btn btn-primary" style="max-width:280px">저장하고 내 링크 받기</button>
+        </div>
+        <div>
+          <div class="capbar">저장하면 <b>링크 아는 사람 모두</b> 볼 수 있는 상태로 시작돼요(기본 전체공개).<br>발급 화면에서 "나만 보기로 전환"을 바로 누를 수 있어요.</div>
+          <div class="privline" style="text-align:left; margin-top:12px">데스크톱 = 폼 + 우측 공개범위 안내 레일.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 3. 마이페이지 (F-E + F-C) ══════════ -->
+  <div class="screen-wrap vp390" id="s3">
+    <div class="note">
+      <b>F-E 마이페이지 6항목 + F-C "내가 응원한 목표".</b> 진입 = 홈 우상단 ☰. 구성(확정): 알림 / 프로필(카카오 프로필 이미지 연동) / 계정 관리 / 결제·정산 관리(<b>준비중</b> — 토스 심사 대기) / 이용약관 / 고객센터. "내가 응원한 목표"의 내 보낸 금액은 <b>본인만</b>(SEC-7) · 합계·랭킹·스트릭 표시 금지(PRD §11-Q2 — 마이페이지는 생색 도구가 아니라 "닿았는지" 불확실성 해소 도구). 감사 도착 시 행에 문구 표시, <b>답장 입력 UI 없음</b>(확정 8 단방향). 벤치마크: 설정 그룹핑·행 리스트 패턴(Baymard 2025 self-service·Toptal settings UX) 차용, 알림 뱃지 남발·프로모 배너는 버림(Discreet).
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">✕</span></div>
+          <div class="profile">
+            <div class="pav">한</div>
+            <div><div class="pn">한서연</div><div class="pk">카카오 프로필과 연동돼요</div></div>
+          </div>
+          <div class="setrow"><div class="ic">🔔</div><div class="tx"><div class="n">알림</div><div class="d">응원 도착 알림 · 카카오 알림톡 켜기/끄기</div></div><span class="chev">›</span></div>
+          <div class="setrow"><div class="ic">🍀</div><div class="tx"><div class="n">내가 응원한 목표</div><div class="d">내가 보낸 응원 기록 (나만 보여요)</div></div><span class="chev">›</span></div>
+          <div class="setrow"><div class="ic">👤</div><div class="tx"><div class="n">계정 관리</div><div class="d">로그아웃 · 회원 탈퇴</div></div><span class="chev">›</span></div>
+          <div class="setrow" style="cursor:default"><div class="ic" style="opacity:.55">💳</div><div class="tx" style="opacity:.55"><div class="n">결제·정산 관리</div><div class="d">결제수단 · 정산 계좌</div></div><span class="soon">준비중</span></div>
+          <div class="setrow"><div class="ic">📄</div><div class="tx"><div class="n">이용약관 · 개인정보 처리방침</div></div><span class="chev">›</span></div>
+          <div class="setrow" style="border-bottom:none"><div class="ic">💬</div><div class="tx"><div class="n">고객센터</div><div class="d">자주 묻는 질문 · 운영자에게 전하기</div></div><span class="chev">›</span></div>
+          <div class="privline">v0.3.0 · 프라이버시 설정은 각 목표 카드에서</div>
+        </div></div>
+        <div class="cap"><b>3a. 마이페이지 메인</b><br>결제·정산 = "준비중"(토스 심사 대기)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="sec">내가 응원한 목표 <span style="font-weight:400;color:var(--faint)">· 최근 순</span></div>
+          <div class="st-default">
+            <div class="who"><div class="a2">도</div><div><div class="nm">도경 · 편입 평점 4.0 해낼게</div><div class="msg">내가 남긴 말: "곧된다 진짜"</div><div class="tsent" style="color:var(--clover-ink)">💌 도경의 감사: "민지야 진짜 고마워, 힘낼게"</div></div><div class="meta2"><div class="clv">🍀 5</div><div class="when">3일 전 · 진행 중</div></div></div>
+            <div class="who"><div class="a2">수</div><div><div class="nm">수아 · 필라테스 자격증 해낼게</div><div class="msg">내가 남긴 말: 없음</div></div><div class="meta2"><div class="clv">🍀 3</div><div class="when">2주 전 · 마감</div></div></div>
+            <div class="who" style="opacity:.65"><div class="a2">?</div><div><div class="nm">지금은 볼 수 없는 목표</div><div class="msg">주인이 잠시 내렸어요 · 내 기록은 남아 있어요</div></div><div class="meta2"><div class="clv">🍀 10</div><div class="when">1달 전</div></div></div>
+            <div class="who" style="border-bottom:none"><div class="a2">태</div><div><div class="nm">태윤 · 마라톤 완주 해낼게</div><div class="msg" style="color:#a8362a">환불됨</div></div><div class="meta2"><div class="clv" style="color:var(--faint);text-decoration:line-through">🍀 5</div><div class="when">2달 전</div></div></div>
+            <div class="privline">보낸 클로버는 <b>나만</b> 볼 수 있어요 · 합계·순위 같은 건 없어요<br>감사가 오면 여기 보여요 — 답장 기능은 없어요(부담 없이)</div>
+          </div>
+          <div class="st-empty" style="display:none">
+            <div class="empty">
+              <div class="b">아직 응원 기록이 없어요</div>
+              <div class="s">친구의 해낼게 링크에서 응원하면<br>여기 조용히 쌓여요.</div>
+            </div>
+          </div>
+          <div class="errcard st-error" style="display:none">
+            <div class="b">기록을 못 불러왔어요</div>
+            <div class="s">네트워크가 불안정해요.</div>
+            <button class="btn btn-line" style="margin-top:8px">다시 불러오기</button>
+          </div>
+        </div></div>
+        <div class="cap"><b>3b. 내가 응원한 목표</b> — 금액=본인만·감사 표시<br>(상태 토글: empty / error)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="sec">알림</div>
+          <div class="swrow"><div class="tx"><div class="n">카카오 알림톡</div><div class="d">응원이 도착하면 카카오톡으로 은은하게 알려드려요. 꺼도 앱 안 알림은 남아요.</div></div><div class="sw on"></div></div>
+          <div class="sec" style="margin-top:14px">최근 알림</div>
+          <div class="who"><div class="a2">🍀</div><div><div class="nm">'편입 평점 4.0 해낼게'에 조용한 응원이 도착했어요</div></div><div class="meta2"><div class="when">방금</div></div></div>
+          <div class="who"><div class="a2">🍀</div><div><div class="nm">'재수하면서 -8kg 해낼게'에 조용한 응원이 도착했어요</div></div><div class="meta2"><div class="when">어제</div></div></div>
+          <div class="who" style="border-bottom:none"><div class="a2">💌</div><div><div class="nm">내가 응원한 도경이 감사를 보냈어요</div></div><div class="meta2"><div class="when">3일 전</div></div></div>
+          <div class="privline">알림 문구에 목표 제목 포함(다중 목표 구분) · 금액·재촉 없음</div>
+        </div></div>
+        <div class="cap"><b>3c. 알림</b> — 알림톡 스위치 + 목표 제목 포함 문구<br>(PRD §4.3-6 템플릿 재심사 반영)</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/me</div>
+      <div class="inner">
+        <div>
+          <div class="profile">
+            <div class="pav">한</div>
+            <div><div class="pn">한서연</div><div class="pk">카카오 프로필과 연동돼요</div></div>
+          </div>
+          <div class="setrow"><div class="ic">🔔</div><div class="tx"><div class="n">알림</div><div class="d">응원 도착 알림 · 카카오 알림톡</div></div><span class="chev">›</span></div>
+          <div class="setrow"><div class="ic">🍀</div><div class="tx"><div class="n">내가 응원한 목표</div><div class="d">내 응원 기록 (나만 보여요)</div></div><span class="chev">›</span></div>
+          <div class="setrow"><div class="ic">👤</div><div class="tx"><div class="n">계정 관리</div><div class="d">로그아웃 · 회원 탈퇴</div></div><span class="chev">›</span></div>
+          <div class="setrow" style="cursor:default"><div class="ic" style="opacity:.55">💳</div><div class="tx" style="opacity:.55"><div class="n">결제·정산 관리</div></div><span class="soon">준비중</span></div>
+          <div class="setrow"><div class="ic">📄</div><div class="tx"><div class="n">이용약관 · 개인정보 처리방침</div></div><span class="chev">›</span></div>
+          <div class="setrow" style="border-bottom:none"><div class="ic">💬</div><div class="tx"><div class="n">고객센터</div></div><span class="chev">›</span></div>
+        </div>
+        <div>
+          <div class="sec">내가 응원한 목표</div>
+          <div class="who"><div class="a2">도</div><div><div class="nm">도경 · 편입 평점 4.0</div><div class="tsent" style="color:var(--clover-ink)">💌 감사 도착</div></div><div class="meta2"><div class="clv">🍀 5</div><div class="when">3일 전</div></div></div>
+          <div class="who" style="border-bottom:none"><div class="a2">수</div><div><div class="nm">수아 · 필라테스 자격증</div></div><div class="meta2"><div class="clv">🍀 3</div><div class="when">2주 전</div></div></div>
+          <div class="privline" style="text-align:left; margin-top:12px">데스크톱 = 설정 리스트 + 우측에 응원 기록 요약 레일.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 4. 프라이버시 설정 (F-A·F-B) ══════════ -->
+  <div class="screen-wrap vp390" id="s4">
+    <div class="note">
+      <b>F-B 항목별 스위치 2개 + 실시간 미리보기 — 이 화면의 핵심 가치는 "끄면 친구에게 어떻게 보이나"를 그 자리에서 보여주는 것</b>(Smashing Magazine Privacy UX: 레이어드 설명 + 수집·노출 시점의 즉물적 안내가 긴 약관보다 효과적). 확정 2: 스위치 = ①응원자 이름 목록 ②응원 메시지. <b>개별 응원 금액은 어떤 설정으로도 공개 불가</b> — 스위치가 아니라 잠긴 상수로 그린다("이 금액은 나만 볼 수 있어요"). 확정 3: 메시지 OFF → <b>공개 워드맵 자체를 표시하지 않음</b>(본인에게만 보임) — 미리보기가 그 상태를 그대로 보여준다. 진입 = 목표 카드 "응원 보기" 상단 ⚙ (목표별 설정이므로 마이페이지가 아니라 목표에 붙는다). 아래 스위치는 실제로 눌러볼 수 있어요.
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="sec">공개 설정 · 편입 평점 4.0 해낼게</div>
+          <div class="swrow"><div class="tx"><div class="n">목표 공개</div><div class="d">끄면 링크를 열어도 "지금은 볼 수 없는 목표예요"만 보여요. 받은 응원·클로버는 그대로예요.</div></div><div class="sw on" id="swVis"></div></div>
+          <div class="swrow"><div class="tx"><div class="n">응원한 사람 이름 보여주기</div><div class="d">끄면 친구 화면에 "13명이 응원했어요"만 남아요.</div></div><div class="sw on" id="swName"></div></div>
+          <div class="swrow"><div class="tx"><div class="n">응원 메시지 보여주기</div><div class="d">끄면 워드맵이 친구 화면에서 아예 사라져요. 나는 계속 볼 수 있어요.</div></div><div class="sw on" id="swMsg"></div></div>
+          <div class="swrow" style="border-bottom:none"><div class="tx"><div class="n" style="color:var(--faint)">응원 금액</div><div class="d">이 금액은 <b style="color:var(--clover-ink)">나만 볼 수 있어요.</b> 어떤 설정으로도 다른 사람에게 공개되지 않아요.</div></div><div class="sw lock"></div></div>
+        </div></div>
+        <div class="cap"><b>4a. 설정 스위치</b> — 금액은 스위치가 아니라 잠긴 상수<br>(스위치를 누르면 4b 미리보기가 바뀜)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="sec">친구에게 이렇게 보여요</div>
+          <div class="preview" id="pvFrame">
+            <div class="ph2">미리보기 · haenael.app/g/pyeonip-40</div>
+            <div class="pb" id="pvOn">
+              <div class="pt">나 편입 평점 4.0 해낼게</div>
+              <div class="pc" id="pvCount">민지님 외 12명이 조용히 응원했어요</div>
+              <div class="pwm" id="pvWm">
+                <span style="font-size:13px">화이팅</span><span>곧된다</span><span style="font-size:12px">멋지다</span><span>고생많아</span><span style="font-size:11px">힘내자</span>
+              </div>
+              <div class="pgone" id="pvWmGone" style="display:none">워드맵은 표시되지 않아요<br><span style="font-size:9px">(메시지는 나만 볼 수 있어요)</span></div>
+            </div>
+            <div class="pb" id="pvOff" style="display:none">
+              <div class="pgone" style="padding:26px 10px">지금은 볼 수 없는 목표예요<br><span style="font-size:9px">해낼게에서 내 목표 만들기 →</span></div>
+            </div>
+          </div>
+          <div class="privline">어떤 조합에서도 금액은 안 보여요 · 저장은 자동이에요</div>
+        </div></div>
+        <div class="cap"><b>4b. 실시간 미리보기</b> — 4a 스위치와 연동<br>(메시지 OFF=워드맵 소멸 · 목표 OFF=비공개 안내)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div></div>
+          <div class="goal-t" style="opacity:.9">지금은 볼 수 없는<br>목표예요</div>
+          <div class="empty" style="margin-top:16px">
+            <div class="b">주인이 잠시 내려뒀어요</div>
+            <div class="s">링크는 살아 있어요. 다시 공개되면<br>이 주소에서 그대로 볼 수 있어요.</div>
+          </div>
+          <button class="btn btn-line">나도 해낼게 만들어보기</button>
+          <div class="privline">404가 아니라 안내 + ① 진입 경로(dead-end 0)</div>
+        </div></div>
+        <div class="cap"><b>4c. 비공개 목표를 친구가 열었을 때</b><br>(PRD §2.2 — 랜딩 회수 경로)</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/home · 공개 설정</div>
+      <div class="inner">
+        <div>
+          <div class="sec">공개 설정 · 편입 평점 4.0 해낼게</div>
+          <div class="swrow"><div class="tx"><div class="n">목표 공개</div><div class="d">끄면 링크를 열어도 "지금은 볼 수 없는 목표예요"만 보여요.</div></div><div class="sw on"></div></div>
+          <div class="swrow"><div class="tx"><div class="n">응원한 사람 이름 보여주기</div><div class="d">끄면 "13명이 응원했어요"만 남아요.</div></div><div class="sw on"></div></div>
+          <div class="swrow"><div class="tx"><div class="n">응원 메시지 보여주기</div><div class="d">끄면 워드맵이 친구 화면에서 사라져요. 나는 계속 볼 수 있어요.</div></div><div class="sw on"></div></div>
+          <div class="swrow" style="border-bottom:none"><div class="tx"><div class="n" style="color:var(--faint)">응원 금액</div><div class="d">나만 볼 수 있어요 — 어떤 설정으로도 공개되지 않아요.</div></div><div class="sw lock"></div></div>
+        </div>
+        <div>
+          <div class="sec">친구에게 이렇게 보여요</div>
+          <div class="preview">
+            <div class="ph2">미리보기</div>
+            <div class="pb">
+              <div class="pt">나 편입 평점 4.0 해낼게</div>
+              <div class="pc">민지님 외 12명이 조용히 응원했어요</div>
+              <div class="pwm"><span style="font-size:13px">화이팅</span><span>곧된다</span><span style="font-size:12px">멋지다</span></div>
+            </div>
+          </div>
+          <div class="privline" style="text-align:left; margin-top:12px">데스크톱 = 설정 + 미리보기 나란히(즉시 피드백).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 5. 고객센터 (F-E) ══════════ -->
+  <div class="screen-wrap vp390" id="s5">
+    <div class="note">
+      <b>고객센터 = FAQ + 운영자 소통 일방향 폼.</b> "개별 답변은 드리지 않습니다"를 <b>제출 버튼 위에</b> 명시(제출 후 고지 = 다크패턴, PRD §6.2). 카테고리 4종 · 본문 1,000자 · 1일 3건 제한. <b>단, 환불·결제 오류는 답을 받아야 하는 문제</b> — FAQ 최상단에 이메일 경로를 분리해 일방향 폼이 CS 블랙홀이 되지 않게 한다. 선결 조건(운영자 읽기 화면, PRD §6.1)은 eng-design 이관.
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="sec">자주 묻는 질문</div>
+          <div class="faq"><div class="q">환불하고 싶어요 <span>▾</span></div><div class="a">결제 영수증(문자·이메일)의 주문번호와 함께 <b>help@haenael.app</b>으로 보내주세요. 환불·결제 오류는 반드시 확인하고 답을 드려요.</div></div>
+          <div class="faq"><div class="q">클로버는 언제 환전되나요 <span>▸</span></div></div>
+          <div class="faq"><div class="q">응원 금액이 친구에게 보이나요 <span>▸</span></div></div>
+          <div class="faq"><div class="q">목표를 잠시 숨길 수 있나요 <span>▸</span></div></div>
+          <div class="sec" style="margin-top:14px">운영자에게 전하기</div>
+          <div class="oneway">여기 남긴 이야기는 운영자가 <b>모두 읽어요.</b><br>다만 <b>개별 답변은 드리지 않아요</b> — 답이 필요한 문제(환불·결제 오류)는 위 이메일로 보내주세요.</div>
+          <div class="field"><select><option>기타 의견</option><option>결제</option><option>계정</option><option>신고</option></select></div>
+          <div class="field"><textarea placeholder="">워드맵 이미지 저장할 때 화질이 조금 아쉬워요. 스토리에 올리면 글자가 흐려 보여요.</textarea><div class="cnt">64 / 1,000자 · 하루 3건까지</div></div>
+          <button class="btn btn-primary">전하기</button>
+        </div></div>
+        <div class="cap"><b>5a. FAQ + 문의 폼</b><br>"개별 답변 X"는 버튼 위 · 환불은 이메일 분리</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="st-default st-empty">
+            <div class="done" style="padding-top:64px">
+              <div class="halo">💬</div>
+              <div class="t">잘 전해졌어요</div>
+              <div class="d">운영자가 꼭 읽을게요.<br>답장이 없어도 흘려듣는 게 아니에요.</div>
+              <button class="btn btn-line" style="max-width:170px;margin:0 auto">돌아가기</button>
+            </div>
+          </div>
+          <div class="st-error" style="display:none">
+            <div class="errcard" style="margin-top:60px">
+              <div class="b">전송이 안 됐어요</div>
+              <div class="s">네트워크가 불안정해요. 쓴 글은 그대로 있어요.</div>
+              <button class="btn btn-line" style="margin-top:8px">다시 전하기</button>
+            </div>
+            <div class="errcard" style="background:var(--warm); border-color:var(--line)">
+              <div class="b" style="color:#7a7363">오늘은 3건을 모두 보냈어요</div>
+              <div class="s" style="color:#8a857a">내일 다시 전할 수 있어요. 급한 결제 문제는 help@haenael.app로.</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="cap"><b>5b. 제출 완료 / 실패·한도</b><br>(상태 토글: error=전송 실패 + 1일 3건 도달)</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/support</div>
+      <div class="inner">
+        <div>
+          <div class="sec">자주 묻는 질문</div>
+          <div class="faq"><div class="q">환불하고 싶어요 <span>▾</span></div><div class="a">주문번호와 함께 <b>help@haenael.app</b>으로 — 환불·결제 오류는 반드시 답을 드려요.</div></div>
+          <div class="faq"><div class="q">클로버는 언제 환전되나요 <span>▸</span></div></div>
+          <div class="faq"><div class="q">응원 금액이 친구에게 보이나요 <span>▸</span></div></div>
+        </div>
+        <div>
+          <div class="sec">운영자에게 전하기</div>
+          <div class="oneway">모두 읽지만 <b>개별 답변은 드리지 않아요.</b></div>
+          <div class="field"><select><option>기타 의견</option></select></div>
+          <div class="field"><textarea style="height:80px">워드맵 이미지 화질이 조금 아쉬워요.</textarea></div>
+          <button class="btn btn-primary">전하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 6. 결제 완료 — 계정 만들기 권유 (F-C) ══════════ -->
+  <div class="screen-wrap vp390" id="s6">
+    <div class="note">
+      <b>확정 6 — 게스트 응원의 계정 연결은 결제 완료 화면 1곳에서만 권유.</b> payment-flow.html 6(완료·피크엔드)의 변형: 완료 감정이 정점일 때 subtle 카드 1장 — <b>로그인 강제로 보이면 실패.</b> 완료 메시지·영수증·"나도 만들래"는 전부 그대로, 승격 카드는 그 아래 보조 위치. "건너뛰기"가 항상 보인다. 목표 페이지·홈·시트엔 로그인 유도 배너 금지(PRD §5.2 실패판정 2).
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="done" style="padding-top:26px">
+            <div class="halo">🍀</div>
+            <div class="t">조용히 닿았어요</div>
+            <div class="d">도경이 워드맵에 "곧된다 진짜"가<br>방금 한 자리 채웠어요.</div>
+            <div class="receipt">영수증 문자/이메일 발송 · 주문 HNG-260722-1847</div>
+          </div>
+          <div class="upgrade st-default st-error">
+            <div class="ut">이 응원, 내 기록으로 남길까요?</div>
+            <div class="ud">로그인하면 "내가 응원한 목표"에 조용히 쌓여요. 도경이 감사를 보내면 받아볼 수도 있어요. 안 해도 응원은 이미 잘 닿았어요.</div>
+            <button class="kakao">💬 카카오로 1초 만에 남기기</button>
+            <button class="skip">괜찮아요, 이대로 둘게요</button>
+          </div>
+          <div class="errcard st-error" style="display:none">
+            <div class="b">로그인이 안 됐어요</div>
+            <div class="s">응원은 이미 잘 닿았어요 — 걱정 마세요.<br>기록 연결만 안 된 거라 다시 시도해도 돼요.</div>
+            <button class="btn btn-line" style="margin-top:8px">다시 시도</button>
+          </div>
+          <button class="btn btn-line st-default st-empty">도경이 페이지 다시 보기</button>
+          <button class="btn btn-ghost st-default st-empty">나도 해낼게 만들래 →</button>
+        </div></div>
+        <div class="cap"><b>6a. 완료 + 승격 카드(subtle)</b><br>(상태 토글: error=로그인 실패 — 응원은 안전)</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="done" style="padding-top:40px">
+            <div class="halo">🍀</div>
+            <div class="t">기록으로 남았어요</div>
+            <div class="d">한서연님의 응원 기록에<br>도경이 목표가 담겼어요.<br><span style="color:var(--faint);font-size:11px">이전의 게스트 응원도 함께 연결됐어요.</span></div>
+            <button class="btn btn-line" style="max-width:190px;margin:14px auto 0">내가 응원한 목표 보기</button>
+            <button class="btn btn-ghost">닫기</button>
+          </div>
+          <div class="privline">승격 성공 — 마이페이지 3b로 연결 · 과거 응원 귀속은 PRD Q6-(a) 채택 시</div>
+        </div></div>
+        <div class="cap"><b>6b. 승격 성공</b> — 게스트 응원이 계정에 귀속</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/payment/success</div>
+      <div class="inner">
+        <div>
+          <div class="done" style="text-align:left; padding-top:0">
+            <div class="t" style="font-size:22px">조용히 닿았어요</div>
+            <div class="d">도경이 워드맵에 "곧된다 진짜"가 방금 한 자리 채웠어요.</div>
+            <div class="receipt">영수증 문자/이메일 발송 · 주문 HNG-260722-1847</div>
+          </div>
+          <button class="btn btn-line" style="max-width:220px">도경이 페이지 다시 보기</button>
+        </div>
+        <div>
+          <div class="upgrade">
+            <div class="ut">이 응원, 내 기록으로 남길까요?</div>
+            <div class="ud">로그인하면 "내가 응원한 목표"에 조용히 쌓여요.</div>
+            <button class="kakao">💬 카카오로 1초 만에 남기기</button>
+            <button class="skip">괜찮아요, 이대로 둘게요</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 7. 감사 보내기 (확정 8) ══════════ -->
+  <div class="screen-wrap vp390" id="s7">
+    <div class="note">
+      <b>확정 8 — 받는사람→응원자 감사 1회 단방향.</b> 에토스 방어 3개(PRD §5.4): ①미전송 감사에 배지·카운트·독촉 <b>없음</b>(안 보내도 화면에 흔적 없음) ②"감사 한마디"는 ghost(행 안 작은 텍스트 버튼, primary 아님) ③"N명에게 감사 안 함" 류 미완료 표시 금지. 1건당 정확히 1회 · 200자 · 보낸 뒤엔 수정·삭제 없음(보내기 전 그 사실 고지 = 실수 방지). 응원자 쪽 수신 화면은 3b(마이페이지 행 + 알림 1회).
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="sec">응원한 사람 · 편입 평점 4.0 <span style="font-weight:400;color:var(--faint)">· 최근 순</span></div>
+          <div class="who"><div class="a2">민</div><div><div class="nm">민지</div><div class="msg">"곧된다 진짜"</div><button class="tbtn">감사 한마디 보내기</button></div><div class="meta2"><div class="clv">🍀 5</div><div class="when">방금</div></div></div>
+          <div class="who"><div class="a2 anon">?</div><div><div class="nm">익명의 누군가</div><div class="msg">"존경해"</div></div><div class="meta2"><div class="clv">🍀 10</div><div class="when">1시간 전</div></div></div>
+          <div class="who"><div class="a2">준</div><div><div class="nm">준호</div><div class="msg" style="color:var(--faint)">메시지 없음</div><div class="tsent">💌 감사 보냄 · 3일 전</div></div><div class="meta2"><div class="clv">🍀 3</div><div class="when">어제</div></div></div>
+          <div class="who" style="border-bottom:none"><div class="a2">서</div><div><div class="nm">서연</div><div class="msg">"멋지다"</div><button class="tbtn">감사 한마디 보내기</button></div><div class="meta2"><div class="clv">🍀 5</div><div class="when">3일 전</div></div></div>
+          <div class="privline">익명 응원엔 감사를 보낼 수 없어요(누군지 몰라도 마음은 닿았어요)<br>안 보내도 아무 표시 안 남아요 — 의무가 아니에요</div>
+        </div></div>
+        <div class="cap"><b>7a. 응원 목록 — 감사 진입(ghost)</b><br>보낸 행만 "감사 보냄" · 미전송 흔적 없음</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">✕</span></div>
+          <div class="sec">민지에게 감사 한마디</div>
+          <div class="thanks-sheet">
+            <div class="tt">"곧된다 진짜" <span class="thanks-badge">🍀 5</span></div>
+            <div class="field" style="margin-top:8px"><textarea style="height:84px">민지야 진짜 고마워. 곧 좋은 소식 들려줄게.</textarea><div class="cnt">23 / 200자</div></div>
+            <div class="oneway" style="margin-top:2px">감사는 <b>한 번만</b> 보낼 수 있어요. 보낸 뒤엔 고칠 수 없어요.<br>민지는 답장할 수 없어요 — 대화가 아니라 마침표예요.</div>
+            <button class="btn btn-primary">이대로 보내기</button>
+            <button class="btn btn-ghost">나중에</button>
+          </div>
+        </div></div>
+        <div class="cap"><b>7b. 감사 작성</b> — 1회·200자·수정 불가 사전 고지</div>
+      </div>
+
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="st-default st-empty">
+            <div class="done" style="padding-top:60px">
+              <div class="halo">💌</div>
+              <div class="t">민지에게 닿았어요</div>
+              <div class="d">조용히 한 번, 그걸로 충분해요.</div>
+              <button class="btn btn-line" style="max-width:170px;margin:0 auto">응원 목록으로</button>
+            </div>
+          </div>
+          <div class="errcard st-error" style="display:none;margin-top:60px">
+            <div class="b">전송이 안 됐어요</div>
+            <div class="s">쓴 글은 그대로 있어요. 다시 보내볼까요?</div>
+            <button class="btn btn-line" style="margin-top:8px">다시 보내기</button>
+          </div>
+        </div></div>
+        <div class="cap"><b>7c. 전송 완료 / 실패</b><br>(상태 토글: error=전송 실패, 글 보존)</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/home · 응원 목록</div>
+      <div class="inner">
+        <div>
+          <div class="sec">응원한 사람 · 편입 평점 4.0</div>
+          <div class="who"><div class="a2">민</div><div><div class="nm">민지</div><div class="msg">"곧된다 진짜"</div><button class="tbtn">감사 한마디 보내기</button></div><div class="meta2"><div class="clv">🍀 5</div><div class="when">방금</div></div></div>
+          <div class="who" style="border-bottom:none"><div class="a2">준</div><div><div class="nm">준호</div><div class="tsent">💌 감사 보냄 · 3일 전</div></div><div class="meta2"><div class="clv">🍀 3</div><div class="when">어제</div></div></div>
+        </div>
+        <div>
+          <div class="thanks-sheet">
+            <div class="tt">민지에게 감사 한마디 <span class="thanks-badge">1회</span></div>
+            <div class="field" style="margin-top:8px"><textarea style="height:70px">민지야 진짜 고마워.</textarea></div>
+            <button class="btn btn-primary">이대로 보내기</button>
+          </div>
+          <div class="privline" style="text-align:left; margin-top:12px">데스크톱 = 목록 + 우측 작성 패널.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 8. 탈퇴 — 잔액 남음 차단 (확정 7) ══════════ -->
+  <div class="screen-wrap vp390" id="s8">
+    <div class="note">
+      <b>확정 7 — 클로버 잔액이 0이 아니면 탈퇴 차단 + 환전 유도.</b> 돈이 남은 계정 삭제 = 분쟁(PRD Q7). 신뢰가 필요한 지점의 <b>의도된 마찰</b>(뱅크샐러드 원칙): 왜 못 하는지·얼마가 남았는지·어떻게 하면 되는지를 그 자리에서 전부 말한다. 최소환전액 미달 잔액 처리는 정책 defer(legal) — 화면 자리만 확보.
+    </div>
+    <div class="stage">
+      <div class="stepcol">
+        <div class="ph"><div class="notch"></div><div class="sc">
+          <div class="top"><div class="brand">해낼게<span class="dot">.</span></div><span class="gear">‹</span></div>
+          <div class="sec">회원 탈퇴</div>
+          <div class="st-default st-error">
+            <div class="capbar" style="background:var(--danger-soft)">
+              <b style="color:var(--danger)">아직 클로버 128개(≈128,000원 상당)가 남아 있어요.</b><br>
+              탈퇴하면 돌려드릴 방법이 없어서, 먼저 환전을 마친 뒤에 탈퇴할 수 있어요.
+            </div>
+            <button class="btn btn-primary">먼저 환전하기 (🍀 128개)</button>
+            <button class="btn btn-line" disabled>탈퇴하기</button>
+            <div class="privline">환전이 끝나 잔액이 0이 되면 탈퇴 버튼이 열려요<br>최소환전액 미달 잔액 처리는 준비 중이에요 · 고객센터로 문의</div>
+          </div>
+          <div class="st-empty" style="display:none">
+            <div class="capbar">잔액이 0이에요. 탈퇴하면 목표·응원 기록·워드맵이 모두 지워지고 되돌릴 수 없어요. 내 링크를 연 친구에겐 "종료된 목표"로 보여요.</div>
+            <button class="btn btn-line" style="color:var(--danger); border-color:#f0cdc8">탈퇴하기</button>
+            <button class="btn btn-primary">그냥 둘래요 (돌아가기)</button>
+          </div>
+        </div></div>
+        <div class="cap"><b>8a. 잔액 有 = 차단 + 환전 유도</b><br>(상태 토글: empty=잔액 0 → 탈퇴 가능·확인)</div>
+      </div>
+    </div>
+
+    <div class="dk"><div class="bar"><span class="dot3"></span><span class="dot3"></span><span class="dot3"></span> haenael.app/me · 계정 관리</div>
+      <div class="inner">
+        <div>
+          <div class="sec">회원 탈퇴</div>
+          <div class="capbar" style="background:var(--danger-soft)">
+            <b style="color:var(--danger)">아직 클로버 128개(≈128,000원 상당)가 남아 있어요.</b><br>
+            먼저 환전을 마친 뒤에 탈퇴할 수 있어요.
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary">먼저 환전하기 (🍀 128개)</button>
+          <button class="btn btn-line" disabled>탈퇴하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 9. 플로우 맵 ══════════ -->
+  <div class="screen-wrap vp390" id="s9">
+    <div class="note"><b>v2 신규 화면 연결 전도 — dead-end 0 검증.</b> 모든 신규 상태에 다음 경로가 있다.</div>
+    <div class="flowmap">
+<pre>
+[받는사람]
+ /home(1) ── ＋새 목표 ──▶ /onboarding(2a) ── 저장 ──▶ 링크 발급(2b: 기본 전체공개 + 나만보기 전환)
+    │                          └ 상한 3 도달 ──▶ 2c: draft 보관 + 마감 유도 (dead-end 0)
+    ├─ 목표 카드 "링크 복사" = 공유할 링크 선택 문제 해소 (카드 단위)
+    ├─ 목표 카드 "응원 보기" ──▶ 응원 목록(7a) ── ghost "감사 한마디" ──▶ 7b 작성 ──▶ 7c 완료/실패(글 보존)
+    │                              └ ⚙ 공개 설정(4a) ⟷ 실시간 미리보기(4b) · 금액=잠긴 상수
+    ├─ ☰ 마이페이지(3a) ─ 알림(3c)/내가 응원한 목표(3b)/계정 관리 ─▶ 탈퇴(8: 잔액>0 차단→환전)
+    │                      └ 결제·정산 = "준비중" (토스 심사 대기 · dead-end 아님, 상태 고지)
+    └─ 고객센터(5a) ── 전하기 ──▶ 5b 완료 / 실패(글 보존) / 1일 3건 도달(내일 + 이메일 경로)
+
+[친구]
+ /g/[slug] ── 비공개 전환된 목표 ──▶ 4c "지금은 볼 수 없는 목표예요" + ① 진입 (404 아님)
+ 결제 완료(6a) ── subtle 승격 카드 ──▶ 카카오 1탭 ──▶ 6b 기록 연결 ──▶ 마이페이지 3b
+    └ 건너뛰기 = 항상 가능 · 로그인 실패해도 응원은 안전(6a error)
+</pre>
+    </div>
+  </div>
+
+  <div class="stamp">
+    <b>🏷 STAMP</b> | line: haenael | 생성: 2026-07-22 14:05 KST | model: claude-fable-5 | agent: product-designer<br>
+    skills: design-html(허브 산출) · design-review(자체 QA — 등급은 채팅 보고에 병기) | 기반: docs/plan/prd-haenael-ge-v0.3.0.md(§9 확정 8건·§4~6) · DESIGN.md v1.7.0 토큰 상속 · docs/design/user-flow.md · WIREFRAMES/receiver-home.html·haenael-receiver-manage-v1-fable.html·payment-flow.html 마크업 관례 · web/src/app/(receiver)/home/page.tsx·MyLinkCard.tsx 실측<br>
+    벤치마크: Smashing Magazine Privacy UX(https://www.smashingmagazine.com/2019/04/privacy-ux-aware-design-framework/ — 노출 시점의 즉물적 미리보기 차용), Baymard Accounts &amp; Self-Service 2025(https://baymard.com/blog/current-state-accounts-selfservice — 설정 그룹핑·행 리스트), Toptal Settings UX(https://www.toptal.com/designers/ux/settings-ux — progressive disclosure). 버린 것: 알림 뱃지 남발·프로모 배너·랭킹(Discreet 위반).<br>
+    고민 한 줄: "다중 목표의 진짜 문제는 결제가 아니라 '어느 링크를 걸까'다 — 대표 링크를 발명하지 않고, 링크 복사를 목표 카드 안으로 넣어 '지금 밀 목표에서 복사'라는 행동으로 치환했다." 예시 데이터 각주: 인명·목표·클로버 수치는 persona.md(한서연·민지) 기반 예시.
+  </div>
+</div>
+
+<script>
+  const wraps = document.querySelectorAll('.screen-wrap');
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-s]').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    wraps.forEach(w=>w.classList.toggle('show', w.id===b.dataset.s));
+  });
+  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('on2'));
+    b.classList.add('on2');
+    wraps.forEach(w=>{w.classList.remove('vp390','vp1024'); w.classList.add(b.dataset.v);});
+  });
+  document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-st]').forEach(x=>x.classList.remove('on2'));
+    b.classList.add('on2');
+    const st = b.dataset.st;
+    document.querySelectorAll('.st-default,.st-empty,.st-error').forEach(el=>{
+      el.style.display = el.classList.contains('st-'+st) ? '' : 'none';
+    });
+  });
+
+  /* 프라이버시 실시간 미리보기 (화면 4) */
+  const swVis=document.getElementById('swVis'), swName=document.getElementById('swName'), swMsg=document.getElementById('swMsg');
+  function pvUpdate(){
+    const vis=swVis.classList.contains('on'), nm=swName.classList.contains('on'), msg=swMsg.classList.contains('on');
+    document.getElementById('pvOn').style.display = vis? '':'none';
+    document.getElementById('pvOff').style.display = vis? 'none':'';
+    document.getElementById('pvCount').textContent = nm? '민지님 외 12명이 조용히 응원했어요' : '13명이 조용히 응원했어요';
+    document.getElementById('pvWm').style.display = msg? '':'none';
+    document.getElementById('pvWmGone').style.display = msg? 'none':'';
+  }
+  [swVis,swName,swMsg].forEach(sw=>sw.onclick=()=>{sw.classList.toggle('on'); pvUpdate();});
+</script>
+</body>
+</html>

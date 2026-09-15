@@ -17,4 +17,4 @@ stages:
       B1: [scaffold, migration, auth-kakao, goal-cheer-ui, wordmap-share, notify-report]   # 비결제 — 지금
       B2: [cheer-order, toss-confirm, toss-webhook, cashout]   # 돈 — legal ⛔ 4건 확정 후. 강모델+Codex.
     models: { volume: sonnet, money_core: opus }
-    # artifacts·gate 는 글로벌 build 상속(docs/build-log.md, gate: human)
+    # artifacts·gate 는 글로벌 build 상속(docs/eng-design/build-log.md, gate: human)

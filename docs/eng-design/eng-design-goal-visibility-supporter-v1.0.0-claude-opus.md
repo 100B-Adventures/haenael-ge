@@ -7,7 +7,7 @@ agent: tech-architect
 stage: eng-design
 status: 결정 대기 (확정 계약 아님)
 upstream:
-  - docs/prd-haenael-ge-v0.4.0.md
+  - docs/plan/prd-haenael-ge-v0.4.0.md
   - docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md
   - wiki/거버넌스/결정.md (D-017 · D-003 · D-004 · P1)
 ---
@@ -16,7 +16,7 @@ upstream:
 
 > **STAMP**
 > 생성 2026-09-06 KST · model `claude-opus-5[1m]` · agent `tech-architect` · skill 미사용(사유는 문서 끝 선언 블록)
-> 기반 포맷: `docs/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md` (섹션 구성·표 스타일·pgTAP ID 명명 상속) + `~/.claude/standards/templates/doc-template-fdd.md` 골격
+> 기반 포맷: `docs/eng-design/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md` (섹션 구성·표 스타일·pgTAP ID 명명 상속) + `~/.claude/standards/templates/doc-template-fdd.md` 골격
 > 상류 버전 핀: `prd-haenael-ge-v0.4.0` · `audit-haenael-ge-v1.0.0` · `erd.md` · `api-contract.md` · `DESIGN.md` · `user-flow.md`
 > 근거: 마이그레이션 42건 중 관련 6건, 앱 라우트 5개, 거버넌스 결정 원장 17건 직접 대조. 외부 벤치마크 2건 실조사(§10).
 > 고민: 되돌리기 비싼 것은 스키마가 아니라 **공개범위가 지나가는 경로의 개수**였다. 컬럼 3개를 추가하는 일은 반나절이지만, 그 값을 검사해야 하는 지점이 뷰 2개, 함수 1개, 엣지 함수 1개, 스토리지 오브젝트 1종, 캐시 테이블 1개로 흩어져 있어 한 곳만 빠뜨려도 "숨겼는데 보인다"가 된다. 그래서 이 문서는 스키마보다 **경로 전수표(§5.2)** 를 중심에 뒀다.
@@ -638,6 +638,6 @@ RUBRIC_SCORE: 완결성 5 / 정밀성 5 / 벤치마크 반영 5 / 추적성 5 / 
 WEAKEST_LINE: "전부라고 확신하지 못한다" (§11-질문3. 경로 전수성을 설계자가 보증하지 못한다고 인정한 문장이다. 결과 단위 테스트로 보완했으나 이 문서에서 가장 약한 주장이다)
 
 SOURCES/MODEL: model `claude-opus-5[1m]` (agent: tech-architect)
-- 레포 실측: `docs/prd-haenael-ge-v0.4.0.md` §2~§9 · `docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md` §1~§3 · `wiki/거버넌스/결정.md` · `wiki/거버넌스/실수.md` · `wiki/거버넌스/요청.md` · `supabase/migrations/20260705163137_init_schema.sql` · `20260719000000_cheer_amount_privacy.sql` · `20260719000001_cheer_public_view.sql` · `20260720030000_dedup_goal_and_clover_backfill.sql` · `20260727010000_update_goal_rpc.sql` · `web/src/app/(receiver)/onboarding/page.tsx` · `web/src/app/(receiver)/me/page.tsx` · `web/src/components/receiver/OnboardingGoalForm.tsx` · `web/src/app/g/[slug]/page.tsx` · `supabase/tests/` 11개 파일 목록 · `web/e2e/` 8개 파일 목록
+- 레포 실측: `docs/plan/prd-haenael-ge-v0.4.0.md` §2~§9 · `docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md` §1~§3 · `wiki/거버넌스/결정.md` · `wiki/거버넌스/실수.md` · `wiki/거버넌스/요청.md` · `supabase/migrations/20260705163137_init_schema.sql` · `20260719000000_cheer_amount_privacy.sql` · `20260719000001_cheer_public_view.sql` · `20260720030000_dedup_goal_and_clover_backfill.sql` · `20260727010000_update_goal_rpc.sql` · `web/src/app/(receiver)/onboarding/page.tsx` · `web/src/app/(receiver)/me/page.tsx` · `web/src/components/receiver/OnboardingGoalForm.tsx` · `web/src/app/g/[slug]/page.tsx` · `supabase/tests/` 11개 파일 목록 · `web/e2e/` 8개 파일 목록
 - 품질헌법: `~/.claude/standards/dev.md` · `~/.claude/standards/doc-review.md`
 - 웹 벤치마크(§10): [PostgreSQL 명시적 잠금 문서](https://www.postgresql.org/docs/current/explicit-locking.html) · [Neon, Rate Limiting in Postgres](https://neon.com/guides/rate-limiting) · [Postgres 메일링 리스트, 트리거 함수의 경합](https://www.postgresql.org/message-id/CAECCA8ZWD_VtfPzcMYcz%3DSyuR%3DGX8mEfEDtD4QAnSGUqk1cNkA%40mail.gmail.com) · [Supabase, Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) · [Supabase splinter, Security Definer View](https://supabase.github.io/splinter/0010_security_definer_view/) · [Bytebase, Postgres Row-Level Security Footguns](https://www.bytebase.com/blog/postgres-row-level-security-footguns/)

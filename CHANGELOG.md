@@ -112,7 +112,7 @@
 - GitHub Actions 세 작업은 결제 차단으로 시작되지 않았다. 코드 실패로 판정하지
   않지만 CI 통과로도 기록하지 않는다.
 
-<!-- STAMP: 수정 2026-08-28 20:53 KST | model gpt-5.6-sol | agent release-manager | skill ship | basis pipeline-state.core.md, RELEASE.md, git tag v1.2.0, docs/qa-tracker.md | decision 승인 정합과 미승격 운영 주소를 함께 기록 -->
+<!-- STAMP: 수정 2026-08-28 20:53 KST | model gpt-5.6-sol | agent release-manager | skill ship | basis pipeline-state.core.md, RELEASE.md, git tag v1.2.0, docs/qa/qa-tracker.md | decision 승인 정합과 미승격 운영 주소를 함께 기록 -->
 
 [1.2.0]: https://github.com/seong-jin-jo/haenael-ge/releases/tag/v1.2.0
 

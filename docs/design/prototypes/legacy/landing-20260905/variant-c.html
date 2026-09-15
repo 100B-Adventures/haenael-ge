@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>해낼게 · C안 선언 전광판</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F1EC; --ink:#111110; --ink-2:#3B3A36; --muted:#6F6E68; --faint:#A4A29A;
+    --rule:#111110; --hair:#D3D1C8; --panel:#FFFFFF;
+    --volt:#00E06A; --volt-ink:#046B37; --volt-wash:#E2FBEC;
+    --r-0:0px; --r-8:8px;
+    --t-fast:120ms; --t-base:200ms; --ease:cubic-bezier(.2,.7,.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Pretendard Variable",Pretendard,sans-serif;
+    background:var(--paper); color:var(--ink); word-break:keep-all; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  .label{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
+
+  nav{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:2px solid var(--rule)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+  .brand{font-size:19px;font-weight:900;letter-spacing:-.6px}
+  .brand span{color:var(--volt-ink)}
+  .nav-cta{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:var(--ink);border:2px solid var(--rule);display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:var(--r-0);text-decoration:none;
+    transition:background var(--t-fast),color var(--t-fast)}
+  .nav-cta:hover{background:var(--ink);color:var(--paper)}
+
+  .hero{border-bottom:2px solid var(--rule);padding:56px 0 0}
+  .hero-top{display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:end;padding-bottom:44px}
+  .kicker{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:1.4px;
+    text-transform:uppercase;color:var(--volt-ink);background:var(--volt-wash);border:1.5px solid var(--volt-ink);
+    padding:7px 13px;margin-bottom:24px}
+  h1{font-size:78px;line-height:.98;letter-spacing:-3.6px;font-weight:900}
+  h1 mark{background:none;color:var(--volt-ink);position:relative}
+  h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:12px;background:var(--volt);opacity:.5;z-index:-1}
+  .sub{font-size:16px;line-height:1.7;color:var(--ink-2);font-weight:500}
+  .sub strong{font-weight:800}
+
+  /* 3D 티커 */
+  .ticker-stage{position:relative;height:260px;border-top:2px solid var(--rule);border-bottom:2px solid var(--rule);
+    background:var(--ink);overflow:hidden;cursor:grab}
+  .ticker-stage:active{cursor:grabbing}
+  .ticker-stage canvas{display:block;width:100%;height:100%}
+  .ticker-legend{position:absolute;left:20px;top:16px;font-family:"JetBrains Mono",monospace;font-size:11px;
+    letter-spacing:1.4px;text-transform:uppercase;color:var(--volt);z-index:2}
+  .ticker-drag{position:absolute;right:20px;bottom:16px;font-family:"JetBrains Mono",monospace;font-size:11px;
+    letter-spacing:1px;color:#7F8A80;z-index:2}
+  .fallback{display:none;position:absolute;inset:0;overflow:hidden}
+  .fallback.on{display:block}
+  .fb-row{white-space:nowrap;font-size:26px;font-weight:800;letter-spacing:-.8px;color:var(--paper);padding:12px 0;
+    animation:slide 26s linear infinite}
+  .fb-row.b{color:var(--volt);animation-duration:34s;animation-direction:reverse}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  .cta-band{display:flex;gap:0;border-bottom:2px solid var(--rule)}
+  .btn{border:0;font-family:inherit;cursor:pointer;font-size:16px;font-weight:800;letter-spacing:-.3px;
+    padding:24px 30px;border-radius:var(--r-0);transition:background var(--t-fast),color var(--t-fast),transform var(--t-fast)}
+  .btn-primary{flex:1.4;background:var(--volt);color:var(--ink)}
+  .btn-primary:hover{background:var(--ink);color:var(--volt)}
+  .btn-primary:active{transform:translateY(2px)}
+  .btn-ghost{flex:1;background:transparent;color:var(--ink);border-left:2px solid var(--rule);text-decoration:none;
+    display:flex;align-items:center;justify-content:center}
+  .btn-ghost:hover{background:var(--ink);color:var(--paper)}
+  .cta-note{padding:14px 28px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);
+    border-bottom:2px solid var(--rule);letter-spacing:.3px}
+
+  section{padding:80px 0;border-bottom:2px solid var(--rule)}
+  h2{font-size:46px;line-height:1.16;letter-spacing:-2px;font-weight:900}
+  .lead{margin-top:18px;font-size:16px;line-height:1.74;color:var(--ink-2);font-weight:500;max-width:600px}
+  .head-row{display:grid;grid-template-columns:180px 1fr;gap:28px;align-items:start}
+
+  .quotes{margin-top:44px;display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:2px solid var(--rule)}
+  .quote{padding:30px 28px;border-right:2px solid var(--rule)}
+  .quote:last-child{border-right:0}
+  .quote p{font-size:19px;line-height:1.6;font-weight:800;letter-spacing:-.5px}
+  .quote cite{display:block;margin-top:16px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.6px;
+    color:var(--faint);font-style:normal}
+
+  .steps{margin-top:44px;border-top:2px solid var(--rule)}
+  .step{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;padding:26px 0;border-bottom:1px solid var(--hair);align-items:baseline}
+  .step .n{font-family:"JetBrains Mono",monospace;font-size:13.5px;font-weight:700;color:var(--volt-ink);letter-spacing:1px}
+  .step h3{font-size:19px;font-weight:900;letter-spacing:-.8px}
+  .step p{font-size:13.5px;line-height:1.7;color:var(--ink-2);font-weight:500}
+
+  .fee{margin-top:36px;border:2px solid var(--rule)}
+  .fee table{width:100%;border-collapse:collapse}
+  .fee th,.fee td{padding:15px 22px;text-align:left;font-size:13.5px;border-bottom:1px solid var(--hair)}
+  .fee th{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--muted);border-bottom:2px solid var(--rule)}
+  .fee tr:last-child td{border-bottom:0}
+  .fee .us td{background:var(--volt-wash);font-weight:900}
+  .fee td.num{font-family:"JetBrains Mono",monospace;font-weight:700;text-align:right}
+  .bar{display:inline-block;height:9px;background:var(--ink);vertical-align:middle;margin-right:10px}
+  .fee .us .bar{background:var(--volt-ink)}
+  .fee-note{margin-top:14px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);line-height:1.9}
+
+  details{border-bottom:1px solid var(--hair)}
+  details summary{list-style:none;cursor:pointer;padding:22px 0;font-size:19px;font-weight:800;letter-spacing:-.6px;
+    display:grid;grid-template-columns:96px 1fr 30px;gap:24px;align-items:center}
+  details summary::-webkit-details-marker{display:none}
+  details summary .q{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--volt-ink);letter-spacing:1px}
+  details summary .m{text-align:right;font-family:"JetBrains Mono",monospace;font-size:19px;color:var(--faint)}
+  details[open] summary .m::after{content:"−"}
+  details:not([open]) summary .m::after{content:"+"}
+  details p{padding:0 0 24px 120px;font-size:16px;line-height:1.78;color:var(--ink-2);font-weight:500;max-width:720px}
+
+  .signup{background:var(--ink);color:var(--paper);padding:64px 44px;text-align:left}
+  .signup h2{color:var(--paper)}
+  .signup .lead{color:#B9B7AE}
+  .form{margin-top:30px;display:flex;gap:0;max-width:620px;border:2px solid var(--volt)}
+  .form input{flex:1;font-family:"JetBrains Mono",monospace;font-size:13.5px;font-weight:500;padding:20px;border:0;
+    background:transparent;color:var(--paper);min-width:0}
+  .form input::placeholder{color:#6C7A70}
+  .form input:focus{outline:none;background:#1B1B19}
+  .form button{background:var(--volt);color:var(--ink);padding:20px 26px;white-space:nowrap;font-size:13.5px}
+  .form button:hover{background:var(--paper)}
+  .form-msg{margin-top:16px;font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--volt);min-height:20px}
+  .honest{margin-top:36px;border:2px dashed var(--hair);padding:26px 28px}
+  .honest b{display:block;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--volt-ink);margin-bottom:12px}
+  .honest p{font-size:13.5px;line-height:1.76;color:var(--ink-2);font-weight:500}
+
+  footer{padding:40px 0 56px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);line-height:2.1}
+
+  @media (max-width:920px){
+    .hero-top,.head-row{grid-template-columns:1fr;gap:24px}
+    .quotes{grid-template-columns:1fr}
+    .quote{border-right:0;border-bottom:2px solid var(--rule)}
+    .quote:last-child{border-bottom:0}
+    .step{grid-template-columns:1fr;gap:8px}
+    details summary{grid-template-columns:1fr 30px}
+    details summary .q{display:none}
+    details p{padding-left:0}
+  }
+  @media (max-width:520px){
+    .wrap{padding:0 20px}
+    .hero{padding-top:36px}
+    h1{font-size:46px;letter-spacing:-2px}
+    h2{font-size:26px;letter-spacing:-1.2px}
+    .ticker-stage{height:230px}
+    section{padding:52px 0}
+    .cta-band{flex-direction:column}
+    .btn-ghost{border-left:0;border-top:2px solid var(--rule)}
+    .signup{padding:40px 22px}
+    .form{flex-direction:column}
+    .form button{width:100%}
+    .fee th,.fee td{padding:13px 14px;font-size:13.5px}
+    .bar{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <div class="brand">해낼게<span>.</span></div>
+  <a class="nav-cta" href="#signup">사전 신청</a>
+</div></nav>
+
+<header class="hero">
+  <div class="wrap"><div class="hero-top">
+    <div>
+      <span class="kicker">정식 오픈 전 · 먼저 쓸 사람 모집</span>
+      <h1>기프티콘은 부담,<br>댓글은 <mark>3초</mark>.</h1>
+    </div>
+    <p class="sub">해낼게는 셋째 방법입니다. 친구가 선언한 목표에 <strong>조용히 돈을 두고 갑니다.</strong> 브랜드 고를 필요도, 배달비 낼 사람도, 답장할 의무도 없습니다.</p>
+  </div></div>
+
+  <div class="ticker-stage" id="stage">
+    <span class="ticker-legend">지금 올라온 선언</span>
+    <canvas id="gl"></canvas>
+    <div class="fallback" id="fb">
+      <div class="fb-row">편입 영어 하루 3시간 · 12월까지 해낼게 &nbsp;/&nbsp; 주 4회 러닝 100일 해낼게 &nbsp;/&nbsp; 정보처리기사 필기 이번엔 해낼게 &nbsp;/&nbsp; 편입 영어 하루 3시간 · 12월까지 해낼게 &nbsp;/&nbsp; 주 4회 러닝 100일 해낼게 &nbsp;/&nbsp; 정보처리기사 필기 이번엔 해낼게 &nbsp;/&nbsp;</div>
+      <div class="fb-row b">토익 850 3개월 안에 해낼게 &nbsp;/&nbsp; 금연 90일 해낼게 &nbsp;/&nbsp; 졸업작품 11월 전시까지 해낼게 &nbsp;/&nbsp; 토익 850 3개월 안에 해낼게 &nbsp;/&nbsp; 금연 90일 해낼게 &nbsp;/&nbsp; 졸업작품 11월 전시까지 해낼게 &nbsp;/&nbsp;</div>
+      <div class="fb-row">공무원 1차 내년 봄에 해낼게 &nbsp;/&nbsp; 매일 새벽 5시 기상 해낼게 &nbsp;/&nbsp; 논문 초고 12월까지 해낼게 &nbsp;/&nbsp; 공무원 1차 내년 봄에 해낼게 &nbsp;/&nbsp; 매일 새벽 5시 기상 해낼게 &nbsp;/&nbsp; 논문 초고 12월까지 해낼게 &nbsp;/&nbsp;</div>
+    </div>
+    <span class="ticker-drag" id="drag">드래그해서 돌려 보세요</span>
+  </div>
+
+  <div class="wrap"><div class="cta-band" style="border-bottom:0">
+    <button class="btn btn-primary" onclick="document.getElementById('signup').scrollIntoView()">내 선언 올리고 링크 받기</button>
+    <a class="btn btn-ghost" href="#how">어떻게 되는지 먼저 보기</a>
+  </div></div>
+  <div class="wrap"><p class="cta-note" style="border-bottom:0;padding-left:0;padding-right:0">
+    이메일만 받습니다. 결제 정보는 지금 받지 않습니다. 위 문장은 서비스가 상정한 예시 선언입니다.
+  </p></div>
+</header>
+
+<section><div class="wrap">
+  <div class="head-row">
+    <span class="label">01 / 문제</span>
+    <div>
+      <h2>따뜻했지만,<br>손에 남은 건 없었습니다.</h2>
+      <p class="lead">새벽 6시 도서관 오픈런을 8개월 한 사람에게 하트 47개가 남습니다. 아무도 잘못하지 않았는데 아무것도 남지 않았습니다.</p>
+    </div>
+  </div>
+  <div class="quotes">
+    <blockquote class="quote">
+      <p>“받고 싶지도 않은 선물 오는 거 부담스럽고 별론데”</p>
+      <cite>블라인드 「카카오톡 선물 거부 못하나요?」 원문</cite>
+    </blockquote>
+    <blockquote class="quote">
+      <p>“선물받는 입장에서 브랜드 선택 X, 주문시 배달비 전부를 선물 받은 사람이 부담”</p>
+      <cite>블라인드 「카카오톡 기프티콘은 좋은 점을 못느끼겠네..」 원문</cite>
+    </blockquote>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="head-row">
+    <span class="label">02 / 구조</span>
+    <div><h2>선언 한 줄, 링크 하나.</h2>
+      <p class="lead">등록할 것도, 인증할 것도 없습니다. 나머지는 친구가 합니다.</p></div>
+  </div>
+  <div class="steps">
+    <div class="step"><span class="n">STEP 01</span><h3>목표를 한 줄로 선언</h3>
+      <p>“편입 영어 하루 3시간”이면 충분합니다. 단계로 쪼개는 작업도, 매일 사진 인증도 없습니다.</p></div>
+    <div class="step"><span class="n">STEP 02</span><h3>친구가 클로버로 응원</h3>
+      <p>링크를 열어도 아무것도 요구하지 않습니다. 익명으로 보낼 수 있고, 금액은 아무에게도 보이지 않습니다.</p></div>
+    <div class="step"><span class="n">STEP 03</span><h3>쌓인 응원을 현금으로</h3>
+      <p>포인트가 아니라 원화 계좌 입금입니다. 달성 여부를 판정하지 않으니, 못 이뤄도 그대로 내 돈입니다.</p></div>
+  </div>
+  <div class="honest" style="margin-top:36px">
+    <b>이 서비스가 하지 않는 것</b>
+    <p>본인이 돈을 걸고 실패하면 잃는 구조가 아닙니다. 사진 인증도, 달성 판정도 없습니다. 판정을 안 하니까 판정 시비도 없습니다. 돈이 흐르는 방향이 챌린저스·StickK·Forfeit과 반대입니다.</p>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="head-row">
+    <span class="label">03 / 수수료</span>
+    <div><h2>우리가 떼는 몫은 10%.</h2>
+      <p class="lead">국내 후원 서비스 중 가장 낮은 구간입니다. 그동안 이걸 아무 데서도 말하지 않았습니다.</p></div>
+  </div>
+  <div class="fee"><table>
+    <thead><tr><th>서비스</th><th style="text-align:right">플랫폼이 가져가는 몫</th></tr></thead>
+    <tbody>
+      <tr class="us"><td><span class="bar" style="width:20px"></span>해낼게</td><td class="num">10% + 부가세</td></tr>
+      <tr><td><span class="bar" style="width:18px"></span>와디즈</td><td class="num">9%</td></tr>
+      <tr><td><span class="bar" style="width:20px"></span>Patreon</td><td class="num">10% + 결제수수료</td></tr>
+      <tr><td><span class="bar" style="width:70px"></span>투네이션</td><td class="num">5.3 ~ 35%</td></tr>
+      <tr><td><span class="bar" style="width:60px"></span>유튜브 슈퍼챗</td><td class="num">30%</td></tr>
+      <tr><td><span class="bar" style="width:100px"></span>틱톡</td><td class="num">50% 이상</td></tr>
+    </tbody>
+  </table></div>
+  <p class="fee-note">출처: 각 서비스 공개 요금 정책(2026-09 조사분). 막대 길이는 상한 기준 비교이고, 표의 숫자는 플랫폼 이용료만 담았습니다. 세금은 포함하지 않았고 환전 화면에서 따로 안내합니다.</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="head-row">
+    <span class="label">04 / FAQ</span>
+    <div><h2>궁금할 만한 것부터.</h2></div>
+  </div>
+  <div style="margin-top:34px;border-top:2px solid var(--rule)">
+    <details open><summary><span class="q">Q1</span><span>목표를 못 이루면 돈은 어떻게 되나요?</span><span class="m"></span></summary>
+      <p>그대로 친구 것입니다. 해낼게는 달성 여부로 돈을 뺏거나 주는 서비스가 아닙니다. 결제되는 순간 친구에게 적립됩니다.</p></details>
+    <details><summary><span class="q">Q2</span><span>얼마를 보냈는지 다른 사람이 보나요?</span><span class="m"></span></summary>
+      <p>못 봅니다. 개별 금액은 설정으로도 공개할 수 없게 시스템이 잠가 뒀습니다. 원하면 이름도 숨길 수 있습니다.</p></details>
+    <details><summary><span class="q">Q3</span><span>내기나 도박 아닌가요?</span><span class="m"></span></summary>
+      <p>본인이 돈을 걸고 실패하면 잃는 구조가 아닙니다. 친구가 보내는 것이고 조건이 없습니다. 돈이 흐르는 방향이 반대입니다.</p></details>
+    <details><summary><span class="q">Q4</span><span>구걸처럼 보일까 봐 걱정됩니다.</span><span class="m"></span></summary>
+      <p>목표를 나만 보기로 두고 시작할 수 있습니다. 금액은 아무에게도 안 보이고, 응원자 이름과 메시지도 항목별로 잠급니다.</p></details>
+    <details><summary><span class="q">Q5</span><span>친구한테 부담 주는 거 아닌가요?</span><span class="m"></span></summary>
+      <p>링크를 열어도 아무것도 요구하지 않습니다. 보내는 사람은 익명을 고를 수 있고, 받는 사람은 답장할 의무가 없습니다.</p></details>
+  </div>
+</div></section>
+
+<section id="signup" style="padding:0;border-bottom:0"><div class="signup">
+  <div class="wrap">
+    <span class="label" style="color:var(--volt)">05 / 사전 신청</span>
+    <h2 style="margin-top:16px">먼저 써 볼 사람을<br>찾습니다.</h2>
+    <p class="lead">정식 오픈 때 가장 먼저 링크를 보내드립니다. 지금은 이메일만 받습니다.</p>
+    <form class="form" onsubmit="return submitLead(event)">
+      <input type="email" id="email" placeholder="name@example.com" required aria-label="이메일 주소">
+      <button class="btn" type="submit">링크 먼저 받기</button>
+    </form>
+    <p class="form-msg" id="msg" role="status"></p>
+  </div>
+</div></section>
+
+<section style="border-bottom:0"><div class="wrap">
+  <div class="honest" style="margin-top:0">
+    <b>사회적 증거 대신 드리는 사실</b>
+    <p>아직 이용자 후기가 없습니다. 그래서 후기를 지어내지 않고 비워 뒀습니다. 전광판에 흐르는 선언 문장은 실제 사용자 글이 아니라 이 서비스가 상정한 목표 유형 예시이고, 사람 이름과 계정은 쓰지 않았습니다.</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  해낼게 · 응원은 돈으로 하는 겁니다.<br>
+  상호: 정성컴퍼니 / 대표: 조성진 / 사업자등록번호: 798-31-01774<br>
+  서울시 강남구 역삼동 620-17 203호 / haenaelge.official@gmail.com
+</div></footer>
+
+<div class="stamp-bar" style="background:#111110;color:#7F8A80;font-size:11px;line-height:1.8;padding:14px 28px;font-family:ui-monospace,monospace">
+🏷 STAMP | line: core | 생성: 2026-09-05 11:50 KST | model: claude-opus-5[1m] | agent: product-designer | skills: design-consultation, design-shotgun, design-html, design-review | 근거: research-haenael-ge-v1.1.0.md 4.1절·7.1절·13절(Forfeit 랜딩 문법), DESIGN.md v2.0.1, 벤치마크 Forfeit "Complete your habits, or lose money"·Awwwards Three.js 스크롤 사례·토스 One page One thing | 고민: 전광판에 흐르는 문장을 실제 사용자 선언처럼 보이게 할지. 그러면 사회적 증거 위조가 된다. 그래서 캡션과 정직 블록 두 곳에 예시라고 못 박고 사람 이름을 뺐다.
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+function submitLead(e){
+  e.preventDefault();
+  var v=document.getElementById('email').value;
+  document.getElementById('msg').textContent='> 신청 접수됨: '+v+' (프로토타입이라 실제로 저장되지 않습니다)';
+  return false;
+}
+
+/* ── 3D 인터랙션: 선언 문장이 감긴 원통 전광판이 스스로 돌고, 드래그로 돌릴 수 있다 ──
+   스스로 움직임(자동 회전) + 클릭·드래그 반응 + 스크롤 반응(속도가 스크롤에 붙는다) 셋 다.
+   심리 근거: Zeigarnik(문장이 끊긴 채 돌아 다음 문장을 기다리게 함)
+             + Jakob(전광판·티커는 이미 아는 패턴이라 학습 비용 0)
+   폴백: WebGL 미지원 / prefers-reduced-motion / 저사양 → CSS 가로 마퀴 3줄 */
+(function(){
+  var stage=document.getElementById('stage'), cv=document.getElementById('gl'),
+      fb=document.getElementById('fb'), dragTip=document.getElementById('drag');
+  function goStatic(reason){ cv.style.display='none'; fb.classList.add('on'); dragTip.textContent=reason; stage.style.cursor='default'; }
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ fb.style.animationPlayState='paused'; goStatic('모션 최소화 설정'); return; }
+  if(typeof THREE==='undefined'){ goStatic('정지 화면'); return; }
+  var probe=document.createElement('canvas');
+  if(!(probe.getContext('webgl')||probe.getContext('experimental-webgl'))){ goStatic('3D 미지원 기기'); return; }
+  try{ var renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true}); }
+  catch(err){ goStatic('3D 미지원 기기'); return; }
+
+  var W=stage.clientWidth,H=stage.clientHeight;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(W,H,false);
+  var scene=new THREE.Scene();
+  var cam=new THREE.PerspectiveCamera(34,W/H,0.1,100);
+  function fitCam(){ cam.position.z = (W/H) < 2.6 ? 17 : 10.5; }
+  fitCam(); cam.position.set(0,0,cam.position.z);
+  scene.add(new THREE.AmbientLight(0xffffff,0.9));
+  var d=new THREE.DirectionalLight(0xffffff,0.5); d.position.set(2,4,6); scene.add(d);
+
+  var LINES=[
+    ['편입 영어 하루 3시간, 12월까지 해낼게','주 4회 러닝 100일 해낼게','정보처리기사 필기 이번엔 해낼게','논문 초고 12월까지 해낼게','매일 새벽 5시 기상 해낼게','공무원 1차 내년 봄에 해낼게'],
+    ['토익 850 3개월 안에 해낼게','금연 90일 해낼게','졸업작품 11월 전시까지 해낼게','한국사 1급 이번 회차에 해낼게','체중 8kg 감량 해낼게','포트폴리오 3개 채우기 해낼게'],
+    ['자격증 필기 합격 해낼게','매일 30분 독서 100일 해낼게','편입 수학 개념 완주 해낼게','블로그 주 2편 연재 해낼게','새벽 수영 주 3회 해낼게','토플 100점 해낼게']
+  ];
+  function plate(text,accent){
+    var c=document.createElement('canvas'); c.width=3200; c.height=190;
+    var g=c.getContext('2d');
+    g.fillStyle='#111110'; g.fillRect(0,0,c.width,c.height);
+    g.font='800 78px Pretendard, sans-serif'; g.textBaseline='middle'; g.textAlign='left';
+    g.fillStyle=accent?'#00E06A':'#F2F1EC';
+    g.fillText(text+'   /   '+text,40,c.height/2);
+    var t=new THREE.CanvasTexture(c); t.minFilter=THREE.LinearFilter; return t;
+  }
+  // 각 줄 = 수평축 드럼. 판을 원둘레에 붙이고 드럼을 돌린다(글자 왜곡 없음).
+  var R=1.95, bands=[];
+  LINES.forEach(function(row,i){
+    var pivot=new THREE.Object3D();
+    pivot.position.y=(1-i)*1.85;
+    row.forEach(function(txt,j){
+      var th=(j/row.length)*Math.PI*2;
+      var p=new THREE.Mesh(
+        new THREE.PlaneGeometry(24,1.42),
+        new THREE.MeshBasicMaterial({map:plate(txt,i===1),side:THREE.FrontSide})
+      );
+      p.position.set(0,R*Math.cos(th),R*Math.sin(th));
+      p.rotation.x=th-Math.PI/2;
+      pivot.add(p);
+    });
+    scene.add(pivot);
+    bands.push({m:pivot,dir:i%2===0?1:-1,base:0.0032+i*0.0009});
+  });
+
+  // 드래그 제어
+  var dragging=false, lastX=0, push=0;
+  function down(x){ dragging=true; lastX=x; dragTip.textContent='돌리는 중'; }
+  function move(x){ if(!dragging) return; push+=(x-lastX)*0.0016; lastX=x; }
+  function up(){ dragging=false; dragTip.textContent='드래그해서 돌려 보세요'; }
+  stage.addEventListener('mousedown',function(e){down(e.clientX);});
+  window.addEventListener('mousemove',function(e){move(e.clientX);});
+  window.addEventListener('mouseup',up);
+  stage.addEventListener('touchstart',function(e){down(e.touches[0].clientX);},{passive:true});
+  stage.addEventListener('touchmove',function(e){move(e.touches[0].clientX);},{passive:true});
+  stage.addEventListener('touchend',up);
+
+  // 스크롤 속도 부스트
+  var boost=0, lastY=window.scrollY;
+  window.addEventListener('scroll',function(){
+    boost=Math.min(Math.abs(window.scrollY-lastY)*0.0016,0.02); lastY=window.scrollY;
+  },{passive:true});
+  window.addEventListener('resize',function(){
+    W=stage.clientWidth;H=stage.clientHeight;cam.aspect=W/H;fitCam();cam.updateProjectionMatrix();renderer.setSize(W,H,false);
+  });
+
+  var frames=0,t0=performance.now(),dead=false,bad=0;
+  var fpsGuard = location.search.indexOf('fps=off')<0;
+  function loop(now){
+    if(dead) return;
+    frames++;
+    if(now-t0>1500){
+      var fps=frames/((now-t0)/1000);
+      bad = fps<24 ? bad+1 : 0;
+      if(fpsGuard && bad>=2){ dead=true; goStatic('기기 성능에 맞춘 정지 티커'); return; }
+      t0=now;frames=0;
+    }
+    boost*=0.94; push*=0.9;
+    bands.forEach(function(b){
+      b.m.rotation.x += (b.base+boost)*b.dir + push*b.dir;
+    });
+    renderer.render(scene,cam);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
