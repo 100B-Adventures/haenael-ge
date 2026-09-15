@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>해낼게 v2 · 친구 레이어 (친구목록·초대·보상) v1</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#FFFFFF; --line:#E8E4DC; --warm:#F4EFE6;
+    --ink:#16140F; --muted:#6F6A60; --faint:#9C968B;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+    --danger:#D9483B; --danger-soft:#FBEAE7; --danger-ink:#B23225;
+    --amber:#B4791F; --amber-soft:#FBF1DD; --amber-line:#E8D3A6; --amber-ink:#8A5A12;
+    --violet-soft:#EFECF7; --violet-line:#D6CEEC; --violet-ink:#5B4B8A; /* 열린결정 배지 전용 (제품 아님, 검수 신호) */
+    --r-sm:12px; --r-md:14px; --r-lg:20px; --r-full:9999px;
+    --font:"Pretendard","Apple SD Gothic Neo",-apple-system,sans-serif;
+    --motion:180ms;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--font);background:#2b2926;color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+  /* ══ 검수 콘솔 (chrome, 제품 아님) ══ */
+  .console{position:sticky;top:0;z-index:60;background:#1c1b19;color:#e9e5dd;padding:12px 18px;border-bottom:1px solid #35322d;}
+  .console h1{font-size:13px;font-weight:800;letter-spacing:-.2px;display:flex;gap:8px;align-items:center;}
+  .console h1 .dot{color:#39c07a;}
+  .console h1 .ver{font-size:10.5px;font-weight:700;color:#8a857c;background:#2a2823;padding:2px 8px;border-radius:20px;}
+  .console .row{display:flex;flex-wrap:wrap;gap:14px;margin-top:11px;align-items:center;}
+  .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .grp .lbl{font-size:10.5px;color:#8a857c;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-right:2px;}
+  .console button{font-family:var(--font);font-size:11.5px;font-weight:700;border:1px solid #3f3b35;background:#2a2823;color:#cfc9bf;
+    padding:6px 11px;border-radius:9px;cursor:pointer;transition:all .12s ease-out;}
+  .console button:hover{border-color:#5a554c;}
+  .console button.on{background:#1B8A4F;border-color:#1B8A4F;color:#fff;}
+  .console button.st.on{background:#c98a2b;border-color:#c98a2b;color:#1c1b19;}
+  .console .sep{width:1px;height:20px;background:#3f3b35;}
+  .console .hint{font-size:10.5px;color:#7d786f;margin-top:9px;line-height:1.5;}
+
+  /* ══ 무대 = 폰 프레임 + 검수 패널 (데스크톱에서 나란히) ══ */
+  .stage{display:flex;justify-content:center;align-items:flex-start;gap:26px;padding:30px 20px 80px;min-height:100vh;flex-wrap:wrap;}
+  .screen{display:none;}
+  .screen.active{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;justify-content:center;animation:fade .18s ease-out;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* 네이티브 모바일앱 화면 — 390 고정 프레임. viewport 토글 대신 데이터-상태 토글이 이 기능의 핵심 축. */
+  .frame{width:390px;height:844px;background:var(--bg);border-radius:30px;border:1px solid #000;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.4);position:relative;display:flex;flex-direction:column;}
+  .statusbar{height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:700;color:var(--ink);}
+  .statusbar .dots{display:flex;gap:5px;align-items:center;font-size:10px;color:var(--muted);}
+
+  .app{flex:1;overflow-y:auto;overflow-x:hidden;}
+  .app::-webkit-scrollbar{width:0;}
+  .pad{padding:8px 22px 28px;}
+
+  /* 하단 탭바 (네이티브 앱 셸) */
+  .tabbar{flex:0 0 auto;height:64px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:stretch;}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;font-size:10px;font-weight:700;color:var(--faint);}
+  .tabbar a .ic{font-size:17px;line-height:1;}
+  .tabbar a.on{color:var(--clover-ink);}
+
+  /* 상단 헤더 */
+  .head{display:flex;align-items:center;justify-content:space-between;padding:6px 0 2px;}
+  .head .ttl{font-size:22px;font-weight:900;letter-spacing:-.4px;}
+  .head .brand{font-size:12.5px;font-weight:800;letter-spacing:-.2px;}
+  .head .brand .d{color:var(--clover-bright);}
+  .head .add{width:44px;height:44px;border-radius:var(--r-full);background:var(--clover-soft);color:var(--clover-ink);border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .head .brand{min-height:44px;display:inline-flex;align-items:center;}
+
+  .sub{font-size:11.5px;font-weight:700;color:var(--muted);margin:20px 2px 8px;display:flex;align-items:center;justify-content:space-between;}
+  .sub .cnt{color:var(--faint);font-weight:700;}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);}
+
+  /* ── 친구 행 ── */
+  .fr{display:flex;gap:12px;padding:14px;align-items:flex-start;min-width:0;text-decoration:none;color:inherit;border-bottom:1px solid var(--line);}
+  .fr:last-child{border-bottom:none;}
+  .av{width:44px;height:44px;border-radius:var(--r-full);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;}
+  .fr .mid{flex:1;min-width:0;}
+  .fr .nm{font-size:14px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:6px;}
+  .fr .goal{font-size:12.5px;font-weight:700;color:var(--ink);margin-top:3px;line-height:1.35;word-break:keep-all;}
+  .fr .news{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.45;word-break:keep-all;display:flex;gap:5px;}
+  .fr .news i{font-style:normal;flex:0 0 auto;opacity:.8;}
+  .prog{height:6px;background:var(--warm);border-radius:var(--r-lg);overflow:hidden;margin-top:9px;}
+  .prog i{display:block;height:100%;background:var(--clover);border-radius:var(--r-lg);}
+  .prog.quiet i{background:var(--amber-line);}
+  .fr .rel{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding-top:2px;}
+  /* 관계 지위 = 두 사람만 보는 사적·비경쟁 배지. 금액 아님(D-003). 횟수·꾸준함만. */
+  .relbadge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:var(--r-full);background:var(--clover-soft);color:var(--clover-ink);white-space:nowrap;}
+  .relbadge.warm{background:var(--warm);color:var(--amber-ink);}
+  .relmeta{font-size:10px;color:var(--faint);font-weight:700;white-space:nowrap;}
+  .badge-you{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:var(--r-full);background:var(--warm);color:var(--muted);}
+
+  /* ── 콜드스타트 (친구 0명) — 가짜 친구 금지(D-009 경계). 정직한 빈 상태. ── */
+  .cold{text-align:center;padding:40px 8px 8px;}
+  .cold .clover{font-size:46px;line-height:1;margin-bottom:6px;}
+  .cold h2{font-size:18px;font-weight:900;letter-spacing:-.4px;line-height:1.35;word-break:keep-all;}
+  .cold p{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:10px;word-break:keep-all;}
+  .cold .steps{margin:22px 0 4px;display:flex;flex-direction:column;gap:2px;}
+  .cstep{display:flex;gap:12px;align-items:flex-start;text-align:left;padding:12px 0;}
+  .cstep .n{width:24px;height:24px;border-radius:var(--r-full);background:var(--warm);color:var(--clover-ink);font-size:12px;font-weight:800;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .cstep .t{font-size:12.5px;font-weight:700;line-height:1.4;}
+  .cstep .t b{color:var(--clover-ink);}
+  .cstep .t span{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:3px;}
+
+  /* ── 초대 화면 ── */
+  .invite-hero{text-align:center;padding:20px 6px 4px;}
+  .invite-hero .k{font-size:12px;font-weight:800;color:var(--clover-ink);}
+  .invite-hero h2{font-size:21px;font-weight:900;letter-spacing:-.4px;margin-top:6px;line-height:1.35;word-break:keep-all;}
+  .invite-hero p{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:10px;word-break:keep-all;}
+
+  /* 초대장 미리보기 = 카카오톡 말풍선 느낌 */
+  .kprev{background:#B2C7DA;border-radius:var(--r-lg);padding:18px 16px;margin-top:16px;}
+  .kprev .from{font-size:10.5px;font-weight:700;color:#41506180;color:#3f4d5c;margin-bottom:8px;padding-left:2px;}
+  .kbubble{background:#fff;border-radius:4px 16px 16px 16px;padding:0;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  .kbubble .top{height:118px;background:radial-gradient(80% 80% at 50% 38%,#E7F4EC,#F4EFE6 72%);display:flex;align-items:center;justify-content:center;position:relative;}
+  .kbubble .top .big{font-size:38px;}
+  .kbubble .top .mini{position:absolute;font-size:15px;opacity:.7;}
+  .kbubble .body{padding:14px 16px 16px;}
+  .kbubble .body h3{font-size:14px;font-weight:800;letter-spacing:-.2px;line-height:1.4;word-break:keep-all;}
+  .kbubble .body .sm{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;word-break:keep-all;}
+  .kbubble .cta{border-top:1px solid var(--line);text-align:center;font-size:12.5px;font-weight:800;color:var(--clover-ink);padding:12px;}
+
+  .share-row{display:flex;gap:10px;margin-top:18px;}
+  .share-row .sbtn{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-family:var(--font);}
+  .share-row .sbtn .ic{width:34px;height:34px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .share-row .sbtn.kakao .ic{background:#FEE500;}
+  .share-row .sbtn.link .ic{background:var(--warm);}
+  .share-row .sbtn .lb{font-size:11.5px;font-weight:800;color:var(--ink);}
+
+  /* ── 보상 화면 ── */
+  .reward{text-align:center;padding:28px 6px 4px;}
+  .reward .burst{width:112px;height:112px;border-radius:var(--r-full);margin:0 auto;background:radial-gradient(closest-side,#E7F4EC,#F4EFE6);display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;animation:pop .5s cubic-bezier(.2,1.4,.4,1);}
+  @keyframes pop{0%{transform:scale(.4);opacity:0;}60%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+  .reward .spark{position:absolute;font-size:16px;animation:rise .7s ease-out;}
+  @keyframes rise{from{transform:translateY(8px);opacity:0;}to{transform:translateY(-6px);opacity:.9;}}
+  .reward h2{font-size:22px;font-weight:900;letter-spacing:-.5px;margin-top:18px;line-height:1.3;word-break:keep-all;}
+  .reward .who{color:var(--clover-ink);}
+  .reward p{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:10px;word-break:keep-all;}
+  .boost-chip{display:inline-flex;align-items:center;gap:8px;background:var(--clover-soft);border:1px solid var(--clover);border-radius:var(--r-full);padding:10px 18px;margin-top:18px;font-size:15px;font-weight:900;color:var(--clover-ink);letter-spacing:-.3px;}
+  .boost-chip .p{font-size:20px;}
+
+  /* 부스트 클로버 설명 카드 */
+  .explain{background:var(--warm);border-radius:var(--r-md);padding:14px 16px;margin-top:20px;text-align:left;}
+  .explain .ln{display:flex;gap:9px;font-size:12px;color:var(--ink);line-height:1.5;word-break:keep-all;}
+  .explain .ln + .ln{margin-top:10px;}
+  .explain .ln i{font-style:normal;flex:0 0 auto;width:18px;text-align:center;}
+  .explain .ln b{color:var(--clover-ink);}
+  .explain .ln.no b{color:var(--amber-ink);}
+
+  /* 열린결정 배지 — 회장 아이디어 보존 + 안전 기본값 표시. 검수용, 제품 카피와 톤 구분. */
+  .opendec{margin-top:16px;border:1px dashed var(--violet-line);background:var(--violet-soft);border-radius:var(--r-md);padding:13px 15px;text-align:left;}
+  .opendec .tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;color:var(--violet-ink);background:#fff;border:1px solid var(--violet-line);padding:3px 9px;border-radius:var(--r-full);letter-spacing:.2px;}
+  .opendec p{font-size:11.5px;color:var(--violet-ink);line-height:1.55;margin-top:9px;word-break:keep-all;}
+  .opendec p b{font-weight:800;}
+
+  .btn{display:block;width:100%;text-align:center;font-size:15px;font-weight:800;padding:16px;border-radius:var(--r-md);border:1px solid transparent;cursor:pointer;text-decoration:none;font-family:var(--font);margin-top:14px;}
+  .btn.pri{background:var(--clover);color:#fff;box-shadow:0 6px 16px rgba(27,138,79,.22);}
+  .btn.sec{background:var(--surface);color:var(--ink);border-color:var(--line);}
+  .btn.ghost{background:none;color:var(--muted);font-size:13px;font-weight:700;padding:12px;box-shadow:none;}
+
+  .safenote{display:flex;gap:9px;background:var(--clover-soft);border-radius:var(--r-sm);padding:12px 14px;margin-top:16px;font-size:11.5px;color:var(--clover-ink);line-height:1.5;word-break:keep-all;font-weight:600;}
+  .safenote i{font-style:normal;flex:0 0 auto;}
+
+  /* ══ 검수 패널 (제품 아님, 검수 셸) ══ */
+  .review{width:330px;flex:0 0 auto;color:#e9e5dd;}
+  @media(max-width:1080px){.review{width:390px;}}
+  .review .blk{background:#232120;border:1px solid #35322d;border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+  .review .blk h4{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a857c;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+  .review .blk h4 .d{width:7px;height:7px;border-radius:50%;background:#39c07a;}
+  .review .blk.chg h4 .d{background:#c98a2b;}
+  .review .blk p{font-size:12px;line-height:1.6;color:#cfc9bf;}
+  .review .blk p + p{margin-top:9px;}
+  .review .blk p b{color:#f3efe7;font-weight:700;}
+  .review .blk .path{font-family:var(--font);font-size:10.5px;color:#8fbfa6;background:#1b1a18;padding:2px 6px;border-radius:5px;}
+  .review .chgitem{border-left:2px solid #c98a2b;padding:2px 0 2px 11px;margin-top:11px;}
+  .review .chgitem:first-of-type{margin-top:0;}
+  .review .chgitem .w{font-size:12px;font-weight:700;color:#f3efe7;line-height:1.5;}
+  .review .chgitem .fb{font-size:11px;color:#b9b2a6;margin-top:4px;line-height:1.5;font-style:italic;}
+  .review .blk.new{border:1px dashed #4a6b58;}
+  .review .blk.new h4{color:#8fbfa6;}
+
+  /* ══ STAMP ══ */
+  .stamp{max-width:1080px;margin:0 auto;color:#8a857c;font-size:10.5px;line-height:1.7;padding:18px 20px 40px;border-top:1px solid #35322d;}
+  .stamp b{color:#cfc9bf;}
+</style>
+</head>
+<body>
+
+<div class="console">
+  <h1><span class="dot">🍀</span> 해낼게 v2 · 친구 레이어 <span class="ver">v1 · 390×844 네이티브앱</span></h1>
+  <div class="row">
+    <div class="grp">
+      <span class="lbl">화면</span>
+      <button class="nav on" data-s="friends">1 · 친구목록</button>
+      <button class="nav" data-s="invite">2 · 연락처 초대</button>
+      <button class="nav" data-s="reward">3 · 초대 보상</button>
+    </div>
+    <span class="sep"></span>
+    <div class="grp" id="stateGrp">
+      <span class="lbl">데이터</span>
+      <button class="st on" data-state="normal">정상</button>
+      <button class="st" data-state="cold">콜드스타트(0명)</button>
+      <button class="st" data-state="over">과다(오버플로)</button>
+    </div>
+  </div>
+  <div class="hint">A안 전제(친구 레이어를 넣되 조용함 유지) · 응원 관계 지위 = 두 사람만 보는 사적 배지, 금액 랭킹 아님(D-003) · 초대=카카오 공유/딥링크(연락처 스크래핑 아님, #13 폐기 준수) · 데이터 토글은 1번 화면에서만 적용.</div>
+</div>
+
+<div class="stage">
+
+  <!-- ══════════ 화면 1 · 친구목록 ══════════ -->
+  <section class="screen active" id="friends">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <div class="ttl">친구</div>
+          <button class="add" title="친구 초대" onclick="go('invite')">+</button>
+        </div>
+
+        <!-- 정상 상태 -->
+        <div data-view="normal">
+          <div class="sub">나를 응원하는 친구 <span class="cnt">3명</span></div>
+          <div class="card">
+            <a class="fr" onclick="return false;" href="#">
+              <div class="av" style="background:#7C9A82;">도</div>
+              <div class="mid">
+                <div class="nm">윤도경 <span class="badge-you">서로 응원</span></div>
+                <div class="goal">이번 학기 평점 4.0 해낼게</div>
+                <div class="prog"><i style="width:68%"></i></div>
+                <div class="news"><i>💬</i><span>3주째 도서관 개근 중이래요</span></div>
+              </div>
+              <div class="rel">
+                <span class="relbadge">🍀 12번 함께</span>
+                <span class="relmeta">6주 연속</span>
+              </div>
+            </a>
+            <a class="fr" onclick="return false;" href="#">
+              <div class="av" style="background:#B98A4A;">서</div>
+              <div class="mid">
+                <div class="nm">서연</div>
+                <div class="goal">토익 900 넘길게</div>
+                <div class="prog"><i style="width:41%"></i></div>
+                <div class="news"><i>💬</i><span>모의고사 820 나왔어, 조금만 더</span></div>
+              </div>
+              <div class="rel">
+                <span class="relbadge">🍀 5번 함께</span>
+                <span class="relmeta">2주 연속</span>
+              </div>
+            </a>
+            <a class="fr" onclick="return false;" href="#">
+              <div class="av" style="background:#8B8177;">민</div>
+              <div class="mid">
+                <div class="nm">민준</div>
+                <div class="goal">3개월 안에 5kg 감량 해낼게</div>
+                <div class="prog quiet"><i style="width:22%"></i></div>
+                <div class="news"><i>🌙</i><span>요즘 조용해요 · 마지막 기록 9일 전</span></div>
+              </div>
+              <div class="rel">
+                <span class="relbadge warm">🍀 3번 함께</span>
+                <span class="relmeta">이번 주 쉼</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="sub">내가 응원하는 친구 <span class="cnt">1명</span></div>
+          <div class="card">
+            <a class="fr" onclick="return false;" href="#">
+              <div class="av" style="background:#5E8C6A;">하</div>
+              <div class="mid">
+                <div class="nm">하늘 <span class="badge-you">내가 먼저</span></div>
+                <div class="goal">매일 아침 6시 기상 21일 해낼게</div>
+                <div class="prog"><i style="width:76%"></i></div>
+                <div class="news"><i>💬</i><span>16일째 성공, 고맙다는 말 남겼어요</span></div>
+              </div>
+              <div class="rel">
+                <span class="relbadge">🍀 9번 함께</span>
+                <span class="relmeta">4주 연속</span>
+              </div>
+            </a>
+          </div>
+
+          <button class="btn sec" onclick="go('invite')">＋ 친구 더 초대하기</button>
+          <p style="font-size:11px;color:var(--faint);text-align:center;margin-top:12px;line-height:1.6;word-break:keep-all;">
+            친구 목록은 서로 응원한 사이에만 연결돼요.<br>금액은 서로에게 보이지 않아요.
+          </p>
+        </div>
+
+        <!-- 콜드스타트 상태 (친구 0명) -->
+        <div data-view="cold" style="display:none;">
+          <div class="cold">
+            <div class="clover">🍀</div>
+            <h2>아직 연결된 친구가 없어요</h2>
+            <p>친구를 초대하면 서로의 목표와 근황이<br>여기 조용히 모여요. 응원할수록 관계가 쌓여요.</p>
+            <div class="steps">
+              <div class="cstep"><div class="n">1</div><div class="t">편한 친구에게 초대장 보내기<span>카카오 공유나 링크로. 연락처를 통째로 가져가지 않아요.</span></div></div>
+              <div class="cstep"><div class="n">2</div><div class="t">친구가 <b>목표를 선언</b>하면 연결<span>서로 응원한 사이만 친구 목록에 남아요.</span></div></div>
+              <div class="cstep"><div class="n">3</div><div class="t">조용히 <b>🍀로 응원</b>하며 관계가 쌓임<span>횟수와 꾸준함이 두 사람만의 지위가 돼요.</span></div></div>
+            </div>
+          </div>
+          <button class="btn pri" onclick="go('invite')">연락처에서 친구 초대하기</button>
+          <button class="btn ghost" onclick="return false;">먼저 내 목표부터 선언할게요</button>
+        </div>
+
+        <!-- 과다 상태 (오버플로 검증: 긴 이름·긴 목표·많은 목록) -->
+        <div data-view="over" style="display:none;">
+          <div class="sub">나를 응원하는 친구 <span class="cnt">24명</span></div>
+          <div class="card" id="overList">
+            <!-- JS로 렌더 -->
+          </div>
+          <p style="font-size:11px;color:var(--faint);text-align:center;margin-top:12px;">
+            스크롤로 전체 확인 · 이름과 목표가 길어도 줄이 깨지지 않아요.
+          </p>
+        </div>
+
+      </div></div>
+      <nav class="tabbar">
+        <a onclick="return false;"><span class="ic">🏠</span>홈</a>
+        <a onclick="return false;"><span class="ic">🍀</span>응원</a>
+        <a class="on" onclick="return false;"><span class="ic">👥</span>친구</a>
+        <a onclick="return false;"><span class="ic">☰</span>더보기</a>
+      </nav>
+    </div>
+
+    <aside class="review">
+      <div class="blk"><h4><span class="d"></span>이 화면</h4>
+        <p><b>친구목록 · 응원자 페르소나 홈.</b> 나를 응원한/내가 응원한 친구를 두 묶음으로 나누고, 각 친구의 진행 중 목표 + 근황 한 줄 + 진행 막대를 보여준다.</p>
+        <p>실구현 참조: <span class="path">web/src/app/(receiver)/me</span>의 워드맵/잔액 톤 계승. 친구 레이어는 <b>신설·미구현</b>(idea-ledger #11 v3이월분을 A안 전제로 당겨옴).</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>심리 근거</h4>
+        <p><b>사회적 책임(Strava 팔로잉 피드)</b> — 친구 근황을 pull로 보며 "나도 챙겨야지". 푸시 재응원(#12 폐기)은 안 쓰고 본인이 열 때만 본다.</p>
+        <p><b>관계적 지위 = 비경쟁 사적 배지.</b> Duolingo 리더보드는 줄세우기지만 우리는 금액·순위 랭킹을 금지(D-003 "지갑은 조용하게"). 대신 "12번 함께 · 6주 연속" 같은 <b>횟수·꾸준함</b>을 두 사람만 보는 관계 신호로 준다.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>벤치마크</h4>
+        <p>Strava(팔로잉 피드·kudos), Duolingo(공유 스트릭 22% 완료율↑ 손실회피 차용, 리더보드 경쟁은 버림), 토스(친구 행 밀도·아바타). <span class="path">websearch 2026-09</span></p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>엣지·오버플로</h4>
+        <p><b>콜드(0명):</b> 가짜 친구 카드 금지(D-009는 런치 피드 한정). 정직한 빈 상태 + 3스텝 안내 + 초대 CTA.</p>
+        <p><b>과다:</b> 긴 이름/목표에서 <span class="path">word-break:keep-all</span>로 단어 단위 줄바꿈, 아바타·배지 <span class="path">flex:0 0 auto</span> 고정, 좌우 오버플로 0. 콘솔 데이터 토글로 3상태 확인.</p>
+      </div>
+      <div class="blk chg new" data-changelog-item><h4><span class="d"></span>v1 신규 (기반 없음)</h4>
+        <p>이 화면군은 v2 최초 제안이라 대조할 이전 버전이 없다. 기반 포맷만 상속: <span class="path">core-cashout-full-journey-v3.8-opus5.html</span>의 콘솔·토큰·행 밀도.</p>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ══════════ 화면 2 · 연락처 초대 ══════════ -->
+  <section class="screen" id="invite">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <button class="brand" style="background:none;border:none;cursor:pointer;" onclick="go('friends')">‹ 뒤로</button>
+        </div>
+        <div class="invite-hero">
+          <div class="k">친구 초대</div>
+          <h2>편한 친구에게<br>초대장을 보내요</h2>
+          <p>초대는 카카오 공유나 링크로만 보내요.<br>연락처를 통째로 가져가지 않아요.</p>
+        </div>
+
+        <!-- 초대장 미리보기 -->
+        <div class="kprev">
+          <div class="from">카카오톡으로 이렇게 도착해요</div>
+          <div class="kbubble">
+            <div class="top">
+              <span class="mini" style="left:22%;top:26%;">🍀</span>
+              <span class="mini" style="right:20%;top:32%;">🍀</span>
+              <span class="big">🍀</span>
+              <span class="mini" style="left:30%;bottom:20%;">✨</span>
+            </div>
+            <div class="body">
+              <h3>도경님이 해낼게에서<br>당신을 응원 친구로 초대했어요</h3>
+              <div class="sm">"네가 뭘 해내려는지 조용히 응원하고 싶어. 목표 하나 선언해볼래?"</div>
+            </div>
+            <div class="cta">초대장 열어보기 ›</div>
+          </div>
+        </div>
+
+        <div class="share-row">
+          <button class="sbtn kakao" onclick="go('reward')">
+            <span class="ic">💬</span><span class="lb">카카오톡 공유</span>
+          </button>
+          <button class="sbtn link" onclick="linkCopied(this)">
+            <span class="ic">🔗</span><span class="lb">초대 링크 복사</span>
+          </button>
+        </div>
+
+        <div class="safenote">
+          <i>🔒</i>
+          <span>상대가 초대장을 열고 <b>직접 수락</b>할 때만 연결돼요. 주소록을 스캔하거나 저장하지 않아요.</span>
+        </div>
+
+        <div class="opendec">
+          <span class="tag">◇ 열린 결정</span>
+          <p><b>초대 성사 보상 = 환전 불가 "응원 전용 클로버(부스트)"</b>로 그려둔 안전 기본값이에요. 실돈성 클로버를 초대에 직결하면 현금성 추천보상이 되어 규제·어뷰징 위험이 있어, 보상은 응원에만 쓰고 환전은 막았어요. 이 형태는 아직 회장 미확정.</p>
+        </div>
+      </div></div>
+      <nav class="tabbar">
+        <a onclick="return false;"><span class="ic">🏠</span>홈</a>
+        <a onclick="return false;"><span class="ic">🍀</span>응원</a>
+        <a class="on" onclick="return false;"><span class="ic">👥</span>친구</a>
+        <a onclick="return false;"><span class="ic">☰</span>더보기</a>
+      </nav>
+    </div>
+
+    <aside class="review">
+      <div class="blk"><h4><span class="d"></span>이 화면</h4>
+        <p><b>연락처 초대.</b> 카카오 공유/딥링크 초대 + 초대장 미리보기(카톡 말풍선으로 실제 도착 모습 렌더). 링크 복사도 병행.</p>
+        <p>실구현 참조: 초대 딥링크는 <span class="path">supabase/functions/auth-kakao</span> 카카오 인증 흐름 위에 얹는다(신설·미구현).</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>심리·안전 근거</h4>
+        <p><b>당사자 동의 바이럴(카카오게임 초대 차용).</b> 회장 폐기분 #13(연락처 통째 스크래핑)을 피하려 <b>공유/딥링크</b>로만 그림. 주소록 스캔 없음을 자물쇠 배지로 명시.</p>
+        <p><b>실행의도 카피</b> — 초대장 문구에 "목표 하나 선언해볼래?"로 수신자의 다음 행동을 지정.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>열린 결정 (제품 아님·검수 신호)</h4>
+        <p>초대 보상을 <b>환전 불가 부스트 클로버</b>로 둔 것은 안전 기본값. 회장 아이디어(연락처 초대로 클로버 적립)를 지우지 않고, 현금성 추천보상 리스크만 흡수. 확정 필요.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>엣지</h4>
+        <p>미가입 수신자 → 초대장 열면 온보딩. 이미 가입자 → 바로 친구 연결 제안. 링크 복사 시 인라인 "복사됨" 피드백(클릭해 확인).</p>
+      </div>
+      <div class="blk chg new" data-changelog-item><h4><span class="d"></span>v1 신규 (기반 없음)</h4>
+        <p>v2 최초 제안. 대조할 이전 버전 없음. 카톡 말풍선 미리보기는 실 카카오 공유 UI 관찰 기반 근사.</p>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ══════════ 화면 3 · 초대 보상 ══════════ -->
+  <section class="screen" id="reward">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="reward">
+          <div class="burst">🍀
+            <span class="spark" style="left:14px;top:20px;">✨</span>
+            <span class="spark" style="right:16px;top:28px;">✨</span>
+            <span class="spark" style="left:30px;bottom:18px;">🍀</span>
+          </div>
+          <h2><span class="who">서연님</span>이<br>초대를 수락했어요</h2>
+          <p>서연님이 "토익 900 넘길게"를 선언했어요.<br>이제 서로의 친구 목록에 연결됐어요.</p>
+
+          <div class="boost-chip"><span class="p">🍀</span> 응원 전용 클로버 +3</div>
+        </div>
+
+        <div class="explain">
+          <div class="ln"><i>🍀</i><span><b>응원 전용 클로버(부스트)</b>는 친구를 응원할 때 쓸 수 있어요.</span></div>
+          <div class="ln no"><i>🚫</i><span>환전은 안 돼요. 실돈성 응원 클로버와 다른, 초대 감사 선물이에요.</span></div>
+          <div class="ln"><i>💚</i><span>받은 부스트로 서연님의 첫 목표에 바로 응원을 두고 올 수 있어요.</span></div>
+        </div>
+
+        <div class="opendec">
+          <span class="tag">◇ 열린 결정 · 회장 미확정</span>
+          <p>회장 원아이디어는 <b>"연락처 초대로 클로버를 모은다"</b>였어요. 실돈성 클로버를 초대 보상으로 직결하면 현금성 추천보상이 되어 규제·어뷰징 리스크가 커, 여기서는 <b>환전 불가 부스트 클로버</b>를 안전 기본값으로 그렸어요. 대안: (a)부스트만, (b)소액 실클로버+상한, (c)보상 없이 관계 연결만. 확정 필요.</p>
+        </div>
+
+        <a class="btn pri" onclick="go('friends')">서연님에게 응원 두고 오기</a>
+        <a class="btn ghost" onclick="go('friends')">친구 목록으로</a>
+      </div></div>
+      <nav class="tabbar">
+        <a onclick="return false;"><span class="ic">🏠</span>홈</a>
+        <a onclick="return false;"><span class="ic">🍀</span>응원</a>
+        <a class="on" onclick="return false;"><span class="ic">👥</span>친구</a>
+        <a onclick="return false;"><span class="ic">☰</span>더보기</a>
+      </nav>
+    </div>
+
+    <aside class="review">
+      <div class="blk"><h4><span class="d"></span>이 화면</h4>
+        <p><b>초대 보상.</b> 초대 성사 시 응원 전용 클로버(부스트) 적립 연출(pop 애니메이션) + 부스트 성격 설명 + 열린결정 배지.</p>
+        <p>실구현 참조: 클로버 적립은 <span class="path">supabase/migrations · welcome_clover</span> 패턴 재사용, 단 <b>부스트=환전 불가 enum 분리 필요</b>(신설·미구현).</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>심리 근거</h4>
+        <p><b>즉시 보상 + 상호성.</b> 수락 직후 시각적 적립으로 초대 루프를 닫고, "받은 부스트로 바로 응원 두기"로 첫 응원까지 한 동선에 연결(Zeigarnik: 관계 시작의 긴장 해소).</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>규제·윤리 경계</h4>
+        <p>실돈성 클로버(총 30 도달 시 환전, D-017)를 초대에 직결하면 현금성 추천보상 → 규제·어뷰징. <b>환전 불가 부스트</b>로 분리해 리스크 흡수. 다크패턴(가짜 긴급·강제) 없음.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>열린 결정 (제품 아님·검수 신호)</h4>
+        <p>보상 형태 a/b/c 3안을 배지로 명시. 회장 아이디어 보존 + 안전 기본값 제시. build 전 확정 필요.</p>
+      </div>
+      <div class="blk chg new" data-changelog-item><h4><span class="d"></span>v1 신규 (기반 없음)</h4>
+        <p>v2 최초 제안. 대조 이전 버전 없음. "부스트 클로버" 개념은 이 프로토타입이 처음 제안 — idea-ledger·결정원장 반영 필요(아이데이션, 박제 전).</p>
+      </div>
+    </aside>
+  </section>
+
+</div>
+
+<div class="stamp">
+  🏷 STAMP | line: friends-invite | 생성: 2026-09-16 14:20 KST | model: claude-opus-4-8 | agent: product-designer | 스킬: design-consultation(research)·design-html·design-review | 근거: idea-ledger #11·#12·#13, 결정.md D-003·D-009·D-017<br>
+  <b>기반 포맷</b> docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html (콘솔·토큰·행 밀도 상속) · 토큰 DESIGN.md v2.0.1<br>
+  <b>근거</b> docs/plan/haenael-v2-idea-ledger #11·#12·#13, one-thing.md, 결정.md D-003·D-009·D-017, web/src/app/page.tsx, WebSearch(Strava·Duolingo·Kakao 초대 2026-09)<br>
+  <b>design-review</b> Design Score A- · AI Slop A (headless 렌더 3화면×3상태 스크린샷 검수, 콘솔에러 0, 오버플로 0, 터치타깃 44px 보정 완료)<br>
+  <b>고민 한 줄</b> "관계적 지위"를 넣되 금액·순위 랭킹이 아니라 두 사람만 보는 횟수·꾸준함 배지로 돌려 D-003 "지갑은 조용하게"를 지켰다. 초대 보상은 실클로버 직결의 규제 리스크를 환전 불가 부스트로 흡수하되 회장 아이디어를 지우지 않고 열린결정으로 표면화.
+</div>
+
+<script>
+  // 화면 전환
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.console .nav').forEach(b=>b.classList.toggle('on', b.dataset.s===id));
+    document.querySelector('.stage').scrollIntoView({behavior:'instant',block:'start'});
+    // 상태 토글은 친구목록에서만 의미
+    document.getElementById('stateGrp').style.opacity = (id==='friends') ? '1':'.4';
+  }
+  document.querySelectorAll('.console .nav').forEach(b=>{
+    b.addEventListener('click',()=>go(b.dataset.s));
+  });
+
+  // 데이터 상태 토글 (화면 1)
+  function setState(st){
+    document.querySelectorAll('#stateGrp .st').forEach(b=>b.classList.toggle('on', b.dataset.state===st));
+    document.querySelectorAll('#friends [data-view]').forEach(v=>{
+      v.style.display = (v.dataset.view===st) ? '':'none';
+    });
+    if(st==='over') renderOver();
+  }
+  document.querySelectorAll('#stateGrp .st').forEach(b=>{
+    b.addEventListener('click',()=>setState(b.dataset.state));
+  });
+
+  // 과다 목록 렌더 (긴 이름·긴 목표로 오버플로 검증)
+  let overRendered=false;
+  function renderOver(){
+    if(overRendered) return;
+    const box=document.getElementById('overList');
+    const names=['김서연정','박준혁','최지우아름다운','이도현','정민서','한example길다란이름테스트','오세훈','문가영','배진우','신하늘별'];
+    const goals=[
+      '이번 학기 전 과목 평점 4.3 이상으로 장학금 받고 졸업까지 해낼게',
+      '토익 990 만점 도전 3개월 안에 반드시 넘길게',
+      '매일 새벽 다섯 시 기상해서 헬스장 가고 3개월 안에 체지방 8kg 감량 해낼게',
+      '정보처리기사 필기 실기 한 번에 합격할게',
+      '10km 마라톤 완주 준비 해낼게'
+    ];
+    const cols=['#7C9A82','#B98A4A','#8B8177','#5E8C6A','#6E7FA0','#A5766A'];
+    let html='';
+    for(let i=0;i<8;i++){
+      const nm=names[i%names.length], gl=goals[i%goals.length], c=cols[i%cols.length];
+      const cnt=(23-i*2), wk=(9-i);
+      html+=`<a class="fr" onclick="return false;" href="#">
+        <div class="av" style="background:${c};">${nm[0]}</div>
+        <div class="mid">
+          <div class="nm">${nm}</div>
+          <div class="goal">${gl}</div>
+          <div class="prog"><i style="width:${30+i*7}%"></i></div>
+          <div class="news"><i>💬</i><span>최근 기록 ${i+1}일 전 · 꾸준히 가고 있어요</span></div>
+        </div>
+        <div class="rel">
+          <span class="relbadge">🍀 ${cnt>0?cnt:1}번 함께</span>
+          <span class="relmeta">${wk>0?wk+'주 연속':'이번 주 쉼'}</span>
+        </div>
+      </a>`;
+    }
+    box.innerHTML=html;
+    overRendered=true;
+  }
+
+  function linkCopied(el){
+    const lb=el.querySelector('.lb'); const old=lb.textContent;
+    lb.textContent='복사됐어요 ✓';
+    el.style.borderColor='var(--clover)';
+    setTimeout(()=>{lb.textContent=old;el.style.borderColor='';},1400);
+  }
+</script>
+</body>
+</html>
