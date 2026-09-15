@@ -761,7 +761,7 @@ motion:
 | **유효 보조** | `docs/design/WIREFRAMES/haenael-receiver-manage-v1-fable.html` | 받는 사람 재방문, 관리 진입, 본인 한정 개별 클로버 노출. [실측 파일:6, `DESIGN.md` 변경 이력 v1.7.0] |
 | **유효 보조** | `docs/design/WIREFRAMES/haenael-v2-hub-v1-claude-fable.html` | 다중 목표·마이페이지·프라이버시·고객센터·승격·감사·탈퇴 허브. [실측 파일:6, `DESIGN.md` 변경 이력 v1.8.0] |
 | **유효 보조** | `docs/design/WIREFRAMES/receiver-home.html` · `wordmap-share.html` · `error-states.html` | 홈·워드맵 확산·dead-end 0의 상태 참조. 환전 잔액 표현은 v3.6이 우선. [실측 각 파일:6] |
-| **결정용, 정본 아님** | `docs/design/WIREFRAMES/landing-compare.html` · `landing-shotgun.html` · `onboarding-compare.html` | 선택 과정 보존용. 확정안 구현 근거로 직접 쓰지 않는다 |
+| **결정용, 정본 아님** | `docs/_archive/wireframes-decision-2026-07/landing-compare.html` · `landing-shotgun.html` · `onboarding-compare.html` | 2026-07 선택 과정 보존용. 확정안 구현 근거로 직접 쓰지 않는다. 현행 대조 검사기 규격(standard-design.md §1.6) 이전 형식이라 살아있는 대조 자료가 아니어서 보관함으로 옮겼다 |
 | **폐기, 보존만** | `docs/design/WIREFRAMES/archive/landing-final-v1.html` · `archive/goal-page-v1.html` · `archive/payment-flow-v1.html` | v2 승격으로 폐기. [실측 각 파일:6, `DESIGN.md` 변경 이력 v1.6.0] |
 | **폐기, 보존만** | `scratchpad/cashout-manual-flow-v2-opus.html` | 수동환전 v2. v3.6 전체 여정으로 대체됨. [실측 파일:6, 정본 v3.6 파일:6] |
 
