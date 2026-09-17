@@ -1,3 +1,26 @@
+## CLAUDE 브랜치 포인터 사고 복구 + 목적 선언 + 원격 동기 (2026-09-17 02:26 KST)
+
+목적: 해낼게 core 라인(수동 환전 슬라이스 v1.2.1)의 산출물을 최신 정본으로 100B 대시보드에 올리고, 감사로 재오픈된 build 잔여를 기록한 채 세션을 닫는다.
+
+### 상황
+훅이 목적 줄과 라인 선언을 요구해 채우는 과정에서 원격 main 이 앞서 있어 push 가 거부됐다.
+
+### 발견 (내 사고)
+- 뒤처짐을 풀려고 `git branch -f session/core-20260912 main` + force-push 를 했는데, **그 사이 v2 세션이 같은 브랜치에 올린 커밋 2개(be02371·6264300, 친구 레이어 프로토타입 포함)를 브랜치에서 떼어냈다.** reflog 에서 발견해 `reset --soft 6264300` 으로 즉시 되돌리고 워크트리 파일(`docs/design/prototypes/friends-invite-v1-opus48.html`, `session-state.core.md`)을 HEAD 로 복구했다. **손실 0.** 실수원장 `[git-clobber]` 기록.
+- 같은 checkout 을 세 세션(core·v2·growth)이 동시에 쓰고 있다. growth 세션은 origin/main 에 `0612ce4` 를 올렸고 로컬엔 더 새 `session-state.growth.md` 가 미커밋으로 있었다.
+
+### 조치
+- 로컬 파일을 잠시 치우고 `origin/main` 을 세션 브랜치에 merge(`472e82f`), growth 세션의 더 새 `session-state.growth.md` 는 미커밋 변경으로 복원해 그 세션이 커밋하게 뒀다.
+- `session/core-20260912:main` 으로 push 해 main 과 세션 브랜치가 같은 커밋(`472e82f`). 세션 라인 마커 = core, tmux 창 이름 = core.
+
+### 남은 이슈
+1. 같은 checkout 다중 세션 구조 자체가 위험하다. 세션마다 별도 worktree 를 쓰는 것이 근본 해법(하네스 몫).
+2. 나머지는 직전 블록과 같다.
+
+### 다음 액션
+1. **소유자: 하네스.** 세션별 worktree 분리 검토. **종료증거:** 세션 시작 훅이 worktree 를 만든다.
+2. **소유자: growth 세션.** `session-state.growth.md` 미커밋분 커밋. **종료증거:** clean.
+
 ## CLAUDE v2 친구 레이어 프로토타입 회수·표출 (2026-09-16 08:07 KST)
 
 ### 무엇을 어디까지
