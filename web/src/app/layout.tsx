@@ -1,7 +1,7 @@
 // layout.tsx — 루트 레이아웃: Pretendard·Toaster(Sonner)
 // folder-structure.md: "루트: Pretendard·토큰·Toaster(Sonner)"
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
@@ -29,6 +29,25 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "해낼게",
   },
+  // 홈 화면 추가용. 매니페스트는 app/manifest.ts 가 만든다.
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "해낼게",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  // design-token-lint-allow: 메타 태그는 CSS 변수를 못 읽는다. globals.css 의 --primary 값 그대로다.
+  themeColor: "#1B8A4F",
 };
 
 export default function RootLayout({
