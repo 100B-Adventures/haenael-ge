@@ -1,3 +1,21 @@
+## CLAUDE v2 워드맵·다국어 랜딩 프로토타입 회수·표출 (2026-09-20 22:14 KST)
+
+### 무엇을 어디까지
+- product-designer 프로토타입 회수: `docs/design/prototypes/landing-wordmap-i18n-v2-opus48.html`. 랜딩+워드맵 버전업, 워드맵 히어로화, KO/EN i18n 토글. show-artifact 표출(포커스 유지).
+- 지난 verify FAIL 원인 해소: 이번엔 globals.css:57-137 토큰 진실원 실독 계승. verify-agent-quality **PASS**(Design Score A-, Skill 2·WebSearch 11·소크라마커 5).
+
+### 검증했나
+- verify PASS. 컨트롤러 독립 headless 실측(Playwright 390폭): langToggleEN_present=1(언어토글 실작동), clicks=9/contentChanged=374, wheelScrollY=1383/scrollHeight=2227, mobileOverflow=0, consoleErrors=0. 원값 `docs/design/prototypes/ui-evidence-landing-wordmap-i18n.txt`.
+
+### 남은 이슈 (회장 판단)
+1. 해외 광고 범위(waitlist 소액 vs 코어 해외화 후 전환광고) — open-decisions.
+2. 앞선 미결: 초대 보상 (a)/(b)/(c), v2 정체성 A/B.
+
+### 다음 액션
+1. **소유자: 회장.** 프로토타입 평가 + 해외 광고 범위. **종료증거:** open-decisions 응답.
+2. **소유자: 세션.** 방향 확정분 PRD·DESIGN 반영. **종료증거:** 산출물 버전 갱신.
+
+---
 ## CLAUDE v2 워드맵·다국어 랜딩 프로토타입 위임 (2026-09-20 22:05 KST, 회장 "워드맵 디자인 신경쓰고 다국어 넣어 해외광고, 기존 배포물 계승해 버전올려 만들어 띄워봐")
 
 ### 진행

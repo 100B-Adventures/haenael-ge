@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>해낼게 v2 · 랜딩 + 워드맵 (i18n KO/EN) v2</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{
+    /* ── 토큰 진실원: web/src/app/globals.css :57-137 + DESIGN.md v2.0.1 프론트매터. 재정의 아님, 실측 복제 ── */
+    --bg:#FBFAF7; --surface:#FFFFFF; --line:#E8E4DC; --warm:#F4EFE6;
+    --ink:#16140F; --muted:#6F6A60; --faint:#9C968B;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+    --accent:#E7F4EC; --accent-fg:#14613A;
+    --danger:#D9483B;
+    /* 워드맵 3단 색·굵기 = Wordmap.tsx :60-64 TIER_STYLE 실측 복제 */
+    --w-s1:#8bb79f; --w-s2:#57a178; --w-s3:#1a8150;
+    --r-sm:12px; --r-md:14px; --r-lg:20px; --r-full:9999px;
+    --font:"Pretendard","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,sans-serif;
+    --motion:180ms;
+    --violet-soft:#EFECF7; --violet-line:#D6CEEC; --violet-ink:#5B4B8A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--font);background:#2b2926;color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+  /* ══ 검수 콘솔 (chrome, 제품 아님) ══ */
+  .console{position:sticky;top:0;z-index:60;background:#1c1b19;color:#e9e5dd;padding:12px 18px;border-bottom:1px solid #35322d;}
+  .console h1{font-size:13px;font-weight:800;letter-spacing:-.2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .console h1 .dot{color:#39c07a;}
+  .console h1 .ver{font-size:10.5px;font-weight:700;color:#8a857c;background:#2a2823;padding:2px 8px;border-radius:20px;}
+  .console .row{display:flex;flex-wrap:wrap;gap:14px;margin-top:11px;align-items:center;}
+  .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .grp .lbl{font-size:10.5px;color:#8a857c;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-right:2px;}
+  .console button{font-family:var(--font);font-size:11.5px;font-weight:700;border:1px solid #3f3b35;background:#2a2823;color:#cfc9bf;
+    padding:6px 11px;border-radius:9px;cursor:pointer;transition:all .12s ease-out;}
+  .console button:hover{border-color:#5a554c;}
+  .console button.on{background:#1B8A4F;border-color:#1B8A4F;color:#fff;}
+  .console button.st.on{background:#c98a2b;border-color:#c98a2b;color:#1c1b19;}
+  .console button.lang.on{background:#3a6ea5;border-color:#3a6ea5;color:#fff;}
+  .console .sep{width:1px;height:20px;background:#3f3b35;}
+  .console .hint{font-size:10.5px;color:#7d786f;margin-top:9px;line-height:1.5;}
+
+  /* ══ 무대 = 폰 프레임 + 검수 패널 ══ */
+  .stage{display:flex;justify-content:center;align-items:flex-start;gap:26px;padding:30px 20px 40px;min-height:100vh;flex-wrap:wrap;}
+  .screen{display:none;}
+  .screen.active{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;justify-content:center;animation:fade .18s ease-out;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  .frame{width:390px;height:844px;background:var(--bg);border-radius:30px;border:1px solid #000;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.4);position:relative;display:flex;flex-direction:column;}
+  .statusbar{height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:700;color:var(--ink);}
+  .statusbar .dots{display:flex;gap:5px;align-items:center;font-size:10px;color:var(--muted);}
+  .app{flex:1;overflow-y:auto;overflow-x:hidden;}
+  .app::-webkit-scrollbar{width:0;}
+
+  /* ══════════ 워드맵 (시그니처 비주얼) ══════════ */
+  /* 구름 은유: 옅은 clover radial halo + size/weight/opacity 3단 + 조용한 드리프트. §5-5 gradient 예외 준수. */
+  .cloud{position:relative;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;
+    gap:10px 14px;padding:26px 20px;border-radius:24px;min-height:220px;
+    background-image:radial-gradient(88% 82% at 50% 44%, var(--accent) 0%, #EEF6F0 60%, transparent 82%);}
+  .cloud.big{min-height:340px;gap:12px 18px;padding:34px 22px;}
+  .cloud .w{white-space:nowrap;line-height:1.25;letter-spacing:-.2px;user-select:none;
+    animation:drift 6s ease-in-out infinite;will-change:transform;}
+  /* 혼합 스크립트: 한글=keep-all, 영문=자간 살짝 조이고 자연 줄바꿈 허용 */
+  .cloud.ko .w{word-break:keep-all;}
+  .cloud.en .w{letter-spacing:-.4px;white-space:normal;text-align:center;overflow-wrap:anywhere;max-width:100%;}
+  .w.s1{color:var(--w-s1);font-weight:600;font-size:15px;opacity:.9;}
+  .w.s2{color:var(--w-s2);font-weight:700;font-size:19px;}
+  .w.s3{color:var(--w-s3);font-weight:800;font-size:26px;}
+  .cloud.big .w.s1{font-size:16px;}
+  .cloud.big .w.s2{font-size:22px;}
+  .cloud.big .w.s3{font-size:31px;}
+  @keyframes drift{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+  /* 클로버 산포 (절제) */
+  .mote{position:absolute;opacity:.4;animation:drift 7s ease-in-out infinite;}
+  @media(prefers-reduced-motion:reduce){.cloud .w,.mote{animation:none;}}
+
+  /* ── 랜딩 (워드맵 히어로) ── */
+  .lp{padding:8px 22px 30px;display:flex;flex-direction:column;min-height:100%;}
+  .lp .brand{font-size:13px;font-weight:800;letter-spacing:-.2px;color:var(--ink);padding:6px 0 0;}
+  .lp .brand .d{color:var(--clover-bright);}
+  .lp .hero{text-align:center;margin:24px 0 18px;display:flex;flex-direction:column;align-items:center;gap:13px;}
+  .lp .hero h1{font-size:40px;font-weight:900;letter-spacing:-1.4px;line-height:1;color:var(--ink);}
+  .lp .hero h1 .d{color:var(--clover-bright);}
+  .lp .hero .slogan{font-size:15.5px;font-weight:500;color:var(--muted);line-height:1.4;word-break:keep-all;}
+  .lp .hook{display:inline-block;font-size:12px;font-weight:800;color:var(--accent-fg);background:var(--accent);border-radius:var(--r-full);padding:6px 13px;}
+  .lp .capw{flex:1;display:flex;flex-direction:column;justify-content:center;margin:6px 0 14px;}
+  .lp .capw .cap{font-size:11.5px;font-weight:700;color:var(--faint);text-align:center;margin-bottom:12px;word-break:keep-all;}
+  .lp .capw .cap2{font-size:11.5px;font-weight:700;color:var(--muted);text-align:center;margin-top:13px;word-break:keep-all;}
+  .lp .steps{display:flex;justify-content:center;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:var(--faint);margin-bottom:13px;flex-wrap:wrap;}
+  .lp .steps b{color:var(--accent-fg);font-weight:800;}
+  .lp .steps .arw{opacity:.45;}
+  .btn{display:block;width:100%;text-align:center;font-size:15.5px;font-weight:800;padding:16px;border-radius:15px;border:1px solid transparent;cursor:pointer;text-decoration:none;font-family:var(--font);letter-spacing:-.2px;}
+  .btn.pri{background:var(--clover);color:#fff;box-shadow:0 6px 16px rgba(27,138,79,.22);}
+  .lp .ghost{display:flex;align-items:center;justify-content:center;min-height:44px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;padding:12px;}
+  .lp .relog{text-align:center;font-size:12.5px;color:var(--faint);padding:6px 6px 2px;display:flex;gap:4px;align-items:center;justify-content:center;}
+  .lp .relog a{color:var(--accent-fg);font-weight:800;text-decoration:underline;text-underline-offset:2px;}
+
+  /* ── 워드맵 풀뷰 ── */
+  .wv{display:flex;flex-direction:column;height:100%;}
+  .wv .head{display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px;}
+  .wv .head .back{width:40px;height:40px;margin-left:-8px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--muted);text-decoration:none;}
+  .wv .head .brand{font-size:12.5px;font-weight:800;letter-spacing:-.2px;}
+  .wv .head .brand .d{color:var(--clover-bright);}
+  .wv .head .sp{width:40px;}
+  .wv .body{flex:1;display:flex;flex-direction:column;padding:0 22px 16px;}
+  .wv .mapcard{flex:1;display:flex;flex-direction:column;border-radius:20px;padding:20px 18px 14px;
+    background-image:linear-gradient(165deg, var(--warm) 0%, var(--accent) 100%);min-height:0;}
+  .wv .goaltitle{font-size:15px;font-weight:800;letter-spacing:-.2px;text-align:center;color:var(--ink);word-break:keep-all;}
+  .wv .cheercnt{text-align:center;font-size:11px;color:var(--muted);margin:5px 0 10px;word-break:keep-all;}
+  .wv .cloudwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0;min-height:0;}
+  .wv .cloudwrap .cloud{width:100%;background-image:radial-gradient(90% 90% at 50% 45%, var(--accent), rgba(238,246,240,.5) 72%, transparent);}
+  .wv .watermark{text-align:right;font-size:10px;font-weight:800;color:var(--accent-fg);opacity:.8;margin-top:8px;}
+  .wv .overflow{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;}
+  .wv .overflow summary{cursor:pointer;list-style:none;font-size:11.5px;color:var(--muted);font-weight:700;}
+  .wv .overflow summary b{color:var(--accent-fg);}
+  .wv .overflow ul{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--ink);list-style:none;}
+  .wv .overflow li{overflow-wrap:anywhere;}
+  /* 콜드스타트 (empty) */
+  .cold{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    border:1.5px dashed #c3d6c9;background:var(--surface);border-radius:18px;padding:34px 20px;min-height:180px;margin:auto;width:100%;}
+  .cold .cl{font-size:38px;margin-bottom:10px;}
+  .cold h3{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px;word-break:keep-all;}
+  .cold p{font-size:12.5px;line-height:1.6;color:var(--muted);word-break:keep-all;}
+  .cold p b{color:var(--accent-fg);}
+  /* 공유 아이콘 바 */
+  .sharebar{display:flex;gap:10px;padding:0 22px 26px;}
+  .sharebar .sb{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-family:var(--font);}
+  .sharebar .sb .ic{width:32px;height:32px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--warm);}
+  .sharebar .sb.kakao .ic{background:#FEE500;}
+  .sharebar .sb .lb{font-size:11px;font-weight:800;color:var(--ink);}
+
+  /* ══ 검수 패널 ══ */
+  .review{width:330px;flex:0 0 auto;color:#e9e5dd;}
+  @media(max-width:1080px){.review{width:390px;}}
+  .review .blk{background:#232120;border:1px solid #35322d;border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+  .review .blk h4{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a857c;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+  .review .blk h4 .d{width:7px;height:7px;border-radius:50%;background:#39c07a;}
+  .review .blk.chg h4 .d{background:#c98a2b;}
+  .review .blk p{font-size:12px;line-height:1.6;color:#cfc9bf;}
+  .review .blk p + p{margin-top:9px;}
+  .review .blk p b{color:#f3efe7;font-weight:700;}
+  .review .blk .path{font-family:ui-monospace,monospace;font-size:10px;color:#8fbfa6;background:#1b1a18;padding:1px 5px;border-radius:5px;}
+  .review .chgitem{border-left:2px solid #c98a2b;padding:2px 0 2px 11px;margin-top:11px;}
+  .review .chgitem:first-of-type{margin-top:0;}
+  .review .chgitem .w{font-size:12px;font-weight:700;color:#f3efe7;line-height:1.5;}
+  .review .chgitem .fb{font-size:11px;color:#b9b2a6;margin-top:4px;line-height:1.5;font-style:italic;}
+
+  .stamp{max-width:1080px;margin:0 auto;color:#8a857c;font-size:10.5px;line-height:1.7;padding:18px 20px 40px;border-top:1px solid #35322d;}
+  .stamp b{color:#cfc9bf;}
+</style>
+</head>
+<body>
+
+<div class="console">
+  <h1><span class="dot">🍀</span> 해낼게 v2 · 랜딩 + 워드맵 <span class="ver">v2 · 390×844 · i18n KO/EN</span></h1>
+  <div class="row">
+    <div class="grp">
+      <span class="lbl">화면</span>
+      <button class="nav on" data-s="landing">1 · 랜딩(워드맵 히어로)</button>
+      <button class="nav" data-s="wordmap">2 · 워드맵 풀뷰</button>
+    </div>
+    <span class="sep"></span>
+    <div class="grp" id="langGrp">
+      <span class="lbl">언어</span>
+      <button class="lang on" data-lang="ko">한국어</button>
+      <button class="lang" data-lang="en">English</button>
+    </div>
+    <span class="sep"></span>
+    <div class="grp" id="stateGrp">
+      <span class="lbl">데이터(2번)</span>
+      <button class="st on" data-state="normal">정상</button>
+      <button class="st" data-state="cold">콜드스타트(0)</button>
+      <button class="st" data-state="over">과다(오버플로)</button>
+    </div>
+  </div>
+  <div class="hint">워드맵 = 응원자가 남긴 단어가 구름처럼 쌓이는 시그니처 비주얼(조용한 응원, D-003) · 언어 토글은 워드맵 단어셋과 랜딩 카피를 동시에 전환(혼합 스크립트 렌더 시연) · 금액·₩ 표기 없음(개수 원칙, DESIGN §6) · 데이터 토글은 2번 풀뷰에만 적용.</div>
+</div>
+
+<div class="stage">
+
+  <!-- ══════════ 화면 1 · 랜딩 ══════════ -->
+  <section class="screen active" id="landing">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="lp">
+        <div class="brand">해낼게<span class="d">.</span></div>
+        <div class="hero">
+          <h1>해낼게<span class="d">.</span></h1>
+          <div class="slogan" data-i18n="slogan">응원은 돈으로 하는 겁니다.</div>
+          <span class="hook" data-i18n="hook">그게 무슨 말이냐면 ↓</span>
+        </div>
+        <div class="capw">
+          <div class="cap" data-i18n="cap1">네 목표 위에, 응원이 이렇게 쌓여요</div>
+          <div class="cloud ko" id="landCloud"></div>
+          <div class="cap2" data-i18n="cap2">친구들이 🍀 클로버로 남긴 응원이에요</div>
+        </div>
+        <div>
+          <div class="steps">
+            <span data-i18n="st1">선언</span><span class="arw">›</span>
+            <span>친구가 <b data-i18n="st2">🍀로 응원</b></span><span class="arw">›</span>
+            <span><b data-i18n="st3">응원이 쌓여요</b></span>
+          </div>
+          <a class="btn pri" href="#" onclick="return false" data-i18n="cta">시작하기</a>
+          <a class="ghost" href="#" onclick="return false" data-i18n="how">어떻게 쓰는 건가요?</a>
+          <div class="relog"><span data-i18n="have">이미 계정이 있으신가요?</span><a href="#" onclick="return false" data-i18n="login">로그인</a></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="review">
+      <div class="blk chg" data-changelog-item>
+        <h4><span class="d"></span>개정에서 바뀐 점 (v1.1 → v2)</h4>
+        <div class="chgitem"><div class="w">워드맵을 프리뷰 장식에서 히어로로 승격.</div>
+          <div class="fb">회장 요구 "단어지도 디자인을 특히 아름답게" 반영 · 3단 size/weight/opacity에 조용한 드리프트 모션(6s, prefers-reduced-motion 존중)을 얹어 "쌓이는 구름"을 살아있게. 정적 프리뷰(page.tsx:71-122)의 절대배치 8단어 → flex 구름 12단어로 확장.</div></div>
+        <div class="chgitem"><div class="w">i18n KO/EN 토글 신규.</div>
+          <div class="fb">회장 요구 "다국어 지원으로 해외 광고" 반영 · 상단 언어 토글로 슬로건·훅·CTA·워드맵 단어셋이 동시 전환. 영문 단어도 Pretendard Latin으로 자간 -0.4px 조여 아름답게 렌더.</div></div>
+      </div>
+      <div class="blk"><h4><span class="d"></span>심리·설득 근거</h4>
+        <p><b>궁금증 갭</b>: "응원은 돈으로 하는 겁니다" + "그게 무슨 말이냐면 ↓" 로 스크롤/탐색 욕구 유발(page.tsx 주석 근거 계승).</p>
+        <p><b>Zeigarnik</b>: 반쯤 찬 워드맵 = 미완성 긴장 → "내 것도 채우고 싶다". <b>사회적 증거 프리뷰</b>: 먼저 쌓인 응원 결과를 먼저 보여줌.</p>
+        <p><b>CTA 욕구</b>: "시작하기"는 결과를 못 말하는 무의미 라벨 후보라 clover 단색 무게로 시각 1순위를 확보하고, 눌렀을 때 온보딩 선언(문턱 낮음)으로 바로 연결.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>벤치마크</h4>
+        <p><b>Buy Me a Coffee</b> supporters wall → 워드맵으로 번안(개수·금액 과시 제거). <b>Linktree/토스</b> one-page one-thing 히어로 절제. <b>Awwwards word-cloud</b> 사례에서 "살아있는 텍스트" 드리프트만 차용, 무의미 3D는 버림.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>실구현·배포 계승</h4>
+        <p>계승: <span class="path">web/src/app/page.tsx</span> 히어로 구조·슬로건·훅·3스텝·CTA·재로그인, <span class="path">globals.css:57-137</span> 토큰, <span class="path">page.tsx:59-69</span> 워드맵 색·굵기.</p>
+        <p>신규: 워드맵 히어로화 + 드리프트 모션 + i18n 토글. 재창조 아님 · 배포 마크업 위에 두 축만 증축.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>PRD 대응</h4>
+        <p>랜딩 포지셔닝 = "C 미니멀 + 워드맵 프리뷰 하이브리드" 확정(결정.md, DESIGN §739). i18n = 신규 요구(해외 광고), 승인 시안 아님 · 아이데이션.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 화면 2 · 워드맵 풀뷰 ══════════ -->
+  <section class="screen" id="wordmap">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="wv">
+        <div class="head">
+          <a class="back" href="#" onclick="return false">‹</a>
+          <div class="brand">해낼게<span class="d">.</span></div>
+          <div class="sp"></div>
+        </div>
+        <div class="body">
+          <div class="mapcard">
+            <div class="goaltitle" data-i18n="wgoal">편입 영어 하루 3시간 해낼게</div>
+            <div class="cheercnt" id="cheerCnt" data-i18n="wcheer">14명이 조용히 응원했어요</div>
+            <div class="cloudwrap"><div id="wvContent"></div></div>
+            <div class="watermark">해낼게.</div>
+          </div>
+        </div>
+        <div class="sharebar">
+          <div class="sb kakao"><div class="ic">💬</div><div class="lb" data-i18n="shareKakao">카카오 공유</div></div>
+          <div class="sb"><div class="ic">📷</div><div class="lb" data-i18n="shareStory">스토리 저장</div></div>
+          <div class="sb" onclick="linkCopied(this)"><div class="ic">🔗</div><div class="lb" data-i18n="shareLink">링크 복사</div></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="review">
+      <div class="blk chg" data-changelog-item>
+        <h4><span class="d"></span>개정에서 바뀐 점 (v1.x → v2)</h4>
+        <div class="chgitem"><div class="w">풀뷰 워드맵을 언어 토글에 반응하게.</div>
+          <div class="fb">회장 요구 "워드맵이 비한글(영문)도 아름답게 렌더" 반영 · 한글은 keep-all, 영문은 자연 줄바꿈+자간 조임으로 혼합 스크립트 붕괴 방지(벤치: CJK+Latin은 x-height·리듬 차이로 조화가 먼저 깨진다).</div></div>
+        <div class="chgitem"><div class="w">엣지 3상태 토글 내장.</div>
+          <div class="fb">콜드스타트(0건, 가짜 단어 금지 D-009 경계) · 정상(14명) · 과다(오버플로 → 12단어 구름 + 나머지 펼침 목록). Wordmap.tsx:145-177 회수 경로 계승.</div></div>
+      </div>
+      <div class="blk"><h4><span class="d"></span>심리·설득 근거</h4>
+        <p><b>사회적 증거(D-003)</b>: "N명이 조용히 응원했어요" · 인원수는 보이되 금액은 조용히. <b>손실회피</b>: 응원 단어는 사라지지 않고 구름으로 남아 공유 자산이 됨.</p>
+        <p><b>공유 확산 고리</b>: 풀뷰 → 카카오/스토리/링크로 재확산(DESIGN §1.3.0). 조용한 톤 유지 · 금액 랭킹·리더보드 없음.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>벤치마크</h4>
+        <p><b>Buy Me a Coffee</b> supporter wall의 "따뜻한 말 모음"을 개수·금액 없는 구름으로. <b>font-converters/fontscompare</b>(2026) CJK+Latin 페어링 원칙: 한 패밀리(Pretendard) 안에서 텍스처 통일 → 혼합 스크립트 조화.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>실구현·배포 계승</h4>
+        <p>계승: <span class="path">wordmap/[goalId]/page.tsx</span> 헤더·맵카드 그라디언트·응원자수·워터마크·공유바, <span class="path">Wordmap.tsx</span> 3단 tier·empty·overflow 회수.</p>
+        <p>신규: i18n 단어셋 전환 + 혼합 스크립트 렌더 규칙 + 드리프트 모션. 배포 화면 위 증축.</p>
+      </div>
+      <div class="blk"><h4><span class="d"></span>PRD 대응</h4>
+        <p>워드맵 풀뷰 = 슬라이스 #9 실구현(계승). 12단어 상한·13번째 펼침 = DESIGN §521-522·§6.1 오버플로 규칙. i18n·모션 = 아이데이션 증분(미승인).</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="stamp">
+  🏷 STAMP | line: core | 생성: 2026-09-20 · model: claude-opus-4-8 | agent: product-designer | 스킬: design-consultation(research)·design-html·design-review<br>
+  근거: web/src/app/globals.css:57-137(토큰 진실원), web/src/app/page.tsx(랜딩 계승), (receiver)/wordmap/[goalId]/page.tsx·Wordmap.tsx(워드맵 계승), DESIGN.md v2.0.1, 결정.md D-003·D-009, 벤치: Buy Me a Coffee·Linktree·토스·fontscompare CJK+Latin(2026)<br>
+  고민: 영문 워드맵을 한글과 같은 flex 구름에 넣으면 x-height·리듬 차이로 조화가 깨진다(벤치 근거). 그래서 언어별로 word-break/자간을 분기하고 같은 Pretendard 패밀리로 텍스처를 통일해 혼합 스크립트 붕괴를 막았다.
+</div>
+
+<script>
+  // ── 단어셋 (실데이터형 · 로렘 금지) ──
+  // KO: 실제 응원 단어. EN: 해외 광고용 자연스러운 응원 표현.
+  const WORDS = {
+    ko: [
+      {w:'멋지다',t:3},{w:'화이팅',t:2},{w:'곧된다',t:3},{w:'할수있어',t:1},{w:'응원해',t:2},
+      {w:'존경',t:1},{w:'고생많아',t:2},{w:'힘내',t:1},{w:'응원할게',t:2},{w:'대단해',t:3},
+      {w:'자랑스러워',t:1},{w:'믿는다',t:2}
+    ],
+    en: [
+      {w:'amazing',t:3},{w:'you got this',t:2},{w:'so proud',t:3},{w:'keep going',t:1},{w:'respect',t:2},
+      {w:'believe',t:1},{w:'almost there',t:2},{w:'hang in there',t:1},{w:'rooting for you',t:2},{w:'incredible',t:3},
+      {w:"don't quit",t:1},{w:'go for it',t:2}
+    ]
+  };
+  // 랜딩 프리뷰 단어(8개, 배포 page.tsx PREVIEW_WORDS 대응)
+  const PREVIEW = {
+    ko:['멋지다','화이팅','곧된다','할수있어','응원해','존경','고생많아','힘내'],
+    en:['amazing','you got this','almost there','keep going','so proud','respect','believe','incredible']
+  };
+  const PREVIEW_TIER = [3,2,3,1,2,1,2,1];
+
+  // 과다 상태 추가 단어(13번째~)
+  const OVER_EXTRA = {
+    ko:['가보자','최고야','파이팅','응원중','끝까지','대박','굿굿','잘하고있어','포기마','버텨','존버','간다'],
+    en:['legend','the best','no limits','cheering','one more','you rock','stay strong','never give up','almost','power','onward','keep at it']
+  };
+
+  // i18n 카피
+  const I18N = {
+    ko:{slogan:'응원은 돈으로 하는 겁니다.',hook:'그게 무슨 말이냐면 ↓',cap1:'네 목표 위에, 응원이 이렇게 쌓여요',
+      cap2:'친구들이 🍀 클로버로 남긴 응원이에요',st1:'선언',st2:'🍀로 응원',st3:'응원이 쌓여요',cta:'시작하기',
+      how:'어떻게 쓰는 건가요?',have:'이미 계정이 있으신가요?',login:'로그인',
+      wgoal:'편입 영어 하루 3시간 해낼게',wcheer:'14명이 조용히 응원했어요',
+      shareKakao:'카카오 공유',shareStory:'스토리 저장',shareLink:'링크 복사'},
+    en:{slogan:'Cheering someone on? Do it with money.',hook:'here is what that means ↓',cap1:'This is how support piles up on your goal',
+      cap2:'Words your friends left with a 🍀 clover',st1:'Declare',st2:'friends cheer 🍀',st3:'support piles up',cta:'Get started',
+      how:'How does it work?',have:'Already have an account?',login:'Log in',
+      wgoal:'3 hours of English every day, I got this',wcheer:'14 friends quietly cheered you on',
+      shareKakao:'Share',shareStory:'Save story',shareLink:'Copy link'}
+  };
+  const CHEER = {ko:{n:14,cold:'응원이 아직 없어요 · 첫 번째를 기다리고 있어요'},en:{n:14,cold:'No cheers yet · waiting for the first one'}};
+
+  let lang='ko', state='normal';
+
+  function motes(host){
+    const pos=[{l:'20%',t:'52%',s:15},{l:'46%',t:'30%',s:13},{l:'74%',t:'56%',s:12}];
+    return pos.map((p,i)=>`<svg class="mote" width="${p.s}" height="${p.s}" viewBox="0 0 24 24" fill="#4aa877" style="left:${p.l};top:${p.t};animation-delay:${i*0.9}s">
+      <path d="M12 12c-1-3-5-4-6-1s2 5 6 1zm0 0c1-3 5-4 6-1s-2 5-6 1zm0 0c-3 1-4 5-1 6s5-2 1-6zm0 0c3 1 4 5 1 6s-5-2-1-6z"/></svg>`).join('');
+  }
+
+  function renderLanding(){
+    const box=document.getElementById('landCloud');
+    box.className='cloud '+lang;
+    let html=motes();
+    PREVIEW[lang].forEach((w,i)=>{
+      html+=`<span class="w s${PREVIEW_TIER[i]}" style="animation-delay:${(i*0.5)%3}s">${w}</span>`;
+    });
+    box.innerHTML=html;
+  }
+
+  function renderWordmap(){
+    const host=document.getElementById('wvContent');
+    const cc=document.getElementById('cheerCnt');
+    if(state==='cold'){
+      cc.style.display='none';
+      const t=lang==='ko'
+        ? {h:'아직 아무도 없어요',p:'당신이 <b>이 목표의 첫 응원</b>이에요.<br>한 마디면 이 자리가 채워지기 시작해요.'}
+        : {h:'No one yet',p:'You could be <b>the very first cheer</b>.<br>One word starts filling this space.'};
+      host.innerHTML=`<div class="cold"><div class="cl">🍀</div><h3>${t.h}</h3><p>${t.p}</p></div>`;
+      return;
+    }
+    cc.style.display='';
+    cc.textContent=lang==='ko'?`${CHEER.ko.n}명이 조용히 응원했어요`:`${CHEER.en.n} friends quietly cheered you on`;
+    let list=WORDS[lang].slice();
+    let over=[];
+    if(state==='over'){
+      // 과다: 12 구름 + 나머지 펼침
+      over=OVER_EXTRA[lang].slice();
+    }
+    let cloud=`<div class="cloud big ${lang}">`+motes();
+    list.forEach((o,i)=>{ cloud+=`<span class="w s${o.t}" style="animation-delay:${(i*0.45)%3}s">${o.w}</span>`; });
+    cloud+='</div>';
+    let ov='';
+    if(over.length){
+      const lb=lang==='ko'
+        ? `<b>12개 표시</b> · 나머지 ${over.length}개 보기`
+        : `<b>Showing 12</b> · see ${over.length} more`;
+      ov=`<details class="overflow"><summary>${lb}</summary><ul>${over.map(w=>`<li>${w}</li>`).join('')}</ul></details>`;
+    }
+    host.innerHTML=cloud+ov;
+  }
+
+  function applyI18n(){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const k=el.dataset.i18n; if(I18N[lang][k]!=null) el.textContent=I18N[lang][k];
+    });
+  }
+
+  function renderAll(){ applyI18n(); renderLanding(); renderWordmap(); }
+
+  // 화면 전환
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===id));
+    document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('on', b.dataset.s===id));
+  }
+  document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>go(b.dataset.s)));
+
+  // 언어 토글
+  document.querySelectorAll('#langGrp .lang').forEach(b=>b.addEventListener('click',()=>{
+    lang=b.dataset.lang;
+    document.querySelectorAll('#langGrp .lang').forEach(x=>x.classList.toggle('on',x.dataset.lang===lang));
+    document.documentElement.lang=lang;
+    renderAll();
+  }));
+
+  // 데이터 상태 토글
+  document.querySelectorAll('#stateGrp .st').forEach(b=>b.addEventListener('click',()=>{
+    state=b.dataset.state;
+    document.querySelectorAll('#stateGrp .st').forEach(x=>x.classList.toggle('on',x.dataset.state===state));
+    renderWordmap();
+  }));
+
+  function linkCopied(el){
+    const lb=el.querySelector('.lb'); const old=lb.textContent;
+    lb.textContent=lang==='ko'?'복사됐어요 ✓':'Copied ✓';
+    setTimeout(()=>{lb.textContent=old;},1400);
+  }
+
+  renderAll();
+</script>
+</body>
+</html>
