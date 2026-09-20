@@ -1,3 +1,26 @@
+## CLAUDE PWA 배포 + 100B 복구 (2026-09-21 00:45 KST, 회장 "pwa되냐? 안되면 빨리 만들어서 배포. 100B 산출물 확인. 100B 왜 안보이지")
+
+### 상황
+회장 세 요구: ①PWA 여부·즉시 배포 ②100B 산출물 최신 정본 확인 ③100B 대시보드가 안 보이는 원인.
+
+### 발견
+1. **PWA 아니었다.** `/manifest.webmanifest`·`/manifest.json` 모두 404, `layout.tsx` 에 manifest·icons·appleWebApp 없음.
+2. **100B 가 안 보인 원인은 둘.** ①위키 저장소가 `~/Documents/SJ_BRAIN_wiki` → `~/SJ_BRAIN_wiki` 로 이전됐는데 5173 dev 서버(회장 진입 경로 `private.html`)가 **옛 경로(빈 폴더)에서 계속 돌아** 전 URL 404. ②새 경로에서 띄워도 생성물 3종(`design-captures`·`structure-conformance`·`artifacts`)의 상대 import 가 옛 깊이(`../`×6)라 vite import-analysis 오류 오버레이. 그중 `collect-structure-conformance.mjs` 는 깊이를 **상수로 손에 들고** 있어 재실행해도 틀린 경로를 냈다.
+3. **산출물은 최신 정본.** 새 저장소 기준 수집 후 haenael 합성키 37·미해결 0, `artifact-drift-check.sh` 드리프트 0.
+
+### 조치
+- **PWA**: `web/src/app/manifest.ts` 신설, `layout.tsx` 에 manifest·icons·appleWebApp·`viewport.themeColor`, 아이콘 3종(D-006 프로필 심볼에서 sips 생성). **서비스 워커는 의도적으로 미도입**(돈 화면 캐시 = 낡은 잔액 위험). 색상 리터럴은 CSS 변수를 못 읽는 자리라 `design-token-lint-allow` 사유 명시. `next build` 통과(라우트 생성), vitest 279/279, 토큰 검사 신규 0. main push → Vercel 자동 배포. **운영 실측**: `/manifest.webmanifest` 200(JSON 정상), `/icons/icon-512.png` 200, HTML 에 `<link rel="manifest">`·`theme-color` 확인.
+  - ⚠ 내가 스테이징한 PWA 파일이 같은 checkout 의 v2 세션 커밋 `e03f521` 에 함께 담겼다(그쪽이 `git commit` 을 먼저 실행). 내용은 정확히 배포됐고 메시지 귀속만 어긋난다. 공유 히스토리라 고쳐 쓰지 않았다.
+- **100B**: 옛 경로 서버 종료 → 새 경로에서 `vite --port 5173` 기동. 수집기 3종 재실행, `collect-structure-conformance.mjs` 의 깊이 상수를 출력 파일 기준 계산으로 교체. `dev-dist/` gitignore. SJ_BRAIN_wiki `a813882` push. **실측**: `private.html` 200, 콘솔 오류 0, 캡처 육안 "해낼게 · core 라인 · 개발 진행".
+
+### 남은 이슈
+1. 같은 checkout 다중 세션이 서로의 스테이징을 삼키는 구조(위 ⚠). worktree 분리 필요(하네스).
+2. 나머지는 직전 블록과 같다(환전 접근 범위·아동 고지·감사 스키마 3갈래·supabase/web 미커밋).
+
+### 다음 액션
+1. **소유자: 하네스.** 세션별 worktree 분리. **종료증거:** 세션 시작 훅이 worktree 를 만든다.
+2. **소유자: 회장.** 폰에서 `https://haenael-ge.vercel.app` 열어 홈 화면 추가 확인. **종료증거:** 회장 confirm.
+
 ## CLAUDE v2 갭 진단 — 조각 시안만 쌓고 통합 청사진이 없다 (2026-09-21 00:46 KST, 회장 "종합적으로 만들어야지, 뭘 빼먹은거같아?")
 
 ### 진단 (근거: PRD v0.4.0 목차·eng-design 설계안·아이디어 원장 실독)
