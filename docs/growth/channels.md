@@ -7,8 +7,8 @@
 
 | 채널 | 계정 | 상태 |
 |---|---|---|
-| Instagram | @haenaelge | 운영(실개설·핸들 적용 관찰됨) |
-| Threads | @haenaelge | 미개설(Instagram 연동 예정) |
+| Instagram | @haenaelge | 운영(피드 9·하이라이트 6. 바이오 링크 utm_source=instagram&utm_medium=bio, campaign 은 앱에서만 수정 가능) |
+| Threads | @haenaelge | 운영(2026-09-21 소개·링크 세팅 관찰됨. 게시물 0) |
 | YouTube | @haenaelge | 미개설(브랜드 전용 Google 계정 결정 대기) |
 
 ## 소유와 실행
