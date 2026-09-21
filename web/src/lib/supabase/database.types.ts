@@ -1038,6 +1038,12 @@ export type Database = {
           payment_id: number
         }[]
       }
+      create_goal: {
+        Args: { p_due_date: string; p_reason: string; p_title: string }
+        Returns: {
+          slug: string
+        }[]
+      }
       expire_stale_cheer_payments: { Args: never; Returns: number }
       get_wordmap: {
         Args: { p_goal_id: number }

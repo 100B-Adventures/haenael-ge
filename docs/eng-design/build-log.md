@@ -5,7 +5,69 @@
 
 ---
 
-## 최신 보안 보정: Next 16.3.3·강제 CSP·런타임 감사 0건 (2026-08-29)
+## 설계안 갈래 1 "다중 목표" 구현 (2026-09-21)
+
+### 배경과 결정
+
+회장 지시(2026-09-21) "홈 화면 추가됨. 나머지 진행해"로 갈래 1 구현에 착수했다.
+기반은 `docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md` §4와
+컨트롤러 채택(2026-09-06 §13): 상한 3개를 삽입 전용 함수 `create_goal`이 advisory
+lock으로 원자 보장하고(옵션 나), 상한은 진행 중(마감 전) 목표만 센다(선택지 가).
+
+되돌리기가 가장 비싼 결정은 유니크 인덱스 제거였다 — 재생성 시점에 중복이 있으면
+실패하는 비대칭이다. `update_goal`(20260727010000)이 이미 같은 형태(SECURITY DEFINER +
+소유권 확인 + advisory lock 계열)로 짜여 있어 새 패턴을 발명하지 않고 그대로 따랐다.
+
+### 구현
+
+- `supabase/migrations/20260921000000_multi_goal_create_fn.sql`: 인덱스 제거,
+  `create_goal(p_title, p_reason, p_due_date)` RPC, `REVOKE INSERT ON goal FROM authenticated`.
+  `search_path`에 `extensions`를 추가해야 했다 — `goal_slug_gen` 트리거가 쓰는
+  `gen_random_bytes`(pgcrypto)가 `extensions` 스키마에 있어 `public, pg_temp`만으로는
+  트리거가 42883으로 죽었다(로컬 실측으로 발견, `update_goal`은 slug를 새로 안 만들어
+  이 문제가 없었다).
+- `web/src/app/(receiver)/onboarding/page.tsx`: 활성 목표 있으면 `/me`로 보내던
+  리다이렉트 제거.
+- `web/src/components/receiver/OnboardingGoalForm.tsx`: 직접 `insert`를 `create_goal`
+  RPC로 교체. `p_reason`은 `null` 대신 `""`(gen types가 non-null로 좁힘, `GoalEditSheet`
+  선례와 동일). 상한 초과(`goal_limit_reached`)는 `/me`로 쫓아내지 않고 인라인 안내 +
+  입력 보존.
+- `web/src/app/(receiver)/me/page.tsx`: `.limit(1)` 단일 목표 조회를 전체 조회로 바꾸고
+  진행 중/지난으로 나눈 뒤, 진행 중 목표를 최근 응원 도착순(동률 시 생성 역순, PRD
+  §4.3-1)으로 정렬. 최상단(primary) 카드는 기존 단일 목표 화면의 상세 UI(응원 검색·
+  워드맵 미리보기·수정·친구뷰 미리보기)를 그대로 유지해 기존 단일 목표 계정의 화면과
+  e2e를 무회귀로 지켰다. 나머지 진행 중 목표와 지난 목표는 설계 §4.5 표대로 간단
+  카드(제목·D-day·응원수·링크복사)만 두는 신규 `MyGoalListCard`로 렌더한다.
+  (주의: `components/goal/GoalCard.tsx`는 친구 공개 페이지용 기존 컴포넌트라 이름이
+  겹치지 않게 `MyGoalListCard`로 새로 만들었다 — 최초 작업에서 실수로 그 파일을
+  덮어썼다가 `git checkout`으로 복구하고 별도 파일로 분리했다.)
+- 대표 링크(사람 허브)는 만들지 않았다(설계 §4.5 결정 그대로).
+
+### 검증
+
+| 등급 | 대상 | 결과 |
+|---|---|---|
+| 테스트됨 | `npx tsc --noEmit` | 오류 0 |
+| 테스트됨 | `npm test`(vitest) | 44 files / 282 tests PASS(다중 목표 신규 4건 포함: 온보딩 상한 안내, `/me` 정렬·다른목표·지난목표 접힘) |
+| 테스트됨 | `node scripts/qa/design-token-lint.mjs` | 신규 위반 0건(기존 74건 기준선 유지) |
+| 테스트됨 | `supabase test db`(pgTAP) | 11 files / 270 tests PASS(신규 `create_goal.test.sql` 10/10: 2개 성공·3번째 성공·4번째 거부·거부 후 행수 불변·마감 지난 목표 상한 제외·직접 INSERT 거부·미인증 거부) |
+| 테스트됨 | `supabase/tests/concurrency/create_goal_limit_race.sh` | PASS — 동시 삽입 2건 중 정확히 1건만 `goal_limit_reached`, 총 3개로 수렴 |
+| 테스트됨 | `npm run build` | Next.js 16.3.3 compile·TypeScript·17 routes PASS |
+| 관찰됨 | dev 서버(`npm run dev`, localhost:3000) + 로컬 Supabase + Playwright 헤드리스(`web/e2e/multi-goal.spec.ts`) | 2/2 PASS. QA 계정으로 실 로그인 세션을 발급받아(`production-auth-readonly.spec.ts`와 동일 기법) `/onboarding`에서 목표 2개 생성 → `/me`에서 최근 목표가 primary로, 이전 목표가 "진행 중인 다른 목표" 카드로 표시됨을 스크린샷(`/tmp/me-multi-goal.png`)으로 확인. 상한(3개) 도달 시 인라인 안내 + 입력 보존도 별도 케이스로 확인 |
+| 관찰됨 | 콘솔 에러 | 목표 2개 생성 + `/me` 진입 전 과정에서 기능 관련 콘솔 에러 0. CSP 위반 4건은 `.env.local`의 GA 플레이스홀더 측정 ID(`G-XXXXXXXXXX`)가 `/onboarding` 최초 진입 시점부터 발생시키는 기존 로컬 환경 문제로, 이번 변경과 무관함을 확인(변경 전에도 재현되는 영역) |
+| 관찰됨 | `web/e2e/goal-flow.spec.ts` | 10/10 실행 가능 항목 PASS, 4건은 기존과 동일하게 `E2E_GOAL_SLUG` 미설정으로 skip(회귀 없음) |
+| 테스트됨 | `web/e2e/cashout-manual.spec.ts` | 다중 목표 변경이 `/cashout` 계열을 건드리지 않음을 재확인하기 위해 재실행(별도 프로세스로 자체 production 서버 기동) |
+
+### 경계와 미검증
+
+- 운영 DB에는 적용하지 않았다(로컬 `supabase db reset`으로만 검증). 운영 적용은 회장
+  승인 후 컨트롤러가 진행한다.
+- 갈래 2(공개범위)·갈래 3(응원자 경험)은 이번 슬라이스 범위 밖.
+- `/me` 카드 목록은 primary(최상단) 1개만 상세 UI(응원 검색·워드맵 미리보기)를 갖고
+  나머지는 간단 카드다 — 설계 §4.5 표의 "카드 최소 구성"은 만족하지만, 계정당
+  목표가 2~3개일 때 두 번째·세 번째 목표의 응원 검색·워드맵 미리보기는 `/wordmap/[goalId]`
+  풀뷰로만 접근 가능하다(신규 화면을 열지 않은 의도적 범위 판단 — 필요시 회장
+  피드백으로 재조정).
 
 ### 발견과 의미
 

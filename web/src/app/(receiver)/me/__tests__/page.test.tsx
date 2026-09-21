@@ -32,6 +32,7 @@ function chainable<T>(result: T) {
     eq: () => obj,
     neq: () => obj,
     is: () => obj,
+    in: () => obj,
     order: () => obj,
     limit: () => obj,
     ilike: (column: string, value: string) => {
@@ -60,6 +61,7 @@ function buildSupabase(
   eligibility: Record<string, unknown> = { reached_threshold: false },
   cheerCount = cheers.length,
   wordmap: Array<{ word: string; word_count: number }> = [],
+  goalRows: Array<Record<string, unknown>> = [GOAL_ROW],
 ) {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "owner-uid" } } }) },
@@ -73,7 +75,7 @@ function buildSupabase(
       return Promise.resolve({ data: [], error: null });
     }),
     from: vi.fn((table: string) => {
-      if (table === "goal") return chainable({ data: [GOAL_ROW], error: null });
+      if (table === "goal") return chainable({ data: goalRows, error: null });
       if (table === "cheer") return chainable({ data: cheers, count: cheerCount, error: null });
       if (table === "member") return chainable({ data: { phone }, error: null });
       throw new Error(`unexpected table: ${table}`);
@@ -294,5 +296,72 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     expect(screen.getByTestId("split-balance-available")).toHaveTextContent("🍀 12개");
     expect(screen.getByTestId("split-balance-locked")).toHaveTextContent("🍀 40개");
     expect(screen.getByTestId("split-balance-block")).toBeInTheDocument();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 다중 목표(설계 §4.4~4.6, 2026-09-21) — 목록·정렬·지난 목표 접힘
+// ─────────────────────────────────────────────────────────────────────────
+describe("/me 다중 목표 목록", () => {
+  beforeEach(() => {
+    vi.mocked(createServerSupabaseClient).mockReset();
+    cheerIlike.mockReset();
+  });
+
+  it("진행 중 목표가 여러 개면 최근 응원 도착순으로 카드가 나열된다(PRD §4.3-1)", async () => {
+    const goalA = { ...GOAL_ROW, id: 1, slug: "goal-a", title: "목표A 해낼게", due_date: "2030-01-01", created_at: "2026-01-01T00:00:00Z" };
+    const goalB = { ...GOAL_ROW, id: 2, slug: "goal-b", title: "목표B 해낼게", due_date: "2030-02-01", created_at: "2026-02-01T00:00:00Z" };
+    // 목표A는 응원이 최근(2026-09-20), 목표B는 응원이 더 이전(2026-09-01)
+    // → 최근 응원 도착순이면 A가 먼저(primary), B가 "다른 목표" 카드로.
+    const cheers = [
+      { id: 10, goal_id: 1, status: "CONFIRMED", created_at: "2026-09-20T00:00:00Z" },
+      { id: 11, goal_id: 2, status: "CONFIRMED", created_at: "2026-09-01T00:00:00Z" },
+    ];
+
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase(cheers, "01012345678", { reached_threshold: false }, 1, [], [goalA, goalB]) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    // primary = 목표A(최근 응원 도착)
+    expect(screen.getByTestId("goal-title")).toHaveTextContent("목표A");
+    // 목표B는 "다른 진행 중 목표" 섹션의 간단 카드로 렌더됨
+    expect(screen.getByTestId("other-goals-section")).toBeInTheDocument();
+    expect(screen.getByText(/목표B/)).toBeInTheDocument();
+  });
+
+  it("마감 지난 목표는 '지난 목표' 접힘 구역에 들어가고 기본은 닫혀 있다", async () => {
+    const activeGoal = { ...GOAL_ROW, id: 1, slug: "goal-active", title: "진행중 해낼게", due_date: "2030-01-01", created_at: "2026-01-01T00:00:00Z" };
+    const pastGoal = { ...GOAL_ROW, id: 2, slug: "goal-past", title: "지난목표 해낼게", due_date: "2020-01-01", created_at: "2019-01-01T00:00:00Z" };
+
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678", { reached_threshold: false }, 0, [], [activeGoal, pastGoal]) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    // primary는 진행 중 목표.
+    expect(screen.getByTestId("goal-title")).toHaveTextContent("진행중");
+
+    const pastSection = screen.getByTestId("past-goals-section");
+    expect(pastSection).toBeInTheDocument();
+    // <details>는 open 속성이 없으면 기본적으로 접혀 있다.
+    expect(pastSection).not.toHaveAttribute("open");
+    expect(screen.getByText(/지난목표/)).toBeInTheDocument();
+  });
+
+  it("목표가 하나뿐이면 다른 목표·지난 목표 섹션을 렌더하지 않는다(회귀 방지)", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([]) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+
+    expect(screen.queryByTestId("other-goals-section")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("past-goals-section")).not.toBeInTheDocument();
   });
 });
