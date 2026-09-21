@@ -1,3 +1,30 @@
+## CLAUDE "나머지 진행해" 착수 — 해시 규약·갈래 1 구현 위임 중 (2026-09-21 22:30 KST)
+
+목적: 해낼게 core 라인(수동 환전 슬라이스 v1.2.1)의 산출물을 최신 정본으로 100B 대시보드에 올리고, 감사로 재오픈된 build 잔여를 설계안대로 구현해 단계를 전진시킨다.
+
+### 상황
+회장 "홈 화면 추가됨. 나머지 진행해"(폰 confirm + 다음 실행 4건 착수 승인). Codex 는 9-26 까지 한도 소진이라 개발 위임을 Claude code-builder 로 대체(회장이 앞서 같은 상황에서 허용).
+
+### 조치 (완료)
+- **승인 핀 해시 규약 신설**: `release-and-artifacts.md` §1.1 에 `sha256` 선택 필드(하네스 `c376fd2`), `harness/bin/artifact-pin-hash.sh`(채우기·대조). 해낼게 핀 41건 기입·대조 **41 일치**(`a0c8a72`). 100B 수집기가 실파일과 대조해 `integrity` 방출, 화면에 "해시 일치 / 승인 뒤 수정됨 / 해시 미기입" 칩(`54073bf`). 전체 = 일치 121 · 승인 뒤 수정됨 14(zero-one) · 미기입 111. 캡처 육안 확인, 콘솔 오류 0.
+- DESIGN.md §3.7(1024 2단) vs 코드 단일 컬럼 충돌 = `open-decisions.md` 등재. 루트 DESIGN.md 에 남의 미커밋 수정이 있어 편집하지 않음.
+- 회장 confirm(홈 화면 추가) 기록.
+
+### 진행 중
+- **갈래 1(다중 목표) 구현 위임(code-builder, Claude).** 과제 파일 = scratchpad `task-goal-branch1.md`(ADR 1순위·세션맥락 블록·테스트 선작성·운영 DB 적용 금지·push 금지). 22:04 실측: 새 마이그레이션 `supabase/migrations/20260921000000_multi_goal_create_fn.sql`, `onboarding/page.tsx`·`me/page.tsx`·`me/__tests__/page.test.tsx` 편집 중. 커밋 대기.
+- 회수 후 컨트롤러가 할 것: `verify-agent-quality.sh` → pgTAP·vitest·E2E 실제 출력 확인 → 헤드리스로 목표 2개 생성·/me 표시 직접 관찰 → 커밋 검토(남의 미커밋 파일 미포함 확인) → push. **운영 마이그레이션 적용은 회장 승인 뒤.**
+
+### 남은 이슈
+1. main 통합 보류: 원격 main 이 growth 세션 커밋으로 앞서 있고, 로컬에 growth 세션의 미커밋 파일(channels.md·session-state.growth.md·png)이 있어 merge 가 막힌다. 내 커밋은 `origin/session/core-20260912` 에 안전. growth 세션이 커밋하면 merge.
+2. 푸시 발송 기능(구독·VAPID·서버) = 별도 기능 스프린트.
+3. 환전 접근 범위·아동 고지 = 회장.
+4. 같은 checkout 다중 세션 = worktree 분리(하네스).
+
+### 다음 액션
+1. **소유자: 세션.** 위임 회수·검증·커밋·push. **종료증거:** pgTAP·vitest·E2E 실제 출력 + 헤드리스 관찰 로그.
+2. **소유자: 회장.** 갈래 1 운영 마이그레이션 적용 승인. **종료증거:** 운영 migration list 일치 + /me 목표 2개 표시.
+3. **소유자: growth 세션.** 미커밋분 커밋 → main 통합. **종료증거:** origin/main 이 session 브랜치를 포함.
+
 ## CLAUDE v2 소셜 바이럴 루프 프로토타입 회수·표출 (2026-09-21 21:39 KST)
 
 ### 무엇을
