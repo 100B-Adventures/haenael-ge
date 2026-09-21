@@ -20,52 +20,52 @@ stage_timestamps:
 approved_artifacts:
   # 2026-08-30 전 단계 최신본 재핀. 갱신 = eng-design 7건(FDD v1.1.0 승격 + ERD·테스트케이스 신규), qa 5건(보안·성능·교차브라우저 리포트 신규), build 1건(구현현황 신규).
   plan:
-    - { path: docs/plan/prd-haenael-ge-v0.4.0.md, version: 0.4.0, status: approved, label: "PRD" }
-    - { path: docs/plan/bm.md, version: unversioned, status: approved, label: "비즈니스 모델" }
-    - { path: docs/plan/risks.md, version: unversioned, status: approved, label: "리스크 원장" }
-    - { path: docs/plan/persona.md, version: unversioned, status: approved, label: "페르소나" }
-    - { path: docs/plan/one-thing.md, version: unversioned, status: approved, label: "One Thing" }
+    - { path: docs/plan/prd-haenael-ge-v0.4.0.md, version: 0.4.0, status: approved, label: "PRD", sha256: 95e3f41a6b19bc8031d7eff07a1259cde666ecd056d02d58f627872a67ab2599 }
+    - { path: docs/plan/bm.md, version: unversioned, status: approved, label: "비즈니스 모델", sha256: ee7e7b1d5909bf1ac2f43ae0ba9a5903450715bd4bc710846da91878dc270862 }
+    - { path: docs/plan/risks.md, version: unversioned, status: approved, label: "리스크 원장", sha256: 736e24b93b13020cec98ac581d360197f95aa289af49c9c293b9077c04cb1d75 }
+    - { path: docs/plan/persona.md, version: unversioned, status: approved, label: "페르소나", sha256: aba54411ad0e14018a682717a416d4d431a0716ff148e50e9467b048fc90cacd }
+    - { path: docs/plan/one-thing.md, version: unversioned, status: approved, label: "One Thing", sha256: c564a3e6c4abeda43919cde84b2b5ac5def2630b1914245949c704432fa4675e }
   design:
-    - { path: DESIGN.md, version: 2.0.1, status: approved, label: "디자인 시스템" }
-    - { path: docs/design/README.md, version: unversioned, status: pending-review, label: "디자인 진입점" }
-    - { path: docs/design/ui-architecture.md, version: unversioned, status: pending-review, label: "UI 아키텍처" }
-    - { path: docs/design/screen-inventory.md, version: unversioned, status: pending-review, label: "화면 인벤토리" }
-    - { path: docs/design/captures/baseline-20260912/manifest.json, version: unversioned, status: pending-review, label: "캡처 매니페스트" }
-    - { path: docs/design/user-flow.md, version: 0.3.1, status: approved, label: "유저플로우" }
-    - { path: docs/design/prototypes/legacy/core-cashout-30-27-v1-gpt-codex.html, version: 1.0.0, status: approved, label: "30·27 환전 프로토타입" }
-    - { path: docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html, version: 3.8.0, status: approved, label: "환전 전체 여정 프로토타입" }
-    - { path: docs/design/design-spec-core-cashout-30-27-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "30·27 디자인 수치 명세" }
-    - { path: docs/design/clean-frames/core-cashout-30-27-clean-frames-v1-gpt-codex.stamp.md, version: 1.0.0, status: approved, label: "30·27 기준 프레임" }
+    - { path: DESIGN.md, version: 2.0.1, status: approved, label: "디자인 시스템", sha256: d220c9a150b61f0fbc188e2d5847b825f138dfdb424d4d49209dc7829ca42294 }
+    - { path: docs/design/README.md, version: unversioned, status: pending-review, label: "디자인 진입점", sha256: 192626afec0aa1f0a7161662bdd54a35fb695330d444f5c1fb52ced77826cd8e }
+    - { path: docs/design/ui-architecture.md, version: unversioned, status: pending-review, label: "UI 아키텍처", sha256: 5baf32fdb76c4f51ec155e3876625a595e1b0b50ad10c66cd34d2a1fc39b7050 }
+    - { path: docs/design/screen-inventory.md, version: unversioned, status: pending-review, label: "화면 인벤토리", sha256: c06edb5517a2670e02f2c6455d7578ad83fdbb8a6d6a2ce3b88e257b5a567b5e }
+    - { path: docs/design/captures/baseline-20260912/manifest.json, version: unversioned, status: pending-review, label: "캡처 매니페스트", sha256: f4bc987ba2559f5d5a139c20e090e5ee87b2dd1ef9ed7ed2f2e7328541518e80 }
+    - { path: docs/design/user-flow.md, version: 0.3.1, status: approved, label: "유저플로우", sha256: 8404a966aa545734219a4d5549d7e822514ff10755df5d1949cef8f649c3cd68 }
+    - { path: docs/design/prototypes/legacy/core-cashout-30-27-v1-gpt-codex.html, version: 1.0.0, status: approved, label: "30·27 환전 프로토타입", sha256: 5214ba92298addb3d1041119815b95ede5308d3adb7a552a0f83976b6960c9a8 }
+    - { path: docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html, version: 3.8.0, status: approved, label: "환전 전체 여정 프로토타입", sha256: c376a818bac77b292b3b05c30f1f9bd360c353a599ba85b374f44d72e85dc058 }
+    - { path: docs/design/design-spec-core-cashout-30-27-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "30·27 디자인 수치 명세", sha256: f4ca0952014d80c1d4b8d3fd951d0ad770710352f241c75bf3a417685257745a }
+    - { path: docs/design/clean-frames/core-cashout-30-27-clean-frames-v1-gpt-codex.stamp.md, version: 1.0.0, status: approved, label: "30·27 기준 프레임", sha256: 561c85fbc85a82f5e2c98a2139550cb8577c10381c445d6eba747129e5841fa1 }
   eng-design:
-    - { path: docs/eng-design/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md, version: 1.1.0, status: approved, label: "FDD 환전 잠금" }
-    - { path: docs/eng-design/fdd-haenael-ge-v0.1.0.md, version: 0.1.0, status: approved, label: "FDD 기저" }
-    - { path: docs/eng-design/erd.md, version: unversioned, status: approved, label: "ERD" }
-    - { path: docs/eng-design/api-contract.md, version: unversioned, status: approved, label: "API 계약" }
-    - { path: docs/eng-design/architecture.md, version: unversioned, status: approved, label: "아키텍처" }
-    - { path: docs/design/design-patterns.md, version: unversioned, status: approved, label: "설계 패턴" }
-    - { path: docs/eng-design/folder-structure.md, version: unversioned, status: approved, label: "폴더 구조" }
-    - { path: docs/qa/test-plan.md, version: unversioned, status: approved, label: "테스트 계획" }
-    - { path: docs/qa/test-cases.md, version: unversioned, status: approved, label: "테스트 케이스" }
-    - { path: docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md, version: 1.0.0, status: pending-review, label: "다중목표·공개범위·응원자 설계안" }
+    - { path: docs/eng-design/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md, version: 1.1.0, status: approved, label: "FDD 환전 잠금", sha256: 3060d41309a37c91a10ce58530a581aaf9af12cdae6d88a43e00d02d46491393 }
+    - { path: docs/eng-design/fdd-haenael-ge-v0.1.0.md, version: 0.1.0, status: approved, label: "FDD 기저", sha256: a5b44ee196f3bd76784063f83b62b1982a4af98844809e367f05b641760de5df }
+    - { path: docs/eng-design/erd.md, version: unversioned, status: approved, label: "ERD", sha256: 686d462b4a7c50c39baca2db47a574328fc9a23e4e30e5de4f39844fa222a444 }
+    - { path: docs/eng-design/api-contract.md, version: unversioned, status: approved, label: "API 계약", sha256: a52ceda629373a558b25b80d23edf52bf514f9c06866f1383f14cd2711c3853c }
+    - { path: docs/eng-design/architecture.md, version: unversioned, status: approved, label: "아키텍처", sha256: 0efef5e0ccf026500207c1e9c1aff613faf9d1aac9479e7a82cee9d18f9c370c }
+    - { path: docs/design/design-patterns.md, version: unversioned, status: approved, label: "설계 패턴", sha256: d5e9269d92110297e20801a5de40b39baabbef6b0e56a2b77775843ff8dfaf1e }
+    - { path: docs/eng-design/folder-structure.md, version: unversioned, status: approved, label: "폴더 구조", sha256: 5ef433d5fedeea9c9b02af0caa74150c4d710075b81e19dce02b1971256553cd }
+    - { path: docs/qa/test-plan.md, version: unversioned, status: approved, label: "테스트 계획", sha256: af6e2b22a8caa9c6b7fde8b4a03e745d08809371b3e6709b4eedaa31105d897a }
+    - { path: docs/qa/test-cases.md, version: unversioned, status: approved, label: "테스트 케이스", sha256: e28990ef5bc22399faa6d04327f48e4b6070608e73da27d5724b8870bd3425c7 }
+    - { path: docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md, version: 1.0.0, status: pending-review, label: "다중목표·공개범위·응원자 설계안", sha256: 0e345e671cd83db4cc8211697c4f019c71142b9358f3964c8e0e958fac9cc6a0 }
   build:
-    - { path: docs/eng-design/build-log.md, version: unversioned, status: approved, label: "빌드 로그" }
-    - { path: docs/구현현황.md, version: unversioned, status: approved, label: "구현 현황" }
-    - { path: supabase/migrations/20260821000000_cashout_service_fee_10pct.sql, version: unversioned, status: approved, label: "환전 이용료 마이그레이션" }
-    - { path: supabase/migrations/20260822000000_cashout_clover_lock_a1.sql, version: unversioned, status: approved, label: "환전 잠금 마이그레이션" }
-    - { path: supabase/migrations/20260825010000_cashout_verified_minor_only.sql, version: unversioned, status: approved, label: "환전 검증 마이그레이션" }
-    - { path: supabase/migrations/20260825020000_cashout_total_threshold_contract.sql, version: unversioned, status: approved, label: "환전 최소기준 마이그레이션" }
+    - { path: docs/eng-design/build-log.md, version: unversioned, status: approved, label: "빌드 로그", sha256: 008fcce7221c7ae8c9df0f8921a202eb2f2bd318443c0793f56142724338b807 }
+    - { path: docs/구현현황.md, version: unversioned, status: approved, label: "구현 현황", sha256: bcf96ff78b487e6a3d6b2dff45e40117c4ab834da61c90579120a876fe720412 }
+    - { path: supabase/migrations/20260821000000_cashout_service_fee_10pct.sql, version: unversioned, status: approved, label: "환전 이용료 마이그레이션", sha256: ce62fde3b659464d3860030d203116497064b47fdbcb3677521d17ee51b7f654 }
+    - { path: supabase/migrations/20260822000000_cashout_clover_lock_a1.sql, version: unversioned, status: approved, label: "환전 잠금 마이그레이션", sha256: 6ee968a6fe0ba5d8c6146b207dd6e15e6554cfc1ab32d3735b0f8cec04d1b359 }
+    - { path: supabase/migrations/20260825010000_cashout_verified_minor_only.sql, version: unversioned, status: approved, label: "환전 검증 마이그레이션", sha256: 44cca2256d1fc6e10e6eb672eb11c4c3b158df5f8ff3c674b7b0aa5693244fb4 }
+    - { path: supabase/migrations/20260825020000_cashout_total_threshold_contract.sql, version: unversioned, status: approved, label: "환전 최소기준 마이그레이션", sha256: 5340637ce90b31967c7d01b722e13c47c1748b463e2cd65077fb5f7420a6abff }
   qa:
-    - { path: docs/qa/qa-tracker.md, version: unversioned, status: approved, label: "QA 트래커" }
-    - { path: docs/qa/core-cashout-qa-report-v2-claude-sonnet.md, version: 2.0.0, status: approved, label: "환전 QA 리포트" }
-    - { path: docs/design/design-conformance-matrix.md, version: unversioned, status: approved, label: "디자인 정합 대조표" }
-    - { path: docs/qa/security-report.md, version: unversioned, status: approved, label: "보안 리포트" }
-    - { path: docs/qa/perf-report.md, version: unversioned, status: approved, label: "성능 리포트" }
-    - { path: docs/qa/cross-browser-matrix.md, version: unversioned, status: approved, label: "교차 브라우저 대조표" }
-    - { path: qa/contracts/deploy-env.contract.json, version: unversioned, status: approved, label: "QA 배포환경 계약 정의" }
-    - { path: docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md, version: 1.0.0, status: approved, label: "코드베이스 감사 보고서" }
+    - { path: docs/qa/qa-tracker.md, version: unversioned, status: approved, label: "QA 트래커", sha256: 650d6e241659e8e684c8c0590d2d2958e3255008b115e15a9e00c772e42cc9f6 }
+    - { path: docs/qa/core-cashout-qa-report-v2-claude-sonnet.md, version: 2.0.0, status: approved, label: "환전 QA 리포트", sha256: 4383cab8b57e486fc256883ef9c9d9c3165311fe6e6fc996a4b8977ccd2759a2 }
+    - { path: docs/design/design-conformance-matrix.md, version: unversioned, status: approved, label: "디자인 정합 대조표", sha256: ad5dc39fdb3a125fa5333371cd1ec0f926eb7c19ef1583f7e4d752160caac0b9 }
+    - { path: docs/qa/security-report.md, version: unversioned, status: approved, label: "보안 리포트", sha256: 4d36b574af9dc96a9f51bee3b497608a911bd52134c744510e92c886bd7b7ba9 }
+    - { path: docs/qa/perf-report.md, version: unversioned, status: approved, label: "성능 리포트", sha256: 2db44c353810f671eb7d33d202efddbedd53c0c3b2605b3f13bf7b08494faa92 }
+    - { path: docs/qa/cross-browser-matrix.md, version: unversioned, status: approved, label: "교차 브라우저 대조표", sha256: 5371c29a5e097d77b7fb51c22bffb65723faa1bc729acd72779ceeb10a951072 }
+    - { path: qa/contracts/deploy-env.contract.json, version: unversioned, status: approved, label: "QA 배포환경 계약 정의", sha256: d1b16796abf55660c44f10761e257f9286cab2e1eb0e8b99bb6ff98d401037c1 }
+    - { path: docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md, version: 1.0.0, status: approved, label: "코드베이스 감사 보고서", sha256: e01d35c9dc9965c214a659c7e940723b66e6a78489691a5554a70e428b8f1938 }
   ship:
-    - { path: RELEASE.md, version: 1.2.1, status: approved, label: "릴리즈 매니페스트" }
-    - { path: CHANGELOG.md, version: 1.2.1, status: approved, label: "변경 기록" }
+    - { path: RELEASE.md, version: 1.2.1, status: approved, label: "릴리즈 매니페스트", sha256: 87d935712ff44e9c5bd04cb1bcca6217ff08a0947b304a021d366d6342005963 }
+    - { path: CHANGELOG.md, version: 1.2.1, status: approved, label: "변경 기록", sha256: b0f43de31d103bd76eb3aee99aa4af2ca85815109151a85ec674c754c49ff040 }
 stages:
   plan:       { status: approved, artifacts_ok: true }   # 2026-08-28 APPROVED (v0.4.0, 595줄). 미결이던 §10.7 Q9~Q11 처리: Q10(카카오 비즈앱+phone_number)=해소(member.phone 컬럼 20260805010000 + 운영 ALIMTALK 실발송 CASHOUT_REQUESTED·CASHOUT_PAID 각 1건), Q11(템플릿 사전심사)=해소(회장 2종 등록 확인), Q9(구글 provider 콘솔 활성)=**앱 출시로 defer**(LoginSheet.tsx:80 SHOW_SOCIAL_LOGIN=false 가 현 상태를 기록, 가역·비차단). §9 Q1~Q8 은 v0.3.0 승인분에서 이미 처리됨. (구 2026-07-26 REOPENED→v0.4.0: 로그인 확장(카카오+구글) + 알림톡 phone(비즈앱 전환) + 본인인증=환전만 명문화. 회장 결정 3/3 확정. prd-architect 위임 중. (2026-07-21 v0.3.0 승인분은 유효, v0.4.0이 계승)
   design:     { status: approved, artifacts_ok: true }   # 2026-08-28 APPROVED. 잔여였던 안내문구 볼드 강조가 코드에 반영된 것을 컨트롤러가 직접 확인(CashoutRequestForm.tsx:506 `<b>입금이 끝나면 그때 N개가 빠져요.</b>`, SplitBalanceCard.tsx:120 `<b>{total}개는 그대로</b>`). 실화면 대조 confirm 507.16px(시안 510)·submitting 614.94px(시안 617). (구 2026-08-22 A안(잠금 유지) 반영 완료: 프로토 v3.6 + DESIGN.md v1.12.0(§6-(d) 잔액 표기 규칙 신설·SplitBalanceCard 등록·A안 확정 이력) + user-flow §5.5. **화면 픽셀 대조 일치 판정**(컨트롤러가 모바일 390 실화면 me-390-locked-v5.png와 프로토 v3.6을 좌우 합성 qa-compare-v5.png로 직접 대조). 잔여 경미 1건: 안내문구 볼드 강조 미적용(리뷰 3차 지적과 함께 처리 예정). /approve design 대기. (구 2026-08-21 이용료 10% 반영 완료: 프로토타입 v3.4(회장 지적 3건 반영 — 차감표 1줄화·안내 2블록 분리·.u-side 갭 규칙 승격 5화면) + DESIGN.md v1.10.0 §8 UX 라이팅 신설. verify PASS(Score A−, RUBRIC 24/25), 컨트롤러 모바일 캡처 2장 직접 육안 대조. /approve design 대기. (구 REOPEN 사유: 이용료 10%: 승인 프로토타입 docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html 541-546행 및 docs/design/WIREFRAMES/cashout.html 119-120행이 '수수료 미정' 플레이스홀더 — 10% 확정으로 정본이 어긋남. product-designer 위임. (구: 2026-07-22 프로토타입 완성(verify PASS·A-) — 회장 피드백 대기. 갈림길 2건(프라이버시진입·고객센터이메일) 미결. 재open 금지 규칙 적용(이미 1회 open하게 있음)
