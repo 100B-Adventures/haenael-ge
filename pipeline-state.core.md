@@ -7,6 +7,15 @@ pipeline_version: 1
 controller: claude             # 2026-08-30 컨트롤러 Claude. 동일 루트 하네스와 단계 게이트를 적용한다.
 current_stage: build   # 2026-09-05 코드베이스 감사에서 P0 1건·P1 16건과 필수 regression 산출물 부재를 확인해 build 재오픈. 상세 = docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md.
 approved_stages: [plan, design, eng-design]   # build·qa·ship은 2026-09-05 감사 BLOCK으로 재잠금.
+# 단계 진입·재작업·완료 시각 (state-file-convention §stage_timestamps). 형식 YYYY-MM-DD HH:MM KST.
+# 승인 로그에 분 단위 시각이 있는 것만 적는다. 없는 칸은 비운다(날짜만 반쯤 채우지 않는다).
+stage_timestamps:
+  plan:       { completed: 2026-08-28 04:50 }
+  design:     { completed: 2026-08-28 04:50 }
+  eng-design: { }
+  build:      { completed: 2026-08-27 20:04, reworked: 2026-09-05 17:24 }
+  qa:         { completed: 2026-08-27 20:04 }
+  ship:       { }
 # 규약 = ~/.claude/standards/release-and-artifacts.md §1.1. 대시보드가 이걸 읽는다. 실물 없는 라벨 금지.
 approved_artifacts:
   # 2026-08-30 전 단계 최신본 재핀. 갱신 = eng-design 7건(FDD v1.1.0 승격 + ERD·테스트케이스 신규), qa 5건(보안·성능·교차브라우저 리포트 신규), build 1건(구현현황 신규).
@@ -18,6 +27,10 @@ approved_artifacts:
     - { path: docs/plan/one-thing.md, version: unversioned, status: approved, label: "One Thing" }
   design:
     - { path: DESIGN.md, version: 2.0.1, status: approved, label: "디자인 시스템" }
+    - { path: docs/design/README.md, version: unversioned, status: pending-review, label: "디자인 진입점" }
+    - { path: docs/design/ui-architecture.md, version: unversioned, status: pending-review, label: "UI 아키텍처" }
+    - { path: docs/design/screen-inventory.md, version: unversioned, status: pending-review, label: "화면 인벤토리" }
+    - { path: docs/design/captures/baseline-20260912/manifest.json, version: unversioned, status: pending-review, label: "캡처 매니페스트" }
     - { path: docs/design/user-flow.md, version: 0.3.1, status: approved, label: "유저플로우" }
     - { path: docs/design/prototypes/legacy/core-cashout-30-27-v1-gpt-codex.html, version: 1.0.0, status: approved, label: "30·27 환전 프로토타입" }
     - { path: docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html, version: 3.8.0, status: approved, label: "환전 전체 여정 프로토타입" }
