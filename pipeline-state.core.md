@@ -116,6 +116,8 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 
 ## 승인 로그
 
+2026-09-21 22:34 KST — build 슬라이스 완료(갈래 1 다중 목표), qa 대기 — 설계안 §4 대로 `20260921000000_multi_goal_create_fn.sql`(유니크 인덱스 제거 + `create_goal` RPC 권고 잠금·상한 3 + REVOKE INSERT), 온보딩 리다이렉트 제거, `/me` 목록. 컨트롤러 직접 실측: vitest 282/282, pgTAP 270/270(신규 create_goal 10), 동시성 스크립트 PASS, Playwright multi-goal 2/2(로컬 Supabase 실세션), cashout-manual 12/12(E2E 전용 빌드), tsc 0, 토큰 신규 0. PR #3 CI success 3/3. **운영 DB 미적용·main 미머지(회장 몫).** 갈래 2·3 미착수. 단계는 build 유지, qa 승인은 /approve 로만. (artifacts: build=d8dab3f)
+
 2026-09-05 17:24 KST ⟲ REOPEN build. 읽기 전용 코드베이스 감사 `docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md`가 P0 1건, P1 표 항목 16건을 확인해 `REVIEW_VERDICT: BLOCK`을 냈다. P0는 거버넌스 D-017의 세무 자문 전 회장 계정 한정과 달리 전역 `CASHOUT_ENABLED`가 켜지면 모든 인증 사용자의 환전 신청이 열리는 계약 위반이다. 승인 PRD v0.4의 다중 목표·visibility·응원자 경험 미구현과 환전 조회 오류 위장도 P1이다. 기존 QA 핀에는 qa-tracker와 design-conformance가 있으나 독립 regression 산출물이 없고, `approved_artifacts:` inline comment 때문에 pin linter가 블록 전체를 읽지 못한 것도 확인했다. 따라서 build·qa·ship 승인을 재잠그고 build부터 수정·비평·QA를 다시 거친다. 이전 릴리스와 승인 로그는 이력으로 보존한다.
 
 2026-08-28 04:50 KST — design APPROVED — 유일 잔여였던 "안내문구 볼드 강조 미적용"이 해소된 것을 컨트롤러가 코드에서 직접 확인했다. `web/src/components/cashout/CashoutRequestForm.tsx`:506 `<b>입금이 끝나면 그때 {cloverAmount}개가 빠져요.</b>` / `web/src/components/goal/SplitBalanceCard.tsx`:120 `<b>{total}개는 그대로</b>` — 승인 프로토타입 v3.7 의 712행·632행 강조와 대응한다. 실화면 대조: confirm 507.16px(시안 510) · submitting 614.94px(시안 617), E2E 캡처 실측. 재검증: 빌드 EXIT=0 / vitest 269-269 / Playwright 12-12 / test:qa-contracts 깨뜨리기 8건 전부 검출. (artifacts: DESIGN.md v2.0.0, docs/design/user-flow.md v0.3.0, docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html v3.7)
