@@ -1,0 +1,8 @@
+ui-evidence social-viral-loop-v1
+contentChanged=2060
+clicks=7
+wheelScrollY=1401
+scrollY=1401
+scrollHeight=2245
+mobileOverflow=0
+consoleErrors=0

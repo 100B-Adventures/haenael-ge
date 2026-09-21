@@ -1,3 +1,20 @@
+## CLAUDE v2 소셜 바이럴 루프 프로토타입 회수·표출 (2026-09-21 21:39 KST)
+
+### 무엇을
+- product-designer 회수: `docs/design/prototypes/social-viral-loop-v1-opus48.html`. 5화면 루프(초대·연결/친구목록/응원자 지위 게이미/소속감 큐/도파민 순간). 금액랭킹 토글 기본 OFF, 게이미·소속감은 응원자 축에만(D-003 이음새 준수). show-artifact 표출.
+- design-review B+/AI Slop A. globals.css 토큰 계승(clover #1B8A4F).
+
+### 검증
+- verify-agent-quality **FAIL**(토큰 진실원 2소스 미만; globals.css는 읽었으나 brandbook/ux-writing 미독) — 개념 prototype이라 ⛔라벨 출고. 컨트롤러 headless 실측(390폭): clicks=7, contentChanged=2060, wheelScrollY/scrollY=1401(scrollHeight 이상 스크롤), mobileOverflow=0, consoleErrors=0. 원값 `docs/design/prototypes/ui-evidence-social-viral-loop.txt`.
+
+### 회장 결정 대기(프로토타입 보며, 결정 B 마감용)
+ⓐ금액 랭킹 on/off ⓑ받는사람 게이미 여부 ⓒ초대보상=부스트클로버 ⓓ친구관계 모델(상호응원 자동 vs 명시 수락).
+
+### 다음 액션
+1. **소유자: 회장.** 프로토타입 보며 ⓐ~ⓓ 확정. **종료증거:** open-decisions 응답.
+2. **소유자: 세션.** 확정 후 소셜 루프를 PRD v0.5.0으로 승격 + 스펙됨·시안없음 7종 design 착수. **종료증거:** PRD 갱신.
+
+---
 ## CLAUDE v2 정의 = 소셜 바이럴 루프 + 프로토타입 위임 (2026-09-21 19:20 KST, 회장 "v2는 소셜 바이럴 루프, 프로토타입 보면서 얘기하자")
 
 ### 회장의 v2 정의 (박제)
