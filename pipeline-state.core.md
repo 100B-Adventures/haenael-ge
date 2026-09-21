@@ -48,8 +48,8 @@ approved_artifacts:
     - { path: docs/qa/test-cases.md, version: unversioned, status: approved, label: "테스트 케이스", sha256: e28990ef5bc22399faa6d04327f48e4b6070608e73da27d5724b8870bd3425c7 }
     - { path: docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md, version: 1.0.0, status: pending-review, label: "다중목표·공개범위·응원자 설계안", sha256: 0e345e671cd83db4cc8211697c4f019c71142b9358f3964c8e0e958fac9cc6a0 }
   build:
-    - { path: docs/eng-design/build-log.md, version: unversioned, status: approved, label: "빌드 로그", sha256: 008fcce7221c7ae8c9df0f8921a202eb2f2bd318443c0793f56142724338b807 }
-    - { path: docs/구현현황.md, version: unversioned, status: approved, label: "구현 현황", sha256: bcf96ff78b487e6a3d6b2dff45e40117c4ab834da61c90579120a876fe720412 }
+    - { path: docs/eng-design/build-log.md, version: unversioned, status: approved, label: "빌드 로그", sha256: ea05789238599f4fde69dce7b8a0a2c60469945f0f27e673902d1e75fe4e3aaa }
+    - { path: docs/구현현황.md, version: unversioned, status: approved, label: "구현 현황", sha256: 696c11b2aff8dc7ea3ffe4f05f6b84768f53ef45425e06e465374ce936f017ef }
     - { path: supabase/migrations/20260821000000_cashout_service_fee_10pct.sql, version: unversioned, status: approved, label: "환전 이용료 마이그레이션", sha256: ce62fde3b659464d3860030d203116497064b47fdbcb3677521d17ee51b7f654 }
     - { path: supabase/migrations/20260822000000_cashout_clover_lock_a1.sql, version: unversioned, status: approved, label: "환전 잠금 마이그레이션", sha256: 6ee968a6fe0ba5d8c6146b207dd6e15e6554cfc1ab32d3735b0f8cec04d1b359 }
     - { path: supabase/migrations/20260825010000_cashout_verified_minor_only.sql, version: unversioned, status: approved, label: "환전 검증 마이그레이션", sha256: 44cca2256d1fc6e10e6eb672eb11c4c3b158df5f8ff3c674b7b0aa5693244fb4 }
