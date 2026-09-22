@@ -1,4 +1,21 @@
+## 소셜루프 v2 재작업 회수·표출 (2026-09-23 07:40 KST)
+회장 반려 3결함 수정 회수: social-viral-loop-v2-opus48.html.
+- 왼쪽 전역 플로우맵 고정 레일(노드 26, position:fixed) — 관찰됨
+- Higgsfield 실사 10 img(5종 seedream_v5_pro, assets/social-viral/) — 관찰됨. Soul 2.0 워터마크로 1차 반려 후 전환.
+- clean-frames 7종 재추출(friends 육안: 실사아바타3·주석0·하단탭·"N번함께" 관계지위=D-003준수) — 관찰됨
+- verify-agent-quality: ⛔ FAIL(브랜드·토큰 미독, Read증거 2건 미만) 미해소 → design-review A- 통과 근거로 ⛔ 라벨 출고(hand-patch 금지 정책).
+- std 강화 커밋 63593cd(왼쪽레일·Higgsfield삽입 의무), 100B 하네스판 반영 완료.
+백로그: 결정 B(ⓐ금액랭킹 ⓑ받는사람게이미 ⓒ부스트클로버 ⓓ친구관계모델) 회장 응답 대기. 탭바 아이콘 SVG교체는 build단계 폴리시.
+
 ## CLAUDE 최신 프로토타입 전면 표출 확인 (2026-09-22 21:54 KST)
+
+## [2026-09-23 07:13 KST] compact 마크 (manual)
+- 세션 d3e235b1 · 라인 core · 브랜치 session/core-20260912
+- 직전 커밋: df11dba chore(state): 최신 v2 프로토타입 전면 표출을 기록한다
+- compact 직전 컨텍스트: 445644 토큰
+- 마지막 회장 요청: /compact
+- 직전에 고친 파일: session-state.core.md haenael-v2-idea-ledger-v1-gpt-codex.md standard-design.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 - 회장 "띄운거야? v2 최신임?" → social-viral-loop-v1 크롬 전면 표출. v2 최신·정본 프로토타입 = `docs/design/prototypes/social-viral-loop-v1-opus48.html`(landing-wordmap·friends-invite 선행분 흡수). clean PNG 5장은 `clean-frames/social-viral-loop/`.
 - 상태 변동 없음. 미결 = 결정 B(ⓐ금액랭킹 ⓑ받는사람게이미 ⓒ부스트클로버 ⓓ친구관계모델).
 
