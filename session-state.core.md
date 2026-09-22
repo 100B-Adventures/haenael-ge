@@ -1,3 +1,8 @@
+## CLAUDE 최신 프로토타입 전면 표출 확인 (2026-09-22 21:54 KST)
+- 회장 "띄운거야? v2 최신임?" → social-viral-loop-v1 크롬 전면 표출. v2 최신·정본 프로토타입 = `docs/design/prototypes/social-viral-loop-v1-opus48.html`(landing-wordmap·friends-invite 선행분 흡수). clean PNG 5장은 `clean-frames/social-viral-loop/`.
+- 상태 변동 없음. 미결 = 결정 B(ⓐ금액랭킹 ⓑ받는사람게이미 ⓒ부스트클로버 ⓓ친구관계모델).
+
+---
 ## CLAUDE 100B 산출물 정본 정렬 + PR 머지 차단 (2026-09-22 21:40 KST, 회장 "알아서하고 100B 산출물 정본으로 다 맞추면 돼")
 
 목적: 해낼게 core 라인의 산출물을 최신 정본으로 100B 대시보드에 올리고, 감사로 재오픈된 build 잔여를 설계안대로 구현해 단계를 전진시킨다.
