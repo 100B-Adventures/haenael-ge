@@ -1,4 +1,13 @@
 # session-state.growth.md — 해낼게 그로스 레인 핸드오프 (최신순)
+## 2026-09-22 21:10 KST — DM 문안 v2 회수·보정 완료, 후보 24명 명단 커밋, CI green
+- DM v2 `wiki/5-hubs/hub-mkt/haenael-ge-dm-coldopen-v2-opus5.md`(262줄, verify PASS RUBRIC 24/25). 자기비하 3문장 삭제, C안(문장 컨시어지 1턴 허락 → 2턴 링크) 신설, B15/C15 배분·캠페인 slug 분리.
+- 컨트롤러 보정 2건: ①제목·소절의 em dash 9개 제거(1개는 SOURCES 줄 구분자, 본문 아님) ②환전 문장. 운영 env 에 CASHOUT_ENABLED 없음(=false) 실측 → "해내는 날 전부 네 것" → "전부 선언한 사람 것으로 남아요" 3곳 교체, §7-1 해소 처리.
+- 남은 회수: §7-2 온보딩 제목 미리 채움(`/onboarding?title=`) 제품 변경 여부, §7-3 프로필 링크·예시 표기 점검.
+- 명단 `docs/growth/campaigns/2026-09/dm-후보명단-v0.md` 24명(main 8e81384, CI green). 30명 미달, 응원자(부모) 2명 포함.
+- 렌더본 file:///tmp/md-web-haenael-ge-haenael-ge-dm-coldopen-v2-opus5.html 열어둠(회장 크롬, 격리창 회피 확인).
+- 다음에 칠 명령: 회장이 지목 교체·발송 승인하면 ①명단 2차 수집으로 30명 채움 ②03-개통.md 에 태그 실문자열·GA4 상태 기록 ③GA4 운영 전환(승인 대기).
+- 검증: verify PASS 출력 관찰됨, em dash 재grep 1(푸터), 환전 플래그 부재 실측, CI green 관찰됨.
+
 ## 2026-09-22 00:56 KST — GA4 우리 계정 개설 완료, DM 30명 명단 수집·문안 v2 진행 중, 하이재킹 원인 수정
 - 회장: ①GA4 알아서 가입(계정 우리 것) ②30명 DM? 최근 DM 문안 참고 ③왜 타 사업체가 우리 포트 크롬에 산출물 띄우나 ④"크롬 포커스 두어서 작업 방해" 질책.
 - ④ 원인 = cdp.mjs 가 /json/activate 호출. 제거하고 창 자체를 없앰: 9334 를 실제 크롬 **headless** 로 재기동(scratchpad/serve-headless.mjs, 세션 쿠키 유지 확인). 피드백 나쁨·실수원장 [focus-steal].
