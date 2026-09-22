@@ -1,3 +1,19 @@
+## CLAUDE 프로토타입 PNG-clean 하네스 확인 + Higgsfield 허용 박제 (2026-09-22 21:18 KST, 회장 "화면 안 주석 달지마 png 추출할거야 하네스 없냐 / 하단탭 잘했다 / 힉스필드 써도 된다")
+
+### 회장 지적에 무엇을 고쳤나
+- **하네스는 이미 있었다**(standard-design §10: 제품 프레임 안 개발·설계 주석 금지 / §12⑤ clean export / §267 clean-frames). 실패는 하네스 부재가 아니라 **내가 clean export 안 하고 주석 붙은 프로토타입을 띄운 것**. → 이 프로토타입의 검수패널·콘솔·STAMP는 이미 디바이스 프레임 **밖**에 있어(§10 준수), 프레임만 크롭하면 깨끗하다.
+- **clean-frame PNG 5장 추출**(주석 0): `docs/design/prototypes/clean-frames/social-viral-loop/{connect,friends,status,belong,dopamine}.png`. 회장이 바로 추출·사용 가능.
+- **하네스 강화**: standard-design §10에 "PNG 추출 대비 아트보드 주석 0 + clean-frame 세트 동반 산출" 명문화, **Higgsfield 실사 허용**(제품 시안에도) 박제.
+- 평가 적립: 하단탭 칭찬 POS(feedback.jsonl), 주석 노출 NEG(hook 자동).
+
+### 남은 이슈 (회장 판단)
+- 결정 B: ⓐ금액랭킹 ⓑ받는사람게이미 ⓒ부스트클로버 ⓓ친구관계모델.
+
+### 다음 액션
+1. **소유자: 회장.** 프로토타입/clean-frame 보며 ⓐ~ⓓ 확정. **종료증거:** open-decisions 응답.
+2. **소유자: 세션.** 확정 후 PRD v0.5.0 승격 + 빠진 7종 화면(Higgsfield 실사 활용). **종료증거:** PRD 갱신.
+
+---
 ## CLAUDE 프로토타입 전면 표출 (2026-09-22 20:56 KST)
 - 회장이 "안 보임" → show-artifact 백그라운드 탭이라 미표시. `open -a "Google Chrome"`로 소셜 루프 프로토타입 전면 표출. 회장 화면 확인 대기.
 - 상태 변동 없음. 미결은 결정 B(ⓐ금액랭킹 ⓑ받는사람게이미 ⓒ부스트클로버 ⓓ친구관계모델) 그대로.
