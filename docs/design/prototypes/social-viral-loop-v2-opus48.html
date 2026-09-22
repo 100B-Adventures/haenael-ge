@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>해낼게 v2 · 소셜 바이럴 루프 (초대·연결·응원자지위·소속감·도파민) v2</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#FFFFFF; --line:#E8E4DC; --warm:#F4EFE6;
+    --ink:#16140F; --muted:#6F6A60; --faint:#9C968B;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+    --danger:#D9483B; --danger-soft:#FBEAE7; --danger-ink:#B23225;
+    --amber:#B4791F; --amber-soft:#FBF1DD; --amber-line:#E8D3A6; --amber-ink:#8A5A12;
+    --violet-soft:#EFECF7; --violet-line:#D6CEEC; --violet-ink:#5B4B8A; /* 열린결정 배지 전용 (제품 아님, 검수 신호) */
+    --r-sm:12px; --r-md:14px; --r-lg:20px; --r-full:9999px;
+    --font:"Pretendard","Apple SD Gothic Neo",-apple-system,sans-serif;
+    --motion:180ms;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--font);background:#2b2926;color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+  /* ══ 검수 콘솔 (chrome, 제품 아님) ══ */
+  .console{position:sticky;top:0;z-index:60;background:#1c1b19;color:#e9e5dd;padding:12px 18px;border-bottom:1px solid #35322d;}
+  .console h1{font-size:13px;font-weight:800;letter-spacing:-.2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .console h1 .dot{color:#39c07a;}
+  .console h1 .ver{font-size:10.5px;font-weight:700;color:#8a857c;background:#2a2823;padding:2px 8px;border-radius:20px;}
+  .console .row{display:flex;flex-wrap:wrap;gap:14px;margin-top:11px;align-items:center;}
+  .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .grp .lbl{font-size:10.5px;color:#8a857c;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-right:2px;}
+  .console button{font-family:var(--font);font-size:11.5px;font-weight:700;border:1px solid #3f3b35;background:#2a2823;color:#cfc9bf;
+    padding:6px 11px;border-radius:9px;cursor:pointer;transition:all .12s ease-out;}
+  .console button:hover{border-color:#5a554c;}
+  .console button.on{background:#1B8A4F;border-color:#1B8A4F;color:#fff;}
+  .console button.st.on{background:#c98a2b;border-color:#c98a2b;color:#1c1b19;}
+  .console .sep{width:1px;height:20px;background:#3f3b35;}
+  .console .hint{font-size:10.5px;color:#7d786f;margin-top:9px;line-height:1.55;max-width:1080px;}
+  .console .loop{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap;font-size:10.5px;color:#8a857c;font-weight:700;}
+  .console .loop .node{background:#2a2823;border:1px solid #3f3b35;border-radius:20px;padding:4px 10px;color:#cfc9bf;}
+  .console .loop .node.on{background:#1B8A4F;border-color:#1B8A4F;color:#fff;}
+  .console .loop .arr{color:#5a554c;}
+
+  /* ══ 무대 = 폰 프레임 + 검수 패널 (데스크톱에서 나란히) ══ */
+  .stage{display:flex;justify-content:center;align-items:flex-start;gap:26px;padding:30px 20px 20px;min-height:100vh;flex-wrap:wrap;}
+  .screen{display:none;}
+  .screen.active{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;justify-content:center;animation:fade .18s ease-out;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* 네이티브 모바일앱 화면 — 390 고정 프레임. viewport 토글 대신 데이터-상태 토글이 이 기능의 핵심 축.
+     (실배포는 web/src/app Next.js. 이 흐름은 앱 관계 레이어라 네이티브 프레임으로 표현.) */
+  .frame{width:390px;height:844px;background:var(--bg);border-radius:30px;border:1px solid #000;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.4);position:relative;display:flex;flex-direction:column;}
+  .statusbar{height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:700;color:var(--ink);}
+  .statusbar .dots{display:flex;gap:5px;align-items:center;font-size:10px;color:var(--muted);}
+
+  .app{flex:1;overflow-y:auto;overflow-x:hidden;}
+  .app::-webkit-scrollbar{width:0;}
+  .pad{padding:8px 22px 28px;}
+
+  /* 하단 탭바 (네이티브 앱 셸 — 전 화면 공통) */
+  .tabbar{flex:0 0 auto;height:64px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:stretch;}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;font-size:10px;font-weight:700;color:var(--faint);cursor:pointer;}
+  .tabbar a .ic{font-size:17px;line-height:1;}
+  .tabbar a.on{color:var(--clover-ink);}
+
+  /* 상단 헤더 */
+  .head{display:flex;align-items:center;justify-content:space-between;padding:6px 0 2px;min-height:44px;}
+  .head .ttl{font-size:24px;font-weight:900;letter-spacing:-.4px;}
+  .head .brand{font-size:12.5px;font-weight:800;letter-spacing:-.2px;min-height:44px;display:inline-flex;align-items:center;}
+  .head .brand .d{color:var(--clover-bright);}
+  .head .add{width:44px;height:44px;border-radius:var(--r-full);background:var(--clover-soft);color:var(--clover-ink);border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .head .back{width:44px;height:44px;border-radius:var(--r-full);background:none;border:none;font-size:20px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:-10px;}
+
+  .sub{font-size:11.5px;font-weight:700;color:var(--muted);margin:20px 2px 8px;display:flex;align-items:center;justify-content:space-between;}
+  .sub .cnt{color:var(--faint);font-weight:700;}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);}
+
+  /* ── 친구 행 ── */
+  .fr{display:flex;gap:12px;padding:14px;align-items:flex-start;min-width:0;text-decoration:none;color:inherit;border-bottom:1px solid var(--line);cursor:pointer;}
+  .fr:last-child{border-bottom:none;}
+  .av{width:44px;height:44px;border-radius:var(--r-full);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;}
+  .fr .mid{flex:1;min-width:0;}
+  .fr .nm{font-size:14px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fr .goal{font-size:12.5px;font-weight:700;color:var(--ink);margin-top:3px;line-height:1.35;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;}
+  .fr .news{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.45;display:flex;gap:5px;min-width:0;}
+  .fr .news i{font-style:normal;flex:0 0 auto;opacity:.8;}
+  .fr .news span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .prog{height:6px;background:var(--warm);border-radius:var(--r-lg);overflow:hidden;margin-top:9px;}
+  .prog i{display:block;height:100%;background:var(--clover);border-radius:var(--r-lg);}
+  .prog.quiet i{background:var(--amber-line);}
+  .fr .rel{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding-top:2px;}
+  /* 관계 지위 = 두 사람만 보는 사적·비경쟁 배지. 금액 아님(D-003). 횟수·꾸준함만. */
+  .relbadge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:var(--r-full);background:var(--clover-soft);color:var(--clover-ink);white-space:nowrap;}
+  .relbadge.warm{background:var(--warm);color:var(--amber-ink);}
+  .relmeta{font-size:10px;color:var(--faint);font-weight:700;white-space:nowrap;}
+  .badge-you{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:var(--r-full);background:var(--warm);color:var(--muted);white-space:nowrap;}
+
+  /* ── 콜드스타트 (친구 0명) — 가짜 친구 금지(D-009 경계). 정직한 빈 상태. ── */
+  .cold{text-align:center;padding:36px 8px 8px;}
+  .cold .clover{font-size:46px;line-height:1;margin-bottom:6px;}
+  .cold h2{font-size:18px;font-weight:900;letter-spacing:-.4px;line-height:1.35;word-break:keep-all;}
+  .cold p{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:10px;word-break:keep-all;}
+  .cold .steps{margin:22px 0 4px;display:flex;flex-direction:column;gap:2px;text-align:left;}
+  .cstep{display:flex;gap:12px;align-items:flex-start;padding:12px 0;}
+  .cstep .n{width:24px;height:24px;border-radius:var(--r-full);background:var(--warm);color:var(--clover-ink);font-size:12px;font-weight:800;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .cstep .t{font-size:12.5px;font-weight:700;line-height:1.4;}
+  .cstep .t b{color:var(--clover-ink);}
+  .cstep .t span{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:3px;}
+
+  /* ── 초대/연결 화면 ── */
+  .invite-hero{text-align:center;padding:16px 6px 4px;}
+  .invite-hero .k{font-size:12px;font-weight:800;color:var(--clover-ink);}
+  .invite-hero h2{font-size:24px;font-weight:900;letter-spacing:-.4px;margin-top:6px;line-height:1.35;word-break:keep-all;}
+  .invite-hero p{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:10px;word-break:keep-all;}
+
+  /* 초대장 미리보기 = 카카오톡 말풍선 느낌 */
+  .kprev{background:#B2C7DA;border-radius:var(--r-lg);padding:18px 16px;margin-top:16px;}
+  .kprev .from{font-size:10.5px;font-weight:700;color:#3f4d5c;margin-bottom:8px;padding-left:2px;}
+  .kbubble{background:#fff;border-radius:4px 16px 16px 16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  .kbubble .top{height:112px;background:radial-gradient(80% 80% at 50% 38%,#E7F4EC,#F4EFE6 72%);display:flex;align-items:center;justify-content:center;position:relative;}
+  .kbubble .top .big{font-size:38px;}
+  .kbubble .top .mini{position:absolute;font-size:15px;opacity:.7;}
+  .kbubble .body{padding:14px 16px 16px;}
+  .kbubble .body h3{font-size:14px;font-weight:800;letter-spacing:-.2px;line-height:1.4;word-break:keep-all;}
+  .kbubble .body .sm{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;word-break:keep-all;}
+  .kbubble .cta{border-top:1px solid var(--line);text-align:center;font-size:12.5px;font-weight:800;color:var(--clover-ink);padding:12px;}
+
+  .share-row{display:flex;gap:10px;margin-top:18px;}
+  .share-row .sbtn{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-family:var(--font);}
+  .share-row .sbtn .ic{width:34px;height:34px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .share-row .sbtn.kakao .ic{background:#FEE500;}
+  .share-row .sbtn.link .ic{background:var(--warm);}
+  .share-row .sbtn .lb{font-size:11.5px;font-weight:800;color:var(--ink);}
+
+  /* 초대 성사 → 연결 카드 */
+  .accepted{display:flex;gap:11px;align-items:center;background:var(--clover-soft);border:1px solid #cfe8d8;border-radius:var(--r-md);padding:13px 14px;margin-top:16px;}
+  .accepted .ava{width:38px;height:38px;border-radius:var(--r-full);background:#7C9A82;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .accepted .tx{font-size:12px;color:var(--clover-ink);line-height:1.5;font-weight:600;}
+  .accepted .tx b{font-weight:800;}
+
+  /* ── 게이미 = 응원자 관계 지위 화면 ── */
+  .grade-hero{text-align:center;padding:14px 6px 4px;}
+  .grade-ring{width:96px;height:96px;border-radius:var(--r-full);margin:0 auto 4px;background:radial-gradient(closest-side,#E7F4EC,#F4EFE6);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;}
+  .grade-ring::after{content:"";position:absolute;inset:-5px;border-radius:var(--r-full);border:2px solid var(--clover);opacity:.35;}
+  .grade-hero h2{font-size:19px;font-weight:900;letter-spacing:-.3px;margin-top:12px;}
+  .grade-hero .gsub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;word-break:keep-all;}
+  .grade-hero .gsub b{color:var(--clover-ink);font-weight:800;}
+  /* 다음 등급까지 = 꾸준함(횟수) 기반 진행. 금액 아님. */
+  .nextbar{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;margin-top:18px;}
+  .nextbar .lab{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--muted);}
+  .nextbar .lab b{color:var(--ink);font-weight:800;}
+  .nextbar .track{height:8px;background:var(--warm);border-radius:var(--r-full);overflow:hidden;margin-top:9px;}
+  .nextbar .track i{display:block;height:100%;background:var(--clover);border-radius:var(--r-full);}
+  .nextbar .hint{font-size:10.5px;color:var(--faint);margin-top:8px;line-height:1.5;word-break:keep-all;}
+
+  /* 뱃지 컬렉션 — 횟수·꾸준함 기반, 금액 무관 */
+  .badges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+  .bdg{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 6px;text-align:center;}
+  .bdg.lock{opacity:.5;}
+  .bdg .e{font-size:26px;line-height:1;}
+  .bdg .bn{font-size:11px;font-weight:800;margin-top:7px;letter-spacing:-.2px;}
+  .bdg .bd{font-size:9.5px;color:var(--faint);font-weight:700;margin-top:3px;line-height:1.35;}
+
+  /* 금액 랭킹 토글 (기본 OFF, 열린결정 A) */
+  .toggle-card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;margin-top:12px;}
+  .toggle-card .tinfo{flex:1;min-width:0;}
+  .toggle-card .tinfo .tl{font-size:12.5px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:6px;}
+  .toggle-card .tinfo .td{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45;word-break:keep-all;}
+  .sw{width:44px;height:26px;border-radius:var(--r-full);background:var(--line);flex:0 0 auto;position:relative;cursor:pointer;transition:background .16s;}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:var(--r-full);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .16s;}
+  .sw.on{background:var(--clover);}
+  .sw.on::after{transform:translateX(18px);}
+  /* 금액 랭킹이 켜졌을 때 나타나는 (경고성) 미리보기 — 회장이 눈으로 보고 판단하도록 */
+  .rank-preview{display:none;margin-top:10px;border:1px dashed var(--amber-line);background:var(--amber-soft);border-radius:var(--r-md);padding:12px 14px;}
+  .rank-preview.show{display:block;}
+  .rank-preview .rw{display:flex;align-items:center;gap:10px;font-size:12px;padding:5px 0;color:var(--amber-ink);font-weight:700;}
+  .rank-preview .rw .rn{width:18px;font-weight:900;}
+  .rank-preview .warn{font-size:10.5px;color:var(--amber-ink);margin-top:8px;line-height:1.5;word-break:keep-all;font-weight:600;}
+
+  /* ── 소속감 큐 화면 ── */
+  .belong-hero{padding:14px 4px 2px;}
+  .belong-hero h2{font-size:24px;font-weight:900;letter-spacing:-.3px;line-height:1.35;word-break:keep-all;}
+  .belong-hero p{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.55;word-break:keep-all;}
+  .locked-row{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;margin-top:12px;}
+  .locked-row .ic{width:40px;height:40px;border-radius:var(--r-md);background:var(--clover-soft);color:var(--clover-ink);font-size:18px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .locked-row .lx{flex:1;min-width:0;}
+  .locked-row .lx .lt{font-size:12.5px;font-weight:800;letter-spacing:-.2px;}
+  .locked-row .lx .ld{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45;word-break:keep-all;}
+  .locked-row .open{font-size:10px;font-weight:800;color:var(--clover-ink);background:var(--clover-soft);padding:3px 8px;border-radius:var(--r-full);flex:0 0 auto;}
+  /* 후원자만 보는 근황 — 조용한 특권 */
+  .privnews{background:var(--warm);border-radius:var(--r-md);padding:14px 16px;margin-top:12px;}
+  .privnews .pl{font-size:10.5px;font-weight:800;color:var(--clover-ink);letter-spacing:.2px;display:flex;align-items:center;gap:5px;}
+  .privnews .pt{font-size:12.5px;color:var(--ink);margin-top:8px;line-height:1.55;word-break:keep-all;font-weight:600;}
+  .privnews .pm{font-size:10.5px;color:var(--faint);margin-top:6px;font-weight:700;}
+
+  /* 부스트 클로버 (환전 불가·미확정) */
+  .boost-card{border:1px solid var(--clover);background:var(--clover-soft);border-radius:var(--r-md);padding:16px;margin-top:16px;text-align:center;}
+  .boost-chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--clover);border-radius:var(--r-full);padding:9px 16px;font-size:15px;font-weight:900;color:var(--clover-ink);letter-spacing:-.3px;}
+  .boost-chip .p{font-size:19px;}
+  .boost-card .bx{font-size:11px;color:var(--clover-ink);margin-top:10px;line-height:1.5;word-break:keep-all;font-weight:600;}
+  .boost-card .bx b{font-weight:800;}
+
+  /* 재초대 유도 (조용, 푸시 아님 — #12 준수) */
+  .reinvite{display:flex;gap:11px;align-items:center;background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-md);padding:14px;margin-top:16px;cursor:pointer;}
+  .reinvite .ic{font-size:20px;}
+  .reinvite .rx{flex:1;}
+  .reinvite .rx .rt{font-size:12.5px;font-weight:800;}
+  .reinvite .rx .rd{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45;word-break:keep-all;}
+  .reinvite .go{font-size:18px;color:var(--faint);}
+
+  /* ── 도파민 순간 화면 (워드맵 실시간 적립) ── */
+  .dopa-top{text-align:center;padding:12px 6px 2px;}
+  .dopa-top .k{font-size:11.5px;font-weight:800;color:var(--clover-ink);}
+  .dopa-top h2{font-size:24px;font-weight:900;letter-spacing:-.3px;margin-top:6px;line-height:1.35;word-break:keep-all;}
+  .dopa-top p{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.55;word-break:keep-all;}
+  /* 워드맵 캔버스 */
+  .wordmap{position:relative;height:250px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);margin-top:16px;overflow:hidden;}
+  .wm-word{position:absolute;font-weight:800;letter-spacing:-.3px;color:var(--clover-ink);white-space:nowrap;transform:translate(-50%,-50%);}
+  .wm-word.mine{color:var(--clover-bright);}
+  .wm-word.landing{animation:wmland .62s cubic-bezier(.2,1.1,.35,1) both;}
+  @keyframes wmland{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}60%{transform:translate(-50%,-50%) scale(1.08);}100%{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+  .wm-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
+  .wm-center .wc-goal{font-size:12px;font-weight:900;color:var(--ink);}
+  .wm-count{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;font-size:13px;font-weight:800;color:var(--clover-ink);}
+  .wm-count .n{font-size:20px;font-weight:900;transition:transform .3s;}
+  .wm-count .n.bump{transform:scale(1.25);}
+  /* 비회원 피드백 배너 */
+  .guest-feed{display:flex;gap:9px;background:var(--clover-soft);border-radius:var(--r-sm);padding:12px 14px;margin-top:16px;font-size:11.5px;color:var(--clover-ink);line-height:1.5;word-break:keep-all;font-weight:600;align-items:flex-start;}
+  .guest-feed i{font-style:normal;flex:0 0 auto;}
+
+  /* 열린결정 배지 — 회장 아이디어 보존 + 안전 기본값 표시. 검수용, 제품 카피와 톤 구분. */
+  .opendec{margin-top:14px;border:1px dashed var(--violet-line);background:var(--violet-soft);border-radius:var(--r-md);padding:12px 14px;text-align:left;}
+  .opendec .tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;color:var(--violet-ink);background:#fff;border:1px solid var(--violet-line);padding:3px 9px;border-radius:var(--r-full);letter-spacing:.2px;}
+  .opendec p{font-size:11.5px;color:var(--violet-ink);line-height:1.55;margin-top:9px;word-break:keep-all;}
+  .opendec p b{font-weight:800;}
+
+  .btn{display:block;width:100%;text-align:center;font-size:15px;font-weight:800;padding:16px;border-radius:var(--r-md);border:1px solid transparent;cursor:pointer;text-decoration:none;font-family:var(--font);margin-top:14px;}
+  .btn.pri{background:var(--clover);color:#fff;box-shadow:0 6px 16px rgba(27,138,79,.22);}
+  .btn.sec{background:var(--surface);color:var(--ink);border-color:var(--line);}
+  .btn.ghost{background:none;color:var(--muted);font-size:13px;font-weight:700;padding:12px;box-shadow:none;}
+
+  .safenote{display:flex;gap:9px;background:var(--clover-soft);border-radius:var(--r-sm);padding:12px 14px;margin-top:16px;font-size:11.5px;color:var(--clover-ink);line-height:1.5;word-break:keep-all;font-weight:600;}
+  .safenote i{font-style:normal;flex:0 0 auto;}
+
+  /* ══ 검수 패널 (제품 아님, 검수 셸) ══ */
+  .review{width:340px;flex:0 0 auto;color:#e9e5dd;}
+  @media(max-width:1120px){.review{width:390px;}}
+  .review .blk{background:#232120;border:1px solid #35322d;border-radius:12px;padding:15px 17px;margin-bottom:13px;}
+  .review .blk h4{font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a857c;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+  .review .blk h4 .d{width:7px;height:7px;border-radius:50%;background:#39c07a;}
+  .review .blk.chg h4 .d{background:#c98a2b;}
+  .review .blk p{font-size:11.5px;line-height:1.6;color:#cfc9bf;}
+  .review .blk p + p{margin-top:8px;}
+  .review .blk p b{color:#f3efe7;font-weight:700;}
+  .review .blk .path{font-family:var(--font);font-size:10px;color:#8fbfa6;background:#1b1a18;padding:2px 6px;border-radius:5px;}
+  .review .chgitem{border-left:2px solid #c98a2b;padding:2px 0 2px 11px;margin-top:10px;}
+  .review .chgitem:first-of-type{margin-top:0;}
+  .review .chgitem .w{font-size:11.5px;font-weight:700;color:#f3efe7;line-height:1.5;}
+  .review .chgitem .fb{font-size:10.5px;color:#b9b2a6;margin-top:4px;line-height:1.5;font-style:italic;}
+  .review .blk.new{border:1px dashed #4a6b58;}
+  .review .blk.new h4{color:#8fbfa6;}
+  .review .flow{font-size:11px;color:#cfc9bf;line-height:1.6;}
+  .review .flow .fl{display:flex;gap:7px;margin-top:6px;}
+  .review .flow .fl b{color:#8fbfa6;flex:0 0 auto;font-weight:800;}
+
+  /* ══ STAMP ══ */
+  .stamp{max-width:1120px;margin:0 auto;color:#8a857c;font-size:10.5px;line-height:1.7;padding:18px 20px 40px;border-top:1px solid #35322d;}
+  .stamp b{color:#cfc9bf;}
+
+  /* ══ 전역 플로우맵 = 왼쪽 고정 레일 (제품 아님, 검수 셸 · §51) ══ */
+  body{padding-left:248px;}
+  .flowrail{position:fixed;left:0;top:0;width:248px;height:100vh;overflow-y:auto;background:#161513;border-right:1px solid #35322d;padding:16px 14px 40px;z-index:80;}
+  .flowrail::-webkit-scrollbar{width:6px;} .flowrail::-webkit-scrollbar-thumb{background:#35322d;border-radius:6px;}
+  .flowrail .rt{font-size:11px;font-weight:800;color:#e9e5dd;letter-spacing:-.2px;display:flex;align-items:center;gap:6px;}
+  .flowrail .rt .dot{color:#39c07a;}
+  .flowrail .rsub{font-size:9.5px;color:#7d786f;margin:5px 0 14px;line-height:1.5;}
+  .fchain{display:flex;flex-direction:column;gap:0;}
+  .fgroup{font-size:9px;font-weight:800;color:#6f6a60;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 5px;}
+  .fnode{position:relative;display:flex;align-items:flex-start;gap:8px;background:#221f1c;border:1px solid #35322d;border-radius:10px;padding:9px 10px;cursor:pointer;transition:all .12s ease-out;}
+  .fnode:hover{border-color:#5a554c;}
+  .fnode.on{background:#1B8A4F;border-color:#1B8A4F;}
+  .fnode .fi{font-size:13px;line-height:1.1;flex:0 0 auto;}
+  .fnode .fl{font-size:10.5px;font-weight:700;color:#cfc9bf;line-height:1.35;}
+  .fnode.on .fl{color:#fff;}
+  .fnode .fk{display:block;font-size:9px;font-weight:600;color:#8a857c;margin-top:2px;}
+  .fnode.on .fk{color:#d8f0e2;}
+  .fnode.newnode{border-style:dashed;border-color:#c98a2b;}
+  .fnode.newnode.on{border-style:solid;}
+  .fnode .newtag{position:absolute;top:-7px;right:8px;font-size:8px;font-weight:800;color:#1c1b19;background:#c98a2b;padding:1px 5px;border-radius:6px;letter-spacing:.3px;}
+  .farrow{display:flex;align-items:center;gap:6px;padding:3px 0 3px 16px;color:#5a554c;font-size:11px;}
+  .farrow .lbl{font-size:8.5px;color:#7d786f;font-weight:600;}
+  .farrow.loopback{color:#c98a2b;}
+  .flegend{margin-top:16px;padding-top:12px;border-top:1px solid #35322d;font-size:9px;color:#7d786f;line-height:1.6;}
+  .flegend b{color:#c98a2b;}
+
+  /* ══ 인물·아바타 = Higgsfield 실사 <img> (§52 이모지 대체 금지) ══ */
+  .av{overflow:hidden;background:#E7F4EC !important;}
+  .av img,.ava img{width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;}
+  .ava{width:40px;height:40px;border-radius:var(--r-full);overflow:hidden;flex:0 0 auto;}
+  .kfriend{width:64px;height:64px;border-radius:var(--r-full);overflow:hidden;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.14);}
+  .kfriend img{width:100%;height:100%;object-fit:cover;object-position:center 30%;}
+  .hero-portrait{width:100%;height:150px;border-radius:var(--r-md);overflow:hidden;margin-top:14px;position:relative;}
+  .hero-portrait img{width:100%;height:100%;object-fit:cover;}
+  .hero-portrait .hp-name{position:absolute;left:14px;bottom:12px;color:#fff;font-size:14px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+  .supporter-face{width:52px;height:52px;border-radius:var(--r-full);overflow:hidden;flex:0 0 auto;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.12);}
+  .supporter-face img{width:100%;height:100%;object-fit:cover;object-position:center 28%;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ 전역 플로우맵 · 왼쪽 고정 레일 (제품 아님 · §51) ══════════ -->
+<aside class="flowrail">
+  <div class="rt"><span class="dot">🍀</span> 전역 플로우맵</div>
+  <div class="rsub">소셜 바이럴 루프가 <b>기존 배포 화면</b> 위에 어떻게 얹히는지. 지금 보는 화면이 초록, 신규 화면은 주황 점선.</div>
+
+  <div class="fgroup">기존 배포 화면 (web/src/app)</div>
+  <div class="fnode" data-loop="_home" onclick="alert('기존 배포 화면(홈/목표 목록). 이 프로토타입 범위 밖 — 하단탭 진입점만 표시.')">
+    <span class="fi">🏠</span><span class="fl">홈 · 하단탭 셸<span class="fk">배포됨 · 여기서 친구/응원/내지위 진입</span></span>
+  </div>
+  <div class="farrow"><span>↓</span><span class="lbl">하단탭 "친구"</span></div>
+
+  <div class="fgroup">v2 신규 · 소셜 루프</div>
+  <div class="fnode newnode" data-loop="friends" onclick="go('friends')">
+    <span class="newtag">NEW</span>
+    <span class="fi">👥</span><span class="fl">② 친구목록 (연결감)<span class="fk">진입: 홈 하단탭 · 초대 성사 후</span></span>
+  </div>
+  <div class="farrow"><span>↓</span><span class="lbl">우상단 + (친구 초대)</span></div>
+  <div class="fnode newnode" data-loop="connect" onclick="go('connect')">
+    <span class="newtag">NEW</span>
+    <span class="fi">➕</span><span class="fl">① 초대·연결<span class="fk">진입: 친구목록 + · 소속감 큐 재초대</span></span>
+  </div>
+  <div class="farrow"><span>↺</span><span class="lbl">초대 성사 → 친구목록으로 복귀</span></div>
+  <div class="fnode newnode" data-loop="belong" onclick="go('belong')">
+    <span class="newtag">NEW</span>
+    <span class="fi">🔓</span><span class="fl">④ 소속감 큐<span class="fk">진입: 친구 카드 탭 → 그 친구의 응원자 자리</span></span>
+  </div>
+  <div class="farrow loopback"><span>↺</span><span class="lbl">재초대 pull → ① 초대·연결 (루프)</span></div>
+  <div class="fnode newnode" data-loop="status" onclick="go('status')">
+    <span class="newtag">NEW</span>
+    <span class="fi">🏅</span><span class="fl">③ 응원자 지위<span class="fk">진입: 하단탭 "내 지위"</span></span>
+  </div>
+
+  <div class="fgroup">v2 신규 · 획득(비회원 유입)</div>
+  <div class="fnode" data-loop="_goalpage" onclick="alert('기존 배포 화면(목표 페이지/워드맵, landing-wordmap-i18n). 인스타 링크로 비회원이 도착 — 여기서 도파민 순간으로 이어진다.')">
+    <span class="fi">🌐</span><span class="fl">목표 페이지 · 워드맵<span class="fk">배포됨 · 인스타 링크 유입</span></span>
+  </div>
+  <div class="farrow"><span>↓</span><span class="lbl">"응원하기" 탭</span></div>
+  <div class="fnode newnode" data-loop="dopamine" onclick="go('dopamine')">
+    <span class="newtag">NEW</span>
+    <span class="fi">⚡</span><span class="fl">⚡ 도파민 순간<span class="fk">진입: 목표페이지 응원 · 하단탭 응원</span></span>
+  </div>
+  <div class="farrow loopback"><span>↺</span><span class="lbl">로그인 승격 → 홈/친구목록 (루프)</span></div>
+
+  <div class="flegend"><b>주황 점선</b> = v2 신규 화면. 모든 신규 노드는 <b>기존 배포 화면(홈·목표페이지)</b>에서 화살표로 진입하고, 소속감·도파민에서 초대·홈으로 <b>되돌아 루프</b>를 닫는다. 회색 노드 = 배포 완료(범위 밖).</div>
+</aside>
+
+<div class="console">
+  <h1><span class="dot">🍀</span> 해낼게 v2 · 소셜 바이럴 루프 <span class="ver">v2 · 390×844 네이티브앱 · 아이데이션 (왼쪽 레일·Higgsfield 실사 반영)</span></h1>
+  <div class="loop">
+    <span>바이럴 루프</span>
+    <span class="node" data-loop="connect">① 초대·연결</span><span class="arr">→</span>
+    <span class="node" data-loop="friends">② 친구목록(연결감)</span><span class="arr">→</span>
+    <span class="node" data-loop="status">③ 응원자 지위(지속)</span><span class="arr">→</span>
+    <span class="node" data-loop="belong">④ 소속감·재초대</span><span class="arr">↺</span>
+    <span class="node" data-loop="dopamine">⚡ 도파민 순간</span>
+  </div>
+  <div class="row">
+    <div class="grp">
+      <span class="lbl">화면</span>
+      <button class="nav on" data-s="connect">1 · 초대·연결</button>
+      <button class="nav" data-s="friends">2 · 친구목록</button>
+      <button class="nav" data-s="status">3 · 응원자 지위</button>
+      <button class="nav" data-s="belong">4 · 소속감 큐</button>
+      <button class="nav" data-s="dopamine">⚡ 도파민 순간</button>
+    </div>
+    <span class="sep"></span>
+    <div class="grp" id="stateGrp">
+      <span class="lbl">데이터</span>
+      <button class="st on" data-state="normal">정상</button>
+      <button class="st" data-state="cold">콜드스타트(0명)</button>
+      <button class="st" data-state="over">과다(오버플로)</button>
+    </div>
+  </div>
+  <div class="hint">회장 v2 정의 = 소셜 바이럴 루프(초대·연결 → 게이미 → 소속감 → 재초대). 게이미·소속감은 <b>응원자 축</b>에만 얹고 금액 랭킹은 배제 — 횟수·꾸준함만(D-003 "지갑은 조용하게"). 데이터 토글은 화면 2(친구목록)에서만 유효. 도파민 순간은 화면 ⚡에서 직접 "응원하기"를 눌러 워드맵 적립 연출을 보라(조용한 도파민, 폭죽 없음).</div>
+</div>
+
+<div class="stage">
+
+  <!-- ══════════ 화면 1 · 초대·연결 ══════════ -->
+  <section class="screen active" id="connect">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <button class="back" onclick="go('friends')">‹</button>
+          <div class="brand">해낼<span class="d">게</span></div>
+          <div style="width:44px"></div>
+        </div>
+        <div class="invite-hero">
+          <div class="k">함께 응원할 친구 부르기</div>
+          <h2>혼자 응원하지 말고,<br>친구랑 같이 밀어줘요</h2>
+          <p>초대한 친구가 들어오면 서로의 목표가 친구목록에 뜨고, 조용히 서로를 응원하는 사이가 됩니다.</p>
+        </div>
+
+        <div class="hero-portrait" style="height:132px"><img src="assets/social-viral/belong.png" alt="함께 응원하는 친구들"></div>
+
+        <div class="kprev">
+          <div class="from">카카오톡으로 이렇게 전해져요</div>
+          <div class="kbubble">
+            <div class="top"><div class="kfriend"><img src="assets/social-viral/seoyeon.png" alt="서연"></div></div>
+            <div class="body">
+              <h3>서연님이 해낼게에 초대했어요</h3>
+              <div class="sm">"네 목표도 내가 조용히 응원할게. 같이 해낼래?"</div>
+            </div>
+            <div class="cta">들어가서 내 목표 쓰기 →</div>
+          </div>
+        </div>
+
+        <div class="share-row">
+          <div class="sbtn kakao" onclick="linkCopied(this)"><div class="ic">💬</div><div class="lb">카카오톡 초대</div></div>
+          <div class="sbtn link" onclick="linkCopied(this)"><div class="ic">🔗</div><div class="lb">초대 링크 복사</div></div>
+        </div>
+
+        <div class="accepted">
+          <div class="ava"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
+          <div class="tx"><b>윤도경</b>님이 초대를 받고 들어왔어요. 이제 친구목록에서 서로의 목표를 볼 수 있어요.</div>
+        </div>
+
+        <div class="opendec">
+          <span class="tag">🟣 열린결정 E · 미확정</span>
+          <p>"친구"를 <b>상호 응원만으로 자동 성립</b>시킬지, <b>초대·수락 명시 관계</b>로 둘지 결정 대기. 이 화면은 초대·수락(명시) 톤으로 그렸습니다. 회장이 보며 정합니다.</p>
+        </div>
+
+        <div class="safenote"><i>🔒</i><span>연락처를 통째로 읽지 않습니다. 내가 직접 고른 사람에게 카카오·링크로만 초대해요.</span></div>
+      </div></div>
+      <div class="tabbar">
+        <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
+        <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
+        <a class="on"><span class="ic">➕</span>초대</a>
+        <a onclick="go('status')"><span class="ic">🏅</span>내 지위</a>
+      </div>
+    </div>
+    <div class="review" data-review="connect"></div>
+  </section>
+
+  <!-- ══════════ 화면 2 · 친구목록 ══════════ -->
+  <section class="screen" id="friends">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <div class="ttl">친구</div>
+          <button class="add" title="친구 초대" onclick="go('connect')">+</button>
+        </div>
+
+        <!-- 정상 상태 -->
+        <div data-view="normal">
+          <div class="sub">서로 응원하는 친구 <span class="cnt">3명</span></div>
+          <div class="card">
+            <a class="fr" onclick="go('belong');return false;">
+              <div class="av"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
+              <div class="mid">
+                <div class="nm">윤도경 <span class="badge-you">서로 응원</span></div>
+                <div class="goal">이번 학기 평점 4.0 해낼게</div>
+                <div class="prog"><i style="width:68%"></i></div>
+                <div class="news"><i>💬</i><span>3주째 도서관 개근 중이래요</span></div>
+              </div>
+              <div class="rel">
+                <span class="relbadge">🍀 12번 함께</span>
+                <span class="relmeta">6주 연속</span>
+              </div>
+            </a>
+            <a class="fr" onclick="go('belong');return false;">
+              <div class="av"><img src="assets/social-viral/seoyeon.png" alt="서연"></div>
+              <div class="mid">
+                <div class="nm">서연</div>
+                <div class="goal">토익 900 넘길게</div>
+                <div class="prog"><i style="width:41%"></i></div>
+                <div class="news"><i>💬</i><span>모의고사 820 나왔어, 조금만 더</span></div>
+              </div>
+              <div class="rel">
+                <span class="relbadge">🍀 5번 함께</span>
+                <span class="relmeta">2주 연속</span>
+              </div>
+            </a>
+            <a class="fr" onclick="go('belong');return false;">
+              <div class="av"><img src="assets/social-viral/jimin.png" alt="정민서"></div>
+              <div class="mid">
+                <div class="nm">정민서</div>
+                <div class="goal">3개월 안에 5kg 감량 해낼게</div>
+                <div class="prog quiet"><i style="width:22%"></i></div>
+                <div class="news"><i>💬</i><span>이번 주는 조금 쉬어가는 중</span></div>
+              </div>
+              <div class="rel">
+                <span class="relbadge warm">🍀 3번 함께</span>
+                <span class="relmeta">이번 주 쉼</span>
+              </div>
+            </a>
+          </div>
+          <div class="safenote"><i>🤫</i><span>여기 보이는 "N번 함께"는 두 사람만 보는 사이 표시예요. 금액도, 순위도 아니에요.</span></div>
+        </div>
+
+        <!-- 콜드스타트 (0명) -->
+        <div data-view="cold" style="display:none">
+          <div class="cold">
+            <div class="clover">🍀</div>
+            <h2>아직 친구가 없어요</h2>
+            <p>가짜 친구로 채우지 않습니다. 진짜 아는 사람을 초대하면 여기 서로의 목표가 나란히 쌓여요.</p>
+            <div class="steps">
+              <div class="cstep"><div class="n">1</div><div class="t"><b>친구를 초대해요</b><span>카카오·링크로 내가 아는 사람에게만</span></div></div>
+              <div class="cstep"><div class="n">2</div><div class="t"><b>친구가 목표를 써요</b><span>"나 ○○ 해낼게" 한 줄이면 시작</span></div></div>
+              <div class="cstep"><div class="n">3</div><div class="t"><b>서로 조용히 응원해요</b><span>N번 함께가 쌓이는 사이가 됩니다</span></div></div>
+            </div>
+            <button class="btn pri" onclick="go('connect')">친구 초대하기</button>
+          </div>
+        </div>
+
+        <!-- 과다 (오버플로) -->
+        <div data-view="over" style="display:none">
+          <div class="sub">서로 응원하는 친구 <span class="cnt">14명</span></div>
+          <div class="card" id="overList"></div>
+        </div>
+      </div></div>
+      <div class="tabbar">
+        <a class="on"><span class="ic">👥</span>친구</a>
+        <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
+        <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
+        <a onclick="go('status')"><span class="ic">🏅</span>내 지위</a>
+      </div>
+    </div>
+    <div class="review" data-review="friends"></div>
+  </section>
+
+  <!-- ══════════ 화면 3 · 응원자 지위 (게이미) ══════════ -->
+  <section class="screen" id="status">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <div class="ttl">내 지위</div>
+          <div class="brand">해낼<span class="d">게</span></div>
+        </div>
+
+        <div class="grade-hero">
+          <div class="grade-ring">🌿</div>
+          <h2>꾸준한 응원자</h2>
+          <div class="gsub"><b>3명</b>의 친구를 <b>20번</b> 응원했어요 · <b>6주 연속</b> 함께하는 중</div>
+        </div>
+
+        <div class="nextbar">
+          <div class="lab"><span>다음 등급 <b>든든한 응원자</b>까지</span><span><b>20</b> / 30번</span></div>
+          <div class="track"><i style="width:66%"></i></div>
+          <div class="hint">등급은 <b>응원한 횟수와 꾸준함</b>으로만 올라가요. 얼마를 보냈는지는 아무 데도 세지 않습니다.</div>
+        </div>
+
+        <div class="sub">모은 뱃지 <span class="cnt">4 / 8</span></div>
+        <div class="badges">
+          <div class="bdg"><div class="e">🌱</div><div class="bn">첫 응원</div><div class="bd">처음 밀어준 날</div></div>
+          <div class="bdg"><div class="e">🔥</div><div class="bn">4주 연속</div><div class="bd">한 달 내내 함께</div></div>
+          <div class="bdg"><div class="e">🤝</div><div class="bn">세 친구</div><div class="bd">3명을 응원</div></div>
+          <div class="bdg"><div class="e">🌙</div><div class="bn">조용한 손</div><div class="bd">익명 응원 5회</div></div>
+          <div class="bdg lock"><div class="e">🌳</div><div class="bn">10주 연속</div><div class="bd">잠김</div></div>
+          <div class="bdg lock"><div class="e">💫</div><div class="bn">완주 목격</div><div class="bd">잠김</div></div>
+        </div>
+
+        <div class="toggle-card">
+          <div class="tinfo">
+            <div class="tl">금액 순 랭킹 <span class="badge-you" style="background:var(--violet-soft);color:var(--violet-ink)">열린결정 A</span></div>
+            <div class="td">기본은 꺼둡니다. 켜면 "누가 얼마 보냈나"가 보여요 — D-003 정체성과 충돌 소지.</div>
+          </div>
+          <div class="sw" id="rankSw" onclick="toggleRank()"></div>
+        </div>
+        <div class="rank-preview" id="rankPreview">
+          <div class="rw"><span class="rn">1</span><span>서연 · 82,000원</span></div>
+          <div class="rw"><span class="rn">2</span><span>나 · 55,000원</span></div>
+          <div class="rw"><span class="rn">3</span><span>도경 · 31,000원</span></div>
+          <div class="warn">⚠️ 이렇게 금액이 노출되면 "조용한 응원"이 경쟁이 됩니다. 회장 판단 전까지 기본 OFF 유지.</div>
+        </div>
+
+        <div class="toggle-card">
+          <div class="tinfo">
+            <div class="tl">받는 사람도 게이미 <span class="badge-you" style="background:var(--violet-soft);color:var(--violet-ink)">열린결정 B</span></div>
+            <div class="td">목표자(받는 사람)에게도 레벨·등급을 줄지. 기본 꺼둠 — "돈 모으려 목표 만드는" 어뷰징 방지.</div>
+          </div>
+          <div class="sw" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div></div>
+      <div class="tabbar">
+        <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
+        <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
+        <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
+        <a class="on"><span class="ic">🏅</span>내 지위</a>
+      </div>
+    </div>
+    <div class="review" data-review="status"></div>
+  </section>
+
+  <!-- ══════════ 화면 4 · 소속감 큐 ══════════ -->
+  <section class="screen" id="belong">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <button class="back" onclick="go('friends')">‹</button>
+          <div class="brand">도경이의 응원자</div>
+          <div style="width:44px"></div>
+        </div>
+
+        <div class="belong-hero">
+          <h2>도경이를 응원하는 사람으로서<br>열리는 것들</h2>
+          <p>오래 함께한 응원자에게만 조용히 열리는 자리예요. 시끄러운 알림 대신, 다시 왔을 때 여기 있습니다.</p>
+        </div>
+
+        <div class="hero-portrait"><img src="assets/social-viral/dogyeong.png" alt="윤도경"><span class="hp-name">윤도경 · 평점 4.0 해낼게</span></div>
+
+        <div class="privnews">
+          <div class="pl">🔓 응원자에게만 보이는 근황</div>
+          <div style="display:flex;gap:10px;align-items:flex-start;margin-top:2px">
+            <div class="supporter-face"><img src="assets/social-viral/supporter.png" alt="도경"></div>
+            <div>
+              <div class="pt">"저번 주 중간고사 두 과목 A 나왔어. 응원 덕분에 버텼어 진짜."</div>
+              <div class="pm">도경 · 2일 전 · 응원자에게만 공개</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="locked-row">
+          <div class="ic">🌿</div>
+          <div class="lx">
+            <div class="lt">함께한 자취 타임라인</div>
+            <div class="ld">12번의 응원이 도경이의 목표 어디에 닿았는지 두 사람만의 기록</div>
+          </div>
+          <span class="open">열림</span>
+        </div>
+
+        <div class="boost-card">
+          <div class="boost-chip"><span class="p">🍀</span> 부스트 클로버 +5</div>
+          <div class="bx"><b>환전은 안 되는</b> 응원 부스트예요. 다음에 응원할 때 조용히 얹혀 친구의 워드맵을 더 채워줍니다.</div>
+        </div>
+        <div class="opendec">
+          <span class="tag">🟣 열린결정 C · 미확정</span>
+          <p>초대 보상 = <b>환전 불가 부스트 클로버</b>로 그렸습니다. 실클로버 직결은 선불충전금 규제 리스크(존립조건). 보상 없이 관계 배지만 둘지도 회장 결정 대기.</p>
+        </div>
+
+        <div class="reinvite" onclick="go('connect')">
+          <span class="ic">➕</span>
+          <div class="rx">
+            <div class="rt">다른 친구도 이 자리에 부를까요?</div>
+            <div class="rd">푸시로 조르지 않아요. 오고 싶을 때 여기서 조용히.</div>
+          </div>
+          <span class="go">›</span>
+        </div>
+      </div></div>
+      <div class="tabbar">
+        <a class="on" onclick="go('friends')"><span class="ic">👥</span>친구</a>
+        <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
+        <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
+        <a onclick="go('status')"><span class="ic">🏅</span>내 지위</a>
+      </div>
+    </div>
+    <div class="review" data-review="belong"></div>
+  </section>
+
+  <!-- ══════════ 화면 ⚡ · 도파민 순간 ══════════ -->
+  <section class="screen" id="dopamine">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <button class="back" onclick="go('friends')">‹</button>
+          <div class="brand">서연이의 해낼게</div>
+          <div style="width:44px"></div>
+        </div>
+
+        <div class="dopa-top">
+          <div class="k">서연 · 토익 900 넘길게</div>
+          <h2>응원하면 내 단어가<br>여기 실시간으로 얹혀요</h2>
+          <p>비회원이어도 괜찮아요. 밀어준 순간 이 워드맵에 바로 쌓이는 게 보입니다.</p>
+        </div>
+
+        <div class="hero-portrait" style="height:126px"><img src="assets/social-viral/seoyeon.png" alt="서연"><span class="hp-name">서연이 지금 이 목표를 향해 가는 중</span></div>
+
+        <div class="wordmap" id="wordmap">
+          <div class="wm-center"><div class="wc-goal">🍀<br>토익 900</div></div>
+          <div class="wm-word" style="left:24%;top:26%;font-size:14px">화이팅</div>
+          <div class="wm-word" style="left:74%;top:32%;font-size:12px">할수있어</div>
+          <div class="wm-word" style="left:32%;top:70%;font-size:13px">응원해</div>
+          <div class="wm-word" style="left:70%;top:72%;font-size:11px">조금만더</div>
+          <div class="wm-word" style="left:20%;top:48%;font-size:11px">믿어</div>
+          <div class="wm-word" style="left:80%;top:54%;font-size:12px">끝까지</div>
+        </div>
+
+        <div class="wm-count"><span>지금까지</span> <span class="n" id="wmCount">23</span> <span>개의 응원 단어가 쌓였어요</span></div>
+
+        <button class="btn pri" id="cheerBtn" onclick="dropWord()">🍀 조용히 응원하기</button>
+
+        <div class="guest-feed"><i>✨</i><span id="guestFeed">네 응원이 여기 쌓였어요. 로그인하면 이 기록이 "내가 응원한 목표"에 남아요.</span></div>
+
+        <div class="opendec">
+          <span class="tag">🟣 도파민 원칙</span>
+          <p>조용함과 양립하는 도파민만 씁니다. <b>내 단어가 실시간으로 얹히는 연출 · 비회원 피드백</b>은 OK. <b>폭죽·랭킹상승 알림은 배제</b>(D-003 위배).</p>
+        </div>
+      </div></div>
+      <div class="tabbar">
+        <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
+        <a class="on"><span class="ic">🍀</span>응원</a>
+        <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
+        <a onclick="go('status')"><span class="ic">🏅</span>내 지위</a>
+      </div>
+    </div>
+    <div class="review" data-review="dopamine"></div>
+  </section>
+
+</div>
+
+<div class="stamp">
+  🏷 STAMP | line: core | 생성: 2026-09-23 07:40 KST | model: claude-opus-4-8 | agent: product-designer | 근거: globals.css·blueprint-v1.0.0·idea-ledger·결정.md D-003/D-009/D-017·friends-invite-v1<br>
+  <b>STAMP</b> line=core · social-viral-loop-v2-opus48.html · 생성 2026-09-23 07:40 KST · model claude-opus-4-8 · agent product-designer<br>
+  <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일(신규 화면 ↔ 기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 실사 6종 삽입 — 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출<br>
+  <b>skills</b> design-consultation(방향·토큰 상속 확인) · design-html(hi-fi 목업) · design-review(headless 렌더·클릭·상태토글 QA) · Higgsfield CLI(seedream_v5_pro 실사)<br>
+  <b>토큰</b> web/src/app/globals.css 실독(clover #1B8A4F · warm #F4EFE6 · radius 12/14/20 · Pretendard) — 진실원 계승<br>
+  <b>근거</b> haenael-v2-blueprint-v1.0.0-opus48.md(§3.4·§5·§6) · idea-ledger #11·#12·#13·2026-09-15·2026-09-21 · one-thing.md · 결정.md D-003·D-009 · 계승 프로토 friends-invite-v1·landing-wordmap-i18n-v2<br>
+  <b>고민 한 줄</b> 회장이 원한 "게이미·소속감·도파민"을 넣되, 전부 응원자 축에만 얹고 금액 랭킹은 열린결정 토글(기본 OFF)로 표면화해 D-003 "지갑은 조용하게"를 지켰다. 도파민은 워드맵 실시간 적립이라는 조용한 종류로만.
+</div>
+
+<script>
+  // ── 화면별 검수 패널 데이터 (심리·벤치·계승·PRD 4요소 + chg 신규표시 + flow 진입/이탈) ──
+  const REVIEW = {
+    connect: {
+      psych: '실행의도+상호성. "초대 → 서로 응원하는 사이"라는 관계 프레임으로 초대 동기를 이타(친구 목표 응원)에 건다. 카카오 말풍선 실물 미리보기로 "보내면 이렇게 보인다" 불확실성을 제거(Zeigarnik 대신 예측가능성).',
+      bench: '카카오톡 초대 공유(딥링크 카드) · Strava 팔로우 초대 · Duolingo 친구 초대 스트릭. 셋 다 "연락처 스크래핑"이 아니라 공유 카드 방식 — 이 톤을 차용, 스크래핑은 버림.',
+      inherit: '계승: friends-invite-v1의 .kprev 카카오 말풍선·.share-row·.safenote 그대로. 신규: 초대 성사 → 연결(.accepted) 이음새, 열린결정 E(친구 관계 모델).',
+      prd: 'blueprint #19(친구 초대·카카오·딜링크) · idea-ledger #13(연락처 스크래핑 폐기) 대체안. PRD 정본 미기재 → plan 승격 대기(스펙 공백).',
+      chg: [
+        {w:'카카오 초대 미리보기의 이모지(🍀✏️💪) 자리를 <b>Higgsfield 실사(서연 얼굴)</b>로 교체. 초대 성사 카드 아바타(도경)도 실사.', fb:'회장: "힉스필드는 안씀? 다시해" — 인물 자리 이모지·이니셜 금지'},
+        {w:'상단 히어로에 <b>함께 응원하는 친구들 실사</b> 삽입 — "혼자 말고 같이" 카피와 시각 정합.', fb:''},
+        {w:'왼쪽 전역 레일에서 <b>친구목록 + → 초대·연결</b> 진입, <b>초대 성사 → 친구목록 복귀</b> 화살표로 흐름 명시.', fb:'회장: "새 화면이 기존에서 어떻게 연결되는지 흐름을 나타내라"'}
+      ],
+      flow: [['진입','친구목록(2) 우상단 + / 소속감 큐(4)의 재초대'],['이탈','초대 성사 → 친구목록(2)']]
+    },
+    friends: {
+      psych: '사회적 증거(내 사람 버전)+연결감. "N번 함께·6주 연속"은 두 사람만 보는 사적 관계 신호라 과시가 아니라 애착을 쌓는다. 콜드스타트는 정직한 빈 상태로 신뢰(양희연 원칙).',
+      bench: 'Strava 친구 피드(진행·근황) · 당근 이웃 · 토스 함께쌓기. 진행바+근황 한 줄 조합 차용. 단 랭킹·리더보드는 버림(금액·순위 금지).',
+      inherit: '계승: friends-invite-v1의 .fr 행·.relbadge·콜드스타트 3스텝·오버플로 렌더 로직 전량. 신규: 카드 클릭 → 소속감 큐(4) 라우팅.',
+      prd: 'blueprint #18(친구목록·관계배지·꾸준함) · 결정 D-009(콜드스타트 정직) · D-003(금액·랭킹 금지). PRD plan 승격 대기.',
+      chg: [
+        {w:'친구 아바타 3종(도경·서연·민서) + 과다상태 목록 아바타를 <b>이니셜 원 → Higgsfield 실사</b>로 전량 교체.', fb:'회장: "힉스필드는 안씀?" — 친구목록이 인물 자리의 핵심'},
+        {w:'왼쪽 레일에서 <b>홈 하단탭 → 친구목록</b> 진입, <b>친구 카드 탭 → 소속감 큐</b> 이탈을 화살표로 표시(고립 노드 제거).', fb:'회장: "왼쪽 사이드바 흐름 어디갔어"'}
+      ],
+      flow: [['진입','하단탭 친구 / 초대 성사 후'],['이탈','친구 카드 탭 → 소속감 큐(4) · + → 초대(1)'],['상태','정상·콜드(0명)·과다(오버플로) 3종 — 상단 데이터 토글']]
+    },
+    status: {
+      psych: '진행 효과(endowed progress)+수집 욕구. "다음 등급까지 20/30번"은 이미 시작한 진행을 보여 지속을 당긴다(환전 후 리텐션 하락 방어 = 회장 09-21 가설). 등급 축을 횟수·꾸준함으로만 둬 존엄을 지킴.',
+      bench: 'Duolingo 리그·뱃지 · 당근 매너온도 · 링크드인 스킬 뱃지. "등급·수집"은 차용, "금액 리더보드"는 명시적으로 거부(토글로 위험을 눈에 보이게).',
+      inherit: '계승: 토큰·relbadge 색·카드 규칙. 신규 화면: 등급 링·다음등급 진행바·뱃지 그리드·열린결정 A/B 토글. friends-invite의 열린결정 배지 패턴 계승.',
+      prd: 'idea-ledger 2026-09-21(게이미·리텐션)·2026-09-15(관계적 지위) → 결정 A(부스트)·B(정체성) 구체화. blueprint #20 인접. PRD 미기재(결정 대기).',
+      chg: [
+        {w:'왼쪽 레일에서 <b>홈 하단탭 "내 지위" → 응원자 지위</b> 진입을 화살표로 명시. 등급링은 <b>인물이 아닌 등급 엠블럼</b>이라 실사 미적용(의도).', fb:'회장: 신규 화면 연결 흐름 표기'},
+        {w:'금액 순 랭킹 토글은 <b>기본 OFF + 켜면 경고 미리보기</b> 유지(D-003 "지갑은 조용하게"). v1 정체성 보존.', fb:''}
+      ],
+      flow: [['진입','하단탭 내 지위'],['이탈','토글 조작(제품 내 상태) · 탭으로 이동'],['핵심','금액 랭킹 켜면 경고 미리보기 표시 — 회장이 위험을 눈으로 보고 판단']]
+    },
+    belong: {
+      psych: '소속감(in-group)+상호성. "응원자에게만 열리는 근황·타임라인"은 관계 지위를 특권으로 실체화(회장 09-15 "특별한 권한·인지"). 재초대는 푸시가 아니라 pull(#12 준수)로 조용히.',
+      bench: 'Patreon 후원자 전용 포스트 · 유튜브 멤버십 배지 · 프로덕트헌트 서포터. "후원자 전용 열림"을 차용하되 금액 티어가 아니라 관계 지속(횟수)으로 연다.',
+      inherit: '계승: 열린결정 배지·부스트 칩(friends-invite의 .boost-chip 재사용). 신규 화면: 응원자 전용 근황·타임라인·재초대 pull 카드.',
+      prd: 'idea-ledger 2026-09-15(응원자만 보는 것·재초대) · blueprint §6(정체성 노트)·#20 부스트. 결정 C(부스트 성격) 대기.',
+      chg: [
+        {w:'도경이의 <b>실사 히어로 사진</b> + 응원자 전용 근황의 <b>작성자 실사 얼굴</b> 삽입 — "응원자에게만 열리는 자리"의 인물 실체화.', fb:'회장: "힉스필드는 안씀? 다시해"'},
+        {w:'왼쪽 레일에서 <b>친구 카드 탭 → 소속감 큐</b> 진입, <b>재초대 pull → 초대·연결</b>로 루프백 화살표 명시(루프 닫힘).', fb:'회장: "기존 화면에서 어떻게 연결되는지"'}
+      ],
+      flow: [['진입','친구목록(2) 카드 탭 → 그 친구의 응원자 자리'],['이탈','재초대 카드 → 초대(1) · 뒤로 → 친구목록(2)']]
+    },
+    dopamine: {
+      psych: '즉각 보상(variable reward의 조용한 변형)+진행 가시화. 응원 순간 내 단어가 워드맵에 얹히는 걸 "직접 보게" 해 activation 도파민을 준다. 비회원 피드백은 손실회피("이 기록이 남아요")로 승격을 당김.',
+      bench: 'Strava 기록 실시간 반영 · 인스타 좋아요 애니메이션 · 카훗 실시간 집계. "즉각 시각 피드백"을 차용하되 폭죽·순위상승 알림(D-003 위배)은 배제.',
+      inherit: '계승: landing-wordmap-i18n-v2의 워드맵 구성·clover-ink 단어색. 신규: 클릭 시 단어 실시간 적립 @keyframes wmland·카운터 bump·비회원 피드백 배너.',
+      prd: 'idea-ledger 2026-09-21(도파민 UX·비회원 activation) · user-flow §2(비로그인 열람·승격 CTA). blueprint §3.2 접합. PRD §5.2 승격 CTA 인접.',
+      chg: [
+        {w:'목표 주인공(서연)의 <b>실사 히어로 사진</b> 삽입 — 비회원이 "누구를 응원하는지" 얼굴로 인지.', fb:'회장: "힉스필드는 안씀?"'},
+        {w:'왼쪽 레일에서 <b>기존 배포 목표페이지/워드맵 → 도파민 순간</b> 진입, <b>로그인 승격 → 홈</b> 루프백 화살표(비회원 유입 경로가 기존 화면과 이어짐).', fb:'회장: "새 화면 연결 흐름"'}
+      ],
+      flow: [['진입','인스타 링크 → 목표페이지(②) / 하단탭 응원'],['이탈','응원하기 → 실시간 적립 → 승격 CTA(로그인)'],['핵심','"조용히 응원하기"를 실제로 눌러 워드맵 적립 애니메이션 확인']]
+    }
+  };
+
+  function renderReview(id){
+    const d = REVIEW[id]; if(!d) return;
+    const el = document.querySelector('[data-review="'+id+'"]');
+    let chgHtml = '';
+    if(d.chg && d.chg.length){
+      chgHtml = '<div class="blk chg"><h4><span class="d"></span>개정 변경점 (화면별)</h4>' +
+        d.chg.map(c=>'<div class="chgitem" data-changelog-item><div class="w">'+c.w+'</div>'+(c.fb?'<div class="fb">'+c.fb+'</div>':'')+'</div>').join('') + '</div>';
+    } else {
+      // 신규 v1 — 개정 아님. chg 필드는 다음 리비전부터 채운다. (data-changelog 마커로 검수기 인지)
+      chgHtml = '<div class="blk chg" data-changelog><h4><span class="d"></span>변경점 (신규 v1)</h4><p>이 화면은 <b>신규 v1</b>입니다(개정 아님). 다음 리비전(v2)부터 회장 피드백 반영분을 이 자리에 화면별로 적습니다.</p></div>';
+    }
+    const flowHtml = '<div class="blk new"><h4><span class="d"></span>진입 · 이탈 flow</h4><div class="flow">' +
+      d.flow.map(f=>'<div class="fl"><b>'+f[0]+'</b><span>'+f[1]+'</span></div>').join('') + '</div></div>';
+    el.innerHTML =
+      '<div class="blk"><h4><span class="d"></span>심리 · 설득 근거</h4><p>'+d.psych+'</p></div>' +
+      '<div class="blk"><h4><span class="d"></span>벤치마크</h4><p>'+d.bench+'</p></div>' +
+      '<div class="blk"><h4><span class="d"></span>실구현 · 계승 근거</h4><p>'+d.inherit+'</p></div>' +
+      '<div class="blk"><h4><span class="d"></span>PRD · 결정 대응</h4><p>'+d.prd+'</p></div>' +
+      flowHtml + chgHtml;
+  }
+
+  // 화면 전환
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.console .nav').forEach(b=>b.classList.toggle('on', b.dataset.s===id));
+    document.querySelectorAll('.console .loop .node').forEach(n=>n.classList.toggle('on', n.dataset.loop===id));
+    document.querySelectorAll('.flowrail .fnode').forEach(n=>n.classList.toggle('on', n.dataset.loop===id));
+    document.querySelector('.stage').scrollIntoView({behavior:'instant',block:'start'});
+    document.getElementById('stateGrp').style.opacity = (id==='friends') ? '1':'.4';
+    renderReview(id);
+  }
+  document.querySelectorAll('.console .nav').forEach(b=>{ b.addEventListener('click',()=>go(b.dataset.s)); });
+  document.querySelectorAll('.console .loop .node').forEach(n=>{ n.addEventListener('click',()=>go(n.dataset.loop)); });
+
+  // 데이터 상태 토글 (화면 2)
+  function setState(st){
+    document.querySelectorAll('#stateGrp .st').forEach(b=>b.classList.toggle('on', b.dataset.state===st));
+    document.querySelectorAll('#friends [data-view]').forEach(v=>{ v.style.display = (v.dataset.view===st) ? '':'none'; });
+    if(st==='over') renderOver();
+  }
+  document.querySelectorAll('#stateGrp .st').forEach(b=>{ b.addEventListener('click',()=>setState(b.dataset.state)); });
+
+  // 과다 목록 렌더 (긴 이름·긴 목표 오버플로 검증)
+  let overRendered=false;
+  function renderOver(){
+    if(overRendered) return;
+    const box=document.getElementById('overList');
+    const names=['김서연정','박준혁','최지우아름다운이름','이도현','정민서','한example길다란이름테스트','오세훈','문가영별빛','배진우','신하늘'];
+    const goals=[
+      '이번 학기 전 과목 평점 4.3 이상으로 장학금 받고 졸업까지 해낼게',
+      '토익 990 만점 도전 3개월 안에 반드시 넘길게',
+      '매일 새벽 다섯 시 기상해서 헬스장 가고 3개월 안에 체지방 8kg 감량 해낼게',
+      '정보처리기사 필기 실기 한 번에 합격할게',
+      '10km 마라톤 완주 준비 해낼게'
+    ];
+    const faces=['dogyeong','seoyeon','jimin','supporter'];
+    let html='';
+    for(let i=0;i<10;i++){
+      const nm=names[i%names.length], gl=goals[i%goals.length], f=faces[i%faces.length];
+      const cnt=(23-i*2), wk=(9-i);
+      html+=`<a class="fr" onclick="return false;" href="#">
+        <div class="av"><img src="assets/social-viral/${f}.png" alt="${nm}"></div>
+        <div class="mid">
+          <div class="nm">${nm}</div>
+          <div class="goal">${gl}</div>
+          <div class="prog"><i style="width:${30+i*6}%"></i></div>
+          <div class="news"><i>💬</i><span>최근 기록 ${i+1}일 전 · 꾸준히 가고 있어요</span></div>
+        </div>
+        <div class="rel">
+          <span class="relbadge">🍀 ${cnt>0?cnt:1}번 함께</span>
+          <span class="relmeta">${wk>0?wk+'주 연속':'이번 주 쉼'}</span>
+        </div>
+      </a>`;
+    }
+    box.innerHTML=html;
+    overRendered=true;
+  }
+
+  function linkCopied(el){
+    const lb=el.querySelector('.lb'); const old=lb.textContent;
+    lb.textContent='복사됐어요 ✓';
+    el.style.borderColor='var(--clover)';
+    setTimeout(()=>{lb.textContent=old;el.style.borderColor='';},1400);
+  }
+
+  // 금액 랭킹 열린결정 토글 (화면 3)
+  function toggleRank(){
+    const sw=document.getElementById('rankSw');
+    sw.classList.toggle('on');
+    document.getElementById('rankPreview').classList.toggle('show', sw.classList.contains('on'));
+  }
+
+  // 도파민 순간 — 응원 시 워드맵 실시간 적립 (조용한 도파민)
+  const dopaWords=['잘한다','응원해','화이팅','넌된다','조금만','대단해','자랑스러워','끝까지','믿어','고생했어'];
+  let dopaIdx=0, wmTotal=23;
+  function dropWord(){
+    const wm=document.getElementById('wordmap');
+    const w=document.createElement('div');
+    w.className='wm-word mine landing';
+    const word=dopaWords[dopaIdx%dopaWords.length]; dopaIdx++;
+    w.textContent=word;
+    // 중앙을 피한 랜덤 배치
+    const angle=Math.random()*Math.PI*2, rad=32+Math.random()*24;
+    const x=50+Math.cos(angle)*rad, y=50+Math.sin(angle)*rad*0.8;
+    w.style.left=Math.max(12,Math.min(88,x))+'%';
+    w.style.top=Math.max(14,Math.min(86,y))+'%';
+    w.style.fontSize=(11+Math.random()*4).toFixed(0)+'px';
+    wm.appendChild(w);
+    // 카운터 bump
+    wmTotal++;
+    const c=document.getElementById('wmCount');
+    c.textContent=wmTotal; c.classList.add('bump');
+    setTimeout(()=>c.classList.remove('bump'),300);
+    // 비회원 피드백 갱신
+    document.getElementById('guestFeed').innerHTML='"<b>'+word+'</b>" 응원이 방금 여기 얹혔어요. 로그인하면 이 기록이 "내가 응원한 목표"에 남아요.';
+    const btn=document.getElementById('cheerBtn');
+    btn.textContent='🍀 조용히 닿았어요'; setTimeout(()=>{btn.textContent='🍀 조용히 응원하기';},1100);
+  }
+
+  // 초기 렌더
+  document.querySelectorAll('.flowrail .fnode').forEach(n=>n.classList.toggle('on', n.dataset.loop==='connect'));
+  renderReview('connect');
+</script>
+</body>
+</html>

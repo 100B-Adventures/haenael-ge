@@ -1,8 +1,1 @@
-ui-evidence social-viral-loop-v1
-contentChanged=2060
-clicks=7
-wheelScrollY=1401
-scrollY=1401
-scrollHeight=2245
-mobileOverflow=0
-consoleErrors=0
+contentChanged=true scrollY=0 wheelScrollY=1710 mobileOverflow=0 imgCount=10 flowrailNodes=26 (social-viral-loop-v2 재작업 실측 2026-09-23)
