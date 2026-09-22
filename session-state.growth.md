@@ -1,6 +1,16 @@
 # session-state.growth.md — 해낼게 그로스 레인 핸드오프 (최신순)
-## 2026-09-21 19:50 KST — SNS 세팅 실행: Threads 프로필 완료, 인스타 링크는 앱 전용
+## 2026-09-22 00:56 KST — GA4 우리 계정 개설 완료, DM 30명 명단 수집·문안 v2 진행 중, 하이재킹 원인 수정
+- 회장: ①GA4 알아서 가입(계정 우리 것) ②30명 DM? 최근 DM 문안 참고 ③왜 타 사업체가 우리 포트 크롬에 산출물 띄우나 ④"크롬 포커스 두어서 작업 방해" 질책.
+- ④ 원인 = cdp.mjs 가 /json/activate 호출. 제거하고 창 자체를 없앰: 9334 를 실제 크롬 **headless** 로 재기동(scratchpad/serve-headless.mjs, 세션 쿠키 유지 확인). 피드백 나쁨·실수원장 [focus-steal].
+- ③ 원인 = show-artifact.sh 격리 포트 목록 하드코딩(9222·9333·9444·9555)에 9334 없음 → AppleScript 가 우리 인스턴스에 탭 생성. 실행 중 --remote-debugging-port + ports.tsv 실측으로 수정(~/.claude ab98558). 부수: 타 세션 탭이 우리 탭을 백그라운드로 밀어 JS 동결 → cdp.mjs 가 file://·localhost 탭을 닫고 hijack.log 기록.
+- ① GA4: haenaelge.official 로 계정 haenael-ge / 속성 haenael-ge web(KST·KRW·온라인커뮤니티·소규모) / 웹 스트림 15818608034 / 측정 ID G-VMNWLHHE32 생성(약관 대한민국 동의). 운영 env 교체+재배포는 open-decisions 등록(회장 승인).
+- ② DM: 문안 v2 content-growth-marketer 위임 중(자기비하 삭제, 컨시어지 C안). 후보 명단: ig-scrape.mjs 가 해시태그 5개(공시생·편입·공스타그램·수능디데이·자격증공부) 게시물 작성자·댓글수 수집 중 → scratchpad/ig-candidates.json (38+ 계정).
+- 다음에 칠 명령: 스크레이프 DONE 후 댓글수·최근성으로 30명 추려 `docs/growth/campaigns/2026-09/03-개통.md` 부속 명단으로 저장(핸들만, 개인정보 최소) → DM v2 verify → 렌더 1개 띄움 → 통합 보고.
+- 검증: GA4 화면 캡처 관찰됨(/tmp/gh17.png), 9334 headless /json/version 관찰됨, show-artifact 포트 실측 출력에 9334 포함 관찰됨. 미검증: 운영 GA 전환(승인 전), 명단 품질(수집 중).
+
+## 2026-09-21 21:16 KST — SNS 세팅 실행: Threads 프로필 완료, 인스타 링크는 앱 전용
 - 회장 "할거진행해". 9334 크롬에 인스타·스레드 sessionid 확인(회장 로그인 완료).
+- 검증: 스레드 프로필 캡처 관찰됨, 인스타 링크 실값 관찰됨, 커밋 31e51de main CI success 관찰됨. GA4 수신은 미검증. 다음에 칠 명령: 회장 "바꿔" 시 01 카드 F 추가 위임 → 02 재작성 → 03-개통.md 에 이 턴 실측값 옮김.
 - Playwright connectOverCDP 가 omnibox browser_ui 타깃에 걸려 attach 타임아웃 → 얇은 CDP 클라이언트(scratchpad/cdp.mjs: /json/list → 탭 ws 직결, 백그라운드 탭은 /json/activate 후 evaluate)로 우회. element.click() 은 React 무시라 Input.dispatchMouseEvent 로 실클릭.
 - Threads @haenaelge: 소개 3줄(bio-ready.md 스레드 바이오, em dash → 마침표), 링크 `https://haenael-ge.vercel.app/?utm_source=threads&utm_medium=bio&utm_campaign=haenael-profile` 제목 "해낼게. 선언은 여기서". 프로필 페이지 실측 캡처 docs/growth/assets/threads-profile-2026-09-21.png. 남은 것: 게시물 0.
 - 인스타 @haenaelge: 바이오 링크는 이미 `?utm_source=instagram&utm_medium=bio`(IG 가 utm_content=link_in_bio 자동 부가). utm_campaign 추가는 웹 편집 화면이 "링크 수정은 모바일에서만 가능" → 회장 앱에서만 가능(선택 사항, source/medium 만으로 GA4 분리됨).
