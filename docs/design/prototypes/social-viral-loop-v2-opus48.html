@@ -267,7 +267,7 @@
   .stamp{max-width:1120px;margin:0 auto;color:#8a857c;font-size:10.5px;line-height:1.7;padding:18px 20px 40px;border-top:1px solid #35322d;}
   .stamp b{color:#cfc9bf;}
 
-  /* ══ 전역 플로우맵 = 왼쪽 고정 레일 (제품 아님, 검수 셸 · §51) ══ */
+  /* ══ 전역 플로우맵 = 왼쪽 고정 레일 (제품 아님, 검수 셸) ══ */
   body{padding-left:248px;}
   .flowrail{position:fixed;left:0;top:0;width:248px;height:100vh;overflow-y:auto;background:#161513;border-right:1px solid #35322d;padding:16px 14px 40px;z-index:80;}
   .flowrail::-webkit-scrollbar{width:6px;} .flowrail::-webkit-scrollbar-thumb{background:#35322d;border-radius:6px;}
@@ -284,6 +284,18 @@
   .fnode.on .fl{color:#fff;}
   .fnode .fk{display:block;font-size:9px;font-weight:600;color:#8a857c;margin-top:2px;}
   .fnode.on .fk{color:#d8f0e2;}
+  .fnode .fmeta{display:block;margin-top:6px;padding-top:6px;border-top:1px solid #35322d;}
+  .fnode.on .fmeta{border-top-color:rgba(255,255,255,.25);}
+  .fnode .fmeta .ml{display:flex;gap:4px;font-size:8.5px;line-height:1.45;margin-top:3px;}
+  .fnode .fmeta .ml:first-child{margin-top:0;}
+  .fnode .fmeta .mk{flex:0 0 auto;font-weight:800;color:#8fbfa6;}
+  .fnode.on .fmeta .mk{color:#d8f0e2;}
+  .fnode .fmeta .mv{color:#a8a299;font-weight:600;}
+  .fnode.on .fmeta .mv{color:#eef7f1;}
+  .fnode .fmeta .mv code{font-family:ui-monospace,Menlo,monospace;font-size:8px;color:#c9c2b8;background:#2a2823;padding:0 3px;border-radius:3px;}
+  .fnode.on .fmeta .mv code{color:#fff;background:rgba(0,0,0,.22);}
+  .fnode .fmeta .mv.newv{color:#e0a94a;font-weight:800;}
+  .fnode.on .fmeta .mv.newv{color:#ffe3ad;}
   .fnode.newnode{border-style:dashed;border-color:#c98a2b;}
   .fnode.newnode.on{border-style:solid;}
   .fnode .newtag{position:absolute;top:-7px;right:8px;font-size:8px;font-weight:800;color:#1c1b19;background:#c98a2b;padding:1px 5px;border-radius:6px;letter-spacing:.3px;}
@@ -293,7 +305,7 @@
   .flegend{margin-top:16px;padding-top:12px;border-top:1px solid #35322d;font-size:9px;color:#7d786f;line-height:1.6;}
   .flegend b{color:#c98a2b;}
 
-  /* ══ 인물·아바타 = Higgsfield 실사 <img> (§52 이모지 대체 금지) ══ */
+  /* ══ 인물·아바타 = Higgsfield 실사 img (이모지 대체 금지) ══ */
   .av{overflow:hidden;background:#E7F4EC !important;}
   .av img,.ava img{width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block;}
   .ava{width:40px;height:40px;border-radius:var(--r-full);overflow:hidden;flex:0 0 auto;}
@@ -308,50 +320,92 @@
 </head>
 <body>
 
-<!-- ══════════ 전역 플로우맵 · 왼쪽 고정 레일 (제품 아님 · §51) ══════════ -->
+<!-- ══════════ 전역 플로우맵 · 왼쪽 고정 레일 (제품 아님, 아트보드 밖) ══════════ -->
 <aside class="flowrail">
   <div class="rt"><span class="dot">🍀</span> 전역 플로우맵</div>
   <div class="rsub">소셜 바이럴 루프가 <b>기존 배포 화면</b> 위에 어떻게 얹히는지. 지금 보는 화면이 초록, 신규 화면은 주황 점선.</div>
 
   <div class="fgroup">기존 배포 화면 (web/src/app)</div>
-  <div class="fnode" data-loop="_home" onclick="alert('기존 배포 화면(홈/목표 목록). 이 프로토타입 범위 밖 — 하단탭 진입점만 표시.')">
-    <span class="fi">🏠</span><span class="fl">홈 · 하단탭 셸<span class="fk">배포됨 · 여기서 친구/응원/내지위 진입</span></span>
+  <div class="fnode" data-loop="_home">
+    <span class="fi">🏠</span><span class="fl">홈 · 하단탭 셸
+      <span class="fmeta">
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>web/src/app/(receiver)/page.tsx</code></span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">앱 실행 · 로그인 후 랜딩</span></span>
+        <span class="ml"><span class="mk">수정</span><span class="mv">홈: 하단탭에 친구·응원·내지위 진입점 3개 추가</span></span>
+      </span>
+    </span>
   </div>
   <div class="farrow"><span>↓</span><span class="lbl">하단탭 "친구"</span></div>
 
   <div class="fgroup">v2 신규 · 소셜 루프</div>
   <div class="fnode newnode" data-loop="friends" onclick="go('friends')">
     <span class="newtag">NEW</span>
-    <span class="fi">👥</span><span class="fl">② 친구목록 (연결감)<span class="fk">진입: 홈 하단탭 · 초대 성사 후</span></span>
+    <span class="fi">👥</span><span class="fl">② 친구목록 (연결감)
+      <span class="fmeta">
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/friends</code> · 부여 예정</span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">홈 하단탭 "친구" · 초대 성사 후 복귀</span></span>
+        <span class="ml"><span class="mk">상태</span><span class="mv newv">신규 화면</span></span>
+      </span>
+    </span>
   </div>
   <div class="farrow"><span>↓</span><span class="lbl">우상단 + (친구 초대)</span></div>
   <div class="fnode newnode" data-loop="connect" onclick="go('connect')">
     <span class="newtag">NEW</span>
-    <span class="fi">➕</span><span class="fl">① 초대·연결<span class="fk">진입: 친구목록 + · 소속감 큐 재초대</span></span>
+    <span class="fi">➕</span><span class="fl">① 초대·연결
+      <span class="fmeta">
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/invite</code> · 부여 예정</span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">친구목록 우상단 + · 소속감 큐 재초대</span></span>
+        <span class="ml"><span class="mk">상태</span><span class="mv newv">신규 화면</span></span>
+      </span>
+    </span>
   </div>
   <div class="farrow"><span>↺</span><span class="lbl">초대 성사 → 친구목록으로 복귀</span></div>
   <div class="fnode newnode" data-loop="belong" onclick="go('belong')">
     <span class="newtag">NEW</span>
-    <span class="fi">🔓</span><span class="fl">④ 소속감 큐<span class="fk">진입: 친구 카드 탭 → 그 친구의 응원자 자리</span></span>
+    <span class="fi">🔓</span><span class="fl">④ 소속감 큐
+      <span class="fmeta">
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/friends/[friendId]</code> · 부여 예정</span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">친구목록 카드 탭 → 그 친구의 응원자 자리</span></span>
+        <span class="ml"><span class="mk">상태</span><span class="mv newv">신규 화면</span></span>
+      </span>
+    </span>
   </div>
   <div class="farrow loopback"><span>↺</span><span class="lbl">재초대 pull → ① 초대·연결 (루프)</span></div>
   <div class="fnode newnode" data-loop="status" onclick="go('status')">
     <span class="newtag">NEW</span>
-    <span class="fi">🏅</span><span class="fl">③ 응원자 지위<span class="fk">진입: 하단탭 "내 지위"</span></span>
+    <span class="fi">🏅</span><span class="fl">③ 응원자 지위
+      <span class="fmeta">
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/me/status</code> · 부여 예정</span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">홈 하단탭 "내 지위"</span></span>
+        <span class="ml"><span class="mk">상태</span><span class="mv newv">신규 화면</span></span>
+      </span>
+    </span>
   </div>
 
   <div class="fgroup">v2 신규 · 획득(비회원 유입)</div>
-  <div class="fnode" data-loop="_goalpage" onclick="alert('기존 배포 화면(목표 페이지/워드맵, landing-wordmap-i18n). 인스타 링크로 비회원이 도착 — 여기서 도파민 순간으로 이어진다.')">
-    <span class="fi">🌐</span><span class="fl">목표 페이지 · 워드맵<span class="fk">배포됨 · 인스타 링크 유입</span></span>
+  <div class="fnode" data-loop="_goalpage">
+    <span class="fi">🌐</span><span class="fl">목표 페이지 · 워드맵
+      <span class="fmeta">
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/wordmap/[goalId]</code></span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">인스타·카톡 공유 링크 (비회원 도착)</span></span>
+        <span class="ml"><span class="mk">수정</span><span class="mv">워드맵: 비회원 "응원하기" → 도파민 순간 진입 추가</span></span>
+      </span>
+    </span>
   </div>
   <div class="farrow"><span>↓</span><span class="lbl">"응원하기" 탭</span></div>
   <div class="fnode newnode" data-loop="dopamine" onclick="go('dopamine')">
     <span class="newtag">NEW</span>
-    <span class="fi">⚡</span><span class="fl">⚡ 도파민 순간<span class="fk">진입: 목표페이지 응원 · 하단탭 응원</span></span>
+    <span class="fi">⚡</span><span class="fl">⚡ 도파민 순간
+      <span class="fmeta">
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/wordmap/[goalId]</code> 응원 오버레이 · 부여 예정</span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">목표 페이지 응원 탭 · 하단탭 "응원"</span></span>
+        <span class="ml"><span class="mk">상태</span><span class="mv newv">신규 화면 (기존 워드맵 위 오버레이)</span></span>
+      </span>
+    </span>
   </div>
   <div class="farrow loopback"><span>↺</span><span class="lbl">로그인 승격 → 홈/친구목록 (루프)</span></div>
 
-  <div class="flegend"><b>주황 점선</b> = v2 신규 화면. 모든 신규 노드는 <b>기존 배포 화면(홈·목표페이지)</b>에서 화살표로 진입하고, 소속감·도파민에서 초대·홈으로 <b>되돌아 루프</b>를 닫는다. 회색 노드 = 배포 완료(범위 밖).</div>
+  <div class="flegend"><b>주황 점선</b> = v2 신규 화면(경로 부여 예정). 회색 노드 = 기존 배포 화면(경로 실재, 수정 diff 한 줄). 모든 신규 노드는 기존 배포 화면에서 화살표로 진입하고 소속감·도파민에서 초대·홈으로 되돌아 루프를 닫는다.</div>
 </aside>
 
 <div class="console">
@@ -424,11 +478,6 @@
         <div class="accepted">
           <div class="ava"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
           <div class="tx"><b>윤도경</b>님이 초대를 받고 들어왔어요. 이제 친구목록에서 서로의 목표를 볼 수 있어요.</div>
-        </div>
-
-        <div class="opendec">
-          <span class="tag">🟣 열린결정 E · 미확정</span>
-          <p>"친구"를 <b>상호 응원만으로 자동 성립</b>시킬지, <b>초대·수락 명시 관계</b>로 둘지 결정 대기. 이 화면은 초대·수락(명시) 톤으로 그렸습니다. 회장이 보며 정합니다.</p>
         </div>
 
         <div class="safenote"><i>🔒</i><span>연락처를 통째로 읽지 않습니다. 내가 직접 고른 사람에게 카카오·링크로만 초대해요.</span></div>
@@ -565,8 +614,8 @@
 
         <div class="toggle-card">
           <div class="tinfo">
-            <div class="tl">금액 순 랭킹 <span class="badge-you" style="background:var(--violet-soft);color:var(--violet-ink)">열린결정 A</span></div>
-            <div class="td">기본은 꺼둡니다. 켜면 "누가 얼마 보냈나"가 보여요 — D-003 정체성과 충돌 소지.</div>
+            <div class="tl">금액 순 랭킹</div>
+            <div class="td">기본은 꺼둡니다. 켜면 "누가 얼마 보냈나"가 서로에게 보여요.</div>
           </div>
           <div class="sw" id="rankSw" onclick="toggleRank()"></div>
         </div>
@@ -574,13 +623,13 @@
           <div class="rw"><span class="rn">1</span><span>서연 · 82,000원</span></div>
           <div class="rw"><span class="rn">2</span><span>나 · 55,000원</span></div>
           <div class="rw"><span class="rn">3</span><span>도경 · 31,000원</span></div>
-          <div class="warn">⚠️ 이렇게 금액이 노출되면 "조용한 응원"이 경쟁이 됩니다. 회장 판단 전까지 기본 OFF 유지.</div>
+          <div class="warn">⚠️ 금액이 보이면 조용한 응원이 서로 눈치 보는 경쟁이 될 수 있어요. 그래서 기본은 꺼둬요.</div>
         </div>
 
         <div class="toggle-card">
           <div class="tinfo">
-            <div class="tl">받는 사람도 게이미 <span class="badge-you" style="background:var(--violet-soft);color:var(--violet-ink)">열린결정 B</span></div>
-            <div class="td">목표자(받는 사람)에게도 레벨·등급을 줄지. 기본 꺼둠 — "돈 모으려 목표 만드는" 어뷰징 방지.</div>
+            <div class="tl">받는 사람도 등급 받기</div>
+            <div class="td">목표를 세운 사람에게도 레벨·등급을 줄지. 기본은 꺼둬요.</div>
           </div>
           <div class="sw" onclick="this.classList.toggle('on')"></div>
         </div>
@@ -637,11 +686,6 @@
           <div class="boost-chip"><span class="p">🍀</span> 부스트 클로버 +5</div>
           <div class="bx"><b>환전은 안 되는</b> 응원 부스트예요. 다음에 응원할 때 조용히 얹혀 친구의 워드맵을 더 채워줍니다.</div>
         </div>
-        <div class="opendec">
-          <span class="tag">🟣 열린결정 C · 미확정</span>
-          <p>초대 보상 = <b>환전 불가 부스트 클로버</b>로 그렸습니다. 실클로버 직결은 선불충전금 규제 리스크(존립조건). 보상 없이 관계 배지만 둘지도 회장 결정 대기.</p>
-        </div>
-
         <div class="reinvite" onclick="go('connect')">
           <span class="ic">➕</span>
           <div class="rx">
@@ -695,11 +739,6 @@
         <button class="btn pri" id="cheerBtn" onclick="dropWord()">🍀 조용히 응원하기</button>
 
         <div class="guest-feed"><i>✨</i><span id="guestFeed">네 응원이 여기 쌓였어요. 로그인하면 이 기록이 "내가 응원한 목표"에 남아요.</span></div>
-
-        <div class="opendec">
-          <span class="tag">🟣 도파민 원칙</span>
-          <p>조용함과 양립하는 도파민만 씁니다. <b>내 단어가 실시간으로 얹히는 연출 · 비회원 피드백</b>은 OK. <b>폭죽·랭킹상승 알림은 배제</b>(D-003 위배).</p>
-        </div>
       </div></div>
       <div class="tabbar">
         <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
@@ -716,7 +755,7 @@
 <div class="stamp">
   🏷 STAMP | line: core | 생성: 2026-09-23 07:40 KST | model: claude-opus-4-8 | agent: product-designer | 근거: globals.css·blueprint-v1.0.0·idea-ledger·결정.md D-003/D-009/D-017·friends-invite-v1<br>
   <b>STAMP</b> line=core · social-viral-loop-v2-opus48.html · 생성 2026-09-23 07:40 KST · model claude-opus-4-8 · agent product-designer<br>
-  <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일(신규 화면 ↔ 기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 실사 6종 삽입 — 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출<br>
+  <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일 — 각 노드에 라우터 경로·진입 화면·신규/수정 diff를 레일 위 글자로 표기(신규↔기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 5종 삽입 — 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출 ④아트보드 안 설계·원칙 주석(도파민 원칙·열린결정 배지) 전량 제거 → 검수 패널로 이관(아트보드 주석 0)<br>
   <b>skills</b> design-consultation(방향·토큰 상속 확인) · design-html(hi-fi 목업) · design-review(headless 렌더·클릭·상태토글 QA) · Higgsfield CLI(seedream_v5_pro 실사)<br>
   <b>토큰</b> web/src/app/globals.css 실독(clover #1B8A4F · warm #F4EFE6 · radius 12/14/20 · Pretendard) — 진실원 계승<br>
   <b>근거</b> haenael-v2-blueprint-v1.0.0-opus48.md(§3.4·§5·§6) · idea-ledger #11·#12·#13·2026-09-15·2026-09-21 · one-thing.md · 결정.md D-003·D-009 · 계승 프로토 friends-invite-v1·landing-wordmap-i18n-v2<br>
@@ -736,7 +775,8 @@
         {w:'상단 히어로에 <b>함께 응원하는 친구들 실사</b> 삽입 — "혼자 말고 같이" 카피와 시각 정합.', fb:''},
         {w:'왼쪽 전역 레일에서 <b>친구목록 + → 초대·연결</b> 진입, <b>초대 성사 → 친구목록 복귀</b> 화살표로 흐름 명시.', fb:'회장: "새 화면이 기존에서 어떻게 연결되는지 흐름을 나타내라"'}
       ],
-      flow: [['진입','친구목록(2) 우상단 + / 소속감 큐(4)의 재초대'],['이탈','초대 성사 → 친구목록(2)']]
+      flow: [['진입','친구목록(2) 우상단 + / 소속감 큐(4)의 재초대'],['이탈','초대 성사 → 친구목록(2)']],
+      opendec: '열린결정 E · 미확정: "친구"를 상호 응원만으로 자동 성립시킬지, 초대·수락 명시 관계로 둘지 결정 대기. 이 화면은 초대·수락(명시) 톤으로 그렸다. 회장이 보며 정한다.'
     },
     friends: {
       psych: '사회적 증거(내 사람 버전)+연결감. "N번 함께·6주 연속"은 두 사람만 보는 사적 관계 신호라 과시가 아니라 애착을 쌓는다. 콜드스타트는 정직한 빈 상태로 신뢰(양희연 원칙).',
@@ -758,29 +798,32 @@
         {w:'왼쪽 레일에서 <b>홈 하단탭 "내 지위" → 응원자 지위</b> 진입을 화살표로 명시. 등급링은 <b>인물이 아닌 등급 엠블럼</b>이라 실사 미적용(의도).', fb:'회장: 신규 화면 연결 흐름 표기'},
         {w:'금액 순 랭킹 토글은 <b>기본 OFF + 켜면 경고 미리보기</b> 유지(D-003 "지갑은 조용하게"). v1 정체성 보존.', fb:''}
       ],
-      flow: [['진입','하단탭 내 지위'],['이탈','토글 조작(제품 내 상태) · 탭으로 이동'],['핵심','금액 랭킹 켜면 경고 미리보기 표시 — 회장이 위험을 눈으로 보고 판단']]
+      flow: [['진입','하단탭 내 지위'],['이탈','토글 조작(제품 내 상태) · 탭으로 이동'],['핵심','금액 랭킹 켜면 경고 미리보기 표시 — 회장이 위험을 눈으로 보고 판단']],
+      opendec: '열린결정 A(금액 순 랭킹): 기본 OFF, 켜면 누가 얼마 보냈나 노출 — D-003 "지갑은 조용하게"와 충돌 소지. 화면 안 경고 카피는 사용자용으로 순화(회장 판단 문구는 이 패널로 이관). / 열린결정 B(받는 사람 게이미): 목표자에게도 레벨·등급 줄지. 기본 OFF — "돈 모으려 목표 만드는" 어뷰징 방지. 둘 다 회장 결정 대기.'
     },
     belong: {
       psych: '소속감(in-group)+상호성. "응원자에게만 열리는 근황·타임라인"은 관계 지위를 특권으로 실체화(회장 09-15 "특별한 권한·인지"). 재초대는 푸시가 아니라 pull(#12 준수)로 조용히.',
       bench: 'Patreon 후원자 전용 포스트 · 유튜브 멤버십 배지 · 프로덕트헌트 서포터. "후원자 전용 열림"을 차용하되 금액 티어가 아니라 관계 지속(횟수)으로 연다.',
       inherit: '계승: 열린결정 배지·부스트 칩(friends-invite의 .boost-chip 재사용). 신규 화면: 응원자 전용 근황·타임라인·재초대 pull 카드.',
-      prd: 'idea-ledger 2026-09-15(응원자만 보는 것·재초대) · blueprint §6(정체성 노트)·#20 부스트. 결정 C(부스트 성격) 대기.',
+      prd: 'idea-ledger 2026-09-15(응원자만 보는 것·재초대) · blueprint 6절(정체성 노트)·#20 부스트. 결정 C(부스트 성격) 대기.',
       chg: [
         {w:'도경이의 <b>실사 히어로 사진</b> + 응원자 전용 근황의 <b>작성자 실사 얼굴</b> 삽입 — "응원자에게만 열리는 자리"의 인물 실체화.', fb:'회장: "힉스필드는 안씀? 다시해"'},
         {w:'왼쪽 레일에서 <b>친구 카드 탭 → 소속감 큐</b> 진입, <b>재초대 pull → 초대·연결</b>로 루프백 화살표 명시(루프 닫힘).', fb:'회장: "기존 화면에서 어떻게 연결되는지"'}
       ],
-      flow: [['진입','친구목록(2) 카드 탭 → 그 친구의 응원자 자리'],['이탈','재초대 카드 → 초대(1) · 뒤로 → 친구목록(2)']]
+      flow: [['진입','친구목록(2) 카드 탭 → 그 친구의 응원자 자리'],['이탈','재초대 카드 → 초대(1) · 뒤로 → 친구목록(2)']],
+      opendec: '열린결정 C · 미확정: 초대 보상 = 환전 불가 부스트 클로버로 그렸다. 실클로버 직결은 선불충전금 규제 리스크(존립조건). 보상 없이 관계 배지만 둘지도 회장 결정 대기.'
     },
     dopamine: {
       psych: '즉각 보상(variable reward의 조용한 변형)+진행 가시화. 응원 순간 내 단어가 워드맵에 얹히는 걸 "직접 보게" 해 activation 도파민을 준다. 비회원 피드백은 손실회피("이 기록이 남아요")로 승격을 당김.',
       bench: 'Strava 기록 실시간 반영 · 인스타 좋아요 애니메이션 · 카훗 실시간 집계. "즉각 시각 피드백"을 차용하되 폭죽·순위상승 알림(D-003 위배)은 배제.',
       inherit: '계승: landing-wordmap-i18n-v2의 워드맵 구성·clover-ink 단어색. 신규: 클릭 시 단어 실시간 적립 @keyframes wmland·카운터 bump·비회원 피드백 배너.',
-      prd: 'idea-ledger 2026-09-21(도파민 UX·비회원 activation) · user-flow §2(비로그인 열람·승격 CTA). blueprint §3.2 접합. PRD §5.2 승격 CTA 인접.',
+      prd: 'idea-ledger 2026-09-21(도파민 UX·비회원 activation) · user-flow 2절(비로그인 열람·승격 CTA). blueprint 3.2 접합. PRD 5.2 승격 CTA 인접.',
       chg: [
         {w:'목표 주인공(서연)의 <b>실사 히어로 사진</b> 삽입 — 비회원이 "누구를 응원하는지" 얼굴로 인지.', fb:'회장: "힉스필드는 안씀?"'},
         {w:'왼쪽 레일에서 <b>기존 배포 목표페이지/워드맵 → 도파민 순간</b> 진입, <b>로그인 승격 → 홈</b> 루프백 화살표(비회원 유입 경로가 기존 화면과 이어짐).', fb:'회장: "새 화면 연결 흐름"'}
       ],
-      flow: [['진입','인스타 링크 → 목표페이지(②) / 하단탭 응원'],['이탈','응원하기 → 실시간 적립 → 승격 CTA(로그인)'],['핵심','"조용히 응원하기"를 실제로 눌러 워드맵 적립 애니메이션 확인']]
+      flow: [['진입','인스타 링크 → 목표페이지(②) / 하단탭 응원'],['이탈','응원하기 → 실시간 적립 → 승격 CTA(로그인)'],['핵심','"조용히 응원하기"를 실제로 눌러 워드맵 적립 애니메이션 확인']],
+      opendec: '도파민 원칙: 조용함과 양립하는 도파민만 쓴다. 내 단어가 실시간으로 얹히는 연출·비회원 피드백은 OK. 폭죽·랭킹상승 알림은 배제(D-003 위배). 이 원칙 주석은 화면 밖 이 패널에만 둔다.'
     }
   };
 
@@ -797,12 +840,13 @@
     }
     const flowHtml = '<div class="blk new"><h4><span class="d"></span>진입 · 이탈 flow</h4><div class="flow">' +
       d.flow.map(f=>'<div class="fl"><b>'+f[0]+'</b><span>'+f[1]+'</span></div>').join('') + '</div></div>';
+    const opendecHtml = d.opendec ? '<div class="blk"><h4><span class="d" style="background:#8a6bbf"></span>🟣 열린결정 (제품 화면 밖)</h4><p>'+d.opendec+'</p></div>' : '';
     el.innerHTML =
       '<div class="blk"><h4><span class="d"></span>심리 · 설득 근거</h4><p>'+d.psych+'</p></div>' +
       '<div class="blk"><h4><span class="d"></span>벤치마크</h4><p>'+d.bench+'</p></div>' +
       '<div class="blk"><h4><span class="d"></span>실구현 · 계승 근거</h4><p>'+d.inherit+'</p></div>' +
       '<div class="blk"><h4><span class="d"></span>PRD · 결정 대응</h4><p>'+d.prd+'</p></div>' +
-      flowHtml + chgHtml;
+      flowHtml + opendecHtml + chgHtml;
   }
 
   // 화면 전환
