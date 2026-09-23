@@ -1,1 +1,1 @@
-contentChanged=true scrollY=0 wheelScrollY=1710 mobileOverflow=0 imgOk=9 railHi=5/5 railHasRoute=true opendecInFrame=0 (v2 2차수정 실측 2026-09-23)
+contentChanged=true hasHomeScreen=true homeTabClick=home homeTabCount=6 imgOk=9 imgBlank=0 err=0 opendecInFrame=0 (v2 홈+하단탭 실측 2026-09-24)

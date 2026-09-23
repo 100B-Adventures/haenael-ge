@@ -316,6 +316,25 @@
   .hero-portrait .hp-name{position:absolute;left:14px;bottom:12px;color:#fff;font-size:14px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.5);}
   .supporter-face{width:52px;height:52px;border-radius:var(--r-full);overflow:hidden;flex:0 0 auto;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.12);}
   .supporter-face img{width:100%;height:100%;object-fit:cover;object-position:center 28%;}
+
+  /* ── 홈(내 목표) = 실배포 (receiver)/me 계승 ── */
+  .home-hi{font-size:12.5px;font-weight:700;color:var(--muted);margin:2px 0 2px;}
+  .home-hi b{color:var(--ink);}
+  .balance{display:flex;align-items:center;justify-content:space-between;background:var(--clover-soft);border:1px solid #cfe8d8;border-radius:var(--r-md);padding:14px 16px;margin-top:8px;}
+  .balance .bl{font-size:11px;font-weight:700;color:var(--clover-ink);}
+  .balance .bv{font-size:20px;font-weight:900;color:var(--clover-ink);letter-spacing:-.4px;display:flex;align-items:center;gap:6px;}
+  .balance .bcta{font-size:11px;font-weight:800;color:var(--clover-ink);background:#fff;border:1px solid var(--clover);border-radius:var(--r-full);padding:7px 12px;}
+  .goalcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:15px 16px;margin-top:11px;}
+  .goalcard .gtop{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+  .chip{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:var(--r-full);white-space:nowrap;}
+  .chip.dday{background:var(--warm);color:var(--amber-ink);}
+  .chip.status{background:var(--clover-soft);color:var(--clover-ink);}
+  .goalcard h3{font-size:16px;font-weight:800;letter-spacing:-.3px;color:var(--ink);line-height:1.35;}
+  .goalcard .greason{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5;word-break:keep-all;}
+  .goalcard .gfoot{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:12px;border-top:1px solid var(--line);}
+  .goalcard .gcheer{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--clover-ink);}
+  .goalcard .gview{font-size:12px;font-weight:800;color:#fff;background:var(--clover);border:none;border-radius:var(--r-full);padding:9px 15px;cursor:pointer;box-shadow:0 4px 12px rgba(27,138,79,.2);}
+  .home-past{font-size:11px;font-weight:700;color:var(--faint);margin:20px 2px 2px;}
 </style>
 </head>
 <body>
@@ -326,12 +345,12 @@
   <div class="rsub">소셜 바이럴 루프가 <b>기존 배포 화면</b> 위에 어떻게 얹히는지. 지금 보는 화면이 초록, 신규 화면은 주황 점선.</div>
 
   <div class="fgroup">기존 배포 화면 (web/src/app)</div>
-  <div class="fnode" data-loop="_home">
-    <span class="fi">🏠</span><span class="fl">홈 · 하단탭 셸
+  <div class="fnode" data-loop="home" onclick="go('home')">
+    <span class="fi">🏠</span><span class="fl">홈 · 내 목표 <span style="font-size:8px;color:#8fbfa6;font-weight:800">실화면 계승</span>
       <span class="fmeta">
-        <span class="ml"><span class="mk">경로</span><span class="mv"><code>web/src/app/(receiver)/page.tsx</code></span></span>
-        <span class="ml"><span class="mk">진입</span><span class="mv">앱 실행 · 로그인 후 랜딩</span></span>
-        <span class="ml"><span class="mk">수정</span><span class="mv">홈: 하단탭에 친구·응원·내지위 진입점 3개 추가</span></span>
+        <span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/me</code> · 배포됨</span></span>
+        <span class="ml"><span class="mk">진입</span><span class="mv">앱 실행 · 로그인 후 랜딩 · 모든 화면 하단탭 홈</span></span>
+        <span class="ml"><span class="mk">수정</span><span class="mv">홈: 하단탭에 친구·응원·초대·내지위 진입점 4개 신설</span></span>
       </span>
     </span>
   </div>
@@ -412,6 +431,7 @@
   <h1><span class="dot">🍀</span> 해낼게 v2 · 소셜 바이럴 루프 <span class="ver">v2 · 390×844 네이티브앱 · 아이데이션 (왼쪽 레일·Higgsfield 실사 반영)</span></h1>
   <div class="loop">
     <span>바이럴 루프</span>
+    <span class="node" data-loop="home">🏠 홈(계승)</span><span class="arr">→</span>
     <span class="node" data-loop="connect">① 초대·연결</span><span class="arr">→</span>
     <span class="node" data-loop="friends">② 친구목록(연결감)</span><span class="arr">→</span>
     <span class="node" data-loop="status">③ 응원자 지위(지속)</span><span class="arr">→</span>
@@ -421,7 +441,8 @@
   <div class="row">
     <div class="grp">
       <span class="lbl">화면</span>
-      <button class="nav on" data-s="connect">1 · 초대·연결</button>
+      <button class="nav on" data-s="home">🏠 홈(계승)</button>
+      <button class="nav" data-s="connect">1 · 초대·연결</button>
       <button class="nav" data-s="friends">2 · 친구목록</button>
       <button class="nav" data-s="status">3 · 응원자 지위</button>
       <button class="nav" data-s="belong">4 · 소속감 큐</button>
@@ -440,8 +461,68 @@
 
 <div class="stage">
 
+  <!-- ══════════ 화면 0 · 홈 (기존 배포 (receiver)/me 계승) ══════════ -->
+  <section class="screen active" id="home">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head">
+          <div class="ttl">내 목표</div>
+          <div class="brand">해낼<span class="d">게</span></div>
+        </div>
+        <div class="home-hi">서연님, <b>3개</b>의 목표를 향해 가는 중이에요</div>
+
+        <div class="balance">
+          <div>
+            <div class="bl">모은 클로버</div>
+            <div class="bv">🍀 128개</div>
+          </div>
+          <button class="bcta" onclick="go('status')">내 지위 보기 ›</button>
+        </div>
+
+        <div class="goalcard">
+          <div class="gtop"><span class="chip dday">D-12</span><span class="chip status">진행 중</span></div>
+          <h3>토익 900 넘길게</h3>
+          <div class="greason">교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
+          <div class="gfoot">
+            <span class="gcheer">🍀 응원 23명</span>
+            <button class="gview" onclick="go('dopamine')">워드맵 보기</button>
+          </div>
+        </div>
+
+        <div class="goalcard">
+          <div class="gtop"><span class="chip dday">D-40</span><span class="chip status">진행 중</span></div>
+          <h3>주 3회 러닝 습관 만들게</h3>
+          <div class="greason">작년에 세 번 실패해서 이번엔 친구랑 같이 한다.</div>
+          <div class="gfoot">
+            <span class="gcheer">🍀 응원 8명</span>
+            <button class="gview" onclick="go('dopamine')">워드맵 보기</button>
+          </div>
+        </div>
+
+        <div class="home-past">지난 목표</div>
+        <div class="goalcard" style="opacity:.72">
+          <div class="gtop"><span class="chip status" style="background:var(--warm);color:var(--muted)">완료</span></div>
+          <h3>2급 자격증 따낼게</h3>
+          <div class="gfoot">
+            <span class="gcheer">🍀 응원 15명</span>
+            <button class="gview" style="background:var(--faint);box-shadow:none" onclick="go('dopamine')">기록 보기</button>
+          </div>
+        </div>
+      </div></div>
+      <div class="tabbar">
+        <a class="on"><span class="ic">🏠</span>홈</a>
+        <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
+        <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
+        <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
+        <a onclick="go('status')"><span class="ic">🏅</span>내 지위</a>
+      </div>
+    </div>
+    <div class="review" data-review="home"></div>
+  </section>
+
   <!-- ══════════ 화면 1 · 초대·연결 ══════════ -->
-  <section class="screen active" id="connect">
+  <section class="screen" id="connect">
     <div class="frame">
       <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
       <div class="app"><div class="pad">
@@ -483,6 +564,7 @@
         <div class="safenote"><i>🔒</i><span>연락처를 통째로 읽지 않습니다. 내가 직접 고른 사람에게 카카오·링크로만 초대해요.</span></div>
       </div></div>
       <div class="tabbar">
+        <a onclick="go('home')"><span class="ic">🏠</span>홈</a>
         <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
         <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
         <a class="on"><span class="ic">➕</span>초대</a>
@@ -571,6 +653,7 @@
         </div>
       </div></div>
       <div class="tabbar">
+        <a onclick="go('home')"><span class="ic">🏠</span>홈</a>
         <a class="on"><span class="ic">👥</span>친구</a>
         <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
         <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
@@ -635,6 +718,7 @@
         </div>
       </div></div>
       <div class="tabbar">
+        <a onclick="go('home')"><span class="ic">🏠</span>홈</a>
         <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
         <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
         <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
@@ -696,6 +780,7 @@
         </div>
       </div></div>
       <div class="tabbar">
+        <a onclick="go('home')"><span class="ic">🏠</span>홈</a>
         <a class="on" onclick="go('friends')"><span class="ic">👥</span>친구</a>
         <a onclick="go('dopamine')"><span class="ic">🍀</span>응원</a>
         <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
@@ -741,6 +826,7 @@
         <div class="guest-feed"><i>✨</i><span id="guestFeed">네 응원이 여기 쌓였어요. 로그인하면 이 기록이 "내가 응원한 목표"에 남아요.</span></div>
       </div></div>
       <div class="tabbar">
+        <a onclick="go('home')"><span class="ic">🏠</span>홈</a>
         <a onclick="go('friends')"><span class="ic">👥</span>친구</a>
         <a class="on"><span class="ic">🍀</span>응원</a>
         <a onclick="go('connect')"><span class="ic">➕</span>초대</a>
@@ -755,7 +841,7 @@
 <div class="stamp">
   🏷 STAMP | line: core | 생성: 2026-09-23 07:40 KST | model: claude-opus-4-8 | agent: product-designer | 근거: globals.css·blueprint-v1.0.0·idea-ledger·결정.md D-003/D-009/D-017·friends-invite-v1<br>
   <b>STAMP</b> line=core · social-viral-loop-v2-opus48.html · 생성 2026-09-23 07:40 KST · model claude-opus-4-8 · agent product-designer<br>
-  <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일 — 각 노드에 라우터 경로·진입 화면·신규/수정 diff를 레일 위 글자로 표기(신규↔기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 5종 삽입 — 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출 ④아트보드 안 설계·원칙 주석(도파민 원칙·열린결정 배지) 전량 제거 → 검수 패널로 이관(아트보드 주석 0)<br>
+  <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일 — 각 노드에 라우터 경로·진입 화면·신규/수정 diff를 레일 위 글자로 표기(신규↔기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 5종 삽입 — 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출 ④아트보드 안 설계·원칙 주석(도파민 원칙·열린결정 배지) 전량 제거 → 검수 패널로 이관(아트보드 주석 0) ⑤기존 배포 홈((receiver)/me 다중목표) 실제 디바이스 프레임으로 계승 추가 + 하단 탭바에 홈 진입 신설(전 화면 go('home') 실동작 — 신규 화면에서 기존 홈 복귀)<br>
   <b>skills</b> design-consultation(방향·토큰 상속 확인) · design-html(hi-fi 목업) · design-review(headless 렌더·클릭·상태토글 QA) · Higgsfield CLI(seedream_v5_pro 실사)<br>
   <b>토큰</b> web/src/app/globals.css 실독(clover #1B8A4F · warm #F4EFE6 · radius 12/14/20 · Pretendard) — 진실원 계승<br>
   <b>근거</b> haenael-v2-blueprint-v1.0.0-opus48.md(§3.4·§5·§6) · idea-ledger #11·#12·#13·2026-09-15·2026-09-21 · one-thing.md · 결정.md D-003·D-009 · 계승 프로토 friends-invite-v1·landing-wordmap-i18n-v2<br>
@@ -765,6 +851,17 @@
 <script>
   // ── 화면별 검수 패널 데이터 (심리·벤치·계승·PRD 4요소 + chg 신규표시 + flow 진입/이탈) ──
   const REVIEW = {
+    home: {
+      psych: '기준점(anchoring)+진행 가시화. 기존 배포 홈(내 목표 목록)을 그대로 계승해 회장이 "무엇이 바뀌었나"를 바로 대조하게 한다. 목표 카드·클로버 잔액·워드맵 보기 CTA는 실배포 그대로, 바뀐 건 하단탭 진입점뿐.',
+      bench: '토스 홈(잔액+할 일 카드) · 당근 나의 당근 · Strava 홈 피드. "잔액 요약 + 진행 카드 리스트 + 단일 CTA" 구조 차용. 이 홈은 신규 발명이 아니라 실배포 (receiver)/me 계승.',
+      inherit: '계승: 실배포 web/src/app/(receiver)/me/page.tsx — 다중 목표(진행 중 최대 3 + 지난 목표), 목표 카드(제목·D-day·상태칩·응원 인원 클로버·"워드맵 보기"→/wordmap/{goalId}), 클로버 잔액. 신규: 하단탭에 친구·응원·초대·내지위 4개 진입점 신설(이 홈이 v2 루프의 관문).',
+      prd: '실배포 계승 화면. 다중목표=설계 §4.4~4.6. v2 변경분(하단탭 신규 진입점)만 이번 스코프. PRD 정본은 기존 receiver-home 유지 + 소셜 진입점 plan 승격 대기.',
+      chg: [
+        {w:'<b>기존 배포 홈을 실제 디바이스 프레임으로 프로토타입에 추가</b> — 레일 노드로만 두지 않고 실화면 계승. 홈에서 v2가 무엇을 바꿨는지(하단탭 신규 진입점)가 눈에 보임.', fb:'회장: "기존 화면도 보여주어서 어떻게 변경됐거나 흐름이 연결되는지 보여줘야지"'},
+        {w:'<b>하단 탭바에 홈 진입 추가</b> — 전 화면 공유 셸에 홈 탭 신설. 어느 신규 화면에서든 하단탭 홈으로 기존 홈 복귀 가능(go(\'home\') 실동작).', fb:'회장: "하단 탭에서는 홈으로 어떻게 가"'}
+      ],
+      flow: [['진입','앱 실행 · 로그인 후 랜딩 · 모든 화면 하단탭 "홈"'],['이탈','목표 카드 "워드맵 보기" → 도파민(워드맵) · 하단탭 → 친구/초대/응원/내지위'],['핵심','v2 루프의 관문 — 여기 하단탭 신규 진입점에서 모든 소셜 화면이 갈라진다']]
+    },
     connect: {
       psych: '실행의도+상호성. "초대 → 서로 응원하는 사이"라는 관계 프레임으로 초대 동기를 이타(친구 목표 응원)에 건다. 카카오 말풍선 실물 미리보기로 "보내면 이렇게 보인다" 불확실성을 제거(Zeigarnik 대신 예측가능성).',
       bench: '카카오톡 초대 공유(딥링크 카드) · Strava 팔로우 초대 · Duolingo 친구 초대 스트릭. 셋 다 "연락처 스크래핑"이 아니라 공유 카드 방식 — 이 톤을 차용, 스크래핑은 버림.',
@@ -949,8 +1046,8 @@
   }
 
   // 초기 렌더
-  document.querySelectorAll('.flowrail .fnode').forEach(n=>n.classList.toggle('on', n.dataset.loop==='connect'));
-  renderReview('connect');
+  document.querySelectorAll('.flowrail .fnode').forEach(n=>n.classList.toggle('on', n.dataset.loop==='home'));
+  renderReview('home');
 </script>
 </body>
 </html>
