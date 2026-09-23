@@ -1,3 +1,11 @@
+## 게이트 오차단 원인규명·정리 완료 (2026-09-23 10:36 KST)
+delegate-continue 게이트가 여러 턴 종료를 막던 원인: 다른 세션의 postAGI code-builder codex가 트랙을 repo별이 아닌 generic `core`로 등록 → 내 core 세션 라인과 충돌 → 내 미완 위임으로 오인. 오등록 라인만 해제(프로세스 미접촉), 내 트랙 count=0. 배경 감시(bmmxa1oa3) 종료.
+현 상태: v2 프로토타입(social-viral-loop-v2-opus48.html) 3결함 수정·표출 완료. 표준 §50 레일 라우트·진입·diff 표기 + §52 아트보드 주석 기계검출 커밋. blueprint 동기화. 결정 B open-decisions 등록.
+남은 이슈/다음 액션:
+- 결정 B(ⓐ금액랭킹 OFF ⓑ받는사람게이미 안함 ⓒ부스트클로버 채택 ⓓ친구관계 명시수락) 회장 응답 → PRD v0.5.0 승격.
+- basics 린트 시간표기 오탐(ADR id D-003을 D-day 오인) 수정 후보.
+- 하네스 후보: codex 위임 트랙이 generic core로 충돌 → repo별 트랙명 강제 검토.
+
 ## v2 프로토타입 2차수정 회수·표출 (2026-09-23 10:00 KST)
 디자이너(이어가기) 3건 수정 회수·실측·표출 완료:
 - 왼쪽 레일 각 노드에 라우트 경로·진입 출발화면·신규/기존수정 diff를 글자로 박음(railHasRoute=true, alert 은닉 제거) — 관찰됨
