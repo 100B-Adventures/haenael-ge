@@ -1,3 +1,22 @@
+## v2 프로토타입 2차수정 회수·표출 (2026-09-23 10:00 KST)
+디자이너(이어가기) 3건 수정 회수·실측·표출 완료:
+- 왼쪽 레일 각 노드에 라우트 경로·진입 출발화면·신규/기존수정 diff를 글자로 박음(railHasRoute=true, alert 은닉 제거) — 관찰됨
+- 아트보드 안 .opendec 원칙주석 3곳(connect·belong·dopamine) 전량 검수패널로 이관, frame내 opendec=0, basics 린트 §52 검사 PASS — 관찰됨
+- clean-frame 7종 재추출, dopamine 육안: 도파민원칙 사라짐·순수 UI — 관찰됨
+- 헤드리스 실측: 5화면 전환 정상·레일하이라이트 5/5·img9·에러0
+- verify-agent-quality: ⛔ FAIL(브랜드토큰 미독) 미해소 → design-review A- 근거로 ⛔ 라벨 출고(hand-patch 금지)
+- 100B artifacts.generated.ts는 무관한 기존 50-missing이라 원복(별도 대시보드 트랙)
+다음: 결정 B(ⓐ금액랭킹 ⓑ받는사람게이미 ⓒ부스트클로버 ⓓ친구관계) 회장 응답 → PRD v0.5.0 승격. basics 린트 D-N/경과 오탐(ADR id 오인) 별도 수정 후보.
+
+## v2 프로토타입 2차 반려·근본대응 (2026-09-23 09:45 KST)
+회장 3차 지적: ①위임 결손 자가진단이 틀림 — 표준에 있으면 워커가 읽고 지켜야(§7), 위임엔 특이사항만 ②왼쪽 레일에 라우터명·기존화면 진입·추가수정 diff 표기 규칙 없음 ③"도파민 원칙"류 설계주석이 아트보드(.frame) 안에 박힘(§52 위반).
+근본대응(커밋 6be4adf):
+- std §50 정밀화: 레일 각 노드에 실제 라우터 경로+진입 출발화면+신규/기존수정 diff를 레일 표면 글자로 박기 의무(alert·툴팁 은닉 금지).
+- check-prototype-basics.sh 검사5 추가: .frame 안 .opendec·원칙/근거/프레임 배지 = §52 위반 기계검출. 현 v2에서 3건(connect·belong·dopamine) 검출 확인.
+- 100B 하네스판 changelog 반영. 대시보드 artifacts 생성물 MISSING(dashboard-kpi-v6...) refresh:all로 재생성 진행.
+- 디자이너(a65fb64) 이어가기로 3건 수정 재지시(레일 라우트표기·opendec 프레임밖 이동·clean 재추출). 회수 대기.
+다음: 회수 후 basics "아트보드 주석0" PASS + 레일 표기 실측 → 표출. 결정 B(ⓐ금액랭킹 ⓑ받는사람게이미 ⓒ부스트클로버 ⓓ친구관계) 회장 응답 대기.
+
 ## 소셜루프 v2 재작업 회수·표출 (2026-09-23 07:40 KST)
 회장 반려 3결함 수정 회수: social-viral-loop-v2-opus48.html.
 - 왼쪽 전역 플로우맵 고정 레일(노드 26, position:fixed) — 관찰됨
