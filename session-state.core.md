@@ -1,3 +1,9 @@
+## 실배포 로직 계승 회수·표출 (2026-09-25 23:29 KST)
+디자이너 회수: 워드맵 빈도집계(Wordmap.tsx normalizeWords·getSizeTier·TIER_STYLE 계승, s3 24px 진함/s2 18px/s1 14px 옅음), 홈 목표관리(수정·친구뷰·링크공유·새목표→onboarding·환전→cashout), 결제 전이트리거(레일: 응원하기→토스PG→success/fail).
+실측(관찰됨): wmDistinctSizes=3(24/18/14), wmCollisions=0, home 관리액션5(수정·친구뷰·공유·새목표·환전), rail 토스·성공·실패, err0, basics 아트보드주석0. dopamine 육안: 빈도 클라우드(화이팅·응원해 크게, 저빈도 작고 옅게) 겹침0.
+verify ⛔ FAIL 5회째(브랜드토큰 미독) → 서브 file:line 증거(Wordmap.tsx:1-140·me:235-360·payment·globals.css:60-129)+컨트롤러 직접 Read+design-review A- → ⛔ 라벨 출고. 커밋됨.
+남은: (근본) verify-agent-quality 이어가기 트랜스크립트 Read마커 미검출 보정=반복 오FAIL 원인. 관리자 우측 금액 오버플로. 범위(약관 포함)·결정 B(ⓐ금액랭킹OFF ⓑ받는사람게이미 안함 ⓒ부스트클로버 ⓓ친구관계 명시수락) 회장 대기.
+
 ## 실배포 로직 미계승 3건 지적·대응 (2026-09-25 23:10 KST)
 회장 지적: ①워드맵 글자 많아지면 겹치냐/비슷한단어 크기·색 조절 안 하냐 ②결제 성공·실패가 어디서 오는지 흐름 표현 하네스 없냐 ③내 해낼게 관리하는 곳 아예 없음. + 뭘 읽었는지.
 컨트롤러 직접 Read(정직): payment/success·fail/page.tsx, privacy/page.tsx(결제언급), components/goal/Wordmap.tsx(빈도집계 merge·word_count·SizeTier s1/s2/s3·opacity), (receiver)/me/page.tsx(MyLinkCard·수정·친구뷰·onboarding redirect), 라우트 find.
