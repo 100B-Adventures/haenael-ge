@@ -1,3 +1,9 @@
+## 실배포 15라우트 계승 회수·표출 (2026-09-25 15:56 KST)
+디자이너 이어가기 회수: 실배포 15 page.tsx+globals.css:60-129+DESIGN.md+screen-inventory file:line Read, 누락 화면 10개 실프레임 계승(랜딩·공개목표 g/[slug]·카카오로그인·온보딩·이용안내·결제성공/실패·환전·환전상태·관리자), 커버리지 대조표(#coverage: 계승10·연결4·누락1=child-safety 사유), 워드맵 겹침0, 하단탭 이모지→SVG.
+실측(관찰됨): screens17 switched17/17, wmCollisions=0, tabbarSVG=30, imgOk9/blank0, err0, basics 아트보드주석0, coverage=1, find라우트=15 일치. 육안: dopamine(겹침0·SVG탭)·admin(환전큐·회원·원장 계승, 우측 금액 오버플로 관찰)·goalpublic(로그인경계·인원수만·승격CTA).
+verify ⛔ FAIL(브랜드토큰 미독, 이어가기 트랜스크립트 Read마커 미검출) → 서브에이전트 globals.css:60-129 file:line 증거 제시+design-review A- → ⛔ 라벨 출고. 커밋 c7d8c7b.
+남은 이슈: 관리자 우측 금액 오버플로 수정, 범위(약관·소개 실프레임 포함 여부) 회장 확인, 결정 B(ⓐ금액랭킹OFF ⓑ받는사람게이미 안함 ⓒ부스트클로버 ⓓ친구관계 명시수락).
+
 ## 실배포 계승 미흡·재창조 의심 대응 (2026-09-25 15:08 KST)
 회장 질책: 기존 화면 다 계승·디벨롭 안 함, 비회원/회원/관리자·결제/환불 화면 없음, 읽을거 안읽고 재창조. 워드맵 글자 겹침. 하단바 아이콘 밤티.
 실측 진단: 실배포 라우트 14개(=(receiver)/me·onboarding·wordmap/[goalId]·cashout(+history·status)·admin·child-safety·g/[slug]·how·payment/success·fail·privacy·terms) 중 프로토타입은 me→home, wordmap→dopamine 2개만 계승. 나머지 12개 누락. verify가 브랜드·토큰 미독 FAIL 3회 냈는데 컨트롤러가 ⛔라벨로 밀어낸 것이 근본 실책(서브에이전트 실배포 Read 미검증).
