@@ -1,1 +1,1 @@
-contentChanged=true hasHomeScreen=true homeTabClick=home homeTabCount=6 imgOk=9 imgBlank=0 err=0 opendecInFrame=0 (v2 홈+하단탭 실측 2026-09-24)
+contentChanged=true screens=17 switchedOK=17 wmCollisions=0 tabbarSVG=30 imgOk=9 imgBlank=0 err=0 coverage=1 routes=15 (v2 실배포계승 실측 2026-09-25)
