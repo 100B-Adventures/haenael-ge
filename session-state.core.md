@@ -1,3 +1,12 @@
+## 프로토타입 전면 표출 (2026-09-26 01:57 KST)
+회장 "어디에 띄움?" = 직전 show-artifact.sh를 백그라운드(&)로 던져 매달려 탭이 안 떴음. AppleScript로 크롬 앞창 새 탭+activate 전면 표출(opened-front, 파일 132KB 확인).
+현 프로토타입 상태(social-viral-loop-v2-opus48.html): 실배포 15라우트 계승 + 워드맵 빈도집계(SizeTier 24/18/14, 겹침0) + 홈 목표관리(수정·친구뷰·공유·새목표·환전) + 결제 전이트리거(레일 응원→토스→success/fail) + 하단탭 SVG. 17화면 전환 OK, basics 아트보드주석0.
+남은 이슈/다음 액션:
+- 범위(약관·소개 실프레임 포함 여부, 추천 레일표기만)·결정 B(ⓐ금액랭킹OFF ⓑ받는사람게이미 안함 ⓒ부스트클로버 ⓓ친구관계 명시수락) 회장 대기.
+- (근본) verify-agent-quality 이어가기 트랜스크립트 Read마커 미검출 5회 오FAIL 보정.
+- show-artifact 백그라운드 매달림 재발방지(포그라운드 규칙화).
+- 관리자 우측 금액 오버플로 수정.
+
 ## 실배포 로직 계승 회수·표출 (2026-09-25 23:29 KST)
 디자이너 회수: 워드맵 빈도집계(Wordmap.tsx normalizeWords·getSizeTier·TIER_STYLE 계승, s3 24px 진함/s2 18px/s1 14px 옅음), 홈 목표관리(수정·친구뷰·링크공유·새목표→onboarding·환전→cashout), 결제 전이트리거(레일: 응원하기→토스PG→success/fail).
 실측(관찰됨): wmDistinctSizes=3(24/18/14), wmCollisions=0, home 관리액션5(수정·친구뷰·공유·새목표·환전), rail 토스·성공·실패, err0, basics 아트보드주석0. dopamine 육안: 빈도 클라우드(화이팅·응원해 크게, 저빈도 작고 옅게) 겹침0.
