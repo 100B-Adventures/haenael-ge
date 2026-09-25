@@ -1,3 +1,10 @@
+## 실배포 로직 미계승 3건 지적·대응 (2026-09-25 23:10 KST)
+회장 지적: ①워드맵 글자 많아지면 겹치냐/비슷한단어 크기·색 조절 안 하냐 ②결제 성공·실패가 어디서 오는지 흐름 표현 하네스 없냐 ③내 해낼게 관리하는 곳 아예 없음. + 뭘 읽었는지.
+컨트롤러 직접 Read(정직): payment/success·fail/page.tsx, privacy/page.tsx(결제언급), components/goal/Wordmap.tsx(빈도집계 merge·word_count·SizeTier s1/s2/s3·opacity), (receiver)/me/page.tsx(MyLinkCard·수정·친구뷰·onboarding redirect), 라우트 find.
+진단: 실배포엔 다 있는데 프로토타입이 미계승 — 워드맵 단순배치(집계 무시), 홈 목록만(관리액션 무시), 결제 전이트리거 무표현.
+조치: std §50 신설 "화면 전이 트리거+외부 콜백 경로"·"계승은 기능·로직·관리액션까지"(커밋 8810213, 100B 반영). 재위임(a65fb64): 워드맵 빈도집계 재현, 홈 목표관리 계승, 결제 트리거체인(응원→토스→success/fail) 레일 표현. 실배포 3파일 file:line Read 증명 강제.
+남은: 재작업 회수·실측. 관리자 우측 금액 오버플로. verify 이어가기 Read미검출 보정. 범위(약관 포함)·결정 B(ⓐ금액랭킹OFF ⓑ받는사람게이미 안함 ⓒ부스트클로버 ⓓ친구관계 명시수락) 회장 대기.
+
 ## 실배포 15라우트 계승 회수·표출 (2026-09-25 15:56 KST)
 디자이너 이어가기 회수: 실배포 15 page.tsx+globals.css:60-129+DESIGN.md+screen-inventory file:line Read, 누락 화면 10개 실프레임 계승(랜딩·공개목표 g/[slug]·카카오로그인·온보딩·이용안내·결제성공/실패·환전·환전상태·관리자), 커버리지 대조표(#coverage: 계승10·연결4·누락1=child-safety 사유), 워드맵 겹침0, 하단탭 이모지→SVG.
 실측(관찰됨): screens17 switched17/17, wmCollisions=0, tabbarSVG=30, imgOk9/blank0, err0, basics 아트보드주석0, coverage=1, find라우트=15 일치. 육안: dopamine(겹침0·SVG탭)·admin(환전큐·회원·원장 계승, 우측 금액 오버플로 관찰)·goalpublic(로그인경계·인원수만·승격CTA).
