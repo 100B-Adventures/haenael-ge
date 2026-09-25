@@ -217,13 +217,17 @@
   .dopa-top h2{font-size:24px;font-weight:900;letter-spacing:-.3px;margin-top:6px;line-height:1.35;word-break:keep-all;}
   .dopa-top p{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.55;word-break:keep-all;}
   /* 워드맵 캔버스 */
-  .wordmap{position:relative;height:250px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);margin-top:16px;overflow:hidden;}
-  .wm-word{position:absolute;font-weight:800;letter-spacing:-.3px;color:var(--clover-ink);white-space:nowrap;transform:translate(-50%,-50%);}
-  .wm-word.mine{color:var(--clover-bright);}
-  .wm-word.landing{animation:wmland .62s cubic-bezier(.2,1.1,.35,1) both;}
-  @keyframes wmland{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}60%{transform:translate(-50%,-50%) scale(1.08);}100%{opacity:1;transform:translate(-50%,-50%) scale(1);}}
-  .wm-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
-  .wm-center .wc-goal{font-size:12px;font-weight:900;color:var(--ink);}
+  /* 워드맵 = 실배포 Wordmap.tsx 계승: 같은 단어 word_count 합산 → 빈도 tier(s1/s2/s3)로 크기·색, flex-wrap 클라우드(겹침 0 by construction), clover 옅은 radial */
+  .wordmap{display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px 12px;min-height:200px;padding:20px 16px;border-radius:var(--r-lg);margin-top:16px;
+    background-image:radial-gradient(90% 90% at 50% 45%,var(--clover-soft),#EEF6F0 72%,transparent);}
+  .wm-word{letter-spacing:-.3px;line-height:1.35;transition:font-size .3s,color .3s;}
+  .wm-word.s1{color:#8bb79f;font-weight:600;font-size:14px;}
+  .wm-word.s2{color:#57a178;font-weight:700;font-size:18px;}
+  .wm-word.s3{color:#1a8150;font-weight:800;font-size:24px;}
+  .wm-word.landing{animation:wmland .5s cubic-bezier(.2,1.1,.35,1) both;}
+  @keyframes wmland{0%{opacity:0;transform:scale(.5);}60%{transform:scale(1.12);}100%{opacity:1;transform:scale(1);}}
+  .wm-goalword{width:100%;text-align:center;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:2px;}
+  .wm-center,.wm-center .wc-goal{display:none;}
   .wm-count{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;font-size:13px;font-weight:800;color:var(--clover-ink);}
   .wm-count .n{font-size:20px;font-weight:900;transition:transform .3s;}
   .wm-count .n.bump{transform:scale(1.25);}
@@ -338,6 +342,14 @@
   .goalcard .gcheer{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--clover-ink);}
   .goalcard .gview{font-size:12px;font-weight:800;color:#fff;background:var(--clover);border:none;border-radius:var(--r-full);padding:9px 15px;cursor:pointer;box-shadow:0 4px 12px rgba(27,138,79,.2);}
   .home-past{font-size:11px;font-weight:700;color:var(--faint);margin:20px 2px 2px;}
+  .gactions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+  .gchip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);background:var(--warm);border:1px solid var(--line);border-radius:var(--r-full);padding:7px 11px;cursor:pointer;}
+  .gchip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .gchip.preview{background:var(--clover-soft);border-color:#cfe8d8;color:var(--clover-ink);}
+  .home-add{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;border:1.5px dashed var(--clover);color:var(--clover-ink);background:var(--clover-soft);border-radius:var(--r-md);padding:14px;font-size:13px;font-weight:800;cursor:pointer;margin-top:13px;}
+  .home-cashout{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 15px;margin-top:11px;cursor:pointer;}
+  .home-cashout .cl2{font-size:12px;font-weight:700;color:var(--ink);}
+  .home-cashout .cv2{font-size:11px;font-weight:800;color:var(--clover-ink);}
 
   /* ── 계승 화면 공통 ── */
   .wordmark{font-size:12.5px;font-weight:800;letter-spacing:-.2px;color:var(--ink);}
@@ -541,6 +553,13 @@
       <span class="fmeta"><span class="ml"><span class="mk">경로</span><span class="mv"><code>app/g/[slug]</code> · 배포됨</span></span><span class="ml"><span class="mk">진입</span><span class="mv">인스타·카톡 공유 링크 (비회원 도착점)</span></span><span class="ml"><span class="mk">상태</span><span class="mv">계승 · 도파민 순간의 실배포 바탕</span></span></span>
     </span>
   </div>
+  <div class="farrow"><span>↓</span><span class="lbl">"응원하기"(CheerPaymentButton) → 토스 PG(외부 리다이렉트)</span></div>
+  <div class="fnode" style="border-style:dashed;border-color:#8a857c;opacity:.85" onclick="alert('외부: 토스 PG 결제창. successUrl → /payment/success, failUrl → /payment/fail 로 콜백 복귀.')">
+    <span class="fi">💳</span><span class="fl">토스 PG (외부 결제창)
+      <span class="fmeta"><span class="ml"><span class="mk">경로</span><span class="mv">외부 · 토스페이먼츠 SDK</span></span><span class="ml"><span class="mk">콜백</span><span class="mv">successUrl → 결제성공 · failUrl → 결제실패</span></span></span>
+    </span>
+  </div>
+  <div class="farrow"><span>↓</span><span class="lbl">성공 콜백 → payment/success · 실패 콜백 → payment/fail</span></div>
   <div class="fnode" data-loop="login" onclick="go('login')">
     <span class="fi">🔑</span><span class="fl">카카오 로그인 (auth)
       <span class="fmeta"><span class="ml"><span class="mk">경로</span><span class="mv"><code>/auth/kakao/start</code> · 배포됨</span></span><span class="ml"><span class="mk">진입</span><span class="mv">온보딩 저장·재로그인·소셜 로그인 필요 시</span></span><span class="ml"><span class="mk">상태</span><span class="mv">계승 · 비회원↔회원 경계</span></span></span>
@@ -660,6 +679,11 @@
           <div class="gtop"><span class="chip dday">D-12</span><span class="chip status">진행 중</span></div>
           <h3>토익 900 넘길게</h3>
           <div class="greason">교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
+          <div class="gactions">
+            <span class="gchip"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>수정</span>
+            <span class="gchip preview" onclick="go('goalpublic')"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="2.6"/></svg>친구에게 이렇게 보여요</span>
+            <span class="gchip" onclick="go('login')"><svg viewBox="0 0 24 24"><path d="M8.6 13.5l6.8 3.9M15.4 6.6l-6.8 3.9"/><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/></svg>링크 공유</span>
+          </div>
           <div class="gfoot">
             <span class="gcheer">🍀 응원 23명</span>
             <button class="gview" onclick="go('dopamine')">워드맵 보기</button>
@@ -670,10 +694,21 @@
           <div class="gtop"><span class="chip dday">D-40</span><span class="chip status">진행 중</span></div>
           <h3>주 3회 러닝 습관 만들게</h3>
           <div class="greason">작년에 세 번 실패해서 이번엔 친구랑 같이 한다.</div>
+          <div class="gactions">
+            <span class="gchip"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>수정</span>
+            <span class="gchip preview" onclick="go('goalpublic')"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="2.6"/></svg>친구에게 이렇게 보여요</span>
+            <span class="gchip" onclick="go('login')"><svg viewBox="0 0 24 24"><path d="M8.6 13.5l6.8 3.9M15.4 6.6l-6.8 3.9"/><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/></svg>링크 공유</span>
+          </div>
           <div class="gfoot">
             <span class="gcheer">🍀 응원 8명</span>
             <button class="gview" onclick="go('dopamine')">워드맵 보기</button>
           </div>
+        </div>
+
+        <button class="home-add" onclick="go('onboarding')">＋ 새 목표 만들기</button>
+        <div class="home-cashout" onclick="go('cashout')">
+          <span class="cl2">🍀 모은 클로버로 환전하기</span>
+          <span class="cv2">92개 지급 가능 ›</span>
         </div>
 
         <div class="home-past">지난 목표</div>
@@ -1043,7 +1078,15 @@
         </div>
         <div class="wm-count" style="margin-top:14px"><span>지금까지</span> <span class="n">23</span> <span>명이 응원했어요</span></div>
         <div class="wordmap" id="wordmap2" style="margin-top:10px">
-          <div class="wm-center"><div class="wc-goal">🍀<br>토익 900</div></div>
+          <div class="wm-goalword">🍀 토익 900 넘길게</div>
+          <span class="wm-word s3">화이팅</span>
+          <span class="wm-word s2">응원해</span>
+          <span class="wm-word s2">할수있어</span>
+          <span class="wm-word s2">끝까지</span>
+          <span class="wm-word s1">믿어</span>
+          <span class="wm-word s1">조금만더</span>
+          <span class="wm-word s1">넌된다</span>
+          <span class="wm-word s1">대단해</span>
         </div>
         <div style="height:150px"></div>
       </div></div>
@@ -1283,7 +1326,8 @@
   🏷 STAMP | line: core | 생성: 2026-09-23 07:40 KST | model: claude-opus-4-8 | agent: product-designer | 근거: globals.css·blueprint-v1.0.0·idea-ledger·결정.md D-003/D-009/D-017·friends-invite-v1<br>
   <b>STAMP</b> line=core · social-viral-loop-v2-opus48.html · 생성 2026-09-23 07:40 KST · model claude-opus-4-8 · agent product-designer<br>
   <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일 — 각 노드에 라우터 경로·진입 화면·신규/수정 diff를 레일 위 글자로 표기(신규↔기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 5종 삽입 — 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출 ④아트보드 안 설계·원칙 주석(도파민 원칙·열린결정 배지) 전량 제거 → 검수 패널로 이관(아트보드 주석 0) ⑤기존 배포 홈((receiver)/me 다중목표) 실제 디바이스 프레임으로 계승 추가 + 하단 탭바에 홈 진입 신설<br>
-  <b>v2 확장(실배포 전수 계승)</b> ⑥실배포 라우트 15개 전수 Read(screen-inventory.md 정본·globals.css @theme 토큰·DESIGN.md 브랜드) → 커버리지 대조표(계승10·연결4·누락사유명시1·누락무사유0, 권한축 비회원·회원·관리자 + 돈축 결제·환전 전부 커버) ⑦누락 기존 화면 실프레임 계승: 랜딩·공개목표(g/[slug])·카카오로그인(auth)·온보딩·이용안내·결제성공·결제실패·환전·환전상태·관리자 ⑧버그: 도파민 워드맵 겹침0 충돌회피 배치 + 하단탭 이모지→인라인 SVG(단색 stroke·clover accent)<br>
+  <b>v2 확장(실배포 전수 계승)</b> ⑥실배포 라우트 15개 전수 Read(screen-inventory.md 정본·globals.css @theme 토큰·DESIGN.md 브랜드) → 커버리지 대조표(계승10·연결4·누락사유명시1·누락무사유0, 권한축 비회원·회원·관리자 + 돈축 결제·환전 전부 커버) ⑦누락 기존 화면 실프레임 계승: 랜딩·공개목표(g/[slug])·카카오로그인(auth)·온보딩·이용안내·결제성공·결제실패·환전·환전상태·관리자 ⑧하단탭 이모지→인라인 SVG(단색 stroke·clover accent)<br>
+  <b>v2 로직 계승(회장 "그림만 계승" 지적)</b> ⑨워드맵: 실배포 Wordmap.tsx 계승 — 같은 단어 word_count 합산·빈도 tier(s1 #8bb79f 14px/s2 #57a178 18px/s3 #1a8150 24px)·flex-wrap 클라우드(겹침0)·상위12. 응원 시 그 단어 +1 → tier 성장 ⑩홈: me/page.tsx 목표 관리 액션 계승(수정·친구뷰 미리보기·링크 공유·새 목표→온보딩·환전 진입) ⑪결제 트리거 체인: 응원하기→토스 PG(외부)→successUrl/failUrl→성공/실패를 레일·검수패널에 화살표로 명시<br>
   <b>skills</b> design-consultation(방향·토큰 상속 확인) · design-html(hi-fi 목업) · design-review(headless 렌더·클릭·상태토글 QA) · Higgsfield CLI(seedream_v5_pro 실사)<br>
   <b>토큰</b> web/src/app/globals.css 실독(clover #1B8A4F · warm #F4EFE6 · radius 12/14/20 · Pretendard) — 진실원 계승<br>
   <b>근거</b> haenael-v2-blueprint-v1.0.0-opus48.md(§3.4·§5·§6) · idea-ledger #11·#12·#13·2026-09-15·2026-09-21 · one-thing.md · 결정.md D-003·D-009 · 계승 프로토 friends-invite-v1·landing-wordmap-i18n-v2<br>
@@ -1296,7 +1340,7 @@
     home: {
       psych: '기준점(anchoring)+진행 가시화. 기존 배포 홈(내 목표 목록)을 그대로 계승해 회장이 "무엇이 바뀌었나"를 바로 대조하게 한다. 목표 카드·클로버 잔액·워드맵 보기 CTA는 실배포 그대로, 바뀐 건 하단탭 진입점뿐.',
       bench: '토스 홈(잔액+할 일 카드) · 당근 나의 당근 · Strava 홈 피드. "잔액 요약 + 진행 카드 리스트 + 단일 CTA" 구조 차용. 이 홈은 신규 발명이 아니라 실배포 (receiver)/me 계승.',
-      inherit: '계승: 실배포 web/src/app/(receiver)/me/page.tsx — 다중 목표(진행 중 최대 3 + 지난 목표), 목표 카드(제목·D-day·상태칩·응원 인원 클로버·"워드맵 보기"→/wordmap/{goalId}), 클로버 잔액. 신규: 하단탭에 친구·응원·초대·내지위 4개 진입점 신설(이 홈이 v2 루프의 관문).',
+      inherit: '계승: 실배포 web/src/app/(receiver)/me/page.tsx:235-360 — 다중 목표(진행 중 3+지난) + 목표 카드 관리 액션 전부: GoalEditSheet(수정)·MyLinkCard(링크 공유)·friend-view-preview(👀 친구에게 이렇게 보여요→/g/slug)·워드맵 보기(→/wordmap/goalId)·SplitBalanceCard(클로버 잔액)·환전 진입(→/cashout, pending 시 /cashout/status)·새 목표(→onboarding). 목록만이 아니라 관리 CRUD 진입을 계승. 신규: 하단탭 4개 소셜 진입점.',
       prd: '실배포 계승 화면. 다중목표=설계 4.4~4.6절. v2 변경분(하단탭 신규 진입점)만 이번 스코프. PRD 정본은 기존 receiver-home 유지 + 소셜 진입점 plan 승격 대기.',
       chg: [
         {w:'<b>기존 배포 홈을 실제 디바이스 프레임으로 프로토타입에 추가</b> — 레일 노드로만 두지 않고 실화면 계승. 홈에서 v2가 무엇을 바꿨는지(하단탭 신규 진입점)가 눈에 보임.', fb:'회장: "기존 화면도 보여주어서 어떻게 변경됐거나 흐름이 연결되는지 보여줘야지"'},
@@ -1355,7 +1399,7 @@
     dopamine: {
       psych: '즉각 보상(variable reward의 조용한 변형)+진행 가시화. 응원 순간 내 단어가 워드맵에 얹히는 걸 "직접 보게" 해 activation 도파민을 준다. 비회원 피드백은 손실회피("이 기록이 남아요")로 승격을 당김.',
       bench: 'Strava 기록 실시간 반영 · 인스타 좋아요 애니메이션 · 카훗 실시간 집계. "즉각 시각 피드백"을 차용하되 폭죽·순위상승 알림(D-003 위배)은 배제.',
-      inherit: '계승: landing-wordmap-i18n-v2의 워드맵 구성·clover-ink 단어색. 신규: 클릭 시 단어 실시간 적립 @keyframes wmland·카운터 bump·비회원 피드백 배너.',
+      inherit: '계승(실배포 로직): web/src/components/goal/Wordmap.tsx — normalizeWords(같은 단어 word_count 합산·내림차순 정렬)·getSizeTier(ratio (count-min)/(max-min) ≥.67 s3 / ≥.34 s2 / else s1)·TIER_STYLE(s1 #8bb79f 14px / s2 #57a178 18px / s3 #1a8150 24px)·flex-wrap 클라우드(겹침 0 by construction)·상위 12개·clover 옅은 radial 배경. 프로토타입도 이 빈도 집계 그대로 재현 — 자주 나온 단어는 크게. 신규: 클릭 시 그 단어 word_count +1 → tier 재계산해 실시간 성장(landing 애니).',
       prd: 'idea-ledger 2026-09-21(도파민 UX·비회원 activation) · user-flow 2절(비로그인 열람·승격 CTA). blueprint 3.2 접합. PRD 5.2 승격 CTA 인접.',
       chg: [
         {w:'목표 주인공(서연)의 <b>실사 히어로 사진</b> 삽입 — 비회원이 "누구를 응원하는지" 얼굴로 인지.', fb:'회장: "힉스필드는 안씀?"'},
@@ -1401,16 +1445,16 @@
       bench:'토스 송금 완료 · 결제 성공 카드(스트라이프). 성공 카드+맥락 복귀 CTA 차용.',
       inherit:'계승(실배포): web/src/app/payment/success/page.tsx:81-113 — 중앙 카드·Clover 아이콘(lucide SVG)·"응원이 전달됐어요"·목표 제목 반영 메시지·친구 목표로 돌아가기. v2 미변경.',
       prd:'실배포 계승. screen-inventory G4. 토스 결제 승인 후 착지(돈축).',
-      flow:[['진입','토스 결제 승인 콜백'],['이탈','친구 목표로(goal-public) · 해낼게 홈(landing)']],
-      opendec:'없음(실배포 계승).'
+      flow:[['트리거 체인','공개목표/도파민 "응원하기"(CheerPaymentButton) → 토스 PG(외부) → successUrl'],['진입','토스 successUrl 콜백 → confirmPayment({paymentKey,orderId,amount}) 승인'],['이탈','goalSlug 있으면 친구 목표로(/g/slug) 복귀(워드맵 반영) · 없으면 홈']],
+      opendec:'외부 콜백 화면: 이 화면은 사용자가 직접 못 열고 토스 결제 승인 리다이렉트로만 도달. confirmPayment 실패 시 같은 화면에서 error 분기(status=error).'
     },
     payfail: {
       psych:'불안 최소화+회복 경로. "결제가 멈췄어요"로 실패를 담담히 알리고 즉시 재시도 경로 제공.',
       bench:'토스/스트라이프 결제 실패 카드. 사유 표시+재시도 차용.',
       inherit:'계승(실배포): web/src/app/payment/fail/page.tsx:21-37 — 중앙 카드·CircleAlert(lucide SVG)·"결제가 멈췄어요"·message 쿼리·홈 복귀. v2 미변경.',
       prd:'실배포 계승. screen-inventory G4(돈축 환불·실패).',
-      flow:[['진입','토스 결제 실패 콜백'],['이탈','다시 응원(goal-public) · 홈(landing)']],
-      opendec:'환불(취소) 전용 화면은 실배포에 별도 라우트 없음 — 결제 실패/환전 반려로 커버. 대조표 참조.'
+      flow:[['트리거 체인','공개목표/도파민 "응원하기" → 토스 PG(외부) → failUrl(사용자 취소·카드 오류·타임아웃)'],['진입','토스 failUrl 콜백 → message 쿼리 표시'],['이탈','다시 응원(goal-public) · 홈(landing)']],
+      opendec:'외부 콜백 화면: 토스 failUrl 리다이렉트로만 도달. 환불(취소) 전용 화면은 실배포에 별도 라우트 없음 — 결제 실패/환전 반려(REJECTED)로 커버. 대조표 참조.'
     },
     cashout: {
       psych:'투명성+신뢰. 지급 가능 클로버·원천징수·실수령액을 미리 다 보여줘 돈 관련 불신을 없앤다.',
@@ -1542,65 +1586,45 @@
     document.getElementById('rankPreview').classList.toggle('show', sw.classList.contains('on'));
   }
 
-  // 도파민 순간 — 응원 시 워드맵 실시간 적립 (조용한 도파민 · 겹침 0 배치)
-  const dopaWords=['잘한다','응원해','화이팅','넌된다','조금만','대단해','자랑스러워','끝까지','믿어','고생했어'];
-  let dopaIdx=0, wmTotal=23;
-  let wmPlaced=[]; // 배치된 단어 박스 {x,y,w,h} in % (중심좌표)
-  // 두 박스가 겹치는지 (가운데 목표칩 포함, 여백 gap%)
-  function wmOverlap(a,b,gap){
-    return Math.abs(a.x-b.x)*2 < (a.w+b.w+gap) && Math.abs(a.y-b.y)*2 < (a.h+b.h+gap);
+  // ── 워드맵 = 실배포 Wordmap.tsx(normalizeWords·getSizeTier) 계승 ──
+  // 같은 단어 word_count 합산 → 내림차순 정렬 → 빈도 ratio 로 s1/s2/s3 크기·색 → 상위 12개 flex-wrap 렌더(겹침 0)
+  const dopaWords=['잘한다','응원해','화이팅','넌된다','조금만더','대단해','자랑스러워','끝까지','믿어','고생했어'];
+  let dopaIdx=0, wmTotal=23, lastWord='';
+  // 실배포 get_wordmap RPC 결과 모사: {단어: word_count}
+  let wmCounts={'화이팅':8,'응원해':6,'할수있어':5,'끝까지':4,'믿어':3,'조금만더':3,'넌된다':2,'대단해':2,'자랑스러워':1,'잘한다':1,'고생했어':1};
+  // 실배포 getSizeTier: n===1→s3, max===min→s2, ratio(count-min/max-min) ≥.67 s3 / ≥.34 s2 / else s1
+  function wmTier(count,min,max,n){
+    if(n===1) return 's3';
+    if(max===min) return 's2';
+    const r=(count-min)/(max-min);
+    return r>=0.67?'s3':r>=0.34?'s2':'s1';
   }
-  // 단어 하나를 겹치지 않는 자리에 배치 (실패 시 가장 덜 겹치는 자리)
-  function wmPlace(word,size){
-    const wm=document.getElementById('wordmap');
-    const W=wm.clientWidth||330, H=wm.clientHeight||300;
-    const bw=(word.length*size*0.66+14)/W*100;   // 박스 폭 %
-    const bh=(size*1.5+8)/H*100;                   // 박스 높이 %
-    const center={x:50,y:50,w:(72/W*100),h:(56/H*100)}; // 가운데 목표칩
-    let best=null,bestScore=Infinity;
-    for(let i=0;i<140;i++){
-      const ang=Math.random()*Math.PI*2, rad=18+Math.random()*30;
-      const x=50+Math.cos(ang)*rad, y=50+Math.sin(ang)*rad*0.82;
-      const box={x,y,w:bw,h:bh};
-      if(x-bw/2<3||x+bw/2>97||y-bh/2<5||y+bh/2>95) continue; // 프레임 밖
-      let overlap=0;
-      if(wmOverlap(box,center,3)) overlap+=100;
-      for(const p of wmPlaced) if(wmOverlap(box,p,2.5)) overlap++;
-      if(overlap===0){ best=box; break; }
-      if(overlap<bestScore){ bestScore=overlap; best=box; }
-    }
-    wmPlaced.push(best);
-    return best;
-  }
-  // 초기 6개 시드 단어 배치 (겹침 0)
-  function wmInit(){
+  function wmRender(changed){
     const wm=document.getElementById('wordmap'); if(!wm) return;
-    wmPlaced=[];
-    const seeds=[['화이팅',14],['할수있어',12],['응원해',13],['조금만더',11],['믿어',12],['끝까지',12]];
-    seeds.forEach(([word,size])=>{
-      const b=wmPlace(word,size);
-      const el=document.createElement('div'); el.className='wm-word';
-      el.textContent=word; el.style.left=b.x+'%'; el.style.top=b.y+'%'; el.style.fontSize=size+'px';
-      wm.appendChild(el);
-    });
+    // normalizeWords: 합산은 이미 map. 내림차순 정렬(동률은 삽입순 유지 불필요 — 값으로만)
+    const entries=Object.entries(wmCounts).sort((a,b)=>b[1]-a[1]);
+    const counts=entries.map(e=>e[1]);
+    const min=Math.min(...counts), max=Math.max(...counts), n=entries.length;
+    const visible=entries.slice(0,12); // 실배포도 상위 12개만 표시
+    wm.innerHTML='<div class="wm-goalword">🍀 토익 900 넘길게</div>'+
+      visible.map(([word,c])=>{
+        const tier=wmTier(c,min,max,n);
+        const anim=(word===changed)?' landing':'';
+        return '<span class="wm-word '+tier+anim+'">'+word+'</span>';
+      }).join('');
   }
+  function wmInit(){ wmRender(); }
   function dropWord(){
-    const wm=document.getElementById('wordmap');
+    // 실배포 병합 모사: 눌러 응원하면 그 단어의 word_count 가 +1 되어 tier 가 커진다(재창조 아님)
     const word=dopaWords[dopaIdx%dopaWords.length]; dopaIdx++;
-    const size=12+Math.floor(Math.random()*3);
-    const b=wmPlace(word,size);
-    const w=document.createElement('div');
-    w.className='wm-word mine landing';
-    w.textContent=word;
-    w.style.left=b.x+'%'; w.style.top=b.y+'%'; w.style.fontSize=size+'px';
-    wm.appendChild(w);
-    // 카운터 bump
+    wmCounts[word]=(wmCounts[word]||0)+1;
+    lastWord=word;
+    wmRender(word);
     wmTotal++;
     const c=document.getElementById('wmCount');
     c.textContent=wmTotal; c.classList.add('bump');
     setTimeout(()=>c.classList.remove('bump'),300);
-    // 비회원 피드백 갱신
-    document.getElementById('guestFeed').innerHTML='"<b>'+word+'</b>" 응원이 방금 여기 얹혔어요. 로그인하면 이 기록이 "내가 응원한 목표"에 남아요.';
+    document.getElementById('guestFeed').innerHTML='"<b>'+word+'</b>" 응원이 방금 얹혔어요. 같은 단어가 쌓일수록 더 크게 자라요. 로그인하면 이 기록이 "내가 응원한 목표"에 남아요.';
     const btn=document.getElementById('cheerBtn');
     btn.textContent='🍀 조용히 닿았어요'; setTimeout(()=>{btn.textContent='🍀 조용히 응원하기';},1100);
   }
