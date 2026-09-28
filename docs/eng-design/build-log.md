@@ -5,6 +5,43 @@
 
 ---
 
+## 검색·AI 답변 노출 기반 구현 (2026-09-28)
+
+### 결론
+
+Organization·SoftwareApplication·FAQPage JSON-LD, `/llms.txt`, 사람이 읽는 FAQ 10개를 구현했다. 운영에 없는 유료 응원 결제와 환전을 제공 기능처럼 쓰던 초안 문구는 제거했고, 확인된 소셜 계정 다섯 개만 Organization에 연결했다.
+
+### 구현과 계약
+
+| 대상 | 구현 | 계약 안전망 |
+|---|---|---|
+| 구조화 데이터 | `web/src/lib/seo/structured-data.ts`에서 URL, 소셜 계정, FAQ, 세 스키마를 생성 | 세 스키마 `JSON.parse`, `<` 이스케이프, Facebook·허위 환전 주장 거절 |
+| 주입 위치 | 루트 `Organization`, `/how` `SoftwareApplication`, `/faq` `FAQPage` | dev HTML에서 유형과 개수 실측 |
+| FAQ 화면 | 기존 Tailwind 의미 토큰과 `<details>`를 사용한 10개 문답 | 화면과 JSON-LD가 동일한 `FAQ_ITEMS`를 공유, 10개 렌더 테스트 |
+| AI 설명 파일 | `web/public/llms.txt` | `/llms.txt` HTTP 200, `text/plain; charset=UTF-8`, 첫 줄 `# 해낼게` |
+| 탐색 연결 | Footer에 `/faq`, FAQ에 `/how` 링크 추가 | Chromium에서 링크 노출과 FAQ 펼침 관찰 |
+
+### 실행 증거
+
+| 등급 | 실행 | 결과 |
+|---|---|---|
+| 테스트됨 | `npm test` | 46 files, 287/287 PASS |
+| 테스트됨 | `npm run build` | Next.js 16.3.3 compile·TypeScript·static generation 18/18 PASS. `/faq` 정적 생성 포함 |
+| 테스트됨 | `npm run qa:design-tokens` | 검사 138파일, 기존 위반 74건, 신규 위반 0건 |
+| 근거 확인 | `design-lint.sh web/src` | 기존 인라인 style·토큰 밖 hex 각 8파일 경고. 신규 FAQ·SEO 파일에는 위반 없음 |
+| 관찰됨 | dev 서버 `127.0.0.1:3028` + curl | `/`, `/faq`, `/how`, `/llms.txt` 모두 200. JSON-LD 각각 Organization 1개, FAQPage 1개, SoftwareApplication 1개 파싱 성공 |
+| 관찰됨 | Chromium 390x844 `/faq` | 제목, 10개 문답, 첫 항목 펼침, 사용법 링크 렌더. 콘솔 오류 0, 페이지 오류 0 |
+
+첫 빌드는 격리 worktree의 `node_modules`가 원본 레포를 가리키는 심볼릭 링크라 Turbopack이 파일시스템 루트 밖 참조를 거부했다. 제품 코드 원인이 아니며, worktree에 `npm ci`로 독립 의존성을 설치한 뒤 동일 빌드를 다시 실행해 통과했다.
+
+### 경계와 다음 게이트
+
+운영 배포, 검색엔진 수집, AI 답변 반영은 미검증이다. Google은 일반 사이트의 FAQ 리치 결과를 보장하지 않으므로 노출 보장으로 보고하지 않는다. QA가 구조화 데이터 검증과 실제 배포 응답을 재확인한 뒤에만 배포 단계로 넘긴다.
+
+STAMP: 2026-09-28 22:40 KST | model GPT-5 Codex | agent code-builder | skill haenael-supabase-build | sources https://nextjs.org/docs/app/guides/json-ld, https://developers.google.com/search/docs/appearance/structured-data/sd-policies, https://developers.google.com/search/docs/appearance/structured-data/software-app, https://llmstxt.org/ | 고민 검색 노출을 과장하지 않고 실제 운영 사실만 기계가 읽게 했다.
+
+---
+
 ## 설계안 갈래 1 "다중 목표" 구현 (2026-09-21)
 
 ### 배경과 결정
