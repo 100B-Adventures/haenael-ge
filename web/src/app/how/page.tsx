@@ -6,11 +6,16 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
+import { JsonLdScript } from "@/components/seo/JsonLdScript";
+import { createSoftwareApplicationJsonLd } from "@/lib/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "어떻게 쓰는 건가요? — 해낼게",
   description:
-    "해낼게는 어떻게 쓰나요. 선언하고, 친구가 클로버로 응원하고, 모이면 환전(오픈 예정)까지 3단계로 안내합니다.",
+    "해낼게에서 목표를 선언하고, 친구에게 공유하고, 응원을 기록으로 남기는 방법을 안내합니다.",
+  alternates: {
+    canonical: "/how",
+  },
 };
 
 interface StepInfo {
@@ -19,8 +24,6 @@ interface StepInfo {
   desc: string;
 }
 
-// 랜딩 steps3("선언 › 친구가 🍀로 응원 › 모이면 환전")
-// + landing-final.html steps3 원문("모이면 환전") 그대로 3단계 확장
 const STEPS: StepInfo[] = [
   {
     no: "1",
@@ -34,14 +37,18 @@ const STEPS: StepInfo[] = [
   },
   {
     no: "3",
-    title: "모이면 환전",
-    desc: "해내면 네 것. 못 해내도, 잃는 사람은 없다. (환전은 오픈 예정입니다)",
+    title: "응원이 남아요",
+    desc: "친구가 남긴 응원과 워드맵은 목표를 이어가는 과정의 기록이 되고, 선언한 사람의 것으로 남아요.",
   },
 ];
 
 export default function HowPage() {
   return (
     <main className="flex flex-col min-h-svh px-[22px] [background-color:var(--background)]! [background-image:radial-gradient(120%_60%_at_50%_6%,_rgba(31,158,90,.05),_transparent_60%)]!">
+      <JsonLdScript
+        id="software-application-jsonld"
+        data={createSoftwareApplicationJsonLd()}
+      />
       {/* BrandMark */}
       <div className="pt-14 pb-0">
         <p className="font-extrabold [font-size:13px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">

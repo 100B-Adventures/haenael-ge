@@ -28,6 +28,16 @@ export function Footer() {
           >
             개인정보처리방침
           </Link>
+          <span className="[color:var(--border)]!" aria-hidden="true">
+            |
+          </span>
+          <Link
+            href="/faq"
+            className="underline underline-offset-2"
+            data-testid="footer-faq-link"
+          >
+            자주 묻는 질문
+          </Link>
         </div>
 
         <ul className="flex flex-col gap-0.5 text-[11px] leading-relaxed [color:var(--faint)]!">
