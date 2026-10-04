@@ -1,4 +1,5 @@
 // OnboardingGoalForm.test.tsx — 회장 지시(2026-07-19) "링크는 로그인 이후에만 발급하라" 회귀 테스트
+// + 다중 목표(설계 §4.4~4.6, 2026-09-21) create_goal RPC 전환 + 상한 안내 테스트
 //
 // 결함이었던 동작: 마운트 effect가 draft가 있고 user(기존 세션)가 존재하면
 // "저장" 버튼을 누른 적이 없어도 자동으로 saveGoalToDB를 호출해 링크를 발급했다.
@@ -7,6 +8,10 @@
 // 수정: "저장하고 내 링크 받기" 버튼을 실제로 눌렀을 때만 draft.utils의
 // saveSaveIntent()로 의도를 마킹하고, 마운트 effect는 hasSaveIntent()가
 // true인 draft만 로그인 후 1회 자동 커밋한다.
+//
+// 다중 목표 전환(2026-09-21): 직접 INSERT가 create_goal RPC 호출로 바뀌었다
+// (DB가 테이블 직접 INSERT 권한을 회수했다). 상한 초과는 goal_limit_reached
+// 오류로 오고, 온보딩 폼은 /me로 쫓아내지 않고 draft를 보존한 채 인라인 안내만 한다.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -14,50 +19,29 @@ import type { User } from "@supabase/supabase-js";
 import { OnboardingGoalForm } from "../OnboardingGoalForm";
 import { loadDraft, hasSaveIntent, clearDraft, clearSaveIntent } from "@/lib/utils/draft";
 
-const mockInsert = vi.fn();
+const mockRpc = vi.fn();
 const mockTrackEvent = vi.fn();
-const mockRouterReplace = vi.fn();
 const mockOnAuthStateChange = vi.fn(() => ({
   data: { subscription: { unsubscribe: vi.fn() } },
 }));
 
-// 회장 결정 A (2026-07-20): 저장 전 기존 활성 목표 SELECT 체크가 들어감 —
-// 기본값은 "기존 목표 없음"(빈 배열)이라 대부분 테스트는 종전처럼 insert까지 간다.
-// 갭A 전용 테스트만 이 값을 override.
-let mockExistingGoals: Array<{ id: number }> = [];
+// 기본값은 성공(slug 반환). 상한 초과 테스트만 이 값을 override.
+let mockRpcResult: { data: unknown; error: { message: string } | null } = {
+  data: [{ slug: "test-slug" }],
+  error: null,
+};
 
 vi.mock("@/lib/analytics", () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }));
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockRouterReplace }),
-}));
-
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     auth: { onAuthStateChange: mockOnAuthStateChange },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          neq: () => ({
-            is: () => ({
-              limit: () =>
-                Promise.resolve({ data: mockExistingGoals, error: null }),
-            }),
-          }),
-        }),
-      }),
-      insert: (...args: unknown[]) => {
-        mockInsert(...args);
-        return {
-          select: () => ({
-            single: () =>
-              Promise.resolve({ data: { slug: "test-slug" }, error: null }),
-          }),
-        };
-      },
-    }),
+    rpc: (...args: unknown[]) => {
+      mockRpc(...args);
+      return Promise.resolve(mockRpcResult);
+    },
   }),
 }));
 
@@ -76,7 +60,7 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    mockExistingGoals = [];
+    mockRpcResult = { data: [{ slug: "test-slug" }], error: null };
   });
 
   it("① 미인증 상태에서 저장 클릭 → LoginSheet만 뜨고 DB 저장은 안 함", async () => {
@@ -87,7 +71,7 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     await waitFor(() => {
       expect(screen.getByTestId("login-sheet-overlay")).toBeInTheDocument();
     });
-    expect(mockInsert).not.toHaveBeenCalled();
+    expect(mockRpc).not.toHaveBeenCalled();
 
     // draft는 저장되고, 저장 "의도"도 마킹돼야 로그인 후 자동커밋이 성립
     expect(loadDraft()?.title).toBe("편입 평점 4.0");
@@ -116,7 +100,7 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
       expect(screen.getByTestId("onboarding-form")).toBeInTheDocument();
     });
     expect(screen.queryByTestId("saving-state")).not.toBeInTheDocument();
-    expect(mockInsert).not.toHaveBeenCalled();
+    expect(mockRpc).not.toHaveBeenCalled();
     expect(mockTrackEvent).not.toHaveBeenCalledWith(
       "goal_created",
       expect.anything(),
@@ -138,8 +122,12 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     render(<OnboardingGoalForm initialUser={fakeUser} />);
 
     await waitFor(() => {
-      expect(mockInsert).toHaveBeenCalledTimes(1);
+      expect(mockRpc).toHaveBeenCalledTimes(1);
     });
+    expect(mockRpc).toHaveBeenCalledWith(
+      "create_goal",
+      expect.objectContaining({ p_title: "편입 평점 4.0" }),
+    );
     await waitFor(() => {
       expect(mockTrackEvent).toHaveBeenCalledWith("goal_created", {
         source: "oauth_return",
@@ -156,21 +144,28 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     fireEvent.click(screen.getByTestId("save-goal-button"));
 
     await waitFor(() => {
-      expect(mockInsert).toHaveBeenCalledTimes(1);
+      expect(mockRpc).toHaveBeenCalledTimes(1);
     });
     expect(hasSaveIntent()).toBe(false);
   });
 
-  it("④ [회장 결정 A, 1계정1목표] 이미 활성 목표가 있으면 재저장 대신 /me로 유도", async () => {
-    mockExistingGoals = [{ id: 1 }];
+  it("④ [다중 목표 설계 §4.6] 상한(3개) 도달 시 /me로 쫓아내지 않고 draft를 보존한 채 인라인 안내", async () => {
+    mockRpcResult = {
+      data: null,
+      error: { message: "goal_limit_reached" },
+    };
     render(<OnboardingGoalForm initialUser={fakeUser} />);
     fillForm();
     fireEvent.click(screen.getByTestId("save-goal-button"));
 
     await waitFor(() => {
-      expect(mockRouterReplace).toHaveBeenCalledWith("/me");
+      expect(
+        screen.getByText(/진행 중인 목표가 이미 3개예요/),
+      ).toBeInTheDocument();
     });
-    expect(mockInsert).not.toHaveBeenCalled();
+    // 쓴 글을 날리지 않는다: 폼이 그대로 남아 입력값을 유지해야 함.
+    expect(screen.getByTestId("onboarding-form")).toBeInTheDocument();
+    expect(screen.getByTestId("goal-title-input")).toHaveValue("편입 평점 4.0");
   });
 });
 

@@ -7,6 +7,11 @@ import { Toaster } from "sonner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Footer } from "@/components/common/Footer";
 import { RegisterServiceWorker } from "@/components/pwa/RegisterServiceWorker";
+import { JsonLdScript } from "@/components/seo/JsonLdScript";
+import {
+  createOrganizationJsonLd,
+  SITE_URL,
+} from "@/lib/seo/structured-data";
 import "./globals.css";
 
 // Pretendard Variable — 한국어 웹 표준 가변 폰트
@@ -22,9 +27,7 @@ export const metadata: Metadata = {
   title: "해낼게 — 응원은 돈으로 하는 겁니다",
   description:
     "친구의 목표에 조용히 클로버로 응원하세요. 응원이 쌓이면 예쁜 워드맵이 됩니다.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://haenael.app",
-  ),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
     locale: "ko_KR",
@@ -59,6 +62,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]!">
+        <JsonLdScript
+          id="organization-jsonld"
+          data={createOrganizationJsonLd()}
+        />
         <GoogleAnalytics />
         <RegisterServiceWorker />
         <div className="flex-1 flex flex-col">{children}</div>

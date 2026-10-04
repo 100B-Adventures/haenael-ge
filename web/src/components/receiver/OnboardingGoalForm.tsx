@@ -9,7 +9,6 @@
 //  로그인 후 복귀: 마운트 시 user 있고 draft 있으면 → auto-save
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { LoginSheet } from "@/components/auth";
 import { ShareLinkCard } from "@/components/goal/ShareLinkCard";
@@ -71,57 +70,45 @@ function defaultDueDate(): string {
 
 // ─── DB insert ───────────────────────────────────────────────────────────────
 //
-// 회장 결정 A (2026-07-20): 1계정 1목표(활성) 강제. DB엔 partial unique index
-// goal_one_active_per_member(member_id) WHERE status != 'DELETED' 가 정본이지만,
-// insert 시도 후 23505 에러로 알리는 건 UX가 나쁘다(원인이 안 보임) — 저장 전
-// SELECT로 기존 활성 목표를 먼저 확인해 "already-has-goal"로 조기 반환한다.
-// 동시요청 레이스는 DB 유니크 인덱스가 최종 방어선(앱레벨은 UX 최적화용).
+// 다중 목표(설계 §4.4~4.6, 2026-09-21): 1계정 1목표 강제를 폐기하고 계정당
+// 진행 중 목표 상한 3개로 바꿨다. 상한 원자 보장은 앱이 아니라 create_goal
+// RPC(SECURITY DEFINER + advisory lock)가 한다 — 테이블 직접 INSERT 권한은
+// DB에서 회수됐으므로(REVOKE) 이 경로가 유일한 생성 경로다.
 
 async function saveGoalToDB(
   values: FormValues,
-  userId: string,
-): Promise<{ slug: string } | { error: string } | { alreadyHasGoal: true }> {
+): Promise<{ slug: string } | { error: string } | { goalLimitReached: true }> {
   const supabase = createClient();
 
-  const { data: existing } = await supabase
-    .from("goal")
-    .select("id")
-    .eq("member_id", userId)
-    .neq("status", "DELETED")
-    .is("deleted_at", null)
-    .limit(1);
-
-  if (existing && existing.length > 0) {
-    return { alreadyHasGoal: true };
-  }
-
-  const title = `${values.title.trim()} 해낼게`;
-  const { data, error } = await supabase
-    .from("goal")
-    .insert({
-      member_id: userId,
-      title,
-      reason: values.reason.trim() || null,
-      due_date: values.due_date,
-    })
-    .select("slug")
-    .single();
+  const { data, error } = await supabase.rpc("create_goal", {
+    p_title: values.title.trim(),
+    // DB가 NULLIF(btrim(p_reason), '')로 빈 문자열을 NULL로 정규화한다.
+    // gen types가 p_reason을 string(non-null)으로 좁혀 null 리터럴은 타입 에러 —
+    // GoalEditSheet(update_goal)와 동일하게 빈 문자열로 맞춘다.
+    p_reason: values.reason.trim() || "",
+    p_due_date: values.due_date,
+  });
 
   if (error) {
-    // 23505 = unique_violation. DB 인덱스가 레이스를 막은 경우도 "이미 목표 있음"으로 처리.
-    if (error.code === "23505") {
-      return { alreadyHasGoal: true };
+    // goal_limit_reached: create_goal이 진행 중 목표 3개 초과 시 명시 코드로 던짐.
+    if (error.message?.includes("goal_limit_reached")) {
+      return { goalLimitReached: true };
     }
-    console.error("[OnboardingGoalForm] insert error:", error);
+    console.error("[OnboardingGoalForm] create_goal error:", error);
     return { error: error.message };
   }
-  return { slug: data.slug };
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row?.slug) {
+    console.error("[OnboardingGoalForm] create_goal returned no slug:", data);
+    return { error: "목표 생성에 실패했습니다." };
+  }
+  return { slug: row.slug };
 }
 
 // ─── 컴포넌트 ─────────────────────────────────────────────────────────────────
 
 export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(initialUser);
   const [values, setValues] = useState<FormValues>({
     title: "",
@@ -161,19 +148,19 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
       if (user && !autoSaveDone && hasSaveIntent()) {
         setAutoSaveDone(true);
         setIsSaving(true);
-        saveGoalToDB(
-          {
-            title: draft.title,
-            reason: draft.reason ?? "",
-            due_date: draft.due_date || defaultDueDate(),
-          },
-          user.id,
-        ).then((result) => {
+        saveGoalToDB({
+          title: draft.title,
+          reason: draft.reason ?? "",
+          due_date: draft.due_date || defaultDueDate(),
+        }).then((result) => {
           setIsSaving(false);
           clearSaveIntent();
-          if ("alreadyHasGoal" in result) {
-            clearDraft();
-            router.replace("/me");
+          if ("goalLimitReached" in result) {
+            // 상한 도달(설계 §4.6): 쓴 글을 날리지 않는다 — draft를 지우지 않고
+            // 폼으로 돌아가 안내만 한다.
+            setSaveError(
+              "진행 중인 목표가 이미 3개예요. 하나를 마무리한 뒤 새로 만들어 주세요.",
+            );
           } else if ("error" in result) {
             setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
           } else {
@@ -243,14 +230,14 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     // 인증 상태 → 버튼 클릭 = 명시적 저장 의도. 즉시 DB 저장(정상 플로우).
     setIsSaving(true);
     setSaveError(null);
-    const result = await saveGoalToDB(values, user.id);
+    const result = await saveGoalToDB(values);
     setIsSaving(false);
 
-    if ("alreadyHasGoal" in result) {
-      // 회장 결정 A: 이미 활성 목표가 있으면 재저장 대신 /me로 유도(dead-end 0).
-      clearDraft();
-      clearSaveIntent();
-      router.replace("/me");
+    if ("goalLimitReached" in result) {
+      // 상한 도달(설계 §4.6): 저장 시점에만 안내하고 입력은 그대로 둔다(날리지 않음).
+      setSaveError(
+        "진행 중인 목표가 이미 3개예요. 하나를 마무리한 뒤 새로 만들어 주세요.",
+      );
     } else if ("error" in result) {
       setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
     } else {

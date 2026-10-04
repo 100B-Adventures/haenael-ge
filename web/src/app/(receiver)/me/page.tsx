@@ -1,7 +1,7 @@
 // (receiver)/me/page.tsx — 받는사람 내 페이지
 // 슬라이스 #9 실구현. 인증 필수.
 // DESIGN.md §6 금액 3층 b: 클로버 개수(🍀 N개)만, ₩ 환산 X.
-// wireframe: docs/WIREFRAMES/receiver-home.html + wordmap-share.html (1. 내 목표 홈).
+// wireframe: docs/design/WIREFRAMES/receiver-home.html + wordmap-share.html (1. 내 목표 홈).
 // 단일 CTA: "워드맵 보기" → /wordmap/{goalId}.
 // 슬라이스 #10: NotificationBadge 통합.
 
@@ -14,6 +14,7 @@ import { PhoneConsentNotice } from "@/components/auth/PhoneConsentNotice";
 import { HomeSeenTracker } from "@/components/goal/HomeSeenTracker";
 import { MyLinkCard } from "@/components/goal/MyLinkCard";
 import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
+import { MyGoalListCard } from "@/components/goal/MyGoalListCard";
 import { SplitBalanceCard } from "@/components/goal/SplitBalanceCard";
 import { type CashoutRecord } from "@/lib/cashout";
 import { CheerList, type ReceiverCheer } from "@/components/receiver/CheerList";
@@ -59,22 +60,69 @@ export default async function ReceiverHomePage({
     redirect("/");
   }
 
-  // G3: 본인 목표 (최신 1개, 삭제 제외)
-  const { data: goals } = await supabase
+  // 다중 목표(설계 §4.4~4.6): 계정당 진행 중 목표 상한은 3개이지만 지난(마감)
+  // 목표는 소프트삭제되지 않고 그대로 남으므로 상한과 무관하게 여러 개일 수
+  // 있다. 진행 중/지난을 한 번에 가져와 화면에서 나눈다.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const { data: allGoals } = await supabase
     .from("goal")
-    .select("id, slug, title, reason, due_date, status")
+    .select("id, slug, title, reason, due_date, status, created_at")
     .eq("member_id", user.id)
     .neq("status", "DELETED")
     .is("deleted_at", null)
-    .order("created_at", { ascending: false })
-    .limit(1);
+    .order("created_at", { ascending: false });
 
-  const goal = goals?.[0];
-
-  // 목표 없으면 온보딩으로
-  if (!goal) {
+  // 목표가 하나도 없으면 온보딩으로(설계 §4.6 "목표 0개" 경계).
+  if (!allGoals || allGoals.length === 0) {
     redirect("/onboarding");
   }
+
+  const inProgressGoalsRaw = allGoals.filter((g) => g.due_date >= todayIso);
+  const pastGoals = allGoals.filter((g) => g.due_date < todayIso);
+
+  // 진행 중 목표가 전부 마감이면(예: 상태 갱신 지연) 온보딩으로 보내지 않고
+  // "지난 목표"만 보여준다(설계 §4.6 "목표 전부 마감" 경계) — 이 경우 primary는 없음.
+  const goalIds = allGoals.map((g) => g.id);
+
+  // 응원 인원수 + 정렬용 최근 응원 도착시각을 목표별로 한 번에 집계.
+  // PRD §4.3-1: 최근 응원 도착순, 같으면 생성 역순.
+  const { data: cheerAggRaw } = goalIds.length
+    ? await supabase
+        .from("cheer")
+        .select("goal_id, created_at")
+        .in("goal_id", goalIds)
+        .eq("status", "CONFIRMED")
+        .is("deleted_at", null)
+    : { data: [] as { goal_id: number; created_at: string }[] };
+
+  const cheerCountByGoal = new Map<number, number>();
+  const lastCheerAtByGoal = new Map<number, string>();
+  for (const row of cheerAggRaw ?? []) {
+    cheerCountByGoal.set(row.goal_id, (cheerCountByGoal.get(row.goal_id) ?? 0) + 1);
+    const prevLast = lastCheerAtByGoal.get(row.goal_id);
+    if (!prevLast || row.created_at > prevLast) {
+      lastCheerAtByGoal.set(row.goal_id, row.created_at);
+    }
+  }
+
+  const stripSuffix = (title: string | null) =>
+    (title ?? "").replace(/\s*해낼게\s*$/, "").trim();
+
+  const inProgressGoals = [...inProgressGoalsRaw].sort((a, b) => {
+    const lastA = lastCheerAtByGoal.get(a.id);
+    const lastB = lastCheerAtByGoal.get(b.id);
+    if (lastA && lastB) return lastA > lastB ? -1 : lastA < lastB ? 1 : 0;
+    if (lastA && !lastB) return -1;
+    if (!lastA && lastB) return 1;
+    // 응원 도착이 둘 다 없으면 생성 역순(최신 먼저).
+    return a.created_at > b.created_at ? -1 : a.created_at < b.created_at ? 1 : 0;
+  });
+
+  // 목록 최상단 카드(primary) — 기존 단일 목표 화면의 상세 UI(응원 검색·워드맵
+  // 미리보기·수정·친구뷰 미리보기)를 그대로 유지한다. 나머지 진행 중 목표와
+  // 지난 목표는 설계 §4.5 표대로 간단 카드(제목·D-day·응원수·링크복사)로만 둔다.
+  const goal = inProgressGoals[0] ?? pastGoals[0];
+  const otherInProgressGoals = inProgressGoals.slice(1);
 
   const { data: member } = await supabase
     .from("member")
@@ -359,6 +407,57 @@ export default async function ReceiverHomePage({
         >
           워드맵 보기
         </Link>
+
+        {/* 다중 목표(설계 §4.5): 진행 중인 다른 목표들 — 세로 스택, 간단 카드 */}
+        {otherInProgressGoals.length > 0 && (
+          <div className="mt-6" data-testid="other-goals-section">
+            <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">
+              진행 중인 다른 목표
+            </p>
+            {otherInProgressGoals.map((g) => (
+              <MyGoalListCard
+                key={g.id}
+                goal={{
+                  id: g.id,
+                  slug: g.slug,
+                  title: stripSuffix(g.title),
+                  due_date: g.due_date,
+                  status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
+                  cheerCount: cheerCountByGoal.get(g.id) ?? 0,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* 지난 목표 — 마감(due_date < 오늘) 목표를 접어서 둔다(설계 §4.5). */}
+        {pastGoals.length > 0 && (
+          <details className="mt-6" data-testid="past-goals-section">
+            <summary
+              className="cursor-pointer select-none py-2 text-[13px] font-bold text-muted-foreground"
+              data-testid="past-goals-toggle"
+            >
+              지난 목표 {pastGoals.length}개
+            </summary>
+            <div className="mt-2">
+              {pastGoals
+                .filter((g) => g.id !== goal.id)
+                .map((g) => (
+                  <MyGoalListCard
+                    key={g.id}
+                    goal={{
+                      id: g.id,
+                      slug: g.slug,
+                      title: stripSuffix(g.title),
+                      due_date: g.due_date,
+                      status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
+                      cheerCount: cheerCountByGoal.get(g.id) ?? 0,
+                    }}
+                  />
+                ))}
+            </div>
+          </details>
+        )}
       </ReceiverPageShell>
     </>
   );

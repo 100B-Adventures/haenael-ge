@@ -1,5 +1,26 @@
 # QA Tracker — haenael-ge
 
+## 2026-09-28: 검색·AI 답변 노출 기반 build 검증
+
+**판정: 🔧 build 수정·관찰 완료. QA 단계 승인은 미실행**
+
+발견: SEO 초안의 Organization·SoftwareApplication 설명과 FAQ·`llms.txt` 일부가 운영에 없는 유료 응원 결제·환전을 현재 기능처럼 말하고 있었다. 이 상태로 공개하면 구조화 데이터의 사실성 원칙과 운영 상태가 충돌한다.
+
+원인: 콘텐츠 초안이 과거 환전 설계를 전제로 작성됐고, 현재 운영 기능 플래그를 구조화 데이터 생성 계약과 대조하는 테스트가 없었다.
+
+수정: 한 모듈에서 세 JSON-LD와 FAQ 10개를 생성하고, 확인된 소셜 계정만 허용하는 계약 테스트를 추가했다. `/how`, `/faq`, `/llms.txt`의 설명은 현재 공개 운영 범위로 낮췄다.
+
+| 요청번호 | 판정 | build 증거 | QA 잔여 |
+|---|---|---|---|
+| SEO-DATA-01 Organization 1회·확인 계정만 | 🔧 | 루트 HTML `Organization` 1개, JSON 파싱 성공 | 배포 HTML 재검증 |
+| SEO-DATA-02 SoftwareApplication 사실성 | 🔧 | `/how` 200, 스키마 파싱, 허위 환전 주장 0 | Google 검증기 확인 |
+| SEO-DATA-03 FAQ 10개·FAQPage 일치 | 🔧 | Vitest 5/5 신규, Chromium 10개·펼침·콘솔 오류 0 | QA 독립 브라우저 검증 |
+| SEO-DATA-04 llms.txt 정적 서빙 | 🔧 | HTTP 200, `text/plain; charset=UTF-8` | 배포 URL 재검증 |
+
+전체 회귀는 Vitest 287/287, production build 18/18, 디자인 토큰 신규 위반 0건이다. 이 블록은 build 증거이며 기존 전체 QA NG 판정을 승인으로 바꾸지 않는다.
+
+STAMP: 2026-09-28 22:40 KST | model GPT-5 Codex | agent code-builder | basis SEO 초안, 운영 기능 플래그, 실제 dev 응답 | root cause 초안과 운영 플래그를 자동 대조하는 계약 부재
+
 ## 2026-08-30: 성능(perf) 항목만 재측정 — 범위 한정
 
 **판정 범위: 성능 항목만.** 아래 2026-08-29 라운드의 다른 blocker(제품 PRD 공백·디자인 lint·eng/legal)는 이 갱신과 무관하게 그대로 남아있다. 전체 QA는 여전히 ❌ NG — 이 항목만 BLOCKED → 부분 PASS로 바뀐 것.

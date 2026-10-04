@@ -1,0 +1,1 @@
+contentChanged=true wmDistinctSizes=3 wmCollisions=0 homeMgmt=5 railPayChain=1 err=0 (v2 로직계승 실측 2026-09-25)
