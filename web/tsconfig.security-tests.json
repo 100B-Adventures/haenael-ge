@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "incremental": false,
+    "paths": {
+      "vitest": ["./node_modules/vitest/dist/index.d.ts"]
+    },
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "../supabase/functions/_shared/toss-webhook-handler.security.test.ts",
+    "../supabase/functions/auth-kakao/security.test.ts"
+  ]
+}

@@ -1,5 +1,22 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-06: 결제·인증 보안 Vitest CI 수집 누락
+
+**판정: 🔧 로컬 수정 검증. 표준 `npm test` 46파일·292건 PASS, 원격 GitHub Actions 실행은 미검증**
+
+| 요청번호 | 증상 | 원인 | 해제 증거 |
+|---|---|---|---|
+| QA-SEC-COLLECT-01 | `toss-webhook-handler.security.test.ts` 5건과 `auth-kakao/security.test.ts` 5건이 별도 실행에서만 PASS | `web/vitest.config.ts`의 `include`가 `src/**/*.test.{ts,tsx}`로 제한되어 `supabase/functions`를 제외 | ✅ 로컬 `npm test`: 46파일·292건 PASS |
+| QA-SEC-CI-01 | `.github/workflows/ci.yml`의 `npm test`가 282건만 실행해 보안 회귀에도 green 가능 | CI 명령은 표준 명령을 따르지만 표준 Vitest project에 Edge Function 보안 테스트가 연결되지 않음 | 🔧 workflow가 같은 `npm test`를 실행하도록 범위를 명시. 원격 run은 미검증 |
+
+- 보호 범위: 보안 테스트 assertion과 결제·인증 구현 파일은 변경하지 않는다.
+- D-003 보호 파일 2개는 변경하지 않는다.
+- 타입 증거: `npm run test:typecheck:security` PASS, `npx tsc --noEmit` PASS.
+- 실행 증거: `heavy-slot.sh` 경유 `npm test`, `edge-security` 10건을 포함한 292/292 PASS.
+- 기존 `NotificationBadge`의 React `act(...)` 경고는 선행 부채로 남으며 실패는 아니다.
+
+STAMP: 2026-10-06 05:06 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 NG 등록
+
 ## 2026-08-30: 성능(perf) 항목만 재측정 — 범위 한정
 
 **판정 범위: 성능 항목만.** 아래 2026-08-29 라운드의 다른 blocker(제품 PRD 공백·디자인 lint·eng/legal)는 이 갱신과 무관하게 그대로 남아있다. 전체 QA는 여전히 ❌ NG — 이 항목만 BLOCKED → 부분 PASS로 바뀐 것.

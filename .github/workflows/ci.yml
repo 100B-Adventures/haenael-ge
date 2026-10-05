@@ -3,7 +3,8 @@
 # 트리거: main 푸시 + 모든 PR + 수동 실행
 #
 # 커버리지 경계 (숨기지 않고 명시한다):
-#   포함  = 단위 테스트 전량, 프로덕션 빌드, cashout-manual 브라우저 E2E
+#   포함  = 웹 단위 테스트 전량, 결제·인증 Edge Function 보안 Vitest,
+#            프로덕션 빌드, cashout-manual 브라우저 E2E
 #   미포함 = cheer-payment / goal-flow / release-v1 / report-flow / wordmap-share
 #            이 5개는 E2E_BASE_URL로 지정한 실행 중인 앱과 Supabase를 요구한다.
 #            운영 DB에 쓰지 않는다는 원칙 때문에 CI에서 자동 실행하지 않는다.
@@ -58,7 +59,7 @@ jobs:
       - name: 디자인 토큰 준수
         run: npm run qa:design-tokens
 
-      - name: 단위 테스트
+      - name: 웹 단위 + 결제·인증 보안 테스트
         run: npm test
 
       - name: 프로덕션 빌드
