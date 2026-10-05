@@ -5,6 +5,37 @@
 
 ---
 
+## 결제·인증 보안 Vitest 표준 실행·CI 연결 (2026-10-06)
+
+### 발견과 의미
+
+커밋 `ec8b4d4`가 추가한 결제·인증 보안 테스트 10건은 assertion이 존재하고 개별 실행도 통과했지만, `web/vitest.config.ts`의 웹 소스 전용 `include` 밖에 있었다. CI가 실행하는 `npm test`도 같은 설정을 사용해 282건만 수집했으므로, 결제·인증 보안 코드가 회귀해도 CI가 green일 수 있었다.
+
+Vitest 3.2의 공식 `projects` 구성을 적용해 웹 테스트는 jsdom, Edge Function 보안 테스트는 node 환경으로 분리했다. `npm test`가 보안 테스트 전용 TypeScript 검사 후 두 project를 한 프로세스에서 실행하도록 연결했고, CI의 기존 표준 명령도 같은 292건을 실행하도록 범위를 명시했다.
+
+### 변경과 검증
+
+| 등급 | 대상 | 결과 |
+|---|---|---|
+| 근거 확인 | 보안 assertion·결제·인증 구현 파일 | 변경 0건 |
+| 테스트됨 | `npm run test:typecheck:security` | PASS |
+| 테스트됨 | `npx tsc --noEmit` | PASS |
+| 테스트됨 | `heavy-slot.sh` 경유 `npm test` | 46파일, 292/292 PASS. 웹 기존 282건 + 보안 10건 |
+| 테스트됨 | `heavy-slot.sh` 경유 `npm run build` | Next.js 16.3.3 compile·TypeScript·정적 생성 17/17 PASS |
+| 미검증 | 원격 GitHub Actions run | workflow는 동일 `npm test`를 실행하지만 push하지 않아 원격 run 미관찰 |
+
+보호 파일 `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 이번 커밋에서 변경하지 않았다. 기존 `NotificationBadge` 테스트의 React `act(...)` 경고는 선행 부채로 남으며 실패는 아니다.
+
+셀프심문: 이 연결이 틀렸다면 가장 그럴듯한 이유는 웹 project가 기존 `@` alias나 React plugin을 상속하지 못해 기존 282건을 깨뜨리는 경우다. 첫 실행에서 실제 alias 해석 실패를 관찰했고, project 안에 plugin과 alias를 명시한 뒤 전량 재실행해 282건 보존과 10건 추가를 함께 확인했다.
+
+레드팀: 까다로운 리뷰어는 CI step 이름만 바꾸고 실제 수집 범위는 그대로일 수 있다고 공격할 수 있다. 수집 수치를 단일 표준 명령의 최종 출력 `Tests 292 passed (292)`로 고정했고, 두 보안 파일이 `edge-security` project로 각각 5건씩 실행되는 로그를 확인했다.
+
+STAMP: line=core | 갱신=2026-10-06 05:09 KST | model=gpt-6.1-sol | agent=code-builder | skill=haenael-supabase-build | 근거=Vitest projects 공식 문서, 커밋 ec8b4d4, 로컬 전체 테스트·빌드 로그 | 고민=보안 테스트를 Deno 전체 테스트와 섞지 않고 Node 호환 순수 보안 테스트만 표준 CI에 연결했다.
+
+SOURCES/MODEL: gpt-6.1-sol | `web/vitest.config.ts` | `.github/workflows/ci.yml` | https://vitest.dev/guide/projects | https://vitest.dev/guide/migration.html
+SKILLS_USED: haenael-supabase-build, Supabase/Next.js build 검증 순서와 증거 기록에 적용
+SKILLS_SKIPPED: 없음
+
 ## 설계안 갈래 1 "다중 목표" 구현 (2026-09-21)
 
 ### 배경과 결정
