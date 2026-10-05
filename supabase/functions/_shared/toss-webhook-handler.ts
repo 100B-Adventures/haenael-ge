@@ -27,6 +27,7 @@ export interface SlackAlert {
 export interface TossPaymentResponse {
   paymentKey: string;
   orderId: string;
+  mId?: string;
   status: string;
   totalAmount: number;
   method: string;
@@ -52,11 +53,24 @@ export interface TossWebhookTossClient {
 export interface TossWebhookDeps {
   /** TOSS_WEBHOOK_TOKEN env 값. 미설정이면 항상 401. */
   expectedToken: string | undefined;
+  /** 운영 런타임은 true. Toss secret으로 조회한 authoritative mId를 필수 대조한다. */
+  requireMerchantId?: boolean;
+  /** 운영 런타임은 true. 전송 ID가 없으면 상태 전이 전에 거부한다. */
+  requireTransmissionId?: boolean;
   /** 미주입(undefined)이면 503 missing_server_env. */
   supabase: TossWebhookSupabaseClient | undefined;
   /** 미주입(undefined)이면 503 missing_server_env. */
   toss: TossWebhookTossClient | undefined;
   sendSlackAlert: (alert: SlackAlert) => Promise<boolean>;
+}
+
+type ReceiptClaimState = "claimed" | "processed" | "in_progress";
+
+function receiptClaimState(data: unknown): ReceiptClaimState | null {
+  const value = Array.isArray(data) ? data[0] : data;
+  return value === "claimed" || value === "processed" || value === "in_progress"
+    ? value
+    : null;
 }
 
 // ./region.ts의 withRegionHeader와 동일 동작(x-region: ap-northeast-2 핀 — architecture §2.6)을
@@ -126,6 +140,47 @@ export async function handleTossWebhook(
   }
   const { supabase, toss, sendSlackAlert } = deps;
 
+  const transmissionId = req.headers.get(
+    "tosspayments-webhook-transmission-id",
+  )?.trim() ?? "";
+  if (deps.requireTransmissionId && !transmissionId) {
+    return json(400, { error: "transmission_id_required" });
+  }
+
+  let claimedTransmissionId: string | null = null;
+  if (transmissionId) {
+    const { data, error } = await supabase.rpc("claim_toss_webhook", {
+      p_transmission_id: transmissionId,
+      p_event_type: String(body.eventType),
+      p_payment_key: paymentKey,
+    });
+    const claimState = receiptClaimState(data);
+    if (error || !claimState) {
+      return json(503, { error: "receipt_claim_failed" });
+    }
+    if (claimState === "processed") {
+      return json(200, { processed: true, duplicate: true });
+    }
+    if (claimState === "in_progress") {
+      return json(409, { error: "receipt_in_progress" });
+    }
+    claimedTransmissionId = transmissionId;
+  }
+
+  const finish = async (response: Response): Promise<Response> => {
+    if (!claimedTransmissionId) return response;
+
+    const successful = response.status >= 200 && response.status < 300;
+    const { error } = await supabase.rpc(
+      successful ? "complete_toss_webhook" : "release_toss_webhook",
+      { p_transmission_id: claimedTransmissionId },
+    );
+    if (error && successful) {
+      return json(500, { error: "receipt_finalize_failed" });
+    }
+    return response;
+  };
+
   let payment: TossPaymentResponse;
   try {
     payment = await toss.getPayment(paymentKey);
@@ -136,7 +191,7 @@ export async function handleTossWebhook(
       severity: "critical",
       summary: "Could not verify Toss webhook against Toss API",
     });
-    return json(502, { error: "verification_failed" });
+    return finish(json(502, { error: "verification_failed" }));
   }
 
   const incomingOrderId = typeof incoming.orderId === "string"
@@ -148,10 +203,18 @@ export async function handleTossWebhook(
   const incomingStatus = typeof incoming.status === "string"
     ? incoming.status
     : null;
+  const incomingMerchantId = typeof incoming.mId === "string"
+    ? incoming.mId
+    : null;
   if (
     (incomingOrderId !== null && payment.orderId !== incomingOrderId) ||
     (incomingAmount !== null && payment.totalAmount !== incomingAmount) ||
-    (incomingStatus !== null && payment.status !== incomingStatus)
+    (incomingStatus !== null && payment.status !== incomingStatus) ||
+    (deps.requireMerchantId &&
+      (!incomingMerchantId || !payment.mId ||
+        payment.mId !== incomingMerchantId)) ||
+    (!deps.requireMerchantId && incomingMerchantId !== null &&
+      payment.mId !== incomingMerchantId)
   ) {
     await sendSlackAlert({
       event: "toss_webhook_mismatch",
@@ -159,7 +222,7 @@ export async function handleTossWebhook(
       summary: "Webhook payload did not match authoritative Toss payment",
       fields: { orderId: payment.orderId },
     });
-    return json(400, { error: "payload_mismatch" });
+    return finish(json(400, { error: "payload_mismatch" }));
   }
 
   if (payment.status === "DONE") {
@@ -180,7 +243,7 @@ export async function handleTossWebhook(
         summary: "DONE webhook could not be reconciled",
         fields: { orderId: payment.orderId, code: error.code ?? "unknown" },
       });
-      return json(500, { error: "reconcile_failed" });
+      return finish(json(500, { error: "reconcile_failed" }));
     }
   } else if (
     payment.status === "CANCELED" || payment.status === "PARTIAL_CANCELED"
@@ -195,14 +258,16 @@ export async function handleTossWebhook(
           canceledAt: payment.canceledAt ?? null,
         },
       });
-      if (error) return json(500, { error: "partial_cancel_review_failed" });
+      if (error) {
+        return finish(json(500, { error: "partial_cancel_review_failed" }));
+      }
       await sendSlackAlert({
         event: "partial_cancel_requires_review",
         severity: "critical",
         summary: "Partial cancellation is outside v1.0.0 contract",
         fields: { orderId: payment.orderId },
       });
-      return json(200, { processed: true, reviewRequired: true });
+      return finish(json(200, { processed: true, reviewRequired: true }));
     }
     const { data, error } = await supabase.rpc("reconcile_canceled_payment", {
       p_order_id: payment.orderId,
@@ -221,7 +286,7 @@ export async function handleTossWebhook(
         summary: "Canceled payment could not be reversed",
         fields: { orderId: payment.orderId, code: error.code ?? "unknown" },
       });
-      return json(500, { error: "cancel_reconcile_failed" });
+      return finish(json(500, { error: "cancel_reconcile_failed" }));
     }
     // reconcile_canceled_payment(20260716120000)이 잔액부족으로 자동 원장 역산이
     // 불가능할 때 예외 대신 durable risk marker로 수렴하며 review_required=true를
@@ -238,11 +303,11 @@ export async function handleTossWebhook(
           "Canceled payment could not be reversed — clover balance insufficient, manual reconciliation required",
         fields: { orderId: payment.orderId },
       });
-      return json(200, { processed: true, reviewRequired: true });
+      return finish(json(200, { processed: true, reviewRequired: true }));
     }
   } else {
-    return json(200, { ignored: true, status: payment.status });
+    return finish(json(200, { ignored: true, status: payment.status }));
   }
 
-  return json(200, { processed: true, status: payment.status });
+  return finish(json(200, { processed: true, status: payment.status }));
 }

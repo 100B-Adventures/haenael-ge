@@ -14,14 +14,17 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const tossSecret = Deno.env.get("TOSS_SECRET_KEY");
 
-  const supabase =
-    supabaseUrl && serviceKey
-      ? createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
-      : undefined;
+  const supabase = supabaseUrl && serviceKey
+    ? createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    : undefined;
   const toss = tossSecret ? new TossClient(tossSecret) : undefined;
 
   return handleTossWebhook(req, {
     expectedToken,
+    requireMerchantId: true,
+    requireTransmissionId: true,
     supabase,
     toss,
     sendSlackAlert,
