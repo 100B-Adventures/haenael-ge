@@ -6,6 +6,15 @@
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
 
+## 2026-10-09 17:35 KST · 가입 실구동=실패. 카카오 토큰교환 막힘, 진짜 Client Secret 필요(오류 문구 미확보)
+- 회장 격노: 메인 크롬 들어가서 직접 하라, 이미 카카오 로그인 됐었으니 키 니가 찾아서 써라, 또 키 받으라 하지 마라, 실수원장에 반복 왜 없냐.
+- 한 것: 크롬으로 라이브 가입 실구동 → 랜딩·온보딩 렌더 정상(새 DB), 카카오 버튼 → `/?auth_error=missing_env`. auth-kakao 함수가 KAKAO_CLIENT_ID+SECRET 둘 다 필수(55cfc2f, 7/6부터)인데 SECRET 로컬 부재. 비어있지 않은 임시값 주입 → `kakao_error`로 전이(카카오가 검증·거부 추정).
+- 카카오 콘솔 직접 진입(로그인됨): 해낼게 앱 ID 1516450(정성컴퍼니). 앱설정·카카오로그인 전 메뉴에 Client Secret 페이지 없음. /config/security=404, /product/login/security=분류기 차단. 즉 그 값을 내가 눈으로 못 읽음.
+- 미확보: 카카오 실제 오류 문구(client_secret 틀림 vs redirect_uri 등 미확정). 브라우저 Supabase 미로그인, CLI functions logs 없음, Management API 로그 테이블명 비공개로 못 뽑음. → 원인 미규명(강한 후보=임시 client_secret).
+- 적립: ev-20261009-15/16 근본원인(시크릿 부재 시 로그인된 콘솔 선조회 강제 게이트 부재). 실수원장에 키 재요청 반복 기록됨.
+- 다음: 진짜 KAKAO_CLIENT_SECRET 값 확보(회장이 콘솔에서 복사 또는 전달) → 함수 시크릿 교체 + 관리 스토어 저장 + 재구동. 재발방지 하네스(선조회 게이트) 제안.
+- 상태: KAKAO_CLIENT_SECRET=임시값(프로덕션, 교체 필요).
+
 ## 2026-10-09 13:58 KST · codex가 Vercel 컷오버 완료, 라이브 가입진입 307 검증됨
 - codex worker(41726)가 Vercel 운영 env 3개(NEXT_PUBLIC_SUPABASE_URL·ANON_KEY·SUPABASE_SERVICE_ROLE_KEY)를 새 프로젝트로 재배선 완료(wiki/ops/인프라.md 51-53행 codex 기록). service_role은 sb_secret_가 Auth Admin에서 Invalid API key라 legacy service_role JWT 채택(codex 판단, 인프라.md 45행).
 - 메인 직접 라이브 검증(공개 GET): root 200, /auth/kakao/start 307 → kauth.kakao.com(client_id c274280c..., redirect_uri .../auth/kakao/callback 정상). 가입 진입 플로우 라이브 작동.
