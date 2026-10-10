@@ -1,4 +1,12 @@
 ## 2026-10-09 13:54 KST · 새 Supabase 운영 컷오버 완료, Auth 세션 실왕복 확인
+
+## [2026-10-10 21:38 KST] compact 마크 (auto)
+- 세션 d3e235b1 · 라인 core · 브랜치 session/core-20260912
+- 직전 커밋: 9c2a5a6 docs(ops): 가입 근본원인 확정 - client_id placeholder 버그 수정, Client Secr
+- compact 직전 컨텍스트: 568411 토큰
+- 마지막 회장 요청: Stop hook feedback: [/Users/sj/.claude/hooks/report-lint.sh]: [report-lint] ⛔ 반려: 아래 위반을 **한 번에 모두** 고쳐 전문을 다시 내라(조각 이어붙이기 금지). [report-lint] ⛔ 반려: 응답에 em-dash(—/–/―)가 있다. 마침표·쉼표·괄호·콜론으로 끊어 다시 써라(CLAUDE.md §5, 회장 반복 지적). 박스선 ─ 은 허용.
+- 직전에 고친 파일: codex-vercel-task.txt session-state.core.md 인프라.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 - 메인 에이전트 지시: 관리 중인 시크릿만 사용해 Vercel Production을 새 Supabase 프로젝트 `ossvejipdivgxzcqszbw`로 컷오버하고 가입 경로를 실제 검증. D-003 보호 SQL 2개 수정 금지.
 - 결과: Vercel 환경변수 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY`·`SUPABASE_SERVICE_ROLE_KEY` PATCH HTTP 200. legacy service_role JWT로 교정 후 운영 재배포 `dpl_EsR4GMHX8aibKf6ZJCN3AArvx4FY` READY, `haenael-ge.vercel.app` alias 확인.
 - 운영 증거: `/` 200·브랜드 본문, `/api/health` 200·`database=ok`·버전 1.2.1, `/auth/kakao/start?redirect=/me` 307·카카오 인증 호스트·state 발급. 새 프로젝트 QA auth-only 사용자 생성→비밀번호 로그인→Supabase 세션 쿠키→운영 `/cashout` 200·핵심 UI 표시·콘솔 오류 0, 제품 `member` 행 0 유지.

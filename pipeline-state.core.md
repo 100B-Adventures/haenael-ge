@@ -291,3 +291,19 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 - **새 문서는 반드시 템플릿에서 시작**: PRD=`~/.claude/standards/templates/doc-template-prd.md` · FDD=`doc-template-fdd.md` · QA=`doc-template-qa.md`.
 - 각 문서: 목차·스탬프·TL;DR·표준 섹션·mermaid 다이어그램·요구↔설계↔테스트 매핑(RTM)·RUBRIC_SCORE(≥20/25) 필수. PRD/FDD/QA 한 파일 통합 금지(분할 유지).
 - **QA 필수(신규): 빌드된 프론트를 승인 프로토타입과 스크린샷 대조**해 design-conformance-matrix를 채운다. 불일치 미해소면 qa /approve 불가.
+
+<!-- release-alignment:start -->
+## 배포 버전 정합 작업
+
+> 소유: 이 제품 라인. 완료 조건: 같은 MAJOR.MINOR 계열의 최신 산출물 핀과 실제 배포 버전을 RELEASE.md에서 대조하고, 실행 화면 또는 명령에서 버전·커밋·빌드 시각을 직접 관찰한다.
+
+- [ ] 제품 VERSION 기록 (실제 배포 버전 확인 후 기록)
+- [x] RELEASE.md 매니페스트: RELEASE.md
+- [x] CHANGELOG.md 변경 기록
+- [ ] 웹·앱·확장·CLI 등 실제 배포물에서 release, commit, build_id, built_at, channel 확인
+- [ ] approved_artifacts의 PRD·디자인·기술설계·개발·QA 산출물이 release_train MAJOR.MINOR와 같은지 대조
+- [ ] 수정된 상류 산출물은 PATCH를 올리고, 수정하지 않은 상류 산출물은 upstream_unchanged_reason 기록
+- [ ] 선택된 배포 채널별 설치·호출 결과와 배포 식별자를 RELEASE.md에 기록
+
+상태: 결손 있음, 체크되지 않은 항목부터 작업
+<!-- release-alignment:end -->
