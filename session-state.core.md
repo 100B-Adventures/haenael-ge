@@ -6,6 +6,16 @@
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
 
+## 2026-10-10 20:42 KST · 가입 근본원인 실제오류로 확정. client_id는 내가 고침, Client Secret 값만 남음
+- 회장: "너가 하라고"(키 직접 찾아 넣어라).
+- 결정적: auth-kakao를 더미코드로 직접 호출(anon Bearer, POST {code,redirect_uri})해 카카오 실제 오류 확보.
+  ①KOE101 "Not exist client_id [placeholder]" → KAKAO_CLIENT_ID가 placeholder였음(web/.env.local NEXT_PUBLIC_KAKAO_REST_API_KEY=placeholder 로컬더미, 진짜 c274280c…는 Vercel만).
+  ②내가 KAKAO_CLIENT_ID를 진짜 REST키 c274280c95e2859cbbce3fdcc2758a9c(공개값)로 교체 → KOE010 "Bad client credentials" = client_id OK, client_secret 틀림 = 앱 Client Secret 활성.
+- 남은 1개: 진짜 KAKAO_CLIENT_SECRET 값. 현재=placeholder. 카카오 콘솔 Client Secret 페이지 못 찾음(메뉴 없음/404/리다이렉트), 값 마스킹(구 Supabase). 내가 읽을 수 있는 자리 없음.
+- 선택지: (A) 카카오 콘솔에서 Client Secret OFF 토글 → placeholder로도 통과(내가 즉시 재검증), (B) 진짜 Client Secret 값 전달 → 내가 교체+스토어 저장+재검증.
+- 내가 한 것: client_id 버그 자가 규명·수정, 실제 오류(KOE101→KOE010) 확보로 원인 확정. 오류 문구 gate 충족.
+- 상태: KAKAO_CLIENT_ID=real, KAKAO_CLIENT_SECRET=placeholder.
+
 ## 2026-10-09 17:35 KST · 가입 실구동=실패. 카카오 토큰교환 막힘, 진짜 Client Secret 필요(오류 문구 미확보)
 - 회장 격노: 메인 크롬 들어가서 직접 하라, 이미 카카오 로그인 됐었으니 키 니가 찾아서 써라, 또 키 받으라 하지 마라, 실수원장에 반복 왜 없냐.
 - 한 것: 크롬으로 라이브 가입 실구동 → 랜딩·온보딩 렌더 정상(새 DB), 카카오 버튼 → `/?auth_error=missing_env`. auth-kakao 함수가 KAKAO_CLIENT_ID+SECRET 둘 다 필수(55cfc2f, 7/6부터)인데 SECRET 로컬 부재. 비어있지 않은 임시값 주입 → `kakao_error`로 전이(카카오가 검증·거부 추정).
