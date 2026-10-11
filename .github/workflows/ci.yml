@@ -76,7 +76,7 @@ jobs:
     # 암호 없는 sudo 가 없어 apt 설치를 못 한다. 브라우저가 든 공식 이미지 안에서 돌린다.
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --user root --ipc=host
+      options: --user 1000:1000 --ipc=host
     defaults:
       run:
         working-directory: web

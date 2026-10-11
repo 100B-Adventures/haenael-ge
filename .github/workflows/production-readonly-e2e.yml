@@ -18,7 +18,7 @@ jobs:
     runs-on: [self-hosted, haenael_runner]
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --user root --ipc=host
+      options: --user 1000:1000 --ipc=host
     environment: production-readonly-qa
     timeout-minutes: 10
     defaults:
