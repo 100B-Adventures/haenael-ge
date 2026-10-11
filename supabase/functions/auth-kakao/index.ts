@@ -27,6 +27,11 @@ import {
   normalizeKakaoUser,
 } from "../_shared/oauth-kakao.ts";
 import { withRegionHeader } from "../_shared/region.ts";
+import {
+  assertProviderLookupSucceeded,
+  generateVerifiedMagicLink,
+  rollbackCreatedAuthUser,
+} from "./security.ts";
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
 
@@ -143,14 +148,17 @@ Deno.serve(async (req: Request) => {
 
     // 3. 기존 유저 조회 (member 테이블 — provider_id가 PK보다 빠름)
     //    service_role → RLS 우회, 직접 조회 가능
-    const { data: existingMember } = await supabaseAdmin
-      .from("member")
-      .select("id,phone")
-      .eq("provider", "kakao")
-      .eq("provider_id", providerId)
-      .maybeSingle();
+    const { data: existingMember, error: providerLookupError } =
+      await supabaseAdmin
+        .from("member")
+        .select("id,phone")
+        .eq("provider", "kakao")
+        .eq("provider_id", providerId)
+        .maybeSingle();
+    assertProviderLookupSucceeded(providerLookupError);
 
     let userId: string;
+    let createdAuthUser = false;
 
     if (existingMember) {
       // 기존 유저: auth metadata + nickname/profile_image 갱신
@@ -232,6 +240,7 @@ Deno.serve(async (req: Request) => {
         }
       } else {
         userId = newUserData.user.id;
+        createdAuthUser = true;
       }
 
       // public.member 행 생성 (upsert: id PK 충돌 시 안전)
@@ -249,8 +258,22 @@ Deno.serve(async (req: Request) => {
 
       if (memberError) {
         // member 생성 실패는 치명적(auth user만 있으면 일관성 깨짐)
-        // auth user 롤백: 모범 사례 = 원자성 보장을 위해 auth user도 삭제
-        await supabaseAdmin.auth.admin.deleteUser(userId);
+        // 이번 요청에서 생성한 Auth 사용자만 보상 삭제한다. 이메일 충돌로 찾은
+        // 기존 사용자는 절대 삭제하지 않는다.
+        try {
+          await rollbackCreatedAuthUser(
+            createdAuthUser,
+            userId,
+            async (rollbackUserId) => {
+              const { error } = await supabaseAdmin.auth.admin.deleteUser(
+                rollbackUserId,
+              );
+              return { error };
+            },
+          );
+        } catch (rollbackError) {
+          console.error("[auth-kakao] new user rollback failed", rollbackError);
+        }
         return jsonError(
           "member_creation_failed",
           `member 행 생성 실패: ${memberError.message}`,
@@ -261,24 +284,28 @@ Deno.serve(async (req: Request) => {
 
     // 4. magic link 생성 → hashed_token
     //    클라이언트: supabase.auth.verifyOtp({ token_hash, type: 'email' })
-    const { data: linkData, error: linkError } =
-      // shouldCreateUser는 signInWithOtp 옵션이지 generateLink 옵션이 아니다(GenerateLinkOptions에 없음).
-      // magiclink generateLink는 대상 유저가 이미 존재해야 hashed_token을 만들므로,
-      // 이 속성 제거로 기존 동작(기존 유저만 링크 생성) 그대로 유지 — 타입에러(TS2353)만 해소.
-      await supabaseAdmin.auth.admin.generateLink({
-        // type "magiclink"은 기존 유저만 대상이라 별도 shouldCreateUser 옵션이 없다
-        // (GenerateLinkOptions는 data/redirectTo만 허용 — TS2353 방지).
-        // 위 3단계에서 auth user 존재를 이미 보장했으므로 옵션 없이 호출한다.
-        type: "magiclink",
-        email,
-      });
-
-    if (linkError || !linkData?.properties?.hashed_token) {
-      throw linkError ?? new Error("generateLink failed — hashed_token 없음");
-    }
+    const hashedToken = await generateVerifiedMagicLink(userId, {
+      getUserById: async (expectedUserId) => {
+        const { data, error } = await supabaseAdmin.auth.admin.getUserById(
+          expectedUserId,
+        );
+        return { user: data.user, error };
+      },
+      generateMagicLink: async (storedEmail) => {
+        const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+          type: "magiclink",
+          email: storedEmail,
+        });
+        return {
+          user: data?.user ?? null,
+          hashedToken: data?.properties?.hashed_token ?? null,
+          error,
+        };
+      },
+    });
 
     return jsonOk({
-      hashed_token: linkData.properties.hashed_token,
+      hashed_token: hashedToken,
       type: "email",
     });
   } catch (err) {

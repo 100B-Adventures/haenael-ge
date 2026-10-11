@@ -26,6 +26,7 @@ export interface TossCancelResponse {
 }
 
 export interface TossPaymentResponse extends TossConfirmResponse {
+  mId: string;
   canceledAt?: string;
 }
 
@@ -41,25 +42,38 @@ export class TossClient {
   }
 
   async getPayment(paymentKey: string): Promise<TossPaymentResponse> {
-    const res = await fetch(`${this.baseUrl}/payments/${encodeURIComponent(paymentKey)}`, {
-      headers: { Authorization: this.authorizationHeader() },
-    });
+    const res = await fetch(
+      `${this.baseUrl}/payments/${encodeURIComponent(paymentKey)}`,
+      {
+        headers: { Authorization: this.authorizationHeader() },
+      },
+    );
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(`Toss payment lookup failed (${res.status})`);
     if (body.paymentKey !== paymentKey || typeof body.orderId !== "string") {
       throw new Error("Toss payment lookup identity mismatch");
     }
     const totalAmount = Number(body.totalAmount);
-    if (!Number.isInteger(totalAmount)) throw new Error("Toss payment lookup amount missing");
+    if (!Number.isInteger(totalAmount)) {
+      throw new Error("Toss payment lookup amount missing");
+    }
+    const mId = typeof body.mId === "string" ? body.mId.trim() : "";
+    if (!mId) throw new Error("Toss payment lookup mId missing");
     return {
       paymentKey,
       orderId: body.orderId,
+      mId,
       status: String(body.status ?? ""),
       totalAmount,
       method: String(body.method ?? body.easyPay?.provider ?? "UNKNOWN"),
       approvedAt: typeof body.approvedAt === "string" ? body.approvedAt : "",
-      receiptUrl: typeof body.receipt?.url === "string" ? body.receipt.url : undefined,
-      canceledAt: Array.isArray(body.cancels) && typeof body.cancels.at(-1)?.canceledAt === "string" ? body.cancels.at(-1).canceledAt : undefined,
+      receiptUrl: typeof body.receipt?.url === "string"
+        ? body.receipt.url
+        : undefined,
+      canceledAt: Array.isArray(body.cancels) &&
+          typeof body.cancels.at(-1)?.canceledAt === "string"
+        ? body.cancels.at(-1).canceledAt
+        : undefined,
       raw: body,
     };
   }
@@ -76,17 +90,20 @@ export class TossClient {
 
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const message =
-        typeof body?.message === "string"
-          ? body.message
-          : `Toss confirm failed (${res.status})`;
+      const message = typeof body?.message === "string"
+        ? body.message
+        : `Toss confirm failed (${res.status})`;
       throw new Error(message);
     }
 
-    const paymentKey = typeof body.paymentKey === "string" ? body.paymentKey : "";
+    const paymentKey = typeof body.paymentKey === "string"
+      ? body.paymentKey
+      : "";
     const orderId = typeof body.orderId === "string" ? body.orderId : "";
     const totalAmount = Number(body.totalAmount);
-    const approvedAt = typeof body.approvedAt === "string" ? body.approvedAt : "";
+    const approvedAt = typeof body.approvedAt === "string"
+      ? body.approvedAt
+      : "";
 
     if (paymentKey !== req.paymentKey || orderId !== req.orderId) {
       throw new Error("Toss confirm response identity mismatch");
@@ -105,12 +122,17 @@ export class TossClient {
       totalAmount,
       method: String(body.method ?? body.easyPay?.provider ?? "UNKNOWN"),
       approvedAt,
-      receiptUrl: typeof body.receipt?.url === "string" ? body.receipt.url : undefined,
+      receiptUrl: typeof body.receipt?.url === "string"
+        ? body.receipt.url
+        : undefined,
       raw: body,
     };
   }
 
-  async cancelPayment(paymentKey: string, cancelReason: string): Promise<TossCancelResponse> {
+  async cancelPayment(
+    paymentKey: string,
+    cancelReason: string,
+  ): Promise<TossCancelResponse> {
     const res = await fetch(`${this.baseUrl}/payments/${paymentKey}/cancel`, {
       method: "POST",
       headers: {
@@ -123,16 +145,17 @@ export class TossClient {
 
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const message =
-        typeof body?.message === "string"
-          ? body.message
-          : `Toss cancel failed (${res.status})`;
+      const message = typeof body?.message === "string"
+        ? body.message
+        : `Toss cancel failed (${res.status})`;
       throw new Error(message);
     }
 
     // 응답 body의 paymentKey가 요청 paymentKey와 다르면, 우리가 취소했다고 믿는 결제가
     // 실제로는 다른 결제일 수 있다 — 보상(compensation) 무결성이 깨지므로 성공으로 간주하지 않는다.
-    const responsePaymentKey = typeof body.paymentKey === "string" ? body.paymentKey : "";
+    const responsePaymentKey = typeof body.paymentKey === "string"
+      ? body.paymentKey
+      : "";
     if (responsePaymentKey !== paymentKey) {
       throw new Error("Toss cancel response paymentKey mismatch");
     }
@@ -144,13 +167,17 @@ export class TossClient {
     // 상위(toss-confirm)가 "보상 성공"으로 잘못 처리하지 않게 한다.
     const status = typeof body.status === "string" ? body.status : "";
     if (status !== "CANCELED") {
-      throw new Error(`Toss cancel response status is not CANCELED: ${status || "unknown"}`);
+      throw new Error(
+        `Toss cancel response status is not CANCELED: ${status || "unknown"}`,
+      );
     }
 
     return {
       paymentKey: responsePaymentKey,
       status,
-      canceledAt: typeof body.canceledAt === "string" ? body.canceledAt : undefined,
+      canceledAt: typeof body.canceledAt === "string"
+        ? body.canceledAt
+        : undefined,
       raw: body,
     };
   }
