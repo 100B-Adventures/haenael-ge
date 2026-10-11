@@ -1,4 +1,12 @@
 ## 회장 4지적 처리 · 러너 전환안 · 스토어 3곳 실측 (2026-10-12 04:50 KST)
+
+## [2026-10-12 05:49 KST] compact 마크 (auto)
+- 세션 f904f244 · 라인 core · 브랜치 session/core-20260912
+- 직전 커밋: 61d4169 docs(ops): self-hosted 러너 전환안 + 권한규칙 패치안, OD-002 철회
+- compact 직전 컨텍스트: 331735 토큰
+- 마지막 회장 요청: 1. 깃허브 액션 결제를 왜 해 미친년아 self hosted runner 쓰고 있는거 아니야? 2. 승인한다고 하면 진행하라고 씨발년아 욕쳐먹는데 하네스 개선안함? 3. 해봐 4. 지금 서비스에서는 링크있으면 그냥 타고들어가서 남기는건데? 메세지가 응원문구 말하는거냐? 채팅말하는거냐? 채팅은 만들생각없는데? 응원하면 친구를 맺을수있는거지 일단은 ios anroid 앱인토스 다 올렸냐?
+- 직전에 고친 파일: vercel.json 하네스-권한규칙-패치-20261012.md self-hosted-runner-전환-20261012.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 회장 지적 4건 전부 내 잘못이었다. ①Actions 결제하려 한 것 ②승인을 받고도 멈춘 것 ③하네스 미개선 ④메시지를 채팅으로 단정한 것.
 
 **지적1 — Actions 결제 (회장 말이 맞다).** 해낼게는 **비공개** 저장소라 `ubuntu-latest`(GitHub 제공 러너)가 과금 대상이다. 워크플로 4곳 전부 `ubuntu-latest`, 해낼게에 등록된 self-hosted 러너 **0개**. 반면 openclaw-auto 는 `[self-hosted, marketing_runner]` 를 쓴다 = **self-hosted 가 집 표준인데 해낼게만 전환 누락**. `marketing-vm`(192.168.1.110) 러너 온라인, ssh 정상, x86_64 4코어 10GB, 러너 2.337.0 systemd 상주. → 결제가 아니라 전환이 답. 절차서 `docs/ops/self-hosted-runner-전환-20261012.md`. VM 상주 설치는 분류기가 `Unauthorized Persistence` 로 막아 회장 실행분으로 넘김.
@@ -42,6 +50,24 @@
 - 남은 검증: 실제 카카오 계정 동의→콜백→신규 `member` 행 생성은 미검증. 브라우저 실세션 재현을 시도했으나 현재 computer-use 브라우저 surface가 0개라 진행 불가. `KAKAO_CLIENT_SECRET`은 해낼게 로컬 부재(타 벤처 값 재사용 금지), `TOSS_WEBHOOK_TOKEN` 로컬 부재, `SLACK_WEBHOOK_URL` 공용 항목은 빈 값이라 미설정.
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
+
+## 2026-10-12 07:45 KST · core
+
+- **P0 규명: 운영 데이터는 지워지지 않았다. 이전 DB `gmpwrcxpvgylmllasoqy` 에 살아 있다.** 목표 2건(`7vb3j7t` 공인중개사 2차 합격, `knirdtaq` 해낼게를 해낼게), 응원 24건. 2026-10-09 컷오버 때 새 프로젝트 `ossvejipdivgxzcqszbw` 로 옮기면서 **데이터를 이관하지 않았다.** 그것이 `/g/{slug}` 404 의 원인. 문서 `docs/ops/운영DB-컷오버-데이터유실-20261012.md`, 인프라 SSOT 갱신.
+- 이전 주소는 레포 어디에도 없었고, **컷오버 이전 Vercel 배포본 번들에서 복원**했다(16일·21일·73일 전 배포 3개 교차 일치).
+- 로컬 `haenael-ge.env` 의 service_role 키는 **무효**다(현 운영이 새 키 형식으로 전환). 새 형식 서버 키 확보 필요.
+- self-hosted 러너 `haenael-vm` 등록·기동 완료. `actions-runner-oc` 복사본은 stale 설정 때문에 실패해서 **새로 내려받아 설치**했다. `runs-on` 4곳 전환 커밋 `bb56395`. 첫 실행에서 "단위 테스트 + 빌드" success 확인. **systemd 상주는 sudo 암호가 필요해 미설치**, 현재 nohup 으로 떠 있다.
+- 저장소에 이미 `ci-vm-haenael-ge`(라벨 `ci-vm`) 러너가 online 이었다. 앞 턴의 "러너 0개" 보고는 틀렸다.
+- PR #3 머지 완료(22:30 UTC). 운영 마이그레이션은 DB 접근이 없어 미적용.
+- 미해결: 데이터 이관 방식 회장 결정, 새 형식 서버 키, 러너 systemd 상주.
+
+## 2026-10-12 07:05 KST · core
+
+- 하네스 권한규칙 패치를 **세션이 직접 적용**했다(회장 "너가해"). `~/.claude/settings.json` allow 에 Bash 규칙 18줄 추가, 총 29줄. 백업 `settings.json.bak-20261012`. **재시작 전까지는 안 먹는다** — 적용 직후 ssh·gh pr merge 를 다시 시도했고 여전히 분류기에 막혔다.
+- 운영 `/g/{slug}` 404 원인 규명. 운영 DB 에 목표 0건. `goal_public` 뷰가 `cheer` 하위질의를 가지는데 비로그인 조회가 42501 없이 200 `[]` 로 돌아온 것이 근거 — 뷰가 정의자 권한으로 RLS 를 우회해 읽었는데도 0건이다. 문서 `docs/ops/운영-404-진단-20261012.md`, 커밋 `95bd6c6`.
+- 운영 Supabase 는 `ossvejipdivgxzcqszbw`, 환경변수 85일간 미변경 = 프로젝트 교체 없음.
+- 별건 발견: `cheer` 는 비로그인 base 권한이 회수됐는데 `goal` 은 아직 남아 있다. RLS 로 현재 유출은 없으나 의도와 불일치.
+- 미해결: 러너 등록·PR #3 머지는 재시작 후 첫 일. 운영 DB 서비스 롤 접근이 없어 "만들어진 적 없음"과 "지워짐"을 못 가름.
 
 ## 2026-10-10 20:42 KST · 가입 근본원인 실제오류로 확정. client_id는 내가 고침, Client Secret 값만 남음
 - 회장: "너가 하라고"(키 직접 찾아 넣어라).
