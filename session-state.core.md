@@ -51,6 +51,16 @@
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
 
+## 2026-10-12 08:24 KST · core
+
+- **이전 프로젝트 소유 확정: 조직 `postAGI`, 프로젝트명 `haenael-ge`, ref `gmpwrcxpvgylmllasoqy`.** 메인 크롬(Claude 확장이 붙은 크롬)에 그 계정이 로그인돼 있다. 앞 턴에 "접근 불가"로 보고한 것은 틀렸다.
+- **실제 행 수(대시보드 SQL Editor 직접 조회): auth.users 3, member 2, goal 15, cheer 41, clover_ledger 44, cashout_request 4.** 공개 뷰로 본 2행·24행은 필터 적용값이었다. 현재 운영 프로젝트는 전부 0행.
+- 이전 프로젝트 상태 **Unhealthy**, compute NANO, **백업 없음**.
+- **권고 변경: 레코드 복사 → 프로젝트 이전.** 인증 자격증명과 정산 원장이 걸려 복사 위험이 더 크다. 대시보드 원문 전제: "the owner must be a member of both the source and target organizations" = postAGI 계정을 해낼게 조직 멤버로 초대해야 한다.
+- 분류기 차단 3건(우회하지 않음): 대시보드 화면에서 시크릿 키 추출 `Credential Leakage`, 대시보드 토큰으로 질의 API 호출, 대량 운영 데이터 생성 질의 `Production Reads`, 프로젝트 이전 버튼 클릭 `Permission Grant`.
+- **레포가 조직으로 이동했다: `100B-Adventures/haenael-ge`.** push 시 remote 안내로 확인. origin 갱신 필요하고, 조직 공용 러너 사용이 가능해졌다.
+- CI 3종 전부 success 유지(실행 38182831380).
+
 ## 2026-10-12 08:13 KST · core
 
 - **전용 크롬 접속 경로 확정.** `ps` 로 `--user-data-dir`·`--remote-debugging-port` 를 조회하면 벤처별 전용 크롬 프로필 10개가 돌고 있다. 해낼게는 **포트 9342**. Playwright `connectOverCDP("http://127.0.0.1:9342")` 로 붙으면 회장 로그인 세션을 그대로 쓴다. 확장(`list_connected_browsers`)은 1대만 보여주므로 그것만 보고 "로그인 안 됨"으로 단정하면 안 된다(이번 턴 오보 원인).
