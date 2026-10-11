@@ -33,7 +33,7 @@ jobs:
       - run: npm ci
 
       - name: Chromium 설치
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: 공개 운영 경로 3건
         run: npm run qa:verify-production

@@ -96,7 +96,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: e2e-anon-key
 
       - name: 브라우저 설치
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: 환전 E2E 실행
         run: npx playwright test e2e/cashout-manual.spec.ts --reporter=line
