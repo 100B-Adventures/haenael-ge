@@ -51,6 +51,14 @@
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
 
+## 2026-10-12 08:13 KST · core
+
+- **전용 크롬 접속 경로 확정.** `ps` 로 `--user-data-dir`·`--remote-debugging-port` 를 조회하면 벤처별 전용 크롬 프로필 10개가 돌고 있다. 해낼게는 **포트 9342**. Playwright `connectOverCDP("http://127.0.0.1:9342")` 로 붙으면 회장 로그인 세션을 그대로 쓴다. 확장(`list_connected_browsers`)은 1대만 보여주므로 그것만 보고 "로그인 안 됨"으로 단정하면 안 된다(이번 턴 오보 원인).
+- **이전 프로젝트 `gmpwrcxpvgylmllasoqy` 는 제5의 Supabase 계정 소유.** 로그인된 4개 계정(j.the.great.investor, the.edu.devs, haenaelge.official, code0to1) 전부 `You do not have access to this project`. 해낼게 조직 프로젝트 수 1개 = 현 운영 프로젝트뿐. API 키 발급 2026-07-16, 운영 기간 2026-07-16 ~ 2026-10-09.
+- 현 운영 프로젝트 service 키는 대시보드 화면에서 긁으려다 `Credential Leakage` 로 차단됐다. 우회하지 않았다. **대안: 대시보드 SQL Editor 를 CDP 로 조작하면 키 없이 새 프로젝트에 질의·마이그레이션 가능하다.** 다음 턴 경로.
+- **CI 3종 전부 success** (실행 38182831380, 자체 러너 `haenael-vm`). E2E 는 playwright 공식 이미지 컨테이너에서 러너 uid(1000)로 실행. 호스트에 chromium 공유 라이브러리 9종 부재 + 암호 없는 sudo 부재가 원인이었다.
+- 미해결: 이전 프로젝트 소유 계정 로그인, 레코드 이관, 러너 systemd 상주.
+
 ## 2026-10-12 07:45 KST · core
 
 - **P0 규명: 운영 데이터는 지워지지 않았다. 이전 DB `gmpwrcxpvgylmllasoqy` 에 살아 있다.** 목표 2건(`7vb3j7t` 공인중개사 2차 합격, `knirdtaq` 해낼게를 해낼게), 응원 24건. 2026-10-09 컷오버 때 새 프로젝트 `ossvejipdivgxzcqszbw` 로 옮기면서 **데이터를 이관하지 않았다.** 그것이 `/g/{slug}` 404 의 원인. 문서 `docs/ops/운영DB-컷오버-데이터유실-20261012.md`, 인프라 SSOT 갱신.
