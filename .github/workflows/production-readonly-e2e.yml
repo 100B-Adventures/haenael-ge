@@ -15,7 +15,7 @@ concurrency:
 jobs:
   production-readonly:
     name: 운영 공개·인증 읽기 경로
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, haenael_runner]
     environment: production-readonly-qa
     timeout-minutes: 10
     defaults:

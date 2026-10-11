@@ -28,7 +28,7 @@ concurrency:
 jobs:
   qa-contracts:
     name: 배포 환경·환전 층간 계약
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, haenael_runner]
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +41,7 @@ jobs:
 
   unit-and-build:
     name: 단위 테스트 + 빌드
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, haenael_runner]
     defaults:
       run:
         working-directory: web
@@ -71,7 +71,7 @@ jobs:
 
   e2e-cashout:
     name: 환전 브라우저 E2E
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, haenael_runner]
     defaults:
       run:
         working-directory: web
