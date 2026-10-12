@@ -1,4 +1,21 @@
+## 2026-10-12 19:10 KST · 카카오 로그인 해소
+
+- 카카오 개발자센터(앱 ID 1516450)는 메인 크롬에서 **로그인돼 있었다.** 앞선 판단이 틀렸다. 역할 Owner, 카카오 로그인 사용 ON, 앱 대표 도메인 `https://haenael-ge.vercel.app`, REST API 키 `c274280c95e2859cbbce3fdcc2758a9c`.
+- 원인은 `KAKAO_CLIENT_SECRET` 하나였다. `KAKAO_CLIENT_ID` 는 이미 정상(SHA256 대조 확인).
+- 조치: 전용 크롬(CDP 9342)에 로그인된 Supabase 대시보드 Edge Functions > Secrets 폼을 세션이 직접 조작해 교체. 관리 API POST 201, 다이제스트 `4097889236...` → `9bbeabddc0...`.
+- 종료 증거: 엣지 함수 `auth-kakao` 더미 코드 호출이 `KOE010 Bad client credentials` → `KOE320 authorization code not found` 로 바뀜(2회 연속).
+- 남은 것: 실제 카카오 계정으로 기존 회원 로그인 실구동, 두 번째 목표 생성 실구동, 대상 DB 비밀번호 재설정, postAGI 프로젝트 `gmpwrcxpvgylmllasoqy` 삭제, 100B 하네스판 재생성.
+- 하네스: `~/.claude/CLAUDE.md` §5 에 두 조항 추가(막힘 보고 전 재확인 2종, 폼 제출 후 모달 확인). 평가 `ev-20261012-53`.
+
 ## 회장 4지적 처리 · 러너 전환안 · 스토어 3곳 실측 (2026-10-12 04:50 KST)
+
+## [2026-10-12 12:09 KST] compact 마크 (auto)
+- 세션 f904f244 · 라인 core · 브랜치 session/core-20260912
+- 직전 커밋: cf81bf1 docs(state): QA 시크릿 교정·러너 통일·카카오 미해결 인계
+- compact 직전 컨텍스트: 675199 토큰
+- 마지막 회장 요청: 니가고쳐 병신아 카카오 개발자센터는 메인크롬에 있고. 이번에 업데이트할거도 다 되었어? 진행해라
+- 직전에 고친 파일: apply-migration.sh stage-for-one-click.sh browser-inventory.sh migrate-auth-users.sh migrate-public-data.sh migrate-remaining-tables.sh copy-empty-tables.sh stage-cleanup-sql.mjs
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 
 ## [2026-10-12 05:49 KST] compact 마크 (auto)
 - 세션 f904f244 · 라인 core · 브랜치 session/core-20260912
