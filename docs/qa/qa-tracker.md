@@ -1,5 +1,21 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-13: V2 소셜 바이럴 루프 서버 실물 0건
+
+**판정: ❌ NG. 웹 우선 기술설계 완료 전 상태이며 구현·운영 검증은 아직 0건**
+
+| 요청번호 | 증상 | 원인 | 해제 증거 |
+|---|---|---|---|
+| QA-V2-WEB-01 | 운영 RPC `create_friend_invite`, `friend_goal_detail`, `my_friend_goals`, `set_goal_cover_preset`, `update_member_preferences` 0건 | 기존 기술설계가 앱인토스 중심이었고 웹 선행 build slice가 없었음 | 웹 우선 migration·RPC 배포 뒤 pgTAP과 운영 read-only catalog 확인 |
+| QA-V2-WEB-02 | 웹 `/friends`, `/invite`, 하단 탭 0건 | 승인 프로토타입이 build 계약과 route map으로 승격되지 않았음 | Playwright WF-01~17 17/17과 390·1024 실제 렌더 |
+| QA-V2-WEB-03 | 미니앱 친구·초대 화면은 있으나 호출 대상 서버가 0건 | 프런트 화면과 백엔드 계약을 별도 완료로 오인할 수 있는 구조 | 웹 공통 RPC 5종 계약 test 5/5 뒤 모바일 2차 QA |
+
+- 근본원인: 앱인토스 중심 설계가 채널 정책 결정을 기다리는 동안 공통 백엔드와 웹 완주 슬라이스가 독립 발주되지 않았다.
+- 재발방지: `docs/eng-design/*-social-viral-loop-web-first-v1.0.0.md` 4종에서 웹을 1차, 모바일을 2차로 분리하고 FDD 17스텝을 route·component·table/RPC·test에 1:1 매핑했다.
+- 현재 증거 등급: 운영 결손은 관찰됨. 새 설계 문서는 근거 확인. 구현·배포·제품 동작은 미검증.
+
+STAMP: 2026-10-13 02:42 KST | model gpt-5-codex | agent tech-architect | skill docs | 상태 NG 등록
+
 ## 2026-10-09: 새 Supabase 운영 컷오버 service role 키 형식 오류
 
 **판정: 🔧 교정·운영 재검증 완료. 실제 카카오 동의·콜백만 미검증**

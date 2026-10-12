@@ -58,6 +58,13 @@ approved_artifacts:
     - { path: docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md, version: 1.0.0, status: pending-review, label: "다중목표·공개범위·응원자 설계안", sha256: 0e345e671cd83db4cc8211697c4f019c71142b9358f3964c8e0e958fac9cc6a0 }
   build:
     - { path: docs/eng-design/build-log.md, version: unversioned, status: approved, label: "빌드 로그", sha256: ea05789238599f4fde69dce7b8a0a2c60469945f0f27e673902d1e75fe4e3aaa }
+    # V2 웹 우선 슬라이스 설계 (2026-10-13, Codex tech-architect). 거버넌스 D-018·D-019.
+    # 미승인이다. /approve eng-design 전까지 build 착수 금지.
+    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: pending-review, label: "V2 웹 우선 기능설계", sha256: 4d603907a7dbee418945bb10b83310eadca839643fedd84a0b8c11471127abc8 }
+    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: pending-review, label: "V2 웹 우선 데이터 구조", sha256: aa9138cbe21c195105a31aa62b607c6ba46d4f4ffdaff0c310235e05efda325e }
+    - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: pending-review, label: "V2 웹 우선 서버 함수 계약", sha256: c2f50b8ffff16b9ff948a1abb91385420e08722df99348ec9b5ec5b5d9fc8fcb }
+    - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: pending-review, label: "V2 웹 우선 시스템 구성도(다이어그램 7종)", sha256: 5236ee8da4e6664ca82fa2f611ff4161e188a703e4f3b0b9383cdd5227826ce9 }
+    - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: pending-review, label: "V2 웹 우선 테스트 계획", sha256: 54d6f922edcdc8953aec4eb7d9975be14801e7d9af7b70afdc914badcfe47241 }
     - { path: docs/구현현황.md, version: unversioned, status: approved, label: "구현 현황", sha256: 696c11b2aff8dc7ea3ffe4f05f6b84768f53ef45425e06e465374ce936f017ef }
     - { path: supabase/migrations/20260821000000_cashout_service_fee_10pct.sql, version: unversioned, status: approved, label: "환전 이용료 마이그레이션", sha256: ce62fde3b659464d3860030d203116497064b47fdbcb3677521d17ee51b7f654 }
     - { path: supabase/migrations/20260822000000_cashout_clover_lock_a1.sql, version: unversioned, status: approved, label: "환전 잠금 마이그레이션", sha256: 6ee968a6fe0ba5d8c6146b207dd6e15e6554cfc1ab32d3735b0f8cec04d1b359 }
