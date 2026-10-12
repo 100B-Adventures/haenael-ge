@@ -51,6 +51,14 @@
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
 
+## 2026-10-12 10:33 KST · core
+
+- **카카오 로그인 실패 원인 확정: 엣지 함수 `auth-kakao` 의 카카오 자격증명 불일치.** 카카오가 `KOE010 Bad client credentials` 를 반환한다. 대조 실험으로 갈랐다. **로컬 키체인 `kakao-client-secret / haenael-ge` + `kakao-rest-api-key / haenael-ge` 조합은 KOE320(자격 정상, 코드만 가짜)** 이고, secret 을 빼면 KOE010 으로 엣지 함수 오류와 같다. 대시보드에 두 시크릿이 **등록은 돼 있으나 값이 틀렸다.** 진단서 `docs/ops/카카오로그인-실패-진단-20261012.md`.
+- `KAKAO_CLIENT_ID` 는 `c274280c95e2859cbbce3fdcc2758a9c`(운영 웹이 쓰는 REST API 키, 브라우저 번들에 들어가는 공개값). `KAKAO_CLIENT_SECRET` 은 키체인 32자.
+- **버전업은 운영 반영 완료.** PR #3 머지 커밋 `3402acc` 가 main 에 있고, 운영 배포 `haenael-89fwun3m8` 이 2026-10-12 07:30:27 KST 생성으로 머지 시각과 일치. 운영 DB 마이그레이션 **44개 전부 적용**(최신 `20261006010000`), `create_goal` 이 다중 목표판(마감일 기준 상한)으로 확인됐다.
+- 레포가 `100B-Adventures/haenael-ge` 로 이동했고 `a717268`(PR #5)로 **CI 가 온프렘 `ci-vm` 러너로 전환**돼 있다. 내가 만든 `haenael_runner` 와 별개 경로라 어느 쪽을 정본으로 둘지 정리 필요.
+- 남은 것: 카카오 시크릿 2개 교정(클립보드에 secret 적재 + 전용 크롬에 콘솔 열어 둠), 교정 후 로그인 실구동, 대상 DB 비밀번호 재설정, 그 뒤 postAGI 프로젝트 삭제.
+
 ## 2026-10-12 10:07 KST · core
 
 - **운영 DB 데이터 이관 완료.** 원본 `gmpwrcxpvgylmllasoqy` → 대상 `ossvejipdivgxzcqszbw`. 14개 테이블 행 수 전부 일치(users 3, member 2, goal 15, cheer 41, payment 28, payment_log 56, ledger 44, balance 2, cashout 4, notification 17, lead 8, report 4, access_log 6, admin 1). **금액 합계 6종 전부 일치**(cheer 클로버 4261, 결제 1,225,000원, 원장 증감 26, 환전 총액 120,000원, 실지급 103,276원, 잔액 26).
