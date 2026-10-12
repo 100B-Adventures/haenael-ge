@@ -51,6 +51,15 @@
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
 
+## 2026-10-12 11:10 KST · core
+
+- **운영 읽기전용 E2E 가 깨져 있던 것을 고쳤다.** 저장소 QA 시크릿 5개가 **2026-09-02 생성분이라 옛 Supabase 프로젝트를 가리켰다.** 쿠키 이름에 프로젝트 ref 가 들어가므로 서버가 세션을 못 읽어 `/cashout` 이 `/` 로 튕겼다. 로컬 `~/.sj-agent-harness/secrets/haenael-ge-qa-production.env` 값으로 갱신 후 실행 38194042617 **success**.
+- **함정 기록: `gh secret set --body -` 는 표준입력이 아니라 리터럴 하이픈을 저장한다.** 그 탓에 다섯 시크릿이 전부 `-` 가 됐고 CI 로그에서 모든 하이픈이 `***` 로 마스킹되는 것으로 발견했다. 올바른 형태는 `printf '%s' "$v" | gh secret set NAME --repo R` 다.
+- **CI 러너 정본 통일.** 레포가 100B-Adventures 조직으로 옮겨지며 **조직 공용 `ci-vm` 4대가 online** 이고 main 이 그쪽을 쓴다. 세션이 만든 레포 전용 `haenael_runner` 전환은 철회했다. 워크플로는 main 것으로 되돌렸다.
+- **제품 코드는 더 올릴 게 없다.** `git diff origin/main..HEAD -- web/src supabase miniapp/src` 가 비어 있다. 버전업(다중 목표)은 `3402acc` 로 머지되고 07:30:27 배포까지 끝났으며 운영 DB 마이그레이션 44개가 적용돼 있다.
+- **카카오 로그인은 아직 미해결.** 엣지 함수 `auth-kakao` 의 자격증명이 틀려 `KOE010`. 카카오 개발자센터는 메인 크롬에 있으나 **이 세션에서 열었을 때 로그아웃 상태**였고 대신 로그인하지 않았다. 해낼게 앱 ID 는 **1516450**. 맞는 값은 키체인 `kakao-client-secret / haenael-ge`(32자)와 `kakao-rest-api-key / haenael-ge`.
+- PR #6 올림(100B-Adventures/haenael-ge). 제품 코드 변경 없음, 문서·운영 스크립트·워크플로 되돌림·상태 기록.
+
 ## 2026-10-12 10:33 KST · core
 
 - **카카오 로그인 실패 원인 확정: 엣지 함수 `auth-kakao` 의 카카오 자격증명 불일치.** 카카오가 `KOE010 Bad client credentials` 를 반환한다. 대조 실험으로 갈랐다. **로컬 키체인 `kakao-client-secret / haenael-ge` + `kakao-rest-api-key / haenael-ge` 조합은 KOE320(자격 정상, 코드만 가짜)** 이고, secret 을 빼면 KOE010 으로 엣지 함수 오류와 같다. 대시보드에 두 시크릿이 **등록은 돼 있으나 값이 틀렸다.** 진단서 `docs/ops/카카오로그인-실패-진단-20261012.md`.
