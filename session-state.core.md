@@ -1,3 +1,13 @@
+## 2026-10-12 21:35 KST · Vercel 자동배포 끊김 원인 확정 = 요금제
+
+- **진짜 원인: Vercel 팀 `100-b` 가 Hobby 요금제이고, Hobby 는 조직 소유 비공개 저장소의 git 연동을 지원하지 않는다.** 저장소가 `100B-Adventures`(비공개) 로 이전된 뒤 2026-10-12 08:14 을 마지막으로 Vercel 배포가 한 건도 생기지 않았다. 재연결 응답: `The repository "haenael-ge" is private and owned by an organization, which is not supported on the Hobby plan. Upgrade to Pro to continue. (409)`
+- 배제된 원인: GitHub 앱 권한(조직 설치 + 접근 저장소 14개에 `haenael-ge` 포함, API 로 확인), 프로젝트 설정(운영 브랜치 main·일시정지 아님·repoId 일치), `ignoreCommand`(미리보기만 건너뜀).
+- 진단 중 `vercel git disconnect` 를 실행했다. 08:14 이후 이미 죽은 연결이라 기능 손실은 없다. 운영은 07:30 배포로 정상(`/` 200, `/api/health` database=ok, version 1.2.1).
+- 회장 결정 필요(돈 또는 공개 범위): ①Pro 업그레이드 ②저장소 공개 전환 ③개인 계정 소유로 환원. `~/.claude/harness/open-decisions.md` 최상단 등록. 추천 ①.
+- 디자인 프로토타입: 개정분 전부 올라갔다. main 의 `docs/design` 87개. 모션 컨셉·바이럴 모션 샷건·화면목록 v3·친구 초대 UI 증거·소셜 바이럴 루프 v2·랜딩 워드맵 다국어 증거 개별 확인 완료.
+- 목표 작성 화면 글자수 표시 `0/200` 고정은 **결함이 아니었다.** 그 표시는 선택 입력인 이유 칸(`reason`)에 묶여 있고, 앞선 측정이 첫 칸(목표, 최대 60자)에 입력했기 때문이다. 이유 칸에 14자 입력 시 `14/200` 으로 정상 변동 확인.
+- 하네스: 추측한 원인으로 회장 작업을 만들지 말고 원인을 명령으로 확정한 뒤 주체를 정하라는 조항 추가. 커밋 `b040d06`. 평가 `ev-20261012-58`.
+
 ## 2026-10-12 20:30 KST · 미니앱 반영 머지 + 배포 트리거 끊김 확정
 
 - PR #8 머지 완료(`8efc9d2`, 20:24 KST). 앱인토스 미니앱 구현본과 소셜 바이럴 루프 기술설계 8종이 이제 저장소에 있다. CI 3종 success(실행 38241640622).
