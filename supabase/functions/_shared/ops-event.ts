@@ -32,7 +32,22 @@ export async function hashId(id: string): Promise<string> {
     .map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** 성공 true. env 없음·네트워크 오류·비 2xx 는 모두 false 이고 절대 throw 하지 않는다. */
+const OPS_EVENT_HOST = "ops-external-watchdog.rosemallow95.workers.dev";
+const OPS_EVENT_PATH = "/v1/event";
+
+/** 송신 허용 URL: https + 고정 호스트 + /v1/event 만. 자격증명·포트·쿼리가 붙으면 거부한다. */
+export function isAllowedOpsUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    return u.protocol === "https:" && u.hostname === OPS_EVENT_HOST && u.port === "" &&
+      u.username === "" && u.password === "" && u.pathname === OPS_EVENT_PATH &&
+      u.search === "" && u.hash === "";
+  } catch {
+    return false;
+  }
+}
+
+/** 성공 = HTTP 202 + 본문 ok:true 뿐. 그 외(200 포함)·허용 밖 URL·env 없음·오류는 모두 false 이고 절대 throw 하지 않는다. */
 export async function sendOpsEvent(
   ev: OpsEvent,
   deps: OpsEventDeps = {},
@@ -44,6 +59,10 @@ export async function sendOpsEvent(
       // 값은 쓰지 않고 비어 있는 변수 이름만 남긴다(수집이 조용히 꺼지는 것을 막는다).
       const missing = [!url ? "OPS_EVENT_URL" : "", !token ? "OPS_EVENT_TOKEN" : ""].filter(Boolean);
       console.warn("[ops-event] disabled, missing env:", missing.join(","));
+      return false;
+    }
+    if (!isAllowedOpsUrl(url)) {
+      console.warn("[ops-event] WARN url not allowed, skip");
       return false;
     }
     const doFetch = deps.fetchFn ?? fetch;
@@ -60,21 +79,35 @@ export async function sendOpsEvent(
       ...(ev.channel ? { channel: ev.channel } : {}),
     });
     for (let attempt = 0; attempt < 2; attempt++) {
+      let retry = false;
       try {
         const res = await doFetch(url, {
           method: "POST",
           headers: { "content-type": "application/json", "X-Ops-Token": token },
           body,
+          redirect: "error",
           signal: AbortSignal.timeout(timeoutMs),
         });
-        if (res.ok) return true;
-        console.error("[ops-event] rejected", res.status);
+        const status = res.status;
+        if (status === 202) {
+          let okBody = false;
+          try {
+            const j = await res.json();
+            okBody = !!j && (j as { ok?: unknown }).ok === true;
+          } catch { /* 본문 불량은 실패 */ }
+          if (okBody) return true;
+          console.error("[ops-event] rejected", status, "bad body");
+        } else {
+          res.body?.cancel().catch(() => undefined);
+          console.error("[ops-event] rejected", status);
+          retry = status >= 500 || status === 429;
+        }
       } catch (e) {
-        console.error(
-          "[ops-event] send failed",
-          e instanceof Error ? e.name : "error",
-        );
+        const isTimeout = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+        console.error("[ops-event] send failed", isTimeout ? "timeout" : "network error");
+        retry = true;
       }
+      if (!retry) return false;
     }
     return false;
   } catch (e) {

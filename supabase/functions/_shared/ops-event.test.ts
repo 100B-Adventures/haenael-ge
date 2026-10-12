@@ -8,7 +8,7 @@ const ev = {
   amount: 5000,
   currency: "KRW",
 };
-const base = { url: "https://example.test/v1/event", token: "t0k" };
+const base = { url: "https://ops-external-watchdog.rosemallow95.workers.dev/v1/event", token: "t0k" };
 
 Deno.test("성공: 202 면 true, 헤더·본문 규격", async () => {
   let seen: { headers: Headers; body: Record<string, unknown> } | null = null;
@@ -62,7 +62,7 @@ Deno.test("5xx 한 번 후 재시도 성공", async () => {
     ...base,
     fetchFn: (() => {
       calls++;
-      return Promise.resolve(new Response("", { status: calls === 1 ? 503 : 202 }));
+      return Promise.resolve(new Response('{"ok":true}', { status: calls === 1 ? 503 : 202 }));
     }) as unknown as typeof fetch,
   });
   assertEquals(ok, true);
@@ -77,13 +77,13 @@ Deno.test("hashId: 결정적이고 원문을 포함하지 않는다", async () =
 });
 
 Deno.test("fireSignup / firePay 는 EdgeRuntime.waitUntil 에 작업을 등록한다", async () => {
-  Deno.env.set("OPS_EVENT_URL", "https://ops.test/v1/event");
+  Deno.env.set("OPS_EVENT_URL", "https://ops-external-watchdog.rosemallow95.workers.dev/v1/event");
   Deno.env.set("OPS_EVENT_TOKEN", "t0k");
   const keys: string[] = [];
   const realFetch = globalThis.fetch;
   globalThis.fetch = ((_u: string, init?: RequestInit) => {
     keys.push(JSON.parse(init!.body as string).idempotency_key);
-    return Promise.resolve(new Response("{}", { status: 202 }));
+    return Promise.resolve(new Response('{"ok":true}', { status: 202 }));
   }) as unknown as typeof fetch;
   const waits: Promise<unknown>[] = [];
   (globalThis as unknown as { EdgeRuntime: unknown }).EdgeRuntime = { waitUntil: (p: Promise<unknown>) => waits.push(p) };
@@ -114,4 +114,81 @@ Deno.test("env 누락 시 변수 이름만 경고하고 값은 쓰지 않는다"
   } finally {
     console.warn = realWarn;
   }
+});
+
+// ---- 강화 계약: 202 + ok:true 만 성공, 4xx 재시도 없음, redirect 금지, URL 허용목록 ----
+const mk = (fn: (init: RequestInit) => Response | Promise<Response>) => {
+  const state = { calls: 0, inits: [] as RequestInit[] };
+  const fetchFn = ((_u: string, init: RequestInit) => {
+    state.calls++;
+    state.inits.push(init);
+    return Promise.resolve(fn(init));
+  }) as unknown as typeof fetch;
+  return { state, fetchFn };
+};
+
+Deno.test("200 은 실패(202 만 성공)", async () => {
+  const m = mk(() => new Response('{"ok":true}', { status: 200 }));
+  assertEquals(await sendOpsEvent(ev, { ...base, fetchFn: m.fetchFn }), false);
+  assertEquals(m.state.calls, 1);
+});
+
+Deno.test("202 라도 본문 ok:true 가 아니면 실패", async () => {
+  const m = mk(() => new Response('{"ok":false}', { status: 202 }));
+  assertEquals(await sendOpsEvent(ev, { ...base, fetchFn: m.fetchFn }), false);
+});
+
+Deno.test("4xx 는 재시도 0회", async () => {
+  const m = mk(() => new Response("", { status: 401 }));
+  assertEquals(await sendOpsEvent(ev, { ...base, fetchFn: m.fetchFn }), false);
+  assertEquals(m.state.calls, 1);
+});
+
+Deno.test("429 는 재시도 1회", async () => {
+  const m = mk(() => new Response("", { status: 429 }));
+  assertEquals(await sendOpsEvent(ev, { ...base, fetchFn: m.fetchFn }), false);
+  assertEquals(m.state.calls, 2);
+});
+
+Deno.test("5xx 지속이면 재시도 1회 뒤 실패(총 2회)", async () => {
+  const m = mk(() => new Response("", { status: 503 }));
+  assertEquals(await sendOpsEvent(ev, { ...base, fetchFn: m.fetchFn }), false);
+  assertEquals(m.state.calls, 2);
+});
+
+Deno.test("redirect:error 로 호출하고 3xx 응답도 실패", async () => {
+  const m = mk(() => new Response("", { status: 302, headers: { location: "https://evil.test/" } }));
+  assertEquals(await sendOpsEvent(ev, { ...base, fetchFn: m.fetchFn }), false);
+  assertEquals(m.state.inits[0].redirect, "error");
+  assertEquals(m.state.calls, 1);
+});
+
+Deno.test("허용 밖 URL 은 송신 0회", async () => {
+  for (const url of [
+    "http://ops-external-watchdog.rosemallow95.workers.dev/v1/event",
+    "https://evil.test/v1/event",
+    "https://ops-external-watchdog.rosemallow95.workers.dev/other",
+    "https://ops-external-watchdog.rosemallow95.workers.dev.evil.test/v1/event",
+    "https://u:p@ops-external-watchdog.rosemallow95.workers.dev/v1/event",
+    "not a url",
+  ]) {
+    const m = mk(() => new Response('{"ok":true}', { status: 202 }));
+    assertEquals(await sendOpsEvent(ev, { url, token: "t0k", fetchFn: m.fetchFn }), false);
+    assertEquals(m.state.calls, 0, url);
+  }
+});
+
+Deno.test("실패 로그에 토큰·URL·본문이 없다", async () => {
+  const logs: string[] = [];
+  const realErr = console.error;
+  console.error = (...a: unknown[]) => { logs.push(a.join(" ")); };
+  try {
+    const m = mk(() => new Response("secret-body t0k", { status: 401 }));
+    await sendOpsEvent(ev, { ...base, fetchFn: m.fetchFn });
+  } finally {
+    console.error = realErr;
+  }
+  const all = logs.join("\n");
+  assertEquals(all.includes("t0k") || all.includes("workers.dev") || all.includes("secret-body"), false);
+  assertEquals(all.includes("401"), true);
 });

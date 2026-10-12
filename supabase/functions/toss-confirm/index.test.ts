@@ -6,14 +6,14 @@ Deno.test("이미 DONE 인 주문 재호출 → 200 idempotent + pay 이벤트(�
   Deno.env.set("SUPABASE_URL", "https://sb.test");
   Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "svc");
   Deno.env.set("TOSS_SECRET_KEY", "tsk");
-  Deno.env.set("OPS_EVENT_URL", "https://ops.test/v1/event");
+  Deno.env.set("OPS_EVENT_URL", "https://ops-external-watchdog.rosemallow95.workers.dev/v1/event");
   Deno.env.set("OPS_EVENT_TOKEN", "t0k");
 
   const opsBodies: Record<string, unknown>[] = [];
   const realFetch = globalThis.fetch;
   globalThis.fetch = ((input: Request | URL | string, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    if (url.startsWith("https://ops.test/")) {
+    if (url.startsWith("https://ops-external-watchdog.rosemallow95.workers.dev/")) {
       opsBodies.push(JSON.parse(init!.body as string));
       return Promise.resolve(new Response('{"ok":true}', { status: 202 }));
     }
