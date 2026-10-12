@@ -19,7 +19,7 @@ SRC_USER=postgres.gmpwrcxpvgylmllasoqy
 DST_HOST=aws-0-ap-southeast-1.pooler.supabase.com
 DST_USER=postgres.ossvejipdivgxzcqszbw
 
-TABLES="payment_log notification lead report kyc_verification risk_event share_event wordmap_render_cache"
+TABLES="cheer clover_balance clover_ledger"
 
 for t in $TABLES; do
   printf '%-26s ' "$t"
