@@ -1,3 +1,10 @@
+## 2026-10-12 22:30 KST · 미니앱 구동 실측 + CI 러너 OOM 복구
+
+- **앱인토스 미니앱 구동 확인.** 빌드 산출물을 `vite preview` 로 띄워 헤드리스 390x844 구동. 상태 200, scrollDelta 202, shortfall 0, overflowX 0, 버튼 12개, 깨진 이미지 0, 콘솔 오류 0. 목표 입력 13자 → 표시 `13/60`. 분위기 칩 선택 반영. 하단 탭 4개(홈·친구·초대·내 설정) 전부 이동 확인. 친구 탭의 "앱 연결 설정을 확인해 주세요." 는 토스 런타임 밖 구동이라 정상 분기.
+- **조직 CI 러너 4대 중 3대가 죽어 있던 것을 복구.** `ci-vm-1·3·4` 가 OOM 킬러에 죽은 상태(`oom-kill`, 14:02~14:03)였다. 러너 위치는 Proxmox 의 `ci-runners` VM(VMID 110, 192.168.1.165), 접속은 `ssh pve` 뒤 `ssh 192.168.1.165`. 세 서비스 재시작 후 GitHub 에서 4대 online 확인.
+- 근본 원인은 VM 벌루닝 하한이 4GB 라 호스트가 빡빡할 때 게스트 메모리가 줄어드는 것. 영구 조치(balloon 8192)는 공용 호스트 설정이라 미결 등록.
+- 미해결은 Vercel 요금제 결정 하나다(Hobby 가 조직 비공개 저장소 자동배포를 막는다).
+
 ## 2026-10-12 21:35 KST · Vercel 자동배포 끊김 원인 확정 = 요금제
 
 - **진짜 원인: Vercel 팀 `100-b` 가 Hobby 요금제이고, Hobby 는 조직 소유 비공개 저장소의 git 연동을 지원하지 않는다.** 저장소가 `100B-Adventures`(비공개) 로 이전된 뒤 2026-10-12 08:14 을 마지막으로 Vercel 배포가 한 건도 생기지 않았다. 재연결 응답: `The repository "haenael-ge" is private and owned by an organization, which is not supported on the Hobby plan. Upgrade to Pro to continue. (409)`
