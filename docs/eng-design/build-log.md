@@ -5,6 +5,97 @@
 
 ---
 
+## 새 Supabase 운영 컷오버 (2026-10-09)
+
+### 결론
+
+Vercel Production 환경변수 3개를 Supabase 프로젝트 `ossvejipdivgxzcqszbw`로 교체하고 마지막 정상 운영 커밋을 재배포했다. 새 프로젝트 Auth 사용자를 실제 생성한 뒤 비밀번호 로그인, Supabase 세션 쿠키, Vercel 서버 렌더링까지 왕복해 연결을 확인했다. 제품 코드와 D-003 보호 SQL은 변경하지 않았다.
+
+### 운영 증거
+
+| 등급 | 대상 | 결과 |
+|---|---|---|
+| 관찰됨 | Vercel 환경변수 PATCH | URL·publishable·legacy service_role 3건 HTTP 200, Production target 유지 |
+| 관찰됨 | Vercel 배포 | `dpl_EsR4GMHX8aibKf6ZJCN3AArvx4FY` READY, `haenael-ge.vercel.app` alias |
+| 관찰됨 | 공개 웹 | `/` 200, 브랜드 본문 확인 |
+| 관찰됨 | 실제 DB 공개 경로 | `/api/health` 200, `database=ok`, 버전 1.2.1 |
+| 관찰됨 | 카카오 로그인 시작 | 307, `kauth.kakao.com`, OAuth state 발급 |
+| 관찰됨 | 운영 Auth·SSR | QA auth-only 사용자 생성·로그인, 세션 쿠키 1개, `/cashout` 200, 핵심 UI 2개 표시, 콘솔 오류 0, 제품 `member` 행 0 |
+
+첫 배포에서는 `SUPABASE_SERVICE_ROLE_KEY`를 새 `sb_secret` 키로 해석해 Auth Admin 호출이 `Invalid API key`로 실패했다. 환경변수 이름과 현행 코드 계약에 맞는 legacy service_role JWT로 교정하고 재배포한 뒤 같은 Auth 실호출을 통과시켰다.
+
+미검증: 실제 카카오 계정 동의·콜백·신규 `member` 행 생성. 브라우저 실세션 재현을 시도했으나 현재 computer-use 브라우저 surface가 0개라 진행할 수 없었다. 해낼게 전용 `KAKAO_CLIENT_SECRET`과 `TOSS_WEBHOOK_TOKEN`은 로컬에 없고, 공용 `SLACK_WEBHOOK_URL`은 빈 값이라 설정하지 않았다. 타 벤처 카카오 자격증명은 앱이 달라 재사용하지 않았다.
+
+셀프심문: 이 컷오버가 틀렸다면 가장 그럴듯한 이유는 환경변수 PATCH 성공을 런타임 성공으로 오인하는 것이다. 그래서 Vercel 재빌드 이후 공개 DB health와 실제 Auth 사용자·세션·SSR 왕복을 별도로 실행했다.
+
+레드팀: 까다로운 고객은 카카오 시작 307만으로 가입 완료를 주장할 수 없다고 공격할 수 있다. 실제 카카오 동의·콜백은 미검증으로 남기고, 이번에 관찰한 범위를 Auth 백엔드와 Vercel 세션 연결로 한정했다.
+
+STAMP: line=core | 갱신=2026-10-09 13:54 KST | model=gpt-5-codex | agent=code-builder | skill=haenael-supabase-build | 근거=Vercel REST API·CLI, Supabase CLI·Auth Admin, 운영 HTTP·Playwright | 고민=환경변수 반영과 사용자 경로 실동작을 분리해 검증했다.
+
+SOURCES/MODEL: gpt-5-codex | `wiki/ops/인프라.md` | `session-state.core.md` | `web/src/app/api/health/route.ts` | https://vercel.com/docs/environment-variables/managing-environment-variables | https://vercel.com/docs/cli/redeploy | https://supabase.com/docs/guides/getting-started/api-keys | https://supabase.com/docs/guides/functions/secrets
+SKILLS_USED: haenael-supabase-build, Supabase·Next.js 운영 컷오버와 실제 Auth·웹 왕복 증거 순서에 적용
+SKILLS_SKIPPED: 없음
+KNOWLEDGE_QUERY: 해낼게 인프라·ADR·실수 원장과 Vercel 환경변수·재배포, Supabase API 키·함수 시크릿 공식 문서를 조회했다.
+HITS_USED: Vercel은 환경변수 변경 뒤 새 배포가 필요하다는 계약, Supabase는 publishable과 서버 전용 키를 분리한다는 계약을 컷오버에 적용했다.
+HITS_REJECTED: 타 벤처 카카오 client secret과 빈 공용 Slack webhook은 해낼게 자격증명이 아니므로 사용하지 않았다. 새 `sb_secret` 키는 현행 Auth Admin 실호출 실패로 Vercel의 legacy service_role 계약에서 제외했다.
+CONFLICTS: 인프라 문서는 service_role과 새 secret 키를 함께 허용한다고 적었지만 현행 런타임 실측은 새 secret 키를 거부했다. 실물을 진실로 삼아 legacy service_role로 교정하고 SSOT를 갱신했다.
+
+## Apps in Toss v0 획득 채널 클라이언트 (2026-10-06)
+
+### 결론
+
+공식 Apps in Toss React 생성기를 기반으로 `miniapp/` 독립 CSR 앱을 만들었다. 로그인 진입, 친구 목표 3건 조회, 응원 상세, 초대, 알림 선호, 6개 프리셋 커버를 연결했고 결제·환전·금액·순위·외부 웹·SSR 의존은 정적 검사로 0건을 고정했다. 기존 Supabase 스키마와 보안 코드는 바꾸지 않았다.
+
+### 구현 계약
+
+| 영역 | 구현 위치 | 현재 동작 |
+|---|---|---|
+| 채널 분리 | `miniapp/`, `apps-in-toss.config.ts` | Vite + React CSR, Toss CDN `dist/`, WebView navigation 사용 |
+| 토스 신원 | `src/gateway.ts` | `TossAuth.login`의 일회성 code를 `auth-toss`에 전송하고 반환 토큰을 `supabase.auth.setSession`에만 전달 |
+| 친구·조회 | `my_friend_goals`, `friend_goal_detail` 어댑터 | 친구 카드와 응원 횟수·메시지·워드맵만 표시. 금액·순위 타입 없음 |
+| 초대 | `create_friend_invite`, `Share.createLink`, `Share.sendMessage` | `intoss://` 딥링크만 공유 |
+| 커버 | `CoverPicker`, `set_goal_cover_preset` 어댑터 | 승인된 프리셋 c1~c6. 사진 업로드는 moderation 공급자 미결로 제외 |
+| 선호 | `update_member_preferences` | 응원 알림 기본 켬, 마케팅 기본 끔. 명시 동의만 저장 |
+| 컴포넌트 카탈로그 | `.storybook/`, co-located stories, token gallery | Button, GoalCard/List, CoverPicker, PageShell 상태와 디자인 토큰 |
+| 회귀 방어 | Vitest, Playwright, static guard, design lint | 정상·거절 계약, 로그인→친구→응원 상세, D-003, 채널 격리 |
+
+데이터가 필요한 로컬 검증은 `?demo=1`에서만 동작하는 명시적 어댑터를 썼다. 운영 기본값은 Supabase 어댑터이며 환경값이 없으면 안정 오류로 중단한다.
+
+### 검증 증거
+
+| 등급 | 실행 | 결과 |
+|---|---|---|
+| 테스트됨 | `npm run typecheck` | TypeScript 오류 0 |
+| 테스트됨 | `npm test` | 2 files, 9/9 PASS. 로그인 정상·설정 누락 거절·친구 조회·없는 목표·선호·커버·초대·D-003 계약 |
+| 테스트됨 | `npm run lint` | oxlint 오류 0 |
+| 테스트됨 | `design-lint.sh miniapp/src` | 임의 spacing px, 인라인 style, 토큰 밖 hex 0건 |
+| 테스트됨 | `heavy-slot.sh npm run build` | 채널 격리 정적 검사 PASS, Vite 117 modules, production bundle PASS |
+| 테스트됨 | `heavy-slot.sh npm run build-storybook` | Storybook 10.6.1 정적 빌드 PASS |
+| 테스트됨 | Node 24 + `heavy-slot.sh npm run ait:build` | `haenael-ge.ait` 생성 PASS, deploymentId `01a10e77-1cb4-7562-855f-8b06b21f5b59` |
+| 관찰됨 | Playwright Chrome dev server E2E | `/login?demo=1` HTTP 200 → 토스 로그인 버튼 → 친구 카드 3개 → 응원 상세. 2/2 PASS, 콘솔 오류 0, 4xx·5xx 0 |
+| 관찰됨 | 모바일 실측 360·390·412·600·700·780·820·900·1000 | 전 폭 PASS. 13px 미만 0, 본문 중앙값 16px, 44px 미만 누름 0, active cover 100%, 가로 넘침 0 |
+| 관찰됨 | 390×844 응원 상세 캡처 육안 대조 | 이미지·제목·메시지·응원 횟수·워드맵·CTA 정상 렌더, 금액·순위 없음 |
+
+### 경계와 회수 필요
+
+레포 실물에는 FDD가 요구하는 `auth-toss`, `member_identity`, 친구·초대·커버·선호 RPC가 아직 없다. 이번 범위는 새 스키마·RPC 금지이므로 클라이언트 계약만 구현했다. 따라서 Toss Sandbox의 실제 code 교환, 운영 Supabase 세션, 실계정 친구 데이터 왕복은 **미검증**이다. 배포된 백엔드에 해당 계약이 존재하는지 확인하고 Sandbox 실기기에서 한 번 왕복하기 전에는 운영 로그인 완료로 판정할 수 없다.
+
+사진 커버는 moderation 공급자와 안전 공개 경로가 미결이므로 프리셋 fallback만 제공했다. 앱 패키지는 만들었지만 입점 콘솔 업로드·외부 공개·배포는 수행하지 않았다.
+
+셀프심문: 이 구현이 틀렸다면 가장 그럴듯한 이유는 문서 계약이 배포 백엔드 실물과 어긋나는 경우다. 그래서 없는 RPC를 로컬에 새로 만들지 않고 운영 어댑터를 계약 경계로 고립했으며, 데모는 명시 쿼리에서만 활성화했다.
+
+레드팀: 까다로운 심사자는 2xx 화면을 실제 Toss 로그인 성공으로 오해할 수 있다고 공격할 수 있다. 보고 등급을 로컬 화면은 관찰됨, Toss Sandbox와 운영 Supabase 왕복은 미검증으로 분리했고, 패키지 생성과 배포 완료도 분리했다.
+
+STAMP: line=core | 갱신=2026-10-06 08:49 KST | model=gpt-6.1-sol | agent=code-builder | skill=haenael-supabase-build | 근거=FDD v0.1.0, Apps in Toss 공식 생성기·로그인·공유 문서, DESIGN.md v2.0.1, 로컬 build·E2E·모바일 실측 | 고민=실백엔드 부재를 데모 성공으로 숨기지 않고 채널 클라이언트와 검증 경계를 분리했다.
+
+SOURCES/MODEL: gpt-6.1-sol | `docs/eng-design/fdd-core-social-viral-loop-appintoss-v0.1.0-gpt-codex.md` | `docs/eng-design/api-contract-social-viral-loop-v0.1.0.md` | `DESIGN.md` | `docs/design/prototypes/social-viral-loop-v2-opus48.html` | https://developers-apps-in-toss.toss.im/intro/overview.html | https://developers-apps-in-toss.toss.im/bedrock/reference/framework/%EB%A1%9C%EA%B7%B8%EC%9D%B8/appLogin.html
+SKILLS_USED: haenael-supabase-build, 독립 미니앱 수직 슬라이스와 테스트·브라우저 증거 순서에 적용
+SKILLS_SKIPPED: 없음
+KNOWLEDGE_QUERY: BRAIN business index에서 선언형 바이럴·유저심리 정본을 조회하고 Apps in Toss 공식 생성기·WebView·로그인·공유·CDN 문서를 조사했다.
+HITS_USED: 선언형 공유 원칙은 초대 카피와 첫 목표 CTA에, Apps in Toss 공식 계약은 CSR 구조·TossAuth·intoss 공유·Node 24 패키징에 반영했다.
+HITS_REJECTED: 보상형 초대와 결제 API는 비용·현금성 혼동·FDD 금지 범위 때문에 제외했다. 사진 업로드는 moderation 공급자 미결로 프리셋 fallback만 채택했다.
+CONFLICTS: 승인 프로토타입의 과거 금액·랭킹 흔적은 D-003과 충돌해 구현하지 않았다. FDD의 배포 백엔드 가정과 레포 실물 부재가 충돌해 실인증을 미검증으로 남겼다.
+
 ## 결제·인증 보안 Vitest 표준 실행·CI 연결 (2026-10-06)
 
 ### 발견과 의미

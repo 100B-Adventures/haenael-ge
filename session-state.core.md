@@ -1,4 +1,42 @@
+## 2026-10-12 20:30 KST · 버전업 반영 실태 규명
+
+회장 지적 "버젼업한거 반영 안된거같은데" 를 세 층으로 쪼개 확인했다.
+
+- **웹 다중 목표(상한 3)는 운영에 떠 있다.** 운영 번들 `/_next/static/immutable/chunks/3vz73ax7zliaz.js` 에서 상한 안내 문구를 직접 찾았다. 3402acc 이후 main 커밋은 `web/` 를 한 줄도 안 건드렸으므로 운영 = main 이다.
+- **앱인토스 미니앱 구현본과 v2 기술설계 8종은 저장소에 한 줄도 없었다.** 작업트리에만 있었다. 미커밋 29건 + 미추적 34건. 이것이 회장 지적의 실체다.
+- 조치: 커밋 `994ab5a` 로 전부 올리고 PR #8 개설. 미니앱 자체 관문 통과(tsc 0 오류, vitest 9/9, vite build 117 모듈). 배포는 하지 않았다.
+- `.gitignore` 에 미니앱 빌드 산출물(`storybook-static`·`test-results`·`playwright-report`·`*.ait`)과 세션 전용 로컬 파일(`.chrome-profile`·`session-state-archive/`) 추가.
+- Vercel 연결은 정상이다. 저장소 이동이 배포를 끊었다고 적었던 PR 본문을 실측 후 정정했다.
+- main CI 가 9시간 전 npm 네트워크 오류(ECONNRESET)로 빨간불이었다. 재실행해 success 로 복구했다.
+- 다른 레인 PR #7(ops/event-send, 관제 입구 송신)이 열려 있다. 결제 부분 교차리뷰 전 머지 금지 표기가 제목에 있어 건드리지 않았다.
+- 하네스: 반영 여부는 작업트리·미푸시·배포본 세 층을 다 본 뒤에 말한다는 조항 추가. 커밋 `c027a8e`. 평가 `ev-20261012-57`.
+
+## 2026-10-12 19:30 KST · 원클릭 스테이징 스크립트 버그 수정
+
+- `~/.claude/harness/bin/stage-for-one-click.sh` 의 클립보드 수신 루프가 **실제로는 동작하지 않았다.** 파이프와 `read` 조합이 개행 없는 값에서 EOF 로 비정상 종료 코드를 내고 `set -e` 가 스크립트를 죽였다. 로그에 `CAPTURED` 도 `TIMEOUT` 도 안 남고 종료 코드 1로 끝났다. 즉 회장이 복사 버튼을 눌러도 아무 일도 일어나지 않는 상태였다.
+- 조치: 값을 변수로 받고 키체인 저장 실패를 별도 로깅. 커밋 `78a5728`.
+- 실측 검증: 클립보드 20자 → 로그 `CAPTURED len=20`, 키체인 값 20자, 클립보드 0바이트. 자체점검 키체인 항목은 삭제했다. 검증 등급 `관찰됨`.
+- 100B 하네스판 반영: `node scripts/collect-harness-changelog.mjs` 직접 실행으로 `78a5728`·`4caca576` 둘 다 생성물에 들어간 것 확인. `npm run refresh:harness` 는 **없는 스크립트**다.
+- 미결 등록: 하네스판 변경 기록이 `CAP = 70` 롤링 창이라 같은 날 커밋이 70건을 넘기면 아침에 확인된 반영이 저녁에 사라진다. 2026-10-12 실측으로 `2a3fe476` 이 창에서 밀려났다. `harness/open-decisions.md` 최상단에 등록.
+
+## 2026-10-12 19:10 KST · 카카오 로그인 해소
+
+- 카카오 개발자센터(앱 ID 1516450)는 메인 크롬에서 **로그인돼 있었다.** 앞선 판단이 틀렸다. 역할 Owner, 카카오 로그인 사용 ON, 앱 대표 도메인 `https://haenael-ge.vercel.app`, REST API 키 `c274280c95e2859cbbce3fdcc2758a9c`.
+- 원인은 `KAKAO_CLIENT_SECRET` 하나였다. `KAKAO_CLIENT_ID` 는 이미 정상(SHA256 대조 확인).
+- 조치: 전용 크롬(CDP 9342)에 로그인된 Supabase 대시보드 Edge Functions > Secrets 폼을 세션이 직접 조작해 교체. 관리 API POST 201, 다이제스트 `4097889236...` → `9bbeabddc0...`.
+- 종료 증거: 엣지 함수 `auth-kakao` 더미 코드 호출이 `KOE010 Bad client credentials` → `KOE320 authorization code not found` 로 바뀜(2회 연속).
+- 남은 것: 실제 카카오 계정으로 기존 회원 로그인 실구동, 두 번째 목표 생성 실구동, 대상 DB 비밀번호 재설정, postAGI 프로젝트 `gmpwrcxpvgylmllasoqy` 삭제, 100B 하네스판 재생성.
+- 하네스: `~/.claude/CLAUDE.md` §5 에 두 조항 추가(막힘 보고 전 재확인 2종, 폼 제출 후 모달 확인). 평가 `ev-20261012-53`.
+
 ## 회장 4지적 처리 · 러너 전환안 · 스토어 3곳 실측 (2026-10-12 04:50 KST)
+
+## [2026-10-12 12:09 KST] compact 마크 (auto)
+- 세션 f904f244 · 라인 core · 브랜치 session/core-20260912
+- 직전 커밋: cf81bf1 docs(state): QA 시크릿 교정·러너 통일·카카오 미해결 인계
+- compact 직전 컨텍스트: 675199 토큰
+- 마지막 회장 요청: 니가고쳐 병신아 카카오 개발자센터는 메인크롬에 있고. 이번에 업데이트할거도 다 되었어? 진행해라
+- 직전에 고친 파일: apply-migration.sh stage-for-one-click.sh browser-inventory.sh migrate-auth-users.sh migrate-public-data.sh migrate-remaining-tables.sh copy-empty-tables.sh stage-cleanup-sql.mjs
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 
 ## [2026-10-12 05:49 KST] compact 마크 (auto)
 - 세션 f904f244 · 라인 core · 브랜치 session/core-20260912

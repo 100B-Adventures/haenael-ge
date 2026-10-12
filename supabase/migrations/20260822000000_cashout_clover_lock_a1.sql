@@ -1,5 +1,5 @@
 -- 환전 중 클로버 잠금(A안). 회장 확정 원문(2026-08-21): "A안이지 실제로 빠져나갔을때 빠져나가야지".
--- 설계 정본: docs/fdd-haenael-ge-cashout-clover-lock-v1.0.0-opus5.md (§6 D1~D4, §7 전이표, §9 API 계약)
+-- 설계 정본: docs/eng-design/fdd-haenael-ge-cashout-clover-lock-v1.0.0-opus5.md (§6 D1~D4, §7 전이표, §9 API 계약)
 --
 -- 변경 요지:
 --   1. create_cashout_request  : 신청은 총량 불변 — CASHOUT_HOLD delta=0, balance_after=변경 전 총량 (D1=A-1)

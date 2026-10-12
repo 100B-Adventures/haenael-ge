@@ -1,6 +1,6 @@
 -- =============================================================================
 -- haenael-ge: RLS 정책 실검증 (pgTAP)
--- 진실원: docs/test-plan.md §7 SEC-1~4 + design-patterns §2 defense-in-depth
+-- 진실원: docs/qa/test-plan.md §7 SEC-1~4 + design-patterns §2 defense-in-depth
 -- 실 Postgres 위에서 역할 전환 — mock 없음 (헌법 §3)
 -- =============================================================================
 
@@ -385,7 +385,7 @@ RESET ROLE;
 
 -- =========================================================================
 -- SEC-5: cheer.clover_amount 개별 금액은 소유자만 (High 유출 차단, 결정 B)
--- 근거: docs/design-cheer-amount-privacy-v0.1.0.md §3/§4,
+-- 근거: docs/design/design-cheer-amount-privacy-v0.1.0.md §3/§4,
 --       migration 20260719000000_cheer_amount_privacy.sql
 -- =========================================================================
 

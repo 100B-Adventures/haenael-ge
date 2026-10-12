@@ -2,7 +2,7 @@
 -- 20260719000000의 pgdelta 부분적용 복구: cheer_public 뷰 + GRANT만 재적용.
 -- (앞 마이그레이션에서 정책 DROP·REVOKE anon은 적용됐으나 CREATE VIEW/GRANT가
 --  pgdelta 트랜잭션 중단으로 미적용됨 — prod anon 조회 PGRST205로 확인.)
--- 동일 SQL(설계 진실원 docs/design-cheer-amount-privacy-v0.1.0.md, Codex 2nd-pass 통과분)의 뷰 부분만.
+-- 동일 SQL(설계 진실원 docs/design/design-cheer-amount-privacy-v0.1.0.md, Codex 2nd-pass 통과분)의 뷰 부분만.
 
 BEGIN;
 
