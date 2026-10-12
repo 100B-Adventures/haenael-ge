@@ -12,6 +12,7 @@ import { toPublicError } from "../_shared/errors.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
 import { dispatchCheerReceivedNotification } from "../_shared/cheer-notification.ts";
 import { isAlimtalkConfigured } from "../_shared/alimtalk.ts";
+import { firePay } from "../_shared/ops-event.ts";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -300,6 +301,8 @@ Deno.serve(async (req: Request) => {
   // 결제 원자 트랜잭션 밖의 부가 작업. 조회/호출/발송 실패는 helper가 모두
   // 흡수하며, confirm_cheer_payment가 만든 기존 INAPP 알림과 결제 응답을 보존한다.
   const confirmed = data[0];
+  // 결제 확정(DB 커밋 직후) 관제 송신. idempotency_key 가 orderId 라 웹훅 경로와 중복돼도 한 건.
+  firePay(orderId, amount);
   await dispatchCheerReceivedNotification({
     alimtalkConfigured: isAlimtalkConfigured(),
     getMemberPhone: async (memberId) => {
