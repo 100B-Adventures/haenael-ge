@@ -36,6 +36,15 @@ approved_artifacts:
     - { path: docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html, version: 3.8.0, status: approved, label: "환전 전체 여정 프로토타입", sha256: c376a818bac77b292b3b05c30f1f9bd360c353a599ba85b374f44d72e85dc058 }
     - { path: docs/design/design-spec-core-cashout-30-27-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "30·27 디자인 수치 명세", sha256: f4ca0952014d80c1d4b8d3fd951d0ad770710352f241c75bf3a417685257745a }
     - { path: docs/design/clean-frames/core-cashout-30-27-clean-frames-v1-gpt-codex.stamp.md, version: 1.0.0, status: approved, label: "30·27 기준 프레임", sha256: 561c85fbc85a82f5e2c98a2139550cb8577c10381c445d6eba747129e5841fa1 }
+    # v2 소셜 바이럴 루프 라운드 (2026-09-16 ~ 2026-10-12). 위 환전 핀은 v1 라운드 정본이고
+    # 아래가 그 뒤 만들어진 최신 디자인이다. 아직 /approve 를 받지 않아 pending-review 로 둔다.
+    # 회장 2026-10-13 지적: 대시보드가 환전 프로토타입만 보여 v2 가 버려진 것처럼 읽혔다.
+    - { path: docs/design/prototypes/social-viral-loop-v2-opus48.html, version: 2.0.0, status: pending-review, label: "소셜 바이럴 루프 v2 프로토타입(하단탭·모션 포함)", sha256: cf4a78fe7041c00f8f4336fcbbb3107f2230f404b1f1116840dcaf469bdb9626 }
+    - { path: docs/design/prototypes/core-viral-motion-shotgun-v1-opus48.html, version: 1.0.0, status: pending-review, label: "바이럴 모션 샷건", sha256: a5d87276065b4bd4968ac201f11b259f437aa1dc9b43f4886b5ddf78051122b2 }
+    - { path: docs/design/motion-concepts-haenael-ge.html, version: unversioned, status: pending-review, label: "모션 컨셉", sha256: 42abb59bf55b514f2388f0de8ce935c46bcf56e67a6fac7a3c6bb56aeb442690 }
+    - { path: docs/design/prototypes/screen-inventory-v3.md, version: 3.0.0, status: pending-review, label: "화면 인벤토리 v3", sha256: a61efc9fdfce3e8643895661706c229f8882dc9ecd1176fcef291e9c085aa267 }
+    - { path: docs/design/prototypes/ui-evidence-friends-invite.txt, version: unversioned, status: pending-review, label: "친구·초대 화면 실측 증거", sha256: 8e40b2440152cf68f07b5973c0ea0c1eeca1e57f8721aedbedddd50c2b7a91e2 }
+    - { path: docs/design/prototypes/ui-evidence-landing-wordmap-i18n.txt, version: unversioned, status: pending-review, label: "랜딩·워드맵 다국어 실측 증거", sha256: a71a49d17dc4475d30308516a0c2f423bc8285256d288097ac5691e016d227e8 }
   eng-design:
     - { path: docs/eng-design/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md, version: 1.1.0, status: approved, label: "FDD 환전 잠금", sha256: 3060d41309a37c91a10ce58530a581aaf9af12cdae6d88a43e00d02d46491393 }
     - { path: docs/eng-design/fdd-haenael-ge-v0.1.0.md, version: 0.1.0, status: approved, label: "FDD 기저", sha256: a5b44ee196f3bd76784063f83b62b1982a4af98844809e367f05b641760de5df }
