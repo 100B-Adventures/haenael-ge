@@ -15,10 +15,7 @@ concurrency:
 jobs:
   production-readonly:
     name: 운영 공개·인증 읽기 경로
-    runs-on: [self-hosted, haenael_runner]
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --user 1000:1000 --ipc=host
+    runs-on: [ci-vm]  # 온프렘 공용 CI VM 110(GitHub 호스팅 분 한도 초과 대응, 2026-10-12)
     environment: production-readonly-qa
     timeout-minutes: 10
     defaults:
@@ -36,7 +33,7 @@ jobs:
       - run: npm ci
 
       - name: Chromium 설치
-        run: echo "컨테이너 이미지에 chromium 포함"
+        run: npx playwright install chromium  # 시스템 의존성은 CI VM 에 사전 설치
 
       - name: 공개 운영 경로 3건
         run: npm run qa:verify-production
