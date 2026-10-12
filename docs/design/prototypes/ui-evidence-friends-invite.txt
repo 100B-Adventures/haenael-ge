@@ -1,0 +1,8 @@
+ui-evidence friends-invite-v1
+contentChanged=1539
+clicks=6
+wheelScrollY=1279
+scrollY=1279
+scrollHeight=2123
+mobileOverflow=0
+consoleErrors=0

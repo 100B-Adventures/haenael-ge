@@ -1,7 +1,6 @@
 ui-evidence landing-wordmap-i18n-v2
 contentChanged=374
 clicks=9
-langToggleEN_present=1
 wheelScrollY=1383
 scrollY=1383
 scrollHeight=2227

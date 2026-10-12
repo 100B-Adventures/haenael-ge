@@ -1,5 +1,21 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-09: 새 Supabase 운영 컷오버 service role 키 형식 오류
+
+**판정: 🔧 교정·운영 재검증 완료. 실제 카카오 동의·콜백만 미검증**
+
+| 요청번호 | 증상 | 원인 | 해제 증거 |
+|---|---|---|---|
+| QA-CUTOVER-01 | 첫 Vercel 재배포 뒤 Auth Admin 호출이 `Invalid API key` | `SUPABASE_SERVICE_ROLE_KEY`에 현행 코드가 기대하는 legacy service_role JWT 대신 새 `sb_secret` 키를 선택 | legacy service_role로 PATCH HTTP 200, 재배포 `dpl_EsR4GMHX8aibKf6ZJCN3AArvx4FY` READY |
+| QA-CUTOVER-02 | 환경변수 PATCH 성공만으로 실제 Auth 동작을 확정할 수 없음 | 배포 설정과 런타임 검증이 분리돼 있음 | 새 프로젝트 QA auth-only 사용자 생성·로그인, 세션 쿠키 발급, 운영 `/cashout` 200·핵심 UI 표시·콘솔 오류 0, 제품 `member` 행 0 |
+| QA-CUTOVER-03 | 카카오 실제 신규가입 종단 미관찰 | 현재 computer-use 브라우저 surface 0개 | 시작 경로 307·카카오 인증 호스트·state 발급까지만 PASS. 동의·콜백·신규 `member` 행은 미검증 |
+
+- 공개 DB 경로: `/api/health` 200, `database=ok`, 버전 1.2.1.
+- D-003 보호 파일 2개는 착수 전후 diff 규모가 같으며 이번 작업에서 수정하지 않았다.
+- 스크린샷: `/tmp/haenael-prod-auth-cashout.png`에서 환전 페이지 실렌더를 육안 확인했다.
+
+STAMP: 2026-10-09 13:54 KST | model gpt-5-codex | agent code-builder | skill haenael-supabase-build | 상태 🔧 교정 완료
+
 ## 2026-10-06: 결제·인증 보안 Vitest CI 수집 누락
 
 **판정: 🔧 로컬 수정 검증. 표준 `npm test` 46파일·292건 PASS, 원격 GitHub Actions 실행은 미검증**

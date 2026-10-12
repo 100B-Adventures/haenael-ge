@@ -1,0 +1,89 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>해낼게 모션 용어·개념 정리</title>
+<style>
+ :root{--ink:#1c1b19;--muted:#6b665d;--clover:#1B8A4F;--line:#e5e1d8;--warm:#f3efe7;--bg:#faf8f3;--card:#fff;}
+ *{box-sizing:border-box;}
+ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.72;}
+ .wrap{max-width:860px;margin:0 auto;padding:34px 20px 60px;}
+ h1{font-size:24px;font-weight:900;margin:0 0 6px;}
+ .lede{color:var(--muted);font-size:14px;margin-bottom:26px;}
+ h2{font-size:18px;font-weight:900;margin:34px 0 12px;padding-top:18px;border-top:1px solid var(--line);}
+ .q{background:var(--warm);border-left:3px solid var(--clover);border-radius:0 8px 8px 0;padding:10px 14px;font-weight:700;font-size:14px;margin:0 0 12px;}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;}
+ .term{font-weight:900;color:var(--clover);}
+ table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;}
+ th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;}
+ th{background:var(--warm);font-weight:800;}
+ code{background:var(--warm);padding:1px 6px;border-radius:5px;font-size:12.5px;}
+ .good{color:var(--clover);font-weight:800;}
+ .bad{color:#b4472b;font-weight:800;}
+ ul{margin:8px 0 8px 2px;padding-left:18px;}
+ li{margin:4px 0;}
+ .src{margin-top:34px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;}
+ .src a{color:var(--clover);}
+</style></head><body><div class="wrap">
+<h1>해낼게 모션 용어·개념 정리</h1>
+<p class="lede">회장 질문(2026-10-02): 용어를 UI 모션이라 하면 되나, 인앱 버튼 컨페티도 UI 모션인가, 로딩·랜딩에서 시선 잡는 건 뭔가, 리모션·모션그래픽은 영상 전용인가, 로딩·동적화면은 GIF 쓰나. 표준 출처(LottieFiles, NN/g, Wikipedia)로 확인해 정리했습니다.</p>
+
+<h2>1. 큰 지도: 용어 위계</h2>
+<div class="card">
+<p><span class="term">모션 디자인(motion design)</span> = 화면 위 모든 움직임을 아우르는 큰 우산입니다. 그 아래로 성격이 다른 두 갈래가 있습니다.</p>
+<ul>
+<li><span class="term">UI 애니메이션(UI animation)</span>: 제품 UI 요소에 움직임을 줘 상호작용을 돕는 것. 앱 "안"의 움직임 전반.</li>
+<li><span class="term">모션 그래픽(motion graphics)</span>: 로고·텍스트·도형 등 그래픽으로 "이야기를 전하는" 움직임. 주로 영상·광고·인트로. 제품 조작과 무관한 서사 연출.</li>
+</ul>
+<p>그리고 UI 애니메이션 안에 특히 작은 단위가 <span class="term">마이크로 인터랙션(microinteraction)</span>입니다. 버튼 탭, 토글, 좋아요처럼 유저 행동에 즉시 반응하는 작고 기능적인 피드백.</p>
+</div>
+
+<h2>2. 질문별 정확한 답</h2>
+
+<p class="q">Q. 용어를 "UI 모션"이라고 하면 됨?</p>
+<div class="card">됩니다. <span class="term">UI 모션 = UI 애니메이션</span>으로 통용됩니다. 더 정확히는, 유저 행동에 반응하는 작은 것은 <span class="term">마이크로 인터랙션</span>, 화면 전체의 전환·등장은 <span class="term">UI 애니메이션/트랜지션</span>이라 부르면 깔끔합니다. 지금 프로토의 화면 전환 fade, 카드 떠오름이 여기에 해당합니다.</div>
+
+<p class="q">Q. 앱 안에서 버튼 눌렀을 때 터지는 컨페티도 UI 모션인가?</p>
+<div class="card">예. 인앱 컨페티는 <span class="term">마이크로 인터랙션(보상·축하 피드백)</span>의 한 종류이고, 따라서 UI 모션입니다. 영상(모션 그래픽)이 아니라 앱 안에서 실시간으로 그려지는 연출입니다. 구현은 CSS·JS 입자, 또는 Lottie·Rive 애니메이션으로 합니다. 참고로 해낼게는 결정 D-003("지갑은 조용하게")과 브랜드 "조용히" 때문에 폭죽형 컨페티는 배제하고, 클로버가 은은히 떠오르는 절제된 보상 연출을 씁니다.</div>
+
+<p class="q">Q. 로딩이나 랜딩에서 움직이며 시선 잡는 건 뭐라고 부르나?</p>
+<div class="card">
+<ul>
+<li>로딩 중 기다림 연출: <span class="term">로딩 애니메이션</span>(스피너, 프로그레스, 또는 콘텐츠 자리를 미리 깔아주는 <span class="term">스켈레톤 로더</span>).</li>
+<li>랜딩에서 시선을 잡는 큰 움직임: <span class="term">히어로 애니메이션</span>(hero animation), 스크롤에 반응하면 <span class="term">스크롤 트리거 애니메이션</span>, 가만히 둬도 은은히 도는 건 <span class="term">앰비언트/루프 애니메이션</span>이라 합니다.</li>
+</ul>
+회장이 보내주신 스레드 예시 같은 "살아 움직이는 랜딩"은 보통 히어로 애니메이션(루프)입니다.
+</div>
+
+<p class="q">Q. 리모션·모션그래픽은 영상 렌더링할 때만 쓰는 용어인가?</p>
+<div class="card">
+<ul>
+<li><span class="term">Remotion(리모션)</span>: React 코드로 <span class="bad">영상(mp4 등)을 찍어내는</span> 도구입니다. 결과물이 동영상 파일이라, 앱 안에서 실시간으로 반응하는 UI 모션에는 안 씁니다. 유튜브·광고·SNS 영상 자동 생성 쪽입니다.</li>
+<li><span class="term">모션 그래픽</span>: 개념은 영상 전용이 아닙니다. 다만 "제품 조작과 무관한 서사형 움직임"을 뜻해 실무에선 영상·인트로에 주로 씁니다. 앱 안에서 쓰고 싶으면 보통 영상이 아니라 Lottie로 넣습니다.</li>
+</ul>
+정리: <b>앱 안의 반응 = UI 모션(CSS·Web Animations·Lottie·Rive)</b>, <b>영상 제작 = 모션 그래픽·Remotion</b>. 둘은 도구와 결과물이 다릅니다.
+</div>
+
+<p class="q">Q. 로딩 화면이나 동적 화면은 GIF로 하나?</p>
+<div class="card">
+현대 앱·웹에서는 <span class="bad">GIF를 권장하지 않습니다.</span> GIF는 용량이 크고(같은 연출이 Lottie의 약 4배), 256색 한계로 그라데이션이 뭉치고, 래스터라 확대하면 흐려지고, 부분 투명도가 없습니다. 대신:
+<table>
+<tr><th>방식</th><th>무엇</th><th>쓰는 곳</th></tr>
+<tr><td class="good">CSS · Web Animations</td><td>코드로 그리는 가벼운 움직임</td><td>전환, 버튼 반응, 간단한 등장(지금 프로토)</td></tr>
+<tr><td class="good">Lottie (dotLottie)</td><td>벡터 애니를 JSON으로. 수십 KB, 선명, 재색칠 가능</td><td>로딩 애니, 랜딩 히어로, 축하 연출</td></tr>
+<tr><td class="good">Rive</td><td>상태머신 있는 인터랙티브 벡터 애니</td><td>유저 입력에 반응하는 복잡한 모션</td></tr>
+<tr><td>mp4 · webm</td><td>영상</td><td>배경 영상, 실사 연출</td></tr>
+<tr><td class="bad">GIF</td><td>구형 래스터</td><td>이메일·채팅 등 Lottie 안 되는 곳만</td></tr>
+</table>
+해낼게 권장: 지금의 전환·보상은 CSS로 충분하고, 랜딩 히어로나 로딩처럼 "조금 더 살아있는" 연출이 필요하면 Lottie를 얹는 게 정석입니다.
+</div>
+
+<h2>3. 해낼게는 어디에 무엇을 쓰나 (제안)</h2>
+<table>
+<tr><th>자리</th><th>부르는 이름</th><th>해낼게 방식</th></tr>
+<tr><td>화면 전환</td><td>UI 트랜지션</td><td>CSS fade/rise (구현됨)</td></tr>
+<tr><td>응원 적립·합류 순간</td><td>마이크로 인터랙션(보상)</td><td>CSS 클로버 블룸·카운트. 폭죽 없음(D-003)</td></tr>
+<tr><td>로딩 대기</td><td>스켈레톤 · 로딩 애니</td><td>스켈레톤 기본, 필요 시 Lottie 클로버</td></tr>
+<tr><td>첫 랜딩 시선</td><td>히어로 애니(루프)</td><td>CSS 단어 떠오름, 강화 시 Lottie</td></tr>
+</table>
+
+<p class="src">출처: <a href="https://lottiefiles.com/blog/design-inspiration/motion-graphics-vs-ui-animation-understanding-the-differences">LottieFiles · Motion Graphics vs UI Animation</a> · <a href="https://www.nngroup.com/articles/animation-purpose-ux/">NN/g · Animation and Motion in UX</a> · <a href="https://lottiefiles.com/blog/working-with-lottie-animations/lottie-vs-gif">LottieFiles · Lottie vs GIF</a> · <a href="https://en.wikipedia.org/wiki/Motion_graphic_design">Wikipedia · Motion graphic design</a></p>
+<p class="src">🏷 STAMP | line: core | 생성: 2026-10-02 05:34 KST | model: Claude Opus 4.8 | agent: 컨트롤러(직접) | 근거: LottieFiles·NN/g·Wikipedia 웹조사, 결정.md D-003 | 고민: 회장 용어 혼동 해소 위해 모션 디자인 위계(UI 애니/모션그래픽/마이크로인터랙션)와 Lottie 대 GIF를 표준 출처로 확정. 제품 결정 아닌 참고용</p>
+</div></body></html>
