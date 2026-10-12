@@ -284,7 +284,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // 신규 가입 확정(member 행 커밋 직후). 관제로 fire-and-forget, 실패해도 로그인 흐름 불변.
-    if (createdAuthUser) await fireSignup(userId);
+    if (createdAuthUser) fireSignup(userId);
 
     // 4. magic link 생성 → hashed_token
     //    클라이언트: supabase.auth.verifyOtp({ token_hash, type: 'email' })

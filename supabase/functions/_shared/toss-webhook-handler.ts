@@ -62,6 +62,11 @@ export interface TossWebhookDeps {
   /** 미주입(undefined)이면 503 missing_server_env. */
   toss: TossWebhookTossClient | undefined;
   sendSlackAlert: (alert: SlackAlert) => Promise<boolean>;
+  /**
+   * 결제 확정(DB 커밋) 직후 관제 송신. 로컬 import 금지 규칙 때문에 index.ts 가 주입한다.
+   * 던져도 결제 처리에는 영향 없다(핸들러가 삼킨다).
+   */
+  reportPaid?: (orderId: string, amountKrw: number) => void;
 }
 
 type ReceiptClaimState = "claimed" | "processed" | "in_progress";
@@ -245,6 +250,9 @@ export async function handleTossWebhook(
       });
       return finish(json(500, { error: "reconcile_failed" }));
     }
+    try {
+      deps.reportPaid?.(payment.orderId, payment.totalAmount);
+    } catch (_e) { /* 관제 송신 실패는 웹훅 처리에 영향 없음 */ }
   } else if (
     payment.status === "CANCELED" || payment.status === "PARTIAL_CANCELED"
   ) {

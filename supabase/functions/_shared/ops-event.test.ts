@@ -75,3 +75,43 @@ Deno.test("hashId: 결정적이고 원문을 포함하지 않는다", async () =
   assertEquals(a.length, 16);
   assertEquals(a.includes("user"), false);
 });
+
+Deno.test("fireSignup / firePay 는 EdgeRuntime.waitUntil 에 작업을 등록한다", async () => {
+  Deno.env.set("OPS_EVENT_URL", "https://ops.test/v1/event");
+  Deno.env.set("OPS_EVENT_TOKEN", "t0k");
+  const keys: string[] = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = ((_u: string, init?: RequestInit) => {
+    keys.push(JSON.parse(init!.body as string).idempotency_key);
+    return Promise.resolve(new Response("{}", { status: 202 }));
+  }) as unknown as typeof fetch;
+  const waits: Promise<unknown>[] = [];
+  (globalThis as unknown as { EdgeRuntime: unknown }).EdgeRuntime = { waitUntil: (p: Promise<unknown>) => waits.push(p) };
+  try {
+    const { fireSignup, firePay } = await import("./ops-event.ts");
+    fireSignup("member-1");
+    firePay("order-1", 3000);
+    assertEquals(waits.length, 2);
+    await Promise.all(waits);
+    assertEquals(keys.some((k) => k.startsWith("signup:haenael-ge:")), true);
+    assertEquals(keys.includes("pay:haenael-ge:order-1"), true);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+Deno.test("env 누락 시 변수 이름만 경고하고 값은 쓰지 않는다", async () => {
+  const warns: string[] = [];
+  const realWarn = console.warn;
+  console.warn = (...a: unknown[]) => { warns.push(a.join(" ")); };
+  try {
+    Deno.env.delete("OPS_EVENT_URL");
+    Deno.env.delete("OPS_EVENT_TOKEN");
+    const { sendOpsEvent } = await import("./ops-event.ts");
+    const ok = await sendOpsEvent({ kind: "test", title: "t", idempotencyKey: "test:k" });
+    assertEquals(ok, false);
+    assertEquals(warns.some((w) => w.includes("OPS_EVENT_URL") && w.includes("OPS_EVENT_TOKEN")), true);
+  } finally {
+    console.warn = realWarn;
+  }
+});

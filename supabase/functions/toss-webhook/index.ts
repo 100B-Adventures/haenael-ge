@@ -6,6 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { TossClient } from "../_shared/toss.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
+import { firePay } from "../_shared/ops-event.ts";
 import { handleTossWebhook } from "../_shared/toss-webhook-handler.ts";
 
 Deno.serve(async (req) => {
@@ -28,5 +29,6 @@ Deno.serve(async (req) => {
     supabase,
     toss,
     sendSlackAlert,
+    reportPaid: firePay,
   });
 });

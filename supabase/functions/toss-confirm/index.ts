@@ -179,6 +179,8 @@ Deno.serve(async (req: Request) => {
       return json(409, { error: toPublicError(error?.message) });
     }
 
+    // 웹훅이 먼저 확정했거나 최초 송신이 유실된 경우의 복구 경로. 키가 같아 수신 측에서 한 건이 된다.
+    firePay(orderId, amount);
     return json(200, {
       paymentId: data[0].payment_id,
       cheerId: data[0].cheer_id,

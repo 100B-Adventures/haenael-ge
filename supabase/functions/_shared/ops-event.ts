@@ -40,7 +40,12 @@ export async function sendOpsEvent(
   try {
     const url = deps.url ?? Deno.env.get("OPS_EVENT_URL");
     const token = deps.token ?? Deno.env.get("OPS_EVENT_TOKEN");
-    if (!url || !token) return false;
+    if (!url || !token) {
+      // 값은 쓰지 않고 비어 있는 변수 이름만 남긴다(수집이 조용히 꺼지는 것을 막는다).
+      const missing = [!url ? "OPS_EVENT_URL" : "", !token ? "OPS_EVENT_TOKEN" : ""].filter(Boolean);
+      console.warn("[ops-event] disabled, missing env:", missing.join(","));
+      return false;
+    }
     const doFetch = deps.fetchFn ?? fetch;
     const timeoutMs = deps.timeoutMs ?? 2000;
     const at = (deps.now ? deps.now() : new Date()).toISOString();
@@ -86,15 +91,21 @@ export function fireOpsEvent(ev: OpsEvent): void {
   if (rt && typeof rt.waitUntil === "function") rt.waitUntil(p);
 }
 
-export async function fireSignup(memberId: string): Promise<void> {
+/** 해시 계산도 응답 경로 밖(waitUntil 작업 안)에서 한다. */
+export function fireSignup(memberId: string): void {
   try {
-    const h = await hashId(memberId);
-    fireOpsEvent({
-      kind: "signup",
-      title: "신규 가입",
-      idempotencyKey: `signup:${OPS_VENTURE}:${h}`,
-      channel: "kakao",
-    });
+    const task = (async () => {
+      const h = await hashId(memberId);
+      await sendOpsEvent({
+        kind: "signup",
+        title: "신규 가입",
+        idempotencyKey: `signup:${OPS_VENTURE}:${h}`,
+        channel: "kakao",
+      });
+    })().catch(() => undefined);
+    // deno-lint-ignore no-explicit-any
+    const rt = (globalThis as any).EdgeRuntime;
+    if (rt && typeof rt.waitUntil === "function") rt.waitUntil(task);
   } catch (_e) { /* 송신 실패는 흐름을 막지 않는다 */ }
 }
 
