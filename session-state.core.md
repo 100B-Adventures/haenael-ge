@@ -1,3 +1,12 @@
+## 2026-10-12 20:30 KST · 미니앱 반영 머지 + 배포 트리거 끊김 확정
+
+- PR #8 머지 완료(`8efc9d2`, 20:24 KST). 앱인토스 미니앱 구현본과 소셜 바이럴 루프 기술설계 8종이 이제 저장소에 있다. CI 3종 success(실행 38241640622).
+- main CI 가 9시간 전 npm 네트워크 오류로 빨간불이었던 것을 재실행해 success 복구.
+- **Vercel 자동배포가 끊겼다.** PR #8 은 `web/` 를 건드렸는데도 머지 4분 뒤까지 배포가 생기지 않았다. `vercel git connect` 는 연결됐다고 답하므로 GitHub 앱 저장소 접근 권한 문제로 본다. `~/.claude/harness/open-decisions.md` 최상단 등록, 전용 크롬에 GitHub Installations·Vercel Git 설정 두 화면 띄워 둠.
+- 운영에 빠진 기능은 없다. 07:30 배포 이후 main 의 `web/` 변경은 주석 한 줄뿐이다.
+- 조직 러너 4대 중 ci-vm-1·ci-vm-4 가 offline 이다. 어느 VM 에 있는지 찾지 못했다(marketing-vm·postagi-vm·zero-one-vm·d-edu-vm 의 러너는 전부 다른 이름). 원인 미규명.
+- 다른 레인 PR #7(ops/event-send)은 결제 교차리뷰 전 머지 금지 표기가 있어 건드리지 않았다.
+
 ## 2026-10-12 20:30 KST · 버전업 반영 실태 규명
 
 회장 지적 "버젼업한거 반영 안된거같은데" 를 세 층으로 쪼개 확인했다.
