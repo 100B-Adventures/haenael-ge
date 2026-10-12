@@ -192,3 +192,48 @@ Deno.test("실패 로그에 토큰·URL·본문이 없다", async () => {
   assertEquals(all.includes("t0k") || all.includes("workers.dev") || all.includes("secret-body"), false);
   assertEquals(all.includes("401"), true);
 });
+
+// ---- 필수 조건 5·6 ----
+Deno.test("0원·음수 결제는 송신하지 않는다", async () => {
+  for (const amount of [0, -1, 1.5]) {
+    const m = mk(() => new Response('{"ok":true}', { status: 202 }));
+    assertEquals(await sendOpsEvent({ ...ev, amount }, { ...base, fetchFn: m.fetchFn }), false);
+    assertEquals(m.state.calls, 0);
+  }
+});
+
+Deno.test("토스 테스트 키면 firePay 는 송신하지 않는다", async () => {
+  Deno.env.set("OPS_EVENT_URL", base.url);
+  Deno.env.set("OPS_EVENT_TOKEN", "t0k");
+  Deno.env.set("TOSS_SECRET_KEY", "test_sk_dummy");
+  let calls = 0;
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (() => { calls++; return Promise.resolve(new Response('{"ok":true}', { status: 202 })); }) as unknown as typeof fetch;
+  try {
+    const { firePay } = await import("./ops-event.ts");
+    firePay("order-t", 3000);
+    await new Promise((r) => setTimeout(r, 20));
+    assertEquals(calls, 0);
+  } finally {
+    globalThis.fetch = realFetch;
+    Deno.env.delete("TOSS_SECRET_KEY");
+  }
+});
+
+Deno.test("기동 경고: 토큰·주소가 비면 WARN 한 줄, 변수 이름만", async () => {
+  Deno.env.delete("OPS_EVENT_URL");
+  Deno.env.set("OPS_EVENT_TOKEN", "secret-value");
+  const warns: string[] = [];
+  const realWarn = console.warn;
+  console.warn = (...a: unknown[]) => { warns.push(a.join(" ")); };
+  try {
+    const { warnIfOpsEventDisabled } = await import("./ops-event.ts");
+    warnIfOpsEventDisabled();
+  } finally {
+    console.warn = realWarn;
+    Deno.env.delete("OPS_EVENT_TOKEN");
+  }
+  assertEquals(warns.length, 1);
+  assertEquals(warns[0].includes("OPS_EVENT_URL"), true);
+  assertEquals(warns[0].includes("secret-value"), false);
+});

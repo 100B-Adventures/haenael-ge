@@ -47,12 +47,27 @@ export function isAllowedOpsUrl(raw: string): boolean {
   }
 }
 
+/**
+ * 운영 기동 시 토큰·주소가 비어 있으면 WARN 한 줄(변수 이름만, 값 금지). 조용히 꺼지지 않게 한다.
+ */
+export function warnIfOpsEventDisabled(): void {
+  try {
+    const missing = [!Deno.env.get("OPS_EVENT_URL") ? "OPS_EVENT_URL" : "", !Deno.env.get("OPS_EVENT_TOKEN") ? "OPS_EVENT_TOKEN" : ""].filter(Boolean);
+    if (missing.length) console.warn("[ops-event] WARN disabled at startup, missing env:", missing.join(","));
+  } catch { /* 기동을 막지 않는다 */ }
+}
+warnIfOpsEventDisabled();
+
 /** 성공 = HTTP 202 + 본문 ok:true 뿐. 그 외(200 포함)·허용 밖 URL·env 없음·오류는 모두 false 이고 절대 throw 하지 않는다. */
 export async function sendOpsEvent(
   ev: OpsEvent,
   deps: OpsEventDeps = {},
 ): Promise<boolean> {
   try {
+    if (ev.kind === "pay" && !(Number.isSafeInteger(ev.amount) && (ev.amount as number) > 0)) {
+      console.warn("[ops-event] pay skipped, non-positive amount");
+      return false;
+    }
     const url = deps.url ?? Deno.env.get("OPS_EVENT_URL");
     const token = deps.token ?? Deno.env.get("OPS_EVENT_TOKEN");
     if (!url || !token) {
@@ -144,6 +159,8 @@ export function fireSignup(memberId: string): void {
 
 export function firePay(orderId: string, amount: number): void {
   try {
+    // 토스 테스트 키(test_ 접두)로 승인된 결제는 매출이 아니다.
+    if ((Deno.env.get("TOSS_SECRET_KEY") ?? "").startsWith("test_")) return;
     fireOpsEvent({
       kind: "pay",
       title: "결제 승인",
