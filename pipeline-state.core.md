@@ -5,7 +5,7 @@ project: haenael-ge
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude             # 2026-08-30 컨트롤러 Claude. 동일 루트 하네스와 단계 게이트를 적용한다.
-current_stage: build   # 2026-09-05 코드베이스 감사에서 P0 1건·P1 16건과 필수 regression 산출물 부재를 확인해 build 재오픈. 상세 = docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md.
+current_stage: eng-design   # 2026-10-13 V2 웹 우선 슬라이스로 재오픈(회장 지시, D-018). 직전 사유는 다음과 같다: 2026-09-05 코드베이스 감사에서 P0 1건·P1 16건과 필수 regression 산출물 부재를 확인해 build 재오픈. 상세 = docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md.
 approved_stages: [plan, design, eng-design]   # build·qa·ship은 2026-09-05 감사 BLOCK으로 재잠금.
 # 단계 진입·재작업·완료 시각 (state-file-convention §stage_timestamps). 형식 YYYY-MM-DD HH:MM KST.
 # 승인 로그에 분 단위 시각이 있는 것만 적는다. 없는 칸은 비운다(날짜만 반쯤 채우지 않는다).
@@ -124,6 +124,8 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 <!-- 위 요약은 인덱스일 뿐, 각 단계 승인 근거의 상세 서술은 아래 "승인 로그"가 진실원 -->
 
 ## 승인 로그
+
+2026-10-13 02:30 KST ⟲ REOPEN eng-design. 회장 "V2 파이프타면서 웹배포하고 그다음 모바일 배포하면 되잖아 코덱스시켜서 적극 해" 지시로 V2 소셜 바이럴 루프를 파이프라인에 올린다. 스코프는 거버넌스 D-018 대로 **웹 우선**이고 모바일(앱인토스)은 2차다. 재오픈 사유: 기존 eng-design 핀은 환전 잠금 중심이고, V2 설계 문서는 앱인토스 중심(`fdd-core-social-viral-loop-appintoss-v0.1.0`)이라 웹 우선 지시와 어긋난다. 웹 우선 슬라이스 설계 4종(FDD·ERD·API 계약·테스트 계획)을 Codex tech-architect 에 위임했다. 1차 슬라이스 범위는 목표 상세·목표 커버·초대 링크·친구 목록이고 활동 타임라인·업적·부스트는 비범위다. build·qa·ship 은 2026-09-05 감사로 이미 잠겨 있어 추가 재잠금은 없다. V2 가 필요한 서버 실물이 운영에 0건임을 직접 조회로 확인했다(RPC 5종 0개, 친구·초대 테이블 0개, 웹 라우트에 친구·초대 부재).
 
 2026-09-21 22:34 KST — build 슬라이스 완료(갈래 1 다중 목표), qa 대기 — 설계안 §4 대로 `20260921000000_multi_goal_create_fn.sql`(유니크 인덱스 제거 + `create_goal` RPC 권고 잠금·상한 3 + REVOKE INSERT), 온보딩 리다이렉트 제거, `/me` 목록. 컨트롤러 직접 실측: vitest 282/282, pgTAP 270/270(신규 create_goal 10), 동시성 스크립트 PASS, Playwright multi-goal 2/2(로컬 Supabase 실세션), cashout-manual 12/12(E2E 전용 빌드), tsc 0, 토큰 신규 0. PR #3 CI success 3/3. **운영 DB 미적용·main 미머지(회장 몫).** 갈래 2·3 미착수. 단계는 build 유지, qa 승인은 /approve 로만. (artifacts: build=d8dab3f)
 
