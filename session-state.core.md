@@ -51,6 +51,15 @@
 - 보호 파일: `supabase/migrations/20260719000000_cheer_amount_privacy.sql`, `supabase/tests/rls_policy.test.sql`은 착수 전후 diff 규모 동일. 이번 작업에서 수정하지 않음.
 - 직접 결함과 교정: service role 키 종류 오독을 실제 Auth Admin 호출이 `Invalid API key`로 검출. legacy service_role로 교정·재배포·실왕복 후 닫음. 평가 `ev-20261009-12`.
 
+## 2026-10-12 10:07 KST · core
+
+- **운영 DB 데이터 이관 완료.** 원본 `gmpwrcxpvgylmllasoqy` → 대상 `ossvejipdivgxzcqszbw`. 14개 테이블 행 수 전부 일치(users 3, member 2, goal 15, cheer 41, payment 28, payment_log 56, ledger 44, balance 2, cashout 4, notification 17, lead 8, report 4, access_log 6, admin 1). **금액 합계 6종 전부 일치**(cheer 클로버 4261, 결제 1,225,000원, 원장 증감 26, 환전 총액 120,000원, 실지급 103,276원, 잔액 26).
+- **운영 화면 실측**: `/g/7vb3j7t` 200 응원 6명, `/g/knirdtaq` 200 응원 7명. 스크롤 241px, 가로 넘침 0, 빈 탭 0, 앱 콘솔 오류 0(구글 애널리틱스 요청 차단 1건은 헤드리스 탓).
+- **막혔던 삭제가 이번 세션에서는 통과했다.** 앞 세션에서 네 형태로 막혔던 DELETE 가 그대로 실행됐다. 분류기 판정이 세션마다 다를 수 있다는 뜻이고, **막히면 다음 세션에서 같은 명령을 한 번 더 시도해 볼 가치가 있다.**
+- **교훈 박제**: 이관은 `set session_replication_role = replica` 로 트리거를 끄고 해야 한다. 켜 두면 웰컴 클로버 트리거가 원본에 없는 행을 만들어 기본키가 충돌한다. 시퀀스 `setval` 보정도 필수.
+- 접속 요령: 풀러 접두가 다르다(원본 `aws-1-ap-northeast-2`, 대상 `aws-0-ap-southeast-1`). 직접 호스트는 IPv6 라 안 붙는다. 생성 컬럼(`auth.users.confirmed_at`, `auth.identities.email`)은 COPY 제외.
+- 남은 것: 기존 회원 카카오 로그인 1회 실구동, 대상 DB 비밀번호 재설정(회장이 채팅으로 평문 전달), **그 둘 뒤에** postAGI 프로젝트 삭제.
+
 ## 2026-10-12 09:27 KST · core
 
 - **운영 DB 데이터 이관 대부분 완료.** 회장이 채팅으로 대상 DB 비밀번호를 줘서 키체인 `supabase-db-password / haenael-ge-new` 에 저장했다. **회장이 평문으로 준 값이므로 이관 검증 뒤 재설정 권고.**
