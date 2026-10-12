@@ -7,9 +7,17 @@
 
 | 채널 | 계정 | 상태 |
 |---|---|---|
-| Instagram | @haenaelge | 운영(실개설·핸들 적용 관찰됨) |
-| Threads | @haenaelge | 미개설(Instagram 연동 예정) |
-| YouTube | @haenaelge | 미개설(브랜드 전용 Google 계정 결정 대기) |
+| Instagram | @haenaelge | 운영(피드 9·하이라이트 6. 바이오 링크 utm_source=instagram&utm_medium=bio, campaign 은 앱에서만 수정 가능) |
+| Threads | @haenaelge | 운영(2026-09-21 소개·링크 세팅 관찰됨. 게시물 0) |
+| YouTube | @haenaelge | 운영(2026-09-25 채널 개설·배너·아이콘·설명·링크 2종 관찰됨. 영상 0) |
+
+## 미개설 채널
+
+| 채널 | 상태 |
+|---|---|
+| TikTok | 미개설. 가입은 회장 몫(런북 `docs/growth/channels/플랫폼-개설-런북-v1.md`) |
+| X | 미개설. 같음 |
+| Facebook | 미개설. 같음. 광고 집행 계획이 설 때 우선순위가 오른다 |
 
 ## 소유와 실행
 

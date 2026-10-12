@@ -89,8 +89,8 @@ channels:
     kind: video
     owned: false
     account: "@haenaelge"
-    state: not_adopted
-    tag: null
+    state: live            # 2026-09-25 채널 개설·배너·아이콘·설명·링크 세팅 관찰됨(영상 0)
+    tag: "utm_source=youtube&utm_medium=bio&utm_campaign=haenael-profile"
     cost: []
     contributions:
       - { gate: acquisition, role: new, measure: m_youtube_arrivals, separable: true }
@@ -104,7 +104,7 @@ measures:
 
   - { id: m_instagram_arrivals, label: 인스타그램에서 들어온 사람, gate: acquisition, subject: {kind: channel, ref: instagram}, unit: people, period: 28d, source: ga4, slice: {by: none}, value: null, state: pending, state_reason: "프로필 링크에 출처 표시가 없다. 방문 분석은 살아 있으나 통로가 안 갈린다", unblock: {owner: chairman, action: "프로필 링크에 출처 표시 부착", reversible: true}, collected_at: null }
   - { id: m_threads_arrivals,   label: 스레드에서 들어온 사람,     gate: acquisition, subject: {kind: channel, ref: threads},   unit: people, period: 28d, source: ga4, slice: {by: none}, value: null, state: blocked, state_reason: "계정이 아직 없다. 링크를 붙일 대상 자체가 없다", collected_at: null }
-  - { id: m_youtube_arrivals,   label: 유튜브에서 들어온 사람,     gate: acquisition, subject: {kind: channel, ref: youtube},   unit: people, period: 28d, source: ga4, slice: {by: none}, value: null, state: blocked, state_reason: "계정이 아직 없다", collected_at: null }
+  - { id: m_youtube_arrivals,   label: 유튜브에서 들어온 사람,     gate: acquisition, subject: {kind: channel, ref: youtube},   unit: people, period: 28d, source: ga4, slice: {by: none}, value: null, state: pending, state_reason: "2026-09-25 채널 개설·태그 링크 부착. GA4 에서 읽어 오는 절차가 없다", collected_at: null }
   - { id: m_signups,  label: 가입한 사람,   gate: acquisition, subject: {kind: step, ref: signup},    unit: people, period: cumulative, source: product_db, slice: {by: cohort}, value: null, state: pending, state_reason: "수집기가 아직 없다", unblock: {owner: session, action: "제품 DB 수집기 작성", reversible: true}, collected_at: null }
 
   - { id: m_goals,    label: 목표를 만든 사람, gate: activation, subject: {kind: step, ref: goal_create}, unit: people, period: cumulative, source: product_db, slice: {by: cohort}, value: null, state: pending, state_reason: "수집기가 아직 없다", unblock: {owner: session, action: "제품 DB 수집기 작성", reversible: true}, collected_at: null }
