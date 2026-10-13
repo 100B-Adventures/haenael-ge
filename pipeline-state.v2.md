@@ -8,15 +8,15 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: qa           # 2026-10-13 재검증 착수. code-builder 수정 보고 = docs/qa/v2-social-viral-loop-qa-fix-v1.0.0-gpt-codex-20261013-1847.md
-approved_stages: [plan, design, eng-design]
+current_stage: ship         # 2026-10-14 qa 승인. 운영 스키마 적용·배포 완료, 운영 read-only QA 통과.
+approved_stages: [plan, design, eng-design, build, qa]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
   build:      { entered: 2026-10-13 10:20, completed: 2026-10-13 17:12 }
-  qa:         { entered: 2026-10-13 17:12 }
-  ship:       { }
+  qa:         { entered: 2026-10-13 17:12, completed: 2026-10-14 00:05 }
+  ship:       { entered: 2026-10-14 00:05 }
 release_train: 2.0
 distribution:
   selected:
@@ -45,15 +45,18 @@ approved_artifacts:
     - { path: docs/build-log.md, version: unversioned, status: approved, label: "V2 build 구현·검증 로그(1차+2차 슬라이스)", sha256: e3612a5a434123d1d39cf1a14fb1b8951f0843241148e046de3eb7fbb19af100 }
     - { path: supabase/migrations/20261013050000_social_viral_loop_web_first.sql, version: unversioned, status: approved, label: "V2 소셜 스키마(운영 미적용)" }
     - { path: supabase/migrations/20261013060000_social_my_page_achievements.sql, version: unversioned, status: approved, label: "마이페이지·업적 집계(운영 미적용)" }
-  qa: []
+  qa:
+    - { path: docs/qa/v2-production-final-readonly-qa-v1.0.0-gpt-codex-20261013-2351.md, version: 1.0.0, status: approved, label: "운영 배포 후 read-only 최종 QA(증거 23건)" }
+    - { path: docs/qa/v2-social-viral-loop-qa-reverification-v1.0.0-gpt-codex-20261013-1920.md, version: 1.0.0, status: approved, label: "결함 재검증" }
+    - { path: docs/qa/v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md, version: 1.0.0, status: approved, label: "전체 회귀 복구 결과" }
   ship: []
 stages:
   plan:       { status: approved, artifacts_ok: true }
   design:     { status: approved, artifacts_ok: true }
   eng-design: { status: approved, artifacts_ok: true }
-  build:      { status: changes-requested, artifacts_ok: false }
+  build:      { status: approved, artifacts_ok: true }
   qa:         { status: changes-requested, artifacts_ok: false }
-  ship:       { status: todo, artifacts_ok: false }
+  ship:       { status: in-progress, artifacts_ok: false }
 override: false
 override_reason: ""
 override_expires: ""
@@ -114,6 +117,18 @@ override_expires: ""
 ### ship ⬜
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-14 00:05 · ✅ APPROVE qa → ship 진입
+
+- 승인 근거(회장 원문): "첫째, 승인 / 둘째 구현 13px 대로 해 / read-only 자격 증명이 뭐가 없는데? 니가 찾아서 세팅해서 진행"
+- **운영 DB 스키마 적용 완료.** `20261013050000`, `20261013060000` 둘 다 운영 remote 값 채워짐을 `migration list` 로 확인.
+- **운영 배포 완료.** `session/core-20260912` 를 main 에 머지·푸시(130 커밋), Vercel 자동 배포. 운영에서 V2 전용 분기 응답 확인.
+- **운영 read-only QA 통과.** 익명 14건(7경로 x 2폭), 인증 4건(2경로 x 2폭) 전부 가로 넘침 0, 콘솔 오류 0, page error 0. 보안 응답 헤더 유지. 운영 쓰기 0건. 하단탭 라벨 computed 13px 확인.
+- **QA 가 낸 NG 1건은 컨트롤러 지시 오류였다.** 내가 수용 경로를 `/admin/covers` 로 적어 보냈는데 그 경로는 설계에도 코드에도 없다. 커버 검수는 `/admin` 안의 섹션이고(`web/src/app/admin/page.tsx` 가 `GoalCoverReviewQueue` 를 쓴다) 운영 익명 `/admin` 은 307 로 정상 분기한다. 제품 결함이 아니므로 승인을 막지 않는다. 대신 승인 로그에 원인을 남긴다.
+- 품질 검증: `verify-agent-quality.sh qa-verifier` = `✅ PASS · RUBRIC 25/25`. 직전 반려(로컬 QA)는 `deploy-hosts.tsv` 에 haenael-ge 줄이 없어 생긴 오탐이었고 그 줄을 추가해 해소했다.
+- 불변식 확인: 환전 수수료·A안 락·계좌 마스킹 단정 무변경, 테스트 삭제·skip·단정 약화 0건, 전체 브라우저 회귀 63/63.
+- ship 잔여: 릴리스 버전 선언과 RELEASE 기록.
+
 
 ### 2026-10-13 18:17 · ⟲ REOPEN build · qa 반려(NG)
 

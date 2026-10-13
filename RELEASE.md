@@ -1,3 +1,39 @@
+# 릴리스 매니페스트: 해낼게 2.0.0
+
+이 문서는 `v2` 소셜 바이럴 루프 슬라이스의 운영 배포와 승인 산출물을 한 릴리스로 묶는다.
+변경 내역은 `CHANGELOG.md`의 `2.0.0` 항목을 따른다. 아래 1.2.1 매니페스트는 `core` 환전 슬라이스 기록으로 그대로 보존한다.
+
+```yaml
+release: 2.0.0
+date: 2026-10-14
+status: released
+delivery: vercel
+canonical_url: https://haenael-ge.vercel.app
+canonical_url_version: 2.0.0
+line: v2
+ships:
+  fdd: 1.1.0
+  erd: 1.1.0
+  api-contract: 1.1.0
+  architecture: 1.1.0
+  test-plan: 1.1.0
+  prototype: 2.0.0
+  code: 2.0.0
+  qa: 1.0.0
+db_migrations:
+  - 20261013050000_social_viral_loop_web_first.sql
+  - 20261013060000_social_my_page_achievements.sql
+decisions:
+  - D-019 FRIENDS 커버는 Presigned URL 로만 제공
+  - D-020 V2 를 별도 v2 파이프라인 라인으로 분리
+  - D-021 앱인토스 SSR 금지와 토스 도메인 렌더 제약 확인
+  - D-022 업적은 DB 집계로 반증 가능한 3지표만
+  - D-023 하단탭 라벨 13px 확정, 시안 정본도 13px
+changelog: CHANGELOG.md#200
+```
+
+---
+
 # 릴리스 매니페스트: 해낼게 1.2.1
 
 이 문서는 `core` 환전 슬라이스의 운영 배포와 승인 산출물을 한 릴리스로 묶는다.
