@@ -176,7 +176,9 @@ Deno.serve(async (req: Request) => {
     is_replay: boolean;
   };
 
-  if (supporter) {
+  // replay는 최초 주문의 호출자 신원을 증명하지 못한다. 다른 로그인 사용자가 같은
+  // fingerprint를 재현해 attribution을 선점하지 못하도록 신규 주문에만 귀속한다.
+  if (supporter && !row.is_replay) {
     const { error: attributionError } = await supabase
       .from("social_cheer_member_attribution")
       .upsert({

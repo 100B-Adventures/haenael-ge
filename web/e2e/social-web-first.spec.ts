@@ -332,9 +332,10 @@ test.describe("V2 web-first social slice", () => {
     const myTab = page.getByTestId("receiver-bottom-nav").getByRole("link", { name: /마이/ });
     await expect(myTab).toHaveAttribute("href", "/my");
     await expect(myTab).toHaveAttribute("aria-current", "page");
-    expect(await page.evaluate(() =>
+    const horizontalOverflow = await page.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth
-    )).toBe(0);
+    );
+    expect(horizontalOverflow).toBe(0);
     const ergonomics = await page.evaluate(() => {
       const visible = (element: Element) => {
         const node = element as HTMLElement;
@@ -393,6 +394,12 @@ test.describe("V2 web-first social slice", () => {
         activeRatio: taps.length ? activeCovered / taps.length : 1,
       };
     });
+    console.info("MY-01 ergonomics", JSON.stringify({
+      width: 390,
+      horizontalOverflow,
+      ...ergonomics,
+      consoleErrors: consoleErrors.length,
+    }));
     expect(ergonomics.fontBelow13).toBe(0);
     expect(ergonomics.medianFont).toBeGreaterThanOrEqual(16);
     expect(ergonomics.tapBelow44).toBe(0);
@@ -523,7 +530,7 @@ test.describe("V2 web-first social slice", () => {
     expect(tabMetrics).toMatchObject({
       height: 64,
       icon: 23,
-      labelSize: "10px",
+      labelSize: "13px",
       labelWeight: "700",
       lockToken: "11px",
     });
@@ -564,6 +571,25 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("PW-05 admin 승인 후 owner와 public 화면에 승인 커버만 보인다", async ({ browser }) => {
+    const { count: pendingCount } = await admin.from("goal_cover_asset")
+      .select("id", { head: true, count: "exact" })
+      .eq("goal_id", ownerGoal)
+      .eq("status", "REVIEW");
+    if (!pendingCount) {
+      const ownerContext = await authContext(browser, emails.owner);
+      const ownerPage = await ownerContext.newPage();
+      await ownerPage.goto(`/me/goal/${ownerGoal}`);
+      await ownerPage.locator('input[type="file"]').setInputFiles({
+        name: "cover-for-review.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+          "base64",
+        ),
+      });
+      await expect(ownerPage.getByText(/검수 대기열/)).toBeVisible();
+      await ownerContext.close();
+    }
     const context = await authContext(browser, emails.admin);
     const page = await context.newPage();
     await page.goto("/admin");
@@ -633,10 +659,67 @@ test.describe("V2 web-first social slice", () => {
         result.error?.message.includes("invite_already_used")
       ),
     ).toHaveLength(1);
+    const winnerId = results[0].error ? ids.acceptB : ids.acceptA;
+    const [memberLowId, memberHighId] = [ids.owner, winnerId].sort();
     const { count } = await admin.from("friend_connection").select("id", {
       head: true,
       count: "exact",
-    }).or(`member_low_id.eq.${ids.owner},member_high_id.eq.${ids.owner}`);
-    expect(count).toBeGreaterThanOrEqual(2);
+    }).eq("member_low_id", memberLowId).eq("member_high_id", memberHighId);
+    expect(count).toBe(1);
+    const { data: acceptedInvite, error: acceptedInviteError } = await admin
+      .from("friend_invite")
+      .select("accepted_by,accepted_at")
+      .eq("accepted_by", winnerId)
+      .single();
+    expect(acceptedInviteError).toBeNull();
+    expect(acceptedInvite?.accepted_by).toBe(winnerId);
+    expect(acceptedInvite?.accepted_at).toBeTruthy();
+  });
+
+  test("ORDER-ATTR-01 replay는 최초 회원 응원 귀속을 다른 사용자로 바꾸지 않는다", async () => {
+    const supporterA = createClient(SUPABASE_URL, ANON_KEY);
+    const supporterB = createClient(SUPABASE_URL, ANON_KEY);
+    const [{ data: authA, error: authAError }, { data: authB, error: authBError }] =
+      await Promise.all([
+        supporterA.auth.signInWithPassword({ email: emails.acceptA, password }),
+        supporterB.auth.signInWithPassword({ email: emails.acceptB, password }),
+      ]);
+    if (authAError || authBError || !authA.session || !authB.session) {
+      throw authAError ?? authBError ?? new Error("supporter_auth_failed");
+    }
+    const body = {
+      goalId: friendPublicGoal,
+      amountKrw: 1000,
+      displayName: "첫 응원자",
+      isAnonymous: false,
+      message: "귀속 보안 검증",
+      customerKey: `attr_${runId}`,
+      requestKey: `attr-${runId}`,
+    };
+    const createOrder = (accessToken: string) =>
+      fetch(`${SUPABASE_URL}/functions/v1/cheer-order`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+    const freshResponse = await createOrder(authA.session.access_token);
+    const freshBody = await freshResponse.json() as {
+      cheerId: number;
+      paymentId: number;
+    };
+    expect(freshResponse.status).toBe(201);
+    paymentIds.push(freshBody.paymentId);
+    const replayResponse = await createOrder(authB.session.access_token);
+    expect(replayResponse.status).toBe(200);
+    const { data: attribution, error: attributionError } = await admin
+      .from("social_cheer_member_attribution")
+      .select("supporter_member_id")
+      .eq("cheer_id", freshBody.cheerId)
+      .single();
+    expect(attributionError).toBeNull();
+    expect(attribution?.supporter_member_id).toBe(ids.acceptA);
   });
 });

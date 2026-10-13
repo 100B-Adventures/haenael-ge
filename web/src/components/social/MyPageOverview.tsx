@@ -51,7 +51,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
         </div>
         <div className="min-w-0">
           <h1 className="truncate text-base font-black text-foreground">{nickname}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-base text-muted-foreground">
             서로 응원하는 친구 {dashboard.friend_count}명 · 진행 중 목표 {activeGoalCount}개
           </p>
         </div>
@@ -60,7 +60,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
       <section aria-labelledby="my-goals-heading">
         <div className="social-card-heading mb-3">
           <h2 id="my-goals-heading">내 목표</h2>
-          <span>{dashboard.goals.length}개</span>
+          <span className="text-base!">{dashboard.goals.length}개</span>
         </div>
         {dashboard.goals.length === 0
           ? (
@@ -88,11 +88,11 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
                   <div className="mt-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="receiver-goal-title">{goal.title}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="mt-1 text-base text-muted-foreground">
                         {goal.status === "ACTIVE" ? "진행 중" : "달성 완료"} · {goal.due_date}
                       </p>
                     </div>
-                    <span className="shrink-0 text-sm font-extrabold text-accent-foreground">
+                    <span className="shrink-0 text-base font-extrabold text-accent-foreground">
                       관리
                     </span>
                   </div>
@@ -105,7 +105,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
       <section aria-labelledby="achievements-heading" data-testid="achievement-section">
         <div className="social-card-heading mb-3">
           <h2 id="achievements-heading">업적</h2>
-          <span>DB 집계 기준</span>
+          <span className="text-base!">DB 집계 기준</span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           {achievementCards.map(({ key, label, description, Icon }) => {
@@ -120,7 +120,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
                   <Icon aria-hidden="true" size={20} />
                 </span>
                 <strong className="mt-2 text-lg font-black text-foreground">{count}</strong>
-                <span className="mt-1 text-sm font-extrabold text-foreground">{label}</span>
+                <span className="mt-1 text-base font-extrabold text-foreground">{label}</span>
                 <span className="mt-1 text-base leading-snug text-muted-foreground">{description}</span>
                 {count > 0 && (
                   <span className="mt-2 inline-flex items-center gap-1 text-base font-bold text-accent-foreground">
@@ -131,7 +131,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
             );
           })}
         </div>
-        <p className="social-muted mt-3">
+        <p className="social-muted mt-3 text-base!">
           데이터베이스로 확인할 수 있는 활동만 집계해요.
         </p>
       </section>
@@ -139,7 +139,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
       <section aria-labelledby="belonging-heading" data-testid="belonging-queue">
         <div className="social-card-heading mb-3">
           <h2 id="belonging-heading">아직 응원하지 않은 친구 목표</h2>
-          <span>{dashboard.belonging_queue.length}개</span>
+          <span className="text-base!">{dashboard.belonging_queue.length}개</span>
         </div>
         {dashboard.belonging_queue.length === 0
           ? (
@@ -158,10 +158,10 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
                   data-testid="belonging-queue-item"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="social-eyebrow">{item.nickname ?? "친구"}의 해낼게</p>
+                    <p className="social-eyebrow text-base!">{item.nickname ?? "친구"}의 해낼게</p>
                     <p className="mt-1 truncate font-extrabold text-foreground">{item.title}</p>
                   </div>
-                  <span className="shrink-0 text-sm font-extrabold text-accent-foreground">
+                  <span className="shrink-0 text-base font-extrabold text-accent-foreground">
                     응원하기
                   </span>
                 </Link>

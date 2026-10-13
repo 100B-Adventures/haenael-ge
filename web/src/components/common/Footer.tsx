@@ -13,7 +13,7 @@ export function Footer() {
         <div className="flex items-center gap-3 text-sm font-semibold [color:var(--muted-foreground)]!">
           <Link
             href="/terms"
-            className="underline underline-offset-2"
+            className="inline-flex min-h-11 items-center underline underline-offset-2 transition-transform active:translate-y-px"
             data-testid="footer-terms-link"
           >
             이용약관
@@ -23,7 +23,7 @@ export function Footer() {
           </span>
           <Link
             href="/privacy"
-            className="underline underline-offset-2"
+            className="inline-flex min-h-11 items-center underline underline-offset-2 transition-transform active:translate-y-px"
             data-testid="footer-privacy-link"
           >
             개인정보처리방침

@@ -1,5 +1,23 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-13: V2 build 2차 슬라이스 검증 결함
+
+**판정: 🔧 로컬 교정 완료. 운영 migration은 미적용이므로 운영 검증은 계속 NG**
+
+| 요청번호 | 증상 | 원인 | 해제 증거 |
+|---|---|---|---|
+| QA-V2-BUILD-04 | `/my` 390px 본문 중앙값 14px, Footer 링크 44px 미만 2건 | 프로토타입의 축소 보조문구와 공용 Footer 누름 높이를 모바일 기준과 대조하지 않음 | MY-01: 중앙값 16px, 13px 미만 0, 44px 미만 0, active 100%, overflow 0, console error 0 |
+| QA-V2-BUILD-05 | 전체 social E2E에서 탭 라벨 기대값이 10px에 남음 | 토큰을 13px로 올리고 기존 SMOKE-01 계약을 함께 갱신하지 않음 | 전체 social spec 11/11 PASS, `DESIGN_METRICS labelSize=13px` |
+| QA-V2-BUILD-06 | PW-05 단독 실행과 CC-01의 정확한 1건 판정이 약함 | 앞 테스트의 REVIEW asset과 기존 owner 연결 수에 의존 | PW-05 자체 fixture fallback, exact pair count·accepted_by 확인, 독립 3/3 PASS |
+| QA-V2-BUILD-07 | 다른 회원이 order replay로 attribution을 선점할 수 있음 | replay에도 현재 로그인 회원 귀속 insert를 시도 | 신규 주문만 attribution 기록, 실 Edge Function ORDER-ATTR-01 PASS |
+| QA-V2-BUILD-08 | Next build가 `COVER_PUBLIC_BASE_URL` 미분류로 차단 | 새 optional origin override를 배포 env 인벤토리에 연결하지 않음 | env 35/35 분류, Next production build 17/17 PASS |
+
+- 남은 위험: 주문 생성과 attribution insert는 단일 DB transaction이 아니다. API 계약 변경이 필요한 후속 기술설계 항목으로 남긴다.
+- 남은 데이터 경계: migration 이전 응원은 신뢰 가능한 회원 식별 원본이 없어 backfill하지 않는다.
+- 운영 상태: `20261013050000`, `20261013060000` remote 미적용. 운영 완료로 판정하지 않는다.
+
+STAMP: 2026-10-13 16:13 KST | model gpt-5-codex | agent code-builder | skills haenael-supabase-build, review | 상태 로컬 🔧, 운영 ❌ NG
+
 ## 2026-10-13: V2 소셜 바이럴 루프 서버 실물 0건
 
 **판정: ❌ NG. 웹 우선 기술설계 완료 전 상태이며 구현·운영 검증은 아직 0건**
