@@ -1,5 +1,17 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-14 00:56: 컨트롤러 정정 — 위 NG 1건은 지시 오류였고 ship 은 승인됐다
+
+`/admin/covers` 404 는 **제품 결함이 아니다.** 컨트롤러가 QA 위임 프롬프트에 수용 경로를 `/admin/covers` 로 적어 보냈는데 그 경로는 승인 설계에도 코드에도 없다. 커버 검수는 `/admin` 안의 섹션이고 `web/src/app/admin/page.tsx` 가 `GoalCoverReviewQueue` 를 렌더한다. 운영 익명 `/admin` 은 307 로 정상 권한 분기한다(2026-10-14 00:50 실측).
+
+따라서 운영 QA 의 실제 결과는 **제품 결함 0건**이고 `pipeline-state.v2.md` 에서 qa 와 ship 을 승인했다. 해낼게 2.0.0 운영 배포 완료, `/api/health` 가 `version 2.0.0`·`database ok`.
+
+남은 QA 부채(차기 라운드):
+- 디자인 정합이 🔶 부분이다. 승인 원본과 동일 크기 픽셀 대조가 미완이다.
+- 대량 친구·목표 조건의 Presigned URL 발급 부하 미측정.
+- 강제 Storage 장애 시 브라우저 종단 분기 미검증.
+
+
 ## 2026-10-13: V2 운영 배포 후 최종 read-only QA v1.0.0
 
 **판정: ❌ NG. 운영 인증 화면·overflow·13px 하단탭·보안 헤더는 통과했으나 `/admin/covers`가 권한 분기 대신 HTTP 404**

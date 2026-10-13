@@ -48,8 +48,9 @@ approved_artifacts:
     - { path: supabase/migrations/20261013060000_social_my_page_achievements.sql, version: unversioned, status: approved, label: "마이페이지·업적 집계(운영 미적용)" }
   qa:
     - { path: docs/qa/v2-production-final-readonly-qa-v1.0.0-gpt-codex-20261013-2351.md, version: 1.0.0, status: approved, label: "운영 배포 후 read-only 최종 QA(증거 23건)" }
-    - { path: docs/qa/v2-social-viral-loop-qa-reverification-v1.0.0-gpt-codex-20261013-1920.md, version: 1.0.0, status: approved, label: "결함 재검증" }
-    - { path: docs/qa/v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md, version: 1.0.0, status: approved, label: "전체 회귀 복구 결과" }
+    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: approved, label: "v2 기능 해피·엣지 추적(배포본 기준 전수)" }
+    - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: approved, label: "디자인 정합 매트릭스(픽셀 대조는 부분, 차기 라운드)" }
+    - { path: docs/qa/v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md, version: 1.0.0, status: approved, label: "누적 전체 회귀 63/63" }
   ship:
     - { path: RELEASE.md, version: 2.0.0, status: approved, label: "해낼게 2.0.0 릴리스 매니페스트" }
     - { path: CHANGELOG.md, version: 2.0.0, status: approved, label: "2.0.0 변경 기록" }
@@ -120,6 +121,12 @@ override_expires: ""
 ### ship ⬜
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-14 02:2x · 핀 정정 · qa 필수 산출물 3종으로 교체
+
+- 게이트가 qa 핀에 기능(qa-tracker)과 디자인 정합(design-conformance-matrix)이 없다고 반려했다. 둘 다 실재하므로 핀했다.
+- 결함 재검증 문서는 **로컬 주소 기준**이라 qa 핀에서 뺐다. qa 증거는 배포본 기준이어야 한다. 그 문서는 build 라운드 기록으로 저장소에 그대로 남는다.
+- 디자인 정합은 🔶 부분이다. 두 폭 렌더·가로 넘침 0·콘솔 0 은 확인했고 **승인 원본과 동일 크기 픽셀 대조가 미완**이다. 숨기지 않고 핀 라벨에 적었다. 차기 라운드 과제다.
 
 ### 2026-10-14 00:56 · ✅ APPROVE ship · 해낼게 2.0.0 운영 배포 완료
 
