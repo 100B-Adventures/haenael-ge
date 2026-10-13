@@ -80,6 +80,11 @@ describe("V2 social contracts", () => {
     }
   });
 
+  it("QA-V2-SEC-01 회귀: private Storage 경로 키는 social 계약 금지 목록이다", () => {
+    expect(FORBIDDEN_SOCIAL_KEYS).toContain("cover_storage_path");
+    expect(FORBIDDEN_SOCIAL_KEYS).toContain("quarantine_path");
+  });
+
   it("CT-MY-01 마이페이지 집계와 소속감 큐 계약을 읽는다", () => {
     const parsed = asMySocialDashboard({
       profile: { nickname: "서연", profile_image: null },

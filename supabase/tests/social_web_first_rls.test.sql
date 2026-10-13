@@ -49,9 +49,9 @@ RESET ROLE;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims','{"role":"authenticated","sub":"52000000-0000-0000-0000-000000000002"}',true);
 SELECT ok(
-  public.my_friend_goals()::text !~ 'clover_amount|payment|cashout|supporter_ci|gross_krw|net_krw'
-  AND public.friend_goal_detail(current_setting('test.friends_goal_id')::bigint)::text !~ 'clover_amount|payment|cashout|supporter_ci|gross_krw|net_krw',
-  'PG-24 social JSON 금지 금액 결제 환전 key 0'
+  public.my_friend_goals()::text !~ 'clover_amount|payment|cashout|supporter_ci|gross_krw|net_krw|cover_storage_path|quarantine_path'
+  AND public.friend_goal_detail(current_setting('test.friends_goal_id')::bigint)::text !~ 'clover_amount|payment|cashout|supporter_ci|gross_krw|net_krw|cover_storage_path|quarantine_path',
+  'PG-24 social JSON 금지 금액 결제 환전 private Storage path key 0'
 );
 RESET ROLE;
 

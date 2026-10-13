@@ -197,7 +197,6 @@ BEGIN
                 'due_date', g.due_date,
                 'cover_preset_key', g.cover_preset_key,
                 'cover_public_path', CASE WHEN g.visibility = 'PUBLIC' THEN a.public_path ELSE NULL END,
-                'cover_storage_path', CASE WHEN g.visibility = 'FRIENDS' THEN a.quarantine_path ELSE NULL END,
                 'cheer_count', (SELECT count(*) FROM public.cheer c WHERE c.goal_id = g.id AND c.status = 'CONFIRMED' AND c.deleted_at IS NULL)
               ) ORDER BY g.due_date NULLS LAST, g.id
             )
@@ -234,7 +233,6 @@ BEGIN
     'reason', v_goal.reason, 'due_date', v_goal.due_date,
     'cover_preset_key', v_goal.cover_preset_key,
     'cover_public_path', CASE WHEN v_goal.visibility = 'PUBLIC' THEN v_asset.public_path ELSE NULL END,
-    'cover_storage_path', CASE WHEN v_goal.visibility = 'FRIENDS' THEN v_asset.quarantine_path ELSE NULL END,
     'cheer_count', (SELECT count(*) FROM public.cheer c WHERE c.goal_id = v_goal.id AND c.status = 'CONFIRMED' AND c.deleted_at IS NULL),
     'wordmap', COALESCE((
       SELECT jsonb_agg(jsonb_build_object('word', q.word, 'weight', q.word_count) ORDER BY q.word_count DESC, q.word)

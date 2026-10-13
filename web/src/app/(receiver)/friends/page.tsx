@@ -16,7 +16,7 @@ export default async function FriendsPage() {
   if (!user) redirect("/");
   const { data, error } = await supabase.rpc("my_friend_goals");
   if (error) throw new Error("친구 목록을 불러오지 못했습니다.");
-  const response = await resolveFriendGoalCovers(asFriendGoals(data));
+  const response = await resolveFriendGoalCovers(asFriendGoals(data), user.id);
   return (
     <ReceiverPageShell testId="friends-page" bottomSafe>
       <ReceiverTopBar variant="home" />

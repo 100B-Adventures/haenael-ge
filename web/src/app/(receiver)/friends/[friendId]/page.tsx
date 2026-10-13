@@ -30,17 +30,22 @@ export default async function FriendDetailPage(
   if (error) notFound();
   const parsed = asFriendGoalDetail(data);
   if (!parsed) notFound();
-  const detail = await resolveFriendDetailCover(parsed);
-  const nickname =
-    asFriendGoals(listData).friends.find((friend) =>
-      friend.friend_member_id === friendId
-    )?.nickname ?? null;
+  const friend = asFriendGoals(listData).friends.find((candidate) =>
+    candidate.friend_member_id === friendId
+  );
+  if (!friend) notFound();
+  let detail;
+  try {
+    detail = await resolveFriendDetailCover(parsed, user.id, friendId);
+  } catch {
+    notFound();
+  }
   return (
     <ReceiverPageShell testId="friend-detail-page" bottomSafe>
       <ReceiverTopBar variant="detail" />
       <FriendGoalDetail
         friendId={friendId}
-        nickname={nickname}
+        nickname={friend.nickname}
         detail={detail}
       />
       <BackHomeLink label="친구 목록으로" />

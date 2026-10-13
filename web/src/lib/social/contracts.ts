@@ -5,7 +5,6 @@ export type SocialGoal = {
   due_date: string;
   cover_preset_key: string;
   cover_public_path: string | null;
-  cover_storage_path?: string | null;
   cover_url?: string | null;
   cheer_count: number;
 };
@@ -128,4 +127,6 @@ export const FORBIDDEN_SOCIAL_KEYS = [
   "supporter_member_id",
   "gross_krw",
   "net_krw",
+  "cover_storage_path",
+  "quarantine_path",
 ] as const;
