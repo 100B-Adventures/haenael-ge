@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(8);
+SELECT plan(9);
 
 INSERT INTO auth.users(id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,confirmation_token,recovery_token,email_change_token_new,raw_app_meta_data,raw_user_meta_data,is_super_admin,is_anonymous)
 SELECT id,'00000000-0000-0000-0000-000000000000','authenticated','authenticated',email,'',now(),now(),'','','','{}','{}',false,false FROM (VALUES
@@ -21,6 +21,20 @@ VALUES
  ('54100000-0000-0000-0000-000000000001',(SELECT id FROM public.goal WHERE slug='cover-public'),'54000000-0000-0000-0000-000000000001','owner/goal/review.webp','REVIEW',repeat('a',64),'image/webp',100),
  ('54100000-0000-0000-0000-000000000002',(SELECT id FROM public.goal WHERE slug='cover-public'),'54000000-0000-0000-0000-000000000001','owner/goal/reject.webp','REVIEW',repeat('b',64),'image/webp',100),
  ('54100000-0000-0000-0000-000000000003',(SELECT id FROM public.goal WHERE slug='cover-friends'),'54000000-0000-0000-0000-000000000001','owner/goal/friends.webp','REVIEW',repeat('c',64),'image/webp',100);
+
+INSERT INTO public.goal(member_id,slug,title,due_date,visibility)
+VALUES('54000000-0000-0000-0000-000000000002','other-cover-goal','타인 커버 목표','2026-12-31','FRIENDS');
+INSERT INTO public.goal_cover_asset(id,goal_id,owner_member_id,quarantine_path,status,content_sha256,mime_type,byte_size)
+VALUES('54100000-0000-0000-0000-000000000004',(SELECT id FROM public.goal WHERE slug='other-cover-goal'),'54000000-0000-0000-0000-000000000002','other/goal/friends.webp','APPROVED',repeat('d',64),'image/webp',100);
+
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims','{"role":"authenticated","sub":"54000000-0000-0000-0000-000000000001"}',true);
+SELECT throws_ok(
+  $$UPDATE public.goal SET active_cover_asset_id='54100000-0000-0000-0000-000000000004' WHERE slug='cover-friends'$$,
+  '23514','cover_asset_goal_mismatch',
+  'QA-V2-SEC-01 타인 asset UUID를 자기 FRIENDS goal에 연결할 수 없음'
+);
+RESET ROLE;
 
 SELECT ok(
   (SELECT count(*)=0 FROM storage.objects WHERE bucket_id='goal-cover-public')

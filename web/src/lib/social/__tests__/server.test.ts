@@ -29,12 +29,21 @@ const detail: FriendGoalDetail = {
 function serviceFixture({
   goalOwnerId = FRIEND_ID,
   signError = false,
-}: { goalOwnerId?: string; signError?: boolean } = {}) {
+  assetGoalId = 17,
+  assetOwnerId = FRIEND_ID,
+  signedPath = "owner/goal/friends.webp",
+}: {
+  goalOwnerId?: string;
+  signError?: boolean;
+  assetGoalId?: number;
+  assetOwnerId?: string;
+  signedPath?: string;
+} = {}) {
   const createSignedUrls = vi.fn(async () => signError
     ? { data: null, error: { message: "storage unavailable" } }
     : {
       data: [{
-        path: "owner/goal/friends.webp",
+        path: signedPath,
         signedUrl: "http://127.0.0.1:54321/storage/v1/object/sign/goal-cover-quarantine/friends.webp?token=redacted",
         error: null,
       }],
@@ -80,6 +89,8 @@ function serviceFixture({
             eq: async () => ({
               data: [{
                 id: "asset-1",
+                goal_id: assetGoalId,
+                owner_member_id: assetOwnerId,
                 quarantine_path: "owner/goal/friends.webp",
                 public_path: null,
                 status: "APPROVED",
@@ -130,8 +141,25 @@ describe("친구 커버 서버 경계", () => {
     expect(fixture.createSignedUrls).not.toHaveBeenCalled();
   });
 
+  it("QA-V2-SEC-01 거절: asset의 goal 또는 owner 결합이 다르면 URL을 발급하지 않는다", async () => {
+    const fixture = serviceFixture({ assetOwnerId: OTHER_ID });
+    createServiceRoleClient.mockReturnValue(fixture.client);
+
+    await expect(resolveFriendDetailCover(detail, VIEWER_ID, FRIEND_ID))
+      .rejects.toThrow("friend_goal_not_found");
+    expect(fixture.createSignedUrls).not.toHaveBeenCalled();
+  });
+
   it("QA-V2-COVER-ERR-01 거절: Presigned URL 발급 실패를 cover 없음으로 축약하지 않는다", async () => {
     const fixture = serviceFixture({ signError: true });
+    createServiceRoleClient.mockReturnValue(fixture.client);
+
+    await expect(resolveFriendDetailCover(detail, VIEWER_ID, FRIEND_ID))
+      .rejects.toThrow("friend_cover_signing_failed");
+  });
+
+  it("QA-V2-PERF-01 거절: batch 응답 path가 요청 path와 다르면 null로 축약하지 않는다", async () => {
+    const fixture = serviceFixture({ signedPath: "unexpected/path.webp" });
     createServiceRoleClient.mockReturnValue(fixture.client);
 
     await expect(resolveFriendDetailCover(detail, VIEWER_ID, FRIEND_ID))

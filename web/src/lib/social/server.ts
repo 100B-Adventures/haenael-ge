@@ -76,13 +76,22 @@ async function resolveCovers(
   );
   const { data: assets, error: assetError } = assetIds.length
     ? await service.from("goal_cover_asset")
-      .select("id,quarantine_path,public_path,status")
+      .select("id,goal_id,owner_member_id,quarantine_path,public_path,status")
       .in("id", assetIds)
       .eq("status", "APPROVED")
     : { data: [], error: null };
   if (assetError) throw new Error("friend_cover_lookup_failed");
 
   const assetById = new Map((assets ?? []).map((asset) => [asset.id, asset]));
+  for (const goal of goalRows) {
+    if (!goal.active_cover_asset_id) continue;
+    const asset = assetById.get(goal.active_cover_asset_id);
+    if (
+      !asset || asset.goal_id !== goal.id || asset.owner_member_id !== goal.member_id
+    ) {
+      throw new Error("friend_goal_not_found");
+    }
+  }
   const privatePaths = goalRows.flatMap((goal) => {
     const asset = goal.active_cover_asset_id
       ? assetById.get(goal.active_cover_asset_id)
@@ -102,8 +111,10 @@ async function resolveCovers(
       }
       signedUrlByPath.set(signed.path, signed.signedUrl);
     }
-    if (signedUrlByPath.size !== new Set(privatePaths).size) {
-      throw new Error("friend_cover_signing_failed");
+    for (const requestedPath of new Set(privatePaths)) {
+      if (!signedUrlByPath.has(requestedPath)) {
+        throw new Error("friend_cover_signing_failed");
+      }
     }
   }
 

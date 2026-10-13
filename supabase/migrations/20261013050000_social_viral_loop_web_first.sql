@@ -95,6 +95,32 @@ CREATE INDEX friend_connection_high_status_idx ON public.friend_connection(membe
 CREATE INDEX goal_visibility_status_idx ON public.goal(visibility, status) WHERE deleted_at IS NULL;
 CREATE INDEX goal_cover_asset_goal_status_idx ON public.goal_cover_asset(goal_id, status, created_at DESC);
 CREATE INDEX goal_cover_asset_sha_idx ON public.goal_cover_asset(content_sha256);
+
+CREATE OR REPLACE FUNCTION public.social_validate_goal_cover_binding()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NEW.active_cover_asset_id IS NULL THEN RETURN NEW; END IF;
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.goal_cover_asset AS asset
+    WHERE asset.id = NEW.active_cover_asset_id
+      AND asset.goal_id = NEW.id
+      AND asset.owner_member_id = NEW.member_id
+      AND asset.status = 'APPROVED'
+  ) THEN
+    RAISE EXCEPTION 'cover_asset_goal_mismatch' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER goal_active_cover_binding_guard
+BEFORE INSERT OR UPDATE OF active_cover_asset_id, member_id ON public.goal
+FOR EACH ROW EXECUTE FUNCTION public.social_validate_goal_cover_binding();
 CREATE INDEX storage_cleanup_queue_pending_idx ON public.storage_cleanup_queue(status, created_at) WHERE status = 'PENDING';
 
 ALTER TABLE public.member_preference ENABLE ROW LEVEL SECURITY;
@@ -512,7 +538,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.social_require_user(), public.social_is_active_friend(uuid,uuid), public.social_validate_invite_token(text) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.social_require_user(), public.social_is_active_friend(uuid,uuid), public.social_validate_invite_token(text), public.social_validate_goal_cover_binding() FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.my_friend_goals(), public.friend_goal_detail(bigint), public.create_friend_invite(bigint,text),
   public.set_goal_cover_preset(bigint,text), public.update_member_preferences(boolean,boolean), public.friend_invite_preview(text),
   public.accept_friend_invite(text), public.remove_friend(uuid), public.set_goal_visibility(bigint,text), public.admin_list_goal_covers(integer),

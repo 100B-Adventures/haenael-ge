@@ -37,8 +37,12 @@ export default async function FriendDetailPage(
   let detail;
   try {
     detail = await resolveFriendDetailCover(parsed, user.id, friendId);
-  } catch {
-    notFound();
+  } catch (coverError) {
+    if (
+      coverError instanceof Error &&
+      coverError.message === "friend_goal_not_found"
+    ) notFound();
+    throw coverError;
   }
   return (
     <ReceiverPageShell testId="friend-detail-page" bottomSafe>
