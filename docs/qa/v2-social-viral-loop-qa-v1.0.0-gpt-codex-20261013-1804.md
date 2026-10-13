@@ -215,3 +215,5 @@ KNOWLEDGE_QUERY: BRAIN business 바이럴·추천 루프와 QA 단계 입력, Su
 HITS_USED: BRAIN의 신뢰 기반 바이럴 원칙은 D-019·D-022 공격 관점에 사용, 공식 문서는 DB·Storage·E2E 증거 기준에 사용
 HITS_REJECTED: 마케팅 심리 문서는 제품 방향 변경 자료라 QA 판정에는 미채택, 일반 QA 블로그는 공식 문서보다 권위가 낮아 미채택
 CONFLICTS: 일반 Supabase private bucket은 authenticated download를 허용할 수 있으나 제품 D-019는 ACTIVE 관계 재확인 후 Presigned URL-only로 더 엄격하므로 제품 정본을 우선
+판단: DB·unit 성공보다 D-019 계약 실패와 27개 미검증을 우선해 QA NG를 선택했다. 선행 11/11 총계를 전체 84건 완료로 해석하지 않았다.
+병목: 전체 E2E·390px·1280px 최종 재실행은 공용 heavy slot 2/2 점유로 62초 후 종료코드 75를 반환해 미실행됐다.
