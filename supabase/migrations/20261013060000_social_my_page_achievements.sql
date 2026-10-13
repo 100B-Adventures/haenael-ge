@@ -135,6 +135,7 @@ BEGIN
               AND c.status = 'CONFIRMED'
               AND c.deleted_at IS NULL
           )
+        ORDER BY g.due_date NULLS LAST, g.id
         LIMIT 20
       ) AS q
     ), '[]'::jsonb)

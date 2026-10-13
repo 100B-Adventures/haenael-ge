@@ -77,7 +77,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
                 <Link
                   key={goal.goal_id}
                   href={`/me/goal/${goal.goal_id}`}
-                  className="social-card block no-underline"
+                  className="social-card block no-underline transition-transform active:translate-y-px"
                   data-testid="my-goal-summary-card"
                 >
                   <GoalCover
@@ -120,10 +120,10 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
                   <Icon aria-hidden="true" size={20} />
                 </span>
                 <strong className="mt-2 text-lg font-black text-foreground">{count}</strong>
-                <span className="mt-1 text-xs font-extrabold text-foreground">{label}</span>
-                <span className="mt-1 text-xs leading-snug text-muted-foreground">{description}</span>
+                <span className="mt-1 text-sm font-extrabold text-foreground">{label}</span>
+                <span className="mt-1 text-base leading-snug text-muted-foreground">{description}</span>
                 {count > 0 && (
-                  <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-accent-foreground">
+                  <span className="mt-2 inline-flex items-center gap-1 text-base font-bold text-accent-foreground">
                     <CheckCircle2 aria-hidden="true" size={14} /> 검증됨
                   </span>
                 )}
@@ -154,7 +154,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
                 <Link
                   key={item.goal_id}
                   href={`/friends/${item.friend_member_id}?goal=${item.goal_id}`}
-                  className="social-card flex items-center gap-3 no-underline"
+                  className="social-card flex items-center gap-3 no-underline transition-transform active:translate-y-px"
                   data-testid="belonging-queue-item"
                 >
                   <div className="min-w-0 flex-1">

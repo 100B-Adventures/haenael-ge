@@ -10,7 +10,7 @@ export function Footer() {
       data-testid="site-footer"
     >
       <div className="mx-auto max-w-md flex flex-col gap-2.5">
-        <div className="flex items-center gap-3 text-xs font-semibold [color:var(--muted-foreground)]!">
+        <div className="flex items-center gap-3 text-sm font-semibold [color:var(--muted-foreground)]!">
           <Link
             href="/terms"
             className="underline underline-offset-2"
@@ -30,7 +30,7 @@ export function Footer() {
           </Link>
         </div>
 
-        <ul className="flex flex-col gap-0.5 text-[11px] leading-relaxed [color:var(--faint)]!">
+        <ul className="flex flex-col gap-0.5 text-[13px] leading-relaxed [color:var(--faint)]!">
           <li>상호: 정성컴퍼니 · 대표: 조성진</li>
           <li>사업자등록번호: 798-31-01774</li>
           <li>주소: 서울시 강남구 역삼동 620-17 203호</li>
@@ -38,7 +38,7 @@ export function Footer() {
           <li>개인정보보호책임자: 윤동주</li>
         </ul>
 
-        <p className="text-[11px] [color:var(--faint)]!">
+        <p className="text-[13px] [color:var(--faint)]!">
           © {new Date().getFullYear()} 정성컴퍼니. All rights reserved.
         </p>
       </div>

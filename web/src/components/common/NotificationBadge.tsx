@@ -121,7 +121,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
     <div className={`relative inline-block ${className ?? ""}`}>
       <button
         type="button"
-        className="relative flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        className="relative flex min-h-11 min-w-11 items-center justify-center rounded-full transition-transform active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         style={{
           color: unreadCount > 0 ? "var(--accent-foreground)" : "#B5B0A6",
         }}
@@ -137,7 +137,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
         </span>
         {unreadCount > 0 && (
           <span
-            className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-[3px] text-[9px] font-bold text-white [background-color:var(--accent-foreground)]!"
+            className="absolute -top-1 -right-1 flex min-h-5 min-w-5 items-center justify-center rounded-full px-1 text-[13px] font-bold leading-none text-white [background-color:var(--accent-foreground)]!"
             aria-hidden="true"
             data-testid="notification-unread-count"
           >
@@ -167,7 +167,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
               </span>
               <button
                 type="button"
-                className="text-[11px] [color:#A09B93]!"
+                className="min-h-11 min-w-11 text-[13px] [color:#A09B93]!"
                 onClick={() => setOpen(false)}
                 aria-label="알림 닫기"
               >
@@ -207,7 +207,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
                       <p className="text-[13px] font-medium leading-snug [color:var(--foreground)]!">
                         {notifText(n)}
                       </p>
-                      <p className="mt-0.5 text-[11px] [color:#A09B93]!">
+                      <p className="mt-0.5 text-[13px] [color:#A09B93]!">
                         {channelBadge(n)} ·{" "}
                         {new Date(n.created_at).toLocaleDateString("ko-KR", {
                           month: "short",

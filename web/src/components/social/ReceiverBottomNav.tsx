@@ -27,7 +27,7 @@ export function ReceiverBottomNav({ locked = false }: { locked?: boolean }) {
           <Link
             key={`${label}-${index}`}
             href={locked ? "/" : href}
-            className={active ? "is-active" : undefined}
+            className={`${active ? "is-active " : ""}transition-transform active:translate-y-px`}
             aria-current={active ? "page" : undefined}
           >
             <span className="receiver-tabbar-icon">

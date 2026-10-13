@@ -335,6 +335,68 @@ test.describe("V2 web-first social slice", () => {
     expect(await page.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth
     )).toBe(0);
+    const ergonomics = await page.evaluate(() => {
+      const visible = (element: Element) => {
+        const node = element as HTMLElement;
+        const rect = node.getBoundingClientRect();
+        return node.offsetParent !== null && rect.width > 0 && rect.height > 0;
+      };
+      const textSizes = Array.from(document.querySelectorAll("body *"))
+        .filter((element) =>
+          visible(element) &&
+          !["SCRIPT", "STYLE", "SVG", "PATH"].includes(element.tagName) &&
+          Array.from(element.childNodes).some((node) =>
+            node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim())
+          )
+        )
+        .map((element) => Number.parseFloat(getComputedStyle(element).fontSize))
+        .sort((left, right) => left - right);
+      const taps = Array.from(document.querySelectorAll(
+        'a[href],button,[role="button"],input:not([type="hidden"]),select,textarea,summary,label[for]',
+      )).filter(visible);
+      const activeSelectors: string[] = [];
+      const walk = (rules: CSSRuleList) => {
+        for (const rule of Array.from(rules)) {
+          const selector = (rule as CSSStyleRule).selectorText ?? "";
+          if (selector.includes(":active")) {
+            activeSelectors.push(...selector.split(",").map((item) =>
+              item.replaceAll(":active", "").trim()
+            ));
+          }
+          const nested = (rule as CSSGroupingRule).cssRules;
+          if (nested?.length) walk(nested);
+        }
+      };
+      for (const sheet of Array.from(document.styleSheets)) {
+        try {
+          walk(sheet.cssRules);
+        } catch {
+          // The product stylesheet is same-origin; cross-origin sheets are irrelevant here.
+        }
+      }
+      const activeCovered = taps.filter((element) =>
+        activeSelectors.some((selector) => {
+          try {
+            return Boolean(selector) && element.matches(selector);
+          } catch {
+            return false;
+          }
+        })
+      ).length;
+      return {
+        fontBelow13: textSizes.filter((size) => size < 13).length,
+        medianFont: textSizes[Math.floor(textSizes.length / 2)] ?? 0,
+        tapBelow44: taps.filter((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.width < 43.5 || rect.height < 43.5;
+        }).length,
+        activeRatio: taps.length ? activeCovered / taps.length : 1,
+      };
+    });
+    expect(ergonomics.fontBelow13).toBe(0);
+    expect(ergonomics.medianFont).toBeGreaterThanOrEqual(16);
+    expect(ergonomics.tapBelow44).toBe(0);
+    expect(ergonomics.activeRatio).toBeGreaterThanOrEqual(0.9);
     expect(consoleErrors).toEqual([]);
     await context.close();
   });
@@ -358,19 +420,33 @@ test.describe("V2 web-first social slice", () => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
     await page.goto(`/me/goal/${ownerGoal}`);
+    const currentCover = page.getByTestId("goal-cover-picker").getByTestId(
+      "goal-cover",
+    ).first();
+    const initialPreset = await currentCover.getAttribute("data-preset");
+    expect(initialPreset).toBeTruthy();
     const png = Buffer.from(
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
       "base64",
+    );
+    const signResponsePromise = page.waitForResponse((response) =>
+      response.url().includes("/functions/v1/goal-cover-sign-upload")
     );
     await page.locator('input[type="file"]').setInputFiles({
       name: "cover.png",
       mimeType: "image/png",
       buffer: png,
     });
+    const signResponse = await signResponsePromise;
+    const signBody = await signResponse.json() as { upload_url?: string };
+    expect(
+      signResponse.status(),
+      "sign response must succeed",
+    ).toBe(200);
+    expect(signBody.upload_url).toBeTruthy();
+    expect(new URL(signBody.upload_url!).origin).toBe(SUPABASE_URL);
     await expect(page.getByText(/검수 대기열/)).toBeVisible();
-    await expect(
-      page.getByTestId("goal-cover-picker").getByTestId("goal-cover").first(),
-    ).toHaveAttribute("data-preset", "c3");
+    await expect(currentCover).toHaveAttribute("data-preset", initialPreset!);
     await context.close();
   });
 
