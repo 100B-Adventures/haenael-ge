@@ -1,12 +1,14 @@
 BEGIN;
-SELECT plan(5);
+SELECT plan(8);
 
 INSERT INTO auth.users(id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,confirmation_token,recovery_token,email_change_token_new,raw_app_meta_data,raw_user_meta_data,is_super_admin,is_anonymous)
 SELECT id,'00000000-0000-0000-0000-000000000000','authenticated','authenticated',email,'',now(),now(),'','','','{}','{}',false,false FROM (VALUES
  ('54000000-0000-0000-0000-000000000001'::uuid,'owner@cover.test'),('54000000-0000-0000-0000-000000000002'::uuid,'other@cover.test'),('54000000-0000-0000-0000-000000000003'::uuid,'admin@cover.test')) x(id,email);
 INSERT INTO public.member(id,nickname) VALUES('54000000-0000-0000-0000-000000000001','Owner'),('54000000-0000-0000-0000-000000000002','Other'),('54000000-0000-0000-0000-000000000003','Admin');
 INSERT INTO public.admin_member(member_id) VALUES('54000000-0000-0000-0000-000000000003');
-INSERT INTO public.goal(member_id,slug,title,due_date,visibility) VALUES('54000000-0000-0000-0000-000000000001','cover-public','커버 목표','2026-12-31','PUBLIC');
+INSERT INTO public.goal(member_id,slug,title,due_date,visibility) VALUES
+('54000000-0000-0000-0000-000000000001','cover-public','커버 목표','2026-12-31','PUBLIC'),
+('54000000-0000-0000-0000-000000000001','cover-friends','친구 커버 목표','2026-12-31','FRIENDS');
 
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims','{"role":"authenticated","sub":"54000000-0000-0000-0000-000000000001"}',true);
@@ -17,7 +19,8 @@ RESET ROLE;
 INSERT INTO public.goal_cover_asset(id,goal_id,owner_member_id,quarantine_path,status,content_sha256,mime_type,byte_size)
 VALUES
  ('54100000-0000-0000-0000-000000000001',(SELECT id FROM public.goal WHERE slug='cover-public'),'54000000-0000-0000-0000-000000000001','owner/goal/review.webp','REVIEW',repeat('a',64),'image/webp',100),
- ('54100000-0000-0000-0000-000000000002',(SELECT id FROM public.goal WHERE slug='cover-public'),'54000000-0000-0000-0000-000000000001','owner/goal/reject.webp','REVIEW',repeat('b',64),'image/webp',100);
+ ('54100000-0000-0000-0000-000000000002',(SELECT id FROM public.goal WHERE slug='cover-public'),'54000000-0000-0000-0000-000000000001','owner/goal/reject.webp','REVIEW',repeat('b',64),'image/webp',100),
+ ('54100000-0000-0000-0000-000000000003',(SELECT id FROM public.goal WHERE slug='cover-friends'),'54000000-0000-0000-0000-000000000001','owner/goal/friends.webp','REVIEW',repeat('c',64),'image/webp',100);
 
 SELECT ok(
   (SELECT count(*)=0 FROM storage.objects WHERE bucket_id='goal-cover-public')
@@ -35,6 +38,35 @@ SELECT ok(
   AND (SELECT rejection_code='copyright' AND public_path IS NULL FROM public.goal_cover_asset WHERE id='54100000-0000-0000-0000-000000000002'),
   'PG-14 승인만 active, 반려는 stable rejection code'
 );
+
+SELECT is(
+  public.admin_apply_goal_cover_review('54100000-0000-0000-0000-000000000003','54000000-0000-0000-0000-000000000003','APPROVE',NULL,NULL)->>'status',
+  'APPROVED',
+  'PG-15 D-019 FRIENDS 승인은 public path 없이 private object를 유지'
+);
+
+INSERT INTO storage.objects(id,bucket_id,name,owner_id,metadata)
+VALUES(gen_random_uuid(),'goal-cover-quarantine','owner/goal/friends.webp','54000000-0000-0000-0000-000000000001','{}'::jsonb);
+INSERT INTO public.friend_connection(member_low_id,member_high_id,status)
+VALUES('54000000-0000-0000-0000-000000000001','54000000-0000-0000-0000-000000000002','ACTIVE');
+
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims','{"role":"authenticated","sub":"54000000-0000-0000-0000-000000000002"}',true);
+SELECT is(
+  (SELECT count(*)::integer FROM storage.objects WHERE bucket_id='goal-cover-quarantine' AND name='owner/goal/friends.webp'),
+  0,
+  'PG-16 D-019 ACTIVE 친구도 private Storage 직접 GET 경로를 조회하지 못함'
+);
+RESET ROLE;
+
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims','{"role":"authenticated","sub":"54000000-0000-0000-0000-000000000001"}',true);
+SELECT is(
+  (SELECT count(*)::integer FROM storage.objects WHERE bucket_id='goal-cover-quarantine' AND name='owner/goal/friends.webp'),
+  1,
+  'PG-17 D-019 소유자는 승인된 private cover object를 조회 가능'
+);
+RESET ROLE;
 
 SELECT * FROM finish();
 ROLLBACK;

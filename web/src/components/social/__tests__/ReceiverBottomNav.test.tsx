@@ -12,3 +12,11 @@ it("CT-NAV-01 홈 친구 초대 마이 4탭과 친구 활성 상태를 렌더한
     "page",
   );
 });
+
+it("CT-NAV-02 비회원 잠금 상태는 홈 외 3탭에 잠금 뱃지를 붙인다", () => {
+  const { container } = render(<ReceiverBottomNav locked />);
+  expect(container.querySelectorAll(".receiver-tabbar-lock")).toHaveLength(3);
+  expect(screen.getAllByRole("link").every((link) =>
+    link.getAttribute("href") === "/"
+  )).toBe(true);
+});

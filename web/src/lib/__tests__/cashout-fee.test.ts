@@ -18,7 +18,9 @@ describe("calcCashoutFee", () => {
   // 회장 확정 기준값. 이 표가 Deno(withholding.ts)·DB RPC와의 동치 계약이다.
   it.each([
     { gross: 10_000, fee: 1_000, vat: 100, feeTotal: 1_100, withhold: 293, net: 8_607 },
+    { gross: 27_000, fee: 2_700, vat: 270, feeTotal: 2_970, withhold: 792, net: 23_238 },
     { gross: 30_000, fee: 3_000, vat: 300, feeTotal: 3_300, withhold: 881, net: 25_819 },
+    { gross: 40_000, fee: 4_000, vat: 400, feeTotal: 4_400, withhold: 1_174, net: 34_426 },
     { gross: 50_000, fee: 5_000, vat: 500, feeTotal: 5_500, withhold: 1_468, net: 43_032 },
     { gross: 100_000, fee: 10_000, vat: 1_000, feeTotal: 11_000, withhold: 2_937, net: 86_063 },
   ])("$gross원 → 이용료 $feeTotal · 원천징수 $withhold · 실지급 $net", (c) => {

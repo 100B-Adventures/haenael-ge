@@ -82,6 +82,7 @@ test.describe("V2 web-first social slice", () => {
   >;
   let ownerGoal = 0;
   let publicSlug = "";
+  let smokeInviteToken = "";
 
   test.beforeAll(async () => {
     for (
@@ -150,6 +151,20 @@ test.describe("V2 web-first social slice", () => {
       member_high_id: [ids.owner, ids.friend].sort()[1],
       status: "ACTIVE",
     });
+    const ownerClient = createClient(SUPABASE_URL, ANON_KEY);
+    const { error: ownerAuthError } = await ownerClient.auth.signInWithPassword({
+      email: emails.owner,
+      password,
+    });
+    if (ownerAuthError) throw ownerAuthError;
+    const { data: smokeInvite, error: smokeInviteError } = await ownerClient.rpc(
+      "create_friend_invite",
+      { goal_id: ownerGoal, channel: "WEB" },
+    );
+    if (smokeInviteError || !smokeInvite) {
+      throw smokeInviteError ?? new Error("smoke_invite_failed");
+    }
+    smokeInviteToken = (smokeInvite as { token: string }).token;
     for (let index = 0; index < 3; index += 1) {
       const { data: payment, error: paymentError } = await admin.from("payment")
         .insert({
@@ -235,6 +250,95 @@ test.describe("V2 web-first social slice", () => {
       page.getByTestId("goal-cover-picker").getByTestId("goal-cover").first(),
     ).toHaveAttribute("data-preset", "c3");
     await context.close();
+  });
+
+  test("SMOKE-01 신규 라우트 전체는 390px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
+    const ownerContext = await authContext(browser, emails.owner);
+    const ownerPage = await ownerContext.newPage();
+    await ownerPage.setViewportSize({ width: 390, height: 844 });
+    const ownerConsoleErrors: string[] = [];
+    ownerPage.on("console", (message) => {
+      if (message.type() === "error") ownerConsoleErrors.push(message.text());
+    });
+    const ownerRoutes = [
+      `/me/goal/${ownerGoal}`,
+      "/friends",
+      `/friends/${ids.friend}`,
+      "/invite",
+    ];
+    for (const route of ownerRoutes) {
+      await ownerPage.goto(route);
+      await expect(ownerPage.locator("main")).toBeVisible();
+      expect(await ownerPage.evaluate(() =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth
+      ), route).toBe(0);
+    }
+
+    await ownerPage.goto("/friends");
+    const tabMetrics = await ownerPage.evaluate(() => {
+      const nav = document.querySelector<HTMLElement>(".receiver-tabbar")!;
+      const active = nav.querySelector<HTMLElement>("a.is-active")!;
+      const icon = active.querySelector<HTMLElement>(".receiver-tabbar-icon")!;
+      const label = active.querySelectorAll<HTMLElement>(":scope > span")[1];
+      const root = getComputedStyle(document.documentElement);
+      const probe = document.createElement("span");
+      probe.style.color = "var(--clover)";
+      document.body.appendChild(probe);
+      const cloverResolved = getComputedStyle(probe).color;
+      probe.remove();
+      return {
+        height: nav.getBoundingClientRect().height,
+        icon: icon.getBoundingClientRect().width,
+        labelSize: getComputedStyle(label).fontSize,
+        labelWeight: getComputedStyle(label).fontWeight,
+        activeColor: getComputedStyle(active).color,
+        cloverColor: root.getPropertyValue("--clover").trim(),
+        cloverResolved,
+        lockToken: root.getPropertyValue("--tabbar-lock-size").trim(),
+      };
+    });
+    expect(tabMetrics).toMatchObject({
+      height: 64,
+      icon: 23,
+      labelSize: "10px",
+      labelWeight: "700",
+      lockToken: "11px",
+    });
+    expect(tabMetrics.activeColor).toBe(tabMetrics.cloverResolved);
+    console.log(`DESIGN_METRICS ${JSON.stringify(tabMetrics)}`);
+    expect(ownerConsoleErrors).toEqual([]);
+    await ownerContext.close();
+
+    const invitePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const inviteConsoleErrors: string[] = [];
+    invitePage.on("console", (message) => {
+      if (message.type() === "error") inviteConsoleErrors.push(message.text());
+    });
+    await invitePage.goto(`/invite/${smokeInviteToken}`);
+    await expect(invitePage.getByTestId("invite-accept-card")).toBeVisible();
+    expect(await invitePage.evaluate(() =>
+      document.documentElement.scrollWidth -
+      document.documentElement.clientWidth
+    )).toBe(0);
+    expect(inviteConsoleErrors).toEqual([]);
+    await invitePage.close();
+
+    const adminContext = await authContext(browser, emails.admin);
+    const adminPage = await adminContext.newPage();
+    await adminPage.setViewportSize({ width: 390, height: 844 });
+    const adminConsoleErrors: string[] = [];
+    adminPage.on("console", (message) => {
+      if (message.type() === "error") adminConsoleErrors.push(message.text());
+    });
+    await adminPage.goto("/admin");
+    await expect(adminPage.getByTestId("goal-cover-review-queue")).toBeVisible();
+    expect(await adminPage.evaluate(() =>
+      document.documentElement.scrollWidth -
+      document.documentElement.clientWidth
+    )).toBe(0);
+    expect(adminConsoleErrors).toEqual([]);
+    await adminContext.close();
   });
 
   test("PW-05 admin 승인 후 owner와 public 화면에 승인 커버만 보인다", async ({ browser }) => {
