@@ -326,9 +326,141 @@ export type Database = {
           },
         ]
       }
+      friend_connection: {
+        Row: {
+          blocked_by_member_id: string | null
+          connected_at: string
+          id: string
+          member_high_id: string
+          member_low_id: string
+          origin_invite_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          blocked_by_member_id?: string | null
+          connected_at?: string
+          id?: string
+          member_high_id: string
+          member_low_id: string
+          origin_invite_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          blocked_by_member_id?: string | null
+          connected_at?: string
+          id?: string
+          member_high_id?: string
+          member_low_id?: string
+          origin_invite_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_connection_blocked_by_member_id_fkey"
+            columns: ["blocked_by_member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_connection_member_high_id_fkey"
+            columns: ["member_high_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_connection_member_low_id_fkey"
+            columns: ["member_low_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_connection_origin_invite_id_fkey"
+            columns: ["origin_invite_id"]
+            isOneToOne: false
+            referencedRelation: "friend_invite"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friend_invite: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          channel: string
+          created_at: string
+          expires_at: string
+          goal_id: number | null
+          id: string
+          inviter_member_id: string
+          revoked_at: string | null
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          channel: string
+          created_at?: string
+          expires_at: string
+          goal_id?: number | null
+          id?: string
+          inviter_member_id: string
+          revoked_at?: string | null
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          channel?: string
+          created_at?: string
+          expires_at?: string
+          goal_id?: number | null
+          id?: string
+          inviter_member_id?: string
+          revoked_at?: string | null
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_invite_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_invite_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_invite_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_invite_inviter_member_id_fkey"
+            columns: ["inviter_member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal: {
         Row: {
+          active_cover_asset_id: string | null
           closed_at: string | null
+          cover_preset_key: string
           created_at: string
           deleted_at: string | null
           due_date: string
@@ -338,9 +470,12 @@ export type Database = {
           slug: string
           status: Database["public"]["Enums"]["goal_status_enum"]
           title: string
+          visibility: string
         }
         Insert: {
+          active_cover_asset_id?: string | null
           closed_at?: string | null
+          cover_preset_key?: string
           created_at?: string
           deleted_at?: string | null
           due_date: string
@@ -350,9 +485,12 @@ export type Database = {
           slug?: string
           status?: Database["public"]["Enums"]["goal_status_enum"]
           title: string
+          visibility?: string
         }
         Update: {
+          active_cover_asset_id?: string | null
           closed_at?: string | null
+          cover_preset_key?: string
           created_at?: string
           deleted_at?: string | null
           due_date?: string
@@ -362,11 +500,96 @@ export type Database = {
           slug?: string
           status?: Database["public"]["Enums"]["goal_status_enum"]
           title?: string
+          visibility?: string
         }
         Relationships: [
           {
+            foreignKeyName: "goal_active_cover_asset_id_fkey"
+            columns: ["active_cover_asset_id"]
+            isOneToOne: false
+            referencedRelation: "goal_cover_asset"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "goal_member_id_fkey"
             columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_cover_asset: {
+        Row: {
+          byte_size: number
+          content_sha256: string
+          created_at: string
+          goal_id: number
+          id: string
+          mime_type: string
+          owner_member_id: string
+          public_path: string | null
+          quarantine_path: string
+          rejection_code: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          byte_size: number
+          content_sha256: string
+          created_at?: string
+          goal_id: number
+          id?: string
+          mime_type: string
+          owner_member_id: string
+          public_path?: string | null
+          quarantine_path: string
+          rejection_code?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status: string
+        }
+        Update: {
+          byte_size?: number
+          content_sha256?: string
+          created_at?: string
+          goal_id?: number
+          id?: string
+          mime_type?: string
+          owner_member_id?: string
+          public_path?: string | null
+          quarantine_path?: string
+          rejection_code?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_cover_asset_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_cover_asset_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_cover_asset_owner_member_id_fkey"
+            columns: ["owner_member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_cover_asset_reviewed_by_fkey"
+            columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "member"
             referencedColumns: ["id"]
@@ -503,6 +726,35 @@ export type Database = {
           provider_id?: string | null
         }
         Relationships: []
+      }
+      member_preference: {
+        Row: {
+          member_id: string
+          notify_cheer: boolean
+          notify_marketing: boolean
+          updated_at: string
+        }
+        Insert: {
+          member_id: string
+          notify_cheer?: boolean
+          notify_marketing?: boolean
+          updated_at?: string
+        }
+        Update: {
+          member_id?: string
+          notify_cheer?: boolean
+          notify_marketing?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_preference_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification: {
         Row: {
@@ -742,6 +994,81 @@ export type Database = {
           },
         ]
       }
+      storage_cleanup_queue: {
+        Row: {
+          attempts: number
+          bucket_id: string
+          completed_at: string | null
+          created_at: string
+          goal_id: number
+          id: number
+          object_path: string
+          reason: string
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          bucket_id: string
+          completed_at?: string | null
+          created_at?: string
+          goal_id: number
+          id?: never
+          object_path: string
+          reason: string
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          bucket_id?: string
+          completed_at?: string | null
+          created_at?: string
+          goal_id?: number
+          id?: never
+          object_path?: string
+          reason?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storage_cleanup_queue_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storage_cleanup_queue_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toss_webhook_receipt: {
+        Row: {
+          claimed_at: string
+          event_type: string
+          payment_key: string
+          processed_at: string | null
+          transmission_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          event_type: string
+          payment_key: string
+          processed_at?: string | null
+          transmission_id: string
+        }
+        Update: {
+          claimed_at?: string
+          event_type?: string
+          payment_key?: string
+          processed_at?: string | null
+          transmission_id?: string
+        }
+        Relationships: []
+      }
       wordmap_render_cache: {
         Row: {
           goal_id: number
@@ -792,22 +1119,6 @@ export type Database = {
           is_anonymous: boolean | null
           message: string | null
         }
-        Insert: {
-          created_at?: string | null
-          display_name?: never
-          goal_id?: number | null
-          id?: number | null
-          is_anonymous?: boolean | null
-          message?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          display_name?: never
-          goal_id?: number | null
-          id?: number | null
-          is_anonymous?: boolean | null
-          message?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "cheer_goal_id_fkey"
@@ -829,6 +1140,8 @@ export type Database = {
         Row: {
           cheer_count: number | null
           closed_at: string | null
+          cover_preset_key: string | null
+          cover_public_path: string | null
           created_at: string | null
           due_date: string | null
           id: number | null
@@ -837,32 +1150,21 @@ export type Database = {
           status: Database["public"]["Enums"]["goal_status_enum"] | null
           title: string | null
         }
-        Insert: {
-          cheer_count?: never
-          closed_at?: string | null
-          created_at?: string | null
-          due_date?: string | null
-          id?: number | null
-          reason?: string | null
-          slug?: string | null
-          status?: Database["public"]["Enums"]["goal_status_enum"] | null
-          title?: string | null
-        }
-        Update: {
-          cheer_count?: never
-          closed_at?: string | null
-          created_at?: string | null
-          due_date?: string | null
-          id?: number | null
-          reason?: string | null
-          slug?: string | null
-          status?: Database["public"]["Enums"]["goal_status_enum"] | null
-          title?: string | null
-        }
         Relationships: []
       }
     }
     Functions: {
+      accept_friend_invite: { Args: { token: string }; Returns: Json }
+      admin_apply_goal_cover_review: {
+        Args: {
+          p_admin_id: string
+          p_asset_id: string
+          p_decision: string
+          p_public_path?: string
+          p_rejection_code?: string
+        }
+        Returns: Json
+      }
       admin_list_cashouts: {
         Args: { p_limit?: number }
         Returns: {
@@ -898,6 +1200,20 @@ export type Database = {
           requested_at: string
           status: Database["public"]["Enums"]["cashout_status_enum"]
           withholding_krw: number
+        }[]
+      }
+      admin_list_goal_covers: {
+        Args: { p_limit?: number }
+        Returns: {
+          asset_id: string
+          byte_size: number
+          content_sha256: string
+          created_at: string
+          goal_id: number
+          goal_title: string
+          mime_type: string
+          owner_nickname: string
+          quarantine_path: string
         }[]
       }
       admin_list_ledger: {
@@ -965,6 +1281,14 @@ export type Database = {
         }[]
       }
       cashout_require_kyc: { Args: never; Returns: boolean }
+      claim_toss_webhook: {
+        Args: {
+          p_event_type: string
+          p_payment_key: string
+          p_transmission_id: string
+        }
+        Returns: string
+      }
       clover_eligibility: {
         Args: { p_member_id: string }
         Returns: {
@@ -976,6 +1300,10 @@ export type Database = {
           total_balance: number
           welcome_amount: number
         }[]
+      }
+      complete_toss_webhook: {
+        Args: { p_transmission_id: string }
+        Returns: undefined
       }
       confirm_cheer_payment: {
         Args: {
@@ -1038,6 +1366,10 @@ export type Database = {
           payment_id: number
         }[]
       }
+      create_friend_invite: {
+        Args: { channel?: string; goal_id?: number }
+        Returns: Json
+      }
       create_goal: {
         Args: { p_due_date: string; p_reason: string; p_title: string }
         Returns: {
@@ -1045,6 +1377,8 @@ export type Database = {
         }[]
       }
       expire_stale_cheer_payments: { Args: never; Returns: number }
+      friend_goal_detail: { Args: { goal_id: number }; Returns: Json }
+      friend_invite_preview: { Args: { token: string }; Returns: Json }
       get_wordmap: {
         Args: { p_goal_id: number }
         Returns: {
@@ -1083,9 +1417,12 @@ export type Database = {
           processing_note: string
           rejected_at: string
           requested_at: string
+          settled_balance_after: number
+          settled_balance_before: number
           status: Database["public"]["Enums"]["cashout_status_enum"]
         }[]
       }
+      my_friend_goals: { Args: never; Returns: Json }
       purge_expired_cashout_accounts: {
         Args: { p_limit?: number }
         Returns: number
@@ -1126,6 +1463,28 @@ export type Database = {
           status: Database["public"]["Enums"]["payment_status_enum"]
         }[]
       }
+      release_toss_webhook: {
+        Args: { p_transmission_id: string }
+        Returns: undefined
+      }
+      remove_friend: { Args: { friend_member_id: string }; Returns: Json }
+      set_goal_cover_preset: {
+        Args: { goal_id: number; preset_key: string }
+        Returns: Json
+      }
+      set_goal_visibility: {
+        Args: { goal_id: number; visibility: string }
+        Returns: Json
+      }
+      social_is_active_friend: {
+        Args: { p_member_a: string; p_member_b: string }
+        Returns: boolean
+      }
+      social_require_user: { Args: never; Returns: string }
+      social_validate_invite_token: {
+        Args: { p_token: string }
+        Returns: string
+      }
       update_goal: {
         Args: {
           p_due_date: string
@@ -1134,6 +1493,10 @@ export type Database = {
           p_title: string
         }
         Returns: undefined
+      }
+      update_member_preferences: {
+        Args: { notify_cheer: boolean; notify_marketing: boolean }
+        Returns: Json
       }
       welcome_clover_amount: { Args: never; Returns: number }
     }
