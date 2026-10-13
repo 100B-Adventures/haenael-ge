@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-13 V2 전체 회귀 테스트 하네스 복구
+
+- 제품 코드 변경 없이 Playwright 환경·local seed·pgTAP fixture만 수정했다.
+- production build PASS, cashout 12/12, cheer 2/2, multi-goal·release 4/4, 전체 pgTAP 323/323 PASS.
+- 전체 Playwright는 62 PASS / 운영 read-only 자격증명 1 FAIL / 0 SKIP이다.
+- 테스트 삭제·skip 추가·계좌 마스킹·수수료 단정 약화는 0건이다.
+- 상세: `docs/qa/v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md`.
+
+> STAMP: 생성 2026-10-13 19:43 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 운영 DB·운영 배포 미실행.
+
 ## 2026-10-13 QA 반려 뒤 증거 범위 정정
 
 QA-V2-COVERAGE-01에 따라 기존 `11/11 PASS`는 승인 test plan 84건 전체가 아니라 `social-web-first.spec.ts`에 당시 구현돼 있던 선별 11건만 뜻한다고 정정한다. QA 기준 집계는 통과 47, 부분 8, 실패 2, 미검증 27이었다. 미검증 27건은 PG-14, CT-04·05·08·10·11·12, PW-01·08~17, CC-02·03, ST-01~05, REG-CASH-01, REG-PUB-03이다. 이 항목들은 테스트가 추가되거나 QA가 실제로 재실행하기 전까지 PASS로 해석하지 않는다.

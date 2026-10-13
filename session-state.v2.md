@@ -8,6 +8,15 @@
 
 목적: 해낼게를 "혼자 쓰는 목표 저금통" 에서 "친구가 응원하러 들어오는 자리" 로 바꾼다. 받는 사람이 목표를 공개 범위로 나누고, 초대 링크로 친구를 연결하고, 친구 목표에 응원을 남기는 루프를 웹에서 먼저 완결한 뒤 앱인토스 미니앱으로 확장한다. 성공 판정은 초대를 받은 사람이 가입하고 응원 1건을 남기는 비율이다. 환전(v1)은 이 라인이 건드리지 않는다.
 
+## 2026-10-13 19:43 KST · 전체 회귀 테스트 하네스 17건 복구, 운영 인증 1건만 FAIL
+
+- cashout은 실제 local Supabase Auth 세션과 격리 PostgREST fixture를 결합해 12/12 PASS했다. 환전 request는 DB에 만들지 않았다.
+- local seed goal `knirdtaq`, 실행 baseURL cookie, 선언 버전 대조, APPROVED cover fixture를 보정했다.
+- local DB reset 뒤 pgTAP 18파일 323건 PASS. production build PASS.
+- 전체 Playwright 63건은 62 PASS / 1 FAIL / 0 SKIP이다. 유일한 실패는 `QA-PROD-AUTH-01` 운영 read-only 자격증명 미주입이며 지시대로 수정하지 않았다.
+- 제품 코드·운영 DB·운영 배포 변경은 0건이다. 상세 보고: `docs/qa/v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md`.
+- 다음: 컨트롤러가 운영 read-only 자격증명을 안전하게 주입해 63/63을 확인하거나, 미주입 상태를 명시한 채 QA 게이트를 계속 보류한다. 하단탭 10px 대 13px 미결정은 그대로다.
+
 ## 2026-10-13 19:06 KST · build 승인 후 qa 가 NG 로 반려. 결함 수정 완료, 재검증 위임 중
 
 **진행 순서대로 일어난 일**
