@@ -1,3 +1,13 @@
+## 2026-10-14 05:45 KST · 카카오 가입 라이브 완료. KAKAO_CLIENT_SECRET 실값 세션이 직접 확보·교체
+
+목적: 신규·기존 회원 카카오 로그인(가입) 운영 라이브. core 라인 잔여 블로커 중 하나였던 "KAKAO_CLIENT_SECRET 실값 미확보" 해소.
+
+- **값을 세션이 전용 크롬에서 직접 찾았다.** 회장에게 넘기지 않음. 위치 = 카카오 콘솔 `앱 > 플랫폼 키 > Default Rest API Key(c274280c…) > 클라이언트 시크릿`. 신 콘솔이 Client Secret 을 `카카오 로그인 > 보안` 이 아니라 REST API 키 하위로 옮긴 것이 종전에 못 찾은 이유다. `/product/login/security` 는 일반으로 리다이렉트된다.
+- **검증 3종**: ①`supabase secrets set --env-file`(count:1) ②더미 호출 `KOE010`→`KOE320`(자격증명 수락) ③전용 크롬 실왕복 start→kauth→callback→`/me` 완주(교체 전 `/?auth_error=missing_env`). 
+- **관리 스토어 저장**: `~/.sj-agent-harness/secrets/haenael-ge-kakao-login.env`(600). 재요구 금지.
+- **별도 사안(미검증)**: 로컬 `haenael-ge.env` 의 service_role 키가 새 프로젝트에서 Invalid API key. 운영은 Vercel env 로 정상. 로컬 DB 조회 필요 시 갱신.
+- **다음**: sj-25 유료광고 트랙이 요청한 프로필 BIO 링크 버튼(share_event BIO·UTM) 착수 여부 판단. 그 다음 2026-09-05 감사 P0 1건.
+
 ## 2026-10-14 02:25 KST · v2 가 2.0.0 으로 운영 배포 완료. 이제 이 라인을 집을 수 있다
 
 목적: 해낼게 v1 환전 라인을 2026-09-05 감사 재오픈 잔여(P0 1건·P1 16건)까지 닫고 회귀 산출물을 갖춘 상태로 build 를 종결한다.
