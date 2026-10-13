@@ -1,0 +1,50 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>앱인토스 서면 사전문의 초안</title>
+<style>
+ :root{--ink:#1c1b19;--muted:#6b665d;--clover:#1B8A4F;--line:#e5e1d8;--warm:#f3efe7;--bg:#faf8f3;--card:#fff;--flag:#b4472b;}
+ *{box-sizing:border-box;}
+ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.72;}
+ .wrap{max-width:820px;margin:0 auto;padding:34px 20px 60px;}
+ h1{font-size:23px;font-weight:900;margin:0 0 6px;}
+ .lede{color:var(--muted);font-size:14px;margin-bottom:24px;}
+ h2{font-size:17px;font-weight:900;margin:30px 0 10px;padding-top:16px;border-top:1px solid var(--line);}
+ .why{background:var(--warm);border-left:3px solid var(--flag);border-radius:0 8px 8px 0;padding:12px 15px;font-size:13.5px;margin:0 0 18px;}
+ .copybox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;font-size:14.5px;white-space:pre-wrap;}
+ .copybox .subj{font-weight:900;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px;display:block;}
+ .step{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;font-size:13.5px;}
+ .step b{color:var(--clover);}
+ code{background:var(--warm);padding:1px 6px;border-radius:5px;font-size:12.5px;}
+ .src{margin-top:32px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;}
+ .src a{color:var(--clover);}
+</style></head><body><div class="wrap">
+<h1>앱인토스 입점 서면 사전문의 초안</h1>
+<p class="lede">회장이 그대로 복사해 앱인토스 개발자 콘솔 문의 채널로 발송하는 용도입니다. 발송 전 회사명·연락처만 채워 주세요.</p>
+
+<div class="why">
+<b>왜 먼저 묻나.</b> 앱인토스(토스 미니앱)는 비게임 심사에서 외부 웹 연결과 앱 안 현금성 거래를 제한합니다. 해낼게의 핵심은 응원 받은 클로버를 현금으로 바꾸는 환전인데, 이 모델이 미니앱 정책에 걸리면 기술설계를 다 짜도 채널이 뒤집힙니다. 그래서 돈 기능을 뺀 "유입 전용"으로 올릴 수 있는지, 또 전체 환전 모델이 심사 대상이 되는지를 구현 전에 서면으로 확정합니다.
+</div>
+
+<h2>보낼 문의문 (복사용)</h2>
+<div class="copybox"><span class="subj">제목: 비게임 미니앱 입점 가능 범위 사전 문의 (유입 전용 구성)</span>안녕하세요. 친구가 선언한 목표를 다른 친구들이 응원하며 함께 이뤄가는 서비스 "해낼게"를 준비 중인 팀입니다. 앱인토스 입점을 검토하며 심사 정책 두 가지를 구현 전에 확인하고자 문의드립니다.
+
+1. 유입 전용 미니앱 구성의 가능 여부
+저희 본 서비스에는 응원으로 모인 적립금을 현금으로 바꾸는 환전 기능이 있습니다. 다만 앱인토스에는 이 환전·결제 기능을 제외하고, 공개된 응원 목표를 둘러보고 서비스를 소개받아 회원가입(온보딩)까지만 하는 "유입 전용" 구성으로 올리려 합니다. 결제·환전 등 금전 거래는 미니앱 안에서 일어나지 않습니다. 이런 구성이 비게임 미니앱 심사 정책상 허용되는지 확인 부탁드립니다.
+
+2. 외부 서비스 연동 범위
+온보딩 이후의 실제 이용은 저희 본 서비스(웹/앱)에서 이뤄집니다. 미니앱에서 본 서비스로 연결하거나 안내하는 방식에 제한이 있는지, 허용되는 연동 형태(링크 이동, 공유 등)의 기준을 알려주시면 그에 맞춰 설계하겠습니다.
+
+3. 환전 모델에 대한 심사 적용 범위
+위처럼 미니앱에는 환전 기능을 넣지 않더라도, 본 서비스가 환전 모델을 가진다는 사실 자체가 미니앱 심사·승인에 영향을 주는지 궁금합니다. 영향을 준다면 어떤 서류나 조건이 필요한지도 함께 안내 부탁드립니다.
+
+빠른 출시보다 정책에 맞는 구성을 먼저 확정하고 싶어 사전에 여쭙습니다. 답변 주시면 그 범위에 맞춰 준비하겠습니다. 감사합니다.
+
+(회사/팀명: ____ · 담당자: ____ · 회신 이메일: ____)</div>
+
+<h2>발송 방법</h2>
+<div class="step"><b>1.</b> 앱인토스 개발자 콘솔(developers-apps-in-toss.toss.im) 로그인 후 문의·지원 채널을 엽니다.</div>
+<div class="step"><b>2.</b> 위 문의문을 붙여넣고 괄호 안 회사명·담당자·회신 이메일만 채웁니다.</div>
+<div class="step"><b>3.</b> 발송 후 회신 내용을 캡처해 주시면, 답변 범위에 맞춰 미니앱 기술설계를 확정하겠습니다.</div>
+
+<p class="src">근거: 앱인토스 <a href="https://developers-apps-in-toss.toss.im/checklist/app-nongame.md">비게임 심사 체크리스트</a>(외부 웹·금전 거래 제한 조항), 결정.md D-003(지갑은 조용하게), open-decisions D-APPINTOSS. 환전=적립 클로버를 현금으로 바꾸는 기능.</p>
+<p class="src">🏷 STAMP | line: core | 생성: 2026-10-03 23:52 KST | model: Claude Opus 4.8 | agent: 컨트롤러(직접, 외부 비즈니스 문의 초안) | 근거: 앱인토스 비게임 심사 체크리스트·D-003 | 고민: 유통채널 최우선 지시에 따라 환전 모델의 미니앱 정책 적합성을 구현 전에 서면 확정. 발송 주체는 외부 공개라 회장</p>
+</div></body></html>

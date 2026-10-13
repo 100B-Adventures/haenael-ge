@@ -10,6 +10,10 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+storybook-static
+test-results
+playwright-report
+*.ait
 *.local
 
 # Editor directories and files

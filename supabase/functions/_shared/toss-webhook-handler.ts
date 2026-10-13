@@ -6,7 +6,7 @@
 //
 // 리팩터링 원칙: 기존 toss-webhook/index.ts의 로직을 동작 변경 없이 그대로 옮긴다.
 // (Codex 최종 재리뷰 P2 — 요청 단위 회귀테스트 부재 해소 목적, docs 근거:
-// docs/test-plan.md SEC-6, supabase/tests/release_v1.test.sql:71-103)
+// docs/qa/test-plan.md SEC-6, supabase/tests/release_v1.test.sql:71-103)
 
 // 이 파일은 로컬 상대경로 import를 일절 쓰지 않는다(zero local imports — toss.ts와 같은 원칙).
 // 이유: Deno는 상대 import에 명시적 ".ts" 확장자를 요구하지만, web/의 tsconfig(bundler

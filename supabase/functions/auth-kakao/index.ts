@@ -1,7 +1,7 @@
 // auth-kakao — 카카오 커스텀 OAuth → Supabase 세션 발급
 // 슬라이스 #3 실구현.
 //
-// 설계: docs/design-patterns.md §11a
+// 설계: docs/design/design-patterns.md §11a
 // 인가코드(code) + redirect_uri 를 받아:
 //   1. 카카오 토큰 교환
 //   2. 카카오 사용자 정보 조회

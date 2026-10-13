@@ -1,7 +1,7 @@
 // (receiver)/wordmap/[goalId]/page.tsx — 워드맵 풀뷰 + 공유 아이콘
 // 슬라이스 #9 실구현. 인증 필수(goal 소유자만 진입).
 // DESIGN.md §6 금액 3층 b: 클로버 개수만, ₩ 없음.
-// wireframe 진실원: docs/WIREFRAMES/wordmap-share.html (단계 2).
+// wireframe 진실원: docs/design/WIREFRAMES/wordmap-share.html (단계 2).
 
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";

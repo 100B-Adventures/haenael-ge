@@ -53,3 +53,10 @@ artifacts/
 # 편집기 개인 설정
 .obsidian/
 .vercel
+
+# 세션 전용 로컬 산출물 (커밋 대상 아님)
+.chrome-profile
+session-state-archive/
+
+# 회장 요청 원문 대장: 장기 보관 불필요 + 공개 저장소 노출 방지 (회장 2026-10-13)
+wiki/거버넌스/요청.md

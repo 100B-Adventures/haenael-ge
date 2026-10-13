@@ -1,0 +1,402 @@
+<!doctype html><html lang="ko" class="force-motion"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>해낼게 · 모션 3안 발산 (connect·belong·랜딩 히어로·로딩)</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#FFFFFF; --line:#E8E4DC; --warm:#F4EFE6;
+    --ink:#16140F; --muted:#6F6A60; --faint:#9C968B;
+    --clover:#1B8A4F; --clover-bright:#1F9E5A; --clover-soft:#E7F4EC; --clover-ink:#14613A;
+    --r-md:14px; --r-full:999px;
+    --ease-decel:cubic-bezier(.05,.7,.1,1);
+    --ease-spring:cubic-bezier(.34,1.56,.64,1);
+    --font:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:#2b2926;color:var(--ink);padding:26px 18px 60px;-webkit-font-smoothing:antialiased;}
+  .top{max-width:1180px;margin:0 auto 24px;color:#f3efe6;}
+  .top h1{font-size:21px;font-weight:900;letter-spacing:-.4px;}
+  .top p{font-size:13px;color:#c7c0b3;margin-top:8px;line-height:1.6;}
+  .top .note{margin-top:12px;font-size:12px;color:#e0a94a;background:#3a352f;border:1px solid #4a443c;border-radius:10px;padding:11px 14px;line-height:1.7;}
+  .top .note b{color:#f0cd8a;}
+  .moment{max-width:1180px;margin:0 auto 30px;background:#f7f4ee;border-radius:18px;padding:20px 20px 24px;}
+  .moment>h2{font-size:16px;font-weight:900;color:var(--ink);}
+  .moment>.axis{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.55;}
+  .cards{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;}
+  .vcard{flex:1;min-width:300px;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;}
+  .vcard .vh{padding:13px 15px;border-bottom:1px solid var(--line);}
+  .vcard .vh .lt{font-size:13.5px;font-weight:900;color:var(--clover-ink);display:flex;align-items:center;gap:8px;}
+  .vcard .vh .tag{font-size:10px;font-weight:800;color:var(--muted);background:var(--warm);border:1px solid var(--line);border-radius:var(--r-full);padding:2px 8px;}
+  .vcard .vh .ld{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5;}
+  .stagew{background:var(--bg);padding:20px 18px;display:flex;justify-content:center;align-items:center;min-height:300px;position:relative;overflow:hidden;}
+  .replay{position:absolute;top:12px;right:12px;z-index:30;background:var(--ink);color:#fff;border:none;border-radius:var(--r-full);font-size:11px;font-weight:800;padding:7px 13px;cursor:pointer;font-family:inherit;}
+  .replay:hover{background:#000;}
+
+  /* 미니 폰 프레임 */
+  .mini{width:286px;background:var(--surface);border-radius:22px;border:1px solid #d7d1c6;box-shadow:0 10px 34px rgba(0,0,0,.16);overflow:hidden;align-self:center;}
+  .mp{padding:16px 15px 20px;}
+
+  /* connect 합류 카드 */
+  .hd{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;}
+  .acc{display:flex;gap:11px;align-items:center;background:var(--clover-soft);border:1px solid #cfe8d8;border-radius:var(--r-md);padding:13px 14px;}
+  .acc .av{width:40px;height:40px;border-radius:var(--r-full);overflow:hidden;flex:0 0 auto;background:#7C9A82;}
+  .acc .av img{width:100%;height:100%;object-fit:cover;}
+  .acc .tx{font-size:12px;font-weight:700;color:var(--clover-ink);line-height:1.45;}
+  .acc .tx b{color:var(--ink);}
+
+  /* belong 아바타 스택 */
+  .bt{display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;}
+  .bt .ringwrap{position:relative;display:inline-flex;padding:10px;}
+  .bt .ring{position:absolute;inset:4px;border-radius:var(--r-full);border:2px solid var(--clover);opacity:0;pointer-events:none;}
+  .bt .avs{display:flex;position:relative;z-index:2;}
+  .bt .a{width:44px;height:44px;border-radius:var(--r-full);border:2.5px solid var(--surface);overflow:hidden;margin-left:-12px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--clover-ink);}
+  .bt .a:first-child{margin-left:0;}
+  .bt .a img{width:100%;height:100%;object-fit:cover;}
+  .bt .cnt{font-size:15px;font-weight:800;color:var(--ink);}
+  .bt .cnt .num{color:var(--clover-ink);font-size:22px;display:inline-block;}
+  .bt .sub{font-size:11.5px;color:var(--muted);line-height:1.5;}
+
+  /* 랜딩 히어로 */
+  .hero{text-align:center;width:100%;}
+  .hero .brand{font-size:27px;font-weight:900;letter-spacing:-1px;color:var(--ink);display:inline-block;}
+  .hero .brand .d{color:var(--clover-bright);}
+  .hero .tag{font-size:12px;color:var(--muted);margin-top:5px;}
+  .hero .hero-clover{font-size:30px;margin:12px 0 4px;display:inline-block;}
+  .hero .hcloud{display:flex;flex-wrap:wrap;gap:7px 11px;justify-content:center;margin-top:10px;}
+  .hw{font-weight:800;color:var(--clover);line-height:1.2;display:inline-block;}
+  .hw.s3{font-size:21px;color:var(--clover-ink);} .hw.s2{font-size:16px;} .hw.s1{font-size:13px;color:#7fb296;}
+
+  /* 로딩 */
+  .ld{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
+  .ldtx{font-size:12px;font-weight:700;color:var(--muted);}
+  .sk{width:100%;display:flex;gap:11px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 14px;}
+  .sk-av{width:40px;height:40px;border-radius:50%;flex:0 0 auto;}
+  .sk-lines{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .sk-bar{height:11px;border-radius:6px;}
+  .sk-bar.w1{width:72%;} .sk-bar.w2{width:46%;}
+  .shimmer{background:linear-gradient(90deg,#e9e4da 0%,#f5f1ea 50%,#e9e4da 100%);background-size:220% 100%;}
+  .spin{width:42px;height:42px;border-radius:50%;border:3.5px solid var(--clover-soft);border-top-color:var(--clover);}
+  .bigclover{font-size:40px;display:inline-block;}
+
+  /* 클로버 파티클 */
+  .leaf{position:absolute;font-size:16px;opacity:0;pointer-events:none;z-index:25;will-change:transform,opacity;}
+
+  /* ═══ 키프레임 ═══ */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  @keyframes popGentle{from{opacity:0;transform:scale(.84);}to{opacity:1;transform:scale(1);}}
+  @keyframes springCard{0%{opacity:0;transform:translateY(22px) scale(.8);}60%{opacity:1;transform:translateY(-4px) scale(1.04);}100%{transform:none;}}
+  @keyframes springPop{0%{opacity:0;transform:scale(.5);}62%{opacity:1;transform:scale(1.14);}100%{transform:scale(1);}}
+  @keyframes glowPulse{0%{box-shadow:0 0 0 0 rgba(27,138,79,.38);}60%{box-shadow:0 0 0 10px rgba(27,138,79,0);}100%{box-shadow:0 0 0 0 rgba(27,138,79,0);}}
+  @keyframes countPulse{0%{transform:scale(1);}45%{transform:scale(1.28);}100%{transform:scale(1);}}
+  @keyframes ringExpand{0%{opacity:.65;transform:scale(.55);}70%{opacity:.3;}100%{opacity:0;transform:scale(1.7);}}
+  @keyframes leafFloat{0%{opacity:0;transform:translate(0,0) rotate(0) scale(.7);}18%{opacity:1;}100%{opacity:0;transform:translate(var(--lx),-78px) rotate(var(--lr)) scale(1);}}
+  @keyframes wordRise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes floatLoop{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+  @keyframes shimmer{0%{background-position:220% 0;}100%{background-position:-220% 0;}}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes softPulse{0%,100%{opacity:.45;}50%{opacity:1;}}
+  @keyframes cloverPulse{0%,100%{transform:scale(1);opacity:.82;}50%{transform:scale(1.2);opacity:1;}}
+
+  /* ═══ 변형 애니(표시 유지 · data-play 게이트로만 재생 → display:none 깜빡임 0) ═══ */
+  /* ── MOMENT connect ── */
+  .va[data-play] .acc{animation:fadeUp 540ms var(--ease-decel) both;}
+  .va[data-play] .acc .av{animation:popGentle 480ms var(--ease-decel) 130ms both;}
+  .va[data-play] .acc .tx{animation:fadeUp 500ms var(--ease-decel) 180ms both;}
+  .vb[data-play] .acc{animation:springCard 580ms var(--ease-spring) both, glowPulse 1500ms var(--ease-decel) 380ms;}
+  .vb[data-play] .acc .av{animation:springPop 540ms var(--ease-spring) 180ms both;}
+  .vb[data-play] .acc .tx{animation:fadeUp 420ms var(--ease-decel) 300ms both;}
+  .vc[data-play] .acc{animation:fadeUp 420ms var(--ease-decel) both;}
+  .vc[data-play] .acc .av{animation:springPop 480ms var(--ease-spring) 140ms both;}
+  .vc[data-play] .acc .tx{animation:fadeUp 420ms var(--ease-decel) 160ms both;}
+
+  /* ── MOMENT belong ── */
+  .va[data-play] .bt .a{animation:fadeUp 440ms var(--ease-decel) both;}
+  .va[data-play] .bt .a:nth-child(1){animation-delay:.04s;}.va[data-play] .bt .a:nth-child(2){animation-delay:.14s;}
+  .va[data-play] .bt .a:nth-child(3){animation-delay:.24s;}.va[data-play] .bt .a:nth-child(4){animation-delay:.34s;}
+  .vb[data-play] .bt .a{animation:springPop 540ms var(--ease-spring) both;}
+  .vb[data-play] .bt .a:nth-child(1){animation-delay:.04s;}.vb[data-play] .bt .a:nth-child(2){animation-delay:.16s;}
+  .vb[data-play] .bt .a:nth-child(3){animation-delay:.28s;}.vb[data-play] .bt .a:nth-child(4){animation-delay:.40s;}
+  .vb[data-play] .cnt .num{animation:countPulse 580ms var(--ease-spring) .55s both;}
+  .vc[data-play] .bt .a{animation:fadeUp 380ms var(--ease-decel) both;}
+  .vc[data-play] .bt .a:nth-child(1){animation-delay:.04s;}.vc[data-play] .bt .a:nth-child(2){animation-delay:.12s;}
+  .vc[data-play] .bt .a:nth-child(3){animation-delay:.20s;}.vc[data-play] .bt .a:nth-child(4){animation-delay:.28s;}
+  .vc[data-play] .ring.r1{animation:ringExpand 1050ms var(--ease-decel) .18s both;}
+  .vc[data-play] .ring.r2{animation:ringExpand 1050ms var(--ease-decel) .52s both;}
+
+  /* ── MOMENT 랜딩 히어로 ── */
+  .va[data-play] .brand{animation:fadeUp 560ms var(--ease-decel) both;}
+  .va[data-play] .tag{animation:fadeUp 560ms var(--ease-decel) 140ms both;}
+  .va[data-play] .hero-clover{animation:fadeUp 600ms var(--ease-decel) 220ms both;}
+  .va[data-play] .hw{animation:wordRise 520ms var(--ease-decel) both;}
+  .vb[data-play] .brand{animation:springCard 600ms var(--ease-spring) both;}
+  .vb[data-play] .tag{animation:fadeUp 440ms var(--ease-decel) 240ms both;}
+  .vb[data-play] .hero-clover{animation:springPop 560ms var(--ease-spring) 200ms both;}
+  .vb[data-play] .hw{animation:springPop 500ms var(--ease-spring) both;}
+  .vc[data-play] .brand{animation:fadeUp 480ms var(--ease-decel) both;}
+  .vc[data-play] .tag{animation:fadeUp 480ms var(--ease-decel) 140ms both;}
+  .vc[data-play] .hero-clover{animation:fadeUp 480ms var(--ease-decel) 200ms both, floatLoop 2600ms ease-in-out 700ms infinite;}
+  .vc[data-play] .hw{animation:wordRise 460ms var(--ease-decel) both;}
+  /* 히어로 단어 stagger(세 변형 공통 간격, 성격은 키프레임이 가름) */
+  [data-play] .hw:nth-child(1){animation-delay:.06s;}[data-play] .hw:nth-child(2){animation-delay:.14s;}
+  [data-play] .hw:nth-child(3){animation-delay:.22s;}[data-play] .hw:nth-child(4){animation-delay:.30s;}
+  [data-play] .hw:nth-child(5){animation-delay:.38s;}[data-play] .hw:nth-child(6){animation-delay:.46s;}
+
+  /* ── MOMENT 로딩 ── */
+  .va[data-play] .shimmer{animation:shimmer 1300ms linear infinite;}
+  .vb[data-play] .spin{animation:spin 760ms linear infinite;}
+  .vb[data-play] .ldtx{animation:softPulse 1400ms ease-in-out infinite;}
+  .vc[data-play] .bigclover{animation:cloverPulse 1300ms ease-in-out infinite;}
+
+  /* 결정 보드 */
+  .board{max-width:1180px;margin:0 auto;background:#f7f4ee;border-radius:18px;padding:22px;}
+  .board h2{font-size:16px;font-weight:900;}
+  .board .bsub{font-size:12px;color:var(--muted);margin-top:4px;}
+  .board .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px;}
+  .board .grp{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;}
+  .board .grp>h3{font-size:13px;font-weight:800;color:var(--clover-ink);margin-bottom:4px;}
+  .board .grp>.gterm{font-size:10.5px;font-weight:700;color:var(--faint);margin-bottom:8px;}
+  .opt{display:flex;gap:10px;align-items:flex-start;padding:9px;border-radius:10px;cursor:pointer;}
+  .opt:hover{background:var(--warm);}
+  .opt input{margin-top:3px;}
+  .opt .ot{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .opt .od{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  textarea{width:100%;margin-top:14px;min-height:72px;border:1px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:13px;resize:vertical;}
+  .board .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .btn{border:none;border-radius:var(--r-full);font-size:13px;font-weight:800;padding:11px 20px;cursor:pointer;font-family:inherit;}
+  .btn.pri{background:var(--clover);color:#fff;}.btn.pri:hover{background:var(--clover-bright);}
+  .btn.gh{background:var(--surface);color:var(--ink);border:1px solid var(--line);}
+  #decOut{margin-top:14px;background:var(--ink);color:#e9f6ee;border-radius:12px;padding:14px;font-size:12px;line-height:1.6;white-space:pre-wrap;display:none;font-family:ui-monospace,monospace;}
+  /* 접근성: OS "동작 줄이기" 시 모션 억제. 단 리뷰 토글(:root.force-motion)이면 억제 건너뜀(회장이 자기 Mac 설정을 안 바꾸고도 모션 확인). 실유저는 force-motion 꺼져 억제 유지. */
+  @media (prefers-reduced-motion: reduce){
+    :root:not(.force-motion) *{animation-duration:.001ms!important;animation-iteration-count:1!important;}
+  }
+  .motog{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#1c1b19;background:#f0cd8a;border:1px solid #d8b874;border-radius:20px;padding:6px 13px;cursor:pointer;margin-top:12px;}
+  .motog input{accent-color:#1B8A4F;cursor:pointer;}
+</style></head>
+<body>
+<div class="top">
+  <h1>🍀 모션 3안 발산 · connect(초대 성공) · belong(소속감) · 랜딩 히어로 · 로딩</h1>
+  <p>회장 지적(9342 실사용): "다시보기 눌러도 아무 동작 없거나(초대성공), 동작이 다 똑같아 그냥 깜빡(소속감)". v2에서 ①세 변형을 형태·속도·성격에서 확실히 다르게 ②다시보기가 표시를 유지한 채 애니만 재장착(display:none 깜빡임 0)해 매번 재생되게 ③클로버 파티클 좌표를 clone 이후 실제 위치로 재계산 ④회장이 궁금해한 랜딩 히어로·로딩 모션도 A/B/C 샘플 추가. 각 프레임 <b>다시보기 ↻</b>로 반복 확인하세요.</p>
+  <div class="note">세 성격 축(용어 = <b>motion-concepts-haenael-ge.html</b> 표준) · <b>A 절제(UI 트랜지션 페이드업)</b> 조용한 응원 톤, decel, 느림 / <b>B 스프링 바운스(마이크로 인터랙션)</b> overshoot 튕김 확실히 / <b>C 클로버 파티클(마이크로 인터랙션·보상)</b> 잎이 또렷이 떠오름. <b>컨페티 폭죽은 D-003 때문에 배제, 금액·랭킹 0.</b></div>
+  <!-- 회장 리뷰용: OS "동작 줄이기(Reduce Motion)"가 켜져 있어도 모션을 보이게 강제. 실유저 앱 동작 아님. 끄면 실유저 경험 그대로. -->
+  <label class="motog"><input type="checkbox" id="motionToggle" checked onchange="toggleForceMotion(this)"> 🎬 모션 미리보기 (OS 동작 줄이기 무시 · 리뷰용)</label>
+</div>
+
+<div class="moment">
+  <h2>MOMENT 1 · 초대한 친구가 합류하는 순간 (바이럴 루프가 닫히는 절정)</h2>
+  <div class="axis">"윤도경님이 초대를 받고 들어왔어요" 합류 카드 등장. 심리 = 관계 형성 방향 안내 + 조용한 보상. 용어 = 마이크로 인터랙션(보상 피드백).</div>
+  <div class="cards" id="m1"></div>
+</div>
+
+<div class="moment">
+  <h2>MOMENT 2 · 함께 응원하는 친구가 차오르는 순간 (정서 절정)</h2>
+  <div class="axis">아바타 스택 등장 + 인원수(13명) 카운트업. D-003: 금액·랭킹 없이 인원수만. 용어 = UI 애니메이션 + 마이크로 인터랙션(카운트).</div>
+  <div class="cards" id="m2"></div>
+</div>
+
+<div class="moment">
+  <h2>MOMENT 3 · 첫 랜딩 진입 시선 (히어로 애니메이션)</h2>
+  <div class="axis">앱/웹 첫 진입에서 브랜드·단어가 떠오르며 시선을 잡는 연출. 용어 = 히어로 애니메이션(C는 앰비언트 루프 포함).</div>
+  <div class="cards" id="m3"></div>
+</div>
+
+<div class="moment">
+  <h2>MOMENT 4 · 로딩 대기 (스켈레톤 · 로딩 애니메이션)</h2>
+  <div class="axis">데이터 불러오는 동안의 대기 연출. 용어 = 스켈레톤 로더 / 로딩 애니메이션. 빈 화면 방지 + 체감 대기 단축.</div>
+  <div class="cards" id="m4"></div>
+</div>
+
+<div class="board">
+  <h2>결정 보드</h2>
+  <div class="bsub">모션마다 성격(A 절제 · B 스프링 · C 클로버 파티클)을 고르세요. 적용은 이 결정 후 별도 지시로 프로토타입에 반영합니다.</div>
+  <div class="grid">
+    <div class="grp">
+      <h3>MOMENT 1 · connect 초대 성공</h3>
+      <div class="gterm">마이크로 인터랙션(보상)</div>
+      <label class="opt"><input type="radio" name="m1" value="A"><span><div class="ot">A · 절제 페이드업</div><div class="od">카드가 조용히 떠오르고 아바타가 가볍게 pop. 브랜드 톤 충실, 느림.</div></span></label>
+      <label class="opt"><input type="radio" name="m1" value="B"><span><div class="ot">B · 스프링 바운스</div><div class="od">카드가 튕겨 들어오고(overshoot) 후광 pulse + 아바타 강한 pop. 합류의 기쁨 강조.</div></span></label>
+      <label class="opt"><input type="radio" name="m1" value="C"><span><div class="ot">C · 클로버 파티클</div><div class="od">아바타 pop + 클로버 잎이 또렷이 떠오름. 브랜드 자산, 컨페티 아님.</div></span></label>
+    </div>
+    <div class="grp">
+      <h3>MOMENT 2 · belong 소속감</h3>
+      <div class="gterm">UI 애니메이션 + 카운트</div>
+      <label class="opt"><input type="radio" name="m2" value="A"><span><div class="ot">A · 절제 페이드업</div><div class="od">아바타 순차 페이드 + 조용한 카운트업. 차분함.</div></span></label>
+      <label class="opt"><input type="radio" name="m2" value="B"><span><div class="ot">B · 스프링 바운스</div><div class="od">아바타가 튕겨 모이고 숫자 pulse. 소속의 온기 강조.</div></span></label>
+      <label class="opt"><input type="radio" name="m2" value="C"><span><div class="ot">C · 클로버 파티클</div><div class="od">아바타 주위로 클로버 링 2겹이 퍼지고 잎이 떠오름.</div></span></label>
+    </div>
+    <div class="grp">
+      <h3>MOMENT 3 · 랜딩 히어로</h3>
+      <div class="gterm">히어로 애니메이션</div>
+      <label class="opt"><input type="radio" name="m3" value="A"><span><div class="ot">A · 절제 페이드업</div><div class="od">브랜드·단어가 조용히 순차로 떠오름. 정적 착지.</div></span></label>
+      <label class="opt"><input type="radio" name="m3" value="B"><span><div class="ot">B · 스프링 바운스</div><div class="od">브랜드·단어가 튕겨 등장(overshoot). 활기.</div></span></label>
+      <label class="opt"><input type="radio" name="m3" value="C"><span><div class="ot">C · 클로버 앰비언트 루프</div><div class="od">단어 떠오름 + 클로버가 은은히 계속 떠다니는 루프 + 잎.</div></span></label>
+    </div>
+    <div class="grp">
+      <h3>MOMENT 4 · 로딩 대기</h3>
+      <div class="gterm">스켈레톤 · 로딩 애니</div>
+      <label class="opt"><input type="radio" name="m4" value="A"><span><div class="ot">A · 스켈레톤 로더</div><div class="od">콘텐츠 자리를 미리 깔고 shimmer. 레이아웃 안정, 차분.</div></span></label>
+      <label class="opt"><input type="radio" name="m4" value="B"><span><div class="ot">B · 클로버 스피너</div><div class="od">클로버색 스피너 회전 + 문구 pulse. 단순·명확.</div></span></label>
+      <label class="opt"><input type="radio" name="m4" value="C"><span><div class="ot">C · 클로버 로딩</div><div class="od">클로버가 숨 쉬듯 커졌다 작아지고 잎이 떠오름. 브랜드 로딩(Lottie 대안).</div></span></label>
+    </div>
+  </div>
+  <textarea id="memo" placeholder="자유 메모 (예: connect는 톤 지켜 A, belong은 온기로 B, 랜딩은 C 루프, 로딩은 A 스켈레톤. 파티클은 절제.)"></textarea>
+  <div class="row">
+    <button class="btn pri" onclick="copyDecision()">결정 복사</button>
+    <button class="btn gh" onclick="resetBoard()">초기화</button>
+  </div>
+  <div id="decOut"></div>
+</div>
+
+<script>
+  const AV={dogyeong:'assets/social-viral/dogyeong.png',seoyeon:'assets/social-viral/seoyeon.png',jimin:'assets/social-viral/jimin.png',supporter:'assets/social-viral/supporter.png'};
+  // 효과적 reduced: OS "동작 줄이기"여도 리뷰 토글(force-motion) ON 이면 모션 재생
+  const reducedMQ=window.matchMedia('(prefers-reduced-motion: reduce)');
+  function reduced(){ return reducedMQ.matches && !document.documentElement.classList.contains('force-motion'); }
+  function toggleForceMotion(cb){
+    document.documentElement.classList.toggle('force-motion', cb.checked);
+    ['m1','m2','m3','m4'].forEach(id=>['va','vb','vc'].forEach(v=>replay(id,v))); // 즉시 재생해 변화를 보이게
+  }
+
+  // 프레임 마크업 (변형 클래스는 .mini 가 가짐. data-play 게이트로만 재생)
+  function connectFrame(v){
+    return `<div class="mini ${v}" data-play="1"><div class="mp">
+      <div class="hd">초대 링크를 보냈어요</div>
+      <div class="acc">
+        <div class="av leaf-src"><img src="${AV.dogyeong}" alt=""></div>
+        <div class="tx"><b>윤도경</b>님이 초대를 받고 들어왔어요. 이제 서로의 목표를 볼 수 있어요.</div>
+      </div>
+    </div></div>`;
+  }
+  function belongFrame(v){
+    const rings = v==='vc' ? '<span class="ring r1"></span><span class="ring r2"></span>' : '';
+    return `<div class="mini ${v}" data-play="1"><div class="mp"><div class="bt">
+      <div class="ringwrap leaf-src">${rings}<div class="avs">
+        <span class="a"><img src="${AV.seoyeon}" alt=""></span>
+        <span class="a"><img src="${AV.jimin}" alt=""></span>
+        <span class="a"><img src="${AV.supporter}" alt=""></span>
+        <span class="a">+10</span>
+      </div></div>
+      <div class="cnt"><span class="num" data-count="13">13</span>명이 함께</div>
+      <div class="sub">도경이를 조용히 응원하는 중이에요<br>(금액·랭킹은 어디에도 없어요)</div>
+    </div></div></div>`;
+  }
+  function heroFrame(v){
+    const words=[['화이팅','s3'],['응원해','s2'],['할수있어','s2'],['끝까지','s1'],['믿어','s1'],['조금만더','s1']];
+    const cloud=words.map(([w,s])=>`<span class="hw ${s}">${w}</span>`).join('');
+    return `<div class="mini ${v}" data-play="1"><div class="mp"><div class="hero">
+      <div class="brand">해낼<span class="d">게.</span></div>
+      <div class="tag">응원은 돈으로 하는 겁니다.</div>
+      <div class="hero-clover leaf-src">🍀</div>
+      <div class="hcloud">${cloud}</div>
+    </div></div></div>`;
+  }
+  function loadingFrame(v){
+    let body;
+    if(v==='va'){
+      body=`<div class="sk"><div class="sk-av shimmer"></div><div class="sk-lines"><div class="sk-bar w1 shimmer"></div><div class="sk-bar w2 shimmer"></div></div></div>
+            <div class="sk"><div class="sk-av shimmer"></div><div class="sk-lines"><div class="sk-bar w1 shimmer"></div><div class="sk-bar w2 shimmer"></div></div></div>
+            <div class="ldtx">목록을 불러오는 중</div>`;
+    } else if(v==='vb'){
+      body=`<div class="spin"></div><div class="ldtx">불러오는 중...</div>`;
+    } else {
+      body=`<div class="bigclover leaf-src">🍀</div><div class="ldtx">조용히 불러오는 중</div>`;
+    }
+    return `<div class="mini ${v}" data-play="1"><div class="mp"><div class="ld">${body}</div></div></div>`;
+  }
+
+  const VARIANTS={
+    m1:[['va','A · 절제 페이드업','마이크로 인터랙션 · decel, 느림'],
+        ['vb','B · 스프링 바운스','마이크로 인터랙션 · overshoot 튕김'],
+        ['vc','C · 클로버 파티클','마이크로 인터랙션 · 잎 떠오름(컨페티 아님)']],
+    m2:[['va','A · 절제 페이드업','UI 애니 · 순차 페이드 + 조용한 카운트'],
+        ['vb','B · 스프링 바운스','마이크로 인터랙션 · 튕겨 모임 + 숫자 pulse'],
+        ['vc','C · 클로버 파티클','마이크로 인터랙션 · 링 2겹 + 잎']],
+    m3:[['va','A · 절제 페이드업','히어로 애니 · 순차 등장, 정적 착지'],
+        ['vb','B · 스프링 바운스','히어로 애니 · overshoot 등장'],
+        ['vc','C · 클로버 앰비언트 루프','히어로 애니 · 클로버 루프 + 잎']],
+    m4:[['va','A · 스켈레톤 로더','로딩 · shimmer 자리 확보'],
+        ['vb','B · 클로버 스피너','로딩 애니 · 회전 + 문구 pulse'],
+        ['vc','C · 클로버 로딩','로딩 애니 · 클로버 숨쉼 + 잎(Lottie 대안)']]
+  };
+  const FRAMES={m1:connectFrame,m2:belongFrame,m3:heroFrame,m4:loadingFrame};
+  const LEAF_MOMENTS={m1:true,m2:true,m3:true,m4:true}; // C 변형만 파티클(벨로우에서 v 체크)
+
+  function build(id){
+    const wrap=document.getElementById(id), frameFn=FRAMES[id];
+    wrap.innerHTML=VARIANTS[id].map(([v,t,d])=>
+      `<div class="vcard"><div class="vh"><div class="lt">🍀 ${t}</div><div class="ld">${d}</div></div>
+       <div class="stagew"><button class="replay" onclick="replay('${id}','${v}')">다시보기 ↻</button>
+       <div class="host" data-v="${v}">${frameFn(v)}</div></div></div>`).join('');
+    VARIANTS[id].forEach(([v])=>{
+      runCount(mini(id,v));
+      if(v==='vc') setTimeout(()=>spawnLeaves(mini(id,v)),reduced()?0:300);
+    });
+  }
+  function mini(id,v){ return document.querySelector(`#${id} .host[data-v="${v}"] .mini`); }
+
+  function runCount(m){
+    if(!m) return;
+    const el=m.querySelector('[data-count]'); if(!el) return;
+    const to=parseInt(el.getAttribute('data-count'),10);
+    if(reduced()){el.textContent=to;return;}
+    const dur=800,start=performance.now();
+    (function step(now){
+      const t=Math.min(1,(now-start)/dur), e=1-Math.pow(1-t,3);
+      el.textContent=Math.round(e*to);
+      if(t<1) requestAnimationFrame(step); else el.textContent=to;
+    })(performance.now());
+  }
+
+  // 파티클: clone 이 아니라 실제 렌더 위치(getBoundingClientRect)로 좌표 재계산 → 항상 정확
+  function spawnLeaves(m){
+    if(reduced()||!m) return;
+    const stage=m.closest('.stagew'); if(!stage) return;
+    const src=m.querySelector('.leaf-src')||m;
+    const sr=stage.getBoundingClientRect(), ar=src.getBoundingClientRect();
+    const cx=ar.left-sr.left+ar.width/2, cy=ar.top-sr.top+ar.height*0.5;
+    const n=7;
+    for(let i=0;i<n;i++){
+      const s=document.createElement('span'); s.className='leaf'; s.textContent='🍀';
+      s.style.left=(cx-10+(Math.random()*44-22))+'px';
+      s.style.top=(cy-6)+'px';
+      s.style.setProperty('--lx',(Math.random()*96-48)+'px');
+      s.style.setProperty('--lr',(Math.random()*140-70)+'deg');
+      s.style.animation=`leafFloat ${1000+Math.random()*420}ms var(--ease-decel) ${i*70}ms both`;
+      stage.appendChild(s);
+      setTimeout(()=>s.remove(),1700);
+    }
+  }
+
+  // 다시보기: 표시 유지한 채 data-play 를 뗐다(reflow) 다시 붙여 모든 CSS 애니 0부터 재장착.
+  // display 를 건드리지 않으므로 깜빡임 0. 파티클은 재장착 후 실제 좌표로 재생성.
+  function replay(id,v){
+    const m=mini(id,v); if(!m) return;
+    const stage=m.closest('.stagew');
+    stage.querySelectorAll('.leaf').forEach(l=>l.remove()); // 남은 잎 정리
+    if(!reduced()){
+      m.removeAttribute('data-play');
+      void m.offsetWidth;            // 레이아웃 커밋(display 유지, none 아님)
+      m.setAttribute('data-play','1');
+    }
+    runCount(m);
+    if(v==='vc') setTimeout(()=>spawnLeaves(m),reduced()?0:140);
+  }
+
+  ['m1','m2','m3','m4'].forEach(build);
+
+  function copyDecision(){
+    const pick=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value||'(미선택)';
+    const memo=document.getElementById('memo').value.trim();
+    const txt=`[해낼게 모션 결정]\nMOMENT1 connect 초대성공: ${pick('m1')}\nMOMENT2 belong 소속감: ${pick('m2')}\nMOMENT3 랜딩 히어로: ${pick('m3')}\nMOMENT4 로딩 대기: ${pick('m4')}\n메모: ${memo||'(없음)'}`;
+    const out=document.getElementById('decOut'); out.style.display='block'; out.textContent=txt;
+    if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
+  }
+  function resetBoard(){
+    document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+    document.getElementById('memo').value='';
+    document.getElementById('decOut').style.display='none';
+  }
+</script>
+<div style="max-width:1180px;margin:22px auto 0;font-size:11px;color:#9c968b;background:#211f1c;border:1px solid #3a352f;border-radius:10px;padding:11px 14px;line-height:1.7">
+🏷 STAMP | line: core | 생성: 2026-09-29 21:20 · v2 재제작: 2026-10-02 · v3 force-motion: 2026-10-03 KST | model: Claude Opus 4.8 | agent: product-designer | skill: design-shotgun | 근거: standard-design.md §11·§12 · 결정.md D-003(인원수만·컨페티 배제) · motion-concepts-haenael-ge.html(용어 표준) · 회장 9342 지적(다시보기 무반응·변형 무차별 · OS Reduce Motion 으로 모션 안 보임) | 고민: v3 근본원인=회장 Mac "동작 줄이기" 켜짐 → @media reduce 가 모션 전부 꺼버림. reduce 억제를 :root:not(.force-motion) 로 가두고 "모션 미리보기" 토글(기본 ON)로 OS 설정과 무관하게 재생. 접근성(실유저 reduce)은 유지. data-play 게이트·getBoundingClientRect 파티클·A/B/C 구분은 v2 유지
+</div>
+</body></html>

@@ -1,6 +1,6 @@
 -- =============================================================================
 -- haenael-ge: 초기 스키마 마이그레이션
--- 진실원: docs/api-contract.md (ERD) + docs/design-patterns.md (RLS 패턴)
+-- 진실원: docs/eng-design/api-contract.md (ERD) + docs/design/design-patterns.md (RLS 패턴)
 -- 14테이블 + 뷰 + 트리거 + RLS 정책 + 인덱스
 -- =============================================================================
 

@@ -15,7 +15,7 @@ concurrency:
 jobs:
   production-readonly:
     name: 운영 공개·인증 읽기 경로
-    runs-on: [ci-vm]  # 온프렘 공용 CI VM 110(GitHub 호스팅 분 한도 초과 대응, 2026-10-12)
+    runs-on: ubuntu-latest  # 공개 저장소는 GitHub 호스팅 분이 무료다. 온프렘 러너 그룹은 공개 저장소를 허용하지 않으므로(allows_public_repositories=false) 호스팅 러너를 쓴다(2026-10-12).
     environment: production-readonly-qa
     timeout-minutes: 10
     defaults:
@@ -33,7 +33,7 @@ jobs:
       - run: npm ci
 
       - name: Chromium 설치
-        run: npx playwright install chromium  # 시스템 의존성은 CI VM 에 사전 설치
+        run: npx playwright install --with-deps chromium  # 호스팅 러너는 시스템 의존성도 받아야 한다
 
       - name: 공개 운영 경로 3건
         run: npm run qa:verify-production

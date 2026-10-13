@@ -1,6 +1,6 @@
 -- 20260719000000_cheer_amount_privacy.sql
 -- High 개인정보 유출 차단: cheer 개별 clover_amount·supporter_ci를 소유자로 격리.
--- 회장 결정 B(2026-07-19). 옵션A. 설계 진실원: docs/design-cheer-amount-privacy-v0.1.0.md
+-- 회장 결정 B(2026-07-19). 옵션A. 설계 진실원: docs/design/design-cheer-amount-privacy-v0.1.0.md
 -- 의존처 전수분석(설계노트 §1): 이 변경으로 깨지는 기능 0개 확인
 --   (goal_public 뷰·get_wordmap RPC는 정의자 권한으로 cheer를 우회 조회하므로 anon base grant 불필요,
 --    소유자 조회 3경로는 cheer_select_goal_owner 정책으로 계속 커버됨).
