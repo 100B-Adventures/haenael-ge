@@ -1,5 +1,22 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-13: V2 소셜 바이럴 루프 QA v1.0.0
+
+**판정: ❌ NG. 계획 84건 중 통과 47, 부분 8, 실패 2, 미검증 27**
+
+| 요청번호 | 판정 | 증거 | 상세 |
+|---|---|---|---|
+| D-019 / PG-16 | ❌ | authenticated RPC가 FRIENDS `cover_storage_path`를 반환 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#3-결함-목록) |
+| D-022 / PG-MY-01~08 | ✅ DB·계약 | 업적 3종 집계 PASS, rank·streak·자기신고 key 0 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#4-권한보안-판정) |
+| REG-CASH-01~05 | 🔶 부분 | SQL·unit·경쟁조건 PASS, 전체 Playwright와 브라우저 masking 미검증 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#5-환전-회귀) |
+| MY-01 | ❌ | 390px ergonomics 통과, production CSP console error 2건 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#6-디자인뷰포트) |
+| DESIGN-V2 | ❌ | `/my` 일부만 관찰, 신규 화면 전수·1280px 미검증 | [정합 매트릭스](design-conformance-matrix.md) |
+
+- 전체 E2E·1280px 실측은 문서 선커밋 뒤 heavy slot을 최대 60초만 시도한다.
+- 운영 배포, 운영 DB migration, 운영 환전 데이터 쓰기는 수행하지 않았다.
+
+STAMP: 2026-10-13 18:04 KST | model gpt-5-codex | agent qa-verifier | skill qa | 상태 NG
+
 ## 2026-10-13: V2 build 2차 슬라이스 검증 결함
 
 **판정: 🔧 로컬 교정 완료. 운영 migration은 미적용이므로 운영 검증은 계속 NG**
