@@ -12,7 +12,7 @@
 | MY-01 | ❌ | 390px ergonomics 통과, production CSP console error 2건 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#6-디자인뷰포트) |
 | DESIGN-V2 | ❌ | `/my` 일부만 관찰, 신규 화면 전수·1280px 미검증 | [정합 매트릭스](design-conformance-matrix.md) |
 
-- 전체 E2E·1280px 실측은 문서 선커밋 뒤 heavy slot을 최대 60초만 시도한다.
+- 전체 E2E·390px·1280px 실측은 문서 선커밋 뒤 heavy slot을 요청했으나 실행 중 2/2로 62초 후 종료코드 75. **슬롯 미확보로 미실행**.
 - 운영 배포, 운영 DB migration, 운영 환전 데이터 쓰기는 수행하지 않았다.
 
 STAMP: 2026-10-13 18:04 KST | model gpt-5-codex | agent qa-verifier | skill qa | 상태 NG

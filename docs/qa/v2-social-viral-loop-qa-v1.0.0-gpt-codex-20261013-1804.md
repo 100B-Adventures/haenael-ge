@@ -30,6 +30,7 @@ STAMP: 2026-10-13 18:04 KST | model gpt-5-codex | agent qa-verifier | skills qa 
 - miniapp: typecheck PASS, 2 files 9 tests PASS.
 - local health: HTTP 200, `status=ok`, `database=ok`, `/private/tmp/haenael-v2-health.json`.
 - 첫 production-mode E2E: 14건 중 2 PASS, 1 FAIL, 11 미실행. 로컬 Supabase를 production CSP가 차단해 `/my` console error 2건 발생.
+- 최종 전체 E2E·390px·1280px 재시도: **슬롯 미확보로 미실행**. `HEAVY_SLOT_MAX_WAIT=60`에서 실행 중 2/2를 관찰하고 62초 뒤 종료코드 75로 끝났다. `/private/tmp/haenael-v2-final-heavy.log`.
 
 ## 2. 케이스별 판정
 
@@ -190,6 +191,8 @@ STAMP: 2026-10-13 18:04 KST | model gpt-5-codex | agent qa-verifier | skills qa 
 보장하는 것: local migration 기준 DB 계약·RLS·집계 322건, Web unit 311건, miniapp 9건, 환전 계산과 동시성 불변식, `/my` 390px의 관찰된 크기 수치, 운영 DB 무쓰기와 테스트 파일 무변경을 보장한다.
 
 보장하지 않는 것: 운영에 미적용인 migration의 실제 동작, 전체 Playwright, 신규 화면 전수 로그인·비로그인 플로우, 1280px와 나머지 모바일 폭, 실제 배포 URL의 시안 정합, 실제 Storage 실패 보상, 실제 결제 종단은 보장하지 않는다.
+
+공용 슬롯은 더 기다리지 않았다. 최종 재시도는 슬롯 미확보로 명령 본문이 실행되지 않았으므로 기존 판정과 케이스 수를 바꾸지 않았다.
 
 ## 8. 벤치마크와 자체 검증
 
