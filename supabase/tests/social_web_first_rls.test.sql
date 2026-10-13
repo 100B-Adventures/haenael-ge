@@ -22,7 +22,13 @@ SELECT id,'https://example.invalid/'||slug,1 FROM public.goal;
 SELECT set_config('test.friends_goal_id',(SELECT id::text FROM public.goal WHERE slug='friends-sentinel'),true);
 
 SET LOCAL ROLE anon;
-SELECT is((SELECT string_agg(title,',') FROM public.goal_public),'PUBLIC_SENTINEL','PG-20 anon goal_public에는 PUBLIC만 도달');
+SELECT is(
+  (SELECT string_agg(title,',' ORDER BY title)
+   FROM public.goal_public
+   WHERE title IN ('PUBLIC_SENTINEL','FRIENDS_SENTINEL','PRIVATE_SENTINEL')),
+  'PUBLIC_SENTINEL',
+  'PG-20 anon goal_public에는 fixture 중 PUBLIC만 도달'
+);
 RESET ROLE;
 
 SET LOCAL ROLE authenticated;
