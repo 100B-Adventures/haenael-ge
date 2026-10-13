@@ -376,4 +376,37 @@ describe("handleTossWebhook", () => {
     expect(deps.rpcMock).not.toHaveBeenCalled();
     expect(deps.slackMock).not.toHaveBeenCalled();
   });
+
+  it("관제. DONE 확정 직후 reportPaid 가 (orderId, 금액)으로 한 번 호출된다", async () => {
+    const reportPaid = vi.fn();
+    const deps = makeDeps({ reportPaid });
+    deps.getPaymentMock.mockResolvedValueOnce(
+      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+    );
+    const res = await handleTossWebhook(makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })), deps);
+    expect(res.status).toBe(200);
+    expect(reportPaid).toHaveBeenCalledTimes(1);
+    expect(reportPaid).toHaveBeenCalledWith(ORDER_ID, 3000);
+  });
+
+  it("관제. confirm RPC 가 실패하면 reportPaid 를 부르지 않는다", async () => {
+    const reportPaid = vi.fn();
+    const deps = makeDeps({ reportPaid });
+    deps.getPaymentMock.mockResolvedValueOnce(
+      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+    );
+    deps.rpcMock.mockResolvedValue({ error: { code: "XX000" } });
+    const res = await handleTossWebhook(makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })), deps);
+    expect(res.status).toBe(500);
+    expect(reportPaid).not.toHaveBeenCalled();
+  });
+
+  it("관제. reportPaid 가 던져도 웹훅은 200 으로 끝난다", async () => {
+    const deps = makeDeps({ reportPaid: () => { throw new Error("boom"); } });
+    deps.getPaymentMock.mockResolvedValueOnce(
+      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+    );
+    const res = await handleTossWebhook(makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })), deps);
+    expect(res.status).toBe(200);
+  });
 });

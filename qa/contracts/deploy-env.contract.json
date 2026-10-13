@@ -35,7 +35,9 @@
     "KAKAO_ALIMTALK_FROM": { "targets": ["supabase-production"], "features": ["notify"] },
     "KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED": { "targets": ["supabase-production"], "features": ["notify"] },
     "KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED": { "targets": ["supabase-production"], "features": ["cashout-notifications"] },
-    "KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID": { "targets": ["supabase-production"], "features": ["cashout-notifications"] }
+    "KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID": { "targets": ["supabase-production"], "features": ["cashout-notifications"] },
+    "OPS_EVENT_URL": { "targets": ["supabase-production"], "features": ["ops-events"] },
+    "OPS_EVENT_TOKEN": { "targets": ["supabase-production"], "features": ["ops-events"] }
   },
   "targets": {
     "vercel-production": {
@@ -44,7 +46,7 @@
     },
     "supabase-production": {
       "provider": "supabase",
-      "features": ["core", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications"]
+      "features": ["core", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events"]
     }
   }
 }
