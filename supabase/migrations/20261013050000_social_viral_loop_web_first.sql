@@ -132,21 +132,9 @@ CREATE POLICY goal_cover_quarantine_owner_read ON storage.objects
     AND EXISTS (
       SELECT 1
       FROM public.goal_cover_asset AS a
-      JOIN public.goal AS g ON g.id = a.goal_id
       WHERE a.quarantine_path = storage.objects.name
         AND a.status = 'APPROVED'
-        AND (
-          a.owner_member_id = auth.uid()
-          OR (
-            g.visibility = 'FRIENDS'
-            AND EXISTS (
-              SELECT 1 FROM public.friend_connection AS fc
-              WHERE fc.status = 'ACTIVE'
-                AND fc.member_low_id = LEAST(auth.uid(), g.member_id)
-                AND fc.member_high_id = GREATEST(auth.uid(), g.member_id)
-            )
-          )
-        )
+        AND a.owner_member_id = auth.uid()
     )
   );
 
