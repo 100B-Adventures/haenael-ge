@@ -4,6 +4,63 @@
 > v1 환전 라인 인계는 `session-state.core.md` 가 소유한다. 서로 덮지 않는다.
 > 최신순 역순.
 
+## 2026-10-13 11:55 KST — build 1차 구현 완료, 검증 일부 미완
+
+**무슨 작업의 어디까지**
+
+Codex `code-builder` 위임이 **제한 시간 초과로 두 번 끊겼다**(각 2700초). 원인은 하네스 전역 무거운 작업 세마포어다. 상한 2개인데 다른 세션의 `./gradlew test` 와 또 다른 Codex 가 슬롯을 물고 있어 Next production build 가 대기열에 걸렸고, 워커가 그 대기 중에 시간을 다 썼다. 코드 자체의 문제가 아니다.
+
+구현 커밋 4건은 보존됐다: `6c250dc` 서버 계약, `8607a48` 웹 화면, `f4cfb65` D-019 검증 갭, `d7431ce` 설계문서 D-019 패치 핀. 끊긴 시점의 작업트리는 `fcc649b` 로 보존했다.
+
+**컨트롤러가 직접 돌린 재검증 (관찰됨)**
+
+| 항목 | 결과 |
+|---|---|
+| web 단위 테스트 | 303/303 통과 · 테스트 파일 50개 · 30.65초 |
+| 환전 공제 기준값 | 27000→23238, 40000→34426 어서션 추가 통과. 기존 어서션 삭제·약화 0 |
+| Next production build | 통과 |
+| 신규 라우트 빌드 포함 | `/friends`, `/friends/[friendId]`, `/invite`, `/invite/[token]`, `/me/goal/[id]` 전부 |
+| 프로덕션 서버 라우트 응답 | 7개 전부 200, 서버 로그 오류 0건 |
+| 초대 만료·없는 토큰 분기 | `/invite/<없는토큰>` → "이 초대를 사용할 수 없어요 · 초대 링크를 찾을 수 없어요" 정상 |
+| 위임 품질 검증 | `verify-agent-quality.sh code-builder` → PASS(Skill 1회 · 참조조회 57회 · 소크라마커 509) |
+
+**마이그레이션 직접 감사 (관찰됨)**
+
+`20261013050000_social_viral_loop_web_first.sql` 536행. 테이블 5개(`member_preference`·`friend_invite`·`friend_connection`·`goal_cover_asset`·`storage_cleanup_queue`), 인덱스 8개, `goal.visibility` 컬럼을 `CHECK (visibility IN ('PUBLIC','FRIENDS','PRIVATE')) DEFAULT 'PUBLIC'` 로 추가. 기존 목표가 전부 PUBLIC 이 되므로 현재 동작이 보존된다.
+
+- 초대 토큰은 `token_hash bytea NOT NULL UNIQUE` 뿐이고 **원문 컬럼이 없다**. 만료 7일.
+- 서버 함수 이름 5종(`create_friend_invite`·`friend_goal_detail`·`my_friend_goals`·`set_goal_cover_preset`·`update_member_preferences`) 전부 존재. 미니앱 호환 계약 유지됨.
+- **D-019 가 코드로 구현됐다**: 199~200행이 `cover_public_path` 를 `visibility = 'PUBLIC'` 일 때만 주고, `FRIENDS` 는 `quarantine_path`(비공개 버킷)만 준다.
+- 환전 스키마·함수·정책은 손대지 않았다. 파일 내 `cashout` 언급은 1행 주석뿐이다.
+
+**디자인 시안 대조 (컨트롤러 직접, 토큰 단위)**
+
+| 항목 | 프로토타입 `social-viral-loop-v2-opus48.html` | 구현 `globals.css` | 판정 |
+|---|---|---|---|
+| 탭바 높이 | 64px | `--tabbar-height: 64px` | 일치 |
+| 아이콘 크기 | 23px | `--tabbar-icon-size: 23px` | 일치 |
+| 아이콘 선 굵기 | 1.9 | `stroke-width: 1.9` | 일치 |
+| 라벨 | 10px / 700 | `--tabbar-label-size: 10px` · `font-weight: 700` | 일치 |
+| 아이콘·라벨 간격 | 3px | `gap: 3px` | 일치 |
+| 활성·비활성색 | `--clover` · `--faint` | 동일 | 일치 |
+| 비회원 잠금 뱃지 | 11px | `--tabbar-lock-size: 11px` | 일치 |
+| 탭 구성 | 홈·친구·초대·마이페이지 | 홈·친구·초대·마이 | 라벨만 축약 |
+
+**남은 것과 결함**
+
+1. pgTAP 재실행, Playwright 실행, 프로토타입 수치 대조표(워커 제출분)가 미완이다. 같은 역할로 재위임해 끝낸다. 컨트롤러가 직접 고쳐 통과시키지 않는다.
+2. **P2 결함 1건(컨트롤러 발견)**: 비로그인 상태로 `/me/goal/1` 을 열면 리다이렉트 없이 셸이 렌더된다. 목표 제목·응원 명단·금액은 노출되지 않아(실측: 빈 셸과 로딩 안내만) 데이터 유출은 아니지만, 기능설계 §4 가 정한 "권한없음" 상태로 가지 않는다. 상단바에 "로그아웃" 이 비회원에게 보이는 문제도 같은 자리다.
+3. **설계 모순 1건(워커 발견, 해소됨)**: 서버 함수 계약 문서에 "승인하면 항상 공개 버킷으로 복사" 라는 D-019 와 어긋나는 낡은 문장이 있었다. 워커가 D-019 를 우선 적용해 구현하고 문서를 패치했다(`d7431ce`).
+4. **세마포어가 위임을 두 번 죽였다.** 무거운 작업 상한 2개와 워커 제한 시간 2700초가 맞지 않는다. 빌드 대기만으로 제한 시간을 다 쓰는 구조다. 하네스 개선 후보로 등록한다.
+
+**다음**
+
+1. 재위임으로 pgTAP·Playwright·대조표 완결. 세마포어 혼잡을 피하려면 다른 세션의 무거운 작업이 끝난 뒤에 던진다.
+2. P2 1건 수정.
+3. 통과하면 `/approve build` 후 qa 위임. 운영 배포는 qa 승인 후.
+
+---
+
 ## 2026-10-13 10:20 KST — 라인 신설과 build 착수
 
 **무슨 작업의 어디까지**

@@ -14,7 +14,7 @@ stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
-  build:      { }
+  build:      { entered: 2026-10-13 10:20 }
   qa:         { }
   ship:       { }
 release_train: 2.0
