@@ -1,0 +1,130 @@
+{
+  "observedAt": "2026-10-13T14:47:29.855Z",
+  "appOrigin": "https://haenael-ge.vercel.app",
+  "results": [
+    {
+      "auth": "authenticated",
+      "width": 390,
+      "route": "/cashout",
+      "status": 200,
+      "finalUrl": "https://haenael-ge.vercel.app/cashout",
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게. 환전 전에 정직하게 보여드릴게요 조금만 더 모으면 환전할 수 있어요 지금 🍀 0개(웰컴 포함) · 최소 환전 30개까지 30개 남았어요. 쌓인 클로버는 그대로 보관돼요. 모인 클로버 (웰컴 포함) 🍀 0개 − 해낼게 웰컴 (지급 대상 아님) − 🍀 0개 친구 응원분 (지급 대상) 🍀 0개 환산 (🍀1개 = 1,000원) 0원 서비스 이용료 (부가세 포함) − 0원 사업소득 원천징수 3.3% − 0원 받으실 금액 0원 서비스 이용료는 커피 한 잔 값이에요. 카드 결제 수수료, 응원 알림 발송, 계좌 확인과 송금에 쓰입니다. 소득세는 저희가 가져가는 돈이 아니라 국세청에 대신 내드리는 금액이에요. 다음 해 5월에 종합소득세 신고하시면 돌려받으실 수도 있어요. 실제 지급액은 신청 시점에 다시 확정합니다. 환전 안내를 받을 전화번호가 필요해요 카카오에서 동의하면 전화번호를 바로 불러와요. 안 되면 아래에 직접 입력할 수 있어요. 카카오에서 동의하기 조금만 더 모으면 환전할",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflow": 0,
+      "tabLabelSizes": [
+        "13px",
+        "13px",
+        "13px",
+        "13px"
+      ],
+      "screenshot": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-production-final-readonly/authenticated-390-cashout.png"
+    },
+    {
+      "auth": "authenticated",
+      "width": 390,
+      "route": "/my",
+      "status": 200,
+      "finalUrl": "https://haenael-ge.vercel.app/my",
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게. 🔔 로그아웃 내 정보와 활동 마이페이지 해 해낼게 사용자 서로 응원하는 친구 0명 · 진행 중 목표 0개 내 목표 0개 아직 등록한 목표가 없어요 첫 목표 만들기 업적 DB 집계 기준 0 달성한 목표 완료 상태로 확인된 목표 0 받은 응원 결제 확정된 응원 0 연결된 친구 현재 연결된 친구 데이터베이스로 확인할 수 있는 활동만 집계해요. 아직 응원하지 않은 친구 목표 0개 지금 확인할 친구 목표가 없어요. 새 목표가 생기면 여기에 조용히 모아둘게요. 홈 친구 초대 마이 이용약관 | 개인정보처리방침 상호: 정성컴퍼니 · 대표: 조성진 사업자등록번호: 798-31-01774 주소: 서울시 강남구 역삼동 620-17 203호 이메일: haenaelge.official@gmail.com 개인정보보호책임자: 윤동주 © 2026 정성컴퍼니. All rights reserved.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflow": 0,
+      "tabLabelSizes": [
+        "13px",
+        "13px",
+        "13px",
+        "13px"
+      ],
+      "screenshot": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-production-final-readonly/authenticated-390-my.png"
+    },
+    {
+      "auth": "authenticated",
+      "width": 1280,
+      "route": "/cashout",
+      "status": 200,
+      "finalUrl": "https://haenael-ge.vercel.app/cashout",
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게. 환전 전에 정직하게 보여드릴게요 조금만 더 모으면 환전할 수 있어요 지금 🍀 0개(웰컴 포함) · 최소 환전 30개까지 30개 남았어요. 쌓인 클로버는 그대로 보관돼요. 모인 클로버 (웰컴 포함) 🍀 0개 − 해낼게 웰컴 (지급 대상 아님) − 🍀 0개 친구 응원분 (지급 대상) 🍀 0개 환산 (🍀1개 = 1,000원) 0원 서비스 이용료 (부가세 포함) − 0원 사업소득 원천징수 3.3% − 0원 받으실 금액 0원 서비스 이용료는 커피 한 잔 값이에요. 카드 결제 수수료, 응원 알림 발송, 계좌 확인과 송금에 쓰입니다. 소득세는 저희가 가져가는 돈이 아니라 국세청에 대신 내드리는 금액이에요. 다음 해 5월에 종합소득세 신고하시면 돌려받으실 수도 있어요. 실제 지급액은 신청 시점에 다시 확정합니다. 환전 안내를 받을 전화번호가 필요해요 카카오에서 동의하면 전화번호를 바로 불러와요. 안 되면 아래에 직접 입력할 수 있어요. 카카오에서 동의하기 조금만 더 모으면 환전할",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflow": 0,
+      "tabLabelSizes": [
+        "13px",
+        "13px",
+        "13px",
+        "13px"
+      ],
+      "screenshot": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-production-final-readonly/authenticated-1280-cashout.png"
+    },
+    {
+      "auth": "authenticated",
+      "width": 1280,
+      "route": "/my",
+      "status": 200,
+      "finalUrl": "https://haenael-ge.vercel.app/my",
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게. 🔔 로그아웃 내 정보와 활동 마이페이지 해 해낼게 사용자 서로 응원하는 친구 0명 · 진행 중 목표 0개 내 목표 0개 아직 등록한 목표가 없어요 첫 목표 만들기 업적 DB 집계 기준 0 달성한 목표 완료 상태로 확인된 목표 0 받은 응원 결제 확정된 응원 0 연결된 친구 현재 연결된 친구 데이터베이스로 확인할 수 있는 활동만 집계해요. 아직 응원하지 않은 친구 목표 0개 지금 확인할 친구 목표가 없어요. 새 목표가 생기면 여기에 조용히 모아둘게요. 이용약관 | 개인정보처리방침 상호: 정성컴퍼니 · 대표: 조성진 사업자등록번호: 798-31-01774 주소: 서울시 강남구 역삼동 620-17 203호 이메일: haenaelge.official@gmail.com 개인정보보호책임자: 윤동주 © 2026 정성컴퍼니. All rights reserved.",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflow": 0,
+      "tabLabelSizes": [
+        "13px",
+        "13px",
+        "13px",
+        "13px"
+      ],
+      "screenshot": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-production-final-readonly/authenticated-1280-my.png"
+    }
+  ],
+  "writeGuard": {
+    "forbiddenWrites": [],
+    "before": {
+      "member": {
+        "count": 0,
+        "error": null
+      },
+      "goal": {
+        "count": 0,
+        "error": null
+      },
+      "friend_connection": {
+        "count": null,
+        "error": null
+      },
+      "friend_invite": {
+        "count": null,
+        "error": null
+      },
+      "cashout_request": {
+        "count": 0,
+        "error": null
+      }
+    },
+    "after": {
+      "member": {
+        "count": 0,
+        "error": null
+      },
+      "goal": {
+        "count": 0,
+        "error": null
+      },
+      "friend_connection": {
+        "count": null,
+        "error": null
+      },
+      "friend_invite": {
+        "count": null,
+        "error": null
+      },
+      "cashout_request": {
+        "count": 0,
+        "error": null
+      }
+    },
+    "unchanged": true
+  }
+}

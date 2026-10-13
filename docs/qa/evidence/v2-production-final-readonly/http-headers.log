@@ -1,0 +1,207 @@
+=== / ===
+HTTP/2 200 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:39 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::qtvpz-1791902679143-0624e3fa236f
+
+=== /my ===
+HTTP/2 307 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:39 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/immutable/chunks/1r9qwpd16ebg7.css>; rel=preload; as="style"
+location: /
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /my
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::55z4j-1791902679403-28af99c1e846
+
+=== /friends ===
+HTTP/2 307 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:39 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/immutable/chunks/1r9qwpd16ebg7.css>; rel=preload; as="style"
+location: /
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /friends
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::vqh4h-1791902679618-f7fece985147
+
+=== /friends/1 ===
+HTTP/2 404 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:40 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/immutable/chunks/1r9qwpd16ebg7.css>; rel=preload; as="style"
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /friends/[friendId]
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::52r9k-1791902679915-d477630ecf66
+
+=== /invite ===
+HTTP/2 307 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:40 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/immutable/chunks/1r9qwpd16ebg7.css>; rel=preload; as="style"
+location: /
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /invite
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::tp2nb-1791902680171-63b9b7e6a38c
+
+=== /invite/qa-token-that-does-not-exist ===
+HTTP/2 200 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:41 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/immutable/chunks/1r9qwpd16ebg7.css>; rel=preload; as="style"
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /invite/[token]
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::qjp6b-1791902680389-56c1a9017a95
+
+=== /me/goal/1 ===
+HTTP/2 200 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:41 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /me/goal/[id]
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::sbgrg-1791902681166-2baaddbfbe4e
+
+=== /admin/covers ===
+HTTP/2 404 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 82
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline; filename="404"
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:41 GMT
+etag: "f2146d1607be1f6e6364c171081d62b1"
+last-modified: Tue, 13 Oct 2026 14:43:19 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /404
+x-vercel-cache: HIT
+x-vercel-id: icn1::f2x78-1791902681392-f520ecba37f3
+content-length: 15895
+
+=== /cashout ===
+HTTP/2 307 
+age: 0
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: text/html; charset=utf-8
+date: Tue, 13 Oct 2026 14:44:41 GMT
+link: </_next/static/immutable/media/PretendardVariable-s.p.2q4tlji06vjpz.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/immutable/chunks/1r9qwpd16ebg7.css>; rel=preload; as="style"
+location: /
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /cashout
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::qjp6b-1791902681584-262ba117857e
+
+=== /api/health ===
+HTTP/2 200 
+age: 0
+cache-control: no-store
+content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://*.tosspayments.com https://*.toss.im; script-src 'self' 'unsafe-inline' https://js.tosspayments.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.tosspayments.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://*.tosspayments.com https://*.toss.im; worker-src 'self' blob:; media-src 'self' blob:; manifest-src 'self'
+content-type: application/json
+date: Tue, 13 Oct 2026 14:44:42 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), accelerometer=(), gyroscope=(), magnetometer=(), usb=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /api/health
+x-vercel-cache: MISS
+x-vercel-id: icn1::icn1::chwcc-1791902681802-9aeb89e48816
+
+=== alias redirect ===
+HTTP/2 308 
+cache-control: public, max-age=0, must-revalidate
+content-type: text/plain
+date: Tue, 13 Oct 2026 14:44:43 GMT
+location: https://haenael-ge.vercel.app/
+refresh: 0;url=https://haenael-ge.vercel.app/
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-vercel-id: icn1::h5mgp-1791902682583-75e94e4d8cb6
+

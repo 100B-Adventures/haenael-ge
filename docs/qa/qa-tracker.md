@@ -1,5 +1,22 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-13: V2 운영 배포 후 최종 read-only QA v1.0.0
+
+**판정: ❌ NG. 운영 인증 화면·overflow·13px 하단탭·보안 헤더는 통과했으나 `/admin/covers`가 권한 분기 대신 HTTP 404**
+
+| TC | 판정 | 증거 | 최종확인일 | 상세 |
+|---|---|---|---|---|
+| V2-PROD-ANON-01~06 | ✅ | 익명 경로 6종 × 2폭, redirect·오류·권한 분기 관찰 | 2026-10-13 | [`최종 QA`](v2-production-final-readonly-qa-v1.0.0-gpt-codex-20261013-2351.md) |
+| V2-PROD-ANON-07 | ❌ | `/admin/covers` 390·1280 모두 HTTP 404 | 2026-10-13 | QA-V2-PROD-ROUTE-01 |
+| V2-PROD-AUTH-01~04 | ✅ | `/cashout`·`/my`, 390·1280, console/pageerror/overflow 0 | 2026-10-13 | [`브라우저 증거`](evidence/v2-production-final-readonly/browser-evidence.json) |
+| V2-PROD-SEC-01 | ✅ | CSP·Permissions-Policy·HSTS·nosniff·DENY·Referrer-Policy 운영 실측 | 2026-10-13 | [`헤더 로그`](evidence/v2-production-final-readonly/http-headers.log) |
+| V2-PROD-UI-01 | ✅ | 모바일 하단탭 네 라벨 computed `13px` | 2026-10-13 | D-023 준수 |
+| V2-PROD-WRITE-01 | ✅ | 금지 write request 0, 전후 가시 상태 동일 | 2026-10-13 | 환전·목표·응원·친구·초대 쓰기 0 |
+
+- 보장: 지정 운영 경로·두 viewport·인증 read-only 화면·응답 헤더·13px 하단탭을 직접 관찰했다.
+- 미보장: 관리자 해피 경로, 제품 쓰기 플로우, 타 브라우저·타 viewport·성능·부하는 이번 라운드 범위가 아니다.
+- 제품 코드 수정 0, 테스트 삭제·skip·단정 약화 0.
+
 ## 2026-10-13: V2 전체 회귀 테스트 하네스 수정 결과 v1.0.0
 
 **판정: 🔧 테스트 하네스 17건 해소. 전체 Playwright 62 PASS / 운영 자격증명 1 FAIL / 0 SKIP, pgTAP 323/323 PASS**
