@@ -8,8 +8,8 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: ship         # 2026-10-14 00:56 ship 완료. 해낼게 2.0.0 운영 배포, health version 2.0.0 실측 확인.
-approved_stages: [plan, design, eng-design, build, qa, ship]
+current_stage: design       # 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
+approved_stages: [plan]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   design:     { completed: 2026-10-13 10:20 }
@@ -56,11 +56,11 @@ approved_artifacts:
     - { path: CHANGELOG.md, version: 2.0.0, status: approved, label: "2.0.0 변경 기록" }
 stages:
   plan:       { status: approved, artifacts_ok: true }
-  design:     { status: approved, artifacts_ok: true }
-  eng-design: { status: approved, artifacts_ok: true }
-  build:      { status: approved, artifacts_ok: true }
+  design:     { status: changes-requested, artifacts_ok: false }
+  eng-design: { status: todo, artifacts_ok: false }
+  build:      { status: todo, artifacts_ok: false }
   qa:         { status: changes-requested, artifacts_ok: false }
-  ship:       { status: approved, artifacts_ok: true }
+  ship:       { status: todo, artifacts_ok: false }
 override: false
 override_reason: ""
 override_expires: ""
@@ -121,6 +121,22 @@ override_expires: ""
 ### ship ⬜
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-14 05:1x · ⟲ REOPEN design · 회장이 운영에서 확인한 불일치·기획 오류·기능 장애
+
+**2.0.0 은 운영에 올라가 있다. 되돌리지 않았다.** 다만 아래가 닫히기 전까지 이 라인의 승인은 무효로 둔다.
+
+1. **[기획 오류, 최상위] 친구 모델이 틀렸다.** 회장 원문 "내가 해낼게 응원하거나 응원받은 사람은 친구로 맺어지는거지." 1차 구현은 초대 링크 수락만이 친구가 되는 유일한 경로였다. D-024 로 확정: 응원 확정 시 양방향 친구, 과거 이력 소급.
+2. **[기능 장애] 목표 커버 업로드가 운영에서 실패한다. 원인을 확정했다.** 엣지 함수 `goal-cover-sign-upload`, `goal-cover-finalize`, `admin-review-goal-cover` 3종이 **운영에 배포되지 않았다.** 운영 함수 목록 11개에 없다. 저장소에는 있다. 즉 화면만 올라가고 서버가 안 올라갔다. 컨트롤러가 배포 완료를 선언하기 전에 이 숫자를 세지 않은 것이 원인이다.
+3. **[시안 불일치] 비회원 랜딩에 하단탭이 없다.** 랜딩(`web/src/app/page.tsx`)이 `(receiver)` 레이아웃 밖이라 잠금 탭바가 붙지 않는다. 승인 프로토타입은 비회원에게 잠금 표시가 달린 4탭을 보여준다. 랜딩 자체도 시안과 다르다는 회장 지적이 있다.
+4. **[문구 결함] 구현 세부가 사용자 화면에 노출된다.** 초대 화면이 "저장소에는 SHA-256 hash만 남아요", "7일 동안 한 번" 을 그대로 보여주고, 친구 초대 카드가 "목표 공개범위를 PUBLIC 또는 FRIENDS로 바꾼 뒤" 라고 코드값을 그대로 쓴다. 사용자 언어가 아니다.
+5. **[미승인 제약] 7일 초대 만료는 회장이 정한 적이 없다.** 워커가 정하고 컨트롤러가 통과시켰다. 재검토 대상이다.
+6. **[설계 미반영] 마이페이지가 시안과 다르다**는 회장 지적. 승인 프로토타입 대조가 필요하다.
+
+**컨트롤러 승인 실패 원인**: `design-conformance-matrix` 가 🔶 부분(픽셀 대조 미완)인 것을 알면서 ship 을 승인했다. 게이트가 요구한 3종 중 하나가 부분이면 그것은 미충족이지 통과가 아니다. 더해서 운영 QA 를 read-only 로만 설계해 업로드·초대 같은 **쓰기 경로를 한 번도 실행하지 않았다.**
+
+**재오픈 범위**: design 부터. 친구 모델이 바뀌면 화면 구조와 데이터 모델이 함께 바뀐다.
+
 
 ### 2026-10-14 02:2x · 핀 정정 · qa 필수 산출물 3종으로 교체
 
