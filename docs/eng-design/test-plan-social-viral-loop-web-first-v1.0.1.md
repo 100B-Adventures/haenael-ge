@@ -7,7 +7,7 @@
 | 작성자/모델 | tech-architect / gpt-5-codex |
 | 작업 라인 | v2 |
 | 상태 | 개발·QA 실행 계약 |
-| 상류 핀 | `fdd-social-viral-loop-web-first-v1.0.0.md`, `erd-social-viral-loop-web-first-v1.0.0.md`, `api-contract-social-viral-loop-web-first-v1.0.0.md` |
+| 상류 핀 | `fdd-social-viral-loop-web-first-v1.0.1.md`, `erd-social-viral-loop-web-first-v1.0.1.md`, `api-contract-social-viral-loop-web-first-v1.0.1.md` |
 | 기반 포맷 | `docs/eng-design/test-plan-social-viral-loop-v0.1.0.md`, `docs/eng-design/test-plan.md` |
 
 > STAMP: 생성 2026-10-13 02:42 KST. 모델 gpt-5-codex. 에이전트 tech-architect. 스킬 docs. 근거는 기존 pgTAP·Vitest·Playwright 구조, 승인 디자인 상태축, Supabase RLS 지침, OWASP token 수명주기다. 가장 오래 고민한 지점은 “각 경로를 테스트”하는 데서 끝내지 않고 어떤 우회 경로로도 FRIENDS·PRIVATE 데이터에 도달하지 못함을 증명하는 fixture를 만드는 일이었다.

@@ -7,7 +7,7 @@
 | 작성자/모델 | tech-architect / gpt-5-codex |
 | 작업 라인 | v2 |
 | 상태 | 웹 1차 additive migration 계약 |
-| 상류 핀 | `fdd-social-viral-loop-web-first-v1.0.0.md`, 운영 기준 `supabase/migrations/20260705163137_init_schema.sql` |
+| 상류 핀 | `fdd-social-viral-loop-web-first-v1.0.1.md`, 운영 기준 `supabase/migrations/20260705163137_init_schema.sql` |
 | 기반 포맷 | `docs/eng-design/erd-social-viral-loop-v0.1.0.md` |
 
 > STAMP: 생성 2026-10-13 02:42 KST. 모델 gpt-5-codex. 에이전트 tech-architect. 스킬 docs. 근거는 현재 운영 스키마, D-003·D-018·D-SOCIAL-V6, Supabase·PostgreSQL 공식 문서다. 가장 오래 고민한 지점은 친구공개를 기존 정의자 권한 view와 함수에서 누락 없이 강제하는 방법이었다.

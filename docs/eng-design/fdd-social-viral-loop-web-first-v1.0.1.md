@@ -7,8 +7,8 @@
 | 작성자/모델 | tech-architect / gpt-5-codex |
 | 작업 라인 | v2 |
 | 상태 | 웹 1차 슬라이스 구현 계약. 모바일은 2차 |
-| 상류 핀 | `pipeline-state.core.md` D-018, `docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md`, `DESIGN.md` v2.0.1, `docs/design/prototypes/social-viral-loop-v2-opus48.html` |
-| 관련 설계 | `erd-social-viral-loop-web-first-v1.0.0.md`, `api-contract-social-viral-loop-web-first-v1.0.0.md`, `test-plan-social-viral-loop-web-first-v1.0.0.md` |
+| 상류 핀 | `pipeline-state.v2.md` D-018, `docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md`, `DESIGN.md` v2.0.1, `docs/design/prototypes/social-viral-loop-v2-opus48.html` |
+| 관련 설계 | `erd-social-viral-loop-web-first-v1.0.1.md`, `api-contract-social-viral-loop-web-first-v1.0.1.md`, `test-plan-social-viral-loop-web-first-v1.0.1.md` |
 | 기반 포맷 | `docs/eng-design/fdd-core-social-viral-loop-appintoss-v0.1.0-gpt-codex.md` |
 
 > STAMP: 생성 2026-10-13 02:42 KST. 모델 gpt-5-codex. 에이전트 tech-architect. 스킬 docs 방법론을 적용하되 로컬 Markdown을 직접 작성했다. 근거는 승인 디자인, 현재 Next.js와 Supabase 구현, 운영 실물 조회 결과, Supabase·PostgreSQL·OWASP·앱인토스 공식 문서다. 가장 오래 고민한 지점은 기존 공개 목표의 도달성을 보존하면서 친구 공개범위를 여는 일과 커스텀 커버를 외부 모더레이션 공급자 결정 없이 안전하게 출시하는 일이었다.

@@ -7,8 +7,8 @@
 | 작성자/모델 | tech-architect / gpt-5-codex |
 | 작업 라인 | v2 |
 | 상태 | eng-design 보완본. 웹 1차는 설계, 모바일 2차는 후속 설계 |
-| 상류 핀 | `pipeline-state.core.md` D-018, `docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md`, `DESIGN.md` v2.0.1, `docs/design/prototypes/social-viral-loop-v2-opus48.html` |
-| 동급 설계 핀 | `fdd-social-viral-loop-web-first-v1.0.0.md`, `erd-social-viral-loop-web-first-v1.0.0.md`, `api-contract-social-viral-loop-web-first-v1.0.0.md`, `test-plan-social-viral-loop-web-first-v1.0.0.md` |
+| 상류 핀 | `pipeline-state.v2.md` D-018, `docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md`, `DESIGN.md` v2.0.1, `docs/design/prototypes/social-viral-loop-v2-opus48.html` |
+| 동급 설계 핀 | `fdd-social-viral-loop-web-first-v1.0.1.md`, `erd-social-viral-loop-web-first-v1.0.1.md`, `api-contract-social-viral-loop-web-first-v1.0.1.md`, `test-plan-social-viral-loop-web-first-v1.0.1.md` |
 | 기반 포맷 | `docs/eng-design/architecture.md` v1.0.0, `docs/eng-design/architecture-social-viral-loop-v0.1.0.md` |
 
 > STAMP: 생성 2026-10-13 03:13 KST. 모델 gpt-5-codex. 에이전트 tech-architect. 스킬 docs. 근거는 D-018, 웹 우선 설계 4종, 현재 Next.js·미니앱·Supabase 코드, 운영 인프라 정본, C4·arc42·Supabase·Vercel·GitHub·앱인토스 공식 문서다. 고민 한 줄: 현재 운영 중인 결제·환전과 아직 서버 실물이 없는 V2 소셜 기능을 같은 그림에서 사실처럼 섞지 않으면서도, 두 클라이언트가 공유할 백엔드 경계를 구현자가 오해하지 않게 만드는 데 집중했다.

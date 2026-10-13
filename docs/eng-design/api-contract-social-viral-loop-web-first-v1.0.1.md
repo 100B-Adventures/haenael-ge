@@ -7,7 +7,7 @@
 | 작성자/모델 | tech-architect / gpt-5-codex |
 | 작업 라인 | v2 |
 | 상태 | 웹 1차·모바일 2차 공통 계약 |
-| 상류 핀 | `fdd-social-viral-loop-web-first-v1.0.0.md`, `erd-social-viral-loop-web-first-v1.0.0.md` |
+| 상류 핀 | `fdd-social-viral-loop-web-first-v1.0.1.md`, `erd-social-viral-loop-web-first-v1.0.1.md` |
 | 기반 포맷 | `docs/eng-design/api-contract-social-viral-loop-v0.1.0.md` |
 
 > STAMP: 생성 2026-10-13 02:42 KST. 모델 gpt-5-codex. 에이전트 tech-architect. 스킬 docs. 근거는 `miniapp/src/gateway.ts`의 실호출, 기존 Supabase RPC·Edge Function 관습, Supabase 공식 함수 보안 문서다. 가장 오래 고민한 지점은 토큰 원문을 저장하지 않으면서 초대 생성 재시도를 어떻게 설명할지였다. 결론은 생성은 비멱등, 수락은 관계 기준 멱등으로 분리하는 것이다.
