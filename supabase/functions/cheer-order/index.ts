@@ -140,6 +140,14 @@ Deno.serve(async (req: Request) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
+  // 로그인한 회원이 공개 목표에서 결제하는 경우에만 회원-응원 귀속을 남긴다.
+  // anon key 호출은 기존 비회원 결제와 동일하게 귀속 없이 진행한다. 원문 JWT나
+  // 사용자 식별자는 payment/cheer 공개 계약과 응답에 포함하지 않는다.
+  const accessToken = authHeader.slice("Bearer ".length);
+  const { data: { user: supporter } } = await supabase.auth.getUser(
+    accessToken,
+  );
+
   const orderId = makeOrderId();
   const { data, error } = await supabase.rpc("create_cheer_order", {
     p_goal_id: goalId,
@@ -167,6 +175,29 @@ Deno.serve(async (req: Request) => {
     order_id: string;
     is_replay: boolean;
   };
+
+  // replay는 최초 주문의 호출자 신원을 증명하지 못한다. 다른 로그인 사용자가 같은
+  // fingerprint를 재현해 attribution을 선점하지 못하도록 신규 주문에만 귀속한다.
+  if (supporter && !row.is_replay) {
+    const { error: attributionError } = await supabase
+      .from("social_cheer_member_attribution")
+      .upsert({
+        cheer_id: row.cheer_id,
+        supporter_member_id: supporter.id,
+      }, { onConflict: "cheer_id", ignoreDuplicates: true });
+    if (attributionError) {
+      console.error(
+        "[cheer-order] supporter attribution failed:",
+        attributionError.code,
+      );
+      await sendSlackAlert({
+        event: "cheer_supporter_attribution_failed",
+        severity: "warning",
+        summary: "Authenticated cheer attribution failed",
+        fields: { code: attributionError.code ?? "unknown" },
+      });
+    }
+  }
 
   return json(row.is_replay ? 200 : 201, {
     orderId: row.order_id,

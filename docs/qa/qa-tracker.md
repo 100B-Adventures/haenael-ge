@@ -1,5 +1,96 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-13: V2 전체 회귀 테스트 하네스 수정 결과 v1.0.0
+
+**판정: 🔧 테스트 하네스 17건 해소. 전체 Playwright 62 PASS / 운영 자격증명 1 FAIL / 0 SKIP, pgTAP 323/323 PASS**
+
+| 결함 ID | 원인 | 수정 경계 |
+|---|---|---|
+| QA-V2-REGTEST-01 | ✅ 테스트 하네스 해소 | cashout 12/12, cheer 2/2, multi-goal 2/2, release 2/2. 전체 suite의 나머지 local 케이스 포함 62 PASS |
+| QA-V2-DBTEST-01 | ✅ 해소 | APPROVED fixture 검수 메타데이터 보강, 전체 pgTAP 18 files·323 tests PASS |
+| QA-PROD-AUTH-01 | ❌ OPEN | 운영 read-only 자격증명 미주입. 테스트 수정·skip 없이 fail-closed 유지 |
+
+- 운영 배포, 운영 DB migration, 운영 환전 데이터 쓰기, 테스트 환전 요청 생성은 금지한다.
+- 결과 문서: [`v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md`](v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md)
+- 제품 코드 diff 0, 신규·변경 skip 0, 테스트 삭제 0, 계좌 마스킹·수수료 단정 변경 0.
+
+STAMP: 2026-10-13 19:43 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 🔧, 운영 인증 1건 ❌
+
+## 2026-10-13: V2 소셜 바이럴 루프 수정 라운드 재검증 v1.0.0
+
+**판정: ❌ NG. 핵심 수정은 해소됐으나 전체 Playwright 18 FAIL, pgTAP 1개 파일 중단, 승인 계획 27건 미검증**
+
+| 결함 ID | 현재 판정 | 재검증 종료증거 |
+|---|---|---|
+| QA-V2-SEC-01 | ✅ 해소 | friend RPC private path 0, direct read 거부, Presigned URL 200, admin path 정상 |
+| QA-V2-FLOW-01 | ✅ 해소 | friendId·goal owner 불일치 실제 HTTP 404 |
+| QA-V2-QA-01 | ✅ 원결함 해소 | production-mode 신규 화면 console/pageerror 0, loopback-only CSP, unsafe-eval 0 |
+| QA-V2-DEP-01 | ✅ 해소 | production dependency audit 0 |
+| QA-V2-COVERAGE-01 | 🔶 OPEN | 문서 과장 해소. 승인 test plan 84건 중 27건은 계속 미검증 |
+| QA-V2-COVER-ERR-01 | ✅ 코드·단위 해소 | signed URL 실패 3분기 명시 오류, 정상 실호출 PASS |
+| QA-V2-PERF-01 | 🔶 OPEN | batch 1회 확인. 다량 fixture request count·latency 미실측 |
+| QA-V2-DESIGN-01 | 🔶 OPEN | 신규 token 위반 0. 공유 lint 3종 출력 후 exit 0 유지 |
+| QA-V2-REGTEST-01 | ❌ OPEN | 전체 Playwright 30 PASS / 18 FAIL / 15 SKIP |
+| QA-V2-DBTEST-01 | ❌ OPEN | `social_web_first_cover.test.sql` fixture constraint 위반으로 pgTAP 중단 |
+
+- 수정 보고: [`v2-social-viral-loop-qa-fix-v1.0.0-gpt-codex-20261013-1847.md`](v2-social-viral-loop-qa-fix-v1.0.0-gpt-codex-20261013-1847.md)
+- 재검증 보고: [`v2-social-viral-loop-qa-reverification-v1.0.0-gpt-codex-20261013-1920.md`](v2-social-viral-loop-qa-reverification-v1.0.0-gpt-codex-20261013-1920.md)
+- 실행 증거: production build PASS, Vitest 319/319, social Playwright 14/14, viewport 14/14, audit 0. 전체 Playwright와 pgTAP은 위 실패로 NG.
+- 운영 배포·운영 DB migration·운영 환전 데이터 쓰기는 금지 상태를 유지한다.
+
+STAMP: 2026-10-13 19:20 KST | model gpt-5-codex | agent qa-verifier | skill qa | 상태 NG
+
+## 2026-10-13: V2 소셜 바이럴 루프 QA v1.0.0
+
+**판정: ❌ NG. 계획 84건 중 통과 47, 부분 8, 실패 2, 미검증 27**
+
+| 요청번호 | 판정 | 증거 | 상세 |
+|---|---|---|---|
+| D-019 / PG-16 | ❌ | authenticated RPC가 FRIENDS `cover_storage_path`를 반환 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#3-결함-목록) |
+| D-022 / PG-MY-01~08 | ✅ DB·계약 | 업적 3종 집계 PASS, rank·streak·자기신고 key 0 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#4-권한보안-판정) |
+| REG-CASH-01~05 | 🔶 부분 | SQL·unit·경쟁조건 PASS, 전체 Playwright와 브라우저 masking 미검증 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#5-환전-회귀) |
+| MY-01 | ❌ | 390px ergonomics 통과, production CSP console error 2건 | [QA 보고서](v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md#6-디자인뷰포트) |
+| DESIGN-V2 | ❌ | `/my` 일부만 관찰, 신규 화면 전수·1280px 미검증 | [정합 매트릭스](design-conformance-matrix.md) |
+
+- 전체 E2E·390px·1280px 실측은 문서 선커밋 뒤 heavy slot을 요청했으나 실행 중 2/2로 62초 후 종료코드 75. **슬롯 미확보로 미실행**.
+- 운영 배포, 운영 DB migration, 운영 환전 데이터 쓰기는 수행하지 않았다.
+
+STAMP: 2026-10-13 18:04 KST | model gpt-5-codex | agent qa-verifier | skill qa | 상태 NG
+
+## 2026-10-13: V2 build 2차 슬라이스 검증 결함
+
+**판정: 🔧 로컬 교정 완료. 운영 migration은 미적용이므로 운영 검증은 계속 NG**
+
+| 요청번호 | 증상 | 원인 | 해제 증거 |
+|---|---|---|---|
+| QA-V2-BUILD-04 | `/my` 390px 본문 중앙값 14px, Footer 링크 44px 미만 2건 | 프로토타입의 축소 보조문구와 공용 Footer 누름 높이를 모바일 기준과 대조하지 않음 | MY-01: 중앙값 16px, 13px 미만 0, 44px 미만 0, active 100%, overflow 0, console error 0 |
+| QA-V2-BUILD-05 | 전체 social E2E에서 탭 라벨 기대값이 10px에 남음 | 토큰을 13px로 올리고 기존 SMOKE-01 계약을 함께 갱신하지 않음 | 전체 social spec 11/11 PASS, `DESIGN_METRICS labelSize=13px` |
+| QA-V2-BUILD-06 | PW-05 단독 실행과 CC-01의 정확한 1건 판정이 약함 | 앞 테스트의 REVIEW asset과 기존 owner 연결 수에 의존 | PW-05 자체 fixture fallback, exact pair count·accepted_by 확인, 독립 3/3 PASS |
+| QA-V2-BUILD-07 | 다른 회원이 order replay로 attribution을 선점할 수 있음 | replay에도 현재 로그인 회원 귀속 insert를 시도 | 신규 주문만 attribution 기록, 실 Edge Function ORDER-ATTR-01 PASS |
+| QA-V2-BUILD-08 | Next build가 `COVER_PUBLIC_BASE_URL` 미분류로 차단 | 새 optional origin override를 배포 env 인벤토리에 연결하지 않음 | env 35/35 분류, Next production build 17/17 PASS |
+
+- 남은 위험: 주문 생성과 attribution insert는 단일 DB transaction이 아니다. API 계약 변경이 필요한 후속 기술설계 항목으로 남긴다.
+- 남은 데이터 경계: migration 이전 응원은 신뢰 가능한 회원 식별 원본이 없어 backfill하지 않는다.
+- 운영 상태: `20261013050000`, `20261013060000` remote 미적용. 운영 완료로 판정하지 않는다.
+
+STAMP: 2026-10-13 16:13 KST | model gpt-5-codex | agent code-builder | skills haenael-supabase-build, review | 상태 로컬 🔧, 운영 ❌ NG
+
+## 2026-10-13: V2 소셜 바이럴 루프 서버 실물 0건
+
+**판정: ❌ NG. 웹 우선 기술설계 완료 전 상태이며 구현·운영 검증은 아직 0건**
+
+| 요청번호 | 증상 | 원인 | 해제 증거 |
+|---|---|---|---|
+| QA-V2-WEB-01 | 운영 RPC `create_friend_invite`, `friend_goal_detail`, `my_friend_goals`, `set_goal_cover_preset`, `update_member_preferences` 0건 | 기존 기술설계가 앱인토스 중심이었고 웹 선행 build slice가 없었음 | 웹 우선 migration·RPC 배포 뒤 pgTAP과 운영 read-only catalog 확인 |
+| QA-V2-WEB-02 | 웹 `/friends`, `/invite`, 하단 탭 0건 | 승인 프로토타입이 build 계약과 route map으로 승격되지 않았음 | Playwright WF-01~17 17/17과 390·1024 실제 렌더 |
+| QA-V2-WEB-03 | 미니앱 친구·초대 화면은 있으나 호출 대상 서버가 0건 | 프런트 화면과 백엔드 계약을 별도 완료로 오인할 수 있는 구조 | 웹 공통 RPC 5종 계약 test 5/5 뒤 모바일 2차 QA |
+
+- 근본원인: 앱인토스 중심 설계가 채널 정책 결정을 기다리는 동안 공통 백엔드와 웹 완주 슬라이스가 독립 발주되지 않았다.
+- 재발방지: `docs/eng-design/*-social-viral-loop-web-first-v1.0.0.md` 4종에서 웹을 1차, 모바일을 2차로 분리하고 FDD 17스텝을 route·component·table/RPC·test에 1:1 매핑했다.
+- 현재 증거 등급: 운영 결손은 관찰됨. 새 설계 문서는 근거 확인. 구현·배포·제품 동작은 미검증.
+
+STAMP: 2026-10-13 02:42 KST | model gpt-5-codex | agent tech-architect | skill docs | 상태 NG 등록
+
 ## 2026-10-09: 새 Supabase 운영 컷오버 service role 키 형식 오류
 
 **판정: 🔧 교정·운영 재검증 완료. 실제 카카오 동의·콜백만 미검증**

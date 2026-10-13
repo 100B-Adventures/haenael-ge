@@ -12,6 +12,9 @@
 
 # ─── 운영 기능 스위치·알림 ──────────────────────────────────────────────────
 PAYMENTS_ENABLED=false
+# 로컬 reverse proxy처럼 Storage 내부 URL과 브라우저 origin이 다를 때만 설정한다.
+# 운영은 SUPABASE_URL origin을 사용하므로 기본값은 비워 둔다.
+COVER_PUBLIC_BASE_URL=
 # 수동환전 CASHOUT_ENABLED·계좌 암호화 키링은 Vercel Production 전용이다.
 # Edge Function에는 등록하지 않는다(W-12).
 SLACK_WEBHOOK_URL=

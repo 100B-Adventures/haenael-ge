@@ -5,7 +5,7 @@ project: haenael-ge
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude             # 2026-08-30 컨트롤러 Claude. 동일 루트 하네스와 단계 게이트를 적용한다.
-current_stage: build   # 2026-09-05 코드베이스 감사에서 P0 1건·P1 16건과 필수 regression 산출물 부재를 확인해 build 재오픈. 상세 = docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md.
+current_stage: build   # 2026-10-13 V2 는 pipeline-state.v2.md 로 라인 분리(회장 지시). 이 파일은 v1 환전 라인만 소유한다. 재오픈 사유는 다음과 같다: 2026-09-05 코드베이스 감사에서 P0 1건·P1 16건과 필수 regression 산출물 부재를 확인해 build 재오픈. 상세 = docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md.
 approved_stages: [plan, design, eng-design]   # build·qa·ship은 2026-09-05 감사 BLOCK으로 재잠금.
 # 단계 진입·재작업·완료 시각 (state-file-convention §stage_timestamps). 형식 YYYY-MM-DD HH:MM KST.
 # 승인 로그에 분 단위 시각이 있는 것만 적는다. 없는 칸은 비운다(날짜만 반쯤 채우지 않는다).
@@ -36,15 +36,7 @@ approved_artifacts:
     - { path: docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html, version: 3.8.0, status: approved, label: "환전 전체 여정 프로토타입", sha256: c376a818bac77b292b3b05c30f1f9bd360c353a599ba85b374f44d72e85dc058 }
     - { path: docs/design/design-spec-core-cashout-30-27-v1-gpt-codex.md, version: 1.0.0, status: approved, label: "30·27 디자인 수치 명세", sha256: f4ca0952014d80c1d4b8d3fd951d0ad770710352f241c75bf3a417685257745a }
     - { path: docs/design/clean-frames/core-cashout-30-27-clean-frames-v1-gpt-codex.stamp.md, version: 1.0.0, status: approved, label: "30·27 기준 프레임", sha256: 561c85fbc85a82f5e2c98a2139550cb8577c10381c445d6eba747129e5841fa1 }
-    # v2 소셜 바이럴 루프 라운드 (2026-09-16 ~ 2026-10-12). 위 환전 핀은 v1 라운드 정본이고
-    # 아래가 그 뒤 만들어진 최신 디자인이다. 아직 /approve 를 받지 않아 pending-review 로 둔다.
-    # 회장 2026-10-13 지적: 대시보드가 환전 프로토타입만 보여 v2 가 버려진 것처럼 읽혔다.
-    - { path: docs/design/prototypes/social-viral-loop-v2-opus48.html, version: 2.0.0, status: pending-review, label: "소셜 바이럴 루프 v2 프로토타입(하단탭·모션 포함)", sha256: cf4a78fe7041c00f8f4336fcbbb3107f2230f404b1f1116840dcaf469bdb9626 }
-    - { path: docs/design/prototypes/core-viral-motion-shotgun-v1-opus48.html, version: 1.0.0, status: pending-review, label: "바이럴 모션 샷건", sha256: a5d87276065b4bd4968ac201f11b259f437aa1dc9b43f4886b5ddf78051122b2 }
-    - { path: docs/design/motion-concepts-haenael-ge.html, version: unversioned, status: pending-review, label: "모션 컨셉", sha256: 42abb59bf55b514f2388f0de8ce935c46bcf56e67a6fac7a3c6bb56aeb442690 }
-    - { path: docs/design/prototypes/screen-inventory-v3.md, version: 3.0.0, status: pending-review, label: "화면 인벤토리 v3", sha256: a61efc9fdfce3e8643895661706c229f8882dc9ecd1176fcef291e9c085aa267 }
-    - { path: docs/design/prototypes/ui-evidence-friends-invite.txt, version: unversioned, status: pending-review, label: "친구·초대 화면 실측 증거", sha256: 8e40b2440152cf68f07b5973c0ea0c1eeca1e57f8721aedbedddd50c2b7a91e2 }
-    - { path: docs/design/prototypes/ui-evidence-landing-wordmap-i18n.txt, version: unversioned, status: pending-review, label: "랜딩·워드맵 다국어 실측 증거", sha256: a71a49d17dc4475d30308516a0c2f423bc8285256d288097ac5691e016d227e8 }
+    # v2 소셜 바이럴 루프 디자인 핀은 pipeline-state.v2.md 로 이관했다(2026-10-13 라인 분리).
   eng-design:
     - { path: docs/eng-design/fdd-haenael-ge-cashout-clover-lock-v1.1.0.md, version: 1.1.0, status: approved, label: "FDD 환전 잠금", sha256: 3060d41309a37c91a10ce58530a581aaf9af12cdae6d88a43e00d02d46491393 }
     - { path: docs/eng-design/fdd-haenael-ge-v0.1.0.md, version: 0.1.0, status: approved, label: "FDD 기저", sha256: a5b44ee196f3bd76784063f83b62b1982a4af98844809e367f05b641760de5df }
@@ -58,6 +50,7 @@ approved_artifacts:
     - { path: docs/eng-design/eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md, version: 1.0.0, status: pending-review, label: "다중목표·공개범위·응원자 설계안", sha256: 0e345e671cd83db4cc8211697c4f019c71142b9358f3964c8e0e958fac9cc6a0 }
   build:
     - { path: docs/eng-design/build-log.md, version: unversioned, status: approved, label: "빌드 로그", sha256: ea05789238599f4fde69dce7b8a0a2c60469945f0f27e673902d1e75fe4e3aaa }
+    # V2 웹 우선 설계 핀은 pipeline-state.v2.md 로 이관했다(2026-10-13 라인 분리).
     - { path: docs/구현현황.md, version: unversioned, status: approved, label: "구현 현황", sha256: 696c11b2aff8dc7ea3ffe4f05f6b84768f53ef45425e06e465374ce936f017ef }
     - { path: supabase/migrations/20260821000000_cashout_service_fee_10pct.sql, version: unversioned, status: approved, label: "환전 이용료 마이그레이션", sha256: ce62fde3b659464d3860030d203116497064b47fdbcb3677521d17ee51b7f654 }
     - { path: supabase/migrations/20260822000000_cashout_clover_lock_a1.sql, version: unversioned, status: approved, label: "환전 잠금 마이그레이션", sha256: 6ee968a6fe0ba5d8c6146b207dd6e15e6554cfc1ab32d3735b0f8cec04d1b359 }
@@ -124,6 +117,8 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 <!-- 위 요약은 인덱스일 뿐, 각 단계 승인 근거의 상세 서술은 아래 "승인 로그"가 진실원 -->
 
 ## 승인 로그
+
+2026-10-13 02:30 KST ⟲ REOPEN eng-design. 회장 "V2 파이프타면서 웹배포하고 그다음 모바일 배포하면 되잖아 코덱스시켜서 적극 해" 지시로 V2 소셜 바이럴 루프를 파이프라인에 올린다. 스코프는 거버넌스 D-018 대로 **웹 우선**이고 모바일(앱인토스)은 2차다. 재오픈 사유: 기존 eng-design 핀은 환전 잠금 중심이고, V2 설계 문서는 앱인토스 중심(`fdd-core-social-viral-loop-appintoss-v0.1.0`)이라 웹 우선 지시와 어긋난다. 웹 우선 슬라이스 설계 4종(FDD·ERD·API 계약·테스트 계획)을 Codex tech-architect 에 위임했다. 1차 슬라이스 범위는 목표 상세·목표 커버·초대 링크·친구 목록이고 활동 타임라인·업적·부스트는 비범위다. build·qa·ship 은 2026-09-05 감사로 이미 잠겨 있어 추가 재잠금은 없다. V2 가 필요한 서버 실물이 운영에 0건임을 직접 조회로 확인했다(RPC 5종 0개, 친구·초대 테이블 0개, 웹 라우트에 친구·초대 부재).
 
 2026-09-21 22:34 KST — build 슬라이스 완료(갈래 1 다중 목표), qa 대기 — 설계안 §4 대로 `20260921000000_multi_goal_create_fn.sql`(유니크 인덱스 제거 + `create_goal` RPC 권고 잠금·상한 3 + REVOKE INSERT), 온보딩 리다이렉트 제거, `/me` 목록. 컨트롤러 직접 실측: vitest 282/282, pgTAP 270/270(신규 create_goal 10), 동시성 스크립트 PASS, Playwright multi-goal 2/2(로컬 Supabase 실세션), cashout-manual 12/12(E2E 전용 빌드), tsc 0, 토큰 신규 0. PR #3 CI success 3/3. **운영 DB 미적용·main 미머지(회장 몫).** 갈래 2·3 미착수. 단계는 build 유지, qa 승인은 /approve 로만. (artifacts: build=d8dab3f)
 

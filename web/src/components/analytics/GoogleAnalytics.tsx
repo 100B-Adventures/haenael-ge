@@ -15,7 +15,11 @@ function RouteTracker() {
 
 export function GoogleAnalytics() {
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-  if (!measurementId) return null;
+  if (
+    process.env.NODE_ENV !== "production" ||
+    !measurementId ||
+    measurementId === "G-XXXXXXXXXX"
+  ) return null;
   return (
     <>
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`} strategy="afterInteractive" />

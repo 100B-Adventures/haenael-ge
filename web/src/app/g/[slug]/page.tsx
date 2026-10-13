@@ -13,6 +13,7 @@ import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { ReportButton } from "@/components/common/ReportButton";
 import { CheerPaymentButton } from "@/components/goal/CheerPaymentButton";
 import { OwnerBar } from "@/components/goal/OwnerBar";
+import { GoalCover } from "@/components/social/GoalCover";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -55,7 +56,7 @@ export default async function GoalPublicPage({ params }: Props) {
   // (과거: .single()이 일시오류에도 error를 반환 → 전부 notFound()로 처리해 정상 목표가 간헐 404).
   const { data: goal, error } = await supabase
     .from("goal_public")
-    .select("id, slug, title, reason, due_date, status, cheer_count")
+    .select("id, slug, title, reason, due_date, status, cheer_count, cover_preset_key, cover_public_path")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -103,6 +104,9 @@ export default async function GoalPublicPage({ params }: Props) {
   );
 
   const cheerCount = goal.cheer_count ?? 0;
+  const coverUrl = goal.cover_public_path
+    ? supabase.storage.from("goal-cover-public").getPublicUrl(goal.cover_public_path).data.publicUrl
+    : null;
 
   // ─── owner bar 판정 (user-flow.md §1.3 (b) — 2026-07-19) ──────────────────
   // goal 테이블(RLS goal_select_own: auth.uid()=member_id)로 재조회 —
@@ -177,6 +181,13 @@ export default async function GoalPublicPage({ params }: Props) {
             </Link>
           </p>
         )}
+
+        <GoalCover
+          presetKey={goal.cover_preset_key}
+          imageUrl={coverUrl}
+          title={goal.title ?? slug}
+          size="banner"
+        />
 
         {/* GoalCard */}
         <GoalCard

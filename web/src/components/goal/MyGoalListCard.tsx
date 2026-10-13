@@ -8,6 +8,7 @@ import Link from "next/link";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import { CheerCount } from "@/components/goal/CheerCount";
 import { MyLinkCard } from "@/components/goal/MyLinkCard";
+import { GoalCover } from "@/components/social/GoalCover";
 
 export interface MyGoalListCardData {
   id: number;
@@ -16,6 +17,7 @@ export interface MyGoalListCardData {
   due_date: string;
   status: "ACTIVE" | "CLOSED" | "DELETED";
   cheerCount: number;
+  coverPresetKey: string;
 }
 
 export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
@@ -25,6 +27,7 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
       data-testid="my-goal-list-card"
       data-goal-id={goal.id}
     >
+      <GoalCover presetKey={goal.coverPresetKey} title={goal.title} size="banner" />
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="min-w-0 flex-1 truncate text-[15px] font-extrabold text-foreground">
           {goal.title}
@@ -42,6 +45,13 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
         <div className="flex-1">
           <MyLinkCard slug={goal.slug} />
         </div>
+        <Link
+          href={`/me/goal/${goal.id}`}
+          className="shrink-0 rounded-sm bg-accent px-3 py-2 text-[12.5px] font-bold text-accent-foreground"
+          data-testid="my-goal-list-card-manage-link"
+        >
+          관리
+        </Link>
         <Link
           href={`/wordmap/${goal.id}`}
           className="shrink-0 rounded-sm border border-border px-3 py-2 text-[12.5px] font-bold text-foreground"

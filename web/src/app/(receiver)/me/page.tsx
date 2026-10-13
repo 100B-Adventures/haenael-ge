@@ -66,7 +66,7 @@ export default async function ReceiverHomePage({
   const todayIso = new Date().toISOString().slice(0, 10);
   const { data: allGoals } = await supabase
     .from("goal")
-    .select("id, slug, title, reason, due_date, status, created_at")
+    .select("id, slug, title, reason, due_date, status, created_at, cover_preset_key")
     .eq("member_id", user.id)
     .neq("status", "DELETED")
     .is("deleted_at", null)
@@ -271,6 +271,14 @@ export default async function ReceiverHomePage({
           editable={goal.status === "ACTIVE"}
         />
 
+        <Link
+          href={`/me/goal/${goal.id}`}
+          className="mb-3 flex min-h-11 items-center justify-center rounded-sm bg-accent px-4 text-[13px] font-bold text-accent-foreground"
+          data-testid="primary-goal-manage-link"
+        >
+          이 목표 관리
+        </Link>
+
         {/* 내 응원 링크 재접근 (user-flow.md §1.3 갭3, 2026-07-20) */}
         <MyLinkCard slug={goal.slug} />
 
@@ -424,6 +432,7 @@ export default async function ReceiverHomePage({
                   due_date: g.due_date,
                   status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
                   cheerCount: cheerCountByGoal.get(g.id) ?? 0,
+                  coverPresetKey: g.cover_preset_key,
                 }}
               />
             ))}
@@ -452,6 +461,7 @@ export default async function ReceiverHomePage({
                       due_date: g.due_date,
                       status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
                       cheerCount: cheerCountByGoal.get(g.id) ?? 0,
+                      coverPresetKey: g.cover_preset_key,
                     }}
                   />
                 ))}

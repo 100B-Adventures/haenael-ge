@@ -14,7 +14,24 @@ const isDevelopment = process.env.NODE_ENV === "development";
  * Kakao OAuth is a top-level redirect, not an embedded resource. Vercel Analytics
  * is not installed, so neither receives a CSP exception.
  */
-export function buildContentSecurityPolicy(development: boolean) {
+function localSupabaseCspOrigins(supabaseUrl: string | undefined) {
+  if (!supabaseUrl) return [];
+  try {
+    const url = new URL(supabaseUrl);
+    if (!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) return [];
+    if (!["http:", "https:"].includes(url.protocol)) return [];
+    const websocketProtocol = url.protocol === "https:" ? "wss:" : "ws:";
+    return [url.origin, `${websocketProtocol}//${url.host}`];
+  } catch {
+    return [];
+  }
+}
+
+export function buildContentSecurityPolicy(
+  development: boolean,
+  supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL,
+) {
+  const localQaOrigins = localSupabaseCspOrigins(supabaseUrl);
   return [
   "default-src 'self'",
   "base-uri 'self'",
@@ -23,7 +40,7 @@ export function buildContentSecurityPolicy(development: boolean) {
   "form-action 'self' https://*.tosspayments.com https://*.toss.im",
   [
     "script-src 'self' 'unsafe-inline'",
-    isDevelopment ? "'unsafe-eval'" : "",
+    development ? "'unsafe-eval'" : "",
     "https://js.tosspayments.com",
     "https://www.googletagmanager.com",
   ]
@@ -38,6 +55,7 @@ export function buildContentSecurityPolicy(development: boolean) {
     development ? "ws://127.0.0.1:54321" : "",
     development ? "http://localhost:54321" : "",
     development ? "ws://localhost:54321" : "",
+    ...localQaOrigins,
     "https://*.supabase.co",
     "wss://*.supabase.co",
     "https://*.tosspayments.com",
@@ -52,7 +70,10 @@ export function buildContentSecurityPolicy(development: boolean) {
   ].join("; ");
 }
 
-export const CONTENT_SECURITY_POLICY = buildContentSecurityPolicy(isDevelopment);
+export const CONTENT_SECURITY_POLICY = buildContentSecurityPolicy(
+  isDevelopment,
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+);
 
 export const SECURITY_HEADERS = [
   { key: "Content-Security-Policy", value: CONTENT_SECURITY_POLICY },

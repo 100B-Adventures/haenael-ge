@@ -26,6 +26,7 @@ function requiredEnv(name: string) {
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";
 const SUPABASE_ANON_KEY = requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 const SUPABASE_SERVICE_ROLE_KEY = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+const APP_ORIGIN = new URL(process.env.E2E_BASE_URL ?? "http://localhost:3000").origin;
 
 // 로컬 전용 QA 계정 — 매 실행 고유 이메일(병렬/재실행 충돌 방지).
 const QA_EMAIL = `multi-goal-e2e-${Date.now()}@test.local`;
@@ -90,7 +91,7 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
     });
     if (signInError) throw new Error(`QA 로그인 실패: ${signInError.message}`);
 
-    const context: BrowserContext = await browser.newContext();
+    const context: BrowserContext = await browser.newContext({ baseURL: APP_ORIGIN });
     const nowSeconds = Math.floor(Date.now() / 1000);
     await context.addCookies(
       [...cookieJar.values()]
@@ -98,7 +99,7 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
         .map(({ name, value, options }) => ({
           name,
           value,
-          url: "http://localhost:3000",
+          url: APP_ORIGIN,
           httpOnly: false,
           secure: false,
           sameSite: "Lax" as const,
@@ -159,7 +160,7 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
       p_due_date: "2030-03-01",
     });
 
-    const context: BrowserContext = await browser.newContext();
+    const context: BrowserContext = await browser.newContext({ baseURL: APP_ORIGIN });
     const nowSeconds = Math.floor(Date.now() / 1000);
     await context.addCookies(
       [...cookieJar.values()]
@@ -167,7 +168,7 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
         .map(({ name, value, options }) => ({
           name,
           value,
-          url: "http://localhost:3000",
+          url: APP_ORIGIN,
           httpOnly: false,
           secure: false,
           sameSite: "Lax" as const,

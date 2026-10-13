@@ -4,6 +4,10 @@ import {
   CashoutQueue,
   type AdminCashout,
 } from "@/components/admin/CashoutQueue";
+import {
+  GoalCoverReviewQueue,
+  type CoverReviewItem,
+} from "@/components/admin/GoalCoverReviewQueue";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +40,8 @@ type AdminRpcName =
   | "is_admin"
   | "admin_list_members"
   | "admin_list_ledger"
-  | "admin_list_cashouts_v2";
+  | "admin_list_cashouts_v2"
+  | "admin_list_goal_covers";
 
 type AdminRpcArgs = { p_limit: number } | undefined;
 
@@ -136,13 +141,14 @@ export default async function AdminPage() {
     notFound();
   }
 
-  const [membersResult, ledgerResult, cashoutsResult] = await Promise.all([
+  const [membersResult, ledgerResult, cashoutsResult, coversResult] = await Promise.all([
     callAdminRpc<AdminMember[]>("admin_list_members", { p_limit: 100 }),
     callAdminRpc<AdminLedgerEntry[]>("admin_list_ledger", { p_limit: 200 }),
     callAdminRpc<AdminCashout[]>("admin_list_cashouts_v2", { p_limit: 100 }),
+    callAdminRpc<CoverReviewItem[]>("admin_list_goal_covers", { p_limit: 100 }),
   ]);
 
-  if (membersResult.error || ledgerResult.error || cashoutsResult.error) {
+  if (membersResult.error || ledgerResult.error || cashoutsResult.error || coversResult.error) {
     throw new Error("관리자 데이터를 불러오지 못했습니다.");
   }
 
@@ -150,6 +156,7 @@ export default async function AdminPage() {
   const ledger = ledgerResult.data ?? [];
   // W-8: 목록은 authenticated RPC로 마스킹 필드만 읽는다. 복호화는 행별 액션에서만 한다.
   const cashouts = cashoutsResult.data ?? [];
+  const covers = coversResult.data ?? [];
 
   return (
     <main className="min-h-svh bg-background px-4 py-10 text-foreground sm:px-6 lg:px-10">
@@ -166,6 +173,7 @@ export default async function AdminPage() {
         </header>
 
         <div className="space-y-10">
+          <GoalCoverReviewQueue initialItems={covers} />
           <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
             <SectionHeader
               title="회원"

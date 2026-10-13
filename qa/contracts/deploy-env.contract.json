@@ -21,6 +21,7 @@
 
     "SUPABASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
     "SUPABASE_ANON_KEY": { "targets": ["supabase-production"], "features": ["wordmap"] },
+    "COVER_PUBLIC_BASE_URL": { "targets": ["supabase-production"], "features": ["core"], "optional": true },
     "PAYMENTS_ENABLED": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_SECRET_KEY": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_WEBHOOK_TOKEN": { "targets": ["supabase-production"], "features": ["payments"] },

@@ -1,0 +1,27 @@
+<!doctype html><html lang=ko><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>V2 웹 우선 설계 열람</title><style>
+:root{color-scheme:only light;--bg:#fff;--fg:#16140f;--muted:#6f6a60;--line:#e2e4e9;--clover:#1f9e5a;--deep:#14613a}
+@media screen and (prefers-color-scheme:dark){:root{color-scheme:only dark;--bg:#16161a;--fg:#ececf1;--muted:#b6b6c0;--line:#30303a;--clover:#3fbd78;--deep:#8fd6ae}}
+html,body{background:var(--bg);color:var(--fg)}
+body{max-width:760px;margin:48px auto;padding:0 24px;font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Apple SD Gothic Neo',sans-serif;line-height:1.7}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:-.4px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 32px}
+ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+a.card{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--fg);border-left:3px solid var(--clover)}
+a.card:hover{border-color:var(--clover)}
+a.card b{display:block;font-size:16px;color:var(--deep)}
+a.card span{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+</style></head><body>
+<h1>V2 웹 우선 설계 열람</h1>
+<p class=sub>해낼게 소셜 바이럴 루프 · 1차 슬라이스 · 설계 5종 · 전부 v1.0.0 · 라인 <code>pipeline-state.v2.md</code></p>
+<ul>
+<li><a class=card href="/tmp/md-web-haenael-ge-architecture-social-viral-loop-web-first-v1.0.0.html"><b>시스템 구성도</b><span>다이어그램 7종. 전체 그림을 먼저 보려면 여기부터.</span></a></li>
+<li><a class=card href="/tmp/md-web-haenael-ge-fdd-social-viral-loop-web-first-v1.0.0.html"><b>기능설계</b><span>화면·컴포넌트 계약, 기능 요구 9건, 추적성 판정.</span></a></li>
+<li><a class=card href="/tmp/md-web-haenael-ge-erd-social-viral-loop-web-first-v1.0.0.html"><b>데이터 구조</b><span>테이블·관계·공개범위 컬럼·인덱스.</span></a></li>
+<li><a class=card href="/tmp/md-web-haenael-ge-api-contract-social-viral-loop-web-first-v1.0.0.html"><b>서버 함수 계약</b><span>RPC·엣지 함수 시그니처. 미니앱 호환 이름 5종 포함.</span></a></li>
+<li><a class=card href="/tmp/md-web-haenael-ge-test-plan-social-viral-loop-web-first-v1.0.0.html"><b>테스트 계획</b><span>pgTAP·Playwright 케이스와 환전 회귀 고정.</span></a></li>
+</ul>
+<footer>원문은 <code>docs/eng-design/</code> 의 md 파일이다. 이 페이지는 링크만 모은 것이고 내용을 요약하거나 재배치하지 않았다.</footer>
+</body></html>

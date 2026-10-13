@@ -5,6 +5,7 @@ import { Clover, X } from "lucide-react";
 import { loadTossPayments } from "@/lib/toss";
 import { trackEvent } from "@/lib/analytics";
 import { KRW_PER_CLOVER, krwFromClover } from "@/lib/clover";
+import { createClient } from "@/lib/supabase/client";
 
 // 클로버 개수 프리셋(2026-07-21, 회장 지시: "1000개가 아니고 1개, 더 큰 금액 예
 // 1만개도 보낼수있게") — 프리셋은 1/3/5/10클로버(=1천~1만원), 그 외엔 직접입력으로
@@ -112,10 +113,13 @@ export function CheerPaymentButton({
       throw new Error("Supabase 환경변수가 필요합니다.");
     }
 
+    const { data: { session } } = await createClient().auth.getSession();
+    const accessToken = session?.access_token ?? anonKey;
+
     const res = await fetch(`${supabaseUrl}/functions/v1/cheer-order`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${anonKey}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

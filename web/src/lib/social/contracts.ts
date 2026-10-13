@@ -1,0 +1,132 @@
+export type SocialGoal = {
+  goal_id: number;
+  slug: string;
+  title: string;
+  due_date: string;
+  cover_preset_key: string;
+  cover_public_path: string | null;
+  cover_url?: string | null;
+  cheer_count: number;
+};
+
+export type SocialFriend = {
+  friend_member_id: string;
+  nickname: string | null;
+  profile_image: string | null;
+  goals: SocialGoal[];
+};
+
+export type FriendGoalsResponse = { friends: SocialFriend[] };
+
+export type FriendGoalDetail = SocialGoal & {
+  reason: string | null;
+  wordmap: Array<{ word: string; weight: number }>;
+};
+
+export type InvitePreview = {
+  inviter_nickname: string | null;
+  goal_title: string | null;
+  cover_preset_key: string;
+  cover_public_path: string | null;
+  expires_at: string;
+  requires_login: boolean;
+};
+
+export type InviteCreated = {
+  invite_id: string;
+  token: string;
+  web_path: string;
+  intoss_path: string;
+  expires_at: string;
+};
+
+export type MySocialGoal = {
+  goal_id: number;
+  slug: string;
+  title: string;
+  due_date: string;
+  status: "ACTIVE" | "CLOSED";
+  cover_preset_key: string;
+};
+
+export type BelongingQueueGoal = {
+  friend_member_id: string;
+  nickname: string | null;
+  goal_id: number;
+  slug: string;
+  title: string;
+  due_date: string;
+  cover_preset_key: string;
+};
+
+export type MySocialDashboard = {
+  profile: {
+    nickname: string | null;
+    profile_image: string | null;
+  };
+  goals: MySocialGoal[];
+  friend_count: number;
+  achievements: {
+    completed_goal_count: number;
+    received_cheer_count: number;
+    connected_friend_count: number;
+  };
+  belonging_queue: BelongingQueueGoal[];
+};
+
+export function asFriendGoals(value: unknown): FriendGoalsResponse {
+  if (!value || typeof value !== "object") return { friends: [] };
+  const friends = (value as { friends?: unknown }).friends;
+  return { friends: Array.isArray(friends) ? friends as SocialFriend[] : [] };
+}
+
+export function asFriendGoalDetail(value: unknown): FriendGoalDetail | null {
+  if (
+    !value || typeof value !== "object" ||
+    typeof (value as { goal_id?: unknown }).goal_id !== "number"
+  ) return null;
+  return value as FriendGoalDetail;
+}
+
+export function asInvitePreview(value: unknown): InvitePreview | null {
+  if (
+    !value || typeof value !== "object" ||
+    typeof (value as { expires_at?: unknown }).expires_at !== "string"
+  ) return null;
+  return value as InvitePreview;
+}
+
+export function asInviteCreated(value: unknown): InviteCreated | null {
+  if (
+    !value || typeof value !== "object" ||
+    typeof (value as { token?: unknown }).token !== "string"
+  ) return null;
+  return value as InviteCreated;
+}
+
+export function asMySocialDashboard(value: unknown): MySocialDashboard | null {
+  if (!value || typeof value !== "object") return null;
+  const candidate = value as Partial<MySocialDashboard>;
+  if (
+    !candidate.profile || !candidate.achievements ||
+    !Array.isArray(candidate.goals) ||
+    !Array.isArray(candidate.belonging_queue) ||
+    typeof candidate.friend_count !== "number" ||
+    typeof candidate.achievements.completed_goal_count !== "number" ||
+    typeof candidate.achievements.received_cheer_count !== "number" ||
+    typeof candidate.achievements.connected_friend_count !== "number"
+  ) return null;
+  return candidate as MySocialDashboard;
+}
+
+export const FORBIDDEN_SOCIAL_KEYS = [
+  "clover_amount",
+  "payment",
+  "cashout",
+  "supporter_ci",
+  "supporter_member_id",
+  "gross_krw",
+  "net_krw",
+  "cover_storage_path",
+  "quarantine_path",
+] as const;
