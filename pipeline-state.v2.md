@@ -8,8 +8,8 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: qa           # 2026-10-13 build 승인(회장 "계속 진행해 개발 다음 qa 그다음 배포잖어") 후 qa 진입.
-approved_stages: [plan, design, eng-design, build]
+current_stage: build        # 2026-10-13 18:17 qa 가 NG(Critical 1·Major 4) 로 반려해 build 재오픈. 사유 = docs/qa/v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md
+approved_stages: [plan, design, eng-design]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   design:     { completed: 2026-10-13 10:20 }
@@ -51,8 +51,8 @@ stages:
   plan:       { status: approved, artifacts_ok: true }
   design:     { status: approved, artifacts_ok: true }
   eng-design: { status: approved, artifacts_ok: true }
-  build:      { status: approved, artifacts_ok: true }
-  qa:         { status: in-progress, artifacts_ok: false }
+  build:      { status: changes-requested, artifacts_ok: false }
+  qa:         { status: changes-requested, artifacts_ok: false }
   ship:       { status: todo, artifacts_ok: false }
 override: false
 override_reason: ""
@@ -114,6 +114,19 @@ override_expires: ""
 ### ship ⬜
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-13 18:17 · ⟲ REOPEN build · qa 반려(NG)
+
+- qa 판정: ❌ NG. 계획 84건 중 통과 47, 부분 8, 실패 2, 미검증 27.
+- 반려 사유 1 (Critical, QA-V2-SEC-01): D-019 위반. FRIENDS 커버의 비공개 경로가 인증 사용자용 서버 함수 JSON 에 그대로 담겨 나간다. 직접 read 는 RLS 로 막히지만 **Presigned URL 만 내준다는 계약**을 어긴다. 근거 = `supabase/migrations/20261013050000_social_viral_loop_web_first.sql:199,200,236,237,523`. 컨트롤러가 1차 감사에서 199행과 200행을 보고 "D-019 구현됨" 으로 판정한 것이 **틀렸다.** 경로를 분기해 담는 것과 경로를 아예 담지 않는 것은 다르다.
+- 반려 사유 2 (Major, QA-V2-FLOW-01): `/friends/[friendId]?goal=` 에서 friendId 와 목표 소유자를 묶어 검증하지 않아 A 의 이름으로 B 의 목표가 표시되고 관계 해제가 A 에게 적용된다.
+- 반려 사유 3 (Major, QA-V2-QA-01): 운영 모드 로컬 QA 에서 CSP 가 로컬 Supabase 를 차단해 UI E2E 가 콘솔 오류로 중단된다. QA 환경 parity 결함.
+- 반려 사유 4 (Major, QA-V2-DEP-01): 운영 의존성 취약점 4건, Next 16.3.3 직접 의존 심각 1건.
+- 반려 사유 5 (Major, QA-V2-COVERAGE-01): 계획 84건 중 27건이 종단 증거 없는데 선행 문서가 전체 통과처럼 적혀 있다.
+- Minor 3건(QA-V2-COVER-ERR-01, QA-V2-PERF-01, QA-V2-DESIGN-01)은 같은 라운드에서 함께 처리한다.
+- qa 미완 원인: 공용 작업 슬롯 상한 2 가 다른 벤처의 gradle test 와 xcodebuild 로 장기 점유돼 전체 E2E 와 1280px 실측이 미실행이다. 워커는 60초 만에 포기하고 기록했다.
+- 운영 배포와 운영 DB 적용은 하지 않았다. 설계 핀은 v1.1.0 을 유지한다.
+
 
 ### 2026-10-13 17:12 · ✅ APPROVE build → qa 진입
 
