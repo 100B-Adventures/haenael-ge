@@ -1,5 +1,20 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-13: V2 전체 회귀 테스트 하네스 수정 착수
+
+**판정: 🔧 수정 중. 제품 결함 0건, 테스트 환경·시드 결함 17건 교정 대상, 운영 자격증명 1건은 FAIL 유지**
+
+| 결함 ID | 원인 | 수정 경계 |
+|---|---|---|
+| QA-V2-REGTEST-01 | cashout build-time env, cheer local seed, multi-goal cookie origin, release version 고정값이 현재 production-mode 실행 계약과 불일치 | 제품 코드·환전 단정은 건드리지 않고 테스트 진입 환경만 수정 |
+| QA-V2-DBTEST-01 | APPROVED cover fixture에 `reviewed_by`, `reviewed_at`이 없어 현행 state constraint 위반 | fixture에 검수 메타데이터만 추가 |
+| QA-PROD-AUTH-01 | 운영 read-only 자격증명 미주입 | 수정하지 않고 FAIL 유지 |
+
+- 운영 배포, 운영 DB migration, 운영 환전 데이터 쓰기, 테스트 환전 요청 생성은 금지한다.
+- 종료 증거: 전체 pgTAP PASS, 전체 Playwright에서 운영 자격증명 1건 외 테스트 하네스 FAIL 0, skip·삭제·단정 약화 0건.
+
+STAMP: 2026-10-13 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 🔧
+
 ## 2026-10-13: V2 소셜 바이럴 루프 수정 라운드 재검증 v1.0.0
 
 **판정: ❌ NG. 핵심 수정은 해소됐으나 전체 Playwright 18 FAIL, pgTAP 1개 파일 중단, 승인 계획 27건 미검증**

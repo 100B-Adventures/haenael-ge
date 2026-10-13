@@ -24,8 +24,8 @@ VALUES
 
 INSERT INTO public.goal(member_id,slug,title,due_date,visibility)
 VALUES('54000000-0000-0000-0000-000000000002','other-cover-goal','타인 커버 목표','2026-12-31','FRIENDS');
-INSERT INTO public.goal_cover_asset(id,goal_id,owner_member_id,quarantine_path,status,content_sha256,mime_type,byte_size)
-VALUES('54100000-0000-0000-0000-000000000004',(SELECT id FROM public.goal WHERE slug='other-cover-goal'),'54000000-0000-0000-0000-000000000002','other/goal/friends.webp','APPROVED',repeat('d',64),'image/webp',100);
+INSERT INTO public.goal_cover_asset(id,goal_id,owner_member_id,quarantine_path,status,content_sha256,mime_type,byte_size,reviewed_by,reviewed_at)
+VALUES('54100000-0000-0000-0000-000000000004',(SELECT id FROM public.goal WHERE slug='other-cover-goal'),'54000000-0000-0000-0000-000000000002','other/goal/friends.webp','APPROVED',repeat('d',64),'image/webp',100,'54000000-0000-0000-0000-000000000003',now());
 
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims','{"role":"authenticated","sub":"54000000-0000-0000-0000-000000000001"}',true);

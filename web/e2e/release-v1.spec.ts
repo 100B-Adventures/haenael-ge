@@ -1,12 +1,17 @@
 import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 const baseUrl = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3456";
+const declaredVersion = (
+  JSON.parse(readFileSync(path.resolve(process.cwd(), "package.json"), "utf8")) as { version: string }
+).version;
 
 test("health reports v1 and database ok", async ({ request }) => {
   const response = await request.get(`${baseUrl}/api/health`);
   expect(response.status()).toBe(200);
   const body = await response.json();
-  expect(body).toMatchObject({ status: "ok", version: "1.0.0", database: "ok" });
+  expect(body).toMatchObject({ status: "ok", version: declaredVersion, database: "ok" });
 });
 
 test("cashout not accessible to anonymous (redirect to landing)", async ({ page }) => {
