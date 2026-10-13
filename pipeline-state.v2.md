@@ -8,21 +8,22 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: ship         # 2026-10-14 qa 승인. 운영 스키마 적용·배포 완료, 운영 read-only QA 통과.
-approved_stages: [plan, design, eng-design, build, qa]
+current_stage: ship         # 2026-10-14 00:56 ship 완료. 해낼게 2.0.0 운영 배포, health version 2.0.0 실측 확인.
+approved_stages: [plan, design, eng-design, build, qa, ship]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
   build:      { entered: 2026-10-13 10:20, completed: 2026-10-13 17:12 }
   qa:         { entered: 2026-10-13 17:12, completed: 2026-10-14 00:05 }
-  ship:       { entered: 2026-10-14 00:05 }
+  ship:       { entered: 2026-10-14 00:05, completed: 2026-10-14 00:56 }
 release_train: 2.0
 distribution:
   selected:
     - { channel: web, priority: primary, reason: "D-018 웹 우선. SSR 가능·즉시 배포·심사 없음" }
     - { channel: appintoss, priority: secondary, reason: "D-018 모바일 2차. CSR 전용·심사 필요" }
-release_targets: []
+release_targets:
+  - { release: 2.0.0, channel: web, url: https://haenael-ge.vercel.app, deployed: 2026-10-14 00:56, health_version: 2.0.0 }
 approved_artifacts:
   plan:
     - { path: docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md, version: 1.0.0, status: approved, label: "V2 청사진" }
@@ -49,14 +50,16 @@ approved_artifacts:
     - { path: docs/qa/v2-production-final-readonly-qa-v1.0.0-gpt-codex-20261013-2351.md, version: 1.0.0, status: approved, label: "운영 배포 후 read-only 최종 QA(증거 23건)" }
     - { path: docs/qa/v2-social-viral-loop-qa-reverification-v1.0.0-gpt-codex-20261013-1920.md, version: 1.0.0, status: approved, label: "결함 재검증" }
     - { path: docs/qa/v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md, version: 1.0.0, status: approved, label: "전체 회귀 복구 결과" }
-  ship: []
+  ship:
+    - { path: RELEASE.md, version: 2.0.0, status: approved, label: "해낼게 2.0.0 릴리스 매니페스트" }
+    - { path: CHANGELOG.md, version: 2.0.0, status: approved, label: "2.0.0 변경 기록" }
 stages:
   plan:       { status: approved, artifacts_ok: true }
   design:     { status: approved, artifacts_ok: true }
   eng-design: { status: approved, artifacts_ok: true }
   build:      { status: approved, artifacts_ok: true }
   qa:         { status: changes-requested, artifacts_ok: false }
-  ship:       { status: in-progress, artifacts_ok: false }
+  ship:       { status: approved, artifacts_ok: true }
 override: false
 override_reason: ""
 override_expires: ""
@@ -117,6 +120,15 @@ override_expires: ""
 ### ship ⬜
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-14 00:56 · ✅ APPROVE ship · 해낼게 2.0.0 운영 배포 완료
+
+- 릴리스 신원: `web/package.json` 2.0.0, `RELEASE.md` 2.0.0 매니페스트, `CHANGELOG.md` 2.0.0.
+- **운영 실측**: `https://haenael-ge.vercel.app/api/health` 가 `version 2.0.0`, `status ok`, `database ok`. 경로 응답 = `/my` `/friends` `/invite` `/admin` 비로그인 307, `/me/goal/1` 200 권한없음 렌더, `/invite/<없는토큰>` 200 오류 분기.
+- 운영 DB 마이그레이션 2건 적용 완료, 운영 read-only QA 통과(익명 14건·인증 4건, 가로 넘침 0, 콘솔 오류 0, 쓰기 0).
+- 전체 브라우저 회귀 63/63, DB 테스트 323건, 단위 테스트 319건 통과.
+- 환전 불변식 무변경 확인.
+
 
 ### 2026-10-14 00:05 · ✅ APPROVE qa → ship 진입
 
