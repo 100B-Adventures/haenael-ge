@@ -167,7 +167,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
               </span>
               <button
                 type="button"
-                className="min-h-11 min-w-11 text-[13px] [color:#A09B93]!"
+                className="min-h-11 min-w-11 text-[13px] text-muted-foreground"
                 onClick={() => setOpen(false)}
                 aria-label="알림 닫기"
               >
@@ -177,7 +177,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
 
             {notifications.length === 0 ? (
               <div
-                className="px-4 py-8 text-center text-[13px] [color:#A09B93]!"
+                className="px-4 py-8 text-center text-[13px] text-muted-foreground"
                 data-testid="notification-empty"
               >
                 아직 알림이 없어요
@@ -207,7 +207,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
                       <p className="text-[13px] font-medium leading-snug [color:var(--foreground)]!">
                         {notifText(n)}
                       </p>
-                      <p className="mt-0.5 text-[13px] [color:#A09B93]!">
+                      <p className="mt-0.5 text-[13px] text-muted-foreground">
                         {channelBadge(n)} ·{" "}
                         {new Date(n.created_at).toLocaleDateString("ko-KR", {
                           month: "short",
