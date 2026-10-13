@@ -8,14 +8,14 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: build        # 2026-10-13 eng-design 승인(회장 "설계 됐으면 또 codex 시켜서 다음단계 진행해") 후 build 진입.
-approved_stages: [plan, design, eng-design]
+current_stage: qa           # 2026-10-13 build 승인(회장 "계속 진행해 개발 다음 qa 그다음 배포잖어") 후 qa 진입.
+approved_stages: [plan, design, eng-design, build]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
-  build:      { entered: 2026-10-13 10:20 }
-  qa:         { }
+  build:      { entered: 2026-10-13 10:20, completed: 2026-10-13 17:12 }
+  qa:         { entered: 2026-10-13 17:12 }
   ship:       { }
 release_train: 2.0
 distribution:
@@ -36,20 +36,23 @@ approved_artifacts:
     - { path: docs/design/prototypes/ui-evidence-landing-wordmap-i18n.txt, version: unversioned, status: approved, label: "랜딩·워드맵 다국어 실측 증거", sha256: a71a49d17dc4475d30308516a0c2f423bc8285256d288097ac5691e016d227e8 }
   eng-design:
     # V2 웹 우선 슬라이스 설계 (2026-10-13, Codex tech-architect). 거버넌스 D-018·D-019.
-    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: approved, label: "V2 웹 우선 기능설계", sha256: 4d603907a7dbee418945bb10b83310eadca839643fedd84a0b8c11471127abc8 }
-    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: approved, label: "V2 웹 우선 데이터 구조", sha256: aa9138cbe21c195105a31aa62b607c6ba46d4f4ffdaff0c310235e05efda325e }
-    - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: approved, label: "V2 웹 우선 서버 함수 계약", sha256: c2f50b8ffff16b9ff948a1abb91385420e08722df99348ec9b5ec5b5d9fc8fcb }
-    - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: approved, label: "V2 웹 우선 시스템 구성도(다이어그램 7종)", sha256: 5236ee8da4e6664ca82fa2f611ff4161e188a703e4f3b0b9383cdd5227826ce9 }
-    - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.0.0.md, version: 1.0.0, status: approved, label: "V2 웹 우선 테스트 계획", sha256: 54d6f922edcdc8953aec4eb7d9975be14801e7d9af7b70afdc914badcfe47241 }
-  build: []
+    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 기능설계", sha256: 13d9b717e839020198b2a1d4f9abda6ad0d021c8a980efa804df08e9c06acc8f }
+    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 데이터 구조", sha256: df77ccfe23ba369a28854355fafe7260b5a9e7bba5a8ed515c93449f23d37109 }
+    - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 서버 함수 계약", sha256: ab54f04fd13fa3d8fd4ca256a2d37c113bea89995d344bbacc0491d760b0ba0c }
+    - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 시스템 구성도(다이어그램 7종)", sha256: b2a7f81a68583886cd39e81b4462f976b020cd0fbb8297e772ca8675cc6bff71 }
+    - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 테스트 계획", sha256: 78a945e1061448af7a56356485d2c39f301f06bcb370cd8c60ea39c8f24bc7cd }
+  build:
+    - { path: docs/build-log.md, version: unversioned, status: approved, label: "V2 build 구현·검증 로그(1차+2차 슬라이스)", sha256: e3612a5a434123d1d39cf1a14fb1b8951f0843241148e046de3eb7fbb19af100 }
+    - { path: supabase/migrations/20261013050000_social_viral_loop_web_first.sql, version: unversioned, status: approved, label: "V2 소셜 스키마(운영 미적용)" }
+    - { path: supabase/migrations/20261013060000_social_my_page_achievements.sql, version: unversioned, status: approved, label: "마이페이지·업적 집계(운영 미적용)" }
   qa: []
   ship: []
 stages:
   plan:       { status: approved, artifacts_ok: true }
   design:     { status: approved, artifacts_ok: true }
   eng-design: { status: approved, artifacts_ok: true }
-  build:      { status: in-progress, artifacts_ok: false }
-  qa:         { status: todo, artifacts_ok: false }
+  build:      { status: approved, artifacts_ok: true }
+  qa:         { status: in-progress, artifacts_ok: false }
   ship:       { status: todo, artifacts_ok: false }
 override: false
 override_reason: ""
@@ -111,6 +114,18 @@ override_expires: ""
 ### ship ⬜
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-13 17:12 · ✅ APPROVE build → qa 진입
+
+- 승인 근거(회장 원문): "계속 진행해 개발 다음 qa 그다음 배포잖어"
+- 설계 핀을 v1.0.0 에서 v1.1.0 으로 올림(업적 범위 해제 반영, D-022). 5종 sha256 재계산.
+- 컨트롤러 재검증(자기신고 아님): 단위 테스트 52파일 311건 통과, 운영 빌드 통과와 `/my` 라우트 포함, 비로그인 `/me/goal/1` 이 권한없음 상태 렌더와 로그아웃 미노출, 없는 초대 토큰 오류 분기 렌더, 서버 오류 로그 0건.
+- 워커 제출 증거: pgTAP 18파일 322건 통과, Playwright 9/9 통과, 390x844 실측(13px 미만 0, 44px 미만 누름 0, 가로 넘침 0, 콘솔 오류 0), 프로토타입 대조표 17행.
+- 위임 품질 검증 PASS(Skill 3회, WebSearch/Fetch 11회, 참조조회 73회).
+- 불변식 확인: 환전 수수료·마스킹 테스트 변경 0건, A안 락 무변경, 운영 DB 쓰기 0건.
+- 미결 1건: 하단탭 라벨 10px 대 13px. 결정판 `docs/design/boards/tabbar-label-10-vs-13-v1.0.0.html` 로 회장에게 제시. qa 중 결정되면 그 값으로 확정한다.
+- 경계: 운영 DB 마이그레이션 2건은 미적용이다. qa 승인 뒤 한 번에 적용한다.
+
 
 - 2026-10-13 10:20 KST — **eng-design APPROVED** — 회장 지시 "설계 됐으면 또 codex 시켜서 다음단계 진행해". 재검증: 5산출물 존재·sha256 핀 일치, `verify-agent-quality.sh tech-architect` → PASS(RUBRIC 25/25), FDD §13 추적성 갭 0, 디자인 시안 대조(하단탭 4개 라벨 일치·프로토 프레임 S1·S3·S4 포함·S2·S5·S6 비범위 사유 명시). D-019 로 ARC-R05 해소. (artifacts: fdd·erd·api-contract·architecture·test-plan 전부 v1.0.0)
 - 2026-10-13 10:20 KST — **design APPROVED** — v2 프로토타입·모션·화면 인벤토리 v3. 회장 2026-10-13 지적("동적모션이나 모바일 하단탭등 디자인 쳐놓은게 있는데 그거 버렸냐")으로 정본 확인됨. core 라인에서 이관.
