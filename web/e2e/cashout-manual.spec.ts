@@ -5,16 +5,18 @@
 // 인증은 기존 스펙의 조건부 실세션 관례를 보완해 @supabase/ssr 쿠키를 로컬 컨텍스트에만 주입한다.
 
 import { spawn, type ChildProcess } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import path from "node:path";
+import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
 const APP_PORT = 3461;
 const SUPABASE_PORT = 54329;
 const APP_URL = `http://127.0.0.1:${APP_PORT}`;
 const SUPABASE_URL = `http://127.0.0.1:${SUPABASE_PORT}`;
-const AUTH_COOKIE = "sb-127-auth-token";
 const FULL_ACCOUNT = "123456789012";
 const VISUAL_ACCOUNT = "81220104448421";
 const FORM_MASKED_ACCOUNT = "********9012";
@@ -22,11 +24,27 @@ const VISUAL_MASKED_ACCOUNT = "**********8421";
 const PERSISTED_MASKED_ACCOUNT = "••••••9012";
 
 const USERS = {
-  below: "ca5e2e00-0000-0000-0000-000000000001",
-  invalid: "ca5e2e00-0000-0000-0000-000000000002",
-  happy: "ca5e2e00-0000-0000-0000-000000000003",
-  duplicate: "ca5e2e00-0000-0000-0000-000000000004",
+  below: randomUUID(),
+  invalid: randomUUID(),
+  happy: randomUUID(),
+  duplicate: randomUUID(),
 } as const;
+
+function requiredEnv(name: string) {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`${name} 미설정 — 로컬 Supabase 환경이 필요합니다.`);
+  return value;
+}
+
+const BUILD_SUPABASE_URL = requiredEnv("NEXT_PUBLIC_SUPABASE_URL");
+const BUILD_SUPABASE_ANON_KEY = requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+const BUILD_SUPABASE_SERVICE_ROLE_KEY = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+const buildSupabaseOrigin = new URL(BUILD_SUPABASE_URL).origin;
+const buildSupabaseHost = new URL(BUILD_SUPABASE_URL).hostname;
+
+if (!["127.0.0.1", "localhost", "::1"].includes(buildSupabaseHost)) {
+  throw new Error("cashout-manual E2E는 운영 Auth에 테스트 사용자를 만들지 않습니다. 로컬 Supabase URL을 사용하세요.");
+}
 
 type CashoutRecord = {
   id: number;
@@ -53,7 +71,14 @@ type UserFixtureState = {
   phone: string | null;
 };
 
+type CapturedCookie = {
+  name: string;
+  value: string;
+  options?: { maxAge?: number };
+};
+
 const fixtureByUser = new Map<string, UserFixtureState>();
+const authCookiesByUser = new Map<string, CapturedCookie[]>();
 const INITIAL_FIXTURE_BY_USER = new Map<string, UserFixtureState>([
   [USERS.below, {
     totalBalance: 29,
@@ -101,44 +126,49 @@ const CAPTURE_DIR = path.resolve(
   process.env.CASHOUT_CAPTURE_DIR ?? "../artifacts/qa-cashout-core-20260824/build-fix",
 );
 
-function base64Url(value: string) {
-  return Buffer.from(value).toString("base64url");
-}
+async function provisionLocalAuthSessions() {
+  const admin = createClient(BUILD_SUPABASE_URL, BUILD_SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 
-function accessTokenFor(userId: string) {
-  const now = Math.floor(Date.now() / 1000);
-  return [
-    base64Url(JSON.stringify({ alg: "none", typ: "JWT" })),
-    base64Url(JSON.stringify({
-      aud: "authenticated",
-      exp: now + 3600,
-      iat: now,
-      role: "authenticated",
-      sub: userId,
-    })),
-    "e2e-signature",
-  ].join(".");
-}
-
-function authCookieValue(userId: string) {
-  const now = Math.floor(Date.now() / 1000);
-  const session = {
-    access_token: accessTokenFor(userId),
-    refresh_token: `refresh-${userId}`,
-    expires_in: 3600,
-    expires_at: now + 3600,
-    token_type: "bearer",
-    user: {
+  for (const userId of Object.values(USERS)) {
+    const email = `cashout-e2e-${userId}@test.local`;
+    const password = `cashout-e2e-${userId}-pw`;
+    const { error: createError } = await admin.auth.admin.createUser({
       id: userId,
-      aud: "authenticated",
-      role: "authenticated",
-      email: `${userId}@test.local`,
-      app_metadata: { provider: "email", providers: ["email"] },
-      user_metadata: {},
-      created_at: "2026-08-04T00:00:00.000Z",
-    },
-  };
-  return `base64-${base64Url(JSON.stringify(session))}`;
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (createError) throw new Error(`cashout QA 계정 생성 실패: ${createError.message}`);
+
+    const cookieJar = new Map<string, CapturedCookie>();
+    const authClient = createBrowserClient(BUILD_SUPABASE_URL, BUILD_SUPABASE_ANON_KEY, {
+      isSingleton: false,
+      cookies: {
+        getAll: () => [...cookieJar.values()].map(({ name, value }) => ({ name, value })),
+        setAll: (cookies) => {
+          for (const cookie of cookies) {
+            if (!cookie.value || cookie.options?.maxAge === 0) cookieJar.delete(cookie.name);
+            else cookieJar.set(cookie.name, cookie as CapturedCookie);
+          }
+        },
+      },
+      auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: true },
+    });
+    const { error: signInError } = await authClient.auth.signInWithPassword({ email, password });
+    if (signInError) throw new Error(`cashout QA 로그인 실패: ${signInError.message}`);
+    authCookiesByUser.set(userId, [...cookieJar.values()]);
+  }
+}
+
+async function removeLocalAuthUsers() {
+  const admin = createClient(BUILD_SUPABASE_URL, BUILD_SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  for (const userId of Object.values(USERS)) {
+    await admin.auth.admin.deleteUser(userId);
+  }
 }
 
 function userIdFromRequest(request: IncomingMessage) {
@@ -398,17 +428,31 @@ async function waitForApp(url: string) {
 }
 
 async function authenticate(context: BrowserContext, userId: string) {
-  await context.addCookies([{
-    name: AUTH_COOKIE,
-    value: authCookieValue(userId),
+  const cookies = authCookiesByUser.get(userId);
+  if (!cookies?.length) throw new Error(`cashout QA 세션 없음: ${userId}`);
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  await context.addCookies(cookies.map(({ name, value, options }) => ({
+    name,
+    value,
     url: APP_URL,
     httpOnly: false,
     secure: false,
-    sameSite: "Lax",
-  }]);
+    sameSite: "Lax" as const,
+    expires: nowSeconds + (options?.maxAge ?? 60 * 60),
+  })));
+}
+
+async function routeFixtureData(page: Page) {
+  await page.route("**/rest/v1/**", async (route) => {
+    const source = new URL(route.request().url());
+    if (source.origin !== buildSupabaseOrigin) return route.fallback();
+    const target = new URL(`${source.pathname}${source.search}`, SUPABASE_URL);
+    await route.continue({ url: target.toString() });
+  });
 }
 
 async function openCashout(page: Page, userId: string) {
+  await routeFixtureData(page);
   await authenticate(page.context(), userId);
   await page.goto(`${APP_URL}/cashout`);
   await expect(page.getByTestId("cashout-page")).toBeVisible();
@@ -424,6 +468,7 @@ test.beforeAll(async () => {
     mockServer.once("error", reject);
     mockServer.listen(SUPABASE_PORT, "127.0.0.1", resolve);
   });
+  await provisionLocalAuthSessions();
 
   nextProcess = spawn(
     process.execPath,
@@ -435,9 +480,12 @@ test.beforeAll(async () => {
         // production 번들은 localhost를 기준으로 만들고 실제 브라우저는 127.0.0.1로
         // 접속한다. MyLinkCard는 첫 hydration을 같은 값으로 시작한 뒤 actual host로 갱신해야 한다.
         NEXT_PUBLIC_APP_URL: "http://localhost:3000",
-        NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL,
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: "e2e-anon-key",
-        SUPABASE_SERVICE_ROLE_KEY: "e2e-service-role-key",
+        CASHOUT_E2E_SUPABASE_SOURCE_URL: BUILD_SUPABASE_URL,
+        CASHOUT_E2E_SUPABASE_TARGET_URL: SUPABASE_URL,
+        NODE_OPTIONS: [
+          process.env.NODE_OPTIONS,
+          `--require=${path.resolve("e2e/support/cashout-fetch-redirect.cjs")}`,
+        ].filter(Boolean).join(" "),
         CASHOUT_ENABLED: "true",
         CASHOUT_ACCOUNT_ENCRYPTION_KEY: "e".repeat(40),
         CASHOUT_ACCOUNT_FINGERPRINT_KEY: "f".repeat(40),
@@ -458,6 +506,7 @@ test.beforeEach(() => {
 
 test.afterAll(async () => {
   nextProcess?.kill("SIGTERM");
+  await removeLocalAuthUsers();
   await new Promise<void>((resolve) => mockServer?.close(() => resolve()));
 });
 
@@ -592,12 +641,17 @@ test.describe("수동 환전: happy + edge", () => {
     await page.getByTestId("cashout-confirm-button").click();
     await expect(page.getByTestId("cashout-confirm-step")).toBeVisible();
 
-    const actionResponsePromise = page.waitForResponse((response) =>
-      response.url().startsWith(APP_URL) && response.request().method() === "POST",
-    );
+    let actionBody = "";
+    await page.route(`${APP_URL}/cashout`, async (route) => {
+      const request = route.request();
+      if (request.method() !== "POST" || !request.headers()["next-action"]) {
+        return route.fallback();
+      }
+      const response = await route.fetch();
+      actionBody = await response.text();
+      await route.fulfill({ response, body: actionBody });
+    });
     await page.getByTestId("cashout-submit-button").click();
-    const actionResponse = await actionResponsePromise;
-    const actionBody = await actionResponse.text();
 
     await expect(page.getByTestId("cashout-request-success")).toBeVisible();
     expect(fixtureByUser.get(USERS.happy)?.phone).toBe("01099998888");
@@ -639,6 +693,7 @@ test.describe("수동 환전: happy + edge", () => {
     });
     mkdirSync(CAPTURE_DIR, { recursive: true });
     await page.setViewportSize({ width: 390, height: 844 });
+    await routeFixtureData(page);
     await authenticate(page.context(), USERS.happy);
 
     eligibilityDelayMs = 1_000;
