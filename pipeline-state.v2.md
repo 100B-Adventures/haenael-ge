@@ -8,7 +8,7 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: build        # 2026-10-13 18:17 qa 가 NG(Critical 1·Major 4) 로 반려해 build 재오픈. 사유 = docs/qa/v2-social-viral-loop-qa-v1.0.0-gpt-codex-20261013-1804.md
+current_stage: qa           # 2026-10-13 재검증 착수. code-builder 수정 보고 = docs/qa/v2-social-viral-loop-qa-fix-v1.0.0-gpt-codex-20261013-1847.md
 approved_stages: [plan, design, eng-design]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }

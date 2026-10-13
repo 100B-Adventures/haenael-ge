@@ -1,5 +1,29 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-13: V2 소셜 바이럴 루프 수정 라운드 재검증 v1.0.0
+
+**판정: ❌ NG. 핵심 수정은 해소됐으나 전체 Playwright 18 FAIL, pgTAP 1개 파일 중단, 승인 계획 27건 미검증**
+
+| 결함 ID | 현재 판정 | 재검증 종료증거 |
+|---|---|---|
+| QA-V2-SEC-01 | ✅ 해소 | friend RPC private path 0, direct read 거부, Presigned URL 200, admin path 정상 |
+| QA-V2-FLOW-01 | ✅ 해소 | friendId·goal owner 불일치 실제 HTTP 404 |
+| QA-V2-QA-01 | ✅ 원결함 해소 | production-mode 신규 화면 console/pageerror 0, loopback-only CSP, unsafe-eval 0 |
+| QA-V2-DEP-01 | ✅ 해소 | production dependency audit 0 |
+| QA-V2-COVERAGE-01 | 🔶 OPEN | 문서 과장 해소. 승인 test plan 84건 중 27건은 계속 미검증 |
+| QA-V2-COVER-ERR-01 | ✅ 코드·단위 해소 | signed URL 실패 3분기 명시 오류, 정상 실호출 PASS |
+| QA-V2-PERF-01 | 🔶 OPEN | batch 1회 확인. 다량 fixture request count·latency 미실측 |
+| QA-V2-DESIGN-01 | 🔶 OPEN | 신규 token 위반 0. 공유 lint 3종 출력 후 exit 0 유지 |
+| QA-V2-REGTEST-01 | ❌ OPEN | 전체 Playwright 30 PASS / 18 FAIL / 15 SKIP |
+| QA-V2-DBTEST-01 | ❌ OPEN | `social_web_first_cover.test.sql` fixture constraint 위반으로 pgTAP 중단 |
+
+- 수정 보고: [`v2-social-viral-loop-qa-fix-v1.0.0-gpt-codex-20261013-1847.md`](v2-social-viral-loop-qa-fix-v1.0.0-gpt-codex-20261013-1847.md)
+- 재검증 보고: [`v2-social-viral-loop-qa-reverification-v1.0.0-gpt-codex-20261013-1920.md`](v2-social-viral-loop-qa-reverification-v1.0.0-gpt-codex-20261013-1920.md)
+- 실행 증거: production build PASS, Vitest 319/319, social Playwright 14/14, viewport 14/14, audit 0. 전체 Playwright와 pgTAP은 위 실패로 NG.
+- 운영 배포·운영 DB migration·운영 환전 데이터 쓰기는 금지 상태를 유지한다.
+
+STAMP: 2026-10-13 19:20 KST | model gpt-5-codex | agent qa-verifier | skill qa | 상태 NG
+
 ## 2026-10-13: V2 소셜 바이럴 루프 QA v1.0.0
 
 **판정: ❌ NG. 계획 84건 중 통과 47, 부분 8, 실패 2, 미검증 27**

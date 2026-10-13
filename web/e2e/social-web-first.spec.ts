@@ -1,6 +1,7 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { execFileSync } from "node:child_process";
+import { mkdirSync } from "node:fs";
 import {
   type Browser,
   type BrowserContext,
@@ -20,6 +21,7 @@ const ANON_KEY = requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 const SERVICE_KEY = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
 const password = "social-web-first-e2e-1234!";
 const runId = Date.now();
+const E2E_BASE_URL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 type CookieRow = { name: string; value: string; options?: { maxAge?: number } };
 
 const LOCAL_DB_CONTAINER = process.env.LOCAL_DB_CONTAINER ??
@@ -90,7 +92,7 @@ async function authContext(
     [...jar.values()].map(({ name, value, options }) => ({
       name,
       value,
-      url: "http://localhost:3000",
+      url: E2E_BASE_URL,
       httpOnly: false,
       secure: false,
       sameSite: "Lax" as const,
@@ -120,6 +122,7 @@ test.describe("V2 web-first social slice", () => {
   >;
   let ownerGoal = 0;
   let friendPublicGoal = 0;
+  let friendFriendsGoal = 0;
   let publicSlug = "";
   let smokeInviteToken = "";
   const paymentIds: number[] = [];
@@ -198,7 +201,12 @@ test.describe("V2 web-first social slice", () => {
     friendPublicGoal = friendGoals.find(({ slug }) =>
       slug === `friend-public-${runId}`
     )?.id ?? 0;
-    if (!friendPublicGoal) throw new Error("friend_public_goal_missing");
+    friendFriendsGoal = friendGoals.find(({ slug }) =>
+      slug === `friend-friends-${runId}`
+    )?.id ?? 0;
+    if (!friendPublicGoal || !friendFriendsGoal) {
+      throw new Error("friend_goal_fixture_missing");
+    }
     await admin.from("friend_connection").insert({
       member_low_id: [ids.owner, ids.friend].sort()[0],
       member_high_id: [ids.owner, ids.friend].sort()[1],
@@ -568,6 +576,248 @@ test.describe("V2 web-first social slice", () => {
     )).toBe(0);
     expect(adminConsoleErrors).toEqual([]);
     await adminContext.close();
+  });
+
+  test("QA-REVERIFY-SEC-01 친구 응답은 private path를 숨기고 signed URL만 노출하며 admin 검수는 경로를 받는다", async ({ browser }) => {
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "base64",
+    );
+    const privatePath = `${ids.friend}/${friendFriendsGoal}/reverify-${runId}.png`;
+    const reviewPath = `${ids.owner}/${ownerGoal}/admin-reverify-${runId}.png`;
+    let approvedAssetId = "";
+    let reviewAssetId = "";
+    try {
+      const { error: privateUploadError } = await admin.storage.from(
+        "goal-cover-quarantine",
+      ).upload(privatePath, png, { contentType: "image/png", upsert: false });
+      expect(privateUploadError).toBeNull();
+      const { error: reviewUploadError } = await admin.storage.from(
+        "goal-cover-quarantine",
+      ).upload(reviewPath, png, { contentType: "image/png", upsert: false });
+      expect(reviewUploadError).toBeNull();
+
+      const { data: approvedAsset, error: approvedAssetError } = await admin
+        .from("goal_cover_asset")
+        .insert({
+          goal_id: friendFriendsGoal,
+          owner_member_id: ids.friend,
+          quarantine_path: privatePath,
+          public_path: null,
+          status: "APPROVED",
+          content_sha256: "a".repeat(64),
+          mime_type: "image/png",
+          byte_size: png.length,
+          reviewed_by: ids.admin,
+          reviewed_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+      expect(approvedAssetError).toBeNull();
+      approvedAssetId = approvedAsset!.id;
+      const { error: activateError } = await admin.from("goal").update({
+        active_cover_asset_id: approvedAssetId,
+      }).eq("id", friendFriendsGoal);
+      expect(activateError).toBeNull();
+
+      const { data: reviewAsset, error: reviewAssetError } = await admin
+        .from("goal_cover_asset")
+        .insert({
+          goal_id: ownerGoal,
+          owner_member_id: ids.owner,
+          quarantine_path: reviewPath,
+          public_path: null,
+          status: "REVIEW",
+          content_sha256: "b".repeat(64),
+          mime_type: "image/png",
+          byte_size: png.length,
+        })
+        .select("id")
+        .single();
+      expect(reviewAssetError).toBeNull();
+      reviewAssetId = reviewAsset!.id;
+
+      const ownerClient = createClient(SUPABASE_URL, ANON_KEY);
+      const { error: ownerAuthError } = await ownerClient.auth
+        .signInWithPassword({ email: emails.owner, password });
+      expect(ownerAuthError).toBeNull();
+      const [{ data: friendList, error: friendListError }, {
+        data: friendDetail,
+        error: friendDetailError,
+      }] = await Promise.all([
+        ownerClient.rpc("my_friend_goals"),
+        ownerClient.rpc("friend_goal_detail", { goal_id: friendFriendsGoal }),
+      ]);
+      expect(friendListError).toBeNull();
+      expect(friendDetailError).toBeNull();
+      const friendPayload = JSON.stringify({ friendList, friendDetail });
+      expect(friendPayload).not.toContain("cover_storage_path");
+      expect(friendPayload).not.toContain("quarantine_path");
+      expect(friendPayload).not.toContain(privatePath);
+      expect((friendDetail as { cover_public_path: string | null })
+        .cover_public_path).toBeNull();
+
+      const directDownload = await ownerClient.storage.from(
+        "goal-cover-quarantine",
+      ).download(privatePath);
+      expect(directDownload.data).toBeNull();
+      expect(directDownload.error).not.toBeNull();
+
+      const ownerContext = await authContext(browser, emails.owner);
+      const ownerPage = await ownerContext.newPage();
+      const response = await ownerPage.goto(
+        `/friends/${ids.friend}?goal=${friendFriendsGoal}`,
+      );
+      expect(response?.status()).toBe(200);
+      const cover = ownerPage.getByRole("img", { name: /목표 커버/ });
+      await expect(cover).toBeVisible();
+      const coverUrl = await cover.getAttribute("src");
+      expect(coverUrl).toContain(
+        "/storage/v1/object/sign/goal-cover-quarantine/",
+      );
+      expect(coverUrl).not.toContain("cover_storage_path");
+      const signedResponse = await ownerPage.request.get(coverUrl!);
+      expect(signedResponse.status()).toBe(200);
+      await ownerContext.close();
+
+      const adminClient = createClient(SUPABASE_URL, ANON_KEY);
+      const { error: adminAuthError } = await adminClient.auth
+        .signInWithPassword({ email: emails.admin, password });
+      expect(adminAuthError).toBeNull();
+      const { data: adminRows, error: adminRowsError } = await adminClient.rpc(
+        "admin_list_goal_covers",
+        { p_limit: 100 },
+      );
+      expect(adminRowsError).toBeNull();
+      const reviewRow = (adminRows as Array<{
+        asset_id: string;
+        quarantine_path: string;
+      }>).find(({ asset_id }) => asset_id === reviewAssetId);
+      expect(reviewRow?.quarantine_path).toBe(reviewPath);
+    } finally {
+      await admin.from("goal").update({ active_cover_asset_id: null }).eq(
+        "id",
+        friendFriendsGoal,
+      );
+      if (approvedAssetId || reviewAssetId) {
+        await admin.from("goal_cover_asset").delete().in(
+          "id",
+          [approvedAssetId, reviewAssetId].filter(Boolean),
+        );
+      }
+      await admin.storage.from("goal-cover-quarantine").remove([
+        privatePath,
+        reviewPath,
+      ]);
+    }
+  });
+
+  test("QA-REVERIFY-FLOW-01 friendId와 목표 소유자가 다르면 실제 HTTP 404다", async ({ browser }) => {
+    const [memberLowId, memberHighId] = [ids.owner, ids.acceptA].sort();
+    await admin.from("friend_connection").upsert({
+      member_low_id: memberLowId,
+      member_high_id: memberHighId,
+      status: "ACTIVE",
+      blocked_by_member_id: null,
+    }, { onConflict: "member_low_id,member_high_id" });
+    try {
+      const context = await authContext(browser, emails.owner);
+      const page = await context.newPage();
+      const response = await page.goto(
+        `/friends/${ids.acceptA}?goal=${friendPublicGoal}`,
+      );
+      expect(response?.status()).toBe(404);
+      await expect(page.getByTestId("friend-goal-detail")).toHaveCount(0);
+      await context.close();
+    } finally {
+      await admin.from("friend_connection").delete()
+        .eq("member_low_id", memberLowId)
+        .eq("member_high_id", memberHighId);
+    }
+  });
+
+  test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
+    const evidenceDir = "../docs/qa/evidence/v2-social-viral-loop-reverify-v1";
+    mkdirSync(evidenceDir, { recursive: true });
+    const routes = [
+      ["goal-detail", `/me/goal/${ownerGoal}`],
+      ["my", "/my"],
+      ["friends", "/friends"],
+      ["friend-detail", `/friends/${ids.friend}?goal=${friendPublicGoal}`],
+      ["invite-create", "/invite"],
+    ] as const;
+    for (const width of [390, 1280]) {
+      const context = await authContext(browser, emails.owner);
+      for (const [label, route] of routes) {
+        const page = await context.newPage();
+        await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+        const consoleErrors: string[] = [];
+        page.on("console", (message) => {
+          if (message.type() === "error") consoleErrors.push(message.text());
+        });
+        page.on("pageerror", (error) => consoleErrors.push(error.message));
+        const response = await page.goto(route);
+        expect(response?.status(), `${width}px ${route}`).toBe(200);
+        await expect(page.locator("body")).not.toContainText("Application error");
+        const overflow = await page.evaluate(() =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth
+        );
+        expect(overflow, `${width}px ${route}`).toBe(0);
+        expect(consoleErrors, `${width}px ${route}`).toEqual([]);
+        await page.screenshot({
+          path: `${evidenceDir}/${width}-${label}.png`,
+          fullPage: true,
+        });
+        await page.close();
+      }
+      await context.close();
+
+      const invitePage = await browser.newPage({
+        viewport: { width, height: width === 390 ? 844 : 900 },
+      });
+      const inviteErrors: string[] = [];
+      invitePage.on("console", (message) => {
+        if (message.type() === "error") inviteErrors.push(message.text());
+      });
+      invitePage.on("pageerror", (error) => inviteErrors.push(error.message));
+      const inviteResponse = await invitePage.goto(`/invite/${smokeInviteToken}`);
+      expect(inviteResponse?.status()).toBe(200);
+      expect(await invitePage.evaluate(() =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth
+      )).toBe(0);
+      expect(inviteErrors).toEqual([]);
+      await invitePage.screenshot({
+        path: `${evidenceDir}/${width}-invite-accept.png`,
+        fullPage: true,
+      });
+      await invitePage.close();
+
+      const adminContext = await authContext(browser, emails.admin);
+      const adminPage = await adminContext.newPage();
+      await adminPage.setViewportSize({
+        width,
+        height: width === 390 ? 844 : 900,
+      });
+      const adminErrors: string[] = [];
+      adminPage.on("console", (message) => {
+        if (message.type() === "error") adminErrors.push(message.text());
+      });
+      adminPage.on("pageerror", (error) => adminErrors.push(error.message));
+      const adminResponse = await adminPage.goto("/admin");
+      expect(adminResponse?.status()).toBe(200);
+      expect(await adminPage.evaluate(() =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth
+      )).toBe(0);
+      expect(adminErrors).toEqual([]);
+      await adminPage.screenshot({
+        path: `${evidenceDir}/${width}-cover-review.png`,
+        fullPage: true,
+      });
+      await adminContext.close();
+    }
   });
 
   test("PW-05 admin 승인 후 owner와 public 화면에 승인 커버만 보인다", async ({ browser }) => {
