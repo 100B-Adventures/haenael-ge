@@ -2,6 +2,8 @@
 
 > **최종 판정: ❌ NG.** 84개 계획 케이스 중 통과 47, 부분 8, 실패 2, 미검증 27이다. 전체 E2E, 1280px 실측, 승인 시안 전수 대조가 끝나지 않았고 D-019 계약 위반이 확인돼 배포 단계로 넘길 수 없다.
 
+> **⛔ 검증실패 보고:** `verify-agent-quality.sh`는 stage 또는 운영 호스트의 V2 배포본 접촉 증거가 0건이라 반려했다. 이번 과업은 운영 배포·운영 DB 적용을 금지했고 현재 V2 migration도 운영 미적용이므로, local production-mode 결과를 배포 환경 증거로 과장하지 않는다.
+
 STAMP: 2026-10-13 18:04 KST | model gpt-5-codex | agent qa-verifier | skills qa | line v2 | 기반 포맷 `docs/qa/core-cashout-release-final-qa-v2-gpt-codex.md` | 승인 설계 `docs/eng-design/*-social-viral-loop-web-first-v1.1.0.md` | 고민: 테스트 총계가 아니라 케이스별 직접 증거와 미검증 범위를 분리했다.
 
 ## 바로가기
