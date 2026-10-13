@@ -40,12 +40,35 @@ describe("SEC-HEADERS 응답 보안 헤더 계약", () => {
   });
 
   it("SEC-HEADERS-04 환경 분리: 로컬 Supabase는 개발에서만 허용한다", () => {
-    const developmentPolicy = buildContentSecurityPolicy(true);
-    const productionPolicy = buildContentSecurityPolicy(false);
+    const developmentPolicy = buildContentSecurityPolicy(true, undefined);
+    const productionPolicy = buildContentSecurityPolicy(
+      false,
+      "https://project.supabase.co",
+    );
 
     expect(developmentPolicy).toContain("http://127.0.0.1:54321");
     expect(developmentPolicy).toContain("ws://localhost:54321");
     expect(productionPolicy).not.toContain("127.0.0.1:54321");
     expect(productionPolicy).not.toContain("localhost:54321");
+  });
+
+  it("QA-V2-QA-01 정상: production-mode 로컬 QA는 설정된 loopback Supabase만 허용한다", () => {
+    const policy = buildContentSecurityPolicy(
+      false,
+      "http://127.0.0.1:54321",
+    );
+
+    expect(policy).toContain("http://127.0.0.1:54321");
+    expect(policy).toContain("ws://127.0.0.1:54321");
+    expect(policy).not.toContain("'unsafe-eval'");
+  });
+
+  it("QA-V2-QA-01 거절: loopback처럼 보이는 외부 origin은 production CSP에 추가하지 않는다", () => {
+    const policy = buildContentSecurityPolicy(
+      false,
+      "https://127.0.0.1.attacker.example",
+    );
+
+    expect(policy).not.toContain("127.0.0.1.attacker.example");
   });
 });
