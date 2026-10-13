@@ -4,6 +4,7 @@ import { CheerPaymentButton } from "../CheerPaymentButton";
 
 const mockRequestPayment = vi.fn();
 const mockLoadTossPayments = vi.fn();
+const mockGetSession = vi.fn();
 
 vi.mock("@/lib/toss", () => ({
   loadTossPayments: (...args: unknown[]) => mockLoadTossPayments(...args),
@@ -11,6 +12,12 @@ vi.mock("@/lib/toss", () => ({
 
 vi.mock("@/lib/analytics", () => ({
   trackEvent: vi.fn(),
+}));
+
+vi.mock("@/lib/supabase/client", () => ({
+  createClient: () => ({
+    auth: { getSession: mockGetSession },
+  }),
 }));
 
 describe("CheerPaymentButton Toss v2 request", () => {
@@ -36,6 +43,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     );
 
     mockRequestPayment.mockResolvedValue(undefined);
+    mockGetSession.mockResolvedValue({ data: { session: null } });
     mockLoadTossPayments.mockResolvedValue({
       payment: () => ({
         requestPayment: mockRequestPayment,
@@ -69,6 +77,58 @@ describe("CheerPaymentButton Toss v2 request", () => {
           method: "CARD",
           amount: { value: 3000, currency: "KRW" },
           orderId: "order-1",
+        }),
+      );
+    });
+  });
+
+  it("AUTH-CHEER-01 로그인 세션은 회원 귀속용 access token으로 주문한다", async () => {
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: "member-access-token" } },
+    });
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "https://example.supabase.co/functions/v1/cheer-order",
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: "Bearer member-access-token",
+          }),
+        }),
+      );
+    });
+  });
+
+  it("AUTH-CHEER-02 비로그인은 기존 anon token으로 주문한다", async () => {
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "https://example.supabase.co/functions/v1/cheer-order",
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: "Bearer anon-key",
+          }),
         }),
       );
     });

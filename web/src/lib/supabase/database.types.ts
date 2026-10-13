@@ -994,6 +994,46 @@ export type Database = {
           },
         ]
       }
+      social_cheer_member_attribution: {
+        Row: {
+          cheer_id: number
+          created_at: string
+          supporter_member_id: string
+        }
+        Insert: {
+          cheer_id: number
+          created_at?: string
+          supporter_member_id: string
+        }
+        Update: {
+          cheer_id?: number
+          created_at?: string
+          supporter_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_cheer_member_attribution_cheer_id_fkey"
+            columns: ["cheer_id"]
+            isOneToOne: true
+            referencedRelation: "cheer"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_cheer_member_attribution_cheer_id_fkey"
+            columns: ["cheer_id"]
+            isOneToOne: true
+            referencedRelation: "cheer_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_cheer_member_attribution_supporter_member_id_fkey"
+            columns: ["supporter_member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storage_cleanup_queue: {
         Row: {
           attempts: number
@@ -1423,6 +1463,7 @@ export type Database = {
         }[]
       }
       my_friend_goals: { Args: never; Returns: Json }
+      my_social_dashboard: { Args: never; Returns: Json }
       purge_expired_cashout_accounts: {
         Args: { p_limit?: number }
         Returns: number

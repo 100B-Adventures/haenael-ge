@@ -1,7 +1,9 @@
-import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { CheerList, type ReceiverCheer } from "@/components/receiver/CheerList";
 import {
   BackHomeLink,
+  ReceiverBrandMark,
   ReceiverPageShell,
   ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
@@ -22,7 +24,22 @@ export default async function GoalManagementPage(
   if (!Number.isSafeInteger(goalId) || goalId <= 0) notFound();
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/");
+  if (!user) {
+    return (
+      <ReceiverPageShell testId="goal-access-required" bottomSafe>
+        <ReceiverBrandMark />
+        <section className="social-empty mt-5">
+          <h1>권한이 필요한 화면이에요.</h1>
+          <p className="social-description">
+            내 목표 관리 화면은 로그인한 목표 소유자만 볼 수 있어요.
+          </p>
+          <Link className="social-primary-action" href="/">
+            로그인하러 가기
+          </Link>
+        </section>
+      </ReceiverPageShell>
+    );
+  }
   const { data: goal, error } = await supabase.from("goal").select(
     "id,slug,title,reason,due_date,status,visibility,cover_preset_key,active_cover_asset_id",
   ).eq("id", goalId).eq("member_id", user.id).is("deleted_at", null)

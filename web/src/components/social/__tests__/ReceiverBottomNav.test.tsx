@@ -1,8 +1,13 @@
 import { render, screen } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 import { ReceiverBottomNav } from "../ReceiverBottomNav";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/friends" }));
+let pathname = "/friends";
+vi.mock("next/navigation", () => ({ usePathname: () => pathname }));
+
+beforeEach(() => {
+  pathname = "/friends";
+});
 
 it("CT-NAV-01 홈 친구 초대 마이 4탭과 친구 활성 상태를 렌더한다", () => {
   render(<ReceiverBottomNav />);
@@ -11,6 +16,14 @@ it("CT-NAV-01 홈 친구 초대 마이 4탭과 친구 활성 상태를 렌더한
     "aria-current",
     "page",
   );
+});
+
+it("CT-NAV-03 마이 탭은 /my로 분리되고 실제 경로에서 활성화된다", () => {
+  pathname = "/my";
+  render(<ReceiverBottomNav />);
+  const myLink = screen.getByRole("link", { name: /마이/ });
+  expect(myLink).toHaveAttribute("href", "/my");
+  expect(myLink).toHaveAttribute("aria-current", "page");
 });
 
 it("CT-NAV-02 비회원 잠금 상태는 홈 외 3탭에 잠금 뱃지를 붙인다", () => {

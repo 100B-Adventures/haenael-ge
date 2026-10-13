@@ -303,6 +303,42 @@ test.describe("V2 web-first social slice", () => {
     await context.close();
   });
 
+  test("AUTH-GOAL-01 비로그인 목표 관리는 권한없음 상태이고 로그아웃을 노출하지 않는다", async ({ page }) => {
+    await page.goto(`/me/goal/${ownerGoal}`);
+    await expect(page.getByTestId("goal-access-required")).toBeVisible();
+    await expect(page.getByText("권한이 필요한 화면이에요.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "로그아웃" })).toHaveCount(0);
+    await expect(page.getByTestId("receiver-bottom-nav").locator("a").nth(3))
+      .toHaveAttribute("href", "/");
+  });
+
+  test("MY-01 마이페이지는 프로필, 목표, 친구 수, 업적, 소속감 큐와 활성 탭을 렌더한다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const consoleErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+
+    await page.goto("/my");
+    await expect(page.getByTestId("my-page-overview")).toBeVisible();
+    await expect(page.getByTestId("my-profile-summary")).toContainText("V2-owner");
+    await expect(page.getByTestId("my-profile-summary")).toContainText("친구 1명");
+    await expect(page.getByTestId("my-goal-summary-card")).toHaveCount(1);
+    await expect(page.getByTestId("achievement-received_cheer_count")).toContainText("3");
+    await expect(page.getByTestId("achievement-connected_friend_count")).toContainText("1");
+    await expect(page.getByTestId("belonging-queue-item")).toHaveCount(2);
+    const myTab = page.getByTestId("receiver-bottom-nav").getByRole("link", { name: /마이/ });
+    await expect(myTab).toHaveAttribute("href", "/my");
+    await expect(myTab).toHaveAttribute("aria-current", "page");
+    expect(await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth
+    )).toBe(0);
+    expect(consoleErrors).toEqual([]);
+    await context.close();
+  });
+
   test("PW-03 c1에서 c3 변경 후 reload와 public 화면에 동일 적용된다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
@@ -348,6 +384,7 @@ test.describe("V2 web-first social slice", () => {
     });
     const ownerRoutes = [
       `/me/goal/${ownerGoal}`,
+      "/my",
       "/friends",
       `/friends/${ids.friend}?goal=${friendPublicGoal}`,
       "/invite",

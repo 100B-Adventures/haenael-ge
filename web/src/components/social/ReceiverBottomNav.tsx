@@ -8,7 +8,7 @@ const tabs = [
   { href: "/me", label: "홈", Icon: Home },
   { href: "/friends", label: "친구", Icon: Users },
   { href: "/invite", label: "초대", Icon: Link2 },
-  { href: "/me", label: "마이", Icon: UserRound },
+  { href: "/my", label: "마이", Icon: UserRound },
 ] as const;
 
 export function ReceiverBottomNav({ locked = false }: { locked?: boolean }) {
@@ -21,10 +21,8 @@ export function ReceiverBottomNav({ locked = false }: { locked?: boolean }) {
     >
       {tabs.map(({ href, label, Icon }, index) => {
         const active = label === "홈"
-          ? pathname === "/me"
-          : label === "마이"
-          ? false
-          : pathname.startsWith(href);
+          ? pathname === "/me" || pathname.startsWith("/me/")
+          : pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={`${label}-${index}`}

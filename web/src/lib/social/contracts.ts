@@ -41,6 +41,40 @@ export type InviteCreated = {
   expires_at: string;
 };
 
+export type MySocialGoal = {
+  goal_id: number;
+  slug: string;
+  title: string;
+  due_date: string;
+  status: "ACTIVE" | "CLOSED";
+  cover_preset_key: string;
+};
+
+export type BelongingQueueGoal = {
+  friend_member_id: string;
+  nickname: string | null;
+  goal_id: number;
+  slug: string;
+  title: string;
+  due_date: string;
+  cover_preset_key: string;
+};
+
+export type MySocialDashboard = {
+  profile: {
+    nickname: string | null;
+    profile_image: string | null;
+  };
+  goals: MySocialGoal[];
+  friend_count: number;
+  achievements: {
+    completed_goal_count: number;
+    received_cheer_count: number;
+    connected_friend_count: number;
+  };
+  belonging_queue: BelongingQueueGoal[];
+};
+
 export function asFriendGoals(value: unknown): FriendGoalsResponse {
   if (!value || typeof value !== "object") return { friends: [] };
   const friends = (value as { friends?: unknown }).friends;
@@ -71,11 +105,27 @@ export function asInviteCreated(value: unknown): InviteCreated | null {
   return value as InviteCreated;
 }
 
+export function asMySocialDashboard(value: unknown): MySocialDashboard | null {
+  if (!value || typeof value !== "object") return null;
+  const candidate = value as Partial<MySocialDashboard>;
+  if (
+    !candidate.profile || !candidate.achievements ||
+    !Array.isArray(candidate.goals) ||
+    !Array.isArray(candidate.belonging_queue) ||
+    typeof candidate.friend_count !== "number" ||
+    typeof candidate.achievements.completed_goal_count !== "number" ||
+    typeof candidate.achievements.received_cheer_count !== "number" ||
+    typeof candidate.achievements.connected_friend_count !== "number"
+  ) return null;
+  return candidate as MySocialDashboard;
+}
+
 export const FORBIDDEN_SOCIAL_KEYS = [
   "clover_amount",
   "payment",
   "cashout",
   "supporter_ci",
+  "supporter_member_id",
   "gross_krw",
   "net_krw",
 ] as const;

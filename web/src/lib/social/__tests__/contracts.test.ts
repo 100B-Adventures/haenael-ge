@@ -4,6 +4,7 @@ import {
   asFriendGoals,
   asInviteCreated,
   asInvitePreview,
+  asMySocialDashboard,
   FORBIDDEN_SOCIAL_KEYS,
 } from "../contracts";
 
@@ -77,5 +78,45 @@ describe("V2 social contracts", () => {
     for (const key of FORBIDDEN_SOCIAL_KEYS) {
       expect(serialized).not.toContain(key);
     }
+  });
+
+  it("CT-MY-01 마이페이지 집계와 소속감 큐 계약을 읽는다", () => {
+    const parsed = asMySocialDashboard({
+      profile: { nickname: "서연", profile_image: null },
+      goals: [{
+        goal_id: 1,
+        slug: "run",
+        title: "달리기",
+        due_date: "2026-12-01",
+        status: "ACTIVE",
+        cover_preset_key: "c1",
+      }],
+      friend_count: 3,
+      achievements: {
+        completed_goal_count: 2,
+        received_cheer_count: 7,
+        connected_friend_count: 3,
+      },
+      belonging_queue: [{
+        friend_member_id: "friend-a",
+        nickname: "도경",
+        goal_id: 2,
+        slug: "study",
+        title: "시험 준비",
+        due_date: "2026-12-20",
+        cover_preset_key: "c3",
+      }],
+    });
+
+    expect(parsed?.achievements).toEqual({
+      completed_goal_count: 2,
+      received_cheer_count: 7,
+      connected_friend_count: 3,
+    });
+    expect(parsed?.belonging_queue[0].goal_id).toBe(2);
+  });
+
+  it("CT-MY-02 불완전한 집계 응답은 거절한다", () => {
+    expect(asMySocialDashboard({ profile: {}, goals: [] })).toBeNull();
   });
 });
