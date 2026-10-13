@@ -2,6 +2,7 @@ import { assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
   COVER_MAX_BYTES,
   detectImageMime,
+  externalizeSignedStorageUrl,
   extensionForMime,
   parseCoverUploadInput,
   sha256Hex,
@@ -17,6 +18,32 @@ Deno.test("GC-UNIT-01 정상 경로: jpeg 업로드 메타데이터를 계약 �
   });
   assertEquals(input.goalId, 3);
   assertEquals(extensionForMime(input.mimeType), "jpg");
+});
+
+Deno.test("GC-UNIT-04 정상 경로: 내부 kong signed URL을 브라우저 접근 origin으로 변환한다", () => {
+  assertEquals(
+    externalizeSignedStorageUrl(
+      "http://kong:8000/storage/v1/object/upload/sign/bucket/path?token=opaque",
+      "http://127.0.0.1:8081/goal-cover-sign-upload",
+      new Headers({
+        host: "127.0.0.1:54321",
+        "x-forwarded-proto": "http",
+      }),
+    ),
+    "http://127.0.0.1:54321/storage/v1/object/upload/sign/bucket/path?token=opaque",
+  );
+});
+
+Deno.test("GC-UNIT-05 로컬 runtime port와 gateway port가 다르면 public base override를 우선한다", () => {
+  assertEquals(
+    externalizeSignedStorageUrl(
+      "http://kong:8000/storage/v1/object/upload/sign/bucket/path?token=opaque",
+      "http://127.0.0.1:8081/goal-cover-sign-upload",
+      new Headers({ host: "127.0.0.1:8000" }),
+      "http://127.0.0.1:54321",
+    ),
+    "http://127.0.0.1:54321/storage/v1/object/upload/sign/bucket/path?token=opaque",
+  );
 });
 
 Deno.test("GC-UNIT-02 거절 경로: 5MB 초과 파일을 거부한다", () => {

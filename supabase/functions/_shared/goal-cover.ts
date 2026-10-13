@@ -50,6 +50,24 @@ export function extensionForMime(mime: CoverMime): "jpg" | "png" | "webp" {
   return "webp";
 }
 
+export function externalizeSignedStorageUrl(
+  signedUrl: string,
+  requestUrl: string,
+  headers?: Pick<Headers, "get">,
+  publicBaseUrl?: string,
+): string {
+  const signed = new URL(signedUrl);
+  const request = new URL(requestUrl);
+  const forwardedHost = headers?.get("x-forwarded-host")?.split(",")[0]
+    .trim() || headers?.get("host")?.split(",")[0].trim();
+  const forwardedProto = headers?.get("x-forwarded-proto")?.split(",")[0]
+    .trim().replace(/:$/, "") || request.protocol.replace(/:$/, "");
+  const publicBase = publicBaseUrl ? new URL(publicBaseUrl) : null;
+  signed.protocol = publicBase?.protocol || `${forwardedProto}:`;
+  signed.host = publicBase?.host || forwardedHost || request.host;
+  return signed.toString();
+}
+
 export function detectImageMime(bytes: Uint8Array): CoverMime | null {
   if (
     bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 &&

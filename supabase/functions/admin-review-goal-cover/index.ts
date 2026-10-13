@@ -49,12 +49,16 @@ Deno.serve(async (req) => {
     if (!user) throw new Error("auth_required");
     const { data: isAdmin } = await caller.rpc("is_admin");
     if (!isAdmin) throw new Error("admin_forbidden");
-    const { data: asset } = await service.from("goal_cover_asset").select(
-      "id,goal_id,quarantine_path,mime_type,status,goal!inner(visibility)",
+    const { data: asset, error: assetError } = await service.from(
+      "goal_cover_asset",
+    ).select(
+      "id,goal_id,quarantine_path,mime_type,status",
     ).eq("id", assetId).maybeSingle();
-    if (!asset) throw new Error("asset_not_found");
+    if (assetError || !asset) throw new Error("asset_not_found");
     if (asset.status !== "REVIEW") throw new Error("asset_not_reviewable");
-    const goal = Array.isArray(asset.goal) ? asset.goal[0] : asset.goal;
+    const { data: goal, error: goalError } = await service.from("goal")
+      .select("visibility").eq("id", asset.goal_id).maybeSingle();
+    if (goalError || !goal) throw new Error("asset_not_found");
     if (decision === "APPROVE" && goal?.visibility === "PUBLIC") {
       const extension = asset.quarantine_path.split(".").pop() ?? "webp";
       copiedPath = `${asset.goal_id}/${asset.id}.${extension}`;

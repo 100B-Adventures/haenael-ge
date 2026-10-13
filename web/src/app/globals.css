@@ -357,11 +357,15 @@
 
   .social-stack {
     display: grid;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--social-card-gap);
   }
 
   .social-card,
   .social-empty {
+    min-width: 0;
+    max-width: 100%;
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
     background: var(--card);

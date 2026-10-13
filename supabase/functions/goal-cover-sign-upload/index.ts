@@ -4,6 +4,7 @@ import {
   COVER_UPLOAD_TTL_SECONDS,
   coverErrorStatus,
   coverJson,
+  externalizeSignedStorageUrl,
   extensionForMime,
   parseCoverUploadInput,
 } from "../_shared/goal-cover.ts";
@@ -60,7 +61,12 @@ Deno.serve(async (req) => {
     }
     return coverJson(200, {
       asset_id: assetId,
-      upload_url: signed.signedUrl,
+      upload_url: externalizeSignedStorageUrl(
+        signed.signedUrl,
+        req.url,
+        req.headers,
+        Deno.env.get("COVER_PUBLIC_BASE_URL"),
+      ),
       object_path: objectPath,
       expires_in_seconds: COVER_UPLOAD_TTL_SECONDS,
       max_bytes: 5242880,

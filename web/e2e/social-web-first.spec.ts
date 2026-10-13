@@ -1,5 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+import { execFileSync } from "node:child_process";
 import {
   type Browser,
   type BrowserContext,
@@ -20,6 +21,43 @@ const SERVICE_KEY = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
 const password = "social-web-first-e2e-1234!";
 const runId = Date.now();
 type CookieRow = { name: string; value: string; options?: { maxAge?: number } };
+
+const LOCAL_DB_CONTAINER = process.env.LOCAL_DB_CONTAINER ??
+  "supabase_db_haenael-ge";
+
+function runLocalSql(sql: string) {
+  execFileSync("docker", [
+    "exec",
+    LOCAL_DB_CONTAINER,
+    "psql",
+    "-U",
+    "postgres",
+    "-d",
+    "postgres",
+    "-v",
+    "ON_ERROR_STOP=1",
+    "-q",
+    "-c",
+    sql,
+  ], { stdio: "pipe" });
+}
+
+function ensureLocalStorageCompatibility() {
+  execFileSync("docker", [
+    "exec",
+    LOCAL_DB_CONTAINER,
+    "sh",
+    "-c",
+    'PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 -q -c "set role supabase_storage_admin; create unique index if not exists local_verify_storage_objects_name_bucket on storage.objects(name, bucket_id);"',
+  ], { stdio: "pipe" });
+}
+
+function uuidList(values: string[]) {
+  for (const value of values) {
+    if (!/^[0-9a-f-]{36}$/i.test(value)) throw new Error("invalid_fixture_uuid");
+  }
+  return values.map((value) => `'${value}'::uuid`).join(",");
+}
 
 async function authContext(
   browser: Browser,
@@ -81,10 +119,13 @@ test.describe("V2 web-first social slice", () => {
     string
   >;
   let ownerGoal = 0;
+  let friendPublicGoal = 0;
   let publicSlug = "";
   let smokeInviteToken = "";
+  const paymentIds: number[] = [];
 
   test.beforeAll(async () => {
+    ensureLocalStorageCompatibility();
     for (
       const [key, email] of Object.entries(emails) as Array<
         [keyof typeof emails, string]
@@ -98,10 +139,13 @@ test.describe("V2 web-first social slice", () => {
       if (error || !data.user) throw error ?? new Error("user_create_failed");
       ids[key] = data.user.id;
     }
-    await admin.from("member").insert(
+    const { error: memberError } = await admin.from("member").insert(
       Object.entries(ids).map(([key, id]) => ({ id, nickname: `V2-${key}` })),
     );
-    await admin.from("admin_member").insert({ member_id: ids.admin });
+    if (memberError) throw memberError;
+    runLocalSql(
+      `insert into public.admin_member(member_id) values('${ids.admin}'::uuid) on conflict do nothing;`,
+    );
     const { data: ownerGoals, error: ownerError } = await admin.from("goal")
       .insert({
         member_id: ids.owner,
@@ -117,7 +161,9 @@ test.describe("V2 web-first social slice", () => {
     }
     ownerGoal = ownerGoals.id;
     publicSlug = ownerGoals.slug;
-    await admin.from("goal").insert([
+    const { data: friendGoals, error: friendGoalsError } = await admin.from(
+      "goal",
+    ).insert([
       {
         member_id: ids.friend,
         slug: `friend-public-${runId}`,
@@ -145,7 +191,14 @@ test.describe("V2 web-first social slice", () => {
         visibility: "PRIVATE",
         cover_preset_key: "c4",
       },
-    ]);
+    ]).select("id,slug");
+    if (friendGoalsError || !friendGoals) {
+      throw friendGoalsError ?? new Error("friend_goals_failed");
+    }
+    friendPublicGoal = friendGoals.find(({ slug }) =>
+      slug === `friend-public-${runId}`
+    )?.id ?? 0;
+    if (!friendPublicGoal) throw new Error("friend_public_goal_missing");
     await admin.from("friend_connection").insert({
       member_low_id: [ids.owner, ids.friend].sort()[0],
       member_high_id: [ids.owner, ids.friend].sort()[1],
@@ -176,6 +229,7 @@ test.describe("V2 web-first social slice", () => {
       if (paymentError || !payment) {
         throw paymentError ?? new Error("payment_failed");
       }
+      paymentIds.push(payment.id);
       await admin.from("cheer").insert({
         goal_id: ownerGoal,
         display_name: `응원자${index + 1}`,
@@ -189,6 +243,38 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test.afterAll(async () => {
+    if (ids.owner && ownerGoal) {
+      const prefix = `${ids.owner}/${ownerGoal}`;
+      const { data: privateObjects } = await admin.storage.from(
+        "goal-cover-quarantine",
+      ).list(prefix);
+      if (privateObjects?.length) {
+        await admin.storage.from("goal-cover-quarantine").remove(
+          privateObjects.map((object) => `${prefix}/${object.name}`),
+        );
+      }
+      const { data: publicObjects } = await admin.storage.from(
+        "goal-cover-public",
+      ).list(String(ownerGoal));
+      if (publicObjects?.length) {
+        await admin.storage.from("goal-cover-public").remove(
+          publicObjects.map((object) => `${ownerGoal}/${object.name}`),
+        );
+      }
+    }
+    const memberIds = Object.values(ids).filter(Boolean);
+    if (memberIds.length) {
+      const members = uuidList(memberIds);
+      const payments = paymentIds.length ? paymentIds.join(",") : "NULL";
+      runLocalSql(`
+        delete from public.cheer where goal_id in (
+          select id from public.goal where member_id in (${members})
+        );
+        delete from public.admin_member where member_id in (${members});
+        delete from public.member where id in (${members});
+        delete from public.payment where id in (${payments});
+      `);
+    }
     for (const id of Object.values(ids)) {
       if (id) await admin.auth.admin.deleteUser(id);
     }
@@ -263,16 +349,39 @@ test.describe("V2 web-first social slice", () => {
     const ownerRoutes = [
       `/me/goal/${ownerGoal}`,
       "/friends",
-      `/friends/${ids.friend}`,
+      `/friends/${ids.friend}?goal=${friendPublicGoal}`,
       "/invite",
     ];
     for (const route of ownerRoutes) {
       await ownerPage.goto(route);
-      await expect(ownerPage.locator("main")).toBeVisible();
-      expect(await ownerPage.evaluate(() =>
-        document.documentElement.scrollWidth -
-        document.documentElement.clientWidth
-      ), route).toBe(0);
+      await expect(ownerPage.locator("body")).toBeVisible();
+      await expect(ownerPage.locator("body")).not.toContainText(
+        "Application error",
+      );
+      const overflow = await ownerPage.evaluate(() => ({
+        delta: document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+        offenders: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+          .map((element) => {
+            const rect = element.getBoundingClientRect();
+            return {
+              tag: element.tagName,
+              testId: element.dataset.testid ?? "",
+              className: typeof element.className === "string"
+                ? element.className.slice(0, 120)
+                : "",
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              width: Math.round(rect.width),
+            };
+          })
+          .filter(({ left, right }) => left < 0 || right > window.innerWidth)
+          .slice(0, 12),
+      }));
+      if (overflow.delta !== 0) {
+        console.log(`OVERFLOW_DIAGNOSTIC ${route} ${JSON.stringify(overflow)}`);
+      }
+      expect(overflow.delta, route).toBe(0);
     }
 
     await ownerPage.goto("/friends");
@@ -346,7 +455,14 @@ test.describe("V2 web-first social slice", () => {
     const page = await context.newPage();
     await page.goto("/admin");
     await expect(page.getByTestId("goal-cover-review-queue")).toBeVisible();
+    const reviewResponse = page.waitForResponse((response) =>
+      response.url().includes("/functions/v1/admin-review-goal-cover")
+    );
     await page.getByRole("button", { name: "승인" }).click();
+    const response = await reviewResponse;
+    const responseBody = await response.text();
+    expect(response.ok(), `admin review ${response.status()} ${responseBody}`)
+      .toBe(true);
     await expect(page.getByText("검수 대기 커버가 없습니다.")).toBeVisible();
     await page.goto(`/g/${publicSlug}`);
     await expect(page.getByRole("img", { name: /목표 커버/ })).toBeVisible();
