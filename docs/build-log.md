@@ -1,5 +1,11 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-13 QA 반려 뒤 증거 범위 정정
+
+QA-V2-COVERAGE-01에 따라 기존 `11/11 PASS`는 승인 test plan 84건 전체가 아니라 `social-web-first.spec.ts`에 당시 구현돼 있던 선별 11건만 뜻한다고 정정한다. QA 기준 집계는 통과 47, 부분 8, 실패 2, 미검증 27이었다. 미검증 27건은 PG-14, CT-04·05·08·10·11·12, PW-01·08~17, CC-02·03, ST-01~05, REG-CASH-01, REG-PUB-03이다. 이 항목들은 테스트가 추가되거나 QA가 실제로 재실행하기 전까지 PASS로 해석하지 않는다.
+
+production-mode 로컬 QA의 `/my`는 당시 CSP가 local Supabase를 차단해 콘솔 오류 2건이 발생했다. 아래 390×844 `콘솔 오류 0` 증거는 이전 dev-mode 선별 실행에 한정한다. 수정 라운드에서 loopback Supabase origin만 환경별 CSP에 추가했지만, production-mode 브라우저 재실행 전까지 QA-V2-QA-01은 `미검증`이다.
+
 | 항목 | 값 |
 |---|---|
 | 라인 | `v2` |
@@ -36,10 +42,10 @@
 | 테스트됨 | `supabase db reset --local` | `20261013050000`, `20261013060000` 순서 적용 성공 |
 | 테스트됨 | `supabase test db` | 18 files, 322 tests, PASS |
 | 테스트됨 | `vitest ...contracts.test.ts` | CT-01 포함 7/7 PASS |
-| 테스트됨 | Playwright 전체 social spec | PW-02~07, CC-01, AUTH-GOAL-01, MY-01, SMOKE-01, ORDER-ATTR-01 11/11 PASS, 36.7초 |
+| 테스트됨 | Playwright 선별 social spec | PW-02~07, CC-01, AUTH-GOAL-01, MY-01, SMOKE-01, ORDER-ATTR-01 11/11 PASS, 36.7초. 승인 test plan 84건 전체 PASS가 아님 |
 | 테스트됨 | Playwright 독립 재실행 | PW-05, CC-01, ORDER-ATTR-01 3/3 PASS, 순서 의존 없음 |
 | 관찰됨 | Chromium 390×844 `/my` | 프로필·목표 1건·업적 3종·소속감 큐 2건·마이 활성 렌더 |
-| 관찰됨 | Chromium 390×844 `/my` | 13px 미만 0, 본문 중앙값 16px, 44px 미만 누름 0, active 커버 100%, 가로 넘침 0, 콘솔 오류 0 |
+| 관찰됨 | Chromium 390×844 `/my` dev-mode 선별 실행 | 13px 미만 0, 본문 중앙값 16px, 44px 미만 누름 0, active 커버 100%, 가로 넘침 0, 콘솔 오류 0. production-mode는 당시 CSP 오류 2건으로 실패 |
 | 테스트됨 | `npx tsc --noEmit` | 오류 0 |
 | 테스트됨 | `npm test` | 52 files, 311 tests, PASS |
 | 테스트됨 | `deno check supabase/functions/cheer-order/index.ts` | PASS |
