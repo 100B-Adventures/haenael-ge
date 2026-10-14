@@ -44,7 +44,9 @@ const normal = {
   }],
 };
 
-export const Normal: Story = { args: { dashboard: normal } };
+const initialPreferences = { notifyCheer: true, notifyMarketing: false };
+
+export const Normal: Story = { args: { dashboard: normal, initialPreferences } };
 
 export const Empty: Story = {
   args: {
@@ -59,6 +61,7 @@ export const Empty: Story = {
       },
       belonging_queue: [],
     },
+    initialPreferences,
   },
 };
 
@@ -79,5 +82,6 @@ export const Overflow: Story = {
         slug: `friend-goal-${index + 1}`,
       })),
     },
+    initialPreferences,
   },
 };

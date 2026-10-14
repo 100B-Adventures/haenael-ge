@@ -14,7 +14,13 @@ export default async function MyPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data, error } = await supabase.rpc("my_social_dashboard");
+  const [{ data, error }, { data: preference }] = await Promise.all([
+    supabase.rpc("my_social_dashboard"),
+    supabase.from("member_preference")
+      .select("notify_cheer,notify_marketing")
+      .eq("member_id", user.id)
+      .maybeSingle(),
+  ]);
   const dashboard = asMySocialDashboard(data);
 
   return (
@@ -31,7 +37,15 @@ export default async function MyPage() {
             <p className="social-description">잠시 뒤 다시 시도해 주세요.</p>
           </section>
         )
-        : <MyPageOverview dashboard={dashboard} />}
+        : (
+          <MyPageOverview
+            dashboard={dashboard}
+            initialPreferences={{
+              notifyCheer: preference?.notify_cheer ?? true,
+              notifyMarketing: preference?.notify_marketing ?? false,
+            }}
+          />
+        )}
     </ReceiverPageShell>
   );
 }

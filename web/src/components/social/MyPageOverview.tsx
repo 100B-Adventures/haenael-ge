@@ -1,41 +1,65 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, HeartHandshake, Target, Users } from "lucide-react";
-import { GoalCover } from "./GoalCover";
+import { useState } from "react";
+import {
+  BellRing,
+  ChevronRight,
+  HandHeart,
+  Megaphone,
+  ReceiptText,
+  Trophy,
+} from "lucide-react";
+import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import type { MySocialDashboard } from "@/lib/social/contracts";
 
-const achievementCards = [
-  {
-    key: "completed_goal_count",
-    label: "달성한 목표",
-    description: "완료 상태로 확인된 목표",
-    Icon: Target,
-  },
-  {
-    key: "received_cheer_count",
-    label: "받은 응원",
-    description: "결제 확정된 응원",
-    Icon: HeartHandshake,
-  },
-  {
-    key: "connected_friend_count",
-    label: "연결된 친구",
-    description: "현재 연결된 친구",
-    Icon: Users,
-  },
-] as const;
+type Preferences = {
+  notifyCheer: boolean;
+  notifyMarketing: boolean;
+};
 
-export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) {
+export function MyPageOverview({
+  dashboard,
+  initialPreferences,
+}: {
+  dashboard: MySocialDashboard;
+  initialPreferences: Preferences;
+}) {
+  const [cheerTab, setCheerTab] = useState<"received" | "sent">("received");
+  const [preferences, setPreferences] = useState(initialPreferences);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const activeGoalCount = dashboard.goals.filter((goal) =>
     goal.status === "ACTIVE"
   ).length;
   const nickname = dashboard.profile.nickname?.trim() || "해낼게 사용자";
   const initial = Array.from(nickname)[0] ?? "해";
+  const firstGoal = dashboard.goals[0];
+
+  async function setPreference(key: keyof Preferences, value: boolean) {
+    if (saving) return;
+    const previous = preferences;
+    const next = { ...preferences, [key]: value };
+    setPreferences(next);
+    setSaving(true);
+    setSaveError(false);
+    const result = await updateMemberPreferencesAction(
+      next.notifyCheer,
+      next.notifyMarketing,
+    );
+    setSaving(false);
+    if (!result.ok) {
+      setPreferences(previous);
+      setSaveError(true);
+    }
+  }
 
   return (
-    <div className="social-stack" data-testid="my-page-overview">
-      <section className="social-card flex items-center gap-3" data-testid="my-profile-summary">
-        <div className="relative flex h-13 w-13 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent text-lg font-black text-accent-foreground">
+    <div className="my-page-stack" data-testid="my-page-overview">
+      <section className="my-profile-card" data-testid="my-profile-summary">
+        <div className="my-profile-avatar">
           {dashboard.profile.profile_image
             ? (
               <Image
@@ -49,126 +73,148 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
             )
             : <span aria-hidden="true">{initial}</span>}
         </div>
-        <div className="min-w-0">
-          <h1 className="truncate text-base font-black text-foreground">{nickname}</h1>
-          <p className="mt-1 text-base text-muted-foreground">
+        <div className="min-w-0 flex-1">
+          <h2>{nickname}</h2>
+          <p>한 걸음씩, 끝까지 함께해요</p>
+          <small>
             서로 응원하는 친구 {dashboard.friend_count}명 · 진행 중 목표 {activeGoalCount}개
-          </p>
+          </small>
         </div>
       </section>
 
-      <section aria-labelledby="my-goals-heading">
-        <div className="social-card-heading mb-3">
-          <h2 id="my-goals-heading">내 목표</h2>
-          <span className="text-base!">{dashboard.goals.length}개</span>
+      <section aria-labelledby="my-activity-heading">
+        <h2 className="my-section-title" id="my-activity-heading">나의 활동</h2>
+        <div className="my-menu-card">
+          <Link href="/me/achievements" className="my-menu-row">
+            <span className="my-menu-icon"><Trophy aria-hidden="true" /></span>
+            <span>
+              <strong>업적</strong>
+              <small>
+                {dashboard.achievements.completed_goal_count +
+                  dashboard.achievements.connected_friend_count}개 달성
+              </small>
+            </span>
+            <ChevronRight aria-hidden="true" />
+          </Link>
+          <Link href="/cashout/history" className="my-menu-row">
+            <span className="my-menu-icon"><ReceiptText aria-hidden="true" /></span>
+            <span>
+              <strong>환전 내역</strong>
+              <small>지금까지 받은 금액과 진행 중 신청</small>
+            </span>
+            <ChevronRight aria-hidden="true" />
+          </Link>
         </div>
-        {dashboard.goals.length === 0
-          ? (
-            <div className="social-empty">
-              <h2>아직 등록한 목표가 없어요</h2>
-              <Link className="social-primary-action" href="/onboarding">
-                첫 목표 만들기
-              </Link>
-            </div>
-          )
-          : (
-            <div className="social-stack" data-testid="my-goal-summary-list">
-              {dashboard.goals.map((goal) => (
-                <Link
-                  key={goal.goal_id}
-                  href={`/me/goal/${goal.goal_id}`}
-                  className="social-card block no-underline transition-transform active:translate-y-px"
-                  data-testid="my-goal-summary-card"
-                >
-                  <GoalCover
-                    presetKey={goal.cover_preset_key}
-                    title={goal.title}
-                    size="banner"
-                  />
-                  <div className="mt-3 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="receiver-goal-title">{goal.title}</p>
-                      <p className="mt-1 text-base text-muted-foreground">
-                        {goal.status === "ACTIVE" ? "진행 중" : "달성 완료"} · {goal.due_date}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-base font-extrabold text-accent-foreground">
-                      관리
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
       </section>
 
-      <section aria-labelledby="achievements-heading" data-testid="achievement-section">
-        <div className="social-card-heading mb-3">
-          <h2 id="achievements-heading">업적</h2>
-          <span className="text-base!">차곡차곡 쌓였어요</span>
+      <section aria-labelledby="my-cheers-heading">
+        <h2 className="my-section-title" id="my-cheers-heading">응원 내역</h2>
+        <div className="my-cheer-tabs" role="tablist" aria-label="응원 내역 구분">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={cheerTab === "received"}
+            className={cheerTab === "received" ? "is-active" : undefined}
+            onClick={() => setCheerTab("received")}
+          >받은 응원</button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={cheerTab === "sent"}
+            className={cheerTab === "sent" ? "is-active" : undefined}
+            onClick={() => setCheerTab("sent")}
+          >보낸 응원</button>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {achievementCards.map(({ key, label, description, Icon }) => {
-            const count = dashboard.achievements[key];
-            return (
-              <article
-                key={key}
-                className="social-card flex flex-col items-center px-2 text-center"
-                data-testid={`achievement-${key}`}
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-accent text-accent-foreground">
-                  <Icon aria-hidden="true" size={20} />
-                </span>
-                <strong className="mt-2 text-lg font-black text-foreground">{count}</strong>
-                <span className="mt-1 text-base font-extrabold text-foreground">{label}</span>
-                <span className="mt-1 text-base leading-snug text-muted-foreground">{description}</span>
-                {count > 0 && (
-                  <span className="mt-2 inline-flex items-center gap-1 text-base font-bold text-accent-foreground">
-                    <CheckCircle2 aria-hidden="true" size={14} /> 검증됨
-                  </span>
-                )}
-              </article>
-            );
-          })}
+        <div className="my-cheer-summary" role="tabpanel">
+          <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
+          {cheerTab === "received"
+            ? (
+              <div>
+                <strong>받은 응원 {dashboard.achievements.received_cheer_count}번</strong>
+                <p>목표마다 도착한 메시지와 워드맵을 확인해 보세요.</p>
+                {firstGoal && <Link href={`/me/goal/${firstGoal.goal_id}`}>내 목표에서 보기</Link>}
+              </div>
+            )
+            : (
+              <div>
+                <strong>내가 응원한 친구</strong>
+                <p>친구 목표에서 응원 메시지와 함께한 기록을 확인할 수 있어요.</p>
+                <Link href="/friends">친구 목표 보기</Link>
+              </div>
+            )}
         </div>
-        <p className="social-muted mt-3 text-base!">
-          목표와 응원 기록이 생길 때마다 자동으로 반영돼요.
-        </p>
+        <p className="my-quiet-note">금액도 순위도 없이, 횟수와 메시지만 쌓여요.</p>
       </section>
 
-      <section aria-labelledby="belonging-heading" data-testid="belonging-queue">
-        <div className="social-card-heading mb-3">
-          <h2 id="belonging-heading">아직 응원하지 않은 친구 목표</h2>
-          <span className="text-base!">{dashboard.belonging_queue.length}개</span>
+      <section aria-labelledby="my-settings-heading">
+        <h2 className="my-section-title" id="my-settings-heading">환경설정</h2>
+        <div className="my-menu-card">
+          <PreferenceRow
+            icon={<BellRing aria-hidden="true" />}
+            title="응원 도착 알림"
+            description="응원이 오면 알림으로 알려드려요."
+            checked={preferences.notifyCheer}
+            disabled={saving}
+            onChange={(value) => void setPreference("notifyCheer", value)}
+          />
+          <PreferenceRow
+            icon={<Megaphone aria-hidden="true" />}
+            title="마케팅 소식 받기"
+            description="이벤트와 업데이트 소식을 받아요."
+            checked={preferences.notifyMarketing}
+            disabled={saving}
+            onChange={(value) => void setPreference("notifyMarketing", value)}
+          />
         </div>
-        {dashboard.belonging_queue.length === 0
-          ? (
-            <div className="social-card">
-              <p className="font-bold text-foreground">지금 확인할 친구 목표가 없어요.</p>
-              <p className="social-description mt-1">새 목표가 생기면 여기에 조용히 모아둘게요.</p>
-            </div>
-          )
-          : (
-            <div className="social-stack">
-              {dashboard.belonging_queue.map((item) => (
-                <Link
-                  key={item.goal_id}
-                  href={`/friends/${item.friend_member_id}?goal=${item.goal_id}`}
-                  className="social-card flex items-center gap-3 no-underline transition-transform active:translate-y-px"
-                  data-testid="belonging-queue-item"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="social-eyebrow text-base!">{item.nickname ?? "친구"}의 해낼게</p>
-                    <p className="mt-1 truncate font-extrabold text-foreground">{item.title}</p>
-                  </div>
-                  <span className="shrink-0 text-base font-extrabold text-accent-foreground">
-                    응원하기
-                  </span>
-                </Link>
-              ))}
-            </div>
-          )}
+        {saveError && <p className="social-error" role="alert">설정을 저장하지 못했어요. 다시 시도해 주세요.</p>}
+        <nav className="my-policy-links" aria-label="서비스 안내">
+          <Link href="/how">이용안내</Link>
+          <Link href="/terms">이용약관</Link>
+          <Link href="/privacy">개인정보처리방침</Link>
+        </nav>
       </section>
+
+      <section aria-labelledby="my-account-heading">
+        <h2 className="my-section-title" id="my-account-heading">계정</h2>
+        <div className="my-account-card"><LogoutButton /></div>
+      </section>
+
+      <p className="my-company-foot">
+        정성컴퍼니 · 대표 조성진 · 사업자등록번호 798-31-01774<br />
+        haenaelge.official@gmail.com
+      </p>
+    </div>
+  );
+}
+
+function PreferenceRow({
+  icon,
+  title,
+  description,
+  checked,
+  disabled,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  checked: boolean;
+  disabled: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <div className="my-preference-row">
+      <span className="my-menu-icon">{icon}</span>
+      <span className="min-w-0 flex-1"><strong>{title}</strong><small>{description}</small></span>
+      <button
+        type="button"
+        role="switch"
+        aria-label={title}
+        aria-checked={checked}
+        className={`my-switch${checked ? " is-on" : ""}`}
+        disabled={disabled}
+        onClick={() => onChange(!checked)}
+      ><span /></button>
     </div>
   );
 }

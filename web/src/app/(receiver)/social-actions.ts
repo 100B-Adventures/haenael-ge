@@ -96,3 +96,17 @@ export async function removeFriendAction(
   revalidatePath("/friends");
   return { ok: true, data: undefined };
 }
+
+export async function updateMemberPreferencesAction(
+  notifyCheer: boolean,
+  notifyMarketing: boolean,
+): Promise<SocialActionResult> {
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase.rpc("update_member_preferences", {
+    notify_cheer: notifyCheer,
+    notify_marketing: notifyMarketing,
+  });
+  if (error) return { ok: false, code: safeCode(error.message) };
+  revalidatePath("/my");
+  return { ok: true, data: undefined };
+}

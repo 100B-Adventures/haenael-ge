@@ -80,10 +80,16 @@ export function ReceiverTopBar({ variant }: ReceiverTopBarProps) {
   );
 }
 
-export function BackHomeLink({ label = "홈으로 돌아가기" }: { label?: string }) {
+export function BackHomeLink({
+  label = "홈으로 돌아가기",
+  href = "/me",
+}: {
+  label?: string;
+  href?: string;
+}) {
   return (
     <Link
-      href="/me"
+      href={href}
       className="mt-6 block text-center text-xs font-semibold text-[var(--faint)]"
     >
       {label}
