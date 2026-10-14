@@ -47,8 +47,7 @@ export function GoalCoverReviewQueue(
       <div className="mb-4">
         <h2 className="text-lg font-extrabold">목표 커버 검수</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          원본은 private bucket에서만 열고, 승인된 PUBLIC 커버만 public
-          bucket으로 복사합니다.
+          검수 전 원본 사진을 확인하고, 승인한 사진만 목표 커버에 반영합니다.
         </p>
       </div>
       {items.length === 0
@@ -66,7 +65,7 @@ export function GoalCoverReviewQueue(
                     <strong>{item.goal_title}</strong>
                     <p className="text-sm text-muted-foreground">
                       {item.owner_nickname} ·{" "}
-                      {(item.byte_size / 1024).toFixed(0)}KB · {item.mime_type}
+                      {(item.byte_size / 1024).toFixed(0)}KB
                     </p>
                   </div>
                   <div className="flex gap-2">

@@ -102,7 +102,7 @@ export function GoalCoverPicker(
         role="group"
         aria-label="기본 커버 선택"
       >
-        {presets.map((key) => (
+        {presets.map((key, index) => (
           <button
             key={key}
             type="button"
@@ -110,8 +110,8 @@ export function GoalCoverPicker(
             className={preset === key ? "is-selected" : undefined}
             aria-pressed={preset === key}
           >
-            <GoalCover presetKey={key} title={`${key} 기본 커버`} />
-            <span>{key.toUpperCase()}</span>
+            <GoalCover presetKey={key} title={`기본 커버 ${index + 1}`} />
+            <span>기본 {index + 1}</span>
           </button>
         ))}
       </div>

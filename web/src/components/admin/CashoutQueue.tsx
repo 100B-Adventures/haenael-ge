@@ -50,10 +50,6 @@ function formatKrw(value: number) {
   return `${numberFormatter.format(value)}원`;
 }
 
-function shortId(value: string) {
-  return `${value.slice(0, 8)}…${value.slice(-4)}`;
-}
-
 function statusClass(status: string) {
   if (status === "REQUESTED") return "bg-amber-soft text-amber-ink";
   if (status === "REJECTED") return "bg-danger-soft text-danger-ink";
@@ -212,7 +208,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
             {filtered.length === 0 ? <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">지급 대기 중인 신청이 없어요.</td></tr> : filtered.map((cashout) => (
               <tr key={cashout.id} className="align-top hover:bg-muted/40">
                 <td className="border-b px-4 py-3 whitespace-nowrap">{formatDateTime(cashout.requested_at)}<p className="mt-1 font-mono text-xs text-muted-foreground">#{cashout.id}</p></td>
-                <td className="border-b px-4 py-3"><p className="font-semibold">{cashout.nickname || "미설정"}</p><p className="font-mono text-xs text-muted-foreground" title={cashout.member_id}>{shortId(cashout.member_id)}</p></td>
+                <td className="border-b px-4 py-3"><p className="font-semibold">{cashout.nickname || "미설정"}</p></td>
                 <td className="border-b px-4 py-3 text-right whitespace-nowrap"><p className="font-bold">🍀 {cashout.clover_amount} · {formatKrw(cashout.gross_krw)}</p></td>
                 <td className="border-b px-4 py-3 text-right whitespace-nowrap">−{formatKrw(cashout.withholding_krw)}</td>
                 <td className="border-b px-4 py-3 text-right font-extrabold text-primary whitespace-nowrap">{formatKrw(cashout.net_krw)}</td>

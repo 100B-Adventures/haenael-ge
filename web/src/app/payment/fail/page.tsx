@@ -12,8 +12,7 @@ type Props = {
 };
 
 export default async function PaymentFailPage({ searchParams }: Props) {
-  const params = await searchParams;
-  const message = params.message ?? "결제가 완료되지 않았습니다.";
+  await searchParams;
 
   return (
     <main
@@ -31,7 +30,7 @@ export default async function PaymentFailPage({ searchParams }: Props) {
           결제가 멈췄어요
         </h1>
         <p className="mt-3 text-[14px] leading-relaxed [color:var(--muted-foreground)]!">
-          {message}
+          결제가 완료되지 않았어요. 결제 수단을 확인한 뒤 다시 시도해 주세요.
         </p>
         <Link
           href="/"

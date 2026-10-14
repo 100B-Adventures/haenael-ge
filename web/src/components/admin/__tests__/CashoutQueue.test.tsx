@@ -49,6 +49,14 @@ describe("CashoutQueue", () => {
     rejectCashout.mockResolvedValue({ ok: true });
   });
 
+  it("ADMIN-COPY-01 요청자 내부 식별자를 화면에 노출하지 않는다", () => {
+    render(<CashoutQueue cashouts={[cashout]} />);
+
+    expect(screen.getAllByText("환전회원").length).toBeGreaterThan(0);
+    expect(document.body.textContent).not.toContain(cashout.member_id);
+    expect(document.body.textContent).not.toContain("ca500000");
+  });
+
   it("계좌는 기본 마스킹하고 명시적 클릭 뒤에만 전체 번호를 표시한다", async () => {
     render(<CashoutQueue cashouts={[cashout]} />);
 

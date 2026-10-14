@@ -67,11 +67,11 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
       if (result.goalTitle) {
         message = `${result.goalTitle.replace(/\s*해낼게\s*$/, "")} 목표에 응원이 전달됐습니다.`;
       }
-    } catch (e) {
+    } catch (error) {
+      console.error("[payment/success] confirmation failed", error);
       status = "error";
       title = "결제 확인이 필요해요";
-      message =
-        e instanceof Error ? e.message : "결제 승인 처리에 실패했습니다.";
+      message = "결제 상태를 바로 확인하지 못했어요. 잠시 후 다시 확인해 주세요.";
     }
   }
 

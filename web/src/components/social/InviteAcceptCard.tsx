@@ -8,7 +8,7 @@ import type { InvitePreview } from "@/lib/social/contracts";
 import { GoalCover } from "./GoalCover";
 
 const ERROR_COPY: Record<string, string> = {
-  invite_expired: "초대 링크의 7일 사용 기간이 끝났어요.",
+  invite_expired: "이 초대는 더 이상 사용할 수 없어요.",
   invite_revoked: "초대자가 이 링크를 취소했어요.",
   invite_already_used: "이미 사용된 초대 링크예요.",
   self_invite: "내가 만든 초대 링크는 직접 수락할 수 없어요.",
@@ -65,9 +65,6 @@ export function InviteAcceptCard(
           “{preview.goal_title}” 목표를 함께 응원할 수 있어요.
         </p>
       )}
-      <p className="social-muted">
-        {new Date(preview.expires_at).toLocaleString("ko-KR")}까지 사용 가능
-      </p>
       {isAuthenticated
         ? (
           <button

@@ -34,7 +34,7 @@ export function FriendInviteCard(
     return (
       <section className="social-empty">
         <h2>초대할 공개 목표가 없어요</h2>
-        <p>목표 공개범위를 PUBLIC 또는 FRIENDS로 바꾼 뒤 다시 시도해 주세요.</p>
+        <p>친구에게 보여줄 목표를 공개 또는 친구 공개로 바꾼 뒤 다시 시도해 주세요.</p>
       </section>
     );
   }
@@ -51,7 +51,7 @@ export function FriendInviteCard(
       >
         {goals.map((goal) => (
           <option key={goal.id} value={goal.id}>
-            {goal.title} · {goal.visibility}
+            {goal.title} · {goal.visibility === "PUBLIC" ? "공개" : "친구 공개"}
           </option>
         ))}
       </select>
@@ -63,16 +63,14 @@ export function FriendInviteCard(
             disabled={state === "loading"}
             onClick={create}
           >
-            {state === "loading" ? "만드는 중" : "7일 초대 링크 만들기"}
+            {state === "loading" ? "만드는 중" : "초대 링크 만들기"}
           </button>
         )
         : (
           <div className="social-invite-result">
             <p className="social-muted">
-              {new Date(invite.expires_at).toLocaleString("ko-KR")}까지 사용할
-              수 있어요.
+              링크가 준비됐어요. 함께 응원하고 싶은 친구에게 보내 주세요.
             </p>
-            <code>{invite.web_path}</code>
             <button
               type="button"
               className="social-primary-action"

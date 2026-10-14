@@ -105,7 +105,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
       <section aria-labelledby="achievements-heading" data-testid="achievement-section">
         <div className="social-card-heading mb-3">
           <h2 id="achievements-heading">업적</h2>
-          <span className="text-base!">DB 집계 기준</span>
+          <span className="text-base!">차곡차곡 쌓였어요</span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           {achievementCards.map(({ key, label, description, Icon }) => {
@@ -132,7 +132,7 @@ export function MyPageOverview({ dashboard }: { dashboard: MySocialDashboard }) 
           })}
         </div>
         <p className="social-muted mt-3 text-base!">
-          데이터베이스로 확인할 수 있는 활동만 집계해요.
+          목표와 응원 기록이 생길 때마다 자동으로 반영돼요.
         </p>
       </section>
 

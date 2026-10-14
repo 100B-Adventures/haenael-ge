@@ -23,11 +23,10 @@ export default async function InvitePage() {
     <ReceiverPageShell testId="invite-page" bottomSafe>
       <ReceiverTopBar variant="home" />
       <div className="mb-6">
-        <p className="social-eyebrow">7일 동안 한 번</p>
-        <h1 className="receiver-page-title">친구를 초대해요</h1>
+        <p className="social-eyebrow">함께 응원할 친구 부르기</p>
+        <h1 className="receiver-page-title">친구를 초대해 함께 응원해요</h1>
         <p className="social-description">
-          초대 토큰 원문은 링크를 만들 때 한 번만 보여요. 저장소에는 SHA-256
-          hash만 남아요.
+          내가 고른 친구에게 링크를 보내면 서로의 목표를 보고 조용히 응원할 수 있어요.
         </p>
       </div>
       <FriendInviteCard goals={data ?? []} />
