@@ -34,6 +34,12 @@ try {
   });
   for (const [screenId, label] of screens) {
     await page.evaluate((id) => globalThis.go(id), screenId);
+    await page.evaluate((id) => {
+      document.querySelectorAll(`#${id} [data-count]`).forEach((element) => {
+        if (element._raf) cancelAnimationFrame(element._raf);
+        element.textContent = element.getAttribute("data-count") ?? "";
+      });
+    }, screenId);
     const frame = page.locator(`#${screenId} .frame`);
     await frame.waitFor({ state: "visible" });
     const box = await frame.boundingBox();

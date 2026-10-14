@@ -183,6 +183,7 @@ test.describe("V2 web-first social slice", () => {
         title: "토익 900 넘길게",
         reason: "교환학생 지원 마감 전에 점수를 만들어야 해서.",
         due_date: isoDateFromNow(12),
+        status: "ACTIVE",
         visibility: "PUBLIC",
         cover_preset_key: "c1",
       }, {
@@ -191,6 +192,7 @@ test.describe("V2 web-first social slice", () => {
         title: "매일 영어 단어 30개 외울게",
         reason: "토익 목표를 매일의 습관으로 이어가려고.",
         due_date: isoDateFromNow(30),
+        status: "ACTIVE",
         visibility: "FRIENDS",
         cover_preset_key: "c3",
       }, {
