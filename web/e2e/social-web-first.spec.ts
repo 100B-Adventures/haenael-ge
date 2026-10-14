@@ -737,14 +737,13 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
-    const evidenceDir = "../docs/qa/evidence/v2-social-viral-loop-reverify-v1";
+    const evidenceDir = "../docs/qa/evidence/v2-approved-build-v1.0.0";
     mkdirSync(evidenceDir, { recursive: true });
     const routes = [
-      ["goal-detail", `/me/goal/${ownerGoal}`],
-      ["my", "/my"],
+      ["mypage", "/my"],
       ["friends", "/friends"],
-      ["friend-detail", `/friends/${ids.friend}?goal=${friendPublicGoal}`],
-      ["invite-create", "/invite"],
+      ["belong", `/friends/${ids.friend}?goal=${friendPublicGoal}`],
+      ["connect", "/invite"],
     ] as const;
     for (const width of [390, 1280]) {
       const context = await authContext(browser, emails.owner);
@@ -765,9 +764,9 @@ test.describe("V2 web-first social slice", () => {
         );
         expect(overflow, `${width}px ${route}`).toBe(0);
         expect(consoleErrors, `${width}px ${route}`).toEqual([]);
+        await page.addStyleTag({ content: "nextjs-portal{display:none!important}" });
         await page.screenshot({
-          path: `${evidenceDir}/${width}-${label}.png`,
-          fullPage: true,
+          path: `${evidenceDir}/dev-${label}-${width}.png`,
         });
         await page.close();
       }
@@ -788,35 +787,38 @@ test.describe("V2 web-first social slice", () => {
         document.documentElement.clientWidth
       )).toBe(0);
       expect(inviteErrors).toEqual([]);
+      await invitePage.addStyleTag({ content: "nextjs-portal{display:none!important}" });
       await invitePage.screenshot({
-        path: `${evidenceDir}/${width}-invite-accept.png`,
-        fullPage: true,
+        path: `${evidenceDir}/dev-inviteaccept-${width}.png`,
       });
       await invitePage.close();
 
-      const adminContext = await authContext(browser, emails.admin);
-      const adminPage = await adminContext.newPage();
-      await adminPage.setViewportSize({
-        width,
-        height: width === 390 ? 844 : 900,
-      });
-      const adminErrors: string[] = [];
-      adminPage.on("console", (message) => {
-        if (message.type() === "error") adminErrors.push(message.text());
-      });
-      adminPage.on("pageerror", (error) => adminErrors.push(error.message));
-      const adminResponse = await adminPage.goto("/admin");
-      expect(adminResponse?.status()).toBe(200);
-      expect(await adminPage.evaluate(() =>
-        document.documentElement.scrollWidth -
-        document.documentElement.clientWidth
-      )).toBe(0);
-      expect(adminErrors).toEqual([]);
-      await adminPage.screenshot({
-        path: `${evidenceDir}/${width}-cover-review.png`,
-        fullPage: true,
-      });
-      await adminContext.close();
+      for (const [label, route] of [
+        ["landing", "/"],
+        ["goalpublic", `/g/${publicSlug}`],
+      ] as const) {
+        const guestPage = await browser.newPage({
+          viewport: { width, height: width === 390 ? 844 : 900 },
+        });
+        const guestErrors: string[] = [];
+        guestPage.on("console", (message) => {
+          if (message.type() === "error") guestErrors.push(message.text());
+        });
+        guestPage.on("pageerror", (error) => guestErrors.push(error.message));
+        const guestResponse = await guestPage.goto(route);
+        expect(guestResponse?.status(), `${width}px ${route}`).toBe(200);
+        await expect(guestPage.getByTestId("receiver-bottom-nav")).toBeVisible();
+        expect(await guestPage.evaluate(() =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth
+        )).toBe(0);
+        expect(guestErrors, `${width}px ${route}`).toEqual([]);
+        await guestPage.addStyleTag({ content: "nextjs-portal{display:none!important}" });
+        await guestPage.screenshot({
+          path: `${evidenceDir}/dev-${label}-${width}.png`,
+        });
+        await guestPage.close();
+      }
     }
   });
 
