@@ -34,7 +34,7 @@ export function CheerCount({ count }: CheerCountProps) {
     <div className="flex items-center gap-2.5 mb-3" data-testid="cheer-count">
       <AvatarStack count={count} />
       <p
-        className="text-[12.5px] font-semibold [color:var(--muted-foreground)]!"
+        className="font-semibold [font-size:var(--text-wordmark)]! [color:var(--muted-foreground)]!"
         // --muted
       >
         <strong className="[color:var(--foreground)]! [font-weight:700]!">

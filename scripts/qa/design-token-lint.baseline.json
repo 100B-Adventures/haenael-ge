@@ -24,7 +24,6 @@
   "web/src/components/common/NotificationBadge.tsx\t색상 리터럴\tclassName=\"flex cursor-pointer items-start gap-3 px-4 py-3 text-left focus-visible:outline-none focu",
   "web/src/components/common/NotificationBadge.tsx\t색상 리터럴\tstyle={{ background: n.read ? \"transparent\" : \"#F2F8F4\" }}",
   "web/src/components/common/NotificationBadge.tsx\t인라인 스타일\tstyle={{ background: n.read ? \"transparent\" : \"#F2F8F4\" }}",
-  "web/src/components/common/ReportButton.tsx\t색상 리터럴\tclassName={`flex items-center gap-1 rounded-lg text-[12px] transition-opacity hover:opacity-70 focus",
   "web/src/components/common/ReportButton.tsx\t색상 리터럴\t<div className=\"h-1 w-10 rounded-full [background-color:#D5D0C8]!\" />",
   "web/src/components/common/ReportButton.tsx\t인라인 스타일\tstyle={{",
   "web/src/components/common/ReportButton.tsx\t색상 리터럴\tselectedReason === preset ? \"var(--accent)\" : \"#F5F2EE\",",

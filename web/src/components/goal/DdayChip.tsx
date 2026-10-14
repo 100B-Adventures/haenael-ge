@@ -19,7 +19,7 @@ export function DdayChip({ dueDate }: DdayChipProps) {
 
   return (
     <span
-      className="inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-semibold [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0.1px]!"
+      className="inline-flex items-center px-3 py-1 rounded-full font-semibold [font-size:var(--text-wordmark)]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0.1px]!"
       data-testid="dday-chip"
     >
       {label}
@@ -44,7 +44,7 @@ const STATUS_STYLE: Record<StatusChipProps["status"], React.CSSProperties> = {
 export function StatusChip({ status }: StatusChipProps) {
   return (
     <span
-      className="inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-semibold"
+      className="inline-flex items-center px-3 py-1 rounded-full font-semibold [font-size:var(--text-wordmark)]!"
       style={STATUS_STYLE[status]}
       data-testid="status-chip"
     >

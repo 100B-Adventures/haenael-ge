@@ -159,7 +159,7 @@ export default async function GoalPublicPage({ params }: Props) {
       {/* 스크롤 영역 */}
       <div className="px-[22px] pt-12 pb-4">
         {/* BrandMark */}
-        <p className="font-extrabold mb-5 [font-size:12.5px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
+        <p className="font-extrabold mb-5 [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
           해낼게<span className="[color:var(--clover-bright)]!">.</span>
         </p>
 
@@ -169,14 +169,14 @@ export default async function GoalPublicPage({ params }: Props) {
         {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
         {!user && (
           <p
-            className="text-center mb-3 [font-size:10.5px]! [color:var(--faint)]!"
+            className="text-center mb-3 [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
             data-testid="relogin-hint"
           >
             내 목표가 있으신가요?{" "}
             <Link
               href="/auth/kakao/start?redirect=/me"
               prefetch={false}
-              className="font-semibold underline underline-offset-2 [color:var(--muted-foreground)]!"
+              className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--muted-foreground)]!"
               data-testid="relogin-link"
             >
               카카오로 로그인
@@ -228,7 +228,7 @@ export default async function GoalPublicPage({ params }: Props) {
         {/* role-transition: "나도 해낼게 만들래" */}
         <Link
           href="/"
-          className="block w-full text-center font-semibold mt-1 [font-size:12px]! [color:var(--faint)]! p-[9px_0_0]! [min-height:44px]! [display:flex]! [align-items:center]! [justify-content:center]!"
+          className="block w-full text-center font-semibold mt-1 [font-size:var(--text-wordmark)]! [color:var(--faint)]! p-[9px_0_0]! [min-height:var(--tap-min-size)]! [display:flex]! [align-items:center]! [justify-content:center]! transition-opacity active:opacity-70"
           data-testid="role-transition-link"
         >
           나도 해낼게 만들래 →

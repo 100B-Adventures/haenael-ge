@@ -154,7 +154,7 @@ export function Wordmap({ words, ownerName }: WordmapProps) {
       {cloud}
       <details className="w-full rounded-[14px] border border-border bg-card px-4 py-3">
         <summary
-          className="cursor-pointer list-none text-[length:var(--text-label-small)]! text-muted-foreground"
+          className="flex min-h-[var(--tap-min-size)] cursor-pointer list-none items-center text-[length:var(--text-label-small)]! text-muted-foreground transition-opacity active:opacity-70"
           data-testid="wordmap-overflow-toggle"
         >
           <strong className="text-accent-foreground">

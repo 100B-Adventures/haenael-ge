@@ -142,8 +142,18 @@ test.describe("V2 web-first social slice", () => {
       if (error || !data.user) throw error ?? new Error("user_create_failed");
       ids[key] = data.user.id;
     }
+    const fixtureNicknames: Record<keyof typeof emails, string> = {
+      owner: "해내는 민지",
+      friend: "꾸준한 준호",
+      admin: "운영자",
+      acceptA: "소영",
+      acceptB: "도윤",
+    };
     const { error: memberError } = await admin.from("member").insert(
-      Object.entries(ids).map(([key, id]) => ({ id, nickname: `V2-${key}` })),
+      Object.entries(ids).map(([key, id]) => ({
+        id,
+        nickname: fixtureNicknames[key as keyof typeof emails],
+      })),
     );
     if (memberError) throw memberError;
     runLocalSql(
@@ -170,8 +180,8 @@ test.describe("V2 web-first social slice", () => {
       {
         member_id: ids.friend,
         slug: `friend-public-${runId}`,
-        title: "PUBLIC_SENTINEL 달릴게",
-        reason: "PUBLIC_SENTINEL",
+        title: "아침마다 달릴게",
+        reason: "건강한 습관을 만들고 싶어요",
         due_date: "2030-12-31",
         visibility: "PUBLIC",
         cover_preset_key: "c2",
@@ -179,8 +189,8 @@ test.describe("V2 web-first social slice", () => {
       {
         member_id: ids.friend,
         slug: `friend-friends-${runId}`,
-        title: "FRIENDS_SENTINEL 읽을게",
-        reason: "FRIENDS_SENTINEL",
+        title: "매달 책 한 권 읽을게",
+        reason: "친구들과 독서 기록을 나누고 싶어요",
         due_date: "2030-12-31",
         visibility: "FRIENDS",
         cover_preset_key: "c3",
@@ -188,8 +198,8 @@ test.describe("V2 web-first social slice", () => {
       {
         member_id: ids.friend,
         slug: `friend-private-${runId}`,
-        title: "PRIVATE_SENTINEL 쓸게",
-        reason: "PRIVATE_SENTINEL",
+        title: "매일 감사 한 줄 쓸게",
+        reason: "하루를 다정하게 마무리하고 싶어요",
         due_date: "2030-12-31",
         visibility: "PRIVATE",
         cover_preset_key: "c4",
@@ -331,7 +341,7 @@ test.describe("V2 web-first social slice", () => {
 
     await page.goto("/my");
     await expect(page.getByTestId("my-page-overview")).toBeVisible();
-    await expect(page.getByTestId("my-profile-summary")).toContainText("V2-owner");
+    await expect(page.getByTestId("my-profile-summary")).toContainText("해내는 민지");
     await expect(page.getByTestId("my-profile-summary")).toContainText("친구 1명");
     await expect(page.getByTestId("my-goal-summary-card")).toHaveCount(1);
     await expect(page.getByTestId("achievement-received_cheer_count")).toContainText("3");
@@ -869,7 +879,7 @@ test.describe("V2 web-first social slice", () => {
       .toBeVisible();
     const anon = await browser.newPage();
     await anon.goto(`/g/${publicSlug}`);
-    await expect(anon.getByText("PUBLIC_SENTINEL")).toHaveCount(0);
+    await expect(anon.getByText("매일 기록할게")).toHaveCount(0);
     await ownerPage.getByRole("button", { name: "비공개" }).click();
     await expect(ownerPage.getByText(/나만 볼 수 있고/)).toBeVisible();
     await anon.reload();
@@ -880,11 +890,11 @@ test.describe("V2 web-first social slice", () => {
 
   test("PW-07 anon 공개 route는 PUBLIC만 노출한다", async ({ page }) => {
     await page.goto(`/g/friend-public-${runId}`);
-    await expect(page.getByText(/PUBLIC_SENTINEL/).first()).toBeVisible();
+    await expect(page.getByText(/아침마다 달릴게/).first()).toBeVisible();
     await page.goto(`/g/friend-friends-${runId}`);
-    await expect(page.getByText(/FRIENDS_SENTINEL/)).toHaveCount(0);
+    await expect(page.getByText(/매달 책 한 권 읽을게/)).toHaveCount(0);
     await page.goto(`/g/friend-private-${runId}`);
-    await expect(page.getByText(/PRIVATE_SENTINEL/)).toHaveCount(0);
+    await expect(page.getByText(/매일 감사 한 줄 쓸게/)).toHaveCount(0);
   });
 
   test("CC-01 동일 token의 동시 accept는 성공 1, used 1, connection 1이다", async () => {

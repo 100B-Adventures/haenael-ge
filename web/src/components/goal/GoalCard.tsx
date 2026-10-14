@@ -89,7 +89,7 @@ export function GoalCard({
             {displayName}
           </p>
           <p
-            className="text-[12.5px] mt-0.5 [color:var(--faint)]!"
+            className="mt-0.5 [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
             // --faint
           >
             해낼게 목표
@@ -117,7 +117,7 @@ export function GoalCard({
       {reason && (
         <div className="rounded-[15px] p-4 mb-5 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
           <p
-            className="text-[11px] font-extrabold mb-1.5 tracking-wide [color:var(--accent-foreground)]!"
+            className="font-extrabold mb-1.5 tracking-wide [font-size:var(--text-wordmark)]! [color:var(--accent-foreground)]!"
             // --clover-ink
           >
             WHY
@@ -133,7 +133,7 @@ export function GoalCard({
           </p>
           <button
             type="button"
-            className="mt-2 text-[13px] font-bold [color:var(--accent-foreground)]!"
+            className="mt-2 inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-bold transition-opacity active:opacity-70 [font-size:var(--text-wordmark)]! [color:var(--accent-foreground)]!"
             aria-expanded={reasonExpanded}
             data-testid="goal-reason-toggle"
             onClick={() => setReasonExpanded((prev) => !prev)}

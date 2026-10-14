@@ -185,7 +185,7 @@ export function CheerPaymentButton({
     <div>
       <button
         type="button"
-        className="w-full flex items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]!"
+        className="w-full flex items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]! transition-transform active:translate-y-px disabled:active:translate-y-0"
         data-testid="cheer-cta"
         aria-label="조용히 응원 결제하기"
         onClick={openSheet}
