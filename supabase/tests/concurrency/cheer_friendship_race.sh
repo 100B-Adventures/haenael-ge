@@ -18,7 +18,10 @@ DELETE FROM public.friend_connection
 WHERE member_low_id IN ('${OWNER_ID}', '${SUPPORTER_A_ID}', '${SUPPORTER_B_ID}')
    OR member_high_id IN ('${OWNER_ID}', '${SUPPORTER_A_ID}', '${SUPPORTER_B_ID}');
 DELETE FROM public.cheer
-WHERE display_name IN ('race-attr-first-${RUN_KEY}', 'race-status-first-${RUN_KEY}');
+WHERE goal_id IN (
+  SELECT id FROM public.goal
+  WHERE slug IN ('race-attr-first-${RUN_KEY}', 'race-status-first-${RUN_KEY}')
+);
 DELETE FROM public.payment
 WHERE order_id IN ('race-attr-first-${RUN_KEY}', 'race-status-first-${RUN_KEY}');
 DELETE FROM public.goal

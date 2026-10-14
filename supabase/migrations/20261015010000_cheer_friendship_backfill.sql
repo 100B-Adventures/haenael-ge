@@ -160,15 +160,19 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  v_cheer_id bigint;
-  v_processed integer := 0;
+  v_inserted integer := 0;
 BEGIN
-  FOR v_cheer_id IN
-    SELECT cheer.id
+  WITH eligible AS (
+    SELECT DISTINCT
+      attribution.supporter_member_id,
+      goal.member_id AS owner_member_id
     FROM public.cheer AS cheer
     JOIN public.social_cheer_member_attribution AS attribution
       ON attribution.cheer_id = cheer.id
+    JOIN public.goal AS goal
+      ON goal.id = cheer.goal_id
     WHERE NOT cheer.is_welcome
+      AND attribution.supporter_member_id <> goal.member_id
       AND (
         cheer.status = 'CONFIRMED'
         OR EXISTS (
@@ -178,12 +182,33 @@ BEGIN
             AND payment_log.to_status = 'DONE'
         )
       )
-    ORDER BY cheer.id
-  LOOP
-    PERFORM public.social_connect_cheer_members(v_cheer_id);
-    v_processed := v_processed + 1;
-  END LOOP;
-  RETURN v_processed;
+  ), canonical_pairs AS (
+    SELECT
+      CASE
+        WHEN supporter_member_id::text < owner_member_id::text
+          THEN supporter_member_id
+        ELSE owner_member_id
+      END AS member_low_id,
+      CASE
+        WHEN supporter_member_id::text < owner_member_id::text
+          THEN owner_member_id
+        ELSE supporter_member_id
+      END AS member_high_id
+    FROM eligible
+  )
+  INSERT INTO public.friend_connection(
+    member_low_id,
+    member_high_id,
+    status,
+    connected_at,
+    updated_at
+  )
+  SELECT DISTINCT member_low_id, member_high_id, 'ACTIVE', now(), now()
+  FROM canonical_pairs
+  ON CONFLICT (member_low_id, member_high_id) DO NOTHING;
+
+  GET DIAGNOSTICS v_inserted = ROW_COUNT;
+  RETURN v_inserted;
 END;
 $$;
 
