@@ -153,11 +153,11 @@ export default async function GoalPublicPage({ params }: Props) {
   return (
     <ReceiverAppShell locked={!user} currentPath={`/g/${slug}`}>
     <main
-      className="min-h-svh pb-32 [background-color:var(--background)]!"
+      className="goal-public-approved min-h-svh pb-32 [background-color:var(--background)]!"
       data-testid="goal-public-page"
     >
       {/* 스크롤 영역 */}
-      <div className="px-[22px] pt-12 pb-4">
+      <div className="goal-public-content px-[22px] pt-12 pb-4">
         {/* BrandMark */}
         <p className="font-extrabold mb-5 [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
           해낼게<span className="[color:var(--clover-bright)]!">.</span>

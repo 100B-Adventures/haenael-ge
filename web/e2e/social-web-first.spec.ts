@@ -153,6 +153,11 @@ test.describe("V2 web-first social slice", () => {
       Object.entries(ids).map(([key, id]) => ({
         id,
         nickname: fixtureNicknames[key as keyof typeof emails],
+        profile_image: key === "owner"
+          ? "/images/social-viral/seoyeon.png"
+          : key === "friend"
+          ? "/images/social-viral/dogyeong.png"
+          : null,
       })),
     );
     if (memberError) throw memberError;
@@ -747,9 +752,12 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(180_000);
     const evidenceDir = "../docs/qa/evidence/v2-approved-build-v1.0.0";
+    const realignmentEvidenceDir =
+      "../docs/qa/evidence/v2-approved-build-realignment-v2.0.0";
     mkdirSync(evidenceDir, { recursive: true });
+    mkdirSync(realignmentEvidenceDir, { recursive: true });
     const routes = [
       ["goal-detail", `/me/goal/${ownerGoal}`],
       ["mypage", "/my"],
@@ -780,6 +788,11 @@ test.describe("V2 web-first social slice", () => {
         await page.screenshot({
           path: `${evidenceDir}/dev-${label}-${width}.png`,
         });
+        if (width === 390) {
+          await page.screenshot({
+            path: `${realignmentEvidenceDir}/dev-${label}-${width}.png`,
+          });
+        }
         await page.close();
       }
       await context.close();
@@ -803,6 +816,11 @@ test.describe("V2 web-first social slice", () => {
       await invitePage.screenshot({
         path: `${evidenceDir}/dev-inviteaccept-${width}.png`,
       });
+      if (width === 390) {
+        await invitePage.screenshot({
+          path: `${realignmentEvidenceDir}/dev-inviteaccept-${width}.png`,
+        });
+      }
       await invitePage.close();
 
       for (const [label, route] of [
@@ -829,6 +847,11 @@ test.describe("V2 web-first social slice", () => {
         await guestPage.screenshot({
           path: `${evidenceDir}/dev-${label}-${width}.png`,
         });
+        if (width === 390) {
+          await guestPage.screenshot({
+            path: `${realignmentEvidenceDir}/dev-${label}-${width}.png`,
+          });
+        }
         await guestPage.close();
       }
 

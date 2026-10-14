@@ -5,8 +5,6 @@ import { Link2, MessageCircle, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { createFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InviteCreated } from "@/lib/social/contracts";
-import invitePeople from "../../../../docs/design/prototypes/assets/social-viral/belong.png";
-import seoyeon from "../../../../docs/design/prototypes/assets/social-viral/seoyeon.png";
 
 export function FriendInviteCard(
   { goals }: {
@@ -83,7 +81,7 @@ export function FriendInviteCard(
         <p>친구가 들어오면 서로의 목표를 보고 조용히 응원할 수 있어요.</p>
         <Image
           className="invite-people-photo"
-          src={invitePeople}
+          src="/images/social-viral/belong.png"
           alt="함께 응원하는 친구들"
           width={1000}
           height={748}
@@ -95,7 +93,12 @@ export function FriendInviteCard(
         <p>카카오톡으로 이렇게 전해져요</p>
         <div>
           <span className="invite-preview-avatar">
-            <Image src={seoyeon} alt="서연" width={44} height={44} />
+            <Image
+              src="/images/social-viral/seoyeon.png"
+              alt="서연"
+              width={44}
+              height={44}
+            />
           </span>
           <h2>서연님이 해낼게에 초대했어요</h2>
           <p>“네 목표도 내가 조용히 응원할게. 같이 해낼래?”</p>
