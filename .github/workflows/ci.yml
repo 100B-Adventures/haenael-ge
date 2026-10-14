@@ -86,14 +86,31 @@ jobs:
 
       - run: npm ci
 
+      # 2026-10-14: 환전 E2E 가 실제 로컬 Auth 로 로그인하도록 바뀌었다(가짜 쿠키 주입 폐기).
+      # 그래서 이 잡은 로컬 Supabase 를 실제로 띄워야 한다. 띄우지 않으면 스펙이 모듈 적재
+      # 시점에 환경변수 부재로 죽고 "No tests found" 로 끝난다(런 38540251889).
+      - name: 로컬 Supabase 기동
+        working-directory: .
+        run: |
+          npx supabase start
+          npx supabase status -o env | sed 's/^/SUPA_/' >> "$GITHUB_ENV"
+
+      - name: 로컬 Supabase 접속값 노출
+        working-directory: .
+        run: |
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=${SUPA_API_URL}"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPA_ANON_KEY}"
+            echo "SUPABASE_SERVICE_ROLE_KEY=${SUPA_SERVICE_ROLE_KEY}"
+          } >> "$GITHUB_ENV"
+
       - name: 환전 격리 환경 프로덕션 빌드
         run: npm run build
         env:
-          # cashout-manual.spec.ts가 띄우는 로컬 계약 서버와 같은 URL로 빌드한다.
-          # NEXT_PUBLIC_* 값은 next build에서 고정되므로 다른 환경의 .next를
-          # next start로 실행하면 Supabase 세션 쿠키 이름이 달라져 로그아웃으로 판정된다.
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54329
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: e2e-anon-key
+          # NEXT_PUBLIC_* 값은 next build 에서 고정되므로 테스트가 쓰는 것과 같은 값으로 빌드해야 한다.
+          # 다르면 Supabase 세션 쿠키 이름이 달라져 로그아웃으로 판정된다.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: 브라우저 설치
         run: npx playwright install --with-deps chromium  # 호스팅 러너는 시스템 의존성도 받아야 한다
