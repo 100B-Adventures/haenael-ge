@@ -193,6 +193,26 @@ test.describe("V2 web-first social slice", () => {
         due_date: isoDateFromNow(30),
         visibility: "FRIENDS",
         cover_preset_key: "c3",
+      }, {
+        member_id: ids.owner,
+        slug: `owner-completed-a-${runId}`,
+        title: "첫 목표 완료",
+        reason: "승인 시안의 DB 검증 가능 완료 목표 fixture",
+        due_date: isoDateFromNow(-20),
+        status: "CLOSED",
+        closed_at: new Date().toISOString(),
+        visibility: "PRIVATE",
+        cover_preset_key: "c5",
+      }, {
+        member_id: ids.owner,
+        slug: `owner-completed-b-${runId}`,
+        title: "두 목표 완료",
+        reason: "승인 시안의 DB 검증 가능 완료 목표 fixture",
+        due_date: isoDateFromNow(-10),
+        status: "CLOSED",
+        closed_at: new Date().toISOString(),
+        visibility: "PRIVATE",
+        cover_preset_key: "c6",
       }]).select("id,slug");
     if (ownerError || !ownerGoals?.length) {
       throw ownerError ?? new Error("owner_goal_failed");
@@ -213,7 +233,7 @@ test.describe("V2 web-first social slice", () => {
         reason: "저번 주 중간고사 두 과목 A 나왔어. 응원 덕분에 버텼어 진짜.",
         due_date: isoDateFromNow(70),
         visibility: "PUBLIC",
-        cover_preset_key: "c2",
+        cover_preset_key: "c3",
       },
       {
         member_id: ids.friend,
@@ -824,9 +844,9 @@ test.describe("V2 web-first social slice", () => {
 
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
     test.setTimeout(process.env.RUN_MOBILE_ERGONOMICS === "1" ? 420_000 : 180_000);
-    const evidenceDir = "../docs/qa/evidence/v2-approved-build-v1.0.0";
-    const realignmentEvidenceDir =
+    const evidenceDir =
       "../docs/qa/evidence/v2-approved-build-realignment-v3.0.0";
+    const realignmentEvidenceDir = evidenceDir;
     const captureWidths = process.env.APPROVED_CAPTURE_WIDTHS === "390"
       ? [390]
       : [390, 1280];
@@ -869,11 +889,30 @@ test.describe("V2 web-first social slice", () => {
         const response = await page.goto(route);
         expect(response?.status(), `${width}px ${route}`).toBe(200);
         await expect(page.locator("body")).not.toContainText("Application error");
-        const overflow = await page.evaluate(() =>
-          document.documentElement.scrollWidth -
-          document.documentElement.clientWidth
-        );
-        expect(overflow, `${width}px ${route}`).toBe(0);
+        const overflow = await page.evaluate(() => ({
+          delta: document.documentElement.scrollWidth -
+            document.documentElement.clientWidth,
+          offenders: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+            .map((element) => {
+              const rect = element.getBoundingClientRect();
+              return {
+                tag: element.tagName,
+                testId: element.dataset.testid ?? "",
+                className: typeof element.className === "string"
+                  ? element.className.slice(0, 120)
+                  : "",
+                left: Math.round(rect.left),
+                right: Math.round(rect.right),
+                width: Math.round(rect.width),
+              };
+            })
+            .filter(({ left, right }) => left < 0 || right > window.innerWidth)
+            .slice(0, 12),
+        }));
+        if (overflow.delta !== 0) {
+          console.log(`CAPTURE_OVERFLOW ${route} ${JSON.stringify(overflow)}`);
+        }
+        expect(overflow.delta, `${width}px ${route}`).toBe(0);
         expect(consoleErrors, `${width}px ${route}`).toEqual([]);
         await page.addStyleTag({ content: "nextjs-portal{display:none!important}" });
         await page.screenshot({
@@ -1030,7 +1069,7 @@ test.describe("V2 web-first social slice", () => {
 
   test("PW-07 anon 공개 route는 PUBLIC만 노출한다", async ({ page }) => {
     await page.goto(`/g/friend-public-${runId}`);
-    await expect(page.getByText(/아침마다 달릴게/).first()).toBeVisible();
+    await expect(page.getByText(/이번 학기 평점 4.0 해낼게/).first()).toBeVisible();
     await page.goto(`/g/friend-friends-${runId}`);
     await expect(page.getByText(/매달 책 한 권 읽을게/)).toHaveCount(0);
     await page.goto(`/g/friend-private-${runId}`);

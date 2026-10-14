@@ -48,6 +48,9 @@ describe("MyPageOverview", () => {
       "href",
       "/me/achievements",
     );
+    expect(screen.getByRole("link", { name: /업적/ })).toHaveTextContent(
+      "완료 목표 2개 · 받은 응원 7개 · 친구 3명",
+    );
     expect(screen.getByRole("link", { name: /환전 내역/ })).toHaveAttribute(
       "href",
       "/cashout/history",

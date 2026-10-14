@@ -69,6 +69,22 @@ describe("GoalCard", () => {
     expect(screen.getByTestId("goal-title")).toHaveTextContent("해낼게");
   });
 
+  it("TITLE-02 이미 '-게'로 끝나는 자연어 목표에는 '해낼게'를 중복하지 않는다", () => {
+    render(
+      <GoalCard
+        title="토익 900 넘길게"
+        reason={null}
+        dueDate={dueDate}
+        status="ACTIVE"
+        variant="public"
+      />,
+    );
+    expect(screen.getByTestId("goal-title")).toHaveTextContent("토익 900 넘길게");
+    expect(screen.getByTestId("goal-title")).not.toHaveTextContent(
+      "토익 900 넘길게 해낼게",
+    );
+  });
+
   it("닉네임 표시", () => {
     render(
       <GoalCard

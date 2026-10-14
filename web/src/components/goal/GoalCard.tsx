@@ -74,6 +74,8 @@ export function GoalCard({
 }: GoalCardProps) {
   const normalizedNickname = nickname?.trim() || null;
   const displayName = normalizedNickname ?? "해낼게 사용자";
+  const trimmedTitle = title.trim();
+  const needsHaenaelSuffix = !/게[.!?]?$/u.test(trimmedTitle);
   const [reasonExpanded, setReasonExpanded] = useState(false);
 
   if (variant === "public") {
@@ -83,7 +85,9 @@ export function GoalCard({
           {status === "ACTIVE" && <DdayChip dueDate={dueDate} />}
           <StatusChip status={status} />
         </div>
-        <h1 data-testid="goal-title">{title} 해낼게</h1>
+        <h1 data-testid="goal-title">
+          {trimmedTitle}{needsHaenaelSuffix ? " 해낼게" : ""}
+        </h1>
         {reason && <p data-testid="goal-reason">{reason}</p>}
       </article>
     );
@@ -120,7 +124,9 @@ export function GoalCard({
         className="font-black leading-tight mb-3 line-clamp-2 [font-size:27px]! [letter-spacing:-0.8px]! [line-height:1.28]! [color:var(--foreground)]!"
         data-testid="goal-title"
       >
-        {title} <span className="[color:var(--clover-bright)]!">해낼게</span>
+        {trimmedTitle}{needsHaenaelSuffix && (
+          <> <span className="[color:var(--clover-bright)]!">해낼게</span></>
+        )}
       </h1>
 
       {/* 칩 */}

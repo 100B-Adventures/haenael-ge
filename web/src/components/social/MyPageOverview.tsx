@@ -96,8 +96,7 @@ export function MyPageOverview({
             <span>
               <strong>업적</strong>
               <small>
-                {dashboard.achievements.completed_goal_count +
-                  dashboard.achievements.connected_friend_count}개 달성
+                완료 목표 {dashboard.achievements.completed_goal_count}개 · 받은 응원 {dashboard.achievements.received_cheer_count}개 · 친구 {dashboard.achievements.connected_friend_count}명
               </small>
             </span>
             <ChevronRight aria-hidden="true" />
