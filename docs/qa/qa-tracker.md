@@ -1,5 +1,15 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-15: D-023 적용 후 환전 제출 중 높이 기준 불일치
+
+**판정: ❌ NG. `cashout-manual.spec.ts`의 제출 중 화면 높이 기준이 D-023 적용 전 값에 머물러 CI가 실패했다.**
+
+| 결함 ID | 기대 | 로컬 실측 | 원인 | 수정 경계 |
+|---|---|---|---|---|
+| QA-CASHOUT-D023-HEIGHT-01 | 기준값 대비 허용 오차 ±4px | 622.8125px, 기존 기준 616.015625px | 하단탭 라벨 13px·최소 터치 크기 적용 뒤 제출 중 화면의 실제 높이가 증가했지만 시각 회귀 기준값은 갱신되지 않음 | 기준값만 622.8125px로 갱신. 허용 오차·계좌 마스킹·환전 수수료 공식 단정은 변경 금지 |
+
+STAMP: 2026-10-15 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 근거 `web/e2e/cashout-manual.spec.ts:756`, 로컬 Playwright 실측 622.8125px
+
 ## 2026-10-14 00:56: 컨트롤러 정정 — 위 NG 1건은 지시 오류였고 ship 은 승인됐다
 
 `/admin/covers` 404 는 **제품 결함이 아니다.** 컨트롤러가 QA 위임 프롬프트에 수용 경로를 `/admin/covers` 로 적어 보냈는데 그 경로는 승인 설계에도 코드에도 없다. 커버 검수는 `/admin` 안의 섹션이고 `web/src/app/admin/page.tsx` 가 `GoalCoverReviewQueue` 를 렌더한다. 운영 익명 `/admin` 은 307 로 정상 권한 분기한다(2026-10-14 00:50 실측).

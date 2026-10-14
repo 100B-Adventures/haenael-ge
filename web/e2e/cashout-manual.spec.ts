@@ -753,7 +753,7 @@ test.describe("수동 환전: happy + edge", () => {
     await expect(page.getByTestId("cashout-confirm-banner")).toHaveCount(0);
     const submittingBox = await page.getByTestId("cashout-page").boundingBox();
     expect(submittingBox).not.toBeNull();
-    expect(Math.abs((submittingBox?.height ?? 0) - 616.015625)).toBeLessThanOrEqual(4);
+    expect(Math.abs((submittingBox?.height ?? 0) - 622.8125)).toBeLessThanOrEqual(4);
     await page.getByTestId("cashout-page").screenshot({ path: path.join(CAPTURE_DIR, "cashout-submitting-390.png") });
     console.log(JSON.stringify({
       cashoutVisualMetrics: {
