@@ -6,6 +6,23 @@
 >
 > STAMP: 생성 2026-10-14 02:25 KST · 모델 Opus 5 (1M context) · 작성 주체 컨트롤러(파이프라인 STATE 계열 자산) · 근거 = `docs/qa/v2-production-final-readonly-qa-v1.0.0-gpt-codex-20261013-2351.md`(qa-verifier 산출, 증거 캡처 23장)와 컨트롤러 직접 호출 실측 · 고민 한 줄: 워커 판정을 옮겨 적지 않고 각 행의 증거 소유자를 명시해 자기신고와 실측을 구분했다.
 
+## 0. 2026-10-14 승인 시안 재대조 라운드
+
+운영 2.0.0을 승인 시안과 390px·1280px에서 다시 대조한 결과는 **QA 반려**다. 화면 22개 중 `일치 0`, `불일치 15`, `미확인 7`이다. 대조쌍 44건은 `verify-compare-pairs.py`를 통과했다. 제품 코드는 고치지 않았다.
+
+| 요청 번호 | 요청 요지 | 테스트 번호 | 판정 | 증거 |
+|---|---|---|---|---|
+| 2026-10-14-V2-01 | 승인 시안 대 운영 전수 대조 | V2-D-01 | ❌ 불일치 | `v2-approved-production-audit-v1-gpt-codex.md` |
+| 2026-10-14-V2-02 | 비회원 랜딩·하단탭 대조 | V2-D-02 | ❌ 불일치 | `spec-landing-*`, `prod-landing-*` |
+| 2026-10-14-V2-03 | 마이페이지 대조 | V2-D-03 | ❌ 불일치 | `spec-mypage-*`, `prod-mypage-*` |
+| 2026-10-14-V2-04 | 커버 업로드 운영 장애 | V2-F-01 | ❌ 운영 함수 미배포 | `goal-cover-sign-upload`, `goal-cover-finalize`, `admin-review-goal-cover` 운영 0건 |
+| 2026-10-14-V2-05 | 초대 화면 구현 세부 노출 제거 | V2-D-04 | ❌ 불일치 | `invite/page.tsx:26-30`, `FriendInviteCard.tsx:37,54,66,72` |
+| D-024 | 응원 확정 시 양방향 친구, 과거 이력 소급 | V2-F-02 | ❌ 미구현 | `accept_friend_invite`만 관계를 생성, `결정.md:16-25` |
+
+상세 보고: `docs/qa/v2-approved-production-audit-v1-gpt-codex.md`
+
+대조 보드: `docs/design/boards/v2-approved-production-audit-v1-gpt-codex.html`
+
 ## 1. 해피 경로
 
 | TC | 화면 | 기대 | 배포본 실제 | 판정 | 증거 소유 |
@@ -51,7 +68,7 @@
 
 | 항목 | 상태 | 사유 |
 |---|---|---|
-| 디자인 픽셀 대조 | 🔶 부분 | 두 폭 렌더·가로 넘침 0·콘솔 0 은 확인. 승인 원본과 동일 크기 픽셀 대조 미완. `design-conformance-matrix.md` 참조 |
+| 디자인 픽셀 대조 | ❌ 불일치 | 390px·1280px 44쌍 대조 완료. 일치 0, 불일치 15, 미확인 7. `v2-approved-production-audit-v1-gpt-codex.md` 참조 |
 | 대량 친구·목표 부하 | 미검증 | Presigned URL 묶음 발급의 요청 수·지연 미측정 |
 | 강제 Storage 장애 종단 | 미검증 | 오류 전파는 단위로 확인, 브라우저 종단 미확인 |
 

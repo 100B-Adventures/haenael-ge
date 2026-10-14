@@ -1,0 +1,1182 @@
+{
+  "capturedAt": "2026-10-13T20:31:49.290Z",
+  "base": "https://haenael-ge.vercel.app",
+  "memberExists": false,
+  "ownGoalAvailable": false,
+  "publicGoalAvailable": true,
+  "friendAvailable": false,
+  "screens": [
+    {
+      "screen": "landing",
+      "width": 390,
+      "requestedPath": "/",
+      "status": 200,
+      "finalPath": "/",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n해낼게.\n\n응원은 돈으로 하는 겁니다.\n\n그게 무슨 말이냐면 ↓\n\n네 목표 위에, 응원이 이렇게 쌓여요\n\n멋지다\n화이팅\n곧된다\n할수있어\n응원해\n존경\n고생많아\n힘내\n\n친구들이 🍀 클로버로 남긴 응원이에요\n\n선언\n›\n친구가 🍀로 응원\n›\n응원이 쌓여요\n시작하기\n어떻게 쓰는 건가요?\n\n이미 계정이 있으신가요?\n로그인\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 353,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "해낼게.",
+        "시작하기",
+        "어떻게 쓰는 건가요?",
+        "로그인",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "goalpublic",
+      "width": 390,
+      "requestedPath": "/g/7vb3j7t",
+      "status": 200,
+      "finalPath": "/g/7vb3j7t",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "공인중개사 2차 합격🖤 해낼게 — 해낼게",
+      "bodyText": "해낼게.\n\n내 목표가 있으신가요? 카카오로 로그인\n\n🍀\n\n해낼게 사용자\n\n해낼게 목표\n\n공인중개사 2차 합격🖤 해낼게\nD-18\n진행 중\n\nWHY\n\n부동산 부자가 되꼬야\n\n더 보기\n\n6명이 조용히 응원했어요\n\n🍀\n부동산\n우끼\n🐒\n🖐\n건넬게요.\n곧\n공인중개숭이에요\n공주\n공주가\n넌\n다솔아\n12개 표시 · 나머지 18개 보기\n🚩\n신고\n조용히 밀어줄게\n나도 해낼게 만들래 →\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 382,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 2,
+      "buttons": [
+        "더 보기",
+        "🚩신고",
+        "조용히 밀어줄게"
+      ],
+      "links": [
+        "카카오로 로그인",
+        "나도 해낼게 만들래 →",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "dopamine",
+      "width": 390,
+      "requestedPath": "/g/7vb3j7t",
+      "status": 200,
+      "finalPath": "/g/7vb3j7t",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "공인중개사 2차 합격🖤 해낼게 — 해낼게",
+      "bodyText": "해낼게.\n\n내 목표가 있으신가요? 카카오로 로그인\n\n🍀\n\n해낼게 사용자\n\n해낼게 목표\n\n공인중개사 2차 합격🖤 해낼게\nD-18\n진행 중\n\nWHY\n\n부동산 부자가 되꼬야\n\n더 보기\n\n6명이 조용히 응원했어요\n\n🍀\n부동산\n우끼\n🐒\n🖐\n건넬게요.\n곧\n공인중개숭이에요\n공주\n공주가\n넌\n다솔아\n12개 표시 · 나머지 18개 보기\n🚩\n신고\n조용히 밀어줄게\n나도 해낼게 만들래 →\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 382,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 2,
+      "buttons": [
+        "더 보기",
+        "🚩신고",
+        "조용히 밀어줄게"
+      ],
+      "links": [
+        "카카오로 로그인",
+        "나도 해낼게 만들래 →",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "paysuccess",
+      "width": 390,
+      "requestedPath": "/payment/success",
+      "status": 200,
+      "finalPath": "/payment/success",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "결제 정보가 부족해요\n\n결제창에서 돌아온 정보가 올바르지 않습니다.\n\n해낼게 홈으로\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 217,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "해낼게 홈으로",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "payfail",
+      "width": 390,
+      "requestedPath": "/payment/fail?code=QA_READONLY&message=QA_READONLY",
+      "status": 200,
+      "finalPath": "/payment/fail",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "결제가 멈췄어요\n\nQA_READONLY\n\n다시 돌아가기\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 201,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "다시 돌아가기",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "login",
+      "width": 390,
+      "requestedPath": "/",
+      "status": 200,
+      "finalPath": "/",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n해낼게.\n\n응원은 돈으로 하는 겁니다.\n\n그게 무슨 말이냐면 ↓\n\n네 목표 위에, 응원이 이렇게 쌓여요\n\n멋지다\n화이팅\n곧된다\n할수있어\n응원해\n존경\n고생많아\n힘내\n\n친구들이 🍀 클로버로 남긴 응원이에요\n\n선언\n›\n친구가 🍀로 응원\n›\n응원이 쌓여요\n시작하기\n어떻게 쓰는 건가요?\n\n이미 계정이 있으신가요?\n로그인\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 353,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "해낼게.",
+        "시작하기",
+        "어떻게 쓰는 건가요?",
+        "로그인",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "how",
+      "width": 390,
+      "requestedPath": "/how",
+      "status": 200,
+      "finalPath": "/how",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "어떻게 쓰는 건가요? — 해낼게",
+      "bodyText": "해낼게.\n\n어떻게 쓰는 건가요?\n\n응원은 돈으로 하는 겁니다.\n\n1\n\n선언\n\n말하면 시작된다. 해낼게. — 이루고 싶은 목표를 한 문장으로 선언해요.\n\n2\n\n친구가 🍀로 응원\n\n기프티콘은 답장을 요구한다. 클로버는 아무것도 요구하지 않는다. 이름도 금액도, 친구에게 보이지 않게 전해드릴게요.\n\n3\n\n모이면 환전\n\n해내면 네 것. 못 해내도, 잃는 사람은 없다. (환전은 오픈 예정입니다)\n\n시작하기\n홈으로\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 399,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "시작하기",
+        "홈으로",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "terms",
+      "width": 390,
+      "requestedPath": "/terms",
+      "status": 200,
+      "finalPath": "/terms",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "이용약관\n\n본 약관은 표준 이용약관 템플릿을 기반으로 “해낼게” 서비스의 실제 기능에 맞춰 작성되었으며, 정식 법률 검토를 대체하지 않는 잠정 문서입니다. 서비스 확장 및 기능 활성화(결제 등)에 따라 개정될 수 있습니다.\n\n제1조 (목적)\n\n이 약관은 “해낼게”(이하 “회사”)가 제공하는 목표 선언 및 응원 서비스(이하 “서비스”)의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.\n\n제2조 (정의)\n회원: 카카오 소셜 로그인을 통해 회원가입을 완료하고 서비스를 이용하는 자를 말합니다.\n목표: 회원이 “○○ 해낼게”와 같이 서비스 내에 선언하는 개인 목표(제목, 사유, 기한 등으로 구성된 “목표 액자”)를 말합니다.\n응원: 회원 또는 이용자가 다른 회원의 목표에 대해 클로버를 결제하여 지지의 뜻을 표시하는 행위를 말합니다.\n클로버: 응원 시 사용되는 서비스 내 가상의 단위를 말합니다. 목표를 선언한 회원은 자신에게 모인 클로버를 서비스 정책에 따라 환전(현금화) 신청할 수 있으며, 환전 기능은 제7조에서 정한 바에 따릅니다.\n워드맵: 회원이 받은 응원 메시지를 시각화하여 공유할 수 있도록 제공되는 이미지 형태의 결과물을 말합니다.\n제3조 (서비스의 제공 및 변경)\n목표 작성 및 목표 페이지 공유\n다른 회원의 목표에 대한 응원(클로버 결제) — 기능 활성화 시\n응원 메시지 기반 워드맵 생성 및 공유\n부적절한 콘텐츠에 대한 신고 접수\n서비스 관련 알림(인앱 및 카카오 알림톡) 발송\n\n회사는 서비스의 내용, 운영상 또는 기술상 필요에 따라 제공하는 서비스의 전부 또는 일부를 변경할 수 있으며, 이 경우 변경 사유와 내용 등을 사전에 공지합니다. 다만 긴급한 보안 문제 등 불가피한 경우 사후에 공지할 수 있습니다.\n\n제4조 (회원가입)\n\n회원가입은 이용자가 카카오 소셜 로그인을 통해 본인의 카카오 계정 정보 제공에 동의하고, 회사가 이를 확인하여 승낙함으로써 체결됩니다. 회사는 다음 각 호에 해당하는 신청에 대하여는 승낙을 하지 않거나 사후에 이용계약을 해지할 수 있습니다.\n\n타인의 명의 또는 정보를 도용하여 신청한 경우\n허위의 정보를 기재하거나 회사가 제시하는 내용을 기재하지 않은 경우\n이전에 이 약관 위반 등으로 이용 제한을 받은 이력이 있는 경우\n제5조 (회원의 의무)\n\n회원은 다음 행위를 하여서는 안 됩니다.\n\n회원가입 시 또는 목표/응원 작성 시 허위",
+      "bodyTextLength": 4710,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "privacy",
+      "width": 390,
+      "requestedPath": "/privacy",
+      "status": 200,
+      "finalPath": "/privacy",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "개인정보처리방침\n\n본 방침은 표준 개인정보처리방침 템플릿을 기반으로 “해낼게” 서비스의 실제 수집 항목에 맞춰 작성되었으며, 정식 법률 검토를 대체하지 않는 잠정 문서입니다. 서비스 확장 및 기능 활성화(결제, 환전, 분석 도구 등)에 따라 개정될 수 있습니다.\n\n“해낼게”(이하 “회사”)는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 등 관계 법령을 준수하기 위해 노력합니다. 회사는 본 개인정보처리방침을 통해 이용자가 제공하는 개인정보가 어떠한 목적과 방식으로 이용되고 있으며, 개인정보 보호를 위해 어떠한 조치가 취해지고 있는지 알려드립니다.\n\n1. 수집하는 개인정보의 항목 및 수집방법\n\n회사는 다음과 같은 개인정보를 수집합니다.\n\n카카오 소셜 로그인(회원가입) 시: 이용자가 카카오 로그인 동의 화면에서 동의한 항목에 한해, 카카오로부터 제공받아 수집합니다.\n[필수] 닉네임(profile_nickname), 카카오 고유 식별자(provider id) — 회원 식별 및 로그인\n[선택] 프로필 이미지(profile_image) — 프로필 표시\n[선택] 카카오계정(이메일)(account_email) — 회원 식별 보조 및 서비스 관련 안내\n[필수] 카카오계정(전화번호)(phone_number) — 응원 도착·환전 지급 완료 등 서비스 이용에 관한 정보성 알림톡(카카오톡 메시지) 발송. 해낼게는 응원 수신과 환전 결과를 알림톡으로 전달하는 것을 기본 전달 수단으로 하므로 전화번호를 필수로 수집합니다. 다만 카카오톡을 이용하지 않는 계정 등 카카오로부터 번호를 제공받지 못하는 경우가 있으며, 이때는 환전 신청 화면에서 이용자가 직접 입력한 번호를 사용합니다.\n[선택] 연령대(age_range) — 미성년 이용자 구분에 따른 환전(정산) 정책 적용 및 통계 분석. 구간 값만 수집하며 생년월일 전체는 수집하지 않습니다.\n[선택] 생일(birthday) — 생일 축하 혜택 등 이벤트 제공 및 통계 분석\n필수 항목에 동의하지 않으면 회원가입이 제한됩니다. 선택 항목에 동의하지 않아도 회원가입 및 서비스의 기본 이용에는 제한이 없습니다.\n출시 알림 리드 신청 시: 이메일 또는 인스타그램 아이디(둘 중 최소 1개), 신청 동의 시각, 유입 경로 정보(UTM source/medium/campaign/content, referrer, 방문 페이지 경로)\n목표 작성 및 응원 이용 시: 목표 제목, 목표 사유, 목표 기한, 응원",
+      "bodyTextLength": 5254,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "onboarding",
+      "width": 390,
+      "requestedPath": "/onboarding",
+      "status": 200,
+      "finalPath": "/onboarding",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "목표 쓰기 — 해낼게",
+      "bodyText": "해낼게.\n\n무엇을 해낼 거예요?\n\n작성하고 저장하면 나만의 응원 링크가 생겨요.\n\n목표\n해낼게\n언제까지?\n왜요? (응원의 이유가 돼요 · 선택)\n\n0/200\n\n저장하고 내 링크 받기\n\n저장하면 로그인 화면이 잠깐 뜨고, 작성 중인 목표는 안전하게 보관 중이에요.\n\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 329,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [
+        "저장하고 내 링크 받기"
+      ],
+      "links": [
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "home",
+      "width": 390,
+      "requestedPath": "/me",
+      "status": 200,
+      "finalPath": "/onboarding",
+      "redirected": true,
+      "consoleErrors": [],
+      "title": "목표 쓰기 — 해낼게",
+      "bodyText": "해낼게.\n\n무엇을 해낼 거예요?\n\n작성하고 저장하면 나만의 응원 링크가 생겨요.\n\n목표\n해낼게\n언제까지?\n왜요? (응원의 이유가 돼요 · 선택)\n\n0/200\n\n내 링크 받기\n\n바로 저장돼요.\n\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 289,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [
+        "내 링크 받기"
+      ],
+      "links": [
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "goaldetail",
+      "width": 390,
+      "requestedPath": "/me/goal/1",
+      "status": 200,
+      "finalPath": "/me/goal/1",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "404\nThis page could not be found.\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 215,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "cashout",
+      "width": 390,
+      "requestedPath": "/cashout",
+      "status": 200,
+      "finalPath": "/cashout",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n환전 전에\n정직하게 보여드릴게요\n\n조금만 더 모으면 환전할 수 있어요\n\n지금 🍀 0개(웰컴 포함) · 최소 환전 30개까지 30개 남았어요. 쌓인 클로버는 그대로 보관돼요.\n\n모인 클로버 (웰컴 포함)\n🍀 0개\n− 해낼게 웰컴 (지급 대상 아님)\n− 🍀 0개\n친구 응원분 (지급 대상)\n🍀 0개\n환산 (🍀1개 = 1,000원)\n0원\n서비스 이용료 (부가세 포함)\n− 0원\n사업소득 원천징수 3.3%\n− 0원\n받으실 금액\n0원\n\n서비스 이용료는 커피 한 잔 값이에요. 카드 결제 수수료, 응원 알림 발송, 계좌 확인과 송금에 쓰입니다. 소득세는 저희가 가져가는 돈이 아니라 국세청에 대신 내드리는 금액이에요. 다음 해 5월에 종합소득세 신고하시면 돌려받으실 수도 있어요. 실제 지급액은 신청 시점에 다시 확정합니다.\n\n환전 안내를 받을 전화번호가 필요해요\n\n카카오에서 동의하면 전화번호를 바로 불러와요. 안 되면 아래에 직접 입력할 수 있어요.\n\n카카오에서 동의하기\n\n조금만 더 모으면 환전할 수 있어요\n\n환전 기준은 모인 클로버 30개 이상이에요. 지금 모인 클로버는 그대로 보관됩니다.\n\n홈으로 돌아가기\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 755,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 3,
+      "buttons": [],
+      "links": [
+        "카카오에서 동의하기",
+        "홈으로 돌아가기",
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "cashstatus",
+      "width": 390,
+      "requestedPath": "/cashout/status",
+      "status": 200,
+      "finalPath": "/cashout/status",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n아직 환전 신청이 없어요\n\n모인 클로버가 30개 이상이면 환전 자격을 채워요. 신청량은 지금 지급 가능한 클로버 안에서 1개 이상 선택할 수 있어요.\n\n환전 화면으로\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 280,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "환전 화면으로",
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "mypage",
+      "width": 390,
+      "requestedPath": "/my",
+      "status": 200,
+      "finalPath": "/my",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n내 정보와 활동\n\n마이페이지\n해\n해낼게 사용자\n\n서로 응원하는 친구 0명 · 진행 중 목표 0개\n\n내 목표\n0개\n아직 등록한 목표가 없어요\n첫 목표 만들기\n업적\nDB 집계 기준\n0\n달성한 목표\n완료 상태로 확인된 목표\n0\n받은 응원\n결제 확정된 응원\n0\n연결된 친구\n현재 연결된 친구\n\n데이터베이스로 확인할 수 있는 활동만 집계해요.\n\n아직 응원하지 않은 친구 목표\n0개\n\n지금 확인할 친구 목표가 없어요.\n\n새 목표가 생기면 여기에 조용히 모아둘게요.\n\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 451,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 8,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "첫 목표 만들기",
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "cashhistory",
+      "width": 390,
+      "requestedPath": "/cashout/history",
+      "status": 200,
+      "finalPath": "/cashout/history",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n환전 내역\n\n지금까지 받은 금액\n\n0원\n\n입금 완료\n\n0건\n\n진행중\n\n0건\n\n아직 환전 내역이 없어요\n\n신청하면 이곳에 처리 상태가 남아요.\n\n🧾 원천징수 3.3%가 제외된 실지급액이에요. 세금 신고 자료가 필요하면 고객센터로 문의해 주세요.\n환전 화면\n홈으로\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 334,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 2,
+      "buttons": [],
+      "links": [
+        "환전 화면",
+        "홈으로",
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "friends",
+      "width": 390,
+      "requestedPath": "/friends",
+      "status": 200,
+      "finalPath": "/friends",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n함께 해내는 사람들\n\n친구의 해낼게\n\n금액과 순위 없이, 친구가 공개한 목표와 응원만 보여요.\n\n아직 연결된 친구가 없어요\n\n초대 링크를 보내고 서로의 해낼게를 응원해 보세요.\n\n친구 초대하기\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 304,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 2,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "친구 초대하기",
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "connect",
+      "width": 390,
+      "requestedPath": "/invite",
+      "status": 200,
+      "finalPath": "/invite",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n7일 동안 한 번\n\n친구를 초대해요\n\n초대 토큰 원문은 링크를 만들 때 한 번만 보여요. 저장소에는 SHA-256 hash만 남아요.\n\n초대할 공개 목표가 없어요\n\n목표 공개범위를 PUBLIC 또는 FRIENDS로 바꾼 뒤 다시 시도해 주세요.\n\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 334,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 2,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "belong",
+      "width": 390,
+      "requestedPath": "/friends/00000000-0000-0000-0000-000000000000?goal=1",
+      "status": 404,
+      "finalPath": "/friends/00000000-0000-0000-0000-000000000000",
+      "redirected": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "title": "404: This page could not be found.",
+      "bodyText": "404\nThis page could not be found.\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 215,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "status",
+      "width": 390,
+      "requestedPath": "/my",
+      "status": 200,
+      "finalPath": "/my",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n내 정보와 활동\n\n마이페이지\n해\n해낼게 사용자\n\n서로 응원하는 친구 0명 · 진행 중 목표 0개\n\n내 목표\n0개\n아직 등록한 목표가 없어요\n첫 목표 만들기\n업적\nDB 집계 기준\n0\n달성한 목표\n완료 상태로 확인된 목표\n0\n받은 응원\n결제 확정된 응원\n0\n연결된 친구\n현재 연결된 친구\n\n데이터베이스로 확인할 수 있는 활동만 집계해요.\n\n아직 응원하지 않은 친구 목표\n0개\n\n지금 확인할 친구 목표가 없어요.\n\n새 목표가 생기면 여기에 조용히 모아둘게요.\n\n홈\n친구\n초대\n마이\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 451,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 8,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "첫 목표 만들기",
+        "홈",
+        "친구",
+        "초대",
+        "마이",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "admin",
+      "width": 390,
+      "requestedPath": "/admin",
+      "status": 404,
+      "finalPath": "/admin",
+      "redirected": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "title": "404: This page could not be found.",
+      "bodyText": "404\nThis page could not be found.\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 204,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "landing",
+      "width": 1280,
+      "requestedPath": "/",
+      "status": 200,
+      "finalPath": "/",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n해낼게.\n\n응원은 돈으로 하는 겁니다.\n\n그게 무슨 말이냐면 ↓\n\n네 목표 위에, 응원이 이렇게 쌓여요\n\n멋지다\n화이팅\n곧된다\n할수있어\n응원해\n존경\n고생많아\n힘내\n\n친구들이 🍀 클로버로 남긴 응원이에요\n\n선언\n›\n친구가 🍀로 응원\n›\n응원이 쌓여요\n시작하기\n어떻게 쓰는 건가요?\n\n이미 계정이 있으신가요?\n로그인\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 353,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "해낼게.",
+        "시작하기",
+        "어떻게 쓰는 건가요?",
+        "로그인",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "goalpublic",
+      "width": 1280,
+      "requestedPath": "/g/7vb3j7t",
+      "status": 200,
+      "finalPath": "/g/7vb3j7t",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "공인중개사 2차 합격🖤 해낼게 — 해낼게",
+      "bodyText": "해낼게.\n\n내 목표가 있으신가요? 카카오로 로그인\n\n🍀\n\n해낼게 사용자\n\n해낼게 목표\n\n공인중개사 2차 합격🖤 해낼게\nD-18\n진행 중\n\nWHY\n\n부동산 부자가 되꼬야\n\n더 보기\n\n6명이 조용히 응원했어요\n\n🍀\n부동산\n우끼\n🐒\n🖐\n건넬게요.\n곧\n공인중개숭이에요\n공주\n공주가\n넌\n다솔아\n12개 표시 · 나머지 18개 보기\n🚩\n신고\n조용히 밀어줄게\n나도 해낼게 만들래 →\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 382,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 2,
+      "buttons": [
+        "더 보기",
+        "🚩신고",
+        "조용히 밀어줄게"
+      ],
+      "links": [
+        "카카오로 로그인",
+        "나도 해낼게 만들래 →",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "dopamine",
+      "width": 1280,
+      "requestedPath": "/g/7vb3j7t",
+      "status": 200,
+      "finalPath": "/g/7vb3j7t",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "공인중개사 2차 합격🖤 해낼게 — 해낼게",
+      "bodyText": "해낼게.\n\n내 목표가 있으신가요? 카카오로 로그인\n\n🍀\n\n해낼게 사용자\n\n해낼게 목표\n\n공인중개사 2차 합격🖤 해낼게\nD-18\n진행 중\n\nWHY\n\n부동산 부자가 되꼬야\n\n더 보기\n\n6명이 조용히 응원했어요\n\n🍀\n부동산\n우끼\n🐒\n🖐\n건넬게요.\n곧\n공인중개숭이에요\n공주\n공주가\n넌\n다솔아\n12개 표시 · 나머지 18개 보기\n🚩\n신고\n조용히 밀어줄게\n나도 해낼게 만들래 →\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 382,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 2,
+      "buttons": [
+        "더 보기",
+        "🚩신고",
+        "조용히 밀어줄게"
+      ],
+      "links": [
+        "카카오로 로그인",
+        "나도 해낼게 만들래 →",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "paysuccess",
+      "width": 1280,
+      "requestedPath": "/payment/success",
+      "status": 200,
+      "finalPath": "/payment/success",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "결제 정보가 부족해요\n\n결제창에서 돌아온 정보가 올바르지 않습니다.\n\n해낼게 홈으로\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 217,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "해낼게 홈으로",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "payfail",
+      "width": 1280,
+      "requestedPath": "/payment/fail?code=QA_READONLY&message=QA_READONLY",
+      "status": 200,
+      "finalPath": "/payment/fail",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "결제가 멈췄어요\n\nQA_READONLY\n\n다시 돌아가기\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 201,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "다시 돌아가기",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "login",
+      "width": 1280,
+      "requestedPath": "/",
+      "status": 200,
+      "finalPath": "/",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n해낼게.\n\n응원은 돈으로 하는 겁니다.\n\n그게 무슨 말이냐면 ↓\n\n네 목표 위에, 응원이 이렇게 쌓여요\n\n멋지다\n화이팅\n곧된다\n할수있어\n응원해\n존경\n고생많아\n힘내\n\n친구들이 🍀 클로버로 남긴 응원이에요\n\n선언\n›\n친구가 🍀로 응원\n›\n응원이 쌓여요\n시작하기\n어떻게 쓰는 건가요?\n\n이미 계정이 있으신가요?\n로그인\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 353,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "해낼게.",
+        "시작하기",
+        "어떻게 쓰는 건가요?",
+        "로그인",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "how",
+      "width": 1280,
+      "requestedPath": "/how",
+      "status": 200,
+      "finalPath": "/how",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "어떻게 쓰는 건가요? — 해낼게",
+      "bodyText": "해낼게.\n\n어떻게 쓰는 건가요?\n\n응원은 돈으로 하는 겁니다.\n\n1\n\n선언\n\n말하면 시작된다. 해낼게. — 이루고 싶은 목표를 한 문장으로 선언해요.\n\n2\n\n친구가 🍀로 응원\n\n기프티콘은 답장을 요구한다. 클로버는 아무것도 요구하지 않는다. 이름도 금액도, 친구에게 보이지 않게 전해드릴게요.\n\n3\n\n모이면 환전\n\n해내면 네 것. 못 해내도, 잃는 사람은 없다. (환전은 오픈 예정입니다)\n\n시작하기\n홈으로\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 399,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "시작하기",
+        "홈으로",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "terms",
+      "width": 1280,
+      "requestedPath": "/terms",
+      "status": 200,
+      "finalPath": "/terms",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "이용약관\n\n본 약관은 표준 이용약관 템플릿을 기반으로 “해낼게” 서비스의 실제 기능에 맞춰 작성되었으며, 정식 법률 검토를 대체하지 않는 잠정 문서입니다. 서비스 확장 및 기능 활성화(결제 등)에 따라 개정될 수 있습니다.\n\n제1조 (목적)\n\n이 약관은 “해낼게”(이하 “회사”)가 제공하는 목표 선언 및 응원 서비스(이하 “서비스”)의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.\n\n제2조 (정의)\n회원: 카카오 소셜 로그인을 통해 회원가입을 완료하고 서비스를 이용하는 자를 말합니다.\n목표: 회원이 “○○ 해낼게”와 같이 서비스 내에 선언하는 개인 목표(제목, 사유, 기한 등으로 구성된 “목표 액자”)를 말합니다.\n응원: 회원 또는 이용자가 다른 회원의 목표에 대해 클로버를 결제하여 지지의 뜻을 표시하는 행위를 말합니다.\n클로버: 응원 시 사용되는 서비스 내 가상의 단위를 말합니다. 목표를 선언한 회원은 자신에게 모인 클로버를 서비스 정책에 따라 환전(현금화) 신청할 수 있으며, 환전 기능은 제7조에서 정한 바에 따릅니다.\n워드맵: 회원이 받은 응원 메시지를 시각화하여 공유할 수 있도록 제공되는 이미지 형태의 결과물을 말합니다.\n제3조 (서비스의 제공 및 변경)\n목표 작성 및 목표 페이지 공유\n다른 회원의 목표에 대한 응원(클로버 결제) — 기능 활성화 시\n응원 메시지 기반 워드맵 생성 및 공유\n부적절한 콘텐츠에 대한 신고 접수\n서비스 관련 알림(인앱 및 카카오 알림톡) 발송\n\n회사는 서비스의 내용, 운영상 또는 기술상 필요에 따라 제공하는 서비스의 전부 또는 일부를 변경할 수 있으며, 이 경우 변경 사유와 내용 등을 사전에 공지합니다. 다만 긴급한 보안 문제 등 불가피한 경우 사후에 공지할 수 있습니다.\n\n제4조 (회원가입)\n\n회원가입은 이용자가 카카오 소셜 로그인을 통해 본인의 카카오 계정 정보 제공에 동의하고, 회사가 이를 확인하여 승낙함으로써 체결됩니다. 회사는 다음 각 호에 해당하는 신청에 대하여는 승낙을 하지 않거나 사후에 이용계약을 해지할 수 있습니다.\n\n타인의 명의 또는 정보를 도용하여 신청한 경우\n허위의 정보를 기재하거나 회사가 제시하는 내용을 기재하지 않은 경우\n이전에 이 약관 위반 등으로 이용 제한을 받은 이력이 있는 경우\n제5조 (회원의 의무)\n\n회원은 다음 행위를 하여서는 안 됩니다.\n\n회원가입 시 또는 목표/응원 작성 시 허위",
+      "bodyTextLength": 4710,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "privacy",
+      "width": 1280,
+      "requestedPath": "/privacy",
+      "status": 200,
+      "finalPath": "/privacy",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "개인정보처리방침\n\n본 방침은 표준 개인정보처리방침 템플릿을 기반으로 “해낼게” 서비스의 실제 수집 항목에 맞춰 작성되었으며, 정식 법률 검토를 대체하지 않는 잠정 문서입니다. 서비스 확장 및 기능 활성화(결제, 환전, 분석 도구 등)에 따라 개정될 수 있습니다.\n\n“해낼게”(이하 “회사”)는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 등 관계 법령을 준수하기 위해 노력합니다. 회사는 본 개인정보처리방침을 통해 이용자가 제공하는 개인정보가 어떠한 목적과 방식으로 이용되고 있으며, 개인정보 보호를 위해 어떠한 조치가 취해지고 있는지 알려드립니다.\n\n1. 수집하는 개인정보의 항목 및 수집방법\n\n회사는 다음과 같은 개인정보를 수집합니다.\n\n카카오 소셜 로그인(회원가입) 시: 이용자가 카카오 로그인 동의 화면에서 동의한 항목에 한해, 카카오로부터 제공받아 수집합니다.\n[필수] 닉네임(profile_nickname), 카카오 고유 식별자(provider id) — 회원 식별 및 로그인\n[선택] 프로필 이미지(profile_image) — 프로필 표시\n[선택] 카카오계정(이메일)(account_email) — 회원 식별 보조 및 서비스 관련 안내\n[필수] 카카오계정(전화번호)(phone_number) — 응원 도착·환전 지급 완료 등 서비스 이용에 관한 정보성 알림톡(카카오톡 메시지) 발송. 해낼게는 응원 수신과 환전 결과를 알림톡으로 전달하는 것을 기본 전달 수단으로 하므로 전화번호를 필수로 수집합니다. 다만 카카오톡을 이용하지 않는 계정 등 카카오로부터 번호를 제공받지 못하는 경우가 있으며, 이때는 환전 신청 화면에서 이용자가 직접 입력한 번호를 사용합니다.\n[선택] 연령대(age_range) — 미성년 이용자 구분에 따른 환전(정산) 정책 적용 및 통계 분석. 구간 값만 수집하며 생년월일 전체는 수집하지 않습니다.\n[선택] 생일(birthday) — 생일 축하 혜택 등 이벤트 제공 및 통계 분석\n필수 항목에 동의하지 않으면 회원가입이 제한됩니다. 선택 항목에 동의하지 않아도 회원가입 및 서비스의 기본 이용에는 제한이 없습니다.\n출시 알림 리드 신청 시: 이메일 또는 인스타그램 아이디(둘 중 최소 1개), 신청 동의 시각, 유입 경로 정보(UTM source/medium/campaign/content, referrer, 방문 페이지 경로)\n목표 작성 및 응원 이용 시: 목표 제목, 목표 사유, 목표 기한, 응원",
+      "bodyTextLength": 5254,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "onboarding",
+      "width": 1280,
+      "requestedPath": "/onboarding",
+      "status": 200,
+      "finalPath": "/onboarding",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "목표 쓰기 — 해낼게",
+      "bodyText": "해낼게.\n\n무엇을 해낼 거예요?\n\n작성하고 저장하면 나만의 응원 링크가 생겨요.\n\n목표\n해낼게\n언제까지?\n왜요? (응원의 이유가 돼요 · 선택)\n\n0/200\n\n저장하고 내 링크 받기\n\n저장하면 로그인 화면이 잠깐 뜨고, 작성 중인 목표는 안전하게 보관 중이에요.\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 318,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [
+        "저장하고 내 링크 받기"
+      ],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "home",
+      "width": 1280,
+      "requestedPath": "/me",
+      "status": 200,
+      "finalPath": "/onboarding",
+      "redirected": true,
+      "consoleErrors": [],
+      "title": "목표 쓰기 — 해낼게",
+      "bodyText": "해낼게.\n\n무엇을 해낼 거예요?\n\n작성하고 저장하면 나만의 응원 링크가 생겨요.\n\n목표\n해낼게\n언제까지?\n왜요? (응원의 이유가 돼요 · 선택)\n\n0/200\n\n내 링크 받기\n\n바로 저장돼요.\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 278,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [
+        "내 링크 받기"
+      ],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "goaldetail",
+      "width": 1280,
+      "requestedPath": "/me/goal/1",
+      "status": 200,
+      "finalPath": "/me/goal/1",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "404\nThis page could not be found.\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 204,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "cashout",
+      "width": 1280,
+      "requestedPath": "/cashout",
+      "status": 200,
+      "finalPath": "/cashout",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n환전 전에 정직하게 보여드릴게요\n\n조금만 더 모으면 환전할 수 있어요\n\n지금 🍀 0개(웰컴 포함) · 최소 환전 30개까지 30개 남았어요. 쌓인 클로버는 그대로 보관돼요.\n\n모인 클로버 (웰컴 포함)\n🍀 0개\n− 해낼게 웰컴 (지급 대상 아님)\n− 🍀 0개\n친구 응원분 (지급 대상)\n🍀 0개\n환산 (🍀1개 = 1,000원)\n0원\n서비스 이용료 (부가세 포함)\n− 0원\n사업소득 원천징수 3.3%\n− 0원\n받으실 금액\n0원\n\n서비스 이용료는 커피 한 잔 값이에요. 카드 결제 수수료, 응원 알림 발송, 계좌 확인과 송금에 쓰입니다. 소득세는 저희가 가져가는 돈이 아니라 국세청에 대신 내드리는 금액이에요. 다음 해 5월에 종합소득세 신고하시면 돌려받으실 수도 있어요. 실제 지급액은 신청 시점에 다시 확정합니다.\n\n환전 안내를 받을 전화번호가 필요해요\n\n카카오에서 동의하면 전화번호를 바로 불러와요. 안 되면 아래에 직접 입력할 수 있어요.\n\n카카오에서 동의하기\n\n조금만 더 모으면 환전할 수 있어요\n\n환전 기준은 모인 클로버 30개 이상이에요. 지금 모인 클로버는 그대로 보관됩니다.\n\n홈으로 돌아가기\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 744,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 3,
+      "buttons": [],
+      "links": [
+        "카카오에서 동의하기",
+        "홈으로 돌아가기",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "cashstatus",
+      "width": 1280,
+      "requestedPath": "/cashout/status",
+      "status": 200,
+      "finalPath": "/cashout/status",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n아직 환전 신청이 없어요\n\n모인 클로버가 30개 이상이면 환전 자격을 채워요. 신청량은 지금 지급 가능한 클로버 안에서 1개 이상 선택할 수 있어요.\n\n환전 화면으로\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 269,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "환전 화면으로",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "mypage",
+      "width": 1280,
+      "requestedPath": "/my",
+      "status": 200,
+      "finalPath": "/my",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n내 정보와 활동\n\n마이페이지\n해\n해낼게 사용자\n\n서로 응원하는 친구 0명 · 진행 중 목표 0개\n\n내 목표\n0개\n아직 등록한 목표가 없어요\n첫 목표 만들기\n업적\nDB 집계 기준\n0\n달성한 목표\n완료 상태로 확인된 목표\n0\n받은 응원\n결제 확정된 응원\n0\n연결된 친구\n현재 연결된 친구\n\n데이터베이스로 확인할 수 있는 활동만 집계해요.\n\n아직 응원하지 않은 친구 목표\n0개\n\n지금 확인할 친구 목표가 없어요.\n\n새 목표가 생기면 여기에 조용히 모아둘게요.\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 440,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 8,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "첫 목표 만들기",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "cashhistory",
+      "width": 1280,
+      "requestedPath": "/cashout/history",
+      "status": 200,
+      "finalPath": "/cashout/history",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n환전 내역\n\n지금까지 받은 금액\n\n0원\n\n입금 완료\n\n0건\n\n진행중\n\n0건\n\n아직 환전 내역이 없어요\n\n신청하면 이곳에 처리 상태가 남아요.\n\n🧾 원천징수 3.3%가 제외된 실지급액이에요. 세금 신고 자료가 필요하면 고객센터로 문의해 주세요.\n환전 화면\n홈으로\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 323,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 2,
+      "buttons": [],
+      "links": [
+        "환전 화면",
+        "홈으로",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "friends",
+      "width": 1280,
+      "requestedPath": "/friends",
+      "status": 200,
+      "finalPath": "/friends",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n함께 해내는 사람들\n\n친구의 해낼게\n\n금액과 순위 없이, 친구가 공개한 목표와 응원만 보여요.\n\n아직 연결된 친구가 없어요\n\n초대 링크를 보내고 서로의 해낼게를 응원해 보세요.\n\n친구 초대하기\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 293,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 2,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "친구 초대하기",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "connect",
+      "width": 1280,
+      "requestedPath": "/invite",
+      "status": 200,
+      "finalPath": "/invite",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n7일 동안 한 번\n\n친구를 초대해요\n\n초대 토큰 원문은 링크를 만들 때 한 번만 보여요. 저장소에는 SHA-256 hash만 남아요.\n\n초대할 공개 목표가 없어요\n\n목표 공개범위를 PUBLIC 또는 FRIENDS로 바꾼 뒤 다시 시도해 주세요.\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 323,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 2,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "belong",
+      "width": 1280,
+      "requestedPath": "/friends/00000000-0000-0000-0000-000000000000?goal=1",
+      "status": 404,
+      "finalPath": "/friends/00000000-0000-0000-0000-000000000000",
+      "redirected": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "title": "404: This page could not be found.",
+      "bodyText": "404\nThis page could not be found.\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 204,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "status",
+      "width": 1280,
+      "requestedPath": "/my",
+      "status": 200,
+      "finalPath": "/my",
+      "redirected": false,
+      "consoleErrors": [],
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다",
+      "bodyText": "해낼게.\n\n🔔\n로그아웃\n\n내 정보와 활동\n\n마이페이지\n해\n해낼게 사용자\n\n서로 응원하는 친구 0명 · 진행 중 목표 0개\n\n내 목표\n0개\n아직 등록한 목표가 없어요\n첫 목표 만들기\n업적\nDB 집계 기준\n0\n달성한 목표\n완료 상태로 확인된 목표\n0\n받은 응원\n결제 확정된 응원\n0\n연결된 친구\n현재 연결된 친구\n\n데이터베이스로 확인할 수 있는 활동만 집계해요.\n\n아직 응원하지 않은 친구 목표\n0개\n\n지금 확인할 친구 목표가 없어요.\n\n새 목표가 생기면 여기에 조용히 모아둘게요.\n\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 440,
+      "overflowX": 0,
+      "bottomNav": true,
+      "bottomNavLabels": [
+        "홈",
+        "친구",
+        "초대",
+        "마이"
+      ],
+      "cards": 8,
+      "buttons": [
+        "🔔",
+        "로그아웃"
+      ],
+      "links": [
+        "첫 목표 만들기",
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    },
+    {
+      "screen": "admin",
+      "width": 1280,
+      "requestedPath": "/admin",
+      "status": 404,
+      "finalPath": "/admin",
+      "redirected": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "title": "404: This page could not be found.",
+      "bodyText": "404\nThis page could not be found.\n이용약관\n|\n개인정보처리방침\n상호: 정성컴퍼니 · 대표: 조성진\n사업자등록번호: 798-31-01774\n주소: 서울시 강남구 역삼동 620-17 203호\n이메일: haenaelge.official@gmail.com\n개인정보보호책임자: 윤동주\n\n© 2026 정성컴퍼니. All rights reserved.",
+      "bodyTextLength": 204,
+      "overflowX": 0,
+      "bottomNav": false,
+      "bottomNavLabels": [],
+      "cards": 1,
+      "buttons": [],
+      "links": [
+        "이용약관",
+        "개인정보처리방침"
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "action": "guest landing how CTA",
+      "resultPath": "/how",
+      "verdict": "read-only navigation observed"
+    },
+    {
+      "action": "guest login link",
+      "boundary": "external Kakao OAuth redirect",
+      "clicked": false
+    },
+    {
+      "action": "authenticated cashout page",
+      "resultPath": "/cashout",
+      "pageVisible": true,
+      "boundary": "cashout submission not clicked"
+    },
+    {
+      "action": "authenticated invite creation",
+      "resultPath": "/invite",
+      "createButtonVisible": false,
+      "boundary": "create invite is a write and was not clicked"
+    },
+    {
+      "action": "goal cover upload pre-write boundary",
+      "resultPath": "/me/goal/1",
+      "uploadButtonVisible": false,
+      "fileChooserOpened": false,
+      "boundary": "no file selected and no upload request sent"
+    }
+  ],
+  "forbiddenWrites": []
+}
