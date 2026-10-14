@@ -97,7 +97,9 @@ jobs:
           npx supabase start \
             -x realtime -x storage-api -x imgproxy -x studio -x mailpit \
             -x edge-runtime -x logflare -x vector -x supavisor -x postgres-meta
-          npx supabase status -o env | sed 's/^/SUPA_/' >> "$GITHUB_ENV"
+          # status -o env 는 값을 큰따옴표로 감싸 내보낸다. 그대로 GITHUB_ENV 에 넣으면
+          # 따옴표가 값의 일부가 되어 new URL() 이 Invalid URL 로 죽는다(런 38551588440).
+          npx supabase status -o env | sed 's/^/SUPA_/; s/="\(.*\)"$/=\1/' >> "$GITHUB_ENV"
 
       - name: 로컬 Supabase 접속값 노출
         working-directory: .
