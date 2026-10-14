@@ -1,5 +1,17 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-15 D-024와 승인 시안 재대조
+
+- D-024 migration을 로컬 reset에 적용했다. 확정 응원 양방향 친구, 과거 이력 소급, attribution·status 경합을 pgTAP 13건과 실제 DB 세션 2순서로 검증했다.
+- 전체 pgTAP 336/336, Vitest 334/334, Next.js production build 정적 생성 17/17 PASS다.
+- 9개 실제 경로를 390px·1280px에서 열어 HTTP 200, 콘솔 오류 0, 가로 넘침 0을 확인했다.
+- 공개 목표에 확정 응원 3건 fixture를 넣고 360~1000 아홉 폭 모바일 사용성 검사를 모두 통과했다.
+- 승인 시안 대 로컬 구현은 6화면 불일치, 1화면 미확인이다. 이미지 규격 14쌍은 검사기를 통과했지만 디자인 게이트는 미통과다.
+- 운영 DB·운영 배포는 실행하지 않았다. 테스트 파일 삭제 0, skip 증가 0이다.
+- 상세: `docs/qa/v2-approved-build-realignment-v1-gpt-codex.md`.
+
+> STAMP: 생성 2026-10-15 02:05 KST. 모델 gpt-codex. 에이전트 code-builder. 스킬 haenael-supabase-build. 운영 미반영.
+
 ## 2026-10-13 V2 전체 회귀 테스트 하네스 복구
 
 - 제품 코드 변경 없이 Playwright 환경·local seed·pgTAP fixture만 수정했다.

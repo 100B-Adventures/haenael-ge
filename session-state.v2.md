@@ -8,6 +8,15 @@
 
 목적: 해낼게를 "혼자 쓰는 목표 저금통" 에서 "친구가 응원하러 들어오는 자리" 로 바꾼다. 받는 사람이 목표를 공개 범위로 나누고, 초대 링크로 친구를 연결하고, 친구 목표에 응원을 남기는 루프를 웹에서 먼저 완결한 뒤 앱인토스 미니앱으로 확장한다. 성공 판정은 초대를 받은 사람이 가입하고 응원 1건을 남기는 비율이다. 환전(v1)은 이 라인이 건드리지 않는다.
 
+## 2026-10-15 02:05 KST · D-024 로컬 통과, 화면 정합은 6불일치·1미확인
+
+- 신규 migration `20261015010000_cheer_friendship_backfill.sql`을 로컬 reset에 적용했다. 확정 응원은 canonical ACTIVE 친구 관계를 만들고, 과거 DONE 이력도 소급한다. REMOVED·BLOCKED·self·welcome은 보호한다.
+- pgTAP 336/336, 실제 동시 세션 2순서, Vitest 334/334, production build 17/17이 통과했다.
+- 실제 데이터 9경로를 390·1280에서 열어 HTTP 200, 콘솔 오류 0, 가로 넘침 0을 확인했다. 모바일 아홉 폭도 모두 통과했다.
+- 대조 보드 14쌍은 기계 규격을 통과했지만, 화면 내용은 랜딩·공개 목표·마이페이지·초대 생성·친구 목록·친구 상세가 불일치다. 초대 수락은 승인 시안 부재로 미확인이다.
+- 운영 DB와 웹에는 적용하지 않았다. 다음은 QA가 6개 불일치를 근거로 design 재오픈 여부를 판정하는 일이다.
+- 상세: `docs/qa/v2-approved-build-realignment-v1-gpt-codex.md`, `docs/design/boards/v2-approved-build-compare-v1-gpt-codex.html`.
+
 ## 2026-10-13 19:43 KST · 전체 회귀 테스트 하네스 17건 복구, 운영 인증 1건만 FAIL
 
 - cashout은 실제 local Supabase Auth 세션과 격리 PostgREST fixture를 결합해 12/12 PASS했다. 환전 request는 DB에 만들지 않았다.

@@ -747,9 +747,11 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
+    test.setTimeout(90_000);
     const evidenceDir = "../docs/qa/evidence/v2-approved-build-v1.0.0";
     mkdirSync(evidenceDir, { recursive: true });
     const routes = [
+      ["goal-detail", `/me/goal/${ownerGoal}`],
       ["mypage", "/my"],
       ["friends", "/friends"],
       ["belong", `/friends/${ids.friend}?goal=${friendPublicGoal}`],
@@ -829,6 +831,30 @@ test.describe("V2 web-first social slice", () => {
         });
         await guestPage.close();
       }
+
+      const adminContext = await authContext(browser, emails.admin);
+      const adminPage = await adminContext.newPage();
+      await adminPage.setViewportSize({
+        width,
+        height: width === 390 ? 844 : 900,
+      });
+      const adminErrors: string[] = [];
+      adminPage.on("console", (message) => {
+        if (message.type() === "error") adminErrors.push(message.text());
+      });
+      adminPage.on("pageerror", (error) => adminErrors.push(error.message));
+      const adminResponse = await adminPage.goto("/admin");
+      expect(adminResponse?.status()).toBe(200);
+      expect(await adminPage.evaluate(() =>
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth
+      )).toBe(0);
+      expect(adminErrors).toEqual([]);
+      await adminPage.addStyleTag({ content: "nextjs-portal{display:none!important}" });
+      await adminPage.screenshot({
+        path: `${evidenceDir}/dev-cover-review-${width}.png`,
+      });
+      await adminContext.close();
     }
   });
 
