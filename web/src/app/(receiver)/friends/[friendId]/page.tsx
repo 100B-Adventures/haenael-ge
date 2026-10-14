@@ -51,8 +51,9 @@ export default async function FriendDetailPage(
         friendId={friendId}
         nickname={friend.nickname}
         detail={detail}
+        friendGoals={friend.goals}
       />
-      <BackHomeLink label="친구 목록으로" />
+      <BackHomeLink label="친구 목록으로" href="/friends" />
     </ReceiverPageShell>
   );
 }
