@@ -92,7 +92,11 @@ jobs:
       - name: 로컬 Supabase 기동
         working-directory: .
         run: |
-          npx supabase start
+          # 호스팅 러너에서 전체 스택을 받으면 컨테이너 이미지 받기 제한(toomanyrequests)에 걸린다(런 38541159192).
+          # 이 스펙에 필요한 것은 DB·Auth·REST 뿐이라 나머지는 제외해 받는 이미지 수를 줄인다.
+          npx supabase start \
+            -x realtime -x storage-api -x imgproxy -x studio -x mailpit \
+            -x edge-runtime -x logflare -x vector -x supavisor -x postgres-meta
           npx supabase status -o env | sed 's/^/SUPA_/' >> "$GITHUB_ENV"
 
       - name: 로컬 Supabase 접속값 노출
