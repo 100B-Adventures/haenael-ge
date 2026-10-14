@@ -157,9 +157,9 @@ export default async function GoalPublicPage({ params }: Props) {
       data-testid="goal-public-page"
     >
       {/* 스크롤 영역 */}
-      <div className="goal-public-content px-[22px] pt-12 pb-4">
+      <div className="goal-public-content px-[22px] pb-4">
         {/* BrandMark */}
-        <p className="font-extrabold mb-5 [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
+        <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
           해낼게<span className="[color:var(--clover-bright)]!">.</span>
         </p>
 
@@ -169,7 +169,7 @@ export default async function GoalPublicPage({ params }: Props) {
         {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
         {!user && (
           <p
-            className="text-center mb-3 [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
+            className="goal-public-relogin text-center [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
             data-testid="relogin-hint"
           >
             내 목표가 있으신가요?{" "}

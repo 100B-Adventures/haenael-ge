@@ -82,7 +82,7 @@ export function GoalCard({
     return (
       <article className="public-goal-card" data-testid="goal-card">
         <div className="public-goal-chips">
-          {status === "ACTIVE" && <DdayChip dueDate={dueDate} />}
+          {status === "ACTIVE" && <DdayChip dueDate={dueDate} tone="warm" />}
           <StatusChip status={status} />
         </div>
         <h1 data-testid="goal-title">

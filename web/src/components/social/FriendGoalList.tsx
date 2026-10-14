@@ -51,7 +51,7 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                       <span className={`friend-list-progress is-${progress}`} aria-hidden="true"><i /></span>
                       <span className="friend-list-news"><MessageCircle aria-hidden="true" /> 응원 {primaryGoal.cheer_count}개가 쌓였어요</span>
                     </span>
-                    <span className="friend-list-relation">연결된 친구<small>서로 응원</small></span>
+                    <span className="friend-list-relation"><span>연결된 친구</span><small>서로 응원</small></span>
                   </Link>
                 )
                 : (

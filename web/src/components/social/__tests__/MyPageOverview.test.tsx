@@ -86,7 +86,7 @@ describe("MyPageOverview", () => {
           id: 10,
           displayName: "도경",
           message: "이번 주도 해낼 수 있어요.",
-          createdAt: "2026-10-15T00:00:00Z",
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         }]}
         initialPreferences={preferences}
       />,
@@ -94,7 +94,7 @@ describe("MyPageOverview", () => {
 
     expect(screen.getByText("도경")).toBeInTheDocument();
     expect(screen.getByText(/이번 주도 해낼 수 있어요/)).toBeInTheDocument();
-    expect(screen.getByText("10. 15.")).toBeInTheDocument();
+    expect(screen.getByText("2시간 전")).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent("🍀 1번");
   });
 });

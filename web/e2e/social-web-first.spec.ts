@@ -320,10 +320,23 @@ test.describe("V2 web-first social slice", () => {
       ...Array.from({ length: 15 }, (_, index) => ({
         displayName: `응원자${index + 1}`,
         message: ["꾸준함", "용기", "성장"][index % 3],
+        createdAt: new Date(Date.now() - (index + 8) * 86_400_000).toISOString(),
       })),
-      { displayName: "익명의 누군가", message: "끝까지 응원할게요" },
-      { displayName: "서연", message: "모의고사 820이면 900 금방이야" },
-      { displayName: "윤도경", message: "도서관에서 같이 힘낸다, 넌 할 수 있어" },
+      {
+        displayName: "익명의 누군가",
+        message: "끝까지 응원할게요",
+        createdAt: new Date(Date.now() - 5 * 86_400_000).toISOString(),
+      },
+      {
+        displayName: "서연",
+        message: "모의고사 820이면 900 금방이야",
+        createdAt: new Date(Date.now() - 86_400_000).toISOString(),
+      },
+      {
+        displayName: "윤도경",
+        message: "도서관에서 같이 힘낸다, 넌 할 수 있어",
+        createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+      },
     ];
     const cheerTargets = [
       ...ownerCheerFixtures.map((fixture) => ({ goalId: ownerGoal, ...fixture })),
@@ -331,6 +344,7 @@ test.describe("V2 web-first social slice", () => {
         goalId: friendPublicGoal,
         displayName: `도경 응원자${index + 1}`,
         message: ["꾸준히", "해낼 수 있어", "끝까지"][index % 3],
+        createdAt: new Date(Date.now() - (index + 1) * 86_400_000).toISOString(),
       })),
     ];
     for (let index = 0; index < cheerTargets.length; index += 1) {
@@ -354,6 +368,7 @@ test.describe("V2 web-first social slice", () => {
         clover_amount: 1,
         payment_id: payment.id,
         status: "CONFIRMED",
+        created_at: fixture.createdAt,
       });
     }
   });
@@ -847,7 +862,7 @@ test.describe("V2 web-first social slice", () => {
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
     test.setTimeout(process.env.RUN_MOBILE_ERGONOMICS === "1" ? 420_000 : 180_000);
     const evidenceDir =
-      "../docs/qa/evidence/v2-approved-build-realignment-v3.0.0";
+      "../docs/qa/evidence/v2-approved-build-realignment-v4.0.0";
     const realignmentEvidenceDir = evidenceDir;
     const captureWidths = process.env.APPROVED_CAPTURE_WIDTHS === "390"
       ? [390]

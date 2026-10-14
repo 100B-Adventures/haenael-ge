@@ -92,16 +92,20 @@ export function FriendInviteCard(
       <section className="invite-preview" aria-label="카카오톡 초대 미리보기">
         <p>카카오톡으로 이렇게 전해져요</p>
         <div>
-          <span className="invite-preview-avatar">
-            <Image
-              src="/images/social-viral/seoyeon.png"
-              alt="서연"
-              width={44}
-              height={44}
-            />
-          </span>
-          <h2>서연님이 해낼게에 초대했어요</h2>
-          <p>“네 목표도 내가 조용히 응원할게. 같이 해낼래?”</p>
+          <div className="invite-preview-top">
+            <span className="invite-preview-avatar">
+              <Image
+                src="/images/social-viral/seoyeon.png"
+                alt="서연"
+                width={64}
+                height={64}
+              />
+            </span>
+          </div>
+          <div className="invite-preview-body">
+            <h2>서연님이 해낼게에 초대했어요</h2>
+            <p>“네 목표도 내가 조용히 응원할게. 같이 해낼래?”</p>
+          </div>
           <strong>들어가서 내 목표 쓰기 →</strong>
         </div>
       </section>

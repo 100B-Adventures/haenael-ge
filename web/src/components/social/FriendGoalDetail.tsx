@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, UsersRound } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import type {
   FriendGoalDetail as FriendGoalDetailData,
@@ -58,16 +58,34 @@ export function FriendGoalDetail(
         <strong>{displayName} · {detail.title}</strong>
       </div>
       <section className="friend-together-card">
-        <UsersRound aria-hidden="true" />
+        <div className="friend-supporter-stack" aria-label={`${detail.cheer_count}명의 응원자`}>
+          <span aria-hidden="true">응</span>
+          <span aria-hidden="true">원</span>
+          <span aria-hidden="true">+{Math.max(detail.cheer_count - 2, 0)}</span>
+        </div>
         <div>
           <strong>{detail.cheer_count}명이 {displayName}을 조용히 응원하는 중이에요</strong>
         </div>
       </section>
       <section className="friend-private-news">
         <p>🔓 응원자에게만 보이는 근황</p>
-        <strong>{detail.reason || "이 목표를 이어가는 중이에요."}</strong>
-        <small>{displayName} · 응원자에게만 공개</small>
+        <div className="friend-private-news-body">
+          <span className="friend-private-news-avatar" aria-hidden="true">
+            {profileImage
+              ? <Image src={profileImage} alt="" width={52} height={52} unoptimized />
+              : Array.from(displayName)[0]}
+          </span>
+          <span>
+            <strong>{detail.reason || "이 목표를 이어가는 중이에요."}</strong>
+            <small>{displayName} · 응원자에게만 공개</small>
+          </span>
+        </div>
       </section>
+      <Link href="/invite" className="friend-reinvite">
+        <span><Plus aria-hidden="true" /></span>
+        <div><strong>다른 친구도 이 자리에 부를까요?</strong><small>내가 고른 친구에게만 조용히 초대해요.</small></div>
+        <b aria-hidden="true">›</b>
+      </Link>
       <details className="social-card friend-wordmap-card">
         <summary className="social-card-heading">
           <h2>응원 워드맵</h2>
@@ -93,11 +111,6 @@ export function FriendGoalDetail(
           ))}
         </section>
       )}
-      <Link href="/invite" className="friend-reinvite">
-        <span><Plus aria-hidden="true" /></span>
-        <div><strong>다른 친구도 이 자리에 부를까요?</strong><small>내가 고른 친구에게만 조용히 초대해요.</small></div>
-        <b aria-hidden="true">›</b>
-      </Link>
       <button
         type="button"
         className="social-danger-action"

@@ -5,6 +5,7 @@ import { calcDday } from "@/lib/utils/format";
 
 interface DdayChipProps {
   dueDate: string; // ISO date string
+  tone?: "clover" | "warm";
 }
 
 interface StatusChipProps {
@@ -13,13 +14,17 @@ interface StatusChipProps {
 
 // ─── D-day ────────────────────────────────────────────────────────────────────
 
-export function DdayChip({ dueDate }: DdayChipProps) {
+export function DdayChip({ dueDate, tone = "clover" }: DdayChipProps) {
   const n = calcDday(dueDate);
   const label = n > 0 ? `D-${n}` : n === 0 ? "D-day" : `D+${Math.abs(n)}`;
 
   return (
     <span
-      className="inline-flex items-center px-3 py-1 rounded-full font-semibold [font-size:var(--text-wordmark)]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0.1px]!"
+      className={`inline-flex items-center px-3 py-1 rounded-full font-semibold [font-size:var(--text-wordmark)]! [letter-spacing:0.1px]! ${
+        tone === "warm"
+          ? "[background-color:var(--warm)]! [color:var(--amber-ink)]!"
+          : "[background-color:var(--primary)]! [color:var(--card)]!"
+      }`}
       data-testid="dday-chip"
     >
       {label}

@@ -139,7 +139,10 @@ export function MyPageOverview({
                     <article key={cheer.id}>
                       <span className="my-cheer-avatar" aria-hidden="true">{Array.from(name)[0]}</span>
                       <div><strong>{name}</strong><p>💬 {cheer.message || "조용한 응원이 도착했어요."}</p></div>
-                      <small>{formatCheerDate(cheer.createdAt)}</small>
+                      <div className="my-cheer-status">
+                        <strong>응원 도착</strong>
+                        <small>{formatCheerDate(cheer.createdAt)}</small>
+                      </div>
                     </article>
                   );
                 })
@@ -203,10 +206,16 @@ export function MyPageOverview({
 function formatCheerDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "도착 시각 미상";
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "numeric",
-    day: "numeric",
-  }).format(date);
+  const elapsed = Date.now() - date.getTime();
+  if (elapsed >= 0 && elapsed < 24 * 60 * 60 * 1000) {
+    const hours = Math.max(1, Math.floor(elapsed / (60 * 60 * 1000)));
+    return `${hours}시간 전`;
+  }
+  if (elapsed >= 0 && elapsed < 2 * 24 * 60 * 60 * 1000) return "어제";
+  if (elapsed >= 0 && elapsed < 7 * 24 * 60 * 60 * 1000) {
+    return `${Math.floor(elapsed / (24 * 60 * 60 * 1000))}일 전`;
+  }
+  return new Intl.DateTimeFormat("ko-KR", { month: "numeric", day: "numeric" }).format(date);
 }
 
 function PreferenceRow({

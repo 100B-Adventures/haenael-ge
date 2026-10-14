@@ -4,6 +4,8 @@
   - D-023: 모바일 접근성 하한을 시안보다 우선해 13px 미만의 사용자 노출 글자를 13px로 올렸다.
   - D-022: DB 원장에서 반증할 수 없는 연속 기록, N번 함께, 활동 타임라인을 제거하고 완료 목표·확정 응원·연결 친구 집계만 남겼다.
   - 대조 fixture: 제품 기본 데이터는 바꾸지 않고 로컬 fixture를 3명 구성, 완료 목표 2개, 확정 응원 18개, 연결 친구 3명으로 맞췄다. 공개 응원 집계는 웰컴 응원을 포함해 19명과 14명이다.
+  2026-10-15 V2 승인 시안 정합화 4차.
+  - D-022: DB 원장에 정의되지 않은 `부스트 클로버 +5`는 반증할 수 없는 지표이므로 소속감 화면에서 제거했다. 재초대 동선은 그대로 유지한다.
   이유: 승인 시안 자체가 접근성·데이터 계약과 충돌하면 구현을 시안에 맞추는 대신 시안 정본을 먼저 바로잡아야 한다.
 -->
 <html lang="ko" class="force-motion">
@@ -367,13 +369,6 @@
   .privnews .pl{font-size:13px;font-weight:800;color:var(--clover-ink);letter-spacing:.2px;display:flex;align-items:center;gap:5px;}
   .privnews .pt{font-size:13px;color:var(--ink);margin-top:8px;line-height:1.55;word-break:keep-all;font-weight:600;}
   .privnews .pm{font-size:13px;color:var(--faint);margin-top:6px;font-weight:700;}
-
-  /* 부스트 클로버 (환전 불가·미확정) */
-  .boost-card{border:1px solid var(--clover);background:var(--clover-soft);border-radius:var(--r-md);padding:16px;margin-top:16px;text-align:center;}
-  .boost-chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--clover);border-radius:var(--r-full);padding:9px 16px;font-size:15px;font-weight:900;color:var(--clover-ink);letter-spacing:-.3px;}
-  .boost-chip .p{font-size:19px;}
-  .boost-card .bx{font-size:13px;color:var(--clover-ink);margin-top:10px;line-height:1.5;word-break:keep-all;font-weight:600;}
-  .boost-card .bx b{font-weight:800;}
 
   /* 재초대 유도 (조용, 푸시 아님 · #12 준수) */
   .reinvite{display:flex;gap:11px;align-items:center;background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-md);padding:14px;margin-top:16px;cursor:pointer;}
@@ -1850,10 +1845,6 @@
           </div>
         </div>
 
-        <div class="boost-card">
-          <div class="boost-chip"><span class="p">🍀</span> 부스트 클로버 +5</div>
-          <div class="bx"><b>환전은 안 되는</b> 응원 부스트예요. 다음에 응원할 때 조용히 얹혀 친구의 워드맵을 더 채워줍니다.</div>
-        </div>
         <div class="reinvite" onclick="go('connect')">
           <span class="ic">➕</span>
           <div class="rx">
@@ -2415,8 +2406,8 @@
     belong: {
       psych: '소속감(in-group)+상호성. ACTIVE 친구에게 허용된 목표와 근황을 조용히 보여준다. 재초대는 푸시가 아니라 pull(#12 준수)로 둔다.',
       bench: 'Patreon 후원자 전용 포스트 · 프로덕트헌트 서포터의 제한 공개 구조를 차용하되 금액 티어와 관계 지속 횟수는 쓰지 않는다.',
-      inherit: '계승: 열린결정 배지·부스트 칩·응원자 전용 근황·재초대 pull 카드. D-022에 따라 활동 타임라인은 제거했다.',
-      prd: 'idea-ledger 2026-09-15(응원자만 보는 것·재초대) · blueprint 6절(정체성 노트)·#20 부스트. 결정 C(부스트 성격) 대기.',
+      inherit: '계승: 응원자 전용 근황·재초대 pull 카드. D-022에 따라 활동 타임라인과 DB 원장에 없는 부스트 수치를 제거했다.',
+      prd: 'idea-ledger 2026-09-15(응원자만 보는 것·재초대) · blueprint 6절(정체성 노트). DB로 반증할 수 있는 친구·응원 집계만 사용한다.',
       chg: [
         {w:'<b>v5 친구 해낼게 커버 사진</b>. 상단에 친구 목표 커버 배너(캡션 "도경이의 평점 4.0 해낼게") 추가, 응원자 시점에서 친구 목표의 맥락·분위기를 준다. <b>배포 미존재·프로토 신규</b>. 금액·순위 아님(D-003 무관).', fb:'회장 결정: 커버는 응원하는 사람에게 맥락 주는 요소'},
         {w:'<b>헤더를 "도경이의 응원자" → "도경이의 해낼게"로 명확화</b> (이 화면이 "친구의 해낼게를 응원자 시점으로 보는 자리"임을 제목이 바로 말하게 함). 친구 카드 → belong 연결은 유지.', fb:'회장: belong이 "친구 해낼게 상세"로 더 명확해야'},
@@ -2425,7 +2416,7 @@
         {w:'히어로 아래에 <b>함께 응원하는 아바타 stack + 인원수(13명)</b> 카드를 추가하고 pop-in·카운트업 모션을 얹었습니다. 금액·랭킹은 넣지 않았습니다.', fb:'회장 2026-09-29: 동적 연출 확대 · D-003 "지갑은 조용하게"(인원수만).'}
       ],
       flow: [['진입','친구목록(2) 카드 탭 → 그 친구의 응원자 자리'],['이탈','재초대 카드 → 초대(1) · 뒤로 → 친구목록(2)']],
-      opendec: '열린결정 C · 미확정: 초대 보상 = 환전 불가 부스트 클로버로 그렸다. 실클로버 직결은 선불충전금 규제 리스크(존립조건). 보상 없이 관계 배지만 둘지도 회장 결정 대기.'
+      opendec: 'D-022 확정: DB 원장에 없는 보상 수치는 노출하지 않는다. 관계·응원 인원·근황만 유지한다.'
     },
     dopamine: {
       psych: '즉각 보상(variable reward의 조용한 변형)+진행 가시화. 응원 순간 내 단어가 워드맵에 얹히는 걸 "직접 보게" 해 activation 도파민을 준다. 비회원 피드백은 손실회피("이 기록이 남아요")로 승격을 당김.',
