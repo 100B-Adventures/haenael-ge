@@ -1,11 +1,12 @@
 import Image from "next/image";
 
 export function GoalCover(
-  { presetKey = "c1", imageUrl, title, size = "card" }: {
+  { presetKey = "c1", imageUrl, title, size = "card", caption }: {
     presetKey?: string | null;
     imageUrl?: string | null;
     title: string;
     size?: "card" | "hero" | "banner";
+    caption?: string;
   },
 ) {
   const resolvedPreset = presetKey ?? "c1";
@@ -25,6 +26,7 @@ export function GoalCover(
           unoptimized
         />
       )}
+      {caption && <span className="goal-cover-caption">{caption}</span>}
       <span className="goal-cover-mark" aria-hidden="true">🍀</span>
     </div>
   );

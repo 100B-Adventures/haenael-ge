@@ -50,6 +50,7 @@ export default async function FriendDetailPage(
       <FriendGoalDetail
         friendId={friendId}
         nickname={friend.nickname}
+        profileImage={friend.profile_image}
         detail={detail}
         friendGoals={friend.goals}
       />

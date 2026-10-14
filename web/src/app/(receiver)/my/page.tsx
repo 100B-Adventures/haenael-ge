@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { MyPageOverview } from "@/components/social/MyPageOverview";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import { NotificationBadge } from "@/components/common/NotificationBadge";
 import {
   ReceiverPageShell,
-  ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
 import { asMySocialDashboard } from "@/lib/social/contracts";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -22,14 +23,24 @@ export default async function MyPage() {
       .maybeSingle(),
   ]);
   const dashboard = asMySocialDashboard(data);
+  const goalIds = dashboard?.goals.map((goal) => goal.goal_id) ?? [];
+  const { data: cheerRows } = goalIds.length
+    ? await supabase.from("cheer")
+      .select("id,goal_id,display_name,is_anonymous,message,created_at")
+      .in("goal_id", goalIds)
+      .eq("status", "CONFIRMED")
+      .eq("is_welcome", false)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(20)
+    : { data: [] };
 
   return (
     <ReceiverPageShell testId="my-page" bottomSafe>
-      <ReceiverTopBar variant="home" />
-      <div className="mb-5">
-        <p className="social-eyebrow">내 정보와 활동</p>
+      <header className="my-page-head">
         <h1 className="receiver-page-title">마이페이지</h1>
-      </div>
+        <div><span>해낼게</span><NotificationBadge /><LogoutButton /></div>
+      </header>
       {error || !dashboard
         ? (
           <section className="social-empty" data-testid="my-page-error">
@@ -40,6 +51,12 @@ export default async function MyPage() {
         : (
           <MyPageOverview
             dashboard={dashboard}
+            receivedCheers={(cheerRows ?? []).map((row) => ({
+              id: row.id,
+              displayName: row.is_anonymous ? null : row.display_name,
+              message: row.message,
+              createdAt: row.created_at,
+            }))}
             initialPreferences={{
               notifyCheer: preference?.notify_cheer ?? true,
               notifyMarketing: preference?.notify_marketing ?? false,

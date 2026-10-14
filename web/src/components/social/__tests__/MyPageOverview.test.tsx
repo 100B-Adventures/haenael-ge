@@ -74,4 +74,23 @@ describe("MyPageOverview", () => {
     await userEvent.click(screen.getByRole("switch", { name: "응원 도착 알림" }));
     expect(updatePreferences).toHaveBeenCalledWith(false, false);
   });
+
+  it("MY-UI-04 받은 응원 탭은 승인 시안처럼 개별 메시지를 표시한다", () => {
+    render(
+      <MyPageOverview
+        dashboard={dashboard}
+        receivedCheers={[{
+          id: 10,
+          displayName: "도경",
+          message: "이번 주도 해낼 수 있어요.",
+          createdAt: "2026-10-15T00:00:00Z",
+        }]}
+        initialPreferences={preferences}
+      />,
+    );
+
+    expect(screen.getByText("도경")).toBeInTheDocument();
+    expect(screen.getByText(/이번 주도 해낼 수 있어요/)).toBeInTheDocument();
+    expect(screen.getByText("🍀 1번")).toBeInTheDocument();
+  });
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, UsersRound } from "lucide-react";
@@ -12,9 +13,10 @@ import { removeFriendAction } from "@/app/(receiver)/social-actions";
 import { GoalCover } from "./GoalCover";
 
 export function FriendGoalDetail(
-  { friendId, nickname, detail, friendGoals }: {
+  { friendId, nickname, profileImage, detail, friendGoals }: {
     friendId: string;
     nickname: string | null;
+    profileImage?: string | null;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
   },
@@ -43,25 +45,39 @@ export function FriendGoalDetail(
         imageUrl={detail.cover_url}
         title={detail.title}
         size="hero"
+        caption={`${displayName}의 ${detail.title}`}
       />
       <section className="friend-detail-hero">
-        <div className="friend-detail-avatar" aria-hidden="true">{Array.from(displayName)[0]}</div>
-        <p className="social-eyebrow">{displayName}의 해낼게</p>
-        <h1 className="receiver-page-title">{detail.title}</h1>
-        <p>{detail.reason || "이 목표를 이어가는 중이에요."}</p>
+        <h1>{displayName}을 응원하는 사람으로서<br />열리는 것들</h1>
+        <p>오래 함께한 응원자에게만 조용히 열리는 자리예요. 다시 왔을 때 여기에서 만나요.</p>
       </section>
+      <div className="friend-detail-portrait">
+        {profileImage
+          ? <Image src={profileImage} alt={displayName} fill sizes="346px" unoptimized />
+          : <span aria-hidden="true">{Array.from(displayName)[0]}</span>}
+        <strong>{displayName} · {detail.title}</strong>
+      </div>
       <section className="friend-together-card">
         <UsersRound aria-hidden="true" />
         <div>
-          <strong>{detail.cheer_count}개의 응원이 {displayName}의 목표에 쌓였어요</strong>
-          <p>금액이나 순위 없이, 응원한 마음만 보여요.</p>
+          <strong>{detail.cheer_count}명이 {displayName}을 조용히 응원하는 중이에요</strong>
         </div>
       </section>
-      <section className="social-card friend-wordmap-card">
-        <div className="social-card-heading">
+      <section className="friend-private-news">
+        <p>🔓 응원자에게만 보이는 근황</p>
+        <strong>{detail.reason || "이 목표를 이어가는 중이에요."}</strong>
+        <small>{displayName} · 응원자에게만 공개</small>
+      </section>
+      <section className="friend-timeline-row">
+        <span aria-hidden="true">🌿</span>
+        <div><strong>함께한 자취 타임라인</strong><small>{detail.cheer_count}번의 응원이 이 목표에 닿은 기록</small></div>
+        <b>열림</b>
+      </section>
+      <details className="social-card friend-wordmap-card">
+        <summary className="social-card-heading">
           <h2>응원 워드맵</h2>
           <span>{detail.wordmap.length}개 단어</span>
-        </div>
+        </summary>
         {detail.wordmap.length
           ? (
             <div className="social-wordmap">
@@ -71,7 +87,7 @@ export function FriendGoalDetail(
             </div>
           )
           : <p className="social-muted">첫 응원을 기다리고 있어요.</p>}
-      </section>
+      </details>
       {otherGoals.length > 0 && (
         <section className="friend-other-goals">
           <h2>{displayName}의 다른 목표</h2>

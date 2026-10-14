@@ -189,6 +189,7 @@ export default async function GoalPublicPage({ params }: Props) {
           imageUrl={coverUrl}
           title={goal.title ?? slug}
           size="banner"
+          caption="친구의 해낼게"
         />
 
         {/* GoalCard */}
@@ -197,11 +198,12 @@ export default async function GoalPublicPage({ params }: Props) {
           reason={goal.reason ?? null}
           dueDate={goal.due_date}
           status={(goal.status as "ACTIVE" | "CLOSED" | "DELETED") ?? "ACTIVE"}
+          variant="public"
         />
 
         {/* CheerCount */}
         <div className="mt-2 mb-3">
-          <CheerCount count={cheerCount} />
+          <CheerCount count={cheerCount} variant="public" />
         </div>
 
         {/* Wordmap */}

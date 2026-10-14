@@ -22,9 +22,16 @@ type Preferences = {
 
 export function MyPageOverview({
   dashboard,
+  receivedCheers = [],
   initialPreferences,
 }: {
   dashboard: MySocialDashboard;
+  receivedCheers?: Array<{
+    id: number;
+    displayName: string | null;
+    message: string | null;
+    createdAt: string;
+  }>;
   initialPreferences: Preferences;
 }) {
   const [cheerTab, setCheerTab] = useState<"received" | "sent">("received");
@@ -36,7 +43,6 @@ export function MyPageOverview({
   ).length;
   const nickname = dashboard.profile.nickname?.trim() || "해낼게 사용자";
   const initial = Array.from(nickname)[0] ?? "해";
-  const firstGoal = dashboard.goals[0];
 
   async function setPreference(key: keyof Preferences, value: boolean) {
     if (saving) return;
@@ -125,21 +131,29 @@ export function MyPageOverview({
             onClick={() => setCheerTab("sent")}
           >보낸 응원</button>
         </div>
-        <div className="my-cheer-summary" role="tabpanel">
-          <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
+        <div className="my-cheer-list" role="tabpanel">
           {cheerTab === "received"
-            ? (
-              <div>
-                <strong>받은 응원 {dashboard.achievements.received_cheer_count}번</strong>
-                <p>목표마다 도착한 메시지와 워드맵을 확인해 보세요.</p>
-                {firstGoal && <Link href={`/me/goal/${firstGoal.goal_id}`}>내 목표에서 보기</Link>}
-              </div>
-            )
+            ? receivedCheers.length > 0
+              ? receivedCheers.slice(0, 3).map((cheer) => {
+                  const name = cheer.displayName?.trim() || "익명의 누군가";
+                  return (
+                    <article key={cheer.id}>
+                      <span className="my-cheer-avatar" aria-hidden="true">{Array.from(name)[0]}</span>
+                      <div><strong>{name}</strong><p>💬 {cheer.message || "조용한 응원이 도착했어요."}</p></div>
+                      <small>🍀 1번</small>
+                    </article>
+                  );
+                })
+              : (
+                <div className="my-cheer-empty">
+                  <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
+                  <div><strong>받은 응원 {dashboard.achievements.received_cheer_count}번</strong><p>새 응원 메시지가 도착하면 여기에 쌓여요.</p></div>
+                </div>
+              )
             : (
-              <div>
-                <strong>내가 응원한 친구</strong>
-                <p>친구 목표에서 응원 메시지와 함께한 기록을 확인할 수 있어요.</p>
-                <Link href="/friends">친구 목표 보기</Link>
+              <div className="my-cheer-empty">
+                <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
+                <div><strong>내가 응원한 친구</strong><p>친구 목표에서 함께한 기록을 확인할 수 있어요.</p><Link href="/friends">친구 목표 보기</Link></div>
               </div>
             )}
         </div>

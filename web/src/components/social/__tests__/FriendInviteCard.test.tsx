@@ -17,7 +17,7 @@ beforeEach(() => {
   });
 });
 
-it("CT-INVITE-01 목표를 골라 초대 링크를 만들고 복사한다", async () => {
+it("CT-INVITE-01 승인 시안의 초대 링크 복사 버튼이 링크를 만들고 복사한다", async () => {
   createInvite.mockResolvedValue({
     ok: true,
     data: {
@@ -32,10 +32,8 @@ it("CT-INVITE-01 목표를 골라 초대 링크를 만들고 복사한다", asyn
     />,
   );
 
-  await userEvent.click(screen.getByRole("button", { name: "초대 링크 만들기" }));
-  expect(createInvite).toHaveBeenCalledWith(42);
-
   await userEvent.click(screen.getByRole("button", { name: "초대 링크 복사" }));
+  expect(createInvite).toHaveBeenCalledWith(42);
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
     `${window.location.origin}/invite/sample-token`,
   );
@@ -50,7 +48,7 @@ it("CT-INVITE-02 초대 생성 거절 코드는 사용자 복구 문구로 표�
     />,
   );
 
-  await userEvent.click(screen.getByRole("button", { name: "초대 링크 만들기" }));
+  await userEvent.click(screen.getByRole("button", { name: "초대 링크 복사" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "잠시 뒤에 새 초대 링크를 만들어 주세요.",
   );

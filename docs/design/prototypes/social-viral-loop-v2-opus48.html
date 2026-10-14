@@ -940,7 +940,14 @@
         <span class="fmeta"><span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/invite</code> · 부여 예정</span></span><span class="ml"><span class="mk">진입</span><span class="mv">친구목록 우상단 + · 소속감 큐 재초대</span></span><span class="ml"><span class="mk">상태</span><span class="mv newv">신규 화면</span></span></span>
       </span>
     </div>
-    <div class="farrow loopback"><span>↺</span><span class="lbl">초대 성사 → 친구목록으로 복귀 (루프)</span></div>
+    <div class="farrow"><span>↓</span><span class="lbl">친구가 초대 링크 열기</span></div>
+    <div class="fnode newnode" data-loop="inviteaccept" onclick="go('inviteaccept')">
+      <span class="newtag">NEW</span>
+      <span class="fi">🤝</span><span class="fl">초대 수락 (비회원·회원 경계)
+        <span class="fmeta"><span class="ml"><span class="mk">경로</span><span class="mv"><code>/invite/[token]</code> · 구현됨</span></span><span class="ml"><span class="mk">진입</span><span class="mv">카카오톡·복사 링크</span></span><span class="ml"><span class="mk">상태</span><span class="mv newv">초대자·목표 확인 → 로그인 또는 즉시 수락</span></span></span>
+      </span>
+    </div>
+    <div class="farrow loopback"><span>↺</span><span class="lbl">초대 수락 → 친구목록으로 복귀 (루프)</span></div>
     <div class="fnode newnode" data-loop="belong" onclick="go('belong')">
       <span class="newtag">NEW</span>
       <span class="fi">🔓</span><span class="fl">소속감 큐 (응원자 전용 자리)
@@ -977,6 +984,7 @@
     <span>바이럴 루프</span>
     <span class="node" data-loop="home">🏠 홈(계승)</span><span class="arr">→</span>
     <span class="node" data-loop="connect">① 초대·연결</span><span class="arr">→</span>
+    <span class="node" data-loop="inviteaccept">초대 수락</span><span class="arr">→</span>
     <span class="node" data-loop="friends">② 친구목록(연결감)</span><span class="arr">→</span>
     <span class="node" data-loop="status">③ 업적(지속)</span><span class="arr">→</span>
     <span class="node" data-loop="belong">④ 소속감·재초대</span><span class="arr">↺</span>
@@ -987,6 +995,7 @@
       <span class="lbl">화면</span>
       <button class="nav on" data-s="home">🏠 홈(계승)</button>
       <button class="nav" data-s="connect">1 · 초대·연결</button>
+      <button class="nav" data-s="inviteaccept">1-1 · 초대 수락</button>
       <button class="nav" data-s="friends">2 · 친구목록</button>
       <button class="nav" data-s="status">3 · 업적</button>
       <button class="nav" data-s="belong">4 · 소속감 큐</button>
@@ -1440,6 +1449,35 @@
       </div>
     </div>
     <div class="review" data-review="connect"></div>
+  </section>
+
+  <!-- ══════════ 화면 1-1 · 초대 수락 (초대 링크 도착) ══════════ -->
+  <section class="screen" id="inviteaccept">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad" style="display:flex;min-height:100%;flex-direction:column">
+        <div class="head">
+          <button class="back" onclick="go('landing')">‹</button>
+          <div class="brand">해낼<span class="d">게</span></div>
+          <div style="width:44px"></div>
+        </div>
+        <div style="display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <div class="hero-portrait" style="width:100%;height:128px"><img src="assets/social-viral/belong.png" alt="함께 응원하는 친구들"></div>
+          <div class="kfriend" style="width:64px;height:64px;margin-top:-32px;border:4px solid var(--bg)"><img src="assets/social-viral/seoyeon.png" alt="서연"></div>
+          <div class="k" style="margin-top:16px;color:var(--clover-ink);font-size:12px;font-weight:800">함께 응원할 친구 초대</div>
+          <h2 style="margin-top:8px;font-size:24px;line-height:1.35;letter-spacing:-.8px">서연님이 함께 해내자고<br>초대했어요</h2>
+          <p style="margin:10px 0 20px;color:var(--muted);font-size:14px;line-height:1.55">“토익 900 넘길게” 목표를 보고<br>서로 조용히 응원할 수 있어요.</p>
+          <button class="cbtn pri" onclick="go('friends')">로그인하고 초대 수락하기</button>
+        </div>
+      </div></div>
+      <div class="tabbar">
+        <a onclick="go('landing')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
+        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>친구</a>
+        <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
+        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>마이</a>
+      </div>
+    </div>
+    <div class="review" data-review="inviteaccept"></div>
   </section>
 
   <!-- ══════════ 화면 2 · 친구목록 ══════════ -->
@@ -2316,6 +2354,16 @@
       ],
       flow: [['진입','친구목록(2) 우상단 + / 소속감 큐(4)의 재초대'],['이탈','초대 성사 → 친구목록(2)']],
       opendec: '열린결정 E · 미확정: "친구"를 상호 응원만으로 자동 성립시킬지, 초대·수락 명시 관계로 둘지 결정 대기. 이 화면은 초대·수락(명시) 톤으로 그렸다. 회장이 보며 정한다.'
+    },
+    inviteaccept: {
+      psych: '예측가능성+신뢰. 링크를 연 사람이 수락 전에 누가 어떤 목표로 초대했는지 확인하고, 로그인과 수락의 결과를 한 화면에서 이해하게 한다.',
+      bench: '카카오톡 초대 딥링크 · Strava 친구 초대 · Duolingo 친구 초대의 "초대자 확인 → 가입 또는 수락" 순서를 차용했다. 연락처 접근과 만료 기한 숫자는 노출하지 않는다.',
+      inherit: '실구현 /invite/[token] + InviteAcceptCard.tsx의 공개 preview RPC, 로그인 경계, 수락 성공 후 /friends 이동을 승인 시안의 기존 초대 사진·토큰·레이아웃으로 시각화했다.',
+      prd: 'D-024 응원 확인 후 양방향 friendship 성립 계약과 현행 friend_invite_preview / accept_friend_invite RPC 흐름을 유지한다. 7일 만료 정책은 회장 미승인이라 화면에 추가하지 않는다.',
+      chg: [
+        {w:'<b>재정렬 2차 신규 승인 프레임</b>. 이전 승인 프로토타입에 빠져 미확인이던 초대 수락 화면을 초대 화면과 같은 실사·카드·버튼 토큰으로 추가했다.', fb:'회장 2026-10-15: 프로토타입에 초대 수락 화면을 추가하고 그 기준으로 구현 판정.'}
+      ],
+      flow: [['진입','카카오톡·복사한 /invite/[token] 링크'],['분기','비회원은 카카오 로그인 후 같은 링크 복귀 · 회원은 즉시 수락'],['이탈','수락 성공 → 친구목록']]
     },
     friends: {
       psych: '사회적 증거(내 사람 버전)+연결감. "N번 함께·6주 연속"은 두 사람만 보는 사적 관계 신호라 과시가 아니라 애착을 쌓는다. 콜드스타트는 정직한 빈 상태로 신뢰(양희연 원칙).',

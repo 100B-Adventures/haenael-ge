@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, UsersRound } from "lucide-react";
 import type { SocialFriend } from "@/lib/social/contracts";
@@ -27,6 +28,9 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
         {friends.map((friend) => {
           const [primaryGoal, ...otherGoals] = friend.goals;
           const nickname = friend.nickname ?? "친구";
+          const progress = primaryGoal
+            ? primaryGoal.cheer_count >= 10 ? "high" : primaryGoal.cheer_count >= 5 ? "mid" : "low"
+            : "low";
           return (
             <article key={friend.friend_member_id} className="friend-list-item" data-testid="friend-card">
               {primaryGoal
@@ -36,13 +40,18 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                     className="friend-list-main"
                     data-testid="friend-goal-link"
                   >
-                    <span className="friend-list-avatar" aria-hidden="true">{Array.from(nickname)[0]}</span>
+                    <span className="friend-list-avatar">
+                      {friend.profile_image
+                        ? <Image src={friend.profile_image} alt={`${nickname} 프로필`} fill sizes="48px" unoptimized />
+                        : <span aria-hidden="true">{Array.from(nickname)[0]}</span>}
+                    </span>
                     <span className="friend-list-copy">
                       <span className="friend-list-name">{nickname}<small>서로 응원</small></span>
                       <strong>{primaryGoal.title}</strong>
+                      <span className={`friend-list-progress is-${progress}`} aria-hidden="true"><i /></span>
                       <span className="friend-list-news"><MessageCircle aria-hidden="true" /> 응원 {primaryGoal.cheer_count}개가 쌓였어요</span>
                     </span>
-                    <span className="friend-list-relation">🍀 {primaryGoal.cheer_count}번 함께</span>
+                    <span className="friend-list-relation">🍀 {primaryGoal.cheer_count}번 함께<small>응원 중</small></span>
                   </Link>
                 )
                 : (

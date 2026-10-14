@@ -4,6 +4,7 @@
 
 export interface CheerCountProps {
   count: number;
+  variant?: "default" | "public";
 }
 
 // 아바타 스택 (최대 4개 원형 원소)
@@ -27,8 +28,16 @@ function AvatarStack({ count }: { count: number }) {
   );
 }
 
-export function CheerCount({ count }: CheerCountProps) {
+export function CheerCount({ count, variant = "default" }: CheerCountProps) {
   if (count === 0) return null;
+
+  if (variant === "public") {
+    return (
+      <p className="public-cheer-count" data-testid="cheer-count">
+        지금까지 <strong>{count.toLocaleString("ko-KR")}</strong>명이 응원했어요
+      </p>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2.5 mb-3" data-testid="cheer-count">

@@ -17,6 +17,8 @@ export interface GoalCardProps {
   nickname?: string | null;
   /** 목표 소유자 프로필 이미지. 공개 조회 계약이 연결되기 전에는 클로버/이니셜 폴백. */
   profileImageUrl?: string | null;
+  /** 승인 공개목표 시안의 압축 카드 표현. */
+  variant?: "default" | "public";
 }
 
 function OwnerAvatar({
@@ -68,10 +70,24 @@ export function GoalCard({
   status,
   nickname,
   profileImageUrl,
+  variant = "default",
 }: GoalCardProps) {
   const normalizedNickname = nickname?.trim() || null;
   const displayName = normalizedNickname ?? "해낼게 사용자";
   const [reasonExpanded, setReasonExpanded] = useState(false);
+
+  if (variant === "public") {
+    return (
+      <article className="public-goal-card" data-testid="goal-card">
+        <div className="public-goal-chips">
+          {status === "ACTIVE" && <DdayChip dueDate={dueDate} />}
+          <StatusChip status={status} />
+        </div>
+        <h1 data-testid="goal-title">{title} 해낼게</h1>
+        {reason && <p data-testid="goal-reason">{reason}</p>}
+      </article>
+    );
+  }
 
   return (
     <article className="w-full" data-testid="goal-card">

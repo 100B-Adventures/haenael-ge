@@ -21,8 +21,9 @@ it("CT-COPY-01 초대 생성 화면은 만료일과 공개범위 코드와 링�
     />,
   );
 
-  expect(screen.getByRole("option")).toHaveTextContent("공개");
-  expect(screen.getByRole("button", { name: "초대 링크 만들기" }))
+  expect(screen.getByText("카카오톡으로 이렇게 전해져요"))
+    .toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "초대 링크 복사" }))
     .toBeInTheDocument();
   expect(document.body.textContent).not.toMatch(/7일|PUBLIC|FRIENDS|expires_at/);
 });
