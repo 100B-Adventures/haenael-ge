@@ -1,4 +1,4 @@
-import { ReceiverBottomNav } from "@/components/social/ReceiverBottomNav";
+import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function ReceiverLayout({
@@ -7,9 +7,6 @@ export default async function ReceiverLayout({
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   return (
-    <div className="min-h-svh bg-background pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px))] lg:pb-0">
-      {children}
-      <ReceiverBottomNav locked={!user} />
-    </div>
+    <ReceiverAppShell locked={!user}>{children}</ReceiverAppShell>
   );
 }

@@ -1,6 +1,29 @@
 import Link from "next/link";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { NotificationBadge } from "@/components/common/NotificationBadge";
+import {
+  ReceiverBottomNav,
+  ReceiverBottomNavView,
+} from "@/components/social/ReceiverBottomNav";
+
+export function ReceiverAppShell({
+  children,
+  locked = false,
+  currentPath,
+}: {
+  children: React.ReactNode;
+  locked?: boolean;
+  currentPath?: string;
+}) {
+  return (
+    <div className="min-h-svh bg-background pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px))]">
+      {children}
+      {currentPath === undefined
+        ? <ReceiverBottomNav locked={locked} />
+        : <ReceiverBottomNavView locked={locked} pathname={currentPath} />}
+    </div>
+  );
+}
 
 type ReceiverPageShellProps = {
   children: React.ReactNode;

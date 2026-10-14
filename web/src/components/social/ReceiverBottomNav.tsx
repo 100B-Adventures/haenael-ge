@@ -1,18 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Link2, LockKeyhole, UserRound, Users } from "lucide-react";
+import { Home, LockKeyhole, UserPlus, UserRound, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const tabs = [
   { href: "/me", label: "홈", Icon: Home },
   { href: "/friends", label: "친구", Icon: Users },
-  { href: "/invite", label: "초대", Icon: Link2 },
+  { href: "/invite", label: "초대", Icon: UserPlus },
   { href: "/my", label: "마이", Icon: UserRound },
 ] as const;
 
 export function ReceiverBottomNav({ locked = false }: { locked?: boolean }) {
   const pathname = usePathname();
+  return <ReceiverBottomNavView locked={locked} pathname={pathname ?? ""} />;
+}
+
+export function ReceiverBottomNavView({
+  locked = false,
+  pathname,
+}: {
+  locked?: boolean;
+  pathname: string;
+}) {
   return (
     <nav
       className="receiver-tabbar"
@@ -21,12 +31,12 @@ export function ReceiverBottomNav({ locked = false }: { locked?: boolean }) {
     >
       {tabs.map(({ href, label, Icon }, index) => {
         const active = label === "홈"
-          ? pathname === "/me" || pathname.startsWith("/me/")
+          ? pathname === "/" || pathname === "/me" || pathname.startsWith("/me/")
           : pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={`${label}-${index}`}
-            href={locked ? "/" : href}
+            href={locked ? (index === 0 ? "/" : "/onboarding") : href}
             className={`${active ? "is-active " : ""}transition-transform active:translate-y-px`}
             aria-current={active ? "page" : undefined}
           >

@@ -11,6 +11,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
 
 export const metadata: Metadata = {
   title: "해낼게 — 응원은 돈으로 하는 겁니다",
@@ -145,7 +146,8 @@ export default async function LandingPage() {
   }
 
   return (
-    <main className="flex flex-col min-h-svh px-[22px] [background-color:var(--background)]! [background-image:radial-gradient(120%_60%_at_50%_6%,_rgba(31,158,90,.05),_transparent_60%)]!">
+    <ReceiverAppShell locked currentPath="/">
+    <main className="flex flex-col min-h-[calc(100svh-var(--tabbar-height))] px-[22px] [background-color:var(--background)]! [background-image:radial-gradient(120%_60%_at_50%_6%,_rgba(31,158,90,.05),_transparent_60%)]!">
       {/* BrandMark — 클릭 시 홈(로그인 상태면 /me, 비로그인이면 랜딩 자기 자신) */}
       <div className="pt-14 pb-0">
         <Link
@@ -238,5 +240,6 @@ export default async function LandingPage() {
         </p>
       </div>
     </main>
+    </ReceiverAppShell>
   );
 }

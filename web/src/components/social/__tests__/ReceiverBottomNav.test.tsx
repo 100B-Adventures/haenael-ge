@@ -27,9 +27,23 @@ it("CT-NAV-03 마이 탭은 /my로 분리되고 실제 경로에서 활성화된
 });
 
 it("CT-NAV-02 비회원 잠금 상태는 홈 외 3탭에 잠금 뱃지를 붙인다", () => {
+  pathname = "/";
   const { container } = render(<ReceiverBottomNav locked />);
   expect(container.querySelectorAll(".receiver-tabbar-lock")).toHaveLength(3);
-  expect(screen.getAllByRole("link").every((link) =>
-    link.getAttribute("href") === "/"
-  )).toBe(true);
+  expect(screen.getByRole("link", { name: /^홈$/ })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  expect(screen.getByRole("link", { name: /친구/ })).toHaveAttribute(
+    "href",
+    "/onboarding",
+  );
+  expect(screen.getByRole("link", { name: /초대/ })).toHaveAttribute(
+    "href",
+    "/onboarding",
+  );
+  expect(screen.getByRole("link", { name: /마이/ })).toHaveAttribute(
+    "href",
+    "/onboarding",
+  );
 });

@@ -14,6 +14,7 @@ import { ReportButton } from "@/components/common/ReportButton";
 import { CheerPaymentButton } from "@/components/goal/CheerPaymentButton";
 import { OwnerBar } from "@/components/goal/OwnerBar";
 import { GoalCover } from "@/components/social/GoalCover";
+import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -150,6 +151,7 @@ export default async function GoalPublicPage({ params }: Props) {
   const rawTitle = (goal.title ?? "").replace(/\s*해낼게\s*$/, "").trim();
 
   return (
+    <ReceiverAppShell locked={!user} currentPath={`/g/${slug}`}>
     <main
       className="min-h-svh pb-32 [background-color:var(--background)]!"
       data-testid="goal-public-page"
@@ -216,7 +218,7 @@ export default async function GoalPublicPage({ params }: Props) {
       </div>
 
       {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}
-      <div className="fixed left-0 right-0 bottom-0 px-[22px] pb-[calc(14px_+_env(safe-area-inset-bottom,_0px))]! pt-[14px]! [background-image:linear-gradient(180deg,_rgba(251,250,247,0)_0%,_var(--background)_34%)]!">
+      <div className="receiver-fixed-action receiver-public-action receiver-bottom-fade">
         <CheerPaymentButton
           goalId={goal.id!}
           goalTitle={rawTitle}
@@ -233,5 +235,6 @@ export default async function GoalPublicPage({ params }: Props) {
         </Link>
       </div>
     </main>
+    </ReceiverAppShell>
   );
 }
