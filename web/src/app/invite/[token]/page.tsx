@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { InviteAcceptCard } from "@/components/social/InviteAcceptCard";
-import { ReceiverBrandMark } from "@/components/receiver/ReceiverShell";
+import {
+  ReceiverAppShell,
+  ReceiverBrandMark,
+} from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { asInvitePreview } from "@/lib/social/contracts";
 
@@ -30,7 +33,8 @@ export default async function InviteTokenPage(
     supabase.auth.getUser(),
   ]);
   return (
-    <main className="min-h-svh bg-background">
+    <ReceiverAppShell locked={!user} currentPath={`/invite/${token}`}>
+    <main className="min-h-[calc(100svh-var(--tabbar-height))] bg-background">
       <div className="receiver-page-frame">
         <ReceiverBrandMark />
         <div className="mx-auto mt-8 max-w-[430px]">
@@ -43,5 +47,6 @@ export default async function InviteTokenPage(
         </div>
       </div>
     </main>
+    </ReceiverAppShell>
   );
 }

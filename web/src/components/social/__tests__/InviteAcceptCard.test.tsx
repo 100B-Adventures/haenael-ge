@@ -26,7 +26,7 @@ const preview = {
 it("CT-07 self_invite stable code를 정확한 복구 카드로 표시한다", async () => {
   render(<InviteAcceptCard token="token" preview={preview} isAuthenticated />);
   await userEvent.click(
-    screen.getByRole("button", { name: "친구로 연결하기" }),
+    screen.getByRole("button", { name: "초대 수락하고 함께하기" }),
   );
   expect(
     await screen.findByText("내가 만든 초대 링크는 직접 수락할 수 없어요."),

@@ -50,7 +50,7 @@ export function InviteAcceptCard(
   }
   return (
     <section
-      className="social-card invite-preview-card"
+      className="invite-accept-card"
       data-testid="invite-accept-card"
     >
       <GoalCover
@@ -58,11 +58,14 @@ export function InviteAcceptCard(
         title={preview.goal_title ?? "친구 초대"}
         size="banner"
       />
-      <p className="social-eyebrow">친구 초대</p>
-      <h1>{preview.inviter_nickname ?? "친구"}님이 함께하자고 초대했어요</h1>
+      <div className="invite-accept-person" aria-hidden="true">
+        {Array.from(preview.inviter_nickname ?? "친구")[0]}
+      </div>
+      <p className="social-eyebrow">함께 응원할 친구 초대</p>
+      <h1>{preview.inviter_nickname ?? "친구"}님이 함께 해내자고 초대했어요</h1>
       {preview.goal_title && (
         <p className="social-description">
-          “{preview.goal_title}” 목표를 함께 응원할 수 있어요.
+          “{preview.goal_title}” 목표를 보고 서로 조용히 응원할 수 있어요.
         </p>
       )}
       {isAuthenticated
@@ -73,7 +76,7 @@ export function InviteAcceptCard(
             onClick={accept}
             disabled={state === "loading"}
           >
-            {state === "loading" ? "연결 중" : "친구로 연결하기"}
+            {state === "loading" ? "함께하는 중" : "초대 수락하고 함께하기"}
           </button>
         )
         : (
@@ -84,7 +87,7 @@ export function InviteAcceptCard(
             prefetch={false}
             className="social-primary-action"
           >
-            로그인하고 수락하기
+            로그인하고 초대 수락하기
           </Link>
         )}
     </section>

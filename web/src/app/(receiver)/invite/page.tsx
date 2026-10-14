@@ -22,13 +22,6 @@ export default async function InvitePage() {
   return (
     <ReceiverPageShell testId="invite-page" bottomSafe>
       <ReceiverTopBar variant="home" />
-      <div className="mb-6">
-        <p className="social-eyebrow">함께 응원할 친구 부르기</p>
-        <h1 className="receiver-page-title">친구를 초대해 함께 응원해요</h1>
-        <p className="social-description">
-          내가 고른 친구에게 링크를 보내면 서로의 목표를 보고 조용히 응원할 수 있어요.
-        </p>
-      </div>
       <FriendInviteCard goals={data ?? []} />
     </ReceiverPageShell>
   );
