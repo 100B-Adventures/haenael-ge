@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { InviteAcceptCard } from "@/components/social/InviteAcceptCard";
 import {
   ReceiverAppShell,
@@ -36,8 +38,12 @@ export default async function InviteTokenPage(
     <ReceiverAppShell locked={!user} currentPath={`/invite/${token}`}>
     <main className="min-h-[calc(100svh-var(--tabbar-height))] bg-background">
       <div className="receiver-page-frame">
-        <ReceiverBrandMark />
-        <div className="mx-auto mt-8 max-w-[430px]">
+        <header className="social-detail-head">
+          <Link href="/" aria-label="해낼게 홈으로"><ChevronLeft aria-hidden="true" /></Link>
+          <ReceiverBrandMark />
+          <span aria-hidden="true" />
+        </header>
+        <div className="mx-auto max-w-[430px]">
           <InviteAcceptCard
             token={token}
             preview={asInvitePreview(previewData)}

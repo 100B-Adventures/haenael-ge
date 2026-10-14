@@ -756,8 +756,28 @@ test.describe("V2 web-first social slice", () => {
     const evidenceDir = "../docs/qa/evidence/v2-approved-build-v1.0.0";
     const realignmentEvidenceDir =
       "../docs/qa/evidence/v2-approved-build-realignment-v2.0.0";
+    const captureWidths = process.env.APPROVED_CAPTURE_WIDTHS === "390"
+      ? [390]
+      : [390, 1280];
     mkdirSync(evidenceDir, { recursive: true });
     mkdirSync(realignmentEvidenceDir, { recursive: true });
+    if (process.env.RUN_MOBILE_ERGONOMICS === "1") {
+      const dataCheck = await browser.newPage({ viewport: { width: 390, height: 844 } });
+      await dataCheck.goto(`/g/${publicSlug}`);
+      expect(await dataCheck.locator("[data-testid=wordmap] [data-wordmap-tier]").count())
+        .toBeGreaterThanOrEqual(3);
+      await dataCheck.close();
+      for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
+        const result = execFileSync("node", [
+          "/Users/sj/.claude/harness/bin/mobile-ergonomics-measure.mjs",
+          `${E2E_BASE_URL}/g/${publicSlug}`,
+          "--width",
+          String(width),
+          "--json",
+        ], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+        console.log(`MOBILE_ERGONOMICS ${result.trim()}`);
+      }
+    }
     const routes = [
       ["goal-detail", `/me/goal/${ownerGoal}`],
       ["mypage", "/my"],
@@ -765,7 +785,7 @@ test.describe("V2 web-first social slice", () => {
       ["belong", `/friends/${ids.friend}?goal=${friendPublicGoal}`],
       ["connect", "/invite"],
     ] as const;
-    for (const width of [390, 1280]) {
+    for (const width of captureWidths) {
       const context = await authContext(browser, emails.owner);
       for (const [label, route] of routes) {
         const page = await context.newPage();

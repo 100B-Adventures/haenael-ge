@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { FriendInviteCard } from "@/components/social/FriendInviteCard";
 import {
+  ReceiverBrandMark,
   ReceiverPageShell,
-  ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -21,7 +23,11 @@ export default async function InvitePage() {
   if (error) throw new Error("초대할 목표를 불러오지 못했습니다.");
   return (
     <ReceiverPageShell testId="invite-page" bottomSafe>
-      <ReceiverTopBar variant="home" />
+      <header className="social-detail-head">
+        <Link href="/friends" aria-label="친구 목록으로"><ChevronLeft aria-hidden="true" /></Link>
+        <ReceiverBrandMark />
+        <span aria-hidden="true" />
+      </header>
       <FriendInviteCard goals={data ?? []} />
     </ReceiverPageShell>
   );

@@ -1,9 +1,10 @@
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { FriendGoalDetail } from "@/components/social/FriendGoalDetail";
 import {
   BackHomeLink,
   ReceiverPageShell,
-  ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { asFriendGoalDetail, asFriendGoals } from "@/lib/social/contracts";
@@ -46,7 +47,11 @@ export default async function FriendDetailPage(
   }
   return (
     <ReceiverPageShell testId="friend-detail-page" bottomSafe>
-      <ReceiverTopBar variant="detail" />
+      <header className="social-detail-head">
+        <Link href="/friends" aria-label="친구 목록으로"><ChevronLeft aria-hidden="true" /></Link>
+        <strong>{friend.nickname ?? "친구"}의 해낼게</strong>
+        <span aria-hidden="true" />
+      </header>
       <FriendGoalDetail
         friendId={friendId}
         nickname={friend.nickname}
