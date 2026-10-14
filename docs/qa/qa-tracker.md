@@ -1,5 +1,15 @@
 # QA Tracker — haenael-ge
 
+## 2026-10-15: D-023 적용 후 환전 제출 중 높이 재검증
+
+**판정: ✅ 해소. Chromium 환전 E2E 12/12가 통과했고 제출 중 화면 높이는 622.8125px로 재현됐다.**
+
+| 결함 ID | 재검증 | 보호 단정 |
+|---|---|---|
+| QA-CASHOUT-D023-HEIGHT-01 | 기준 622.8125px, 실측 622.8125px, 허용 오차 ±4px | 계좌 마스킹·서비스 이용료 10%+VAT·이용료 차감 후 원천징수 단정 통과 |
+
+STAMP: 2026-10-15 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 근거 `/tmp/haenael-v2-cashout-e2e-final.log`
+
 ## 2026-10-15: D-023 적용 후 환전 제출 중 높이 기준 불일치
 
 **판정: ❌ NG. `cashout-manual.spec.ts`의 제출 중 화면 높이 기준이 D-023 적용 전 값에 머물러 CI가 실패했다.**
