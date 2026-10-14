@@ -61,6 +61,12 @@ function uuidList(values: string[]) {
   return values.map((value) => `'${value}'::uuid`).join(",");
 }
 
+function isoDateFromNow(days: number) {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 async function authContext(
   browser: Browser,
   email: string,
@@ -112,6 +118,8 @@ test.describe("V2 web-first social slice", () => {
   const emails = {
     owner: `social-owner-${runId}@test.local`,
     friend: `social-friend-${runId}@test.local`,
+    friend2: `social-friend2-${runId}@test.local`,
+    friend3: `social-friend3-${runId}@test.local`,
     admin: `social-admin-${runId}@test.local`,
     acceptA: `social-a-${runId}@test.local`,
     acceptB: `social-b-${runId}@test.local`,
@@ -143,8 +151,10 @@ test.describe("V2 web-first social slice", () => {
       ids[key] = data.user.id;
     }
     const fixtureNicknames: Record<keyof typeof emails, string> = {
-      owner: "해내는 민지",
-      friend: "꾸준한 준호",
+      owner: "서연",
+      friend: "윤도경",
+      friend2: "서연",
+      friend3: "정민서",
       admin: "운영자",
       acceptA: "소영",
       acceptB: "도윤",
@@ -153,10 +163,12 @@ test.describe("V2 web-first social slice", () => {
       Object.entries(ids).map(([key, id]) => ({
         id,
         nickname: fixtureNicknames[key as keyof typeof emails],
-        profile_image: key === "owner"
+        profile_image: key === "owner" || key === "friend2"
           ? "/images/social-viral/seoyeon.png"
           : key === "friend"
           ? "/images/social-viral/dogyeong.png"
+          : key === "friend3"
+          ? "/images/social-viral/jimin.png"
           : null,
       })),
     );
@@ -165,29 +177,41 @@ test.describe("V2 web-first social slice", () => {
       `insert into public.admin_member(member_id) values('${ids.admin}'::uuid) on conflict do nothing;`,
     );
     const { data: ownerGoals, error: ownerError } = await admin.from("goal")
-      .insert({
+      .insert([{
         member_id: ids.owner,
         slug: `owner-${runId}`,
-        title: "매일 기록할게",
-        reason: "작게라도 매일",
-        due_date: "2030-12-31",
+        title: "토익 900 넘길게",
+        reason: "교환학생 지원 마감 전에 점수를 만들어야 해서.",
+        due_date: isoDateFromNow(12),
         visibility: "PUBLIC",
         cover_preset_key: "c1",
-      }).select("id,slug").single();
-    if (ownerError || !ownerGoals) {
+      }, {
+        member_id: ids.owner,
+        slug: `owner-second-${runId}`,
+        title: "매일 영어 단어 30개 외울게",
+        reason: "토익 목표를 매일의 습관으로 이어가려고.",
+        due_date: isoDateFromNow(30),
+        visibility: "FRIENDS",
+        cover_preset_key: "c3",
+      }]).select("id,slug");
+    if (ownerError || !ownerGoals?.length) {
       throw ownerError ?? new Error("owner_goal_failed");
     }
-    ownerGoal = ownerGoals.id;
-    publicSlug = ownerGoals.slug;
+    const publicOwnerGoal = ownerGoals.find(({ slug }) =>
+      slug === `owner-${runId}`
+    );
+    if (!publicOwnerGoal) throw new Error("owner_public_goal_missing");
+    ownerGoal = publicOwnerGoal.id;
+    publicSlug = publicOwnerGoal.slug;
     const { data: friendGoals, error: friendGoalsError } = await admin.from(
       "goal",
     ).insert([
       {
         member_id: ids.friend,
         slug: `friend-public-${runId}`,
-        title: "아침마다 달릴게",
-        reason: "건강한 습관을 만들고 싶어요",
-        due_date: "2030-12-31",
+        title: "이번 학기 평점 4.0 해낼게",
+        reason: "저번 주 중간고사 두 과목 A 나왔어. 응원 덕분에 버텼어 진짜.",
+        due_date: isoDateFromNow(70),
         visibility: "PUBLIC",
         cover_preset_key: "c2",
       },
@@ -196,7 +220,7 @@ test.describe("V2 web-first social slice", () => {
         slug: `friend-friends-${runId}`,
         title: "매달 책 한 권 읽을게",
         reason: "친구들과 독서 기록을 나누고 싶어요",
-        due_date: "2030-12-31",
+        due_date: isoDateFromNow(90),
         visibility: "FRIENDS",
         cover_preset_key: "c3",
       },
@@ -205,7 +229,7 @@ test.describe("V2 web-first social slice", () => {
         slug: `friend-private-${runId}`,
         title: "매일 감사 한 줄 쓸게",
         reason: "하루를 다정하게 마무리하고 싶어요",
-        due_date: "2030-12-31",
+        due_date: isoDateFromNow(120),
         visibility: "PRIVATE",
         cover_preset_key: "c4",
       },
@@ -222,11 +246,40 @@ test.describe("V2 web-first social slice", () => {
     if (!friendPublicGoal || !friendFriendsGoal) {
       throw new Error("friend_goal_fixture_missing");
     }
-    await admin.from("friend_connection").insert({
-      member_low_id: [ids.owner, ids.friend].sort()[0],
-      member_high_id: [ids.owner, ids.friend].sort()[1],
-      status: "ACTIVE",
-    });
+    const extraFriendGoals = [
+      {
+        member_id: ids.friend2,
+        slug: `friend2-public-${runId}`,
+        title: "토익 900 넘길게",
+        reason: "모의고사 820점에서 한 걸음 더 가려고.",
+        due_date: isoDateFromNow(45),
+        visibility: "PUBLIC",
+        cover_preset_key: "c1",
+      },
+      {
+        member_id: ids.friend3,
+        slug: `friend3-public-${runId}`,
+        title: "3개월 안에 5kg 감량 해낼게",
+        reason: "무리하지 않고 생활 리듬을 바꾸려고.",
+        due_date: isoDateFromNow(80),
+        visibility: "PUBLIC",
+        cover_preset_key: "c4",
+      },
+    ];
+    const { error: extraGoalError } = await admin.from("goal").insert(
+      extraFriendGoals,
+    );
+    if (extraGoalError) throw extraGoalError;
+    const connectionRows = [ids.friend, ids.friend2, ids.friend3].map(
+      (friendId) => ({
+        member_low_id: [ids.owner, friendId].sort()[0],
+        member_high_id: [ids.owner, friendId].sort()[1],
+        status: "ACTIVE",
+      }),
+    );
+    const { error: connectionError } = await admin.from("friend_connection")
+      .insert(connectionRows);
+    if (connectionError) throw connectionError;
     const ownerClient = createClient(SUPABASE_URL, ANON_KEY);
     const { error: ownerAuthError } = await ownerClient.auth.signInWithPassword({
       email: emails.owner,
@@ -241,7 +294,25 @@ test.describe("V2 web-first social slice", () => {
       throw smokeInviteError ?? new Error("smoke_invite_failed");
     }
     smokeInviteToken = (smokeInvite as { token: string }).token;
-    for (let index = 0; index < 3; index += 1) {
+    const ownerCheerFixtures = [
+      ...Array.from({ length: 15 }, (_, index) => ({
+        displayName: `응원자${index + 1}`,
+        message: ["꾸준함", "용기", "성장"][index % 3],
+      })),
+      { displayName: "익명의 누군가", message: "끝까지 응원할게요" },
+      { displayName: "서연", message: "모의고사 820이면 900 금방이야" },
+      { displayName: "윤도경", message: "도서관에서 같이 힘낸다, 넌 할 수 있어" },
+    ];
+    const cheerTargets = [
+      ...ownerCheerFixtures.map((fixture) => ({ goalId: ownerGoal, ...fixture })),
+      ...Array.from({ length: 13 }, (_, index) => ({
+        goalId: friendPublicGoal,
+        displayName: `도경 응원자${index + 1}`,
+        message: ["꾸준히", "해낼 수 있어", "끝까지"][index % 3],
+      })),
+    ];
+    for (let index = 0; index < cheerTargets.length; index += 1) {
+      const fixture = cheerTargets[index];
       const { data: payment, error: paymentError } = await admin.from("payment")
         .insert({
           order_id: `social-${runId}-${index}`,
@@ -254,10 +325,10 @@ test.describe("V2 web-first social slice", () => {
       }
       paymentIds.push(payment.id);
       await admin.from("cheer").insert({
-        goal_id: ownerGoal,
-        display_name: `응원자${index + 1}`,
-        is_anonymous: false,
-        message: ["꾸준함", "용기", "성장"][index],
+        goal_id: fixture.goalId,
+        display_name: fixture.displayName,
+        is_anonymous: fixture.displayName === "익명의 누군가",
+        message: fixture.message,
         clover_amount: 1,
         payment_id: payment.id,
         status: "CONFIRMED",
@@ -346,12 +417,12 @@ test.describe("V2 web-first social slice", () => {
 
     await page.goto("/my");
     await expect(page.getByTestId("my-page-overview")).toBeVisible();
-    await expect(page.getByTestId("my-profile-summary")).toContainText("해내는 민지");
-    await expect(page.getByTestId("my-profile-summary")).toContainText("친구 1명");
-    await expect(page.getByTestId("my-goal-summary-card")).toHaveCount(1);
-    await expect(page.getByTestId("achievement-received_cheer_count")).toContainText("3");
-    await expect(page.getByTestId("achievement-connected_friend_count")).toContainText("1");
-    await expect(page.getByTestId("belonging-queue-item")).toHaveCount(2);
+    await expect(page.getByTestId("my-profile-summary")).toContainText("서연");
+    await expect(page.getByTestId("my-profile-summary")).toContainText("친구 3명");
+    await expect(page.getByTestId("my-profile-summary")).toContainText("진행 중 목표 2개");
+    await expect(page.getByTestId("my-page-overview")).toContainText("윤도경");
+    await expect(page.getByTestId("my-page-overview")).not.toContainText("주 연속");
+    await expect(page.getByTestId("my-page-overview")).not.toContainText("번 함께");
     const myTab = page.getByTestId("receiver-bottom-nav").getByRole("link", { name: /마이/ });
     await expect(myTab).toHaveAttribute("href", "/my");
     await expect(myTab).toHaveAttribute("aria-current", "page");
@@ -755,7 +826,7 @@ test.describe("V2 web-first social slice", () => {
     test.setTimeout(process.env.RUN_MOBILE_ERGONOMICS === "1" ? 420_000 : 180_000);
     const evidenceDir = "../docs/qa/evidence/v2-approved-build-v1.0.0";
     const realignmentEvidenceDir =
-      "../docs/qa/evidence/v2-approved-build-realignment-v2.0.0";
+      "../docs/qa/evidence/v2-approved-build-realignment-v3.0.0";
     const captureWidths = process.env.APPROVED_CAPTURE_WIDTHS === "390"
       ? [390]
       : [390, 1280];

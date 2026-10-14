@@ -11,7 +11,7 @@ const prototypePath = join(
 );
 const evidenceDir = join(
   repoRoot,
-  "docs/qa/evidence/v2-approved-build-realignment-v2.0.0",
+  "docs/qa/evidence/v2-approved-build-realignment-v3.0.0",
 );
 const screens = [
   ["landing", "landing"],
@@ -30,7 +30,7 @@ try {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(pathToFileURL(prototypePath).href, { waitUntil: "load" });
   await page.addStyleTag({
-    content: ".console,.flowrail,.review{display:none!important}",
+    content: ".console,.flowrail,.review,.statusbar{display:none!important}.frame{border:0!important;border-radius:0!important;box-shadow:none!important}",
   });
   for (const [screenId, label] of screens) {
     await page.evaluate((id) => globalThis.go(id), screenId);

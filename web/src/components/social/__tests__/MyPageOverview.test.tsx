@@ -91,6 +91,7 @@ describe("MyPageOverview", () => {
 
     expect(screen.getByText("도경")).toBeInTheDocument();
     expect(screen.getByText(/이번 주도 해낼 수 있어요/)).toBeInTheDocument();
-    expect(screen.getByText("🍀 1번")).toBeInTheDocument();
+    expect(screen.getByText("10. 15.")).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("🍀 1번");
   });
 });

@@ -51,7 +51,7 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                       <span className={`friend-list-progress is-${progress}`} aria-hidden="true"><i /></span>
                       <span className="friend-list-news"><MessageCircle aria-hidden="true" /> 응원 {primaryGoal.cheer_count}개가 쌓였어요</span>
                     </span>
-                    <span className="friend-list-relation">🍀 {primaryGoal.cheer_count}번 함께<small>응원 중</small></span>
+                    <span className="friend-list-relation">연결된 친구<small>서로 응원</small></span>
                   </Link>
                 )
                 : (
@@ -79,7 +79,7 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
           );
         })}
       </div>
-      <p className="friends-quiet-note"><UsersRound aria-hidden="true" /> 함께한 기록은 둘만 보는 사이 표시예요. 금액도 순위도 없어요.</p>
+      <p className="friends-quiet-note"><UsersRound aria-hidden="true" /> 명시적으로 연결된 친구만 보여요. 금액도 순위도 없어요.</p>
     </section>
   );
 }

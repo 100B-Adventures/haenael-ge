@@ -68,11 +68,6 @@ export function FriendGoalDetail(
         <strong>{detail.reason || "이 목표를 이어가는 중이에요."}</strong>
         <small>{displayName} · 응원자에게만 공개</small>
       </section>
-      <section className="friend-timeline-row">
-        <span aria-hidden="true">🌿</span>
-        <div><strong>함께한 자취 타임라인</strong><small>{detail.cheer_count}번의 응원이 이 목표에 닿은 기록</small></div>
-        <b>열림</b>
-      </section>
       <details className="social-card friend-wordmap-card">
         <summary className="social-card-heading">
           <h2>응원 워드맵</h2>

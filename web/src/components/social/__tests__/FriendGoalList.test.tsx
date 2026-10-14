@@ -40,6 +40,8 @@ it("CT-FRIEND-01 친구와 모든 공개 목표의 상세 동선을 보존한다
     .toHaveAttribute("href", "/friends/friend-a?goal=1");
   expect(screen.getByRole("link", { name: "매일 스무 쪽 읽을게" }))
     .toHaveAttribute("href", "/friends/friend-a?goal=2");
+  expect(screen.getByText("연결된 친구")).toBeInTheDocument();
+  expect(document.body).not.toHaveTextContent("번 함께");
 });
 
 it("CT-FRIEND-02 친구 0명은 실제 초대 절차와 CTA를 표시한다", () => {

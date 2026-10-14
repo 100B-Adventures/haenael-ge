@@ -140,7 +140,7 @@ export function MyPageOverview({
                     <article key={cheer.id}>
                       <span className="my-cheer-avatar" aria-hidden="true">{Array.from(name)[0]}</span>
                       <div><strong>{name}</strong><p>💬 {cheer.message || "조용한 응원이 도착했어요."}</p></div>
-                      <small>🍀 1번</small>
+                      <small>{formatCheerDate(cheer.createdAt)}</small>
                     </article>
                   );
                 })
@@ -153,11 +153,11 @@ export function MyPageOverview({
             : (
               <div className="my-cheer-empty">
                 <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
-                <div><strong>내가 응원한 친구</strong><p>친구 목표에서 함께한 기록을 확인할 수 있어요.</p><Link href="/friends">친구 목표 보기</Link></div>
+                <div><strong>내가 응원한 친구</strong><p>연결된 친구의 목표와 응원 메시지를 확인할 수 있어요.</p><Link href="/friends">친구 목표 보기</Link></div>
               </div>
             )}
         </div>
-        <p className="my-quiet-note">금액도 순위도 없이, 횟수와 메시지만 쌓여요.</p>
+        <p className="my-quiet-note">금액도 순위도 없이, 응원 메시지와 도착 시각만 보여요.</p>
       </section>
 
       <section aria-labelledby="my-settings-heading">
@@ -199,6 +199,15 @@ export function MyPageOverview({
       </p>
     </div>
   );
+}
+
+function formatCheerDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "도착 시각 미상";
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "numeric",
+    day: "numeric",
+  }).format(date);
 }
 
 function PreferenceRow({
