@@ -1,0 +1,152 @@
+[
+  {
+    "variant": "v2",
+    "label": "landing",
+    "path": "/",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-landing-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "goal",
+    "path": "/g/v1-v2-owner-1792057839620",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "토익 900 넘길게 — 해낼게"
+    },
+    "file": "v2-goal-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "me",
+    "path": "/me",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-me-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "cashout",
+    "path": "/cashout",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-cashout-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "wordmap",
+    "path": "/wordmap/605",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-wordmap-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "invite-create",
+    "path": "/invite",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-invite-create-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "invite-accept",
+    "path": "/invite/8qoYcDWhM5IDykPEfM-jtaxHh7xr6d52jUi9-Lh8dcA",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "친구 초대 · 해낼게"
+    },
+    "file": "v2-invite-accept-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "friends",
+    "path": "/friends",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-friends-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "friend-detail",
+    "path": "/friends/f09c1efd-ea40-4062-a20f-4f4c259372e9?goal=607",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-friend-detail-390.png"
+  },
+  {
+    "variant": "v2",
+    "label": "achievements",
+    "path": "/me/achievements",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v2-achievements-390.png"
+  }
+]

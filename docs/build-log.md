@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-15 v1.2.1 대 v2.0.0 화면 결정 보드
+
+- tag `v1.2.1`을 별도 git worktree에 체크아웃해 v1과 현재 v2의 production build를 각각 통과시켰다. 정적 생성은 v1 16/16, v2 17/17이다.
+- 같은 local Supabase fixture를 두 production server가 읽게 하고 공통 5화면을 각각 390×844로 캡처했다. v2 신규 5화면도 같은 fixture로 캡처했다.
+- 캡처 15장은 HTTP 200, console error 0, page error 0, 가로 overflow 0이며 실제 이미지를 열어 판정했다.
+- 결정 보드는 5쌍 크기·좌우 순서·통짜 덤프 검사와 Chromium 렌더를 통과했다. 기본 추천은 절충 3, v1 유지 2다.
+- local fixture와 v1 worktree를 정리했다. 운영 DB 쓰기·배포·롤백은 실행하지 않았다. 상세: `docs/qa/v1-vs-v2-decision-v1-gpt-codex.md`.
+
+> STAMP: 생성 2026-10-15 18:59 KST. 모델 gpt-codex/gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 운영 미반영, 회장 화면 선택 대기.
+
 ## 2026-10-15 승인 시안 재정렬 5차 최종 정합
 
 - 보고서 뒤 남았던 공개 목표 utility 충돌, 초대 수락 cover 좌표, 계약 테스트와 재캡처 변경을 모두 포함한 상태에서 390×844 이미지 14장을 다시 열었다. 데이터 자체 차이를 제외한 판정은 일치 7·불일치 0·미확인 0이다.

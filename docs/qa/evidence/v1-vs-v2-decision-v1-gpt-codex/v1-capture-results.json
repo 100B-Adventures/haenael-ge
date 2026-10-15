@@ -1,0 +1,77 @@
+[
+  {
+    "variant": "v1",
+    "label": "landing",
+    "path": "/",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v1-landing-390.png"
+  },
+  {
+    "variant": "v1",
+    "label": "goal",
+    "path": "/g/v1-v2-owner-1792057839620",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "토익 900 넘길게 — 해낼게"
+    },
+    "file": "v1-goal-390.png"
+  },
+  {
+    "variant": "v1",
+    "label": "me",
+    "path": "/me",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v1-me-390.png"
+  },
+  {
+    "variant": "v1",
+    "label": "cashout",
+    "path": "/cashout",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v1-cashout-390.png"
+  },
+  {
+    "variant": "v1",
+    "label": "wordmap",
+    "path": "/wordmap/605",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "height": 844,
+      "overflowX": false,
+      "title": "해낼게 — 응원은 돈으로 하는 겁니다"
+    },
+    "file": "v1-wordmap-390.png"
+  }
+]
