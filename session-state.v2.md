@@ -1,3 +1,11 @@
+## 2026-10-16 06:1x KST · 디자인 개정 재개(중단분 보존), 위임 역할 게이트 신설
+
+- **라인 선언 교정**: 이 세션 라인 마커를 `core` 에서 **`v2`** 로 바로잡고 `~/.claude/harness/line-repos.tsv` 에 `v2 → haenael-ge` 등록. 종전엔 `core` 가 verse 레포로 매핑돼 회장 발화 48블록이 verse 요청 원장에 박혔다(회수 완료).
+- **단계·역할 게이트 신설**: `~/.claude/hooks/delegate-role-stage-gate.sh`. 이 레포는 라인이 둘(core=build, v2=design)이라 라인 선언 없이 발주하면 단계를 잘못 읽는다. 라인 미선언 반려, 선언 라인의 current_stage 와 발주 역할 불일치 반려. 실측 3경로.
+- **디자인 개정 재개**: 직전 product-designer 가 세션 종료로 중단되며 `docs/design/prototypes/social-viral-loop-v3-opus5.html`(308KB)와 `docs/design/assets/v2-design-revision-v2/` Higgsfield 자산 10여 개를 남겼다. **버리지 않고 이어받아** 마무리 발주(진행 중). 종료증거 = 보드 v2(일괄 복사 버튼 필수) + 판정표 + 모션 GIF + design-review B 이상 + 린트 통과.
+- **남은 이슈**: D-027-A~G 미반영분(공개 목표 제목 색 강조·신고 버튼, 관리 화면 푸터·로그아웃·알림 토글·상세 진입 경로·배너, 업적, 워드맵 떠다니는 배치, 친구 상세 워드맵), 회장 디자인 승인, 승인 후 운영 배포.
+- 단계는 design 유지, 승인 단계는 plan 하나. 제품 코드 변경은 승인 뒤로 미룬다.
+
 # session-state.v2.md — V2 소셜 바이럴 루프 라인 핸드오프
 
 > 라인 `v2`. 파이프라인 확정 마일스톤은 `pipeline-state.v2.md`, 이 파일은 진행 중 서사다.
