@@ -59,9 +59,10 @@ export function FriendGoalDetail(
       </div>
       <section className="friend-together-card">
         <div className="friend-supporter-stack" aria-label={`${detail.cheer_count}명의 응원자`}>
-          <span aria-hidden="true">응</span>
-          <span aria-hidden="true">원</span>
-          <span aria-hidden="true">+{Math.max(detail.cheer_count - 2, 0)}</span>
+          <span aria-hidden="true"><Image src="/images/social-viral/seoyeon.png" alt="" width={32} height={32} /></span>
+          <span aria-hidden="true"><Image src="/images/social-viral/jimin.png" alt="" width={32} height={32} /></span>
+          <span aria-hidden="true"><Image src={profileImage ?? "/images/social-viral/dogyeong.png"} alt="" width={32} height={32} unoptimized={Boolean(profileImage)} /></span>
+          <span aria-hidden="true">+{Math.max(detail.cheer_count - 3, 0)}</span>
         </div>
         <div>
           <strong>{detail.cheer_count}명이 {displayName}을 조용히 응원하는 중이에요</strong>

@@ -208,7 +208,7 @@ export default async function GoalPublicPage({ params }: Props) {
 
         {/* Wordmap */}
         <div className="mb-4">
-          <Wordmap words={words} />
+          <Wordmap words={words} showOverflowDisclosure={false} />
         </div>
 
         {/* 최근 응원자 리스트는 공개 RLS/정렬 정책 확정 후 연결 */}

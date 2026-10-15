@@ -23,7 +23,7 @@ const goals = [
   },
 ];
 
-it("CT-FRIEND-01 친구와 모든 공개 목표의 상세 동선을 보존한다", () => {
+it("CT-FRIEND-01 친구 목록은 대표 목표 한 행만 보여 주고 상세에서 다른 목표 동선을 보존한다", () => {
   render(
     <FriendGoalList
       friends={[{
@@ -38,8 +38,8 @@ it("CT-FRIEND-01 친구와 모든 공개 목표의 상세 동선을 보존한다
   expect(screen.getByText("서로 응원하는 친구")).toHaveTextContent("1명");
   expect(screen.getByRole("link", { name: /이번 달에는 세 번씩 달릴게/ }))
     .toHaveAttribute("href", "/friends/friend-a?goal=1");
-  expect(screen.getByRole("link", { name: "매일 스무 쪽 읽을게" }))
-    .toHaveAttribute("href", "/friends/friend-a?goal=2");
+  expect(screen.queryByRole("link", { name: "매일 스무 쪽 읽을게" }))
+    .not.toBeInTheDocument();
   expect(screen.getByText("연결된 친구")).toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("번 함께");
 });

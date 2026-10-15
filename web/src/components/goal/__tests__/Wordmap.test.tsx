@@ -126,6 +126,18 @@ describe("Wordmap", () => {
     );
   });
 
+  it("CT-WORDMAP-01 공개 목표는 상위 12개를 유지하되 추가 펼침 카드를 노출하지 않는다", () => {
+    const words = Array.from({ length: 13 }, (_, i) => ({
+      word: `공개단어${i}`,
+      word_count: i + 1,
+    }));
+    render(<Wordmap words={words} showOverflowDisclosure={false} />);
+
+    expect(screen.getByTestId("wordmap").querySelectorAll("span")).toHaveLength(12);
+    expect(screen.queryByTestId("wordmap-overflow-toggle")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("wordmap-overflow-list")).not.toBeInTheDocument();
+  });
+
   it("정규화 후 빈 문자열만 남으면 기존 empty 상태를 유지한다", () => {
     render(<Wordmap words={[{ word: "   ", word_count: 1 }]} ownerName="도경" />);
     expect(screen.getByTestId("wordmap-empty")).toBeInTheDocument();

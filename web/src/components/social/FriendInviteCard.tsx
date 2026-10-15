@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Link2, MessageCircle, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { createFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InviteCreated } from "@/lib/social/contracts";
@@ -78,7 +78,7 @@ export function FriendInviteCard(
       <section className="invite-hero-card">
         <p className="social-eyebrow">함께 응원할 친구 부르기</p>
         <h1>혼자 응원하지 말고,<br />친구랑 같이 밀어줘요</h1>
-        <p>친구가 들어오면 서로의 목표를 보고 조용히 응원할 수 있어요.</p>
+        <p>초대한 친구가 들어오면 서로의 목표가 친구목록에 뜨고, 조용히 서로를 응원하는 사이가 됩니다.</p>
         <Image
           className="invite-people-photo"
           src="/images/social-viral/belong.png"
@@ -120,10 +120,10 @@ export function FriendInviteCard(
         : (
           <section className="invite-share-row" aria-label="초대 보내기">
             <button type="button" className="is-kakao" disabled={state === "loading"} onClick={() => void share()}>
-              <MessageCircle aria-hidden="true" /><span>카카오톡 초대</span>
+              <span className="invite-share-icon" aria-hidden="true">💬</span><span>카카오톡 초대</span>
             </button>
             <button type="button" disabled={state === "loading"} onClick={() => void copy()}>
-              <Link2 aria-hidden="true" /><span>{state === "loading" ? "준비 중" : "초대 링크 복사"}</span>
+              <span className="invite-share-icon" aria-hidden="true">🔗</span><span>{state === "loading" ? "준비 중" : "초대 링크 복사"}</span>
             </button>
             {state === "copied" && <p role="status" className="social-success">초대 링크를 복사했어요.</p>}
             {state === "shared" && <p role="status" className="social-success">친구에게 초대를 보냈어요.</p>}

@@ -12,6 +12,8 @@ export interface WordmapProps {
   words: WordmapWord[];
   /** empty 상태용 이름 (목표 주인공) */
   ownerName?: string;
+  /** 공개 목표처럼 상위 단어만 한 화면에 보여 줄 때 overflow disclosure를 숨긴다. */
+  showOverflowDisclosure?: boolean;
 }
 
 type SizeTier = "s1" | "s2" | "s3";
@@ -100,7 +102,11 @@ function EmptyWordmap({ ownerName }: { ownerName?: string }) {
 
 // ─── 워드맵 본체 ──────────────────────────────────────────────────────────────
 
-export function Wordmap({ words, ownerName }: WordmapProps) {
+export function Wordmap({
+  words,
+  ownerName,
+  showOverflowDisclosure = true,
+}: WordmapProps) {
   const normalizedWords = normalizeWords(words);
 
   if (normalizedWords.length === 0) {
@@ -142,7 +148,7 @@ export function Wordmap({ words, ownerName }: WordmapProps) {
     </div>
   );
 
-  if (hiddenWords.length === 0) {
+  if (hiddenWords.length === 0 || !showOverflowDisclosure) {
     return cloud;
   }
 

@@ -26,7 +26,7 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
       <p className="friends-count">서로 응원하는 친구 <strong>{friends.length}명</strong></p>
       <div className="friends-list-card">
         {friends.map((friend) => {
-          const [primaryGoal, ...otherGoals] = friend.goals;
+          const [primaryGoal] = friend.goals;
           const nickname = friend.nickname ?? "친구";
           const progress = primaryGoal
             ? primaryGoal.cheer_count >= 10 ? "high" : primaryGoal.cheer_count >= 5 ? "mid" : "low"
@@ -63,18 +63,6 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                     </span>
                   </div>
                 )}
-              {otherGoals.length > 0 && (
-                <div className="friend-extra-goals" aria-label={`${nickname}의 다른 목표`}>
-                  {otherGoals.map((goal) => (
-                    <Link
-                      key={goal.goal_id}
-                      href={`/friends/${friend.friend_member_id}?goal=${goal.goal_id}`}
-                    >
-                      {goal.title}
-                    </Link>
-                  ))}
-                </div>
-              )}
             </article>
           );
         })}
