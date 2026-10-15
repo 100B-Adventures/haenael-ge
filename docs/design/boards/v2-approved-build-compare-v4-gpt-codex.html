@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="design-compare-template">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="artifact" content="v2-approved-build-compare-v4">
+  <title>해낼게 V2 승인 시안 재정렬 4차 대조</title>
+  <style>
+    :root { --ink:#1c1b18; --muted:#6e695f; --line:#d9d4ca; --paper:#f7f4ee; --ok:#14613a; --ok-bg:#e7f4ec; --bad:#a43f32; --bad-bg:#f8e7e3; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif; line-height:1.55; }
+    header { position:sticky; top:0; z-index:5; padding:18px 24px; border-bottom:1px solid var(--line); background:rgba(247,244,238,.96); backdrop-filter:blur(12px); }
+    h1 { margin:0 0 4px; font-size:22px; }
+    header p { margin:0; color:var(--muted); font-size:13px; }
+    main { max-width:1080px; margin:0 auto; padding:20px 16px 64px; }
+    details { margin:0 0 14px; overflow:hidden; border:1px solid var(--line); border-radius:14px; background:#fff; }
+    summary { display:flex; align-items:center; gap:10px; padding:15px 18px; cursor:pointer; font-size:16px; font-weight:800; }
+    summary code { color:var(--muted); font-size:12px; }
+    .verdict { margin-left:auto; padding:3px 9px; border-radius:999px; font-size:12px; }
+    .verdict.ok { color:var(--ok); background:var(--ok-bg); }
+    .verdict.bad { color:var(--bad); background:var(--bad-bg); }
+    .scroll { overflow-x:auto; padding:18px; border-top:1px solid var(--line); }
+    .pair { display:flex; width:max-content; gap:18px; align-items:flex-start; }
+    .card { flex:none; }
+    .card h3 { margin:0 0 8px; font-size:13px; }
+    .card h3 span { color:var(--muted); font-weight:500; }
+    .card img { display:block; width:390px; height:auto; border:1px solid var(--line); background:#fff; }
+    .note { margin:0 0 18px; max-width:900px; color:var(--muted); font-size:13px; }
+    footer { padding:18px 24px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>해낼게 V2 승인 시안 재정렬 4차 대조</h1>
+    <p>좌: 승인 프로토타입, 우: 로컬 구현. 동일한 390×844 CSS viewport와 1× 배율입니다. 이름·사진·숫자·문구 값 자체는 판정에서 제외했습니다. 판정: 일치 2, 불일치 5, 미확인 0.</p>
+  </header>
+  <main>
+    <details open>
+      <summary>1. 비회원 랜딩 <code>landing</code><span class="verdict ok">일치</span></summary>
+      <div class="scroll"><p class="note">상단 브랜드, 제목·설명·접힘 버튼, 워드맵 프리뷰, 선언 문구, 주·보조 CTA, 로그인과 하단탭의 위계·폭·간격이 같은 화면으로 보입니다.</p><div class="pair"><div class="card spec"><h3>승인 시안 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/spec-landing-390.png" alt="비회원 랜딩 승인 시안 390px"></div><div class="card dev"><h3>로컬 구현 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/dev-landing-390.png" alt="비회원 랜딩 로컬 구현 390px"></div></div></div>
+    </details>
+    <details open>
+      <summary>2. 공개 목표 <code>goalpublic</code><span class="verdict bad">불일치</span></summary>
+      <div class="scroll"><p class="note">이름·응원 수·워드맵 단어는 제외했습니다. 구현은 상단 브랜드와 로그인 문구가 한 줄로 합쳐졌고, 워드맵 아래 추가 펼침 카드와 준비 중 CTA가 노출돼 승인 시안의 정보 위계·상태와 다릅니다.</p><div class="pair"><div class="card spec"><h3>승인 시안 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/spec-goalpublic-390.png" alt="공개 목표 승인 시안 390px"></div><div class="card dev"><h3>로컬 구현 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/dev-goalpublic-390.png" alt="공개 목표 로컬 구현 390px"></div></div></div>
+    </details>
+    <details open>
+      <summary>3. 마이페이지 <code>mypage</code><span class="verdict ok">일치</span></summary>
+      <div class="scroll"><p class="note">아바타·이름·메시지 값은 제외했습니다. 헤더, 프로필 카드, 활동 카드 2개, 응원 탭, 응원 행 3개, 안내 문구와 환경설정 진입의 순서·카드 폭·행 간격·하단탭이 같은 구조로 보입니다.</p><div class="pair"><div class="card spec"><h3>승인 시안 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/spec-mypage-390.png" alt="마이페이지 승인 시안 390px"></div><div class="card dev"><h3>로컬 구현 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/dev-mypage-390.png" alt="마이페이지 로컬 구현 390px"></div></div></div>
+    </details>
+    <details open>
+      <summary>4. 초대 생성 <code>connect</code><span class="verdict bad">불일치</span></summary>
+      <div class="scroll"><p class="note">인물 자체는 제외했습니다. 구현의 본문 전체가 승인 시안보다 위에서 시작하고, 사진 crop·카카오 미리보기의 아바타 비율·카드 내부 여백·하단 CTA 아이콘 스타일이 다릅니다.</p><div class="pair"><div class="card spec"><h3>승인 시안 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/spec-connect-390.png" alt="초대 생성 승인 시안 390px"></div><div class="card dev"><h3>로컬 구현 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/dev-connect-390.png" alt="초대 생성 로컬 구현 390px"></div></div></div>
+    </details>
+    <details open>
+      <summary>5. 초대 수락 <code>inviteaccept</code><span class="verdict bad">불일치</span></summary>
+      <div class="scroll"><p class="note">초대한 사람과 목표 문구 값은 제외했습니다. cover·아바타 이후 제목·설명·CTA의 수직 간격이 다르고, 구현 CTA가 승인 시안보다 크게 아래에 배치됩니다.</p><div class="pair"><div class="card spec"><h3>승인 시안 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/spec-inviteaccept-390.png" alt="초대 수락 승인 시안 390px"></div><div class="card dev"><h3>로컬 구현 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/dev-inviteaccept-390.png" alt="초대 수락 로컬 구현 390px"></div></div></div>
+    </details>
+    <details open>
+      <summary>6. 친구 목록 <code>friends</code><span class="verdict bad">불일치</span></summary>
+      <div class="scroll"><p class="note">친구 순서·이름·목표·근황 값은 제외했습니다. 구현의 행 높이가 균일하지 않고 두 번째 행에 별도 목표 pill이 추가돼, 승인 시안의 동일 높이 3행·진행 막대·메타데이터 배치와 다릅니다.</p><div class="pair"><div class="card spec"><h3>승인 시안 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/spec-friends-390.png" alt="친구 목록 승인 시안 390px"></div><div class="card dev"><h3>로컬 구현 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/dev-friends-390.png" alt="친구 목록 로컬 구현 390px"></div></div></div>
+    </details>
+    <details open>
+      <summary>7. 친구 상세 <code>belong</code><span class="verdict bad">불일치</span></summary>
+      <div class="scroll"><p class="note">친구·사진·응원 수·근황 문구 값은 제외했습니다. 응원자 묶음이 구현에서는 문자 원형으로 바뀌었고, 근황 카드 이후 수직 간격과 마지막 재초대 카드의 테두리·아이콘·높이가 승인 시안과 다릅니다.</p><div class="pair"><div class="card spec"><h3>승인 시안 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/spec-belong-390.png" alt="친구 상세 승인 시안 390px"></div><div class="card dev"><h3>로컬 구현 <span>390px</span></h3><img src="../../qa/evidence/v2-approved-build-realignment-v4.0.0/dev-belong-390.png" alt="친구 상세 로컬 구현 390px"></div></div></div>
+    </details>
+  </main>
+  <footer>
+    기반 포맷: docs/design/boards/v2-approved-build-compare-v3-gpt-codex.html<br>
+    STAMP: 2026-10-15 09:14 KST · gpt-codex/gpt-6.1-sol · code-builder · haenael-supabase-build · 근거: docs/design/prototypes/social-viral-loop-v2-opus48.html, docs/qa/evidence/v2-approved-build-realignment-v4.0.0, https://playwright.dev/docs/test-snapshots · 고민: fixture 데이터 차이를 화면 구조 차이로 오판하지 않되 실제 카드·간격·상태 차이는 숨기지 않았습니다.<br>
+    SOURCES/MODEL: gpt-codex/gpt-6.1-sol · 승인 프로토타입·로컬 390px 캡처·Playwright visual comparison<br>
+    PRESENTATION_CHECK: 내부 태그 잔재 없음 확인 · 승인 시안 7장과 dev 7장을 각각 실제 이미지로 열어 육안 대조함
+  </footer>
+</body>
+</html>

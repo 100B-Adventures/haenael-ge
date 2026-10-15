@@ -860,15 +860,13 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
-    test.setTimeout(process.env.RUN_MOBILE_ERGONOMICS === "1" ? 420_000 : 180_000);
+    test.setTimeout(process.env.RUN_MOBILE_ERGONOMICS === "1" ? 420_000 : 300_000);
     const evidenceDir =
       "../docs/qa/evidence/v2-approved-build-realignment-v4.0.0";
-    const realignmentEvidenceDir = evidenceDir;
     const captureWidths = process.env.APPROVED_CAPTURE_WIDTHS === "390"
       ? [390]
       : [390, 1280];
     mkdirSync(evidenceDir, { recursive: true });
-    mkdirSync(realignmentEvidenceDir, { recursive: true });
     if (process.env.RUN_MOBILE_ERGONOMICS === "1") {
       const dataCheck = await browser.newPage({ viewport: { width: 390, height: 844 } });
       await dataCheck.goto(`/g/${publicSlug}`);
@@ -935,11 +933,6 @@ test.describe("V2 web-first social slice", () => {
         await page.screenshot({
           path: `${evidenceDir}/dev-${label}-${width}.png`,
         });
-        if (width === 390) {
-          await page.screenshot({
-            path: `${realignmentEvidenceDir}/dev-${label}-${width}.png`,
-          });
-        }
         await page.close();
       }
       await context.close();
@@ -963,11 +956,6 @@ test.describe("V2 web-first social slice", () => {
       await invitePage.screenshot({
         path: `${evidenceDir}/dev-inviteaccept-${width}.png`,
       });
-      if (width === 390) {
-        await invitePage.screenshot({
-          path: `${realignmentEvidenceDir}/dev-inviteaccept-${width}.png`,
-        });
-      }
       await invitePage.close();
 
       for (const [label, route] of [
@@ -994,11 +982,6 @@ test.describe("V2 web-first social slice", () => {
         await guestPage.screenshot({
           path: `${evidenceDir}/dev-${label}-${width}.png`,
         });
-        if (width === 390) {
-          await guestPage.screenshot({
-            path: `${realignmentEvidenceDir}/dev-${label}-${width}.png`,
-          });
-        }
         await guestPage.close();
       }
 

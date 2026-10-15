@@ -202,7 +202,7 @@ export default async function GoalPublicPage({ params }: Props) {
         />
 
         {/* CheerCount */}
-        <div className="mt-2 mb-3">
+        <div className="public-cheer-wrap">
           <CheerCount count={cheerCount} variant="public" />
         </div>
 

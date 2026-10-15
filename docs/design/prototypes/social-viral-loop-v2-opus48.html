@@ -6,6 +6,7 @@
   - 대조 fixture: 제품 기본 데이터는 바꾸지 않고 로컬 fixture를 3명 구성, 완료 목표 2개, 확정 응원 18개, 연결 친구 3명으로 맞췄다. 공개 응원 집계는 웰컴 응원을 포함해 19명과 14명이다.
   2026-10-15 V2 승인 시안 정합화 4차.
   - D-022: DB 원장에 정의되지 않은 `부스트 클로버 +5`는 반증할 수 없는 지표이므로 소속감 화면에서 제거했다. 재초대 동선은 그대로 유지한다.
+  - D-023: 마이페이지 응원 탭의 31px 높이는 44px 터치 하한과 충돌하므로 정본을 44px로 올렸다.
   이유: 승인 시안 자체가 접근성·데이터 계약과 충돌하면 구현을 시안에 맞추는 대신 시안 정본을 먼저 바로잡아야 한다.
 -->
 <html lang="ko" class="force-motion">
@@ -705,7 +706,7 @@
   .ava-opt img{width:100%;height:100%;object-fit:cover;}
   /* v6.2 IA: 응원 내역 (받은·보낸 · 횟수·메시지만, 금액·순위 0, D-003) */
   .mp-cheer-tabs{display:flex;gap:7px;margin-top:9px;}
-  .mpct{font-size:13px;font-weight:800;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-full);padding:7px 15px;cursor:pointer;}
+  .mpct{min-height:44px;font-size:13px;font-weight:800;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-full);padding:7px 15px;cursor:pointer;}
   .mpct.on{background:var(--clover-soft);color:var(--clover-ink);border-color:#cfe8d8;}
   .mp-cheer-card{margin-top:10px;padding:2px 14px;}
   .mp-cheer-card .fr{cursor:default;}

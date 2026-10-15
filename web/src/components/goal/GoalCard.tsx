@@ -83,7 +83,7 @@ export function GoalCard({
       <article className="public-goal-card" data-testid="goal-card">
         <div className="public-goal-chips">
           {status === "ACTIVE" && <DdayChip dueDate={dueDate} tone="warm" />}
-          <StatusChip status={status} />
+          <StatusChip status={status} tone="public" />
         </div>
         <h1 data-testid="goal-title">
           {trimmedTitle}{needsHaenaelSuffix ? " 해낼게" : ""}

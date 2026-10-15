@@ -227,6 +227,8 @@
     padding-top: 0;
   }
 
+  [data-testid="invite-page"] { padding-top: 1rem; }
+
   .receiver-wordmark {
     color: var(--foreground);
     font-size: var(--text-wordmark);
@@ -672,14 +674,18 @@
     padding: 1rem;
   }
 
-  .public-goal-chips { display: flex; gap: 0.375rem; margin-bottom: 0.75rem; }
-  .public-goal-card h1 { font-size: 1.25rem; font-weight: 950; line-height: 1.35; letter-spacing: -0.035em; }
-  .public-goal-card p { margin-top: 0.5rem; color: var(--muted-color); font-size: 0.875rem; line-height: 1.55; }
+  .public-goal-chips { display: flex; gap: 0.375rem; margin-bottom: 0.5rem; }
+  .public-goal-chips [data-testid="dday-chip"],
+  .public-goal-chips [data-testid="status-chip"] { padding: 0.25rem 0.5625rem; font-size: var(--text-label-small) !important; line-height: 1.2; }
+  .public-goal-card h1 { font-size: 1rem; font-weight: 950; line-height: 1.35; letter-spacing: -0.01875rem; }
+  .public-goal-card p { margin-top: 0.3125rem; color: var(--muted-color); font-size: var(--text-label-small); line-height: 1.5; }
   .public-cheer-count { margin: 0.875rem 0 0.625rem; color: var(--muted-color); font-size: 0.875rem; text-align: center; }
   .public-cheer-count strong { margin-inline: 0.25rem; color: var(--clover-ink); font-size: 1.5rem; font-weight: 950; }
-  .goal-public-content { width: 100%; max-width: var(--receiver-native-width); margin-inline: auto; padding-top: 0.375rem !important; }
-  .goal-public-wordmark { margin-bottom: 0.875rem !important; }
-  .goal-public-relogin { margin-bottom: 0.75rem !important; }
+  .public-cheer-wrap { margin: 0.5rem 0 0.25rem; }
+  .public-cheer-wrap .public-cheer-count { margin: 0; }
+  .goal-public-content { width: 100%; max-width: var(--receiver-native-width); margin-inline: auto; padding-top: 0.875rem !important; }
+  .goal-public-wordmark { margin-bottom: 0 !important; }
+  .goal-public-relogin { margin-bottom: 0 !important; }
   .goal-public-approved .goal-cover--banner { height: 9.375rem; background: var(--public-cover); }
   .goal-public-approved .goal-cover-caption { font-size: 0.8125rem; }
 
@@ -760,7 +766,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.8125rem;
   }
 
   .my-page-head > div {
@@ -799,8 +805,8 @@
     font-weight: 900;
   }
 
-  .my-profile-card h2 { font-size: 1rem; font-weight: 900; }
-  .my-profile-card p { margin-top: 0.1875rem; color: var(--muted-color); font-size: 0.875rem; }
+  .my-profile-card h2 { font-size: 0.875rem; font-weight: 900; }
+  .my-profile-card p { margin-top: 0.1875rem; color: var(--muted-color); font-size: var(--text-label-small); }
   .my-profile-card small { display: block; margin-top: 0.25rem; color: var(--faint); font-size: 0.8125rem; }
 
   .my-section-title {
@@ -835,7 +841,7 @@
   .my-preference-row + .my-preference-row { border-top: 1px solid var(--line); }
   .my-menu-row > svg { width: 1rem; color: var(--faint); }
   .my-menu-row strong,
-  .my-preference-row strong { display: block; font-size: 1rem; }
+  .my-preference-row strong { display: block; font-size: 0.875rem; }
   .my-menu-row small,
   .my-preference-row small { display: block; margin-top: 0.1875rem; color: var(--muted-color); font-size: 0.8125rem; line-height: 1.4; }
 
@@ -905,11 +911,11 @@
   .my-cheer-list article,
   .my-cheer-empty {
     display: grid;
-    min-height: 4.625rem;
+    min-height: 4.25rem;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 0;
+    padding: 0.5rem 0;
   }
 
   .my-cheer-list article + article { border-top: 1px solid var(--line); }
@@ -918,7 +924,7 @@
   .my-cheer-status strong { border-radius: 9999px; padding: 0.25rem 0.5625rem; color: var(--clover-ink); background: var(--clover-soft); font-size: var(--text-label-small); white-space: nowrap; }
   .my-cheer-status small { color: var(--faint); font-size: var(--text-label-small); font-weight: 700; white-space: nowrap; }
   .my-cheer-list strong { font-size: 0.9375rem; }
-  .my-cheer-list p { margin-top: 0.1875rem; color: var(--muted-color); font-size: 0.8125rem; line-height: 1.4; }
+  .my-cheer-list p { overflow: hidden; margin-top: 0.1875rem; color: var(--muted-color); font-size: 0.8125rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
   .my-cheer-list article > small { color: var(--clover-ink); font-size: var(--text-label-small); font-weight: 850; white-space: nowrap; }
   .my-cheer-empty { grid-template-columns: auto minmax(0, 1fr); min-height: 7.5rem; }
   .my-cheer-empty a { display: inline-flex; min-height: var(--tap-min-size); align-items: center; color: var(--clover-ink); font-size: 0.875rem; font-weight: 850; }

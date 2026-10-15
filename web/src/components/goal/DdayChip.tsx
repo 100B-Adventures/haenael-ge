@@ -10,6 +10,7 @@ interface DdayChipProps {
 
 interface StatusChipProps {
   status: "ACTIVE" | "CLOSED" | "DELETED";
+  tone?: "default" | "public";
 }
 
 // ─── D-day ────────────────────────────────────────────────────────────────────
@@ -46,11 +47,14 @@ const STATUS_STYLE: Record<StatusChipProps["status"], React.CSSProperties> = {
   DELETED: { background: "#EFEDE8", color: "#8a857a" },
 };
 
-export function StatusChip({ status }: StatusChipProps) {
+export function StatusChip({ status, tone = "default" }: StatusChipProps) {
+  const style = tone === "public" && status === "ACTIVE"
+    ? { background: "var(--clover-soft)", color: "var(--clover-ink)" }
+    : STATUS_STYLE[status];
   return (
     <span
       className="inline-flex items-center px-3 py-1 rounded-full font-semibold [font-size:var(--text-wordmark)]!"
-      style={STATUS_STYLE[status]}
+      style={style}
       data-testid="status-chip"
     >
       {STATUS_LABEL[status]}
