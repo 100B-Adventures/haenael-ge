@@ -158,31 +158,33 @@ export default async function GoalPublicPage({ params }: Props) {
     >
       {/* 스크롤 영역 */}
       <div className="goal-public-content px-[22px] pb-4">
-        {/* BrandMark */}
-        <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
-          해낼게<span className="[color:var(--clover-bright)]!">.</span>
-        </p>
-
-        {/* owner bar — 본인 세션 열람 시에만 렌더(위에서 이미 판정 완료) */}
-        {isOwner && <OwnerBar cheerCreatedAts={ownerCheerCreatedAts} />}
-
-        {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
-        {!user && (
-          <p
-            className="goal-public-relogin text-center [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
-            data-testid="relogin-hint"
-          >
-            내 목표가 있으신가요?{" "}
-            <Link
-              href="/auth/kakao/start?redirect=/me"
-              prefetch={false}
-              className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--muted-foreground)]!"
-              data-testid="relogin-link"
-            >
-              카카오로 로그인
-            </Link>
+        <div className="goal-public-intro grid h-16 grid-rows-[1.25rem_2.75rem]">
+          {/* BrandMark */}
+          <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
+            해낼게<span className="[color:var(--clover-bright)]!">.</span>
           </p>
-        )}
+
+          {/* owner bar — 본인 세션 열람 시에만 렌더(위에서 이미 판정 완료) */}
+          {isOwner && <OwnerBar cheerCreatedAts={ownerCheerCreatedAts} />}
+
+          {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
+          {!user && (
+            <p
+            className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
+              data-testid="relogin-hint"
+            >
+              내 목표가 있으신가요?{" "}
+              <Link
+                href="/auth/kakao/start?redirect=/me"
+                prefetch={false}
+                className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--muted-foreground)]!"
+                data-testid="relogin-link"
+              >
+                카카오로 로그인
+              </Link>
+            </p>
+          )}
+        </div>
 
         <GoalCover
           presetKey={goal.cover_preset_key}

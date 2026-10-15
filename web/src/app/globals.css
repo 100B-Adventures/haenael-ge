@@ -128,7 +128,8 @@
   --social-card-gap: 12px;
   --receiver-native-width: 390px;
   --profile-avatar-size: 52px;
-  --invite-preview: #B7CEE0;
+  --invite-preview: #B2C7DA;
+  --kakao-fill: #FEE500;
   --public-cover: #1F714C;
   --cover-c1-start: #2A8F57;
   --cover-c1-end: #136B3C;
@@ -667,11 +668,11 @@
   .goal-cover-caption + .goal-cover-mark { display: none; }
 
   .public-goal-card {
-    margin-bottom: 0.875rem;
+    margin-bottom: 0.5rem;
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
     background: var(--card);
-    padding: 1rem;
+    padding: 0.875rem 1rem;
   }
 
   .public-goal-chips { display: flex; gap: 0.375rem; margin-bottom: 0.5rem; }
@@ -685,7 +686,8 @@
   .public-cheer-wrap .public-cheer-count { margin: 0; }
   .goal-public-content { width: 100%; max-width: var(--receiver-native-width); margin-inline: auto; padding-top: 0.625rem !important; }
   .goal-public-wordmark { margin-bottom: 0 !important; line-height: 1.25; }
-  .goal-public-relogin { display: flex; min-height: var(--tap-min-size); align-items: center; justify-content: center; margin-bottom: 0 !important; }
+  .goal-public-relogin { min-height: var(--tap-min-size); margin-bottom: 0 !important; }
+  .goal-public-approved [data-testid="report-button"] > [aria-hidden="true"] { display: none; }
   .goal-public-approved .goal-cover--banner { height: 9.375rem; background: var(--public-cover); }
   .goal-public-approved .goal-cover-caption { font-size: 0.8125rem; }
 
@@ -1077,7 +1079,7 @@
 
   .invite-share-icon { display: inline-flex; width: 2.125rem; height: 2.125rem; align-items: center; justify-content: center; border-radius: 9999px; background: var(--warm); font-size: 1.0625rem; }
   .invite-share-row .is-kakao { border-color: var(--line); background: var(--card); }
-  .invite-share-row .is-kakao .invite-share-icon { background: var(--amber-soft); }
+  .invite-share-row .is-kakao .invite-share-icon { background: var(--kakao-fill); }
   .invite-share-row > [role="status"],
   .invite-share-row > [role="alert"] { grid-column: 1 / -1; margin-top: 0; text-align: center; }
 
@@ -1104,6 +1106,7 @@
     justify-content: center;
     margin-top: -2rem;
     text-align: center;
+    transform: translateY(-1rem);
   }
 
   .invite-accept-card .goal-cover { align-self: stretch; }
@@ -1125,9 +1128,9 @@
     font-weight: 950;
   }
 
-  .invite-accept-card .social-eyebrow { margin-top: 0.5rem; }
+  .invite-accept-card .social-eyebrow { margin-top: -0.125rem; }
   .invite-accept-card h1 { max-width: 16rem; margin-top: 0.5rem; font-size: 1.5rem; font-weight: 950; line-height: 1.35; letter-spacing: -0.04em; word-break: keep-all; }
-  .invite-accept-card .social-description { margin: 0.625rem 0 1.25rem; font-size: 0.875rem; line-height: 1.55; }
+  .invite-accept-card .social-description { max-width: 17rem; margin: 0.625rem 0 1.25rem; font-size: 0.875rem; line-height: 1.55; }
   .invite-accept-card .social-primary-action { width: 100%; }
 
   .friends-page-head {
@@ -1150,7 +1153,7 @@
   }
 
   .friends-page-head svg { width: 1.25rem; height: 1.25rem; }
-  .friends-count { margin-bottom: 0.625rem; color: var(--muted-color); font-size: 0.875rem; }
+  .friends-count { margin-bottom: 0.3125rem; color: var(--muted-color); font-size: 0.875rem; }
   .friends-count strong { color: var(--clover-ink); }
 
   .friends-list-card {
@@ -1164,7 +1167,7 @@
 
   .friend-list-main {
     display: grid;
-    min-height: 6.625rem;
+    height: 6.5rem;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.75rem;
@@ -1245,11 +1248,11 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-top: 0.875rem;
+    margin-top: 1.125rem;
     border-radius: var(--radius-card);
     border: 1px solid var(--line);
     background: var(--card);
-    padding: 0.75rem 0.875rem;
+    padding: 0.5rem 0.875rem;
   }
 
   .friend-supporter-stack { display: flex; flex: 0 0 auto; }
@@ -1258,7 +1261,7 @@
   .friend-supporter-stack img { width: 100%; height: 100%; object-fit: cover; }
   .friend-together-card strong { font-size: 0.9375rem; line-height: 1.4; }
   .friend-together-card p { margin-top: 0.1875rem; color: var(--muted-color); font-size: 0.8125rem; }
-  .friend-private-news { margin-top: 0.5rem; border-radius: var(--radius-card); background: var(--warm); padding: 0.875rem 1rem; }
+  .friend-private-news { margin-top: 0.3125rem; border-radius: var(--radius-card); background: var(--warm); padding: 0.75rem 1rem; }
   .friend-private-news-body { display: flex; align-items: flex-start; gap: 0.625rem; margin-top: 0.125rem; }
   .friend-private-news-avatar { display: inline-flex; width: 3.25rem; height: 3.25rem; flex: 0 0 auto; align-items: center; justify-content: center; overflow: hidden; border: 0.125rem solid var(--card); border-radius: 9999px; color: var(--clover-ink); background: var(--clover-soft); box-shadow: 0 0.1875rem 0.625rem rgb(22 20 15 / 12%); }
   .friend-private-news-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -1274,11 +1277,11 @@
   .friend-other-goals a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .friend-other-goals a small { color: var(--muted-color); white-space: nowrap; }
 
-  .friend-reinvite { display: flex; min-height: var(--tap-min-size); align-items: center; gap: 0.6875rem; margin-top: 1rem; border: 1px dashed var(--line); border-radius: var(--radius-card); background: var(--card); padding: 0.875rem; color: var(--foreground); text-decoration: none; }
+  .friend-reinvite { display: flex; min-height: var(--tap-min-size); align-items: center; gap: 0.6875rem; margin-top: 1rem; border: 1px dashed var(--line); border-radius: var(--radius-card); background: var(--card); padding: 0.8125rem 0.875rem; color: var(--foreground); text-decoration: none; }
   .friend-reinvite > span { display: inline-flex; width: 1.25rem; height: 1.25rem; flex: 0 0 auto; align-items: center; justify-content: center; color: var(--foreground); }
   .friend-reinvite > div { min-width: 0; flex: 1; }
   .friend-reinvite svg { width: 1.25rem; height: 1.25rem; stroke-width: 3; }
-  .friend-reinvite strong { display: block; font-size: 0.9375rem; }
+  .friend-reinvite strong { display: block; font-size: 0.8125rem; }
   .friend-reinvite small { display: block; margin-top: 0.1875rem; color: var(--muted-color); font-size: 0.8125rem; }
 }
 

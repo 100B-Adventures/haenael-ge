@@ -862,7 +862,7 @@ test.describe("V2 web-first social slice", () => {
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
     test.setTimeout(process.env.RUN_MOBILE_ERGONOMICS === "1" ? 420_000 : 300_000);
     const evidenceDir =
-      "../docs/qa/evidence/v2-approved-build-realignment-v4.0.0";
+      "../docs/qa/evidence/v2-approved-build-realignment-v5.0.0";
     const captureWidths = process.env.APPROVED_CAPTURE_WIDTHS === "390"
       ? [390]
       : [390, 1280];

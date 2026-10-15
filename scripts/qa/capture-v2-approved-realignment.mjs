@@ -11,7 +11,7 @@ const prototypePath = join(
 );
 const evidenceDir = join(
   repoRoot,
-  "docs/qa/evidence/v2-approved-build-realignment-v4.0.0",
+  "docs/qa/evidence/v2-approved-build-realignment-v5.0.0",
 );
 const screens = [
   ["landing", "landing"],

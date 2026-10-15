@@ -191,7 +191,7 @@ export function CheerPaymentButton({
         onClick={openSheet}
         disabled={!paymentsEnabled}
       >
-        <Clover aria-hidden="true" size={20} strokeWidth={2.7} />
+        <span aria-hidden="true">🍀</span>
         {paymentsEnabled ? "조용히 밀어줄게" : "응원 결제 준비 중"}
       </button>
 
