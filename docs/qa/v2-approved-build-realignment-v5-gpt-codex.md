@@ -4,7 +4,7 @@
 
 기반 포맷: `docs/qa/v2-approved-build-realignment-v4-gpt-codex.md`
 
-STAMP: 2026-10-15 10:41 KST | model=gpt-codex/gpt-6.1-sol | agent=code-builder | skill=haenael-supabase-build | 근거=승인 프로토타입·390px 이미지 14장·로컬 Supabase fixture·Next production runtime·Vitest·pgTAP·Playwright | 고민=데이터 자체 차이를 화면 계약에서 제외하면서도 구조·간격·상태 차이를 숨기지 않도록 7쌍을 모두 별도로 열어 판정했다.
+STAMP: 2026-10-15 11:28 KST | model=gpt-codex/gpt-6.1-sol | agent=code-builder | skill=haenael-supabase-build | 근거=승인 프로토타입·최종 커밋 후보의 390px 이미지 14장·로컬 Supabase fixture·Next production runtime·Vitest·pgTAP·Playwright | 고민=보고서 이후 남은 작업트리 변경까지 포함해 다시 캡처하고, 데이터 자체 차이와 구조 차이를 분리해 7쌍을 모두 새로 열어 판정했다.
 
 ## 1. 이미지 육안 판정
 
@@ -15,10 +15,10 @@ STAMP: 2026-10-15 10:41 KST | model=gpt-codex/gpt-6.1-sol | agent=code-builder |
 | 화면 | 390px 판정 | 실제 이미지 육안 근거 |
 |---|---|---|
 | 비회원 랜딩 | 일치 | 브랜드부터 워드맵 프리뷰·선언 문구·CTA·하단탭까지 위계·폭·간격이 같은 구조로 보임 |
-| 공개 목표 | 일치 | 브랜드와 로그인 안내를 각각 유지하고 cover·목표 카드·응원 수·워드맵·신고·활성 CTA 순서와 간격이 같음 |
+| 공개 목표 | 일치 | 브랜드와 로그인 안내가 겹치지 않는 2행이고 cover·목표 카드·응원 수·워드맵·신고·활성 CTA 순서와 간격이 같음 |
 | 마이페이지 | 일치 | 헤더·프로필·활동 카드 2개·응원 탭·응원 행 3개·안내·환경설정의 순서와 카드 폭이 같음 |
 | 초대 생성 | 일치 | 본문 시작선·사진 crop·카카오 미리보기 중앙 아바타 비율과 여백·두 CTA 아이콘과 높이가 같음 |
-| 초대 수락 | 일치 | 128px cover·32px 아바타 겹침·eyebrow·제목·설명·CTA의 수직 흐름과 위치가 같음 |
+| 초대 수락 | 일치 | 96px cover·32px 아바타 겹침·eyebrow·제목·설명·CTA의 수직 흐름과 위치가 같음 |
 | 친구 목록 | 일치 | 동일 높이 3행이며 시안에 없는 추가 목표 pill 없이 대표 목표·진행 막대·근황·상태가 같은 구조로 배치됨 |
 | 친구 상세 | 일치 | 응원자 아바타 묶음·근황 이후 간격·재초대 카드의 점선 테두리·아이콘·높이가 같은 구조로 보임 |
 
@@ -30,7 +30,7 @@ STAMP: 2026-10-15 10:41 KST | model=gpt-codex/gpt-6.1-sol | agent=code-builder |
 |---|---|---|
 | 관찰됨 | 승인 프로토타입 | `social-viral-loop-v2-opus48.html`에서 390×844 프레임 7장 추출 |
 | 관찰됨 | 로컬 구현 | 로컬 Supabase fixture와 Next production server `http://127.0.0.1:3010`에서 390×844 화면 7장 재캡처 |
-| 관찰됨 | 실제 경로 | Playwright 1/1 통과. 대상 경로 HTTP 200, 브라우저 console error 0, page error 0, 가로 overflow 0 |
+| 관찰됨 | 실제 경로 | 최종 작업트리에서 Playwright 1/1 통과. 대상 경로 HTTP 200, 브라우저 console error 0, page error 0, 가로 overflow 0. 공개 목표 2행과 초대 수락 cover 위치를 DOM 좌표로도 확인 |
 | 관찰됨 | 대조 보드 | 이미지 14개·깨짐 0·섹션 7개·콘솔 오류 0 |
 | 근거 확인 | 서버 종료 | 검증 명령의 trap으로 포트 3010 listener 종료. 장기 실행 서버를 남기지 않음 |
 
@@ -40,7 +40,7 @@ STAMP: 2026-10-15 10:41 KST | model=gpt-codex/gpt-6.1-sol | agent=code-builder |
 
 | 공정 | 상태 | 직접 실행 결과 |
 |---|---|---|
-| Vitest·TypeScript 보안 테스트 | 테스트됨 | 59파일, 337/337 통과. 첫 전체 실행의 5초 timeout 2건은 단독 4/4 통과 뒤 전체를 다시 실행해 해소 |
+| Vitest·TypeScript 보안 테스트 | 테스트됨 | 59파일, 337/337 통과. 전체 병렬 실행에서 동적 import 테스트가 기본 5초를 간헐 초과해 해당 테스트 제한만 10초로 명시했고 assertion 변경 없이 표준 `npm test`를 재통과 |
 | pgTAP | 테스트됨 | 19파일, 336/336 통과 |
 | Next.js production build | 테스트됨 | Next.js 16.4.0 compile·TypeScript·정적 생성 17/17 통과 |
 | 환전 브라우저 E2E | 관찰됨 | Chromium 12/12 통과. confirm 512.78125px, submitting 622.8125px, 계좌 마스킹·이용료·원천징수 단정 유지 |
@@ -59,7 +59,8 @@ STAMP: 2026-10-15 10:41 KST | model=gpt-codex/gpt-6.1-sol | agent=code-builder |
 - 공개 목표에서 승인 상태용 워드맵 overflow disclosure를 숨기고 브랜드·로그인 안내·활성 응원 CTA를 정렬했다.
 - 초대 생성의 crop·카카오 미리보기·공유 CTA, 초대 수락의 cover·아바타·본문 수직 리듬을 맞췄다.
 - 친구 목록은 대표 목표 한 행만 유지하고, 친구 상세은 실제 아바타 묶음과 승인 재초대 카드로 맞췄다.
-- 계약 테스트에 공개 워드맵 12개 상태와 대표 목표 단일 행을 추가했다.
+- 보고서 이후 남았던 공개 목표 utility 충돌을 제거하고, 초대 수락 cover를 승인 프레임의 96px 높이·245px 시작점으로 고정했다.
+- 계약 테스트에 공개 워드맵 12개 상태, 대표 목표 단일 행, 공개 목표 2행 위치, 초대 수락 cover 좌표를 추가했다.
 
 유지한 기존 기능:
 
@@ -72,7 +73,7 @@ STAMP: 2026-10-15 10:41 KST | model=gpt-codex/gpt-6.1-sol | agent=code-builder |
 - [Playwright visual comparisons](https://playwright.dev/docs/test-snapshots)의 같은 브라우저·viewport·fixture에서 안정된 프레임을 비교하는 원칙을 차용했다. 픽셀 스냅샷의 자동 동일성 주장은 하지 않고, 데이터 값 차이를 제외한 구조를 실제 이미지로 판정했다.
 - BRAIN `concept-공유장벽-선언vs요청-UGC바이럴.md`의 선언형 공유 원칙은 공개 목표와 초대 화면의 역할을 해석하는 보조 근거로만 사용했고, 승인 시안의 구조를 바꾸는 근거로 쓰지 않았다.
 - 이 결론이 틀릴 가장 그럴듯한 이유는 데이터 문자열 길이가 구조 차이를 가리는 경우다. 그래서 이름·문구 값을 제외하되 카드 경계·행 높이·CTA 위치·아바타 겹침처럼 데이터와 무관한 축을 화면별로 따로 확인했다.
-- 까다로운 고객은 “비슷해 보인다는 말로 1~2px와 상태 차이를 덮을 수 있다”고 공격할 수 있다. 그래서 중간 96px 배너 보정은 픽셀 런과 prototype의 128px 계약이 어긋남을 확인한 즉시 폐기하고, 128px production 캡처를 다시 만든 뒤에만 일치로 판정했다.
+- 까다로운 고객은 “비슷해 보인다는 말로 작업트리의 후속 변경과 1~2px 차이를 덮을 수 있다”고 공격할 수 있다. 그래서 보고서 작성 뒤 남은 변경을 별도 diff로 확인하고, 승인 이미지에서 실측한 초대 수락 cover 96px와 공개 목표 2행을 브라우저 좌표 계약으로 고정한 뒤 production 캡처를 다시 만들었다.
 
 ## 6. 다음 실행
 

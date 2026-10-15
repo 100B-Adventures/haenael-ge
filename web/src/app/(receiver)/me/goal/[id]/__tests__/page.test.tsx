@@ -35,5 +35,5 @@ describe("/me/goal/[id] 권한 경계", () => {
     );
     expect(screen.queryByRole("button", { name: "로그아웃" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "로그인하러 가기" })).toHaveAttribute("href", "/");
-  });
+  }, 10_000);
 });

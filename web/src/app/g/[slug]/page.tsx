@@ -158,7 +158,7 @@ export default async function GoalPublicPage({ params }: Props) {
     >
       {/* 스크롤 영역 */}
       <div className="goal-public-content px-[22px] pb-4">
-        <div className="goal-public-intro grid h-16 grid-rows-[1.25rem_2.75rem]">
+        <div className="goal-public-intro">
           {/* BrandMark */}
           <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
             해낼게<span className="[color:var(--clover-bright)]!">.</span>

@@ -1107,10 +1107,10 @@
     justify-content: center;
     margin-top: -2rem;
     text-align: center;
-    transform: translateY(-0.8125rem);
+    transform: translateY(0.0625rem);
   }
 
-  .invite-accept-card .goal-cover { height: 8rem; margin-bottom: 0; align-self: stretch; }
+  .invite-accept-card .goal-cover { height: 6rem; margin-bottom: 0; align-self: stretch; }
 
   .invite-accept-person {
     position: relative;

@@ -947,6 +947,12 @@ test.describe("V2 web-first social slice", () => {
       invitePage.on("pageerror", (error) => inviteErrors.push(error.message));
       const inviteResponse = await invitePage.goto(`/invite/${smokeInviteToken}`);
       expect(inviteResponse?.status()).toBe(200);
+      if (width === 390) {
+        const coverBox = await invitePage.locator(".invite-accept-card .goal-cover").boundingBox();
+        expect(coverBox).not.toBeNull();
+        expect(Math.abs((coverBox?.height ?? 0) - 96)).toBeLessThanOrEqual(1);
+        expect(Math.abs((coverBox?.y ?? 0) - 245)).toBeLessThanOrEqual(2);
+      }
       expect(await invitePage.evaluate(() =>
         document.documentElement.scrollWidth -
         document.documentElement.clientWidth
@@ -973,6 +979,13 @@ test.describe("V2 web-first social slice", () => {
         const guestResponse = await guestPage.goto(route);
         expect(guestResponse?.status(), `${width}px ${route}`).toBe(200);
         await expect(guestPage.getByTestId("receiver-bottom-nav")).toBeVisible();
+        if (width === 390 && label === "goalpublic") {
+          const wordmarkBox = await guestPage.locator(".goal-public-wordmark").boundingBox();
+          const reloginBox = await guestPage.getByTestId("relogin-hint").boundingBox();
+          expect(wordmarkBox).not.toBeNull();
+          expect(reloginBox).not.toBeNull();
+          expect((reloginBox?.y ?? 0) - (wordmarkBox?.y ?? 0)).toBeGreaterThanOrEqual(20);
+        }
         expect(await guestPage.evaluate(() =>
           document.documentElement.scrollWidth -
           document.documentElement.clientWidth
