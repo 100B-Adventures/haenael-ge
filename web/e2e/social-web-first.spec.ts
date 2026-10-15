@@ -980,11 +980,26 @@ test.describe("V2 web-first social slice", () => {
         expect(guestResponse?.status(), `${width}px ${route}`).toBe(200);
         await expect(guestPage.getByTestId("receiver-bottom-nav")).toBeVisible();
         if (width === 390 && label === "goalpublic") {
-          const wordmarkBox = await guestPage.locator(".goal-public-wordmark").boundingBox();
-          const reloginBox = await guestPage.getByTestId("relogin-hint").boundingBox();
-          expect(wordmarkBox).not.toBeNull();
-          expect(reloginBox).not.toBeNull();
-          expect((reloginBox?.y ?? 0) - (wordmarkBox?.y ?? 0)).toBeGreaterThanOrEqual(20);
+          const textRows = await guestPage.evaluate(() => {
+            const textRect = (selector: string) => {
+              const element = document.querySelector(selector);
+              const text = element?.firstChild;
+              if (!text || text.nodeType !== Node.TEXT_NODE) return null;
+              const range = document.createRange();
+              range.selectNodeContents(text);
+              const rect = range.getBoundingClientRect();
+              return { top: rect.top, bottom: rect.bottom };
+            };
+            return {
+              wordmark: textRect(".goal-public-wordmark"),
+              relogin: textRect("[data-testid=relogin-hint]"),
+            };
+          });
+          expect(textRows.wordmark).not.toBeNull();
+          expect(textRows.relogin).not.toBeNull();
+          expect(
+            (textRows.relogin?.top ?? 0) - (textRows.wordmark?.bottom ?? 0),
+          ).toBeGreaterThanOrEqual(8);
         }
         expect(await guestPage.evaluate(() =>
           document.documentElement.scrollWidth -
