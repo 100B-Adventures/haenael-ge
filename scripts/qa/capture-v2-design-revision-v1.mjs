@@ -76,7 +76,7 @@ try {
       bypassCSP: true,
       locale: "ko-KR",
       timezoneId: "Asia/Seoul",
-      reducedMotion: "no-preference",
+      reducedMotion: "reduce",
     });
     if (authenticated) await context.addCookies(authCookieRows);
     const page = await context.newPage();
@@ -87,7 +87,9 @@ try {
     });
     page.on("pageerror", (error) => pageErrors.push(error.message));
     const response = await page.goto(`${baseUrl}${path}`, {
-      waitUntil: "networkidle",
+      // next dev keeps its HMR connection open, so networkidle is not a stable
+      // render-complete signal. The target selector plus fonts/images below is.
+      waitUntil: "domcontentloaded",
       timeout: 45_000,
     });
     await page.locator(selector).first().waitFor({ state: "visible", timeout: 20_000 });

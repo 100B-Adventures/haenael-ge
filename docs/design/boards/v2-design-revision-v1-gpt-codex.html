@@ -1,0 +1,103 @@
+<!doctype html>
+<!--
+  STAMP | line=v2 | 생성=2026-10-16 02:18 KST | model=gpt-6.1-sol | agent=code-builder
+  skills=store-visual,haenael-supabase-build | 근거=D-026-A~H, v1-goal-390.png, Higgsfield Soul 2.0, 390px dSF2 full-page 캡처 8장
+  고민=친구 방향은 복원하되 중복 배지는 만들지 않고, 출처 없는 근황은 시각적으로 다듬는 대신 제거했다.
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 V2 디자인 개정 1차 결정 보드</title>
+  <style>
+    :root { --bg:#ece9e1; --panel:#fff; --ink:#17150f; --muted:#69645b; --line:#d9d4ca; --green:#1b8a4f; --soft:#e7f4ec; --amber:#8a5a12; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:Pretendard,"Apple SD Gothic Neo",sans-serif; }
+    header { position:sticky; top:0; z-index:10; border-bottom:1px solid var(--line); background:rgb(255 255 255 / 94%); backdrop-filter:blur(16px); padding:18px 24px; }
+    header h1 { margin:0; font-size:22px; }
+    header p { max-width:960px; margin:6px 0 0; color:var(--muted); font-size:14px; line-height:1.55; }
+    nav { display:flex; gap:8px; overflow:auto; margin-top:12px; padding-bottom:2px; }
+    nav a { flex:0 0 auto; border-radius:999px; padding:7px 11px; color:var(--green); background:var(--soft); font-size:13px; font-weight:800; text-decoration:none; }
+    main { max-width:1120px; margin:0 auto; padding:24px; }
+    .summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:24px; }
+    .summary div { border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:14px; }
+    .summary strong { display:block; color:var(--green); font-size:22px; }
+    .summary span { color:var(--muted); font-size:13px; }
+    .decision { margin-bottom:24px; border:1px solid #b9d9c5; border-radius:16px; background:var(--soft); padding:18px; }
+    .decision h2 { margin:0 0 8px; font-size:17px; }
+    .decision p { margin:0; color:var(--muted); font-size:14px; line-height:1.65; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; align-items:start; }
+    article { scroll-margin-top:126px; border:1px solid var(--line); border-radius:18px; background:var(--panel); padding:18px; box-shadow:0 12px 32px rgb(40 36 28 / 8%); }
+    article h2 { margin:0; font-size:18px; }
+    .meta { margin:5px 0 14px; color:var(--muted); font-size:13px; line-height:1.55; }
+    .shot { display:flex; justify-content:center; overflow:auto; border-radius:12px; background:#d7d2c8; padding:12px; }
+    .shot img { display:block; width:390px; max-width:100%; height:auto; background:#fbfaf7; box-shadow:0 6px 18px rgb(0 0 0 / 16%); }
+    fieldset { display:flex; gap:8px; margin:14px 0 0; border:0; padding:0; }
+    legend { margin-bottom:7px; font-size:13px; font-weight:850; }
+    fieldset label { flex:1; cursor:pointer; }
+    fieldset input { position:absolute; opacity:0; pointer-events:none; }
+    fieldset span { display:flex; min-height:44px; align-items:center; justify-content:center; border:1px solid var(--line); border-radius:11px; color:var(--muted); background:#fbfaf7; font-size:13px; font-weight:800; }
+    fieldset input:checked + span { border-color:var(--green); color:var(--green); background:var(--soft); box-shadow:0 0 0 2px rgb(27 138 79 / 12%); }
+    .note-label { display:block; margin-top:12px; font-size:13px; font-weight:850; }
+    textarea { width:100%; min-height:92px; margin-top:7px; resize:vertical; border:1px solid var(--line); border-radius:12px; padding:12px; color:var(--ink); background:#fbfaf7; font:14px/1.5 inherit; }
+    textarea:focus { outline:3px solid rgb(27 138 79 / 18%); border-color:var(--green); }
+    .saved { min-height:18px; margin:5px 0 0; color:var(--green); font-size:12px; }
+    footer { max-width:1120px; margin:0 auto; padding:4px 24px 30px; color:var(--muted); font-size:12px; line-height:1.7; }
+    @media (max-width:840px) { .grid { grid-template-columns:1fr; } .summary { grid-template-columns:repeat(2,minmax(0,1fr)); } header { position:static; } article { scroll-margin-top:12px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>해낼게 V2 디자인 개정 1차</h1>
+    <p>프로토타입을 먼저 개정한 뒤 같은 계약을 로컬 제품 화면에 반영했습니다. 각 화면에서 선택 버튼과 메모를 남기면 브라우저에 저장됩니다. 운영 배포 결정은 포함하지 않습니다.</p>
+    <nav aria-label="화면 바로가기">
+      <a href="#landing">랜딩</a><a href="#public-goal">공개 목표</a><a href="#manage">해낼게 관리</a><a href="#friends">친구 목록</a><a href="#friend-detail">친구 상세</a><a href="#achievements">업적</a><a href="#wordmap">워드맵</a><a href="#cashout">환전</a>
+    </nav>
+  </header>
+  <main>
+    <section class="summary" aria-label="개정 요약">
+      <div><strong>8</strong><span>390px 전체 화면</span></div>
+      <div><strong>2×</strong><span>최소 캡처 배율</span></div>
+      <div><strong>0</strong><span>하단탭·푸터 공존</span></div>
+      <div><strong>3+1</strong><span>응원 방향과 초대 경계</span></div>
+    </section>
+    <section class="decision">
+      <h2>이번 판의 핵심 판단</h2>
+      <p>공개 목표 제목은 v1의 27px 선행 구조로 복원했습니다. 친구 목록과 상세에는 DB 응원 귀속으로 계산한 관계 방향을 표시합니다. 작성 경로가 없는 비공개 근황은 제거했습니다. 업적은 Higgsfield 실사 자산으로 교체했고, 워드맵은 하단탭 유지 화면으로 재분류했습니다.</p>
+    </section>
+    <section class="grid">
+      <article id="landing"><h2>랜딩</h2><p class="meta">하단탭은 유지하고 전역 푸터는 숨깁니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/landing-390-full.png" alt="랜딩 전체 화면"></div><div data-controls="landing"></div></article>
+      <article id="public-goal"><h2>공개 목표</h2><p class="meta">목표 제목을 커버 앞 27px로 복원하고 상태 칩을 바로 아래에 배치했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/public-goal-390-full.png" alt="공개 목표 전체 화면"></div><div data-controls="public-goal"></div></article>
+      <article id="manage"><h2>해낼게 관리</h2><p class="meta">하단탭 아래 전역 푸터를 제거하고 화면 내부 정책 링크는 유지했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/manage-390-full.png" alt="해낼게 관리 전체 화면"></div><div data-controls="manage"></div></article>
+      <article id="friends"><h2>친구 목록</h2><p class="meta">친구 행마다 내가 응원함, 응원받음, 서로 응원 중 한 방향을 표시합니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/friends-390-full.png" alt="친구 목록 전체 화면"></div><div data-controls="friends"></div></article>
+      <article id="friend-detail"><h2>친구 상세</h2><p class="meta">관계 방향을 제목 아래 표시하고, 데이터 출처가 없는 비공개 근황 블록은 제거했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/friend-detail-390-full.png" alt="친구 상세 전체 화면"></div><div data-controls="friend-detail"></div></article>
+      <article id="achievements"><h2>업적</h2><p class="meta">Higgsfield Soul 2.0으로 만든 2048px 클로버 세라믹 비주얼을 사용했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/achievements-390-full.png" alt="업적 전체 화면"></div><div data-controls="achievements"></div></article>
+      <article id="wordmap"><h2>응원 워드맵</h2><p class="meta">D-026-H에 따라 하단탭을 유지하고 전역 푸터는 숨깁니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/wordmap-390-full.png" alt="응원 워드맵 전체 화면"></div><div data-controls="wordmap"></div></article>
+      <article id="cashout"><h2>환전</h2><p class="meta">단일 거래 화면이므로 하단탭을 숨기고 전역 푸터와 화면 내 다음 행동을 유지합니다.</p><div class="shot"><img src="../../qa/evidence/v2-design-revision-v1-gpt-codex/cashout-390-full.png" alt="환전 전체 화면"></div><div data-controls="cashout"></div></article>
+    </section>
+  </main>
+  <footer>
+    SOURCES/MODEL: gpt-6.1-sol | `docs/design/chairman-directives-v2-20261015.md` D-026-A~H · `v1-goal-390.png` · Apple HIG Activity Rings · Duolingo Achievement Badges · Higgsfield Soul 2.0<br>
+    SKILLS_USED: store-visual(Higgsfield 생성·육안 검수), haenael-supabase-build(프로토타입 우선·additive migration·테스트 계약)<br>
+    PRESENTATION_CHECK: 화면별 선택 버튼 3개와 메모칸 1개 · 390px full-page 이미지 8장 · Chromium 렌더 검수 대상
+  </footer>
+  <script>
+    document.querySelectorAll("[data-controls]").forEach((host) => {
+      const id = host.dataset.controls;
+      host.innerHTML = `<fieldset><legend>이 화면 선택</legend>${["승인","수정","보류"].map((choice) => `<label><input type="radio" name="choice-${id}" value="${choice}"><span>${choice}</span></label>`).join("")}</fieldset><label class="note-label" for="note-${id}">화면 메모</label><textarea id="note-${id}" data-note="${id}"></textarea><p class="saved" aria-live="polite"></p>`;
+      const savedChoice = localStorage.getItem(`haenael-v2-revision-choice:${id}`);
+      if (savedChoice) host.querySelector(`input[value="${savedChoice}"]`).checked = true;
+      host.querySelectorAll("input[type=radio]").forEach((input) => input.addEventListener("change", () => localStorage.setItem(`haenael-v2-revision-choice:${id}`, input.value)));
+      const field = host.querySelector("textarea");
+      field.value = localStorage.getItem(`haenael-v2-revision-note:${id}`) || "";
+      field.addEventListener("input", () => {
+        localStorage.setItem(`haenael-v2-revision-note:${id}`, field.value);
+        const status = field.nextElementSibling;
+        status.textContent = "저장됨";
+        clearTimeout(field._savedTimer);
+        field._savedTimer = setTimeout(() => { status.textContent = ""; }, 1200);
+      });
+    });
+  </script>
+</body>
+</html>

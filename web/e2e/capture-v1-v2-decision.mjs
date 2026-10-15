@@ -200,6 +200,16 @@ async function seed() {
   if (cheerError || !insertedCheers?.length) {
     throw cheerError ?? new Error("fixture cheers missing");
   }
+  const ownerCheersForFriend = insertedCheers
+    .filter((cheer) => cheer.goal_id === friendGoal.id)
+    .map((cheer) => ({
+      cheer_id: cheer.id,
+      supporter_member_id: ownerId,
+    }));
+  const { error: attributionError } = await admin
+    .from("social_cheer_member_attribution")
+    .insert(ownerCheersForFriend);
+  if (attributionError) throw attributionError;
   const { error: ledgerError } = await admin.from("clover_ledger").insert({
     member_id: ownerId,
     entry_type: "EARN",
