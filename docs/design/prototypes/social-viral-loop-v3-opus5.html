@@ -1543,7 +1543,7 @@
         </div>
         <div class="wm-count" style="margin-top:18px"><span>지금까지</span> <span class="n" data-count="24">24</span> <span>명이 이 단어들로 응원했어요</span></div>
         <!-- D-025-F 전체 표시(12개 상한 폐기) + D-027-E 떠다니는 배치 -->
-        <div class="wordmap cloud" id="wordmap3" style="margin-top:10px;min-height:430px">
+        <div class="wordmap cloud" id="wordmap3" style="margin-top:10px;min-height:330px">
           <div class="wm-goalword">🍀 토익 900 해낼게</div>
           <span class="wm-word s3">화이팅</span>
           <span class="wm-word s3">응원해</span>
@@ -3050,7 +3050,7 @@
       let t=rnd()*Math.PI*2, r=i===0?0:8, px=null, py=null;
       for(let step=0; step<1400; step++){
         const ax=cx+Math.cos(t)*r*1.18-b.w/2;
-        const ay=cy+Math.sin(t)*r*0.60-b.h/2;
+        const ay=cy+Math.sin(t)*r*0.72-b.h/2;
         const qx=Math.min(Math.max(ax,x0),Math.max(x0,x1-b.w));
         const qy=Math.min(Math.max(ay,y0),Math.max(y0,y1-b.h));
         const rect={x:qx-6,y:qy-5,w:b.w+12,h:b.h+10};
