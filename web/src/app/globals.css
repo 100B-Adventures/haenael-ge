@@ -685,9 +685,10 @@
   .public-cheer-wrap { margin: 0.5rem 0 0.25rem; }
   .public-cheer-wrap .public-cheer-count { margin: 0; }
   .goal-public-content { width: 100%; max-width: var(--receiver-native-width); margin-inline: auto; padding-top: 0.625rem !important; }
-  .goal-public-intro { position: relative; display: block; height: 4rem; }
-  .goal-public-wordmark { position: absolute; top: 0; left: 0; margin-bottom: 0 !important; line-height: 1.25; }
-  .goal-public-relogin { position: absolute; top: 1.25rem; right: 0; left: 0; min-height: var(--tap-min-size); margin-bottom: 0 !important; }
+  .goal-public-intro { display: grid; height: 4rem; grid-template-rows: 1.25rem 2.75rem; }
+  .goal-public-wordmark { grid-row: 1; margin-bottom: 0 !important; line-height: 1.25; }
+  .goal-public-relogin { grid-row: 2; min-height: var(--tap-min-size); margin-bottom: 0 !important; }
+  .goal-public-intro:has([data-testid="owner-bar"]) { height: auto; grid-template-rows: auto auto; }
   .goal-public-approved [data-testid="report-button"] > [aria-hidden="true"] { display: none; }
   .goal-public-approved .goal-cover--banner { height: 9.375rem; background: var(--public-cover); }
   .goal-public-approved .goal-cover-caption { font-size: 0.8125rem; }
