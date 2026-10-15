@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { Flag, HandHeart, Trophy, UsersRound } from "lucide-react";
+import Image from "next/image";
+import { Flag, HandHeart, UsersRound } from "lucide-react";
 import {
   BackHomeLink,
   ReceiverPageShell,
@@ -28,7 +29,15 @@ export default async function AchievementsPage() {
     <ReceiverPageShell testId="achievements-page" bottomSafe>
       <ReceiverTopBar variant="detail" />
       <div className="achievement-hero">
-        <span><Trophy aria-hidden="true" /></span>
+        <div className="achievement-visual">
+          <Image
+            src="/images/social-viral/achievement-higgsfield-v1.png"
+            alt="초록 클로버 모양의 세라믹 업적 트로피"
+            fill
+            sizes="346px"
+            priority
+          />
+        </div>
         <h1>지금까지의 업적</h1>
         <p>목표와 응원 기록이 생길 때마다 차곡차곡 쌓여요.</p>
       </div>

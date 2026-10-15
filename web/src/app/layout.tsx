@@ -5,7 +5,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
-import { Footer } from "@/components/common/Footer";
+import { ConditionalFooter } from "@/components/common/ConditionalFooter";
 import { RegisterServiceWorker } from "@/components/pwa/RegisterServiceWorker";
 import "./globals.css";
 
@@ -62,7 +62,7 @@ export default function RootLayout({
         <GoogleAnalytics />
         <RegisterServiceWorker />
         <div className="flex-1 flex flex-col">{children}</div>
-        <Footer />
+        <ConditionalFooter />
         <Toaster richColors position="top-center" />
       </body>
     </html>

@@ -15,6 +15,7 @@ describe("V2 social contracts", () => {
         friend_member_id: "friend-a",
         nickname: "서연",
         profile_image: null,
+        relationship_direction: "I_CHEERED",
         goals: [{
           goal_id: 1,
           slug: "run",

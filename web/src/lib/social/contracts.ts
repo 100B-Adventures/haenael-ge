@@ -9,10 +9,24 @@ export type SocialGoal = {
   cheer_count: number;
 };
 
+export type RelationshipDirection =
+  | "I_CHEERED"
+  | "CHEERED_ME"
+  | "MUTUAL"
+  | "INVITED";
+
+export const RELATIONSHIP_DIRECTION_LABEL: Record<RelationshipDirection, string> = {
+  I_CHEERED: "내가 응원함",
+  CHEERED_ME: "응원받음",
+  MUTUAL: "서로 응원",
+  INVITED: "초대로 연결",
+};
+
 export type SocialFriend = {
   friend_member_id: string;
   nickname: string | null;
   profile_image: string | null;
+  relationship_direction: RelationshipDirection;
   goals: SocialGoal[];
 };
 

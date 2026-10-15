@@ -186,14 +186,6 @@ export default async function GoalPublicPage({ params }: Props) {
           )}
         </div>
 
-        <GoalCover
-          presetKey={goal.cover_preset_key}
-          imageUrl={coverUrl}
-          title={goal.title ?? slug}
-          size="banner"
-          caption="친구의 해낼게"
-        />
-
         {/* GoalCard */}
         <GoalCard
           title={rawTitle}
@@ -201,6 +193,14 @@ export default async function GoalPublicPage({ params }: Props) {
           dueDate={goal.due_date}
           status={(goal.status as "ACTIVE" | "CLOSED" | "DELETED") ?? "ACTIVE"}
           variant="public"
+        />
+
+        <GoalCover
+          presetKey={goal.cover_preset_key}
+          imageUrl={coverUrl}
+          title={goal.title ?? slug}
+          size="banner"
+          caption="친구의 해낼게"
         />
 
         {/* CheerCount */}

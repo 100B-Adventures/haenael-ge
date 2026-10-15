@@ -19,6 +19,11 @@
   - D-022: DB 원장에 정의되지 않은 `부스트 클로버 +5`는 반증할 수 없는 지표이므로 소속감 화면에서 제거했다. 재초대 동선은 그대로 유지한다.
   - D-023: 마이페이지 응원 탭의 31px 높이는 44px 터치 하한과 충돌하므로 정본을 44px로 올렸다.
   이유: 승인 시안 자체가 접근성·데이터 계약과 충돌하면 구현을 시안에 맞추는 대신 시안 정본을 먼저 바로잡아야 한다.
+  2026-10-16 V2 design 개정 1차(D-026-A~H).
+  - 하단탭 화면의 사업자 푸터를 제거하고, 워드맵 전체보기는 하단탭 유지 화면으로 재분류했다.
+  - 공개 목표 제목을 v1의 27px 선행 제목 구조로 복원했다.
+  - 친구 목록·상세에 응원 방향을 표시하고, 데이터 출처·작성 경로가 없는 비공개 근황 블록은 제거했다.
+  - 업적 히어로에 Higgsfield 생성 비주얼을 사용했다. 캡처는 390 CSS px, deviceScaleFactor 2 이상을 계약으로 둔다.
 -->
 <html lang="ko" class="force-motion">
 <head>
@@ -85,11 +90,9 @@
   /* ══ 모션 시스템 (standard-design 11절 · 심리에 복무: 방향안내·완료감·상태피드백) ══ */
   /* [M-전환] 화면 전이 = 방향 안내(공간 모델). base 200ms decel. 위 .screen.active[data-anim="run"] fade 로 구현. */
 
-  /* [M-등급링] status 진입 시 등급 링이 감속으로 자리잡고(성취), 후광 링이 한 번 퍼진다(보상) */
-  .screen.active[data-anim="run"] .grade-ring{animation:ringIn var(--motion-slow) var(--ease-decel) both;}
-  @keyframes ringIn{from{opacity:0;transform:scale(.72);}to{opacity:1;transform:scale(1);}}
-  .screen.active[data-anim="run"] .grade-ring::after{animation:ringPing 1400ms var(--ease-decel);}
-  @keyframes ringPing{0%{transform:scale(1);opacity:.5;}70%{opacity:0;}100%{transform:scale(1.35);opacity:0;}}
+  /* [M-업적 비주얼] status 진입 시 Higgsfield 실사 자산이 감속으로 자리잡는다. */
+  .screen.active[data-anim="run"] .achievement-visual{animation:ringIn var(--motion-slow) var(--ease-decel) both;}
+  @keyframes ringIn{from{opacity:0;transform:scale(.94) translateY(8px);}to{opacity:1;transform:none;}}
 
   /* [M-뱃지] 수집 뱃지 stagger 등장 = 수집 욕구·성취 시각화 */
   .screen.active[data-anim="run"] .bdg{animation:badgePop var(--motion-base) var(--ease-decel) both;}
@@ -176,7 +179,6 @@
   #landing.screen.active[data-anim="run"] .landing-hero .gap{animation:fadeUpC 480ms var(--ease-decel) 220ms both;}
   #landing.screen.active[data-anim="run"] .land-clover{animation:fadeUpC 480ms var(--ease-decel) 200ms both, floatLoop 2600ms ease-in-out 700ms infinite;}
   #belong.screen.active[data-anim="run"] .belong-hero{animation:rise var(--motion-base) var(--ease-decel) both;}
-  #belong.screen.active[data-anim="run"] .privnews{animation:rise var(--motion-base) var(--ease-decel) 160ms both;}
 
   /* [M-단계진행] onboarding 진행바가 차오르고 필드가 순차 등장 = 진행 피드백(Zeigarnik·endowed progress) */
   .ob-prog{display:flex;align-items:center;gap:10px;margin:16px 0 4px;}
@@ -287,6 +289,9 @@
   /* 관계 표시는 ACTIVE 친구 연결 상태만 사용한다. D-022에 따라 횟수·연속 기록은 표시하지 않는다. */
   .relbadge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;padding:4px 9px;border-radius:var(--r-full);background:var(--clover-soft);color:var(--clover-ink);white-space:nowrap;}
   .relbadge.warm{background:var(--warm);color:var(--amber-ink);}
+  .relationship-direction{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 9px;border-radius:var(--r-full);background:var(--clover-soft);color:var(--clover-ink);font-size:13px;font-weight:800;white-space:nowrap;}
+  .relationship-direction.incoming{background:var(--amber-soft);color:var(--amber-ink);}
+  .relationship-direction.mutual{background:var(--violet-soft);color:var(--violet-ink);}
   .relmeta{font-size:13px;color:var(--faint);font-weight:700;white-space:nowrap;}
   .badge-you{font-size:13px;font-weight:800;padding:2px 6px;border-radius:var(--r-full);background:var(--warm);color:var(--muted);white-space:nowrap;}
 
@@ -342,8 +347,8 @@
 
   /* ── 게이미 = 응원자 관계 지위 화면 ── */
   .grade-hero{text-align:center;padding:14px 6px 4px;}
-  .grade-ring{width:96px;height:96px;border-radius:var(--r-full);margin:0 auto 4px;background:radial-gradient(closest-side,#E7F4EC,#F4EFE6);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;}
-  .grade-ring::after{content:"";position:absolute;inset:-5px;border-radius:var(--r-full);border:2px solid var(--clover);opacity:.35;}
+  .achievement-visual{height:188px;margin:0 auto 14px;border-radius:var(--r-md);overflow:hidden;background:var(--warm);box-shadow:0 12px 30px rgba(22,20,15,.12);}
+  .achievement-visual img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 62%;}
   .grade-hero h2{font-size:19px;font-weight:900;letter-spacing:-.3px;margin-top:12px;}
   .grade-hero .gsub{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;word-break:keep-all;}
   .grade-hero .gsub b{color:var(--clover-ink);font-weight:800;}
@@ -377,6 +382,7 @@
   .belong-hero{padding:14px 4px 2px;}
   .belong-hero h2{font-size:24px;font-weight:900;letter-spacing:-.3px;line-height:1.35;word-break:keep-all;}
   .belong-hero p{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.55;word-break:keep-all;}
+  .belong-hero .relationship-direction{margin-top:10px;}
   .locked-row{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;margin-top:12px;}
   .locked-row .ic{width:40px;height:40px;border-radius:var(--r-md);background:var(--clover-soft);color:var(--clover-ink);font-size:18px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .locked-row .lx{flex:1;min-width:0;}
@@ -384,10 +390,9 @@
   .locked-row .lx .ld{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;word-break:keep-all;}
   .locked-row .open{font-size:13px;font-weight:800;color:var(--clover-ink);background:var(--clover-soft);padding:3px 8px;border-radius:var(--r-full);flex:0 0 auto;}
   /* 후원자만 보는 근황 · 조용한 특권 */
-  .privnews{background:var(--warm);border-radius:var(--r-md);padding:14px 16px;margin-top:12px;}
-  .privnews .pl{font-size:13px;font-weight:800;color:var(--clover-ink);letter-spacing:.2px;display:flex;align-items:center;gap:5px;}
-  .privnews .pt{font-size:13px;color:var(--ink);margin-top:8px;line-height:1.55;word-break:keep-all;font-weight:600;}
-  .privnews .pm{font-size:13px;color:var(--faint);margin-top:6px;font-weight:700;}
+  .public-goal-heading{margin:4px 0 12px;font-size:27px;font-weight:900;letter-spacing:-.8px;line-height:1.28;color:var(--ink);word-break:keep-all;}
+  .public-goal-heading .haenael{color:var(--clover-bright);}
+  .public-goal-chips{display:flex;gap:7px;margin-bottom:12px;}
 
   /* 재초대 유도 (조용, 푸시 아님 · #12 준수) */
   .reinvite{display:flex;gap:11px;align-items:center;background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-md);padding:14px;margin-top:16px;cursor:pointer;}
@@ -707,7 +712,6 @@
   .mp-links{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding:0 2px;}
   .mp-links a{font-size:13px;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
   .mp-logout-btn{display:block;width:100%;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;font-size:13.5px;font-weight:800;color:var(--ink);cursor:pointer;margin-top:4px;}
-  .mp-foot{font-size:13px;color:var(--faint);line-height:1.6;margin-top:18px;padding:0 2px 8px;}
   #mypage.screen.active[data-anim="run"] .mp-row{animation:rise var(--motion-base) var(--ease-decel) both;}
   #mypage.screen.active[data-anim="run"] .mp-row:nth-of-type(1){animation-delay:60ms;}
   #mypage.screen.active[data-anim="run"] .mp-row:nth-of-type(2){animation-delay:150ms;}
@@ -1524,7 +1528,7 @@
                 <div class="prog"><i style="width:68%"></i></div>
                 <div class="news"><i>💬</i><span>3주째 도서관 개근 중이래요</span></div>
               </div>
-              <div class="rel"><span class="mp-go">›</span></div>
+              <div class="rel"><span class="relationship-direction">내가 응원함</span><span class="mp-go">›</span></div>
             </a>
             <a class="fr" onclick="go('belong');return false;">
               <div class="av"><img src="assets/social-viral/seoyeon.png" alt="서연"></div>
@@ -1534,7 +1538,7 @@
                 <div class="prog"><i style="width:41%"></i></div>
                 <div class="news"><i>💬</i><span>모의고사 820 나왔어, 조금만 더</span></div>
               </div>
-              <div class="rel"><span class="mp-go">›</span></div>
+              <div class="rel"><span class="relationship-direction incoming">응원받음</span><span class="mp-go">›</span></div>
             </a>
             <a class="fr" onclick="go('belong');return false;">
               <div class="av"><img src="assets/social-viral/jimin.png" alt="정민서"></div>
@@ -1544,7 +1548,7 @@
                 <div class="prog quiet"><i style="width:22%"></i></div>
                 <div class="news"><i>💬</i><span>이번 주는 조금 쉬어가는 중</span></div>
               </div>
-              <div class="rel"><span class="mp-go">›</span></div>
+              <div class="rel"><span class="relationship-direction mutual">서로 응원</span><span class="mp-go">›</span></div>
             </a>
           </div>
           <div class="quietnote">금액도 순위도 없이 친구의 목표와 응원 소식만 보여요</div>
@@ -1562,7 +1566,7 @@
                 <div class="prog"><i style="width:68%"></i></div>
                 <div class="news"><i>💬</i><span>3주째 도서관 개근 중이래요</span></div>
               </div>
-              <div class="rel"><span class="mp-go">›</span></div>
+              <div class="rel"><span class="relationship-direction">내가 응원함</span><span class="mp-go">›</span></div>
             </a>
           </div>
           <div class="sparse-next">
@@ -1615,7 +1619,7 @@
         </div>
 
         <div class="grade-hero">
-          <div class="grade-ring">🏆</div>
+          <div class="achievement-visual"><img src="../assets/v2-design-revision-v1/achievement-higgsfield-d.png" alt="초록 클로버 모양의 세라믹 업적 트로피"></div>
           <h2>지금까지 <span data-count="4">4</span>개 업적을 모았어요</h2>
           <div class="gsub">완료 목표 <b><span data-count="2">2</span>개</b> · 받은 확정 응원 <b><span data-count="18">18</span>개</b> · 연결 친구 <b><span data-count="3">3</span>명</b></div>
         </div>
@@ -1789,7 +1793,6 @@
         <button class="mp-logout-btn" onclick="go('landing')">로그아웃</button>
         <button class="danger-act" onclick="alert('실배포: 탈퇴는 고객센터 문의(개인정보처리방침 §3 보유기간 준수). 프로토 안내용.')">회원 탈퇴</button>
 
-        <div class="mp-foot">정성컴퍼니 · 대표 조성진 · 사업자등록번호 798-31-01774<br>haenaelge.official@gmail.com</div>
       </div></div>
       <div class="tabbar">
         <a onclick="go('home')"><span class="ic"></span>홈</a>
@@ -1869,7 +1872,8 @@
         <div class="cover belong-cover c3"><span class="cov-cap">도경이의 평점 4.0 해낼게</span><span class="cov-wm">🍀</span></div>
         <div class="belong-hero">
           <h2>도경의 해낼게</h2>
-          <p>응원한 친구에게만 근황과 응원 기록을 보여줘요.</p>
+          <span class="relationship-direction mutual">서로 응원</span>
+          <p>도경의 목표와 응원 워드맵을 함께 봐요.</p>
         </div>
 
         <div class="hero-portrait"><img src="assets/social-viral/dogyeong.png" alt="윤도경"><span class="hp-name">윤도경 · 평점 4.0 해낼게</span></div>
@@ -1885,17 +1889,6 @@
             </div>
           </div>
           <div class="bt-tx"><b><span data-count="14">14</span>명</b>이 도경이를 조용히 응원하는 중이에요</div>
-        </div>
-
-        <div class="privnews">
-          <div class="pl">🔓 응원자에게만 보이는 근황</div>
-          <div style="display:flex;gap:10px;align-items:flex-start;margin-top:2px">
-            <div class="supporter-face"><img src="assets/social-viral/supporter.png" alt="도경"></div>
-            <div>
-              <div class="pt">"저번 주 중간고사 두 과목 A 나왔어. 응원 덕분에 버텼어 진짜."</div>
-              <div class="pm">도경 · 이틀 전 · 응원자에게만 공개</div>
-            </div>
-          </div>
         </div>
 
         <div class="reinvite" onclick="go('connect')">
@@ -1998,10 +1991,10 @@
       <div class="app"><div class="pad">
         <div style="padding-top:6px;margin-bottom:14px"><span class="wordmark">해낼<span class="d">게.</span></span></div>
         <div class="relogin" style="margin:0 0 12px;font-size:13px">내 목표가 있으신가요? <a onclick="go('login')">카카오로 로그인</a></div>
+        <h1 class="public-goal-heading">토익 900 넘길게 <span class="haenael">해낼게</span></h1>
+        <div class="public-goal-chips"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
         <div class="cover pub-cover c1"><span class="cov-cap">서연이의 해낼게</span><span class="cov-wm">🍀</span></div>
         <div class="goalcard" style="margin-top:0">
-          <div class="gtop"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
-          <h3>토익 900 넘길게</h3>
           <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
         </div>
         <div class="wm-count" style="margin-top:14px"><span>지금까지</span> <span class="n" data-count="19">19</span> <span>명이 응원했어요</span></div>
@@ -2416,9 +2409,10 @@
     friends: {
       psych: '사회적 증거(내 사람 버전)+연결감. ACTIVE 친구 연결과 공개 가능한 목표만 보여 과장 없이 관계 맥락을 만든다. 콜드스타트는 정직한 빈 상태로 신뢰를 지킨다.',
       bench: 'Strava 친구 피드(진행·근황) · 당근 이웃 · 토스 함께쌓기. 진행바+근황 한 줄 조합 차용. 단 랭킹·리더보드는 버림(금액·순위 금지).',
-      inherit: '계승: friends-invite-v1의 .fr 행·콜드스타트 3스텝·오버플로 렌더 로직. D-022에 따라 N번 함께·N주 연속을 제거하고 ACTIVE 친구 연결 상태만 남겼다. 카드 클릭 → 소속감 큐(4) 라우팅은 유지한다.',
+      inherit: '계승: friends-invite-v1의 .fr 행·콜드스타트 3스텝·오버플로 렌더 로직. D-022에 따라 N번 함께·N주 연속은 제거하고, D-026-D에 따라 DB 응원 귀속으로 계산한 관계 방향은 복원했다. 카드 클릭 → 친구 상세 라우팅은 유지한다.',
       prd: 'D-022(DB 원장에서 반증 가능한 지표만) · D-009(콜드스타트 정직) · D-003(금액·랭킹 금지).',
       chg: [
+        {w:'<b>D-026-D 관계 방향 복원</b>. 친구 행마다 내가 응원함·응원받음·서로 응원을 한 번만 표시한다. 방향은 supporter attribution과 목표 소유자를 양방향 대조해 계산하며, UUID low/high 순서는 의미로 쓰지 않는다.', fb:'회장 2026-10-16: "내가 응원한건지 응원 받은건지 서로 응원한지가 중요하지않을까?"'},
         {w:'<b>D-022 정합화</b>. 친구별 N번 함께·N주 연속을 제거하고 ACTIVE 친구 연결 상태만 표시한다.', fb:'회장 확정 D-022: DB 원장에서 반증할 수 없는 지표 금지'},
         {w:'친구 아바타 3종(도경·서연·민서) + 과다상태 목록 아바타를 <b>이니셜 원 → Higgsfield 실사</b>로 전량 교체.', fb:'회장: "힉스필드는 안씀?" · 친구목록이 인물 자리의 핵심'},
         {w:'왼쪽 레일에서 <b>홈 하단탭 → 친구목록</b> 진입, <b>친구 카드 탭 → 소속감 큐</b> 이탈을 화살표로 표시(고립 노드 제거).', fb:'회장: "왼쪽 사이드바 흐름 어디갔어"'}
@@ -2428,11 +2422,12 @@
     status: {
       psych: '수집 욕구+진행 효과(endowed progress). DB 원장에서 확인 가능한 완료 목표·받은 확정 응원·ACTIVE 친구만 업적 근거로 사용한다.',
       bench: 'Duolingo 업적·뱃지 · 당근 매너온도 · 링크드인 스킬 뱃지. "업적·수집·마일스톤"은 차용, "금액 리더보드"는 구조에서 완전히 배제(D-003 "지갑은 조용하게").',
-      inherit: '계승: 토큰·relbadge 색·카드 규칙. 신규 화면: 업적 트로피 히어로·다음 업적 진행바·업적 그리드·등급 받기 설정 토글(열린결정 B). friends-invite의 열린결정 배지 패턴 계승.',
+      inherit: '계승: 토큰·relbadge 색·카드 규칙, 다음 업적 진행바, 반증 가능한 업적 그리드. D-026-F에서 이모지 트로피를 Higgsfield Soul 2.0 실사 클로버 세라믹 비주얼로 교체했다.',
       prd: 'idea-ledger 2026-09-21(게이미·리텐션)·2026-09-15(관계적 지위) → 결정 A(부스트)·B(정체성) 구체화. blueprint #20 인접. PRD 미기재(결정 대기).',
       chg: [
+        {w:'<b>D-026-F Higgsfield 업적 비주얼</b>. 손코딩 SVG·이모지 히어로를 폐기하고 실제 생성한 2048px 클로버 세라믹 자산을 카드 상단에 사용했다. 화면에서는 가짜 문자와 SNS 프레임이 보이지 않도록 중앙 오브젝트만 crop한다.', fb:'회장 2026-10-16: "업적은 저게 니 수준의 한계냐? 힉스필드 안써?"'},
         {w:'<b>하단탭·헤더 "스트릭" → "업적"으로 워딩 개정</b> + 히어로를 연속 기록 위주에서 <b>업적 축(누적 성취·연속·마일스톤)</b>으로 재구성. 그린 새싹(🌿) → 트로피(🏆), "6주 연속 응원 중" → "지금까지 4개 업적을 모았어요"(연속·인원·횟수는 부제로 유지). 탭 아이콘도 메달로.', fb:'회장 9342: "스트릭보단 업적 뭐 이런 느낌이 더 나을거같고"'},
-        {w:'왼쪽 레일에서 <b>홈·친구 하단탭 "업적"</b> 진입을 화살표로 명시. 히어로 엠블럼은 <b>인물이 아닌 트로피</b>라 실사 미적용(의도).', fb:'회장: 신규 화면 연결 흐름 표기'},
+        {w:'왼쪽 레일에서 <b>홈·친구 하단탭 "업적"</b> 진입을 화살표로 명시.', fb:'회장: 신규 화면 연결 흐름 표기'},
         {w:'<b>금액·순위 노출 토글 완전 제거</b>(토글·예시 금액 미리보기·경고 카피·순위 숫자 전량 삭제). D-003 "지갑은 조용하게" 위반 소지를 승인본에서 근본 차단 · 금액·순위는 켜고 끌 수 있는 옵션조차 두지 않는다.', fb:'회장 2026-10-04: "금액·순위 노출 토글이 승인 프로토에 남아 있는데 지갑은 조용하게 위반, 완전히 제거." 횟수·꾸준함 표기만 유지.'}
       ],
       flow: [['진입','마이페이지 "나의 활동 › 업적"'],['이탈','등급 받기 토글 조작(제품 내 상태) · 탭으로 이동'],['핵심','업적은 완료 목표·받은 확정 응원·ACTIVE 친구만 · 금액·순위 노출 0']],
@@ -2463,19 +2458,20 @@
       flow:[['진입','마이페이지 "환전 내역"'],['이탈','확인중 건 → 환전 상태 · 환전 화면 · 홈']]
     },
     belong: {
-      psych: '소속감(in-group)+상호성. ACTIVE 친구에게 허용된 목표와 근황을 조용히 보여준다. 재초대는 푸시가 아니라 pull(#12 준수)로 둔다.',
-      bench: 'Patreon 후원자 전용 포스트 · 프로덕트헌트 서포터의 제한 공개 구조를 차용하되 금액 티어와 관계 지속 횟수는 쓰지 않는다.',
-      inherit: '계승: 응원자 전용 근황·재초대 pull 카드. D-022에 따라 활동 타임라인과 DB 원장에 없는 부스트 수치를 제거했다.',
+      psych: '소속감(in-group)+상호성. ACTIVE 친구에게 허용된 목표와 응원 워드맵을 조용히 보여준다. 재초대는 푸시가 아니라 pull(#12 준수)로 둔다.',
+      bench: 'Strava 친구 목표 상세와 Duolingo 친구 진행 카드의 관계 맥락을 차용하되 금액 티어와 출처 없는 비공개 게시물은 쓰지 않는다.',
+      inherit: '계승: 친구 목표·응원자 수·워드맵·재초대 pull 카드. D-022에 따라 활동 타임라인과 DB 원장에 없는 부스트 수치를 제거했고, D-026-E에 따라 출처 없는 근황 블록도 제거했다.',
       prd: 'idea-ledger 2026-09-15(응원자만 보는 것·재초대) · blueprint 6절(정체성 노트). DB로 반증할 수 있는 친구·응원 집계만 사용한다.',
       chg: [
+        {w:'<b>D-026-D·E 친구 상세 정합화</b>. 제목 아래에 관계 방향을 표시한다. 기존 "응원자에게만 보이는 근황"은 테이블·RPC·작성 화면이 없고 goal.reason을 근황처럼 오용했으므로 제거했다.', fb:'회장 2026-10-16: 관계 방향이 중요하고, 정의 없는 근황이 무엇인지 지적'},
         {w:'<b>v5 친구 해낼게 커버 사진</b>. 상단에 친구 목표 커버 배너(캡션 "도경이의 평점 4.0 해낼게") 추가, 응원자 시점에서 친구 목표의 맥락·분위기를 준다. <b>배포 미존재·프로토 신규</b>. 금액·순위 아님(D-003 무관).', fb:'회장 결정: 커버는 응원하는 사람에게 맥락 주는 요소'},
         {w:'<b>헤더를 "도경이의 응원자" → "도경이의 해낼게"로 명확화</b> (이 화면이 "친구의 해낼게를 응원자 시점으로 보는 자리"임을 제목이 바로 말하게 함). 친구 카드 → belong 연결은 유지.', fb:'회장: belong이 "친구 해낼게 상세"로 더 명확해야'},
-        {w:'도경이의 <b>실사 히어로 사진</b> + 응원자 전용 근황의 <b>작성자 실사 얼굴</b> 삽입 · "응원자에게만 열리는 자리"의 인물 실체화.', fb:'회장: "힉스필드는 안씀? 다시해"'},
+        {w:'도경이의 <b>실사 히어로 사진</b>을 유지해 친구 목표의 주체를 명확히 한다.', fb:'회장: "힉스필드는 안씀? 다시해"'},
         {w:'왼쪽 레일에서 <b>친구 카드 탭 → 소속감 큐</b> 진입, <b>재초대 pull → 초대·연결</b>로 루프백 화살표 명시(루프 닫힘).', fb:'회장: "기존 화면에서 어떻게 연결되는지"'},
         {w:'히어로 아래에 <b>함께 응원하는 아바타 stack + 인원수(13명)</b> 카드를 추가하고 pop-in·카운트업 모션을 얹었습니다. 금액·랭킹은 넣지 않았습니다.', fb:'회장 2026-09-29: 동적 연출 확대 · D-003 "지갑은 조용하게"(인원수만).'}
       ],
       flow: [['진입','친구목록(2) 카드 탭 → 그 친구의 응원자 자리'],['이탈','재초대 카드 → 초대(1) · 뒤로 → 친구목록(2)']],
-      opendec: 'D-022 확정: DB 원장에 없는 보상 수치는 노출하지 않는다. 관계·응원 인원·근황만 유지한다.'
+      opendec: 'D-022·D-026-E 확정: DB 원장과 작성 경로가 없는 보상 수치·근황은 노출하지 않는다. 관계 방향·응원 인원·워드맵만 유지한다.'
     },
     dopamine: {
       psych: '즉각 보상(variable reward의 조용한 변형)+진행 가시화. 응원 순간 내 단어가 워드맵에 얹히는 걸 "직접 보게" 해 activation 도파민을 준다. 비회원 피드백은 손실회피("이 기록이 남아요")로 승격을 당김.',
@@ -2496,6 +2492,7 @@
       prd:'실배포 계승. 비회원 진입(screen-inventory G1 landing). v2 소셜은 이 화면 미변경.',
       flow:[['진입','인스타·직접 URL(비회원)'],['이탈','시작하기 → 온보딩 · 로그인 → 카카오 시트 · 어떻게? → how · 하단탭 잠금 → 온보딩']],
       chg:[
+        {w:'<b>D-026-B 전역 푸터 제거</b>. 하단탭과 사업자 푸터가 같은 스크롤에 공존하지 않도록 이 화면의 푸터를 제거했다. 정책 링크는 환경설정 블록에 유지한다.', fb:'회장 2026-10-16: "하단탭 밑에 푸터가 있으니"'},
         {w:'<b>비회원에게도 하단탭을 노출</b> · 회원 전용 탭(친구·초대·업적)은 잠금 뱃지를 달고 누르면 온보딩으로 유도. 비회원이 서비스 구조를 먼저 보고 하나씩 등록하는 동선(활성화 온보딩).', fb:'회장: "비회원이라도 하단 탭 보여주면서 하나씩 등록하는 게 낫지 않냐"'}
       ],
       opendec:'v2 소셜 루프는 랜딩 본문 미변경. v2.1에서 하단탭만 추가(잠금 뱃지). 대조표상 "계승 + 하단탭 추가".'
@@ -2506,6 +2503,7 @@
       inherit:'계승(실배포 상태분기 전량): web/src/app/g/[slug]/page.tsx · ①line 1 비로그인 SSR(공유링크 타깃) ②line 107-143 owner bar 판정: goal 테이블 RLS(auth.uid()=member_id)로 재조회해 <b>비로그인·제3자는 isOwner=false</b> → owner bar(응원 개수·created_at) 자체가 렌더 안 됨 ③line 105 CheerCount는 goal_public 뷰(금액 필드 부재)라 <b>인원수만</b> 노출(D-003) ④line 164-179 {!user} 비로그인 전용 카카오 로그인 유도(/auth/kakao/start?redirect=/me) ⑤line 201-204 ReportButton(게스트/비로그인 모두) ⑥line 209 CheerPaymentButton(비회원도 게스트 결제). 프로토는 이 6개 분기를 그대로 재현 · owner 데이터 0, 인원수만, 로그인 유도, 게스트 응원·신고.',
       prd:'실배포 계승. screen-inventory G3 goal-public. <b>유저타입 ① 비회원</b>의 대표 도착·전환 화면(왼쪽 레일 비회원축).',
       chg:[
+        {w:'<b>D-026-C v1 제목 복원</b>. 공개 목표의 핵심 제목을 커버보다 앞, 27px로 되돌리고 "해낼게"를 브랜드 색으로 강조했다. 상태 칩은 제목 바로 아래에 둔다.', fb:'회장 2026-10-16: "무엇을 해낼건지 제목은 이전 배포 버젼이 낫다"'},
         {w:'<b>v5 공개뷰 커버 사진</b>. 공개 목표 상단에 커버 배너(선언자 이름 캡션 "서연이의 해낼게") 추가, 응원하러 온 사람에게 목표 맥락·분위기를 준다. <b>배포 미존재·프로토 신규</b>. 금액·순위 아님(D-003 무관).', fb:'회장 결정: "자기 해낼게를 꾸며서 응원받는 것" · 커버는 응원자에게 맥락 주는 요소'},
         {w:'<b>비회원 유저타입을 왼쪽 레일에 독립축(①)으로 그룹핑</b> · landing·onboarding·goalpublic·dopamine·결제·login·terms·privacy를 회원(②)·관리자(③)축과 나란히 세워, 비로그인 흐름이 한눈에 서게 함.', fb:'회장 격노: "비회원타입도 없고 기존 화면 관리 어디갔냐"'},
         {w:'goalpublic 프레임에 <b>게스트 신고 진입점</b> 명시 노출(g/[slug]:201 ReportButton 계승). 검수 패널에 owner바 숨김·인원수만·로그인 유도·게스트 응원/신고 6분기를 file:line으로 명기.', fb:'회장: "그림만 계승, 상태분기 안 담는다"'},

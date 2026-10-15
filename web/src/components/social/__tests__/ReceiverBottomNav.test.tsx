@@ -56,3 +56,9 @@ it.each(["/cashout", "/cashout/status", "/cashout/history"])(
     expect(container).toBeEmptyDOMElement();
   },
 );
+
+it("CT-NAV-05 응원 워드맵 전체보기에서도 하단탭을 유지한다", () => {
+  pathname = "/wordmap/42";
+  render(<ReceiverBottomNav />);
+  expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
+});

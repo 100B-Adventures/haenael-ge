@@ -14,6 +14,7 @@ export const Normal: Story = {
       friend_member_id: "friend-a",
       nickname: "서연",
       profile_image: null,
+      relationship_direction: "I_CHEERED",
       goals: [{
         goal_id: 1,
         slug: "run",
@@ -46,6 +47,7 @@ export const Normal: Story = {
       friend_member_id: "friend-b",
       nickname: "윤도경",
       profile_image: null,
+      relationship_direction: "CHEERED_ME",
       goals: [{
         goal_id: 4,
         slug: "grade",
@@ -60,6 +62,7 @@ export const Normal: Story = {
       friend_member_id: "friend-c",
       nickname: "정민서",
       profile_image: null,
+      relationship_direction: "MUTUAL",
       goals: [{
         goal_id: 5,
         slug: "fitness",

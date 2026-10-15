@@ -7,17 +7,20 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import type {
   FriendGoalDetail as FriendGoalDetailData,
+  RelationshipDirection,
   SocialGoal,
 } from "@/lib/social/contracts";
 import { removeFriendAction } from "@/app/(receiver)/social-actions";
 import { GoalCover } from "./GoalCover";
 import { Wordmap } from "@/components/goal/Wordmap";
+import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, detail, friendGoals }: {
+  { friendId, nickname, profileImage, relationshipDirection, detail, friendGoals }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
+    relationshipDirection: RelationshipDirection;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
   },
@@ -50,7 +53,8 @@ export function FriendGoalDetail(
       />
       <section className="friend-detail-hero">
         <h1>{displayName}의 해낼게</h1>
-        <p>응원한 친구에게만 근황과 응원 기록을 보여줘요.</p>
+        <FriendRelationshipBadge direction={relationshipDirection} />
+        <p>{displayName}의 목표와 응원 워드맵을 함께 봐요.</p>
       </section>
       <div className="friend-detail-portrait">
         {profileImage
@@ -67,20 +71,6 @@ export function FriendGoalDetail(
         </div>
         <div>
           <strong>{detail.cheer_count}명이 {displayName}을 조용히 응원하는 중이에요</strong>
-        </div>
-      </section>
-      <section className="friend-private-news">
-        <p>🔓 응원자에게만 보이는 근황</p>
-        <div className="friend-private-news-body">
-          <span className="friend-private-news-avatar" aria-hidden="true">
-            {profileImage
-              ? <Image src={profileImage} alt="" width={52} height={52} unoptimized />
-              : Array.from(displayName)[0]}
-          </span>
-          <span>
-            <strong>{detail.reason || "이 목표를 이어가는 중이에요."}</strong>
-            <small>{displayName} · 응원자에게만 공개</small>
-          </span>
         </div>
       </section>
       <Link href="/invite" className="friend-reinvite">

@@ -81,13 +81,15 @@ export function GoalCard({
   if (variant === "public") {
     return (
       <article className="public-goal-card" data-testid="goal-card">
+        <h1 data-testid="goal-title">
+          {trimmedTitle}{needsHaenaelSuffix && (
+            <> <span>해낼게</span></>
+          )}
+        </h1>
         <div className="public-goal-chips">
           {status === "ACTIVE" && <DdayChip dueDate={dueDate} tone="warm" />}
           <StatusChip status={status} tone="public" />
         </div>
-        <h1 data-testid="goal-title">
-          {trimmedTitle}{needsHaenaelSuffix ? " 해낼게" : ""}
-        </h1>
         {reason && (
           <div className="public-goal-why">
             <strong>WHY</strong>

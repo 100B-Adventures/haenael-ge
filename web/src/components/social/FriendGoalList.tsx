@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, UserPlus } from "lucide-react";
 import type { SocialFriend } from "@/lib/social/contracts";
+import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 
 export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
   if (friends.length === 0) {
@@ -46,7 +47,10 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                         : <span aria-hidden="true">{Array.from(nickname)[0]}</span>}
                     </span>
                     <span className="friend-list-copy">
-                      <span className="friend-list-name" title={nickname}>{nickname}</span>
+                      <span className="friend-list-name" title={nickname}>
+                        {nickname}
+                        <FriendRelationshipBadge direction={friend.relationship_direction} />
+                      </span>
                       <strong>{primaryGoal.title}</strong>
                       <span className={`friend-list-progress is-${progress}`} aria-hidden="true"><i /></span>
                       <span className="friend-list-news"><MessageCircle aria-hidden="true" /> 응원 {primaryGoal.cheer_count}개가 쌓였어요</span>
@@ -58,7 +62,10 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                   <div className="friend-list-main">
                     <span className="friend-list-avatar" aria-hidden="true">{Array.from(nickname)[0]}</span>
                     <span className="friend-list-copy">
-                      <span className="friend-list-name" title={nickname}>{nickname}</span>
+                      <span className="friend-list-name" title={nickname}>
+                        {nickname}
+                        <FriendRelationshipBadge direction={friend.relationship_direction} />
+                      </span>
                       <strong>지금 공개한 목표가 없어요.</strong>
                     </span>
                   </div>

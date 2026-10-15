@@ -30,6 +30,7 @@ it("CT-FRIEND-01 친구 목록은 대표 목표 한 행만 보여 주고 상세�
         friend_member_id: "friend-a",
         nickname: "서연",
         profile_image: null,
+        relationship_direction: "I_CHEERED",
         goals,
       }]}
     />,
@@ -41,7 +42,7 @@ it("CT-FRIEND-01 친구 목록은 대표 목표 한 행만 보여 주고 상세�
   expect(screen.queryByRole("link", { name: "매일 스무 쪽 읽을게" }))
     .not.toBeInTheDocument();
   expect(screen.queryByText("연결된 친구")).not.toBeInTheDocument();
-  expect(screen.queryByText("서로 응원")).not.toBeInTheDocument();
+  expect(screen.getByText("내가 응원함")).toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("번 함께");
   expect(screen.getByTestId("friends-sparse-next-step")).toHaveTextContent(
     "한 명 더 함께 응원해볼까요?",
@@ -57,6 +58,7 @@ it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전
     friend_member_id: `friend-${index}`,
     nickname: index === 0 ? "아주아주아주아주아주긴친구닉네임" : null,
     profile_image: null,
+    relationship_direction: index % 2 === 0 ? "MUTUAL" as const : "CHEERED_ME" as const,
     goals,
   }));
   render(<FriendGoalList friends={friends} />);

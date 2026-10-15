@@ -12,10 +12,20 @@ const tabs = [
 ] as const;
 
 export function shouldShowBottomNav(pathname: string) {
+  const usesReceiverShell = pathname === "/" ||
+    pathname.startsWith("/g/") ||
+    pathname === "/me" || pathname.startsWith("/me/") ||
+    pathname === "/my" || pathname.startsWith("/my/") ||
+    pathname === "/friends" || pathname.startsWith("/friends/") ||
+    pathname === "/invite" || pathname.startsWith("/invite/") ||
+    pathname === "/wordmap" || pathname.startsWith("/wordmap/") ||
+    pathname === "/cashout" || pathname.startsWith("/cashout/") ||
+    pathname === "/onboarding";
+
+  if (!usesReceiverShell) return false;
   return !(
     pathname === "/cashout" ||
     pathname.startsWith("/cashout/") ||
-    pathname.startsWith("/wordmap/") ||
     pathname.startsWith("/me/goal/") ||
     pathname.startsWith("/invite/") ||
     pathname === "/payment/success" ||
