@@ -38,12 +38,21 @@ const preferences = { notifyCheer: true, notifyMarketing: false };
 describe("MyPageOverview", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("MY-UI-01 프로토타입 순서대로 프로필, 활동, 응원 내역, 환경설정, 계정을 렌더한다", () => {
+  it("MY-UI-01 관리 화면은 내 해낼게, 활동, 응원, 설정, 계정 순서로 렌더한다", () => {
     render(
-      <MyPageOverview dashboard={dashboard} initialPreferences={preferences} />,
+      <MyPageOverview
+        dashboard={dashboard}
+        initialPreferences={preferences}
+        goalCheerCounts={{ 1: 35 }}
+        goalReasons={{ 1: "교환학생 지원 전에 점수를 만들고 싶어요." }}
+      />,
     );
     const text = screen.getByTestId("my-page-overview").textContent ?? "";
     expect(screen.getByTestId("my-profile-summary")).toHaveTextContent("서연");
+    expect(screen.getByText("내 해낼게")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /공유하기/ })).toHaveAttribute("href", "/g/run");
+    expect(screen.getByText("35명이 응원했어요")).toBeInTheDocument();
+    expect(screen.getByText(/교환학생 지원 전에/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /업적/ })).toHaveAttribute(
       "href",
       "/me/achievements",

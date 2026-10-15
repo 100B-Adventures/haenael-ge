@@ -16,7 +16,7 @@ export function ReceiverAppShell({
   currentPath?: string;
 }) {
   return (
-    <div className="min-h-svh bg-background pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px))]">
+    <div className="receiver-app-shell min-h-svh bg-background pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px))]">
       {children}
       {currentPath === undefined
         ? <ReceiverBottomNav locked={locked} />

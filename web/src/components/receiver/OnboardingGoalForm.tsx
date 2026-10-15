@@ -370,7 +370,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             htmlFor="goal-reason"
             className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
           >
-            왜요?{" "}
+            WHY{" "}
             <span className="text-[10px] font-normal normal-case [color:var(--faint)]!">
               (응원의 이유가 돼요 · 선택)
             </span>

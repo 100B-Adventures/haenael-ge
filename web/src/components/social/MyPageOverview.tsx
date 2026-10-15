@@ -10,9 +10,11 @@ import {
   Megaphone,
   ReceiptText,
   Trophy,
+  Share2,
 } from "lucide-react";
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import type { MySocialDashboard } from "@/lib/social/contracts";
 
 type Preferences = {
@@ -24,6 +26,8 @@ export function MyPageOverview({
   dashboard,
   receivedCheers = [],
   initialPreferences,
+  goalCheerCounts = {},
+  goalReasons = {},
 }: {
   dashboard: MySocialDashboard;
   receivedCheers?: Array<{
@@ -33,6 +37,8 @@ export function MyPageOverview({
     createdAt: string;
   }>;
   initialPreferences: Preferences;
+  goalCheerCounts?: Record<number, number>;
+  goalReasons?: Record<number, string | null>;
 }) {
   const [cheerTab, setCheerTab] = useState<"received" | "sent">("received");
   const [preferences, setPreferences] = useState(initialPreferences);
@@ -83,8 +89,25 @@ export function MyPageOverview({
           <h2>{nickname}</h2>
           <p>한 걸음씩, 끝까지 함께해요</p>
           <small>
-            서로 응원하는 친구 {dashboard.friend_count}명 · 진행 중 목표 {activeGoalCount}개
+            친구 {dashboard.friend_count}명 · 진행 중 목표 {activeGoalCount}개
           </small>
+        </div>
+      </section>
+
+      <section aria-labelledby="my-goals-heading">
+        <h2 className="my-section-title" id="my-goals-heading">내 해낼게</h2>
+        <div className="my-goal-grid">
+          {dashboard.goals.length > 0 ? dashboard.goals.map((goal) => (
+            <article className="my-goal-card" key={goal.goal_id}>
+              <div className={`my-goal-cover is-${goal.cover_preset_key}`} aria-hidden="true" />
+              <div className="my-goal-card-body">
+                <div className="my-goal-chips"><DdayChip dueDate={goal.due_date} /><StatusChip status={goal.status} /></div>
+                <h3 title={goal.title}>{goal.title}</h3>
+                <p><strong>WHY</strong> {goalReasons[goal.goal_id]?.trim() || "이 목표를 시작한 이유를 아직 적지 않았어요."}</p>
+                <div className="my-goal-meta"><span>{goalCheerCounts[goal.goal_id] ?? 0}명이 응원했어요</span><Link href={`/g/${goal.slug}`}><Share2 aria-hidden="true" /> 공유하기</Link></div>
+              </div>
+            </article>
+          )) : <p className="social-muted">진행 중인 해낼게가 없어요.</p>}
         </div>
       </section>
 
@@ -155,7 +178,7 @@ export function MyPageOverview({
             : (
               <div className="my-cheer-empty">
                 <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
-                <div><strong>내가 응원한 친구</strong><p>연결된 친구의 목표와 응원 메시지를 확인할 수 있어요.</p><Link href="/friends">친구 목표 보기</Link></div>
+                <div><strong>내가 응원한 친구</strong><p>친구의 목표와 응원 메시지를 확인할 수 있어요.</p><Link href="/friends">친구 목표 보기</Link></div>
               </div>
             )}
         </div>

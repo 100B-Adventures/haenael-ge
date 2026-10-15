@@ -131,7 +131,7 @@ export function GoalEditSheet({
       >
         <div className="flex items-center justify-between gap-3">
           <p className="text-[11px] font-bold [color:var(--muted-foreground)]!">
-            왜요?
+            WHY
           </p>
           {editable && (
             <button
@@ -265,7 +265,7 @@ export function GoalEditSheet({
                   htmlFor="edit-goal-reason"
                   className="text-[11px] font-bold tracking-wider [color:var(--muted-foreground)]!"
                 >
-                  왜요?{" "}
+                  WHY{" "}
                   <span className="text-[10px] font-normal [color:var(--faint)]!">
                     (응원의 이유가 돼요 · 선택)
                   </span>

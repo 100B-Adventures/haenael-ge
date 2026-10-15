@@ -9,7 +9,7 @@ const options = [
     label: "전체 공개",
     help: "공유 링크를 가진 누구나 볼 수 있어요.",
   },
-  { value: "FRIENDS", label: "친구 공개", help: "연결된 친구만 볼 수 있어요." },
+  { value: "FRIENDS", label: "친구 공개", help: "친구만 볼 수 있어요." },
   {
     value: "PRIVATE",
     label: "비공개",

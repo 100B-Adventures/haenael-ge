@@ -24,10 +24,23 @@ export const metadata: Metadata = {
 };
 
 function WordmapPreview() {
+  const messages = [
+    ["너라면 할 수 있어", "strong"],
+    ["오늘도 한 걸음 ♥", "medium"],
+    ["끝까지 가보자", "soft"],
+    ["진짜 멋지다", "medium"],
+    ["꼭 해낼 거야", "strong"],
+    ["내가 옆에 있을게", "soft"],
+  ] as const;
   return (
-    <div className="landing-wordmap-preview" aria-hidden="true">
-      <span aria-hidden="true">🍀</span>
-      <strong>워드맵 프리뷰</strong>
+    <div className="landing-wordmap-preview" aria-label="응원 메시지 예시">
+      <span className="landing-preview-heart landing-preview-heart--left" aria-hidden="true">♥</span>
+      <span className="landing-preview-heart landing-preview-heart--right" aria-hidden="true">♥</span>
+      {messages.map(([message, tone]) => (
+        <span key={message} className={`landing-preview-message is-${tone}`}>
+          {message}
+        </span>
+      ))}
     </div>
   );
 }

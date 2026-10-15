@@ -8,8 +8,21 @@ const tabs = [
   { href: "/me", label: "홈", Icon: Home },
   { href: "/friends", label: "친구", Icon: Users },
   { href: "/invite", label: "초대", Icon: UserPlus },
-  { href: "/my", label: "마이", Icon: UserRound },
+  { href: "/my", label: "관리", Icon: UserRound },
 ] as const;
+
+export function shouldShowBottomNav(pathname: string) {
+  return !(
+    pathname === "/cashout" ||
+    pathname.startsWith("/cashout/") ||
+    pathname.startsWith("/wordmap/") ||
+    pathname.startsWith("/me/goal/") ||
+    pathname.startsWith("/invite/") ||
+    pathname === "/payment/success" ||
+    pathname === "/payment/fail" ||
+    pathname === "/onboarding"
+  );
+}
 
 export function ReceiverBottomNav({ locked = false }: { locked?: boolean }) {
   const pathname = usePathname();
@@ -23,6 +36,8 @@ export function ReceiverBottomNavView({
   locked?: boolean;
   pathname: string;
 }) {
+  if (!shouldShowBottomNav(pathname)) return null;
+
   return (
     <nav
       className="receiver-tabbar"

@@ -11,6 +11,7 @@ import type {
 } from "@/lib/social/contracts";
 import { removeFriendAction } from "@/app/(receiver)/social-actions";
 import { GoalCover } from "./GoalCover";
+import { Wordmap } from "@/components/goal/Wordmap";
 
 export function FriendGoalDetail(
   { friendId, nickname, profileImage, detail, friendGoals }: {
@@ -48,8 +49,8 @@ export function FriendGoalDetail(
         caption={`${displayName}의 ${detail.title}`}
       />
       <section className="friend-detail-hero">
-        <h1>{displayName}을 응원하는 사람으로서<br />열리는 것들</h1>
-        <p>오래 함께한 응원자에게만 조용히 열리는 자리예요. 다시 왔을 때 여기에서 만나요.</p>
+        <h1>{displayName}의 해낼게</h1>
+        <p>응원한 친구에게만 근황과 응원 기록을 보여줘요.</p>
       </section>
       <div className="friend-detail-portrait">
         {profileImage
@@ -92,15 +93,13 @@ export function FriendGoalDetail(
           <h2>응원 워드맵</h2>
           <span>{detail.wordmap.length}개 단어</span>
         </summary>
-        {detail.wordmap.length
-          ? (
-            <div className="social-wordmap">
-              {detail.wordmap.map((item) => (
-                <span key={item.word}>{item.word}</span>
-              ))}
-            </div>
-          )
-          : <p className="social-muted">첫 응원을 기다리고 있어요.</p>}
+        <Wordmap
+          words={detail.wordmap.map((item) => ({
+            word: item.word,
+            word_count: item.weight,
+          }))}
+          ownerName={displayName}
+        />
       </details>
       {otherGoals.length > 0 && (
         <section className="friend-other-goals">

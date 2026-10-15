@@ -1,0 +1,130 @@
+[
+  {
+    "label": "landing",
+    "path": "/",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1106,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0
+    },
+    "file": "landing-390-full.png"
+  },
+  {
+    "label": "public-goal",
+    "path": "/g/v1-v2-owner-1792070229257",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1252,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 23
+    },
+    "file": "public-goal-390-full.png"
+  },
+  {
+    "label": "manage",
+    "path": "/my",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 2247,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0
+    },
+    "file": "manage-390-full.png"
+  },
+  {
+    "label": "friends",
+    "path": "/friends",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1106,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0
+    },
+    "file": "friends-390-full.png"
+  },
+  {
+    "label": "friend-detail",
+    "path": "/friends/da90065e-a003-4761-bdf4-96c70c10a5ea?goal=690",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1316,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 15
+    },
+    "file": "friend-detail-390-full.png"
+  },
+  {
+    "label": "achievements",
+    "path": "/me/achievements",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1106,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0
+    },
+    "file": "achievements-390-full.png"
+  },
+  {
+    "label": "wordmap",
+    "path": "/wordmap/688",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1170,
+      "overflowX": false,
+      "bottomNav": false,
+      "wordmapItems": 23
+    },
+    "file": "wordmap-390-full.png"
+  },
+  {
+    "label": "cashout",
+    "path": "/cashout",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1275,
+      "overflowX": false,
+      "bottomNav": false,
+      "wordmapItems": 0
+    },
+    "file": "cashout-390-full.png"
+  }
+]

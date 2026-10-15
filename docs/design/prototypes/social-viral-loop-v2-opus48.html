@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <!--
+  2026-10-15 회장 화면별 지시 반영 1차(D-025).
+  - 랜딩·공개 목표: 실제 응원 메시지형 워드맵, 하트, 빈도 가중 부유 모션. 공개 목표는 배너, D-29·진행 중 칩, 목표·WHY 순서로 정리했다.
+  - 해낼게 관리: 마이페이지 명칭을 폐기하고 커버·상태·WHY·응원 인원·공유 CTA를 추가했다.
+  - 환전: 하단탭을 숨기고 해낼게 관리로 돌아가는 다음 행동을 둔다.
+  - 친구: `서로 응원`·`연결된 친구` 중복을 제거하고 0명·다수·긴 이름 상태를 유지했다.
+  - UX writing: `열리는 것들`·`열리는 자리`를 구체적 화면 설명으로 교체하고 이유 라벨을 `WHY`로 통일했다.
+  - 워드맵: 12개 상한을 폐기하고 모든 메시지를 표시한다. D-022의 완료 목표·받은 응원·친구 3지표는 유지한다.
+  변경 사유: `docs/design/chairman-directives-v2-20261015.md`가 기존 승인 시안보다 우선하는 회장 최신 결정이다.
   2026-10-15 V2 승인 시안 정합화 3차.
   - D-023: 모바일 접근성 하한을 시안보다 우선해 13px 미만의 사용자 노출 글자를 13px로 올렸다.
   - D-022: DB 원장에서 반증할 수 없는 연속 기록, N번 함께, 활동 타임라인을 제거하고 완료 목표·확정 응원·연결 친구 집계만 남겼다.
@@ -389,9 +397,9 @@
   .wordmap{position:relative;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px 12px;min-height:200px;padding:20px 16px;border-radius:var(--r-lg);margin-top:16px;overflow:hidden;
     background-image:radial-gradient(90% 90% at 50% 45%,var(--clover-soft),#EEF6F0 72%,transparent);}
   .wm-word{letter-spacing:-.3px;line-height:1.35;transition:font-size .3s,color .3s;position:relative;z-index:1;will-change:transform;}
-  .wm-word.s1{color:#8bb79f;font-weight:600;font-size:14px;}
-  .wm-word.s2{color:#57a178;font-weight:700;font-size:18px;}
-  .wm-word.s3{color:#1a8150;font-weight:800;font-size:24px;}
+  .wm-word.s1{color:#8bb79f;font-weight:600;font-size:16px;}
+  .wm-word.s2{color:#57a178;font-weight:700;font-size:20px;}
+  .wm-word.s3{color:#1a8150;font-weight:800;font-size:26px;}
   /* ══ v6 워드맵 동적 모션 (회장 요청 "둥둥 떠다니거나 입력할 때 신기한 동적 모션") ══
      ①앰비언트 루프: 단어가 은은히 상하 부유(서로 다른 위상·속도, infinite). ②입력 마이크로 인터랙션:
      새 응원 단어가 pop + 클로버 번짐(bloom), 이웃 단어 살짝 반응(nudge). 폭죽 아님, D-003 "조용히". */
@@ -1004,8 +1012,8 @@
       <button class="nav" data-s="belong">4 · 소속감 큐</button>
       <button class="nav" data-s="dopamine">⚡ 도파민 순간</button>
       <span class="sep"></span>
-      <span class="lbl">마이</span>
-      <button class="nav" data-s="mypage">마이페이지</button>
+      <span class="lbl">관리</span>
+      <button class="nav" data-s="mypage">해낼게 관리</button>
       <button class="nav" data-s="cashhistory">환전내역</button>
       <span class="sep"></span>
       <span class="lbl">계승</span>
@@ -1127,7 +1135,7 @@
         <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="home"></div>
@@ -1354,7 +1362,7 @@
         <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="goaldetail"></div>
@@ -1396,7 +1404,7 @@
         <a onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="mywordmap"></div>
@@ -1448,7 +1456,7 @@
         <a onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="connect"></div>
@@ -1477,7 +1485,7 @@
         <a onclick="go('landing')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>친구</a>
         <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>마이</a>
+        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="inviteaccept"></div>
@@ -1495,20 +1503,17 @@
 
         <!-- 정상 상태 -->
         <div data-view="normal">
-          <div class="sub">서로 응원하는 친구 <span class="cnt">3명</span></div>
+          <div class="sub">친구 <span class="cnt">3명</span></div>
           <div class="card">
             <a class="fr" onclick="go('belong');return false;">
               <div class="av"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
               <div class="mid">
-                <div class="nm">윤도경 <span class="badge-you">서로 응원</span></div>
+                <div class="nm">윤도경</div>
                 <div class="goal">이번 학기 평점 4.0 해낼게</div>
                 <div class="prog"><i style="width:68%"></i></div>
                 <div class="news"><i>💬</i><span>3주째 도서관 개근 중이래요</span></div>
               </div>
-              <div class="rel">
-                <span class="relbadge">연결된 친구</span>
-                <span class="relmeta">서로 응원</span>
-              </div>
+              <div class="rel"><span class="mp-go">›</span></div>
             </a>
             <a class="fr" onclick="go('belong');return false;">
               <div class="av"><img src="assets/social-viral/seoyeon.png" alt="서연"></div>
@@ -1518,10 +1523,7 @@
                 <div class="prog"><i style="width:41%"></i></div>
                 <div class="news"><i>💬</i><span>모의고사 820 나왔어, 조금만 더</span></div>
               </div>
-              <div class="rel">
-                <span class="relbadge">연결된 친구</span>
-                <span class="relmeta">서로 응원</span>
-              </div>
+              <div class="rel"><span class="mp-go">›</span></div>
             </a>
             <a class="fr" onclick="go('belong');return false;">
               <div class="av"><img src="assets/social-viral/jimin.png" alt="정민서"></div>
@@ -1531,13 +1533,10 @@
                 <div class="prog quiet"><i style="width:22%"></i></div>
                 <div class="news"><i>💬</i><span>이번 주는 조금 쉬어가는 중</span></div>
               </div>
-              <div class="rel">
-                <span class="relbadge warm">연결된 친구</span>
-                <span class="relmeta">서로 응원</span>
-              </div>
+              <div class="rel"><span class="mp-go">›</span></div>
             </a>
           </div>
-          <div class="quietnote">명시적으로 연결된 친구만 보여요 · 금액도 순위도 없어요</div>
+          <div class="quietnote">금액도 순위도 없이 친구의 목표와 응원 소식만 보여요</div>
         </div>
 
         <!-- 콜드스타트 (0명) -->
@@ -1545,11 +1544,11 @@
           <div class="cold">
             <div class="clover">🍀</div>
             <h2>아직 친구가 없어요</h2>
-            <p>가짜 친구로 채우지 않습니다. 진짜 아는 사람을 초대하면 여기 서로의 목표가 나란히 쌓여요.</p>
+            <p>아는 사람을 초대하거나 서로 응원하면 친구가 돼요. 친구의 목표는 여기에 쌓여요.</p>
             <div class="steps">
               <div class="cstep"><div class="n">1</div><div class="t"><b>친구를 초대해요</b><span>카카오·링크로 내가 아는 사람에게만</span></div></div>
               <div class="cstep"><div class="n">2</div><div class="t"><b>친구가 목표를 써요</b><span>"나 ○○ 해낼게" 한 줄이면 시작</span></div></div>
-              <div class="cstep"><div class="n">3</div><div class="t"><b>서로 조용히 응원해요</b><span>명시적으로 연결된 친구의 목표를 봐요</span></div></div>
+              <div class="cstep"><div class="n">3</div><div class="t"><b>응원이 도착해요</b><span>응원을 주고받으면 친구 목록에 바로 보여요</span></div></div>
             </div>
             <button class="btn pri" onclick="go('connect')">친구 초대하기</button>
           </div>
@@ -1557,7 +1556,7 @@
 
         <!-- 과다 (오버플로) -->
         <div data-view="over" style="display:none">
-          <div class="sub">서로 응원하는 친구 <span class="cnt">14명</span></div>
+          <div class="sub">친구 <span class="cnt">14명</span></div>
           <div class="card" id="overList"></div>
         </div>
       </div></div>
@@ -1565,7 +1564,7 @@
         <a onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="friends"></div>
@@ -1615,7 +1614,7 @@
         <a onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a class="on" onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a class="on" onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="status"></div>
@@ -1635,7 +1634,7 @@
       </div>
       <div class="app"><div class="pad">
         <div class="head">
-          <div class="ttl">마이페이지</div>
+          <div class="ttl">해낼게 관리</div>
           <div class="acts">
             <div class="brand">해낼<span class="d">게</span></div>
             <button class="topbell" aria-label="알림 1개 새 알림" onclick="toggleNotif(this)">🔔<span class="unread">1</span></button>
@@ -1652,7 +1651,7 @@
           <div class="mp-pf">
             <div class="mp-nm" data-edit="name" data-val="서연" onclick="editInline(this,'text')">서연<span class="edot">✎</span></div>
             <div class="mp-intro" data-edit="intro" data-val="한 걸음씩, 끝까지 함께해요" onclick="editInline(this,'textarea')">한 걸음씩, 끝까지 함께해요<span class="edot">✎</span></div>
-            <div class="mp-sub">서로 응원하는 친구 3명 · 진행 중 목표 2개</div>
+            <div class="mp-sub">친구 3명 · 진행 중 목표 2개</div>
           </div>
         </div>
         <div class="cover-pick mp-ava-pick" id="mpAvaPick" style="display:none">
@@ -1664,6 +1663,15 @@
             <label class="cp-up"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>내 사진<input type="file" accept="image/*" hidden onchange="uploadAva(this)"></label>
           </div>
           <div class="cp-hint">프로필 사진을 고르거나, 내 사진으로 바꿀 수 있어요</div>
+        </div>
+
+        <div class="mp-sect">내 해낼게</div>
+        <div class="cover pub-cover c1"><span class="cov-cap">서연이의 해낼게</span><span class="cov-wm">🍀</span></div>
+        <div class="goalcard" style="margin-top:0">
+          <div class="gtop"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
+          <h3>토익 900 넘길게</h3>
+          <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
+          <div class="gfoot"><span class="gcheer">19명이 응원했어요</span><button class="gview" onclick="linkCopied(this)">공유하기</button></div>
         </div>
 
         <!-- 업적 요약 → 업적 상세(status) -->
@@ -1743,7 +1751,7 @@
         <a onclick="go('home')"><span class="ic"></span>홈</a>
         <a onclick="go('friends')"><span class="ic"></span>친구</a>
         <a onclick="go('connect')"><span class="ic"></span>초대</a>
-        <a class="on"><span class="ic"></span>마이</a>
+        <a class="on"><span class="ic"></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="mypage"></div>
@@ -1797,7 +1805,7 @@
         <a onclick="go('home')"><span class="ic"></span>홈</a>
         <a onclick="go('friends')"><span class="ic"></span>친구</a>
         <a onclick="go('connect')"><span class="ic"></span>초대</a>
-        <a class="on" onclick="go('mypage')"><span class="ic"></span>마이</a>
+        <a class="on" onclick="go('mypage')"><span class="ic"></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="cashhistory"></div>
@@ -1816,8 +1824,8 @@
 
         <div class="cover belong-cover c3"><span class="cov-cap">도경이의 평점 4.0 해낼게</span><span class="cov-wm">🍀</span></div>
         <div class="belong-hero">
-          <h2>도경이를 응원하는 사람으로서<br>열리는 것들</h2>
-          <p>오래 함께한 응원자에게만 조용히 열리는 자리예요. 시끄러운 알림 대신, 다시 왔을 때 여기 있습니다.</p>
+          <h2>도경의 해낼게</h2>
+          <p>응원한 친구에게만 근황과 응원 기록을 보여줘요.</p>
         </div>
 
         <div class="hero-portrait"><img src="assets/social-viral/dogyeong.png" alt="윤도경"><span class="hp-name">윤도경 · 평점 4.0 해낼게</span></div>
@@ -1859,7 +1867,7 @@
         <a onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a class="on" onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="belong"></div>
@@ -1898,7 +1906,7 @@
         <a onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
         <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
-        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
+        <a onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="dopamine"></div>
@@ -1916,8 +1924,13 @@
           <div class="tag">응원은 돈으로 하는 겁니다.</div>
           <div class="gap">그게 무슨 말이냐면 ↓</div>
         </div>
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:140px;background:radial-gradient(80% 70% at 50% 40%,#E7F4EC,#F4EFE6 78%);border-radius:var(--r-md);margin-bottom:18px;">
-          <div style="text-align:center;color:var(--clover-ink)"><div class="land-clover" style="font-size:34px">🍀</div><div style="font-size:13px;font-weight:700;margin-top:6px">워드맵 프리뷰</div></div>
+        <div class="wordmap" style="flex:1;min-height:140px;margin:0 0 18px">
+          <span class="wm-word s3 landing">꼭 해낼 거야</span>
+          <span class="wm-word s2 landing">너라면 할 수 있어</span>
+          <span class="wm-word s1 landing">오늘도 한 걸음 ♥</span>
+          <span class="wm-word s2 landing">진짜 멋지다</span>
+          <span class="wm-word s3 landing">끝까지 가보자</span>
+          <span class="wm-word s1 landing">내가 옆에 있을게</span>
         </div>
         <div class="step3"><span>선언</span><span style="opacity:.45">›</span><span>친구가 <b>🍀로 응원</b></span><span style="opacity:.45">›</span><span><b>응원이 쌓여요</b></span></div>
         <button class="cbtn pri" onclick="go('onboarding')">시작하기</button>
@@ -1928,7 +1941,7 @@
         <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>친구</a>
         <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>초대</a>
-        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>마이</a>
+        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="landing"></div>
@@ -1943,9 +1956,9 @@
         <div class="relogin" style="margin:0 0 12px;font-size:13px">내 목표가 있으신가요? <a onclick="go('login')">카카오로 로그인</a></div>
         <div class="cover pub-cover c1"><span class="cov-cap">서연이의 해낼게</span><span class="cov-wm">🍀</span></div>
         <div class="goalcard" style="margin-top:0">
-          <div class="gtop"><span class="chip dday">D-12</span><span class="chip status">진행 중</span></div>
+          <div class="gtop"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
           <h3>토익 900 넘길게</h3>
-          <div class="greason">교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
+          <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
         </div>
         <div class="wm-count" style="margin-top:14px"><span>지금까지</span> <span class="n" data-count="19">19</span> <span>명이 응원했어요</span></div>
         <div class="wordmap" id="wordmap2" style="margin-top:10px">
@@ -1972,7 +1985,7 @@
         <a onclick="go('landing')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
         <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>친구</a>
         <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>초대</a>
-        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>마이</a>
+        <a class="locked" onclick="go('onboarding')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><span class="lockdot"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>관리</a>
       </div>
     </div>
     <div class="review" data-review="goalpublic"></div>
@@ -2092,6 +2105,7 @@
         <div class="field"><label>예금주</label><div class="inp">조서연</div></div>
         <button class="cbtn pri" style="margin-top:20px" onclick="submitCashout(this)">환전 신청하기</button>
         <p style="font-size:13px;color:var(--faint);text-align:center;margin-top:10px;line-height:1.6">웰컴·부스트 클로버는 환전되지 않아요.<br>친구 응원으로 모인 클로버만 환전됩니다.</p>
+        <button class="cbtn ghost" onclick="go('mypage')">해낼게 관리로 돌아가기</button>
       </div></div>
     </div>
     <div class="review" data-review="cashout"></div>
@@ -2324,7 +2338,7 @@
     mywordmap: {
       psych:'자기효능감+소속감(내 사람 버전). owner 가 "내가 받은 응원"을 담백하게 되돌아보는 화면. 응원을 요구하지 않고(응원 CTA 없음) 쌓인 단어만 보여줘, 선언자가 외롭지 않다는 정서적 보상을 조용히 준다. 절제된 착지 모션만(폭죽 없음, 브랜드 "조용히").',
       bench:'토스 "받은 마음" 모아보기 · 당근 "받은 매너 칭찬" 집계 · 브런치 구독자 단어 클라우드. 셋 다 "받은 것을 되돌아보는 읽기 전용 면", 이 톤 차용, 랭킹·금액은 버림.',
-      inherit:'계승(실배포): (receiver)/wordmap/[goalId]/page.tsx:72-112 get_wordmap RPC → Wordmap.tsx normalizeWords·getSizeTier(동일 단어 합산→빈도 ratio→s1/s2/s3 크기, 상위 12개). owner 읽기 맥락이라 응원 오버레이(CheerPaymentButton)·비회원 로그인 유도 없이 워드맵만 렌더.',
+      inherit:'계승(실배포): (receiver)/wordmap/[goalId]/page.tsx:72-112 get_wordmap RPC → Wordmap.tsx normalizeWords·getSizeTier(동일 단어 합산→빈도 ratio→s1/s2/s3 크기, 전체 표시). owner 읽기 맥락이라 응원 오버레이(CheerPaymentButton)·비회원 로그인 유도 없이 워드맵만 렌더.',
       prd:'실배포 wordmap 라우트의 owner 읽기 상태. dopamine(응원 적립 연출)·goalpublic(비회원 도착) 과 같은 라우트의 다른 진입 맥락. v4 신규 분리 화면.',
       chg:[
         {w:'<b>v6.2 전용 전체화면 읽기뷰로 격하(진입 뎁스 제거)</b>. 워드맵이 목표 관리(goaldetail)에 인라인으로 올라오면서, 이 독립 화면은 더 이상 필수 경로가 아니다. 워드맵의 1차 표출면은 관리 화면이고, 이 화면은 "전체화면으로 크게 보기"용 보조면으로만 남는다(검수용으로 유지).', fb:'회장 2026-10-05: "워드맵을 한 뎁스 아래로 숨기지 마라" → 인라인이 주, 이 화면은 보조'},
@@ -2422,7 +2436,7 @@
     dopamine: {
       psych: '즉각 보상(variable reward의 조용한 변형)+진행 가시화. 응원 순간 내 단어가 워드맵에 얹히는 걸 "직접 보게" 해 activation 도파민을 준다. 비회원 피드백은 손실회피("이 기록이 남아요")로 승격을 당김.',
       bench: 'Strava 기록 실시간 반영 · 인스타 좋아요 애니메이션 · 카훗 실시간 집계. "즉각 시각 피드백"을 차용하되 폭죽·순위상승 알림(D-003 위배)은 배제.',
-      inherit: '계승(실배포 로직): web/src/components/goal/Wordmap.tsx · normalizeWords(같은 단어 word_count 합산·내림차순 정렬)·getSizeTier(ratio (count-min)/(max-min) ≥.67 s3 / ≥.34 s2 / else s1)·TIER_STYLE(s1 #8bb79f 14px / s2 #57a178 18px / s3 #1a8150 24px)·flex-wrap 클라우드(겹침 0 by construction)·상위 12개·clover 옅은 radial 배경. 프로토타입도 이 빈도 집계 그대로 재현 · 자주 나온 단어는 크게. 신규: 클릭 시 그 단어 word_count +1 → tier 재계산해 실시간 성장(landing 애니).',
+      inherit: '계승(실배포 로직): web/src/components/goal/Wordmap.tsx · normalizeWords(같은 단어 word_count 합산·내림차순 정렬)·getSizeTier(ratio (count-min)/(max-min) ≥.67 s3 / ≥.34 s2 / else s1)·flex-wrap 클라우드(겹침 0 by construction)·전체 메시지 표시·clover 옅은 radial 배경. 프로토타입도 이 빈도 집계 그대로 재현 · 자주 나온 단어는 크게. 신규: 클릭 시 그 단어 word_count +1 → tier 재계산해 실시간 성장(landing 애니).',
       prd: 'idea-ledger 2026-09-21(도파민 UX·비회원 activation) · user-flow 2절(비로그인 열람·승격 CTA). blueprint 3.2 접합. PRD 5.2 승격 CTA 인접.',
       chg: [
         {w:'목표 주인공(서연)의 <b>실사 히어로 사진</b> 삽입 · 비회원이 "누구를 응원하는지" 얼굴로 인지.', fb:'회장: "힉스필드는 안씀?"'},
@@ -2753,10 +2767,7 @@
           <div class="prog"><i style="width:${30+i*6}%"></i></div>
           <div class="news"><i>💬</i><span>공개된 목표를 확인할 수 있어요</span></div>
         </div>
-        <div class="rel">
-          <span class="relbadge">연결된 친구</span>
-          <span class="relmeta">서로 응원</span>
-        </div>
+        <div class="rel"><span class="mp-go">›</span></div>
       </a>`;
     }
     box.innerHTML=html;
@@ -2929,7 +2940,7 @@
   }
 
   // ── 워드맵 = 실배포 Wordmap.tsx(normalizeWords·getSizeTier) 계승 ──
-  // 같은 단어 word_count 합산 → 내림차순 정렬 → 빈도 ratio 로 s1/s2/s3 크기·색 → 상위 12개 flex-wrap 렌더(겹침 0)
+  // 같은 단어 word_count 합산 → 내림차순 정렬 → 빈도 ratio 로 s1/s2/s3 크기·색 → 전체 flex-wrap 렌더(겹침 0)
   const dopaWords=['잘한다','응원해','화이팅','넌된다','조금만더','대단해','자랑스러워','끝까지','믿어','고생했어'];
   let dopaIdx=0, wmTotal=23, lastWord='';
   // 실배포 get_wordmap RPC 결과 모사: {단어: word_count}
@@ -2963,7 +2974,7 @@
     const entries=Object.entries(wmCounts).sort((a,b)=>b[1]-a[1]);
     const counts=entries.map(e=>e[1]);
     const min=Math.min(...counts), max=Math.max(...counts), n=entries.length;
-    const visible=entries.slice(0,12); // 실배포도 상위 12개만 표시
+    const visible=entries;
     wm.innerHTML='<div class="wm-goalword">🍀 토익 900 넘길게</div>'+
       visible.map(([word,c])=>{
         const tier=wmTier(c,min,max,n);

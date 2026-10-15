@@ -88,7 +88,12 @@ export function GoalCard({
         <h1 data-testid="goal-title">
           {trimmedTitle}{needsHaenaelSuffix ? " 해낼게" : ""}
         </h1>
-        {reason && <p data-testid="goal-reason">{reason}</p>}
+        {reason && (
+          <div className="public-goal-why">
+            <strong>WHY</strong>
+            <p data-testid="goal-reason">{reason}</p>
+          </div>
+        )}
       </article>
     );
   }

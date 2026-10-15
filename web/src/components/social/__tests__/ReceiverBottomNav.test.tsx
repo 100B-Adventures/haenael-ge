@@ -9,7 +9,7 @@ beforeEach(() => {
   pathname = "/friends";
 });
 
-it("CT-NAV-01 홈 친구 초대 마이 4탭과 친구 활성 상태를 렌더한다", () => {
+it("CT-NAV-01 홈 친구 초대 관리 4탭과 친구 활성 상태를 렌더한다", () => {
   render(<ReceiverBottomNav />);
   expect(screen.getAllByRole("link")).toHaveLength(4);
   expect(screen.getByRole("link", { name: /친구/ })).toHaveAttribute(
@@ -18,10 +18,10 @@ it("CT-NAV-01 홈 친구 초대 마이 4탭과 친구 활성 상태를 렌더한
   );
 });
 
-it("CT-NAV-03 마이 탭은 /my로 분리되고 실제 경로에서 활성화된다", () => {
+it("CT-NAV-03 관리 탭은 /my로 분리되고 실제 경로에서 활성화된다", () => {
   pathname = "/my";
   render(<ReceiverBottomNav />);
-  const myLink = screen.getByRole("link", { name: /마이/ });
+  const myLink = screen.getByRole("link", { name: /관리/ });
   expect(myLink).toHaveAttribute("href", "/my");
   expect(myLink).toHaveAttribute("aria-current", "page");
 });
@@ -42,8 +42,17 @@ it("CT-NAV-02 비회원 잠금 상태는 홈 외 3탭에 잠금 뱃지를 붙인
     "href",
     "/onboarding",
   );
-  expect(screen.getByRole("link", { name: /마이/ })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: /관리/ })).toHaveAttribute(
     "href",
     "/onboarding",
   );
 });
+
+it.each(["/cashout", "/cashout/status", "/cashout/history"])(
+  "CT-NAV-04 단일 거래 화면 %s에서는 하단탭을 숨긴다",
+  (path) => {
+    pathname = path;
+    const { container } = render(<ReceiverBottomNav />);
+    expect(container).toBeEmptyDOMElement();
+  },
+);

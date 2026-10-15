@@ -192,7 +192,7 @@ export function CashoutPageView({
         </aside>
       </div>
 
-      {isFormScreen && <BackHomeLink />}
+      {isFormScreen && <BackHomeLink label="해낼게 관리로 돌아가기" href="/my" />}
     </ReceiverPageShell>
   );
 }

@@ -33,7 +33,7 @@ it("CT-FRIEND-03 친구 상세는 소속감 정보와 다른 목표 동선을 �
     />,
   );
 
-  expect(screen.getByText("서연을 응원하는 사람으로서", { exact: false })).toBeInTheDocument();
+  expect(screen.getByText("서연의 해낼게")).toBeInTheDocument();
   expect(screen.getByText("13명이 서연을 조용히 응원하는 중이에요")).toBeInTheDocument();
   expect(screen.queryByText("함께한 자취 타임라인")).not.toBeInTheDocument();
   expect(screen.getByText("꾸준히")).toBeInTheDocument();
