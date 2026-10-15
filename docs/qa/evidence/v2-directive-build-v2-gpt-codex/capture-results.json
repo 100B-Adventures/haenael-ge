@@ -1,0 +1,170 @@
+[
+  {
+    "label": "landing",
+    "path": "/",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1106,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 0,
+      "sparseFriendNextAction": false,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "landing-390-full.png"
+  },
+  {
+    "label": "public-goal",
+    "path": "/g/v1-v2-owner-1792072193882",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1205,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 13,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 0,
+      "sparseFriendNextAction": false,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "public-goal-390-full.png"
+  },
+  {
+    "label": "manage",
+    "path": "/my",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 2247,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 0,
+      "sparseFriendNextAction": false,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "manage-390-full.png"
+  },
+  {
+    "label": "friends",
+    "path": "/friends",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1106,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 1,
+      "sparseFriendNextAction": true,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "friends-390-full.png"
+  },
+  {
+    "label": "friend-detail",
+    "path": "/friends/7c61f5db-6dd9-44a3-9c72-ba9251b7c89f?goal=727",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1316,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 6,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 0,
+      "sparseFriendNextAction": false,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "friend-detail-390-full.png"
+  },
+  {
+    "label": "achievements",
+    "path": "/me/achievements",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1106,
+      "overflowX": false,
+      "bottomNav": true,
+      "wordmapItems": 0,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 0,
+      "sparseFriendNextAction": false,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "achievements-390-full.png"
+  },
+  {
+    "label": "wordmap",
+    "path": "/wordmap/725",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1170,
+      "overflowX": false,
+      "bottomNav": false,
+      "wordmapItems": 13,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 0,
+      "sparseFriendNextAction": false,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "wordmap-390-full.png"
+  },
+  {
+    "label": "cashout",
+    "path": "/cashout",
+    "status": 200,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "metrics": {
+      "width": 390,
+      "viewportHeight": 844,
+      "pageHeight": 1275,
+      "overflowX": false,
+      "bottomNav": false,
+      "wordmapItems": 0,
+      "forbiddenWordmapFragments": [],
+      "friendCards": 0,
+      "sparseFriendNextAction": false,
+      "emptyGoalNextAction": false,
+      "emptyCheerNextAction": false
+    },
+    "file": "cashout-390-full.png"
+  }
+]

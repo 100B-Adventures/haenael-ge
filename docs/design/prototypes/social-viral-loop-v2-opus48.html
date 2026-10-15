@@ -7,6 +7,9 @@
   - 친구: `서로 응원`·`연결된 친구` 중복을 제거하고 0명·다수·긴 이름 상태를 유지했다.
   - UX writing: `열리는 것들`·`열리는 자리`를 구체적 화면 설명으로 교체하고 이유 라벨을 `WHY`로 통일했다.
   - 워드맵: 12개 상한을 폐기하고 모든 메시지를 표시한다. D-022의 완료 목표·받은 응원·친구 3지표는 유지한다.
+  2026-10-15 회장 화면별 지시 반영 2차.
+  - 워드맵: 조사·서술어 조각 대신 의미 키워드 정규형만 보여준다. 빈도 가중과 전체 표시는 유지한다.
+  - 빈 상태: 친구 1명에는 초대 유도 카드를, 목표·응원 0건에는 다음 행동 하나를 보여준다. 상단 데이터 토글의 `희소·빈 상태`에서 확인한다.
   변경 사유: `docs/design/chairman-directives-v2-20261015.md`가 기존 승인 시안보다 우선하는 회장 최신 결정이다.
   2026-10-15 V2 승인 시안 정합화 3차.
   - D-023: 모바일 접근성 하한을 시안보다 우선해 13px 미만의 사용자 노출 글자를 13px로 올렸다.
@@ -298,6 +301,13 @@
   .cstep .t{font-size:13px;font-weight:700;line-height:1.4;}
   .cstep .t b{color:var(--clover-ink);}
   .cstep .t span{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-top:3px;}
+  .sparse-next{margin-top:14px;padding:20px;border:1px dashed var(--clover-mid);border-radius:var(--r-md);background:var(--clover-soft);text-align:center;}
+  .sparse-next .clover{font-size:28px;}
+  .sparse-next h3{margin:8px 0 4px;font-size:17px;line-height:1.35;color:var(--ink);}
+  .sparse-next p{margin:0 0 14px;font-size:13px;line-height:1.55;color:var(--muted);}
+  .empty-next{display:grid;min-height:208px;place-items:center;margin-top:10px;padding:24px;border:1px dashed var(--clover-mid);border-radius:var(--r-md);background:var(--clover-soft);text-align:center;}
+  .empty-next h3{margin:8px 0 4px;font-size:17px;}
+  .empty-next p{margin:0 0 14px;font-size:13px;line-height:1.55;color:var(--muted);}
 
   /* ── 초대/연결 화면 ── */
   .invite-hero{text-align:center;padding:16px 6px 4px;}
@@ -1036,6 +1046,7 @@
     <div class="grp" id="stateGrp">
       <span class="lbl">데이터</span>
       <button class="st on" data-state="normal">정상</button>
+      <button class="st" data-state="scarce">희소·빈 상태</button>
       <button class="st" data-state="cold">콜드스타트(0명)</button>
       <button class="st" data-state="over">과다(오버플로)</button>
     </div>
@@ -1045,7 +1056,7 @@
       <label class="motog"><input type="checkbox" id="motionToggle" checked onchange="toggleForceMotion(this)"> 🎬 모션 미리보기</label>
     </div>
   </div>
-  <div class="hint">회장 v2 정의 = 소셜 바이럴 루프(초대·연결 → 게이미 → 소속감 → 재초대). 금액·순위는 배제하고, 업적은 완료 목표·받은 확정 응원·ACTIVE 친구처럼 DB에서 확인 가능한 기록만 사용한다(D-022·D-003). 데이터 토글은 화면 2(친구목록)에서만 유효하다.</div>
+  <div class="hint">회장 v2 정의 = 소셜 바이럴 루프(초대·연결 → 게이미 → 소속감 → 재초대). 금액·순위는 배제하고, 업적은 완료 목표·받은 확정 응원·ACTIVE 친구처럼 DB에서 확인 가능한 기록만 사용한다(D-022·D-003). 희소·빈 상태는 친구목록과 해낼게 관리에서 다음 행동을 실제 화면으로 확인한다.</div>
 </div>
 
 <div class="stage">
@@ -1180,12 +1191,12 @@
           <div class="wm-goalword">🍀 토익 900 넘길게</div>
           <span class="wm-word s3">화이팅</span>
           <span class="wm-word s2">응원해</span>
-          <span class="wm-word s2">할수있어</span>
+          <span class="wm-word s2">할 수 있어</span>
           <span class="wm-word s2">끝까지</span>
           <span class="wm-word s1">믿어</span>
-          <span class="wm-word s1">조금만더</span>
-          <span class="wm-word s1">넌된다</span>
-          <span class="wm-word s1">대단해</span>
+          <span class="wm-word s1">꾸준함</span>
+          <span class="wm-word s1">잘하고 있어</span>
+          <span class="wm-word s1">대단하다</span>
         </div>
         <div class="quietnote">같은 단어가 쌓일수록 크게 자라요 · 금액도 순위도 없어요</div>
 
@@ -1390,12 +1401,12 @@
           <div class="wm-goalword">🍀 토익 900 넘길게</div>
           <span class="wm-word s3">화이팅</span>
           <span class="wm-word s2">응원해</span>
-          <span class="wm-word s2">할수있어</span>
+          <span class="wm-word s2">할 수 있어</span>
           <span class="wm-word s2">끝까지</span>
           <span class="wm-word s1">믿어</span>
-          <span class="wm-word s1">조금만더</span>
-          <span class="wm-word s1">넌된다</span>
-          <span class="wm-word s1">대단해</span>
+          <span class="wm-word s1">꾸준함</span>
+          <span class="wm-word s1">잘하고 있어</span>
+          <span class="wm-word s1">대단하다</span>
         </div>
         <div class="quietnote">같은 단어가 쌓일수록 크게 자라요 · 금액도 순위도 없어요</div>
         <div style="height:20px"></div>
@@ -1539,6 +1550,29 @@
           <div class="quietnote">금액도 순위도 없이 친구의 목표와 응원 소식만 보여요</div>
         </div>
 
+        <!-- 희소 상태 (1명): 빈 여백을 다음 행동으로 전환 -->
+        <div data-view="scarce" style="display:none">
+          <div class="sub">친구 <span class="cnt">1명</span></div>
+          <div class="card">
+            <a class="fr" onclick="go('belong');return false;">
+              <div class="av"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
+              <div class="mid">
+                <div class="nm">윤도경</div>
+                <div class="goal">이번 학기 평점 4.0 해낼게</div>
+                <div class="prog"><i style="width:68%"></i></div>
+                <div class="news"><i>💬</i><span>3주째 도서관 개근 중이래요</span></div>
+              </div>
+              <div class="rel"><span class="mp-go">›</span></div>
+            </a>
+          </div>
+          <div class="sparse-next">
+            <div class="clover">🍀</div>
+            <h3>한 명 더 함께 응원해볼까요?</h3>
+            <p>친구 한 명을 더 초대하면 서로의 목표와 응원 소식이 이곳에 자연스럽게 쌓여요.</p>
+            <button class="btn pri" onclick="go('connect')">친구 초대하기</button>
+          </div>
+        </div>
+
         <!-- 콜드스타트 (0명) -->
         <div data-view="cold" style="display:none">
           <div class="cold">
@@ -1666,12 +1700,17 @@
         </div>
 
         <div class="mp-sect">내 해낼게</div>
-        <div class="cover pub-cover c1"><span class="cov-cap">서연이의 해낼게</span><span class="cov-wm">🍀</span></div>
-        <div class="goalcard" style="margin-top:0">
-          <div class="gtop"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
-          <h3>토익 900 넘길게</h3>
-          <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
-          <div class="gfoot"><span class="gcheer">19명이 응원했어요</span><button class="gview" onclick="linkCopied(this)">공유하기</button></div>
+        <div data-mypage-view="normal">
+          <div class="cover pub-cover c1"><span class="cov-cap">서연이의 해낼게</span><span class="cov-wm">🍀</span></div>
+          <div class="goalcard" style="margin-top:0">
+            <div class="gtop"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
+            <h3>토익 900 넘길게</h3>
+            <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
+            <div class="gfoot"><span class="gcheer">19명이 응원했어요</span><button class="gview" onclick="linkCopied(this)">공유하기</button></div>
+          </div>
+        </div>
+        <div class="empty-next" data-mypage-view="scarce" style="display:none">
+          <div><div style="font-size:28px">🎯</div><h3>첫 해낼게를 만들어보세요</h3><p>내가 해내고 싶은 한 가지를 적으면 친구가 응원할 수 있어요.</p><button class="btn pri" onclick="go('onboarding')">목표 만들기</button></div>
         </div>
 
         <!-- 업적 요약 → 업적 상세(status) -->
@@ -1689,40 +1728,45 @@
 
         <!-- 응원 내역 (받은·보낸 · 횟수와 메시지만, 금액·순위 0 D-003) -->
         <div class="mp-sect">응원 내역</div>
-        <div class="mp-cheer-tabs">
-          <button class="mpct on" onclick="switchCheerLog(this,'recv')">받은 응원</button>
-          <button class="mpct" onclick="switchCheerLog(this,'sent')">보낸 응원</button>
+        <div data-mypage-view="normal">
+          <div class="mp-cheer-tabs">
+            <button class="mpct on" onclick="switchCheerLog(this,'recv')">받은 응원</button>
+            <button class="mpct" onclick="switchCheerLog(this,'sent')">보낸 응원</button>
+          </div>
+          <div class="card mp-cheer-card" data-cheerlog="recv">
+            <a class="fr">
+              <div class="av"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
+              <div class="mid"><div class="nm">윤도경</div><div class="news"><i>💬</i><span>도서관에서 같이 힘낸다, 넌 할 수 있어</span></div></div>
+              <div class="rel"><span class="relbadge">응원 도착</span><span class="relmeta">2시간 전</span></div>
+            </a>
+            <a class="fr">
+              <div class="av"><img src="assets/social-viral/seoyeon.png" alt="서연"></div>
+              <div class="mid"><div class="nm">서연</div><div class="news"><i>💬</i><span>모의고사 820이면 900 금방이야</span></div></div>
+              <div class="rel"><span class="relbadge">응원 도착</span><span class="relmeta">어제</span></div>
+            </a>
+            <a class="fr">
+              <div class="av anon">?</div>
+              <div class="mid"><div class="nm">익명의 누군가</div><div class="news"><i>💬</i><span>끝까지 응원할게요</span></div></div>
+              <div class="rel"><span class="relbadge">응원 도착</span><span class="relmeta">5일 전</span></div>
+            </a>
+          </div>
+          <div class="card mp-cheer-card" data-cheerlog="sent" style="display:none">
+            <a class="fr">
+              <div class="av"><img src="assets/social-viral/jimin.png" alt="정민서"></div>
+              <div class="mid"><div class="nm">정민서에게</div><div class="news"><i>💬</i><span>오늘도 한 걸음, 꾸준히 가자</span></div></div>
+              <div class="rel"><span class="relbadge">응원 보냄</span><span class="relmeta">3일 전</span></div>
+            </a>
+            <a class="fr">
+              <div class="av"><img src="assets/social-viral/supporter.png" alt="박준"></div>
+              <div class="mid"><div class="nm">박준에게</div><div class="news"><i>💬</i><span>마라톤 완주 믿는다 화이팅</span></div></div>
+              <div class="rel"><span class="relbadge">응원 보냄</span><span class="relmeta">1주 전</span></div>
+            </a>
+          </div>
+          <div class="quietnote">금액도 순위도 없이, 응원 메시지와 도착 시각만 보여요</div>
         </div>
-        <div class="card mp-cheer-card" data-cheerlog="recv">
-          <a class="fr">
-            <div class="av"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
-            <div class="mid"><div class="nm">윤도경</div><div class="news"><i>💬</i><span>도서관에서 같이 힘낸다, 넌 할 수 있어</span></div></div>
-            <div class="rel"><span class="relbadge">응원 도착</span><span class="relmeta">2시간 전</span></div>
-          </a>
-          <a class="fr">
-            <div class="av"><img src="assets/social-viral/seoyeon.png" alt="서연"></div>
-            <div class="mid"><div class="nm">서연</div><div class="news"><i>💬</i><span>모의고사 820이면 900 금방이야</span></div></div>
-            <div class="rel"><span class="relbadge">응원 도착</span><span class="relmeta">어제</span></div>
-          </a>
-          <a class="fr">
-            <div class="av anon">?</div>
-            <div class="mid"><div class="nm">익명의 누군가</div><div class="news"><i>💬</i><span>끝까지 응원할게요</span></div></div>
-            <div class="rel"><span class="relbadge">응원 도착</span><span class="relmeta">5일 전</span></div>
-          </a>
+        <div class="empty-next" data-mypage-view="scarce" style="display:none">
+          <div><div style="font-size:28px">💌</div><h3>첫 응원을 받아볼까요?</h3><p>목표를 공개하고 친구 한 명에게 공유하면 첫 응원이 시작돼요.</p><button class="btn pri" onclick="go('connect')">친구 초대하기</button></div>
         </div>
-        <div class="card mp-cheer-card" data-cheerlog="sent" style="display:none">
-          <a class="fr">
-            <div class="av"><img src="assets/social-viral/jimin.png" alt="정민서"></div>
-            <div class="mid"><div class="nm">정민서에게</div><div class="news"><i>💬</i><span>오늘도 한 걸음, 꾸준히 가자</span></div></div>
-            <div class="rel"><span class="relbadge">응원 보냄</span><span class="relmeta">3일 전</span></div>
-          </a>
-          <a class="fr">
-            <div class="av"><img src="assets/social-viral/supporter.png" alt="박준"></div>
-            <div class="mid"><div class="nm">박준에게</div><div class="news"><i>💬</i><span>마라톤 완주 믿는다 화이팅</span></div></div>
-            <div class="rel"><span class="relbadge">응원 보냄</span><span class="relmeta">1주 전</span></div>
-          </a>
-        </div>
-        <div class="quietnote">금액도 순위도 없이, 응원 메시지와 도착 시각만 보여요</div>
 
         <!-- 환경설정 -->
         <div class="mp-sect">환경설정</div>
@@ -1965,12 +2009,12 @@
           <div class="wm-goalword">🍀 토익 900 넘길게</div>
           <span class="wm-word s3">화이팅</span>
           <span class="wm-word s2">응원해</span>
-          <span class="wm-word s2">할수있어</span>
+          <span class="wm-word s2">할 수 있어</span>
           <span class="wm-word s2">끝까지</span>
           <span class="wm-word s1">믿어</span>
-          <span class="wm-word s1">조금만더</span>
-          <span class="wm-word s1">넌된다</span>
-          <span class="wm-word s1">대단해</span>
+          <span class="wm-word s1">꾸준함</span>
+          <span class="wm-word s1">잘하고 있어</span>
+          <span class="wm-word s1">대단하다</span>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:8px">
           <span style="font-size:13px;font-weight:700;color:var(--faint);text-decoration:underline;text-underline-offset:2px;cursor:pointer">신고</span>
@@ -2283,8 +2327,8 @@
 </div>
 
 <div class="stamp">
-  🏷 STAMP | line: core | 생성: 2026-09-23 07:40 · v4·v5 2026-10-02 · v6 2026-10-03 · v6.1 랭킹제거+모션C안 2026-10-04 · v6.2 IA(워드맵 인라인·응원내역·프로필수정) 2026-10-05 KST | model: claude-opus-4-8 | agent: product-designer | skill: design-review | 근거: 결정.md D-003 "지갑은 조용하게" · core-viral-motion-shotgun-v1-opus48.html(4모먼트 C안 결정보드) · ReceiverShell/NotificationBadge/CheerList/Wordmap/GoalEditSheet/OnboardingGoalForm 실배포 · standard-design §11 모션 · motion-concepts-haenael-ge.html(용어 표준) · package.json 1.2.1<br>
-  <b>STAMP</b> line=core · social-viral-loop-v2-opus48.html · 생성 2026-09-23 07:40 · v4·v5 2026-10-02 · v6 2026-10-03 · v6.1 2026-10-04 · v6.2 2026-10-05 KST · model claude-opus-4-8 · agent product-designer · skill design-review · 배포 1.2.1(실배포 버전 미육안확인=소스 기준)<br>
+  🏷 STAMP | line: core | 생성: 2026-09-23 07:40 · v4·v5 2026-10-02 · v6 2026-10-03 · v6.1 랭킹제거+모션C안 2026-10-04 · v6.2 IA 2026-10-05 · 회장 지시 2차 2026-10-15 22:43 KST | model: claude-opus-4-8 + gpt-6.1-sol | agent: product-designer + code-builder | skill: design-review + haenael-supabase-build | 근거: 결정.md D-003 · chairman-directives-v2-20261015.md · standard-wordmap-keyword.md · 실구현 컴포넌트<br>
+  <b>STAMP</b> line=core · social-viral-loop-v2-opus48.html · 생성 2026-09-23 07:40 · 회장 지시 2차 2026-10-15 22:43 KST · model claude-opus-4-8 + gpt-6.1-sol · agent product-designer + code-builder · skill design-review + haenael-supabase-build · 배포 1.2.1(운영 미배포, 로컬 소스 기준)<br>
   <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일 · 각 노드에 라우터 경로·진입 화면·신규/수정 diff를 레일 위 글자로 표기(신규↔기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 5종 삽입 · 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출 ④아트보드 안 설계·원칙 주석(도파민 원칙·열린결정 배지) 전량 제거 → 검수 패널로 이관(아트보드 주석 0) ⑤기존 배포 홈((receiver)/me 다중목표) 실제 디바이스 프레임으로 계승 추가 + 하단 탭바에 홈 진입 신설<br>
   <b>v2 확장(실배포 전수 계승)</b> ⑥실배포 라우트 15개 전수 Read(screen-inventory.md 정본·globals.css @theme 토큰·DESIGN.md 브랜드) → 커버리지 대조표(계승10·연결4·누락사유명시1·누락무사유0, 권한축 비회원·회원·관리자 + 돈축 결제·환전 전부 커버) ⑦누락 기존 화면 실프레임 계승: 랜딩·공개목표(g/[slug])·카카오로그인(auth)·온보딩·이용안내·결제성공·결제실패·환전·환전상태·관리자 ⑧하단탭 이모지→인라인 SVG(단색 stroke·clover accent)<br>
   <b>v2 로직 계승(회장 "그림만 계승" 지적)</b> ⑨워드맵: 실배포 Wordmap.tsx 계승 · 같은 단어 word_count 합산·빈도 tier(s1 #8bb79f 14px/s2 #57a178 18px/s3 #1a8150 24px)·flex-wrap 클라우드(겹침0)·상위12. 응원 시 그 단어 +1 → tier 성장 ⑩홈: me/page.tsx 목표 관리 액션 계승(수정·친구뷰 미리보기·링크 공유·새 목표→온보딩·환전 진입) ⑪결제 트리거 체인: 응원하기→토스 PG(외부)→successUrl/failUrl→성공/실패를 레일·검수패널에 화살표로 명시<br>
@@ -2725,7 +2769,7 @@
     document.querySelectorAll('.console .loop .node').forEach(n=>n.classList.toggle('on', n.dataset.loop===id));
     document.querySelectorAll('.flowrail .fnode').forEach(n=>n.classList.toggle('on', n.dataset.loop===id));
     document.querySelector('.stage').scrollIntoView({behavior:'instant',block:'start'});
-    document.getElementById('stateGrp').style.opacity = (id==='friends'||id==='goaldetail') ? '1':'.4';
+    document.getElementById('stateGrp').style.opacity = (id==='friends'||id==='goaldetail'||id==='mypage') ? '1':'.4';
     if(id==='dopamine' && !wmSeeded){ wmSeeded=true; wmInit(); }
     renderReview(id);
     animateScreen(id);
@@ -2737,7 +2781,14 @@
   // 데이터 상태 토글 (화면 2)
   function setState(st){
     document.querySelectorAll('#stateGrp .st').forEach(b=>b.classList.toggle('on', b.dataset.state===st));
-    document.querySelectorAll('#friends [data-view], #goaldetail [data-view]').forEach(v=>{ v.style.display = (v.dataset.view===st) ? '':'none'; });
+    document.querySelectorAll('#friends, #goaldetail').forEach(screen=>{
+      const views=[...screen.querySelectorAll('[data-view]')];
+      const target=views.some(v=>v.dataset.view===st) ? st : 'normal';
+      views.forEach(v=>{ v.style.display = (v.dataset.view===target) ? '':'none'; });
+    });
+    document.querySelectorAll('#mypage [data-mypage-view]').forEach(v=>{
+      v.style.display = (v.dataset.mypageView===(st==='scarce'?'scarce':'normal')) ? '':'none';
+    });
     if(st==='over') renderOver();
   }
   document.querySelectorAll('#stateGrp .st').forEach(b=>{ b.addEventListener('click',()=>setState(b.dataset.state)); });
@@ -2941,10 +2992,10 @@
 
   // ── 워드맵 = 실배포 Wordmap.tsx(normalizeWords·getSizeTier) 계승 ──
   // 같은 단어 word_count 합산 → 내림차순 정렬 → 빈도 ratio 로 s1/s2/s3 크기·색 → 전체 flex-wrap 렌더(겹침 0)
-  const dopaWords=['잘한다','응원해','화이팅','넌된다','조금만더','대단해','자랑스러워','끝까지','믿어','고생했어'];
+  const dopaWords=['잘했어','응원','화이팅','할 수 있어','꾸준함','대단하다','자랑스러워','끝까지','믿어','함께'];
   let dopaIdx=0, wmTotal=23, lastWord='';
   // 실배포 get_wordmap RPC 결과 모사: {단어: word_count}
-  let wmCounts={'화이팅':8,'응원해':6,'할수있어':5,'끝까지':4,'믿어':3,'조금만더':3,'넌된다':2,'대단해':2,'자랑스러워':1,'잘한다':1,'고생했어':1};
+  let wmCounts={'화이팅':8,'응원':6,'할 수 있어':5,'끝까지':4,'믿어':3,'꾸준함':3,'잘하고 있어':2,'대단하다':2,'자랑스러워':1,'잘했어':1,'함께':1};
   // 실배포 getSizeTier: n===1→s3, max===min→s2, ratio(count-min/max-min) ≥.67 s3 / ≥.34 s2 / else s1
   function wmTier(count,min,max,n){
     if(n===1) return 's3';

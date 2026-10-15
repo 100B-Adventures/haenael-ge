@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { createFriendInviteAction } from "@/app/(receiver)/social-actions";
@@ -115,6 +116,7 @@ export function FriendInviteCard(
           <section className="social-empty">
             <h2>초대할 목표가 없어요</h2>
             <p>친구에게 보여줄 목표를 공개 또는 친구 공개로 바꾼 뒤 다시 시도해 주세요.</p>
+            <Link href="/me" className="social-primary-action">내 해낼게 관리하기</Link>
           </section>
         )
         : (

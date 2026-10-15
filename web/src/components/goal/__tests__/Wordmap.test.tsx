@@ -79,9 +79,8 @@ describe("Wordmap", () => {
     );
 
     expect(keywords).toEqual(expect.arrayContaining(["마라톤", "끝까지", "응원", "꾸준함", "❤️"]));
-    expect(keywords).not.toEqual(expect.arrayContaining([
-      "저희가", "저희", "건넬게요", "건네", "차례예요", "차례", "클로버는", "클로버",
-    ]));
+    ["저희가", "저희", "건넬게요", "건네", "차례예요", "차례", "클로버는", "클로버"]
+      .forEach((fragment) => expect(keywords).not.toContain(fragment));
   });
 
   it("WM-KO-02 최소 길이와 숫자 규칙으로 한 글자·금액성 토막을 제외한다", () => {
@@ -90,6 +89,16 @@ describe("Wordmap", () => {
     );
     expect(extractWordmapKeywords("나 너 100개 꿈을 향해 힘내! 최고야"))
       .not.toEqual(expect.arrayContaining(["나", "너", "100개"]));
+  });
+
+  it("WM-KO-03 시스템 환영 문장의 기능어는 제거하고 의미 표현만 남긴다", () => {
+    const keywords = extractWordmapKeywords(
+      "저희가 먼저 응원을 건넬게요. 친구들은 오늘도 한걸음 함께 가요.",
+    );
+
+    expect(keywords).toEqual(expect.arrayContaining(["응원", "한 걸음", "함께"]));
+    ["저희", "먼저", "건넬게요", "친구들", "오늘"]
+      .forEach((fragment) => expect(keywords).not.toContain(fragment));
   });
 
   it("WM-02 빈도에 따라 3단계 강조를 적용하고 동률이면 모두 중간 단계다", () => {

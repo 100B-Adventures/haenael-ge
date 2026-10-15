@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  STAMP | line=v2 | 생성=2026-10-15 22:51 KST | model=gpt-6.1-sol | agent=code-builder
+  skill=haenael-supabase-build | 근거=회장 지시 2차, 규칙 기반 한국어 키워드 계약, 로컬 390px full-page 캡처 8장
+  고민=한 명뿐인 친구 목록의 빈 여백을 과장된 콘텐츠로 채우지 않고, 다음 행동 하나로 밀도를 회복했다.
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 V2 지시 반영 2차 결정 보드</title>
+  <style>
+    :root { --bg:#ece9e1; --panel:#fff; --ink:#17150f; --muted:#69645b; --line:#d9d4ca; --green:#1b8a4f; --soft:#e7f4ec; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:Pretendard,"Apple SD Gothic Neo",sans-serif; }
+    header { position:sticky; top:0; z-index:10; border-bottom:1px solid var(--line); background:rgb(255 255 255 / 94%); backdrop-filter:blur(16px); padding:18px 24px; }
+    header h1 { margin:0; font-size:22px; }
+    header p { margin:6px 0 0; color:var(--muted); font-size:14px; }
+    nav { display:flex; gap:8px; overflow:auto; margin-top:12px; padding-bottom:2px; }
+    nav a { flex:0 0 auto; border-radius:999px; padding:7px 11px; color:var(--green); background:var(--soft); font-size:13px; font-weight:800; text-decoration:none; }
+    main { max-width:1120px; margin:0 auto; padding:24px; }
+    .summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:24px; }
+    .summary div { border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:14px; }
+    .summary strong { display:block; color:var(--green); font-size:22px; }
+    .summary span { color:var(--muted); font-size:13px; }
+    .decision { margin-bottom:24px; border:1px solid #b9d9c5; border-radius:16px; background:var(--soft); padding:18px; }
+    .decision h2 { margin:0 0 8px; font-size:17px; }
+    .decision p { margin:0; color:var(--muted); font-size:14px; line-height:1.65; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; align-items:start; }
+    article { scroll-margin-top:126px; border:1px solid var(--line); border-radius:18px; background:var(--panel); padding:18px; box-shadow:0 12px 32px rgb(40 36 28 / 8%); }
+    article h2 { margin:0; font-size:18px; }
+    .meta { margin:5px 0 14px; color:var(--muted); font-size:13px; line-height:1.5; }
+    .shot { display:flex; justify-content:center; overflow:auto; border-radius:12px; background:#d7d2c8; padding:12px; }
+    .shot img { display:block; width:390px; max-width:100%; height:auto; background:#fbfaf7; box-shadow:0 6px 18px rgb(0 0 0 / 16%); }
+    label { display:block; margin-top:14px; font-size:13px; font-weight:800; }
+    textarea { width:100%; min-height:92px; margin-top:7px; resize:vertical; border:1px solid var(--line); border-radius:12px; padding:12px; color:var(--ink); background:#fbfaf7; font:14px/1.5 inherit; }
+    textarea:focus { outline:3px solid rgb(27 138 79 / 18%); border-color:var(--green); }
+    .saved { min-height:18px; margin-top:5px; color:var(--green); font-size:12px; }
+    footer { max-width:1120px; margin:0 auto; padding:4px 24px 30px; color:var(--muted); font-size:12px; line-height:1.7; }
+    @media (max-width:840px) { .grid { grid-template-columns:1fr; } .summary { grid-template-columns:repeat(2,minmax(0,1fr)); } header { position:static; } article { scroll-margin-top:12px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>해낼게 V2 지시 반영 2차</h1>
+    <p>390px 로컬 production 전체 스크롤. 워드맵 의미 키워드와 희소·빈 상태의 실제 제품 반영을 검토합니다.</p>
+    <nav aria-label="화면 바로가기">
+      <a href="#landing">랜딩</a><a href="#public-goal">공개 목표</a><a href="#manage">해낼게 관리</a><a href="#friends">친구 1명</a><a href="#friend-detail">친구 상세</a><a href="#achievements">업적</a><a href="#wordmap">워드맵</a><a href="#cashout">환전</a>
+    </nav>
+  </header>
+  <main>
+    <section class="summary" aria-label="검증 요약">
+      <div><strong>8/8</strong><span>실화면 캡처 대상</span></div>
+      <div><strong>0</strong><span>금지 문장 조각</span></div>
+      <div><strong>1명</strong><span>희소 친구 fixture</span></div>
+      <div><strong>3종</strong><span>목표·응원·친구 다음 행동</span></div>
+    </section>
+    <section class="decision">
+      <h2>이번 판의 결정</h2>
+      <p>형태소 분석기 추가 대신 `Intl.Segmenter`와 명시적 조사·어미·불용어·정규형 규칙을 채택했습니다. 한 명뿐인 목록은 가짜 항목으로 채우지 않고 초대 CTA를 붙였습니다. 목표 0개와 응원 0건은 각각 목표 만들기와 공유·친구 보기로 이어집니다.</p>
+    </section>
+    <section class="grid">
+      <article id="landing"><h2>랜딩</h2><p class="meta">기존 전체 문장형 영감 워드맵과 진입 동선을 보존했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/landing-390-full.png" alt="랜딩 전체 스크롤 캡처"></div><label for="note-landing">화면 메모</label><textarea id="note-landing" data-note="landing"></textarea><p class="saved" aria-live="polite"></p></article>
+      <article id="public-goal"><h2>공개 목표</h2><p class="meta">조사·서술어 조각 없이 의미 키워드 전체를 빈도 가중으로 표시합니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/public-goal-390-full.png" alt="공개 목표 전체 스크롤 캡처"></div><label for="note-public-goal">화면 메모</label><textarea id="note-public-goal" data-note="public-goal"></textarea><p class="saved" aria-live="polite"></p></article>
+      <article id="manage"><h2>해낼게 관리</h2><p class="meta">목표 0개와 응원 0건 계약은 각각 단일 primary action으로 이어집니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/manage-390-full.png" alt="해낼게 관리 전체 스크롤 캡처"></div><label for="note-manage">화면 메모</label><textarea id="note-manage" data-note="manage"></textarea><p class="saved" aria-live="polite"></p></article>
+      <article id="friends"><h2>친구 목록, 1명</h2><p class="meta">한 명 카드 아래 초대 유도 카드를 배치해 하단의 큰 공백을 다음 행동으로 바꿨습니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/friends-390-full.png" alt="친구 1명과 다음 행동 전체 스크롤 캡처"></div><label for="note-friends">화면 메모</label><textarea id="note-friends" data-note="friends"></textarea><p class="saved" aria-live="polite"></p></article>
+      <article id="friend-detail"><h2>친구 상세</h2><p class="meta">대표 목표, 다른 목표, 워드맵의 기존 기능을 보존했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/friend-detail-390-full.png" alt="친구 상세 전체 스크롤 캡처"></div><label for="note-friend-detail">화면 메모</label><textarea id="note-friend-detail" data-note="friend-detail"></textarea><p class="saved" aria-live="polite"></p></article>
+      <article id="achievements"><h2>업적</h2><p class="meta">완료 목표·받은 응원·친구의 반증 가능한 3지표를 유지했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/achievements-390-full.png" alt="업적 전체 스크롤 캡처"></div><label for="note-achievements">화면 메모</label><textarea id="note-achievements" data-note="achievements"></textarea><p class="saved" aria-live="polite"></p></article>
+      <article id="wordmap"><h2>응원 워드맵</h2><p class="meta">키워드 전체 표시와 빈도별 3단계 크기는 유지하고 문장 토막만 제거했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/wordmap-390-full.png" alt="정규화된 워드맵 전체 스크롤 캡처"></div><label for="note-wordmap">화면 메모</label><textarea id="note-wordmap" data-note="wordmap"></textarea><p class="saved" aria-live="polite"></p></article>
+      <article id="cashout"><h2>환전</h2><p class="meta">이번 범위 밖의 돈 흐름은 변경하지 않고 전체 회귀만 재실행했습니다.</p><div class="shot"><img src="../../qa/evidence/v2-directive-build-v2-gpt-codex/cashout-390-full.png" alt="환전 전체 스크롤 캡처"></div><label for="note-cashout">화면 메모</label><textarea id="note-cashout" data-note="cashout"></textarea><p class="saved" aria-live="polite"></p></article>
+    </section>
+  </main>
+  <footer>
+    SOURCES/MODEL: gpt-6.1-sol | `docs/design/chairman-directives-v2-20261015.md` · `docs/design/standard-wordmap-keyword.md` · 로컬 production 캡처 결과 · Shopify·Atlassian empty state 공식 가이드<br>
+    PRESENTATION_CHECK: 전체 스크롤 캡처 8장 · 화면별 메모 입력 8칸 · Chromium 렌더 검수 대상
+  </footer>
+  <script>
+    document.querySelectorAll("textarea[data-note]").forEach((field) => {
+      const key = `haenael-v2-directive-v2-note:${field.dataset.note}`;
+      field.value = localStorage.getItem(key) || "";
+      field.addEventListener("input", () => {
+        localStorage.setItem(key, field.value);
+        const status = field.nextElementSibling;
+        status.textContent = "저장됨";
+        clearTimeout(field._savedTimer);
+        field._savedTimer = setTimeout(() => { status.textContent = ""; }, 1200);
+      });
+    });
+  </script>
+</body>
+</html>

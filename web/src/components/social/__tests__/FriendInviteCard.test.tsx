@@ -53,3 +53,12 @@ it("CT-INVITE-02 초대 생성 거절 코드는 사용자 복구 문구로 표�
     "잠시 뒤에 새 초대 링크를 만들어 주세요.",
   );
 });
+
+it("CT-INVITE-03 초대 가능한 목표가 없으면 관리 화면으로 이어진다", () => {
+  render(<FriendInviteCard goals={[]} />);
+
+  expect(screen.getByRole("heading", { name: "초대할 목표가 없어요" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "내 해낼게 관리하기" }))
+    .toHaveAttribute("href", "/me");
+  expect(screen.queryByRole("button", { name: "초대 링크 복사" })).not.toBeInTheDocument();
+});

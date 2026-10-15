@@ -1,3 +1,10 @@
+## 2026-10-15 22:58 KST · 응원 키워드·희소 데이터 2차 build 완료, 운영 미반영
+
+- **워드맵**: `web/src/lib/wordmap/keywords.ts`에 한국어 조사·어미·불용어·승인 표현 정규화를 추가했다. production 캡처의 13개 키워드에서 `건넬게요`, `저희가`, `차례예요`, `클로버는` 0건을 직접 관찰했고 빈도 가중·전체 표시는 유지했다.
+- **빈·희소 상태**: 친구 1명 CTA, 목표 0개·받은/보낸 응원 0건·초대 목표 0개 CTA를 구현했다. 승인 프로토타입도 `희소·빈 상태` 토글과 같은 구조로 갱신했다.
+- **증거**: Vitest 346/346, pgTAP 336/336, Next 17/17, Storybook build, 환전 E2E 12/12, production 390px 8화면 오류·overflow 0, 9개 모바일 폭 PASS. 보고서 `docs/qa/v2-directive-build-v2-gpt-codex.md`, 보드 `docs/design/boards/v2-directive-build-v2-gpt-codex.html`.
+- **경계**: 운영 DB 쓰기·배포 0건. 규칙 기반 추출의 실제 사용자 200건 라벨 평가는 아직 미검증이며 QA가 독립 검증한다.
+
 ## 2026-10-15 22:40 KST · 회장 화면별 지시 반영 1차 완료, 내가 찾은 결함 2건으로 2차 진행 중
 
 - **회장 지시 원문 박제**: `docs/design/chairman-directives-v2-20261015.md`(원문 + 확정 결정 D-025-A~K). 위임의 필수 입력이다.

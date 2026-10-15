@@ -12,7 +12,7 @@ const anonKey = required("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 const statePath = process.env.V1_V2_FIXTURE_STATE ?? "/tmp/haenael-v1-v2-fixture.json";
 const outputDir = resolve(
   process.env.V2_DIRECTIVE_EVIDENCE_DIR ??
-    "docs/qa/evidence/v2-directive-build-v1-gpt-codex",
+    "docs/qa/evidence/v2-directive-build-v2-gpt-codex",
 );
 const password = "haenael-v1-v2-local-fixture-2026!";
 
@@ -105,14 +105,26 @@ try {
     await page.addStyleTag({
       content: "*,*::before,*::after{animation-play-state:paused!important;transition:none!important;caret-color:transparent!important}",
     });
-    const metrics = await page.evaluate(() => ({
-      width: window.innerWidth,
-      viewportHeight: window.innerHeight,
-      pageHeight: document.documentElement.scrollHeight,
-      overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      bottomNav: Boolean(document.querySelector("[data-testid=receiver-bottom-nav]")),
-      wordmapItems: document.querySelectorAll("[data-wordmap-item]").length,
-    }));
+    const metrics = await page.evaluate(() => {
+      const wordmapText = Array.from(document.querySelectorAll("[data-wordmap-item]"))
+        .map((element) => element.textContent ?? "")
+        .join(" ");
+      const forbiddenFragments = ["건넬게요", "저희가", "차례예요", "클로버는"]
+        .filter((fragment) => wordmapText.includes(fragment));
+      return {
+        width: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        pageHeight: document.documentElement.scrollHeight,
+        overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        bottomNav: Boolean(document.querySelector("[data-testid=receiver-bottom-nav]")),
+        wordmapItems: document.querySelectorAll("[data-wordmap-item]").length,
+        forbiddenWordmapFragments: forbiddenFragments,
+        friendCards: document.querySelectorAll("[data-testid=friend-card]").length,
+        sparseFriendNextAction: Boolean(document.querySelector("[data-testid=friends-sparse-next-step]")),
+        emptyGoalNextAction: Boolean(document.querySelector("[data-testid=my-goals-empty] a")),
+        emptyCheerNextAction: Boolean(document.querySelector("[data-testid=received-cheers-empty] a")),
+      };
+    });
     // 결정 보드용 full-page 캡처에서는 fixed 하단탭을 문서 맨 아래에 한 번만 둔다.
     // 실제 fixed 동작과 노출 여부는 위 metrics에서 스타일 변경 전에 계측한다.
     await page.addStyleTag({
@@ -133,7 +145,8 @@ await writeFile(
 );
 const failures = results.filter((result) =>
   result.status !== 200 || result.consoleErrors.length || result.pageErrors.length ||
-  result.metrics.overflowX || result.metrics.width !== 390
+  result.metrics.overflowX || result.metrics.width !== 390 ||
+  result.metrics.forbiddenWordmapFragments.length > 0
 );
 console.log(`full-page captures=${results.length} failures=${failures.length}`);
 if (failures.length) process.exitCode = 2;

@@ -36,7 +36,7 @@ it("CT-FRIEND-03 친구 상세는 소속감 정보와 다른 목표 동선을 �
   expect(screen.getByText("서연의 해낼게")).toBeInTheDocument();
   expect(screen.getByText("13명이 서연을 조용히 응원하는 중이에요")).toBeInTheDocument();
   expect(screen.queryByText("함께한 자취 타임라인")).not.toBeInTheDocument();
-  expect(screen.getByText("꾸준히")).toBeInTheDocument();
+  expect(screen.getByText("꾸준함")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /매일 스무 쪽 읽을게/ }))
     .toHaveAttribute("href", "/friends/friend-a?goal=2");
   expect(screen.getByRole("link", { name: /다른 친구도 이 자리에 부를까요/ }))

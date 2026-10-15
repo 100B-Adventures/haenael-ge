@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-15 응원 키워드·희소 데이터 2차
+
+- 한국어 응원 문장을 `Intl.Segmenter`와 조사·어미·불용어·승인 표현 규칙으로 정규화했다. `건넬게요`, `저희가`, `차례예요`, `클로버는`은 워드맵에서 0건이고, 빈도 가중·전체 표시는 유지했다.
+- 친구 1명에는 초대 유도 카드를 추가했다. 목표 0개, 받은·보낸 응원 0건, 초대 가능한 목표 0개에는 단일 다음 행동을 연결했다.
+- 승인 프로토타입에 `희소·빈 상태` 토글을 추가하고, 390px production-mode 8화면과 HTML 보드를 다시 렌더했다. 8/8 HTTP 200, console·page error 0, overflow X 0이다.
+- Vitest 59파일 346/346, pgTAP 19파일 336/336, Next.js 정적 생성 17/17, Storybook build, 환전 Playwright 12/12, 360~1000 아홉 폭 모바일 사용성 검사를 통과했다.
+- 운영 DB 쓰기와 운영 배포는 실행하지 않았다. 상세: `docs/qa/v2-directive-build-v2-gpt-codex.md`.
+
+> STAMP: 생성 2026-10-15 22:58 KST. 모델 gpt-codex/gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 상태 local build 검증 통과, 운영 미반영.
+
 ## 2026-10-15 v1.2.1 대 v2.0.0 화면 결정 보드
 
 - tag `v1.2.1`을 별도 git worktree에 체크아웃해 v1과 현재 v2의 production build를 각각 통과시켰다. 정적 생성은 v1 16/16, v2 17/17이다.
