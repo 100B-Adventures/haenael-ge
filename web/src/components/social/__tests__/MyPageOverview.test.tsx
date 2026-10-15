@@ -50,7 +50,7 @@ describe("MyPageOverview", () => {
     const text = screen.getByTestId("my-page-overview").textContent ?? "";
     expect(screen.getByTestId("my-profile-summary")).toHaveTextContent("서연");
     expect(screen.getByText("내 해낼게")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /공유하기/ })).toHaveAttribute("href", "/g/run");
+    expect(screen.getByRole("link", { name: /^공유하기$/ })).toHaveAttribute("href", "/g/run");
     expect(screen.getByText("35명이 응원했어요")).toBeInTheDocument();
     expect(screen.getByText(/교환학생 지원 전에/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /업적/ })).toHaveAttribute(
@@ -74,9 +74,23 @@ describe("MyPageOverview", () => {
     render(
       <MyPageOverview dashboard={dashboard} initialPreferences={preferences} />,
     );
-    expect(screen.getByText("받은 응원 7번")).toBeInTheDocument();
+    expect(screen.getByTestId("received-cheers-empty")).toHaveTextContent("첫 응원을 받아볼까요?");
+    expect(screen.getByRole("link", { name: "응원 링크 공유하기" })).toHaveAttribute("href", "/me");
     await userEvent.click(screen.getByRole("tab", { name: "보낸 응원" }));
     expect(screen.getByText("내가 응원한 친구")).toBeInTheDocument();
+  });
+
+  it("MY-UI-05 목표 0개면 다음 행동이 있는 빈 상태를 보여준다", () => {
+    render(
+      <MyPageOverview
+        dashboard={{ ...dashboard, goals: [] }}
+        initialPreferences={preferences}
+      />,
+    );
+
+    expect(screen.getByTestId("my-goals-empty")).toHaveTextContent("첫 해낼게를 만들어보세요");
+    expect(screen.getAllByRole("link", { name: "해낼게 만들기" })[0])
+      .toHaveAttribute("href", "/onboarding");
   });
 
   it("MY-UI-03 알림 설정은 실제 RPC 액션에 연결된다", async () => {

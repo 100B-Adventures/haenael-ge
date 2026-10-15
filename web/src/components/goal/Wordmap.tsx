@@ -3,6 +3,8 @@
 // DESIGN.md §5-5: gradient 예외(clover 계열 옅은 radial 허용). 단색+사이즈/opacity로 다정함.
 // 서버 컴포넌트에서도 사용 가능 (no useState).
 
+import { normalizeWordmapKeywords } from "@/lib/wordmap/keywords";
+
 export interface WordmapWord {
   word: string;
   word_count: number;
@@ -17,32 +19,6 @@ export interface WordmapProps {
 }
 
 type SizeTier = "s1" | "s2" | "s3";
-
-interface NormalizedWordmapWord extends WordmapWord {
-  firstIndex: number;
-}
-
-function normalizeWords(words: WordmapWord[]): NormalizedWordmapWord[] {
-  const merged = new Map<string, NormalizedWordmapWord>();
-
-  words.forEach((item, index) => {
-    const word = item.word.normalize("NFC").trim().replace(/\s+/gu, " ");
-    if (!word) return;
-
-    const count = Number.isFinite(item.word_count) ? item.word_count : 0;
-    const existing = merged.get(word);
-    if (existing) {
-      existing.word_count += count;
-      return;
-    }
-
-    merged.set(word, { word, word_count: count, firstIndex: index });
-  });
-
-  return Array.from(merged.values()).sort(
-    (a, b) => b.word_count - a.word_count || a.firstIndex - b.firstIndex,
-  );
-}
 
 function getSizeTier(
   count: number,
@@ -79,7 +55,7 @@ export function Wordmap({
   ownerName,
   showOverflowDisclosure: _showOverflowDisclosure = true,
 }: WordmapProps) {
-  const normalizedWords = normalizeWords(words);
+  const normalizedWords = normalizeWordmapKeywords(words);
 
   if (normalizedWords.length === 0) {
     return <EmptyWordmap ownerName={ownerName} />;

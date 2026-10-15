@@ -860,6 +860,21 @@
   .my-profile-card small { display: block; margin-top: 0.25rem; color: var(--faint); font-size: 0.8125rem; }
 
   .my-goal-grid { display: grid; gap: var(--social-card-gap); }
+  .my-list-empty {
+    display: grid;
+    min-height: 13rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--card);
+    padding: 1.25rem;
+  }
+  .my-list-empty strong { display: block; font-size: 1rem; }
+  .my-list-empty p { margin-top: 0.25rem; color: var(--muted-color); font-size: 0.875rem; line-height: 1.5; }
+  .my-list-empty .social-primary-action { grid-column: 1 / -1; width: 100%; }
   .my-goal-card { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--card); }
   .my-goal-cover { height: 7.5rem; background: linear-gradient(135deg, var(--clover-soft), var(--warm)); }
   .my-goal-cover.is-c1 { background: linear-gradient(135deg, var(--cover-c1-start), var(--cover-c1-end)); }
@@ -1230,6 +1245,25 @@
     border-radius: var(--radius-card);
     background: var(--card);
   }
+
+  .friends-sparse-next {
+    display: grid;
+    min-height: 13rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    border: 1px dashed var(--clover);
+    border-radius: var(--radius-card);
+    background: var(--clover-soft);
+    padding: 1.25rem;
+  }
+  .friends-sparse-icon { display: inline-flex; width: 2.75rem; height: 2.75rem; align-items: center; justify-content: center; border-radius: 9999px; color: var(--clover-ink); background: var(--card); }
+  .friends-sparse-icon svg { width: 1.25rem; height: 1.25rem; }
+  .friends-sparse-next strong { display: block; font-size: 1rem; }
+  .friends-sparse-next p { margin-top: 0.25rem; color: var(--muted-color); font-size: 0.875rem; line-height: 1.5; }
+  .friends-sparse-next .social-primary-action { grid-column: 1 / -1; width: 100%; }
 
   .friend-list-item + .friend-list-item { border-top: 1px solid var(--line); }
 

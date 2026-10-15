@@ -43,6 +43,13 @@ it("CT-FRIEND-01 친구 목록은 대표 목표 한 행만 보여 주고 상세�
   expect(screen.queryByText("연결된 친구")).not.toBeInTheDocument();
   expect(screen.queryByText("서로 응원")).not.toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("번 함께");
+  expect(screen.getByTestId("friends-sparse-next-step")).toHaveTextContent(
+    "한 명 더 함께 응원해볼까요?",
+  );
+  expect(screen.getByRole("link", { name: "친구 초대하기" })).toHaveAttribute(
+    "href",
+    "/invite",
+  );
 });
 
 it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전하게 렌더한다", () => {
@@ -59,6 +66,7 @@ it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전
     "아주아주아주아주아주긴친구닉네임",
   );
   expect(screen.getAllByRole("link")).toHaveLength(12);
+  expect(screen.queryByTestId("friends-sparse-next-step")).not.toBeInTheDocument();
 });
 
 it("CT-FRIEND-02 친구 0명은 실제 초대 절차와 CTA를 표시한다", () => {

@@ -11,6 +11,7 @@ import {
   ReceiptText,
   Trophy,
   Share2,
+  Target,
 } from "lucide-react";
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
 import { LogoutButton } from "@/components/auth/LogoutButton";
@@ -107,7 +108,13 @@ export function MyPageOverview({
                 <div className="my-goal-meta"><span>{goalCheerCounts[goal.goal_id] ?? 0}명이 응원했어요</span><Link href={`/g/${goal.slug}`}><Share2 aria-hidden="true" /> 공유하기</Link></div>
               </div>
             </article>
-          )) : <p className="social-muted">진행 중인 해낼게가 없어요.</p>}
+          )) : (
+            <div className="my-list-empty" data-testid="my-goals-empty">
+              <span className="my-menu-icon" aria-hidden="true"><Target /></span>
+              <div><strong>첫 해낼게를 만들어보세요</strong><p>목표와 WHY를 적으면 친구에게 공유할 링크가 생겨요.</p></div>
+              <Link href="/onboarding" className="social-primary-action">해낼게 만들기</Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -170,13 +177,19 @@ export function MyPageOverview({
                   );
                 })
               : (
-                <div className="my-cheer-empty">
+                <div className="my-cheer-empty" data-testid="received-cheers-empty">
                   <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
-                  <div><strong>받은 응원 {dashboard.achievements.received_cheer_count}번</strong><p>새 응원 메시지가 도착하면 여기에 쌓여요.</p></div>
+                  <div>
+                    <strong>첫 응원을 받아볼까요?</strong>
+                    <p>내 해낼게 링크를 공유하면 친구의 응원 메시지가 여기에 쌓여요.</p>
+                    {dashboard.goals.length > 0
+                      ? <Link href="/me">응원 링크 공유하기</Link>
+                      : <Link href="/onboarding">해낼게 만들기</Link>}
+                  </div>
                 </div>
               )
             : (
-              <div className="my-cheer-empty">
+              <div className="my-cheer-empty" data-testid="sent-cheers-empty">
                 <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
                 <div><strong>내가 응원한 친구</strong><p>친구의 목표와 응원 메시지를 확인할 수 있어요.</p><Link href="/friends">친구 목표 보기</Link></div>
               </div>

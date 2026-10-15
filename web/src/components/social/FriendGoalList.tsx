@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, UserPlus } from "lucide-react";
 import type { SocialFriend } from "@/lib/social/contracts";
 
 export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
@@ -67,6 +67,16 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
           );
         })}
       </div>
+      {friends.length === 1 && (
+        <aside className="friends-sparse-next" data-testid="friends-sparse-next-step">
+          <span className="friends-sparse-icon" aria-hidden="true"><UserPlus /></span>
+          <div>
+            <strong>한 명 더 함께 응원해볼까요?</strong>
+            <p>친구를 초대하거나 응원을 주고받으면 이 목록에 바로 이어져요.</p>
+          </div>
+          <Link href="/invite" className="social-primary-action">친구 초대하기</Link>
+        </aside>
+      )}
     </section>
   );
 }
