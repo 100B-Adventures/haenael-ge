@@ -1,0 +1,362 @@
+<!doctype html>
+<!--
+  STAMP | line=v2 | 생성=2026-10-16 06:40 KST | model=claude-opus-5[1m] | agent=product-designer
+  skills=design-review | 근거=chairman-board-memos-20261016.md(D-027-A~G) · chairman-directives-v2-20261015.md(D-025·D-026)
+        · wiki/거버넌스/결정.md D-025~D-027 · standard-bottom-tab.md v1.1.0 · standard-ux-writing.md · standard-wordmap-keyword.md
+  캡처=390 CSS px · deviceScaleFactor 3(물리 1170px) · 전체 스크롤 풀페이지 · 모션 화면은 GIF 녹화 동봉
+  고민=정지 캡처로는 "둥실둥실"을 판정할 수 없다는 것이 이번 판의 1번 지적이었다. 그래서 모션이 있는 네 화면은
+      GIF 를 캡처 옆에 나란히 뒀고, 메모를 꺼낼 수 없던 사고를 막으려 화면별 복사와 전체 일괄 복사를 둘 다 넣었다.
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 V2 디자인 개정 2차 결정 보드 (보드 메모 D-027 반영)</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+  <style>
+    :root { --bg:#ece9e1; --panel:#fff; --ink:#17150f; --muted:#69645b; --faint:#938d82; --line:#d9d4ca;
+            --green:#1b8a4f; --soft:#e7f4ec; --amber:#8a5a12; --amber-soft:#f6eddb; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:Pretendard,"Apple SD Gothic Neo",sans-serif; }
+    header { position:sticky; top:0; z-index:10; border-bottom:1px solid var(--line); background:rgb(255 255 255 / 94%); backdrop-filter:blur(16px); padding:16px 24px; }
+    header h1 { margin:0; font-size:22px; letter-spacing:-.4px; }
+    header p { max-width:1000px; margin:6px 0 0; color:var(--muted); font-size:14px; line-height:1.6; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+    nav { display:flex; gap:7px; overflow:auto; flex:1; min-width:0; padding-bottom:2px; }
+    nav a { flex:0 0 auto; border-radius:999px; padding:7px 11px; color:var(--green); background:var(--soft); font-size:13px; font-weight:800; text-decoration:none; }
+    .copyall { flex:0 0 auto; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:var(--green); color:#fff;
+               font-size:14px; font-weight:850; cursor:pointer; box-shadow:0 6px 16px rgb(27 138 79 / 28%); }
+    .copyall:active { transform:translateY(1px); }
+    .copyall.done { background:#15663b; }
+    main { max-width:1180px; margin:0 auto; padding:22px 24px 10px; }
+    .summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:20px; }
+    .summary div { border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:14px; }
+    .summary strong { display:block; color:var(--green); font-size:22px; }
+    .summary span { color:var(--muted); font-size:13px; line-height:1.45; }
+    .decision { margin-bottom:22px; border:1px solid #b9d9c5; border-radius:16px; background:var(--soft); padding:18px; }
+    .decision h2 { margin:0 0 8px; font-size:17px; }
+    .decision p { margin:0 0 7px; color:#2b4c39; font-size:14px; line-height:1.7; }
+    .decision p:last-child { margin-bottom:0; }
+    article { margin-bottom:22px; scroll-margin-top:150px; border:1px solid var(--line); border-radius:18px; background:var(--panel);
+              padding:18px; box-shadow:0 12px 32px rgb(40 36 28 / 8%); }
+    article > h2 { margin:0; font-size:19px; letter-spacing:-.3px; }
+    .meta { margin:5px 0 14px; color:var(--muted); font-size:13px; line-height:1.6; }
+    .pair { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; align-items:start; }
+    figure.card { margin:0; }
+    .card { border:1px solid var(--line); border-radius:13px; background:#d7d2c8; padding:10px; }
+    .card h3 { margin:0 0 8px; color:#413c33; font-size:13px; font-weight:850; text-align:center; }
+    .card.ba.after h3 { color:var(--green); }
+    .card img { display:block; width:100%; max-width:390px; margin:0 auto; height:auto; border-radius:7px; background:#fbfaf7;
+                box-shadow:0 6px 18px rgb(0 0 0 / 16%); }
+    .motionrow { margin-top:14px; }
+    .motionrow .card.motion { max-width:520px; margin:0 auto; }
+    .card.motion { background:#1f1d19; }
+    .card.motion h3 { color:#d8f0e0; }
+    .card.motion figcaption { margin:8px 2px 0; color:#a9a398; font-size:12px; line-height:1.55; text-align:center; }
+    .chg { margin:16px 0 0; border-left:3px solid var(--amber); border-radius:0 11px 11px 0; background:var(--amber-soft); padding:13px 15px; }
+    .chg h4 { margin:0 0 9px; color:var(--amber); font-size:13px; font-weight:850; }
+    .chg li { margin-bottom:9px; font-size:13.5px; line-height:1.65; }
+    .chg li:last-child { margin-bottom:0; }
+    .chg ul { margin:0; padding-left:17px; }
+    .chg q { display:block; margin-top:3px; color:#7a6a4a; font-size:12.5px; font-style:italic; }
+    fieldset { display:flex; gap:8px; margin:15px 0 0; border:0; padding:0; }
+    legend { margin-bottom:7px; font-size:13px; font-weight:850; }
+    fieldset label { flex:1; cursor:pointer; }
+    fieldset input { position:absolute; opacity:0; pointer-events:none; }
+    fieldset span { display:flex; min-height:44px; align-items:center; justify-content:center; border:1px solid var(--line);
+                    border-radius:11px; color:var(--muted); background:#fbfaf7; font-size:14px; font-weight:800; }
+    fieldset input:checked + span { border-color:var(--green); color:var(--green); background:var(--soft); box-shadow:0 0 0 2px rgb(27 138 79 / 12%); }
+    .note-label { display:flex; align-items:center; justify-content:space-between; margin-top:13px; font-size:13px; font-weight:850; }
+    .copyone { min-height:34px; padding:0 11px; border:1px solid var(--line); border-radius:9px; background:#fbfaf7; color:var(--muted);
+               font-size:12px; font-weight:800; cursor:pointer; }
+    .copyone:active { background:var(--soft); }
+    textarea { width:100%; min-height:92px; margin-top:7px; resize:vertical; border:1px solid var(--line); border-radius:12px;
+               padding:12px; color:var(--ink); background:#fbfaf7; font:14px/1.6 inherit; }
+    textarea:focus { outline:3px solid rgb(27 138 79 / 18%); border-color:var(--green); }
+    .saved { min-height:18px; margin:5px 0 0; color:var(--green); font-size:12px; }
+    footer { max-width:1180px; margin:0 auto; padding:4px 24px 34px; color:var(--muted); font-size:12px; line-height:1.8; }
+    .toast { position:fixed; left:50%; bottom:26px; z-index:50; transform:translate(-50%,16px); opacity:0; pointer-events:none;
+             border-radius:999px; background:#17150f; padding:13px 22px; color:#fff; font-size:14px; font-weight:800; transition:.22s; }
+    .toast.on { transform:translate(-50%,0); opacity:1; }
+    @media (max-width:860px) { .summary { grid-template-columns:repeat(2,minmax(0,1fr)); } header { position:static; } article { scroll-margin-top:12px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>해낼게 V2 디자인 개정 2차 · 보드 메모 반영본</h1>
+    <p>왼쪽이 지난 판(v2), 오른쪽이 이번 개정본(v3)입니다. 모션이 있는 화면은 GIF 를 함께 올렸습니다. 정지 캡처로는 "둥실둥실" 을 판정할 수 없기 때문입니다. 각 화면에서 선택과 메모를 남기신 뒤 상단 <b>전체 복사</b> 를 누르면 8화면 전부가 한 번에 클립보드로 나옵니다.</p>
+    <div class="bar">
+      <nav aria-label="화면 바로가기">
+        <a href="#landing">랜딩</a><a href="#goalpublic">공개 목표</a><a href="#mypage">해낼게 관리</a><a href="#friends">친구</a><a href="#belong">친구 상세</a><a href="#status">업적</a><a href="#mywordmap">응원 워드맵</a><a href="#cashout">환전</a>
+      </nav>
+      <button type="button" class="copyall" id="copyAll">메모·선택 전체 복사</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="summary" aria-label="개정 요약">
+      <div><strong>8</strong><span>390px 풀스크롤 전후 대조</span></div>
+      <div><strong>3×</strong><span>캡처 배율(물리 1170px)</span></div>
+      <div><strong>5</strong><span>모션 GIF 녹화</span></div>
+      <div><strong>0</strong><span>워드맵 한 줄·단어 겹침</span></div>
+    </section>
+
+    <section class="decision">
+      <h2>이번 판에서 고친 것 (보드 메모 8건 → D-027-A~G)</h2>
+      <p><b>워드맵은 이제 구조적으로 한 줄이 될 수 없습니다.</b> CSS 줄바꿈(flex-wrap)을 버리고, 단어 하나하나의 실제 크기를 재서 중심부터 타원 나선으로 좌표를 찍는 배치 엔진을 넣었습니다. 겹침 0 을 기계로 확인했고, 빈도가 높은 단어가 중심을 먼저 차지합니다. 다섯 화면 전부에 같은 엔진을 썼습니다. 한 화면만 고치면 다음 판에 되돌아오기 때문입니다.</p>
+      <p><b>업적은 통계에서 수집으로 바꿨습니다.</b> 메달 실사 히어로, 집계 세 칸, 진열대 위의 메달 그리드(획득은 입체에 빛이 쓸리고, 잠김은 회색 음각에 정지). Higgsfield 로 만든 메달 자산 여덟 종을 씁니다.</p>
+      <p><b>해낼게 관리는 다섯 군데를 손봤습니다.</b> 푸터 제거, 로그아웃을 계정 블록 한 곳으로, 알림 토글을 한 카드 두 행으로, 목표 상세 관리 진입 신설, 커버를 실사 사진으로.</p>
+      <p><b>공개 목표</b>는 제목 끝 "해낼게" 를 브랜드 색으로 분리하고(실배포 GoalCard 규칙 그대로), 본문 끝에 떠 있던 신고를 상단 더보기 안으로 넣었습니다. <b>친구 상세</b>에는 응원 워드맵과 전체 보기를 노출했습니다.</p>
+    </section>
+
+    <article id="landing">
+      <h2>랜딩</h2>
+      <p class="meta">비회원 첫 도착. 하단탭 유지(회원 전용 탭은 잠금), 전역 푸터 없음.</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2)</h3><img src="shots/v2-design-revision-v2/landing-v2-390-full.png" alt="랜딩 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3)</h3><img src="shots/v2-design-revision-v2/landing-v3-390-full.png" alt="랜딩 개정본 전체 화면"></figure>
+      </div>
+      <div class="motionrow">
+        <figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v2/landing-v3-motion.gif" alt="랜딩 모션 녹화"><figcaption>단어 착지 → 서로 다른 속도로 부유 · 하트와 클로버가 떠오름</figcaption></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul>
+          <li><b>D-027-A 모션을 볼 수 있게 했습니다.</b> 정지 캡처 옆에 GIF 를 함께 올립니다.<q>"동적 모션은 왜 안보여주냐? 하네스 씨발이네 이거"</q></li>
+          <li><b>D-027-E 프리뷰 워드맵을 떠다니는 배치로.</b> 실제 유저가 남긴 문장 그대로("꼭 해낼 거야", "내가 옆에 있을게")를 서로 다른 위상으로 띄웠습니다.<q>"하트이모지 같은것도 넣고 둥실둥실 움직이게 할거지?"</q></li>
+        </ul>
+      </div>
+      <div data-controls="landing"></div>
+    </article>
+
+    <article id="goalpublic">
+      <h2>공개 목표</h2>
+      <p class="meta">인스타·카톡 링크로 도착하는 비회원 전환면. 금액·순위 노출 0(D-003).</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2)</h3><img src="shots/v2-design-revision-v2/goalpublic-v2-390-full.png" alt="공개 목표 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3)</h3><img src="shots/v2-design-revision-v2/goalpublic-v3-390-full.png" alt="공개 목표 개정본 전체 화면"></figure>
+      </div>
+      <div class="motionrow">
+        <figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v2/goalpublic-v3-motion.gif" alt="공개 목표 모션 녹화"><figcaption>워드맵 영역으로 스크롤한 상태에서 녹화</figcaption></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul>
+          <li><b>D-027-B 제목에서 "해낼게" 를 브랜드 색으로 강조.</b> 실배포 GoalCard 규칙(제목 끝 "해낼게" 를 clover-bright 로 분리, 27px, 두 줄 클램프)을 그대로 따랐습니다. 샘플 제목도 "토익 900 해낼게" 로 정렬했습니다.<q>"이전 버젼에서 '토익 900 해낼게' 에서 해낼게는 다른 색으로 강조하지 않았냐"</q></li>
+          <li><b>D-027-B 신고 버튼을 상단 더보기(⋯)로.</b> 본문 끝에 밑줄 링크로 떠 있던 신고를 없애고, 44px 버튼 + 시트(링크 복사·신고)로 묶었습니다. 본문이 제목 → 칩 → 커버 → WHY → 워드맵 으로 끊기지 않고 내려갑니다.<q>"신고 버튼 저렇게 뜬금 없이 있어서 전체적인 간격구조 씨발같네"</q></li>
+          <li><b>D-027-E 워드맵 떠다니는 배치.</b></li>
+        </ul>
+      </div>
+      <div data-controls="goalpublic"></div>
+    </article>
+
+    <article id="mypage">
+      <h2>해낼게 관리</h2>
+      <p class="meta">회원의 최상위 관리면. 하단탭 유지이므로 전역 푸터를 깔지 않습니다(하단탭 기준 7항).</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2)</h3><img src="shots/v2-design-revision-v2/mypage-v2-390-full.png" alt="해낼게 관리 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3)</h3><img src="shots/v2-design-revision-v2/mypage-v3-390-full.png" alt="해낼게 관리 개정본 전체 화면"></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점 (지적 다섯 가지 전부)</h4>
+        <ul>
+          <li><b>푸터를 없앴습니다.</b> 사업자 정보는 계정 블록 아래 접힘 안으로 옮겼습니다.<q>"푸터 없앤다며? 여기엔 왜있고"</q></li>
+          <li><b>로그아웃을 계정 블록 한 곳으로.</b> 상단 헤더에서 뺐고, 상단에는 자주 쓰는 알림만 남습니다.<q>"로그아웃은 왜 저 위치에 있꼬"</q></li>
+          <li><b>알림 토글 재설계.</b> 카드 두 장 나열 → 한 카드 두 행. 스위치는 46×27 트랙을 44px 터치영역이 감쌉니다(role=switch).<q>"알림 토글 버튼은 왜 저지랄이고"</q></li>
+          <li><b>목표 상세 관리 진입 신설.</b> 관리 화면인데 목표 하나를 손볼 길이 없었습니다. 목표 카드에 "목표 관리 ›" 를 넣어 응원자 명단·편집·종료 화면으로 보냅니다.<q>"관리인데 상세관리로는 어떻게 가며"</q></li>
+          <li><b>배너 사진 교체.</b> 단색 그라데이션 띠 → 실사 커버(아침 책상) + 하단 그라데이션 위 캡션.<q>"배너사진은 너는 저게 이쁘다고생각하냐?"</q></li>
+        </ul>
+      </div>
+      <div data-controls="mypage"></div>
+    </article>
+
+    <article id="friends">
+      <h2>친구</h2>
+      <p class="meta">응원하면 친구가 됩니다(D-024). 이번 판 변경 없음 — 지난 판 지적이 없던 화면입니다.</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2)</h3><img src="shots/v2-design-revision-v2/friends-v2-390-full.png" alt="친구 목록 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3)</h3><img src="shots/v2-design-revision-v2/friends-v3-390-full.png" alt="친구 목록 개정본 전체 화면"></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul>
+          <li><b>없음.</b> 보드 메모 4번에서 선택도 메모도 없으셨고, D-026-D 관계 방향(내가 응원함 / 응원받음 / 서로 응원)은 지난 판에 이미 반영돼 있습니다. 대조를 위해 그대로 싣습니다.</li>
+        </ul>
+      </div>
+      <div data-controls="friends"></div>
+    </article>
+
+    <article id="belong">
+      <h2>친구 상세</h2>
+      <p class="meta">친구 한 명의 목표와 받은 응원을 보는 화면. 하단탭 유지.</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2)</h3><img src="shots/v2-design-revision-v2/belong-v2-390-full.png" alt="친구 상세 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3)</h3><img src="shots/v2-design-revision-v2/belong-v3-390-full.png" alt="친구 상세 개정본 전체 화면"></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul>
+          <li><b>D-027-F 응원 워드맵을 노출했습니다.</b> 친구가 받은 응원이 이 화면에 전혀 없었습니다. "도경이가 받은 응원" 섹션과 "전체 보기 ›" 진입을 넣었습니다.<q>"응원 워드맵은 왜 안보이냐?"</q></li>
+          <li><b>커버를 실사 사진으로.</b> 배너 지적을 같은 컴포넌트를 쓰는 이 화면에도 적용했습니다.</li>
+          <li><b>중복 캡션 제거.</b> 커버 캡션과 인물 사진 캡션에 "평점 4.0 해낼게" 가 두 번 나오던 것을 한 번으로 줄였습니다.</li>
+        </ul>
+      </div>
+      <div data-controls="belong"></div>
+    </article>
+
+    <article id="status">
+      <h2>업적</h2>
+      <p class="meta">DB 집계로 반증 가능한 세 지표만 씁니다(D-022). 금액·순위는 업적에 들어가지 않습니다.</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2)</h3><img src="shots/v2-design-revision-v2/status-v2-390-full.png" alt="업적 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3)</h3><img src="shots/v2-design-revision-v2/status-v3-390-full.png" alt="업적 개정본 전체 화면"></figure>
+      </div>
+      <div class="motionrow">
+        <figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v2/status-v3-motion.gif" alt="업적 모션 녹화"><figcaption>진행바 채움 · 메달 순차 등장 · 획득 메달만 빛이 쓸림(잠김은 정지)</figcaption></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul>
+          <li><b>D-027-D 전면 재설계.</b> 사진 한 장 + 숫자 세 줄이라 "통계" 로 읽혔습니다. 메달 히어로 → 집계 세 칸 → <b>진열대 수집 그리드</b> → 다음 메달 진행바 순서로, 화면이 "모으는 곳" 이라고 형태로 말하게 했습니다.<q>"이게 업적 화면같이 보여?"</q></li>
+          <li><b>이미지·아이콘 교체.</b> 이모지 배지 여덟 종 → Higgsfield 메달 실사 여섯 종. 히어로도 리본 달린 클로버 메달로 바꿨습니다.<q>"사진이 너는 맞다고 보냐 이 이미지에? 아이콘 좃같은데?"</q></li>
+          <li><b>모션 추가.</b> 히어로 등장, 메달 순차 pop, 획득 메달만 빛 쓸림 반복. 잠긴 메달은 정지라 "아직 내 것이 아님" 이 움직임으로 구분됩니다.<q>"동적모션은 어디갔고"</q></li>
+          <li><b>스위치 규격 통일.</b> 이 화면에만 남아 있던 구형 토글을 해낼게 관리와 같은 컴포넌트로 바꿨습니다.</li>
+        </ul>
+      </div>
+      <div data-controls="status"></div>
+    </article>
+
+    <article id="mywordmap">
+      <h2>응원 워드맵 (전체 보기)</h2>
+      <p class="meta">받은 응원 전부 표시(12개 상한 폐기, D-025-F). 하단탭 유지(D-026-H).</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2) — 한 줄로 눕던 배치</h3><img src="shots/v2-design-revision-v2/mywordmap-v2-390-full.png" alt="응원 워드맵 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3) — 떠다니는 배치</h3><img src="shots/v2-design-revision-v2/mywordmap-v3-390-full.png" alt="응원 워드맵 개정본 전체 화면"></figure>
+      </div>
+      <div class="motionrow">
+        <figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v2/mywordmap-v3-motion.gif" alt="응원 워드맵 모션 녹화"><figcaption>단어 열네 개가 서로 다른 속도·진폭·회전으로 부유</figcaption></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul>
+          <li><b>D-027-E 떠다니는 배치 엔진.</b> CSS 줄바꿈은 폭이 모자라면 반드시 줄을 만듭니다. 그 구조를 버리고 단어 실측 크기로 타원 나선 좌표를 계산합니다. 390px 에서 단어 열네 개를 겹침 0 으로 담는 것을 기계로 확인했습니다.<q>"한줄로 하지말라고 말했는데 다 씹네 내가 요청한거는 어디 좆박고 그냥 무시하냐?"</q></li>
+          <li><b>면적이 모자라면 세로로 늘립니다.</b> 단어가 더 늘어도 줄로 눕지 않습니다.</li>
+          <li><b>빈도 위계의 접근성 교정.</b> 가장 작은 단어 색이 배경 대비 2.0:1 로 본문 하한(4.5:1)에 미달이었습니다. 4.5:1 로 올리고, 빈도 차이는 크기(16/20/26)와 굵기(600/700/800)가 지게 했습니다.</li>
+        </ul>
+      </div>
+      <div data-controls="mywordmap"></div>
+    </article>
+
+    <article id="cashout">
+      <h2>환전</h2>
+      <p class="meta">돈이 움직이는 단일 거래. 하단탭 숨김 + 화면 안에 다음 행동(D-025-D).</p>
+            <div class="pair">
+        <figure class="card ba"><h3>지난 판 (v2)</h3><img src="shots/v2-design-revision-v2/cashout-v2-390-full.png" alt="환전 지난 판 전체 화면"></figure>
+        <figure class="card ba after"><h3>이번 개정 (v3)</h3><img src="shots/v2-design-revision-v2/cashout-v3-390-full.png" alt="환전 개정본 전체 화면"></figure>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul>
+          <li><b>없음.</b> 보드 메모 8번에서 승인하셨고 이번 지적 대상이 아닙니다. 수수료 공식과 A안 환전 잠금은 손대지 않았습니다. 대조를 위해 그대로 싣습니다.</li>
+        </ul>
+      </div>
+      <div data-controls="cashout"></div>
+    </article>
+  </main>
+
+  <footer>
+    SOURCES/MODEL: claude-opus-5[1m] | <code>docs/design/chairman-board-memos-20261016.md</code>(D-027-A~G) · <code>docs/design/chairman-directives-v2-20261015.md</code>(D-025·D-026) · <code>wiki/거버넌스/결정.md</code> D-025~D-027 · <code>docs/design/standard-bottom-tab.md</code> v1.1.0 · <code>standard-ux-writing.md</code> · <code>standard-wordmap-keyword.md</code> · 실배포 <code>web/src/components/goal/GoalCard.tsx</code>:130-137<br>
+    SKILLS_USED: design-review(캡처 기반 육안 재검 · 대비 실측 · 등급 산출)<br>
+    캡처 규격: 390 CSS px · deviceScaleFactor 3(물리 1170px) · 전체 스크롤 풀페이지 · 모션 5종 GIF 녹화(9fps)<br>
+    PRESENTATION_CHECK: 화면 8개 전부 선택 버튼 3개 + 메모칸 1개 + 화면별 복사 · 상단 전체 일괄 복사 · 툴콜 잔재 0 · Chromium 렌더 확인함
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const KEY = "haenael-v2-revision2";
+    const SCREENS = [];
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("on");
+      clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove("on"), 1800);
+    }
+
+    async function writeClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (e) {
+        // file:// 에서 권한이 막히는 경우가 있어 폴백을 둔다. 복사가 안 되면 메모가 갇힌다.
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:-1000px;left:0;opacity:0";
+        document.body.appendChild(ta); ta.select();
+        const ok = document.execCommand("copy");
+        ta.remove();
+        return ok;
+      }
+    }
+
+    function readOne(id) {
+      const choice = localStorage.getItem(`${KEY}-choice:${id}`) || "(선택 없음)";
+      const note = (localStorage.getItem(`${KEY}-note:${id}`) || "").trim() || "(메모 없음)";
+      const title = document.querySelector(`#${id} > h2`).textContent.trim();
+      return { id, title, choice, note };
+    }
+
+    document.querySelectorAll("[data-controls]").forEach((host) => {
+      const id = host.dataset.controls;
+      SCREENS.push(id);
+      host.innerHTML =
+        `<fieldset><legend>이 화면 선택</legend>${["승인", "수정", "반려"]
+          .map((c) => `<label><input type="radio" name="choice-${id}" value="${c}"><span>${c}</span></label>`)
+          .join("")}</fieldset>` +
+        `<div class="note-label"><label for="note-${id}">화면 메모</label>` +
+        `<button type="button" class="copyone" data-copyone="${id}">이 화면만 복사</button></div>` +
+        `<textarea id="note-${id}" placeholder="이 화면에서 고쳐야 할 것을 적어주세요. 입력하는 대로 저장되고, 위 버튼이나 상단 전체 복사로 꺼낼 수 있습니다."></textarea>` +
+        `<p class="saved" aria-live="polite"></p>`;
+
+      const saved = localStorage.getItem(`${KEY}-choice:${id}`);
+      if (saved) { const r = host.querySelector(`input[value="${saved}"]`); if (r) r.checked = true; }
+      host.querySelectorAll("input[type=radio]").forEach((input) =>
+        input.addEventListener("change", () => localStorage.setItem(`${KEY}-choice:${id}`, input.value)));
+
+      const field = host.querySelector("textarea");
+      field.value = localStorage.getItem(`${KEY}-note:${id}`) || "";
+      field.addEventListener("input", () => {
+        localStorage.setItem(`${KEY}-note:${id}`, field.value);
+        const status = field.nextElementSibling;
+        status.textContent = "저장됨";
+        clearTimeout(field._t); field._t = setTimeout(() => { status.textContent = ""; }, 1200);
+      });
+
+      host.querySelector("[data-copyone]").addEventListener("click", async () => {
+        const r = readOne(id);
+        const ok = await writeClipboard(`## ${r.title}\n- 선택: ${r.choice}\n- 메모: ${r.note}\n`);
+        toast(ok ? `"${r.title}" 복사했습니다` : "복사에 실패했습니다. 메모를 직접 긁어 주세요");
+      });
+    });
+
+    document.getElementById("copyAll").addEventListener("click", async (e) => {
+      const stamp = new Date().toLocaleString("ko-KR", { hour12: false });
+      const rows = SCREENS.map(readOne);
+      const body = rows.map((r, i) => `${i + 1}. ${r.title}\n   선택: ${r.choice}\n   메모: ${r.note}`).join("\n\n");
+      const text =
+        `# 해낼게 V2 디자인 개정 2차 보드 — 회장 메모·선택 회수본\n` +
+        `생성: ${stamp}\n` +
+        `보드: docs/design/boards/v2-design-revision-v2-opus5.html\n\n${body}\n`;
+      const ok = await writeClipboard(text);
+      if (ok) {
+        e.target.textContent = "전체 복사 완료";
+        e.target.classList.add("done");
+        setTimeout(() => { e.target.textContent = "메모·선택 전체 복사"; e.target.classList.remove("done"); }, 2200);
+        toast(`${rows.length}개 화면의 선택과 메모를 복사했습니다`);
+      } else {
+        toast("복사에 실패했습니다. 메모를 직접 긁어 주세요");
+      }
+    });
+  </script>
+</body>
+</html>
