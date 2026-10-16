@@ -78,6 +78,9 @@ model: claude-opus-5
 | 워드맵 13개 초과 안내·회수 경로, 제목 2줄·이유 3줄 clamp | `goal-public` `receiver-me` | DESIGN.md §6.1, 감사 P1 :36·:37 |
 | 친구 초대, 랜딩 워드맵 다국어 | 신규 · `landing` | `prototypes/friends-invite-v1-opus48.html`, `landing-wordmap-i18n-v2-opus48.html`. 미승인 초안 |
 | 응원 탐색 피드 | 없음 | D-004 로 제외. 화면을 만들지 않는다 |
+| **약관 및 정책**(`legal`, v2 프로토 신규) | `receiver-me`(해낼게 관리에서 진입 행 1개) · `terms` `privacy` `how` | D-030-B. 하단탭 화면에서 사업자 정보·약관 블록을 빼고 이 한 화면이 상시 접근을 책임진다. 시안 = `prototypes/social-viral-loop-v3-opus5.html#legal`. 전 화면 노출 표 = `DESIGN.md` §법적 고지 노출 |
+| **배너 직접 올리기**(`bannerupload`, v2 프로토 신규) | `onboarding` `goal-detail` `receiver-me` 의 배너 선택기 | D-030-D. 업로드 경로를 문구가 아니라 화면으로. 상태 4종(고르기 전·미리보기·용량 초과 오류·적용). 시안 = `prototypes/social-viral-loop-v3-opus5.html#bannerupload` |
+| 법적 고지 블록(랜딩·공개 목표 콘텐츠 말미) | `landing` `goal-public` | D-030-B. 전자상거래법 제10조 초기화면 표시. 전역 푸터로 되돌리지 않는다 |
 
 ## 4. 다음 캡처 세트가 채워야 할 것
 

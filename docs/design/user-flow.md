@@ -148,6 +148,8 @@
 | 사용법 | 실구현 `/how` | 서비스 이용 안내 |
 | 운영자 대시보드 | 실구현 `/admin` | 회원·클로버 원장 조회, 환전 큐·계좌 열람·지급 완료·반려 |
 | 아동 안전 | 실구현 `/child-safety` | 아동 안전 정책 |
+| **약관 및 정책 (v2 신규, 2026-10-17 D-030-B)** | `prototypes/social-viral-loop-v3-opus5.html#legal` | 이용안내·이용약관·개인정보처리방침 진입 + 사업자 정보. 진입 = 해낼게 관리 `약관 및 정책 ›`, 이탈 = 각 문서 · 뒤로 |
+| **배너 직접 올리기 (v2 신규, 2026-10-17 D-030-D)** | `prototypes/social-viral-loop-v3-opus5.html#bannerupload` | 고르기 전(빈) · 배너 비율 미리보기 · 용량 초과 오류 · 적용 후 복귀. 진입 = 온보딩·목표 관리·해낼게 관리의 배너 선택기 `내 사진 올리기` |
 | (참고) 랜딩 포지셔닝 탐색안 | `WIREFRAMES/landing-compare.html` | A/B/C 비교 — C 확정으로 archive |
 | (참고) 가입방식 비교 | (onboarding-compare 내) | write/social 비교 — write-first 확정 |
 

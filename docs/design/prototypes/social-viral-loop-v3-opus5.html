@@ -1,7 +1,25 @@
 <!DOCTYPE html>
 <!--
   변경 이력은 최신순(위가 최신)이다. 파일명 v3 는 승인 세대 표기이고 작업 횟수가 아니다
-  (정본 = ~/.claude/standards/prototype-versioning.md · D-028-B). 같은 세대 안의 개정은 이 파일을 고친다.
+  (정본 = ~/.claude/standards/artifact-stamp.md §1 · D-028-B · D-029-B). 같은 세대 안의 개정은 이 파일을 고친다.
+
+  2026-10-17 V2 design 개정 4차(D-030-A~F · 회장 보드 메모 11건 + 10-16 메모 8건 재검증).
+  - 모션(D-030-A): 실측에서 @keyframes 28종이 선언돼 있는데 로드 직후 '화면 안에 보이는' 실행 애니메이션이 0개였다.
+    전부 스크롤 아래에 있거나 이미 끝난 뒤였다. ①진입 시 첫 화면 블록 5개 순차 rise ②IntersectionObserver 로
+    스크롤 진입 시 재생 ③프레임 아래 모션 바(다시 재생·4초 반복·순간별 재생) 를 넣었다. 우측 검수 패널의
+    '동적 인터랙션(모션 명세)' 블록은 삭제했다(회장 "모션을 오른쪽에 또 따로보여주네"). 25개 화면 전부
+    보이는 영역 실행 ≥1, 400ms 픽셀 변화 11/11 표본.
+  - 푸터 일관성(D-030-B): 전역 푸터 제거는 사업자 정보·이용안내·약관·개인정보 블록 전체를 뜻한다. 전 화면 노출
+    표를 DESIGN.md 에 박고 그대로 구현했다. 랜딩·공개 목표에만 법적 고지 블록(전자상거래법 제10조 초기화면),
+    해낼게 관리에는 '약관 및 정책 ›' 한 행, 내용은 신규 legal 화면이 소유(개인정보 보호법 제30조 제2항).
+  - 응원 메시지 줄넘침(D-030-C): 1줄 말줄임을 폐기하고 2줄 clamp + 같은 자리 '더 보기/접기' 로 통일했다.
+    목표 관리·해낼게 관리·친구·친구 상세 네 화면에 같은 처리. 실제로 잘린 메시지에만 토글이 붙는다.
+  - 배너 직접 올리기(D-030-D): 업로드를 문구가 아니라 화면으로 냈다(bannerupload 신규). 선택기의 '내 사진 올리기'
+    타일을 맨 앞으로 옮겼다(끝에 두면 가로 스크롤 밖이라 안 보인다). 상태 4종: 고르기 전·미리보기·용량 초과 오류·적용.
+  - 조판(D-030-E): '기본은 꺼둬요' 처럼 한 조각만 줄바꿈한 곳을 전수로 고쳤다. 그 문장은 옆 스위치와 중복이라
+    삭제했고, '금액과 순위는 업적에 들어가지 않아요'(없는 것 설명)와 '24  명이'(숫자·단위 분리)도 정리했다.
+  - 제목 회귀(D-030-F): 목표 제목의 '해낼게' 강조를 실배포 GoalCard.tsx 규칙으로 되돌렸다. 제목이 '게'로 끝나지
+    않을 때만 붙이고 그 조각만 --clover-bright. 적용 5곳(공개 목표·홈·목표 관리·응원 워드맵·친구 상세).
 
   2026-10-16 V2 design 개정 3차(D-028-A·D·E · 회장 지적 6건).
   - CSS 미적용 class 0: 목표 카드의 "목표 관리" 버튼이 마크업 부모는 .goal-actions 인데 선택자가 .gfoot .gmanage 라
@@ -462,6 +480,8 @@
   .wm-center,.wm-center .wc-goal{display:none;}
   .wm-count{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;font-size:13px;font-weight:800;color:var(--clover-ink);}
   .wm-count .n{font-size:20px;font-weight:900;transition:transform .3s;}
+  /* D-030-E 숫자와 단위는 한 덩어리다. 사이에 간격·줄바꿈이 생기면 "24  명이" 처럼 읽힌다. */
+  .wm-count .cnt{word-break:keep-all;}
   .wm-count .n.bump{transform:scale(1.25);}
   /* 비회원 피드백 배너 */
   .guest-feed{display:flex;gap:9px;background:var(--clover-soft);border-radius:var(--r-sm);padding:12px 14px;margin-top:16px;font-size:13px;color:var(--clover-ink);line-height:1.5;word-break:keep-all;font-weight:600;align-items:flex-start;}
@@ -1060,6 +1080,108 @@
   .balance .bcta{min-height:44px;padding:0 14px;display:inline-flex;align-items:center;}
   .goalcard .gfoot .gview{min-height:44px;padding:0 16px;}
   .cheer-more button{min-height:44px;padding:0 10px;}
+
+  /* ══════════════════════════════════════════════════════════════════
+     v4 개정(2026-10-17 · D-030) 전용 규칙
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* ── D-030-A ① 진입 모션을 "보이는 영역"에서 돌게 한다 ──
+     실측(2026-10-17 01:1x, 390px·dSF2 헤드리스): @keyframes 28종이 선언돼 있는데 로드 직후 화면 안에서
+     보이는 애니메이션 0개, 첫 화면 400ms 픽셀 변화 0. 모션이 없던 것이 아니라 전부 스크롤 아래에 있거나
+     이미 끝난 뒤였다. 그래서 각 화면의 첫 화면(above the fold) 블록 다섯 개에 진입 rise 를 스태거로 준다.
+     아래 IntersectionObserver 가 스크롤로 들어오는 블록의 모션을 그 시점에 다시 재생한다. */
+  .screen.active[data-anim="run"] .app > .pad > *:nth-child(-n+5){animation:rise var(--motion-base) var(--ease-decel) both;}
+  .screen.active[data-anim="run"] .app > .pad > *:nth-child(1){animation-delay:0ms;}
+  .screen.active[data-anim="run"] .app > .pad > *:nth-child(2){animation-delay:70ms;}
+  .screen.active[data-anim="run"] .app > .pad > *:nth-child(3){animation-delay:140ms;}
+  .screen.active[data-anim="run"] .app > .pad > *:nth-child(4){animation-delay:210ms;}
+  .screen.active[data-anim="run"] .app > .pad > *:nth-child(5){animation-delay:280ms;}
+
+  /* ── D-030-A ② 프레임 아래 모션 검수 바 (검수 셸 · 제품 화면 아님) ──
+     회장 메모: "모션을 오른쪽에 또 따로보여주네 병신인가?" → 오른쪽 패널의 모션 명세 블록을 없애고,
+     그 화면 바로 아래에서 다시 재생·순간별 재생을 하게 한다. 모션은 설명이 아니라 돌아가는 것으로 본다. */
+  .framecol{display:flex;flex-direction:column;gap:12px;flex:0 0 auto;}
+  .motionbar{width:390px;background:#1c1b19;border:1px solid #35322d;border-radius:14px;padding:13px 14px;color:#e9e5dd;}
+  .motionbar .mb-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+  .motionbar .mb-t{font-size:13px;font-weight:800;color:#e0a94a;letter-spacing:-.2px;}
+  .motionbar .mb-play{min-height:38px;padding:0 14px;border:0;border-radius:var(--r-full);background:var(--clover);color:#fff;
+    font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .motionbar .mb-play:active{transform:translateY(1px);}
+  .motionbar .mb-loop{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#b9b2a6;cursor:pointer;}
+  .motionbar .mb-loop input{accent-color:var(--clover);cursor:pointer;}
+  .motionbar .mb-list{margin-top:11px;display:flex;flex-direction:column;gap:7px;}
+  .motionbar .mb-item{text-align:left;border:1px solid #35322d;border-radius:10px;background:#232120;padding:9px 11px;cursor:pointer;
+    font-family:var(--font);color:#e9e5dd;}
+  .motionbar .mb-item:hover{border-color:#5a554c;}
+  .motionbar .mb-item.playing{border-color:var(--clover);box-shadow:0 0 0 2px rgba(27,138,79,.22);}
+  .motionbar .mb-item .n{display:block;font-size:13px;font-weight:800;line-height:1.5;}
+  .motionbar .mb-item .m{display:block;margin-top:3px;font-size:13px;color:#a9a398;line-height:1.5;}
+  .motionbar .mb-note{margin-top:10px;font-size:13px;color:#7d786f;line-height:1.6;}
+
+  /* ── D-030-B 법적 고지 블록 (전 화면 노출 표대로만 쓴다) ──
+     전자상거래법 제10조는 사업자 정보를 "사이버몰의 초기화면"에 표시하게 한다. 그래서 비로그인으로 처음
+     닿는 두 화면(랜딩·공개 목표)에만 콘텐츠 말미 블록으로 두고, 하단탭을 가진 회원 화면에는 깔지 않는다.
+     상시 접근은 해낼게 관리 → 약관 및 정책(legal) 한 곳이 책임진다(개인정보 보호법 제30조 제2항). */
+  .legalfoot{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);}
+  .legalfoot .lf-links{display:flex;gap:13px;flex-wrap:wrap;}
+  .legalfoot .lf-links a{font-size:13px;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+  .legalfoot .lf-biz{margin-top:9px;font-size:13px;color:var(--faint);line-height:1.7;}
+  /* 약관 및 정책 화면: 관리 화면의 행 컴포넌트를 그대로 쓴다(같은 데이터는 같은 모양) */
+  .legal-biz{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:15px;}
+  .legal-biz .lb-t{font-size:13px;font-weight:800;color:var(--muted);}
+  .legal-biz .lb-d{margin-top:8px;font-size:13px;color:var(--faint);line-height:1.8;}
+
+  /* ── D-030-C 응원 메시지 줄넘침: 목록은 2줄까지, 넘치면 "더 보기" ──
+     규칙 = docs/design/DESIGN.md §4 오버플로. 한 줄 말줄임은 메시지가 거의 안 보여 응원을 읽는 화면의
+     목적을 깨고, 전문 노출은 목록 스캔을 깨뜨린다. 그래서 두 줄 + 펼치기로 통일하고 목표 관리·해낼게 관리·
+     친구·친구 상세의 모든 응원 메시지에 같은 컴포넌트를 쓴다. */
+  .cheer-msg,.fr .news span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+    white-space:normal;word-break:keep-all;text-overflow:ellipsis;}
+  .cheer-msg.full,.fr .news span.full{-webkit-line-clamp:unset;display:block;}
+  /* 터치 영역: 글자는 13px 이지만 위아래 여백으로 눌리는 면을 넓힌다. 행 전체도 같은 토글을 받는다(44px 하한은 행이 충족). */
+  .msg-more{display:inline-block;margin-top:3px;padding:6px 2px;font-size:13px;font-weight:800;color:var(--clover-ink);cursor:pointer;white-space:nowrap;}
+  .msg-more.hide{display:none;}
+
+  /* ── D-030-D 배너 직접 올리기 (사진 보관함 → 위치 맞추기 → 적용) ── */
+  .bu-note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px;}
+  .bu-pick{margin-top:16px;}
+  .bu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+  .bu-ph{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;border:2px solid transparent;background:var(--warm);cursor:pointer;padding:0;}
+  .bu-ph img{display:block;width:100%;height:100%;object-fit:cover;}
+  .bu-ph.sel{border-color:var(--clover);}
+  .bu-ph.sel:after{content:"✓";position:absolute;right:5px;top:4px;width:19px;height:19px;border-radius:var(--r-full);
+    background:var(--clover);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+  .bu-ph .big{position:absolute;left:5px;bottom:5px;padding:2px 7px;border-radius:var(--r-full);background:rgba(14,22,16,.56);
+    color:#fff;font-size:13px;font-weight:800;}
+  .bu-crop{margin-top:16px;position:relative;height:150px;border-radius:var(--r-md);overflow:hidden;background:#E7E2D8;}
+  .bu-crop img{display:block;width:100%;height:100%;object-fit:cover;}
+  .bu-crop .grid{position:absolute;inset:0;background:
+    linear-gradient(to right,transparent 33%,rgba(255,255,255,.5) 33%,rgba(255,255,255,.5) 33.4%,transparent 33.4%,
+    transparent 66.6%,rgba(255,255,255,.5) 66.6%,rgba(255,255,255,.5) 67%,transparent 67%);}
+  .bu-crop .drag{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);padding:5px 11px;border-radius:var(--r-full);
+    background:rgba(14,22,16,.52);color:#fff;font-size:13px;font-weight:800;white-space:nowrap;}
+  .bu-err{margin-top:12px;background:var(--danger-soft);border:1px solid #F0C9C3;border-radius:var(--r-md);padding:12px 14px;
+    color:var(--danger-ink);font-size:13px;font-weight:700;line-height:1.6;}
+  .bu-err.hide{display:none;}
+  .bu-empty{margin-top:16px;background:var(--surface);border:1.5px dashed var(--line);border-radius:var(--r-md);padding:22px 16px;text-align:center;}
+  .bu-empty .e1{font-size:13px;font-weight:800;color:var(--muted);}
+  .bu-empty .e2{margin-top:5px;font-size:13px;color:var(--faint);line-height:1.6;}
+  .bu-acts{display:flex;gap:9px;margin-top:16px;}
+  /* 두 버튼이 같은 폭으로 나란히 선다. 라벨은 한 줄을 유지한다(ux-writing 줄바꿈 규칙: 버튼은 한 줄). */
+  .bu-acts .cbtn{flex:1 1 0;min-width:0;margin-top:0;white-space:nowrap;}
+  .bu-acts .cbtn.ghost{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);}
+  .bu-file{display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;margin-top:10px;border-radius:var(--r-md);
+    border:1.5px dashed var(--clover);background:var(--clover-soft);color:var(--clover-ink);font-size:13px;font-weight:800;cursor:pointer;}
+  .bu-file svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  /* 선택기의 "내 사진" 타일에서 이 화면으로 들어온다(문구가 아니라 화면으로 보여준다) */
+  .cp-upgo{flex:0 0 auto;width:98px;height:64px;border-radius:12px;border:1.5px dashed var(--clover);background:var(--clover-soft);
+    color:var(--clover-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+    font-family:var(--font);font-size:13px;font-weight:800;align-self:flex-start;}
+  .cp-upgo svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* ── D-030-F 목표 제목의 '해낼게' 강조 (실배포 GoalCard.tsx 규칙) ──
+     규칙 원문: 제목이 '게'로 끝나지 않으면 ' 해낼게'를 붙이고 그 조각만 브랜드 색으로 강조한다. */
+  .gd-hero h2 .haenael,.goalcard h3 .haenael,.belong-hero h2 .haenael{color:var(--clover-bright);}
 </style>
 </head>
 <body>
@@ -1264,6 +1386,8 @@
       <span class="lbl">관리</span>
       <button class="nav" data-s="mypage">해낼게 관리</button>
       <button class="nav" data-s="cashhistory">환전내역</button>
+      <button class="nav" data-s="legal">약관 및 정책</button>
+      <button class="nav" data-s="bannerupload">배너 직접 올리기</button>
       <span class="sep"></span>
       <span class="lbl">계승</span>
       <button class="nav" data-s="landing">랜딩</button>
@@ -1335,7 +1459,7 @@
         <div class="goalcard">
           <div class="cover card-cover photo"><img src="../assets/v2-cover-presets/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-wm">🍀</span></div>
           <div class="gtop"><span class="chip dday">D-12</span><span class="chip status">진행 중</span></div>
-          <h3>토익 900 해낼게</h3>
+          <h3>토익 900 <span class="haenael">해낼게</span></h3>
           <div class="greason">교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
           <div class="gactions">
             <span class="gchip" onclick="go('goaldetail')"><svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2.3"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="17" r="2.3"/></svg>관리</span>
@@ -1409,12 +1533,12 @@
         <!-- v4 FIX4: 별도 수정폼 토글 제거 → 제목·이유·마감을 그 자리에서 탭해 인라인 편집 -->
         <div class="gd-hero">
           <div class="gtop"><span class="chip dday" data-edit="dday" data-val="2026-10-07" onclick="editInline(this,'date')">D-12</span><span class="chip status">진행 중</span></div>
-          <h2 data-edit="title" data-val="토익 900 해낼게" onclick="editInline(this,'text')">토익 900 해낼게<span class="edot">✎</span></h2>
+          <h2 data-edit="title" data-val="토익 900 해낼게" onclick="editInline(this,'text')">토익 900 <span class="haenael">해낼게</span><span class="edot">✎</span></h2>
           <div class="greason" data-edit="reason" data-val="교환학생 지원 마감 전에 점수를 만들어야 해서." onclick="editInline(this,'textarea')">교환학생 지원 마감 전에 점수를 만들어야 해서.<span class="edot">✎</span></div>
         </div>
 
         <div class="gd-sect">응원 워드맵</div>
-        <div class="wm-count" style="margin-top:2px"><span>지금까지</span> <span class="n"><span data-count="24">24</span></span><span>명이 이 단어들로 응원했어요</span></div>
+        <div class="wm-count" style="margin-top:2px"><span>지금까지</span><span class="cnt"><b class="n" data-count="24">24</b>명이 이 단어들로 응원했어요</span></div>
         <div class="wordmap cloud" id="wordmapGd" style="margin-top:10px">
           <div class="wm-goalword">🍀 토익 900 해낼게</div>
           <span class="wm-word s3">화이팅</span>
@@ -1437,7 +1561,7 @@
               <div class="av"><img src="assets/social-viral/dogyeong.png" alt="윤도경"></div>
               <div class="mid msg-wrap">
                 <div class="nm">윤도경</div>
-                <div class="cheer-msg">도서관에서 같이 힘낸다, 넌 할 수 있어. 저번에 같이 공부한 그 카페 또 가자 끝까지 응원한다<span class="msg-chev">▾</span></div>
+                <div class="cheer-msg">도서관에서 같이 힘낸다, 넌 할 수 있어. 저번에 같이 공부한 그 카페 또 가자 끝까지 응원한다</div>
               </div>
               <div class="rel"><span class="relbadge">🍀 8번</span><span class="relmeta">2시간 전</span></div>
             </a>
@@ -1445,7 +1569,7 @@
               <div class="av"><img src="assets/social-viral/seoyeon.png" alt="서연"></div>
               <div class="mid msg-wrap">
                 <div class="nm">서연</div>
-                <div class="cheer-msg">모의고사 820이면 900 금방이야<span class="msg-chev">▾</span></div>
+                <div class="cheer-msg">모의고사 820이면 900 금방이야</div>
               </div>
               <div class="rel"><span class="relbadge">🍀 5번</span><span class="relmeta">어제</span></div>
             </a>
@@ -1453,7 +1577,7 @@
               <div class="av"><img src="assets/social-viral/jimin.png" alt="정민서"></div>
               <div class="mid msg-wrap">
                 <div class="nm">정민서</div>
-                <div class="cheer-msg">오늘도 한 걸음, 응원 보내<span class="msg-chev">▾</span></div>
+                <div class="cheer-msg">오늘도 한 걸음, 응원 보내</div>
               </div>
               <div class="rel"><span class="relbadge">🍀 3번</span><span class="relmeta">3일 전</span></div>
             </a>
@@ -1461,7 +1585,7 @@
               <div class="av anon">?</div>
               <div class="mid msg-wrap">
                 <div class="nm">익명의 누군가</div>
-                <div class="cheer-msg">끝까지 응원할게요<span class="msg-chev">▾</span></div>
+                <div class="cheer-msg">끝까지 응원할게요</div>
               </div>
               <div class="rel"><span class="relbadge">🍀 2번</span><span class="relmeta">5일 전</span></div>
             </a>
@@ -1469,39 +1593,39 @@
               <div class="av"><img src="assets/social-viral/supporter.png" alt="박준"></div>
               <div class="mid msg-wrap">
                 <div class="nm">박준</div>
-                <div class="cheer-msg">화이팅 넌 된다<span class="msg-chev">▾</span></div>
+                <div class="cheer-msg">화이팅 넌 된다</div>
               </div>
               <div class="rel"><span class="relbadge">🍀 2번</span><span class="relmeta">6일 전</span></div>
             </a>
             <a class="fr" onclick="toggleCheerMsg(this);return false">
               <div class="av anon">?</div>
-              <div class="mid msg-wrap"><div class="nm">익명의 누군가</div><div class="cheer-msg">조용히 응원합니다<span class="msg-chev">▾</span></div></div>
+              <div class="mid msg-wrap"><div class="nm">익명의 누군가</div><div class="cheer-msg">조용히 응원합니다</div></div>
               <div class="rel"><span class="relbadge">🍀 1번</span><span class="relmeta">6일 전</span></div>
             </a>
             <a class="fr" onclick="toggleCheerMsg(this);return false">
               <div class="av"><img src="assets/social-viral/seoyeon.png" alt="한서윤"></div>
-              <div class="mid msg-wrap"><div class="nm">한서윤</div><div class="cheer-msg">언니 믿어 끝까지 간다<span class="msg-chev">▾</span></div></div>
+              <div class="mid msg-wrap"><div class="nm">한서윤</div><div class="cheer-msg">언니 믿어 끝까지 간다</div></div>
               <div class="rel"><span class="relbadge">🍀 1번</span><span class="relmeta">7일 전</span></div>
             </a>
             <a class="fr" onclick="toggleCheerMsg(this);return false">
               <div class="av"><img src="assets/social-viral/jimin.png" alt="오세훈"></div>
-              <div class="mid msg-wrap"><div class="nm">오세훈</div><div class="cheer-msg">대단하다 진짜<span class="msg-chev">▾</span></div></div>
+              <div class="mid msg-wrap"><div class="nm">오세훈</div><div class="cheer-msg">대단하다 진짜</div></div>
               <div class="rel"><span class="relbadge">🍀 1번</span><span class="relmeta">8일 전</span></div>
             </a>
             <!-- cheer-hidden: 더보기 전 숨김(8개 미리보기 뒤 20개까지 펼침) -->
             <a class="fr cheer-hidden" style="display:none" onclick="toggleCheerMsg(this);return false">
               <div class="av anon">?</div>
-              <div class="mid msg-wrap"><div class="nm">익명의 누군가</div><div class="cheer-msg">조금만 더 힘내요<span class="msg-chev">▾</span></div></div>
+              <div class="mid msg-wrap"><div class="nm">익명의 누군가</div><div class="cheer-msg">조금만 더 힘내요</div></div>
               <div class="rel"><span class="relbadge">🍀 1번</span><span class="relmeta">9일 전</span></div>
             </a>
             <a class="fr cheer-hidden" style="display:none" onclick="toggleCheerMsg(this);return false">
               <div class="av"><img src="assets/social-viral/dogyeong.png" alt="문가영"></div>
-              <div class="mid msg-wrap"><div class="nm">문가영</div><div class="cheer-msg">자랑스러워<span class="msg-chev">▾</span></div></div>
+              <div class="mid msg-wrap"><div class="nm">문가영</div><div class="cheer-msg">자랑스러워</div></div>
               <div class="rel"><span class="relbadge">🍀 1번</span><span class="relmeta">10일 전</span></div>
             </a>
             <a class="fr cheer-hidden" style="display:none" onclick="toggleCheerMsg(this);return false">
               <div class="av"><img src="assets/social-viral/supporter.png" alt="배진우"></div>
-              <div class="mid msg-wrap"><div class="nm">배진우</div><div class="cheer-msg">고생했어 거의 다 왔다<span class="msg-chev">▾</span></div></div>
+              <div class="mid msg-wrap"><div class="nm">배진우</div><div class="cheer-msg">고생했어 거의 다 왔다</div></div>
               <div class="rel"><span class="relbadge">🍀 1번</span><span class="relmeta">11일 전</span></div>
             </a>
             <!-- 더보기 바 (PREVIEW 8 → EXPANDED 20 → 검색) -->
@@ -1619,10 +1743,10 @@
         </div>
         <div class="gd-hero">
           <div class="gtop"><span class="chip dday">D-12</span><span class="chip status">진행 중</span></div>
-          <h2>토익 900 해낼게</h2>
+          <h2>토익 900 <span class="haenael">해낼게</span></h2>
           <div class="greason">친구들이 보내준 응원이 단어로 쌓였어요.</div>
         </div>
-        <div class="wm-count" style="margin-top:18px"><span>지금까지</span> <span class="n" data-count="24">24</span><span>명이 이 단어들로 응원했어요</span></div>
+        <div class="wm-count" style="margin-top:18px"><span>지금까지</span><span class="cnt"><b class="n" data-count="24">24</b>명이 이 단어들로 응원했어요</span></div>
         <!-- D-025-F 전체 표시(12개 상한 폐기) + D-027-E 떠다니는 배치 -->
         <div class="wordmap cloud" id="wordmap3" style="margin-top:10px;min-height:330px">
           <div class="wm-goalword">🍀 토익 900 해낼게</div>
@@ -1864,7 +1988,7 @@
         <div class="ach-next">
           <div class="lab"><span>다음 메달 <b>목표 세 개 완료</b></span><span>2 / 3개</span></div>
           <div class="track"><i style="width:66%"></i></div>
-          <div class="hint">업적은 완료 목표, 받은 확정 응원, 친구 수로만 계산해요.<br>금액과 순위는 업적에 들어가지 않아요.</div>
+          <div class="hint">업적은 완료 목표 · 받은 확정 응원 · 친구 수로 계산해요.</div>
         </div>
 
         <div class="shelf">
@@ -1884,7 +2008,7 @@
         <!-- D-027-C 스위치 규격을 해낼게 관리와 같은 컴포넌트로 통일(46x27 트랙 + 44px 터치영역) -->
         <div class="set-group" style="margin-top:16px">
           <div class="set-row">
-            <div class="sx"><div class="sl">받는 사람도 등급 받기</div><div class="sd">목표를 세운 사람에게도 레벨과 등급을 줄지 정해요.<br>기본은 꺼둬요.</div></div>
+            <div class="sx"><div class="sl">받는 사람도 등급 받기</div><div class="sd">목표를 세운 사람도 레벨과 등급을 받을지 정해요.</div></div>
             <div class="set-sw" role="switch" aria-checked="false" aria-label="받는 사람도 등급 받기" onclick="this.classList.toggle('on')"><i></i></div>
           </div>
         </div>
@@ -1951,7 +2075,7 @@
           <div class="cover-pick" id="mpCoverPick" data-cover-pick="mpCover" data-auto="study" style="display:none"></div>
           <div class="goalcard" style="margin-top:0">
             <div class="gtop"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
-            <h3>토익 900 해낼게</h3>
+            <h3>토익 900 <span class="haenael">해낼게</span></h3>
             <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
             <!-- D-027-C 목표 상세 관리 진입 신설: 응원자 명단·환전·편집은 목표 관리 화면이 소유한다 -->
             <div class="goal-actions">
@@ -2030,7 +2154,7 @@
             <div class="set-sw on" role="switch" aria-checked="true" aria-label="응원 도착 알림" onclick="this.classList.toggle('on')"><i></i></div>
           </div>
           <div class="set-row">
-            <div class="sx"><div class="sl">마케팅 소식 받기</div><div class="sd">이벤트와 업데이트 소식. 기본은 꺼둬요.</div></div>
+            <div class="sx"><div class="sl">마케팅 소식 받기</div><div class="sd">이벤트와 업데이트 소식을 보내요.</div></div>
             <div class="set-sw" role="switch" aria-checked="false" aria-label="마케팅 소식 받기" onclick="this.classList.toggle('on')"><i></i></div>
           </div>
         </div>
@@ -2038,18 +2162,15 @@
 
         <!-- 계정 -->
         <div class="mp-sect">계정</div>
+        <!-- D-030-B 하단탭 화면에는 사업자 정보·약관·개인정보 블록을 깔지 않는다.
+             상시 접근 의무(개인정보 보호법 제30조 제2항)는 이 한 행이 책임지고, 내용은 약관 및 정책 화면이 소유한다. -->
+        <div class="mp-row" onclick="go('legal')">
+          <div class="mp-ic">📄</div>
+          <div class="mp-rx"><div class="mp-rt">약관 및 정책</div><div class="mp-rd">약관 · 개인정보 · 사업자 정보</div></div>
+          <span class="mp-go">›</span>
+        </div>
         <button class="mp-logout-btn" onclick="go('landing')">로그아웃</button>
         <button class="danger-act" onclick="alert('실배포: 탈퇴는 고객센터 문의(개인정보처리방침 §3 보유기간 준수). 프로토 안내용.')">회원 탈퇴</button>
-        <div class="mp-links" style="margin-top:14px">
-          <a onclick="go('how')">이용안내</a>
-          <a onclick="go('terms')">이용약관</a>
-          <a onclick="go('privacy')">개인정보처리방침</a>
-        </div>
-        <!-- D-027-C·D-026-B 하단탭 화면에는 전역 푸터를 깔지 않는다. 사업자 정보는 이 접힘 안에서 본다. -->
-        <details class="biz">
-          <summary>사업자 정보</summary>
-          <div class="bz">정성컴퍼니 · 대표 조성진<br>사업자등록번호 798-31-01774<br>haenaelge.official@gmail.com</div>
-        </details>
         <div style="height:12px"></div>
 
       </div></div>
@@ -2130,7 +2251,7 @@
 
         <div class="cover belong-cover photo"><img src="../assets/v2-cover-presets/cover-run.jpg" alt="새벽 공원 길 위의 러닝화"><span class="shade"></span><span class="cov-cap">도경이의 평점 4.0 해낼게</span><span class="cov-wm">🍀</span></div>
         <div class="belong-hero">
-          <h2>도경의 해낼게</h2>
+          <h2>도경의 <span class="haenael">해낼게</span></h2>
           <span class="relationship-direction mutual">서로 응원</span>
           <p>도경의 목표와 응원 워드맵을 함께 봐요.</p>
         </div>
@@ -2209,7 +2330,7 @@
           <div class="wm-center"><div class="wc-goal">🍀<br>토익 900</div></div>
         </div>
 
-        <div class="wm-count"><span>지금까지</span> <span class="n" id="wmCount" data-count="23">23</span> <span>개의 응원 단어가 쌓였어요</span></div>
+        <div class="wm-count"><span>지금까지</span><span class="cnt"><b class="n" id="wmCount" data-count="23">23</b>개의 응원 단어가 쌓였어요</span></div>
 
         <button class="btn pri" id="cheerBtn" onclick="dropWord()">🍀 조용히 응원하기</button>
 
@@ -2249,6 +2370,15 @@
         <button class="cbtn pri" onclick="go('onboarding')">시작하기</button>
         <button class="cbtn ghost" onclick="go('how')" style="margin-top:2px">어떻게 쓰는 건가요?</button>
         <div class="relogin">이미 계정이 있으신가요? <a onclick="go('login')">카카오로 로그인</a></div>
+        <!-- D-030-B 법적 고지: 비로그인으로 처음 닿는 초기화면에만 둔다(전자상거래법 제10조). 전역 푸터가 아니라 콘텐츠 말미 블록이다. -->
+        <div class="legalfoot">
+          <div class="lf-links">
+            <a onclick="go('how')">이용안내</a>
+            <a onclick="go('terms')">이용약관</a>
+            <a onclick="go('privacy')">개인정보처리방침</a>
+          </div>
+          <div class="lf-biz">정성컴퍼니 · 대표 조성진 · 사업자등록번호 798-31-01774<br>haenaelge.official@gmail.com</div>
+        </div>
       </div></div>
       <div class="tabbar">
         <a class="on"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
@@ -2281,7 +2411,7 @@
         <div class="goalcard" style="margin-top:0">
           <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
         </div>
-        <div class="wm-count" style="margin-top:14px"><span>지금까지</span> <span class="n" data-count="19">19</span> <span>명이 응원했어요</span></div>
+        <div class="wm-count" style="margin-top:14px"><span>지금까지</span><span class="cnt"><b class="n" data-count="19">19</b>명이 응원했어요</span></div>
         <div class="wordmap cloud" id="wordmap2" style="margin-top:10px">
           <div class="wm-goalword">🍀 토익 900 해낼게</div>
           <span class="wm-word s3">화이팅</span>
@@ -2296,6 +2426,15 @@
           <span class="wm-word s1">함께</span>
         </div>
         <div class="wm-legend"><span>같은 단어가 쌓일수록 <i>크게</i> 자라요</span></div>
+        <!-- D-030-B 법적 고지: 비로그인으로 처음 닿는 초기화면에만 둔다(전자상거래법 제10조). 전역 푸터가 아니라 콘텐츠 말미 블록이다. -->
+        <div class="legalfoot">
+          <div class="lf-links">
+            <a onclick="go('how')">이용안내</a>
+            <a onclick="go('terms')">이용약관</a>
+            <a onclick="go('privacy')">개인정보처리방침</a>
+          </div>
+          <div class="lf-biz">정성컴퍼니 · 대표 조성진 · 사업자등록번호 798-31-01774<br>haenaelge.official@gmail.com</div>
+        </div>
         <div style="height:220px"></div>
       </div></div>
       <div style="position:absolute;left:0;right:0;bottom:64px;padding:16px 22px 14px;background:linear-gradient(180deg,rgba(251,250,247,0),var(--bg) 34%)">
@@ -2557,6 +2696,82 @@
   </section>
 
   <!-- ══════════ 커버리지 대조표 (검수 문서 · 51항) ══════════ -->
+
+  <!-- ══════════ 화면 · 약관 및 정책 (D-030-B · 법적 정보의 단일 상시 접근 지점) ══════════ -->
+  <section class="screen" id="legal">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head"><button class="back" onclick="go('mypage')">‹</button><div class="brand">약관 및 정책</div><div style="width:44px"></div></div>
+        <div class="mp-row" onclick="go('how')">
+          <div class="mp-ic">📖</div>
+          <div class="mp-rx"><div class="mp-rt">이용안내</div><div class="mp-rd">해낼게를 쓰는 방법</div></div>
+          <span class="mp-go">›</span>
+        </div>
+        <div class="mp-row" onclick="go('terms')">
+          <div class="mp-ic">📄</div>
+          <div class="mp-rx"><div class="mp-rt">이용약관</div><div class="mp-rd">서비스 이용 조건과 응원·환전 규칙</div></div>
+          <span class="mp-go">›</span>
+        </div>
+        <div class="mp-row" onclick="go('privacy')">
+          <div class="mp-ic">🔐</div>
+          <div class="mp-rx"><div class="mp-rt">개인정보처리방침</div><div class="mp-rd">수집 항목과 보관 기간</div></div>
+          <span class="mp-go">›</span>
+        </div>
+        <div class="legal-biz">
+          <div class="lb-t">사업자 정보</div>
+          <div class="lb-d">정성컴퍼니 · 대표 조성진<br>사업자등록번호 798-31-01774<br>haenaelge.official@gmail.com</div>
+        </div>
+        <div style="height:16px"></div>
+      </div></div>
+      <div class="tabbar">
+        <a onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span>홈</a>
+        <a onclick="go('friends')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6A5 5 0 0 1 21 20"/></svg></span>친구</a>
+        <a onclick="go('connect')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M18 8v6M15 11h6"/></svg></span>초대</a>
+        <a class="on" onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>관리</a>
+      </div>
+    </div>
+    <div class="review" data-review="legal"></div>
+  </section>
+
+  <!-- ══════════ 화면 · 배너 직접 올리기 (D-030-D · 프리셋이 아니라 내 사진으로 가는 경로) ══════════ -->
+  <section class="screen" id="bannerupload">
+    <div class="frame">
+      <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
+      <div class="app"><div class="pad">
+        <div class="head"><button class="back" onclick="go('goaldetail')">‹</button><div class="brand">내 사진으로 배너 만들기</div><div style="width:44px"></div></div>
+        <div>
+          <div class="field" style="margin-top:4px"><label>어떤 사진을 쓸까요</label></div>
+          <p class="bu-note">가로로 넓은 사진이 배너에 잘 맞아요.</p>
+        </div>
+        <div class="bu-empty" id="buEmpty">
+          <div class="e1">아직 고른 사진이 없어요</div>
+          <div class="e2">사진을 고르면 배너에서 어떻게 보이는지 바로 확인해요.</div>
+        </div>
+        <div id="buCropWrap" style="display:none">
+          <div class="bu-crop">
+            <img id="buCropImg" src="../assets/v2-cover-presets/cover-run.jpg" alt="고른 사진을 배너 비율로 맞춘 미리보기">
+            <span class="grid"></span>
+            <span class="drag">위아래로 끌어 위치를 맞춰요</span>
+          </div>
+          <div class="bu-acts">
+            <button class="cbtn ghost" onclick="buReset()">다른 사진 고르기</button>
+            <button class="cbtn pri" onclick="buApply()">배너로 쓰기</button>
+          </div>
+        </div>
+        <div class="bu-err hide" id="buErr">사진이 너무 커요. 10MB 이하 사진으로 올려주세요.</div>
+        <div class="bu-pick">
+          <div class="field"><label>내 사진</label></div>
+          <div class="bu-grid" id="buGrid"></div>
+          <label class="bu-file"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>기기에서 사진 찾기
+            <input type="file" accept="image/*" hidden onchange="buFile(this)"></label>
+        </div>
+        <div style="height:18px"></div>
+      </div></div>
+    </div>
+    <div class="review" data-review="bannerupload"></div>
+  </section>
+
   <section class="screen" id="coverage">
     <div class="covwrap">
       <h2>📋 실배포 라우트 커버리지 대조표 (standard-design.md 51항)</h2>
@@ -2648,6 +2863,26 @@
         {w:'[v2.2 유지] 1급 목적 = 응원자 명단 + 환전(JTBD). 응원자 명단은 빈/정상/과다(긴 이름·많은 응원자) 3상태. 금액·순위는 어느 상태에도 0(D-003).', fb:'ev-20261001-10 시정 · D-003 "지갑은 조용하게"'}
       ],
       flow: [['진입','홈 목표 카드 "관리" 칩 · 홈 "워드맵 보기"'],['이탈','환전 → cashout · 응원 링크 복사 · 친구뷰 → 공개목표 · 뒤로 → 홈'],['핵심','관리 = 응원 워드맵(인라인·주 콘텐츠) + 응원자 명단 + 환전. 워드맵은 더 이상 한 뎁스 아래가 아님. 편집은 그 자리 인라인 수정']]
+    },
+    legal: {
+      psych:'통제감+신뢰. 법적 정보를 찾을 자리를 한 곳으로 고정해, 사용자가 "어디서 봤더라" 를 겪지 않게 한다. 찾는 비용이 낮을수록 신뢰가 올라간다.',
+      bench:'토스 전체 > 약관 및 정책 · 카카오페이 설정 > 약관·정책 · 당근 내 정보 > 약관. 셋 다 앱 내부 화면에 사업자 정보를 깔지 않고 설정 하위 한 화면에 모아 둔다. 그 구조를 차용했고, 화면마다 푸터를 반복하는 방식은 버렸다.',
+      inherit:'계승(실배포): Footer.tsx 의 법적 링크·사업자 정보 + terms/page.tsx · privacy/page.tsx · how. 종전에는 Footer 가 전 화면에 깔려 하단탭과 겹쳤다. 블록을 이 화면으로 옮기고 관리 화면에는 진입 행 하나만 남겼다.',
+      prd:'D-030-B 푸터 일관성. 노출 표의 "상시 접근" 칸을 이 화면이 책임진다. 법적 근거는 전자상거래법 제10조(초기화면 사업자 정보)와 개인정보 보호법 제30조 제2항(쉽게 확인할 수 있도록 공개).',
+      chg:[
+        {w:'<b>D-030-B 신규 화면</b>. 해낼게 관리에 나열돼 있던 이용안내·이용약관·개인정보처리방침 링크와 사업자 정보 접힘을 이 화면으로 옮겼다. 관리 화면에는 <b>약관 및 정책</b> 한 행만 남는다. 전 화면 노출 표는 보드와 판정표에 있다.', fb:'회장 2026-10-17: "전역 푸터를 깔지 않는다는데 아래 사업자 정보 칸은 왜 보이고 이용안내 이용약관 개인정보처리방침은 왜 여기 있지"'}
+      ],
+      flow:[['진입','해낼게 관리 → 약관 및 정책'],['이탈','각 문서 화면 · 뒤로 → 해낼게 관리'],['핵심','법적 정보의 단일 상시 접근 지점. 다른 회원 화면에는 이 블록을 두지 않는다']]
+    },
+    bannerupload: {
+      psych:'자기표현+통제감. 프리셋은 빠르지만 내 사진은 "내 해낼게" 가 된다. 올리기 전에 배너에서 어떻게 보이는지 먼저 보여줘 올렸다 지우는 왕복을 없앤다(불확실성 제거).',
+      bench:'카카오톡 프로필 배경 설정 · 인스타그램 사진 자르기 · 카카오 선물하기 메시지 카드 사진 교체. 셋 다 "고르기 → 비율 안에서 위치 맞추기 → 적용" 세 단계이고, 적용 전 결과를 같은 비율로 보여준다. 그 순서를 차용했고 필터·스티커는 버렸다.',
+      inherit:'계승: 배너 선택기(cover-pick)의 업로드 경로. 종전에는 "직접 찍은 사진도 올릴 수 있어요" 라는 문구와 숨은 file input 만 있어 업로드 케이스를 화면으로 볼 수 없었다. 선택기의 "내 사진 올리기" 타일이 이 화면으로 들어온다.',
+      prd:'D-030-D 상태 완전성 · D-028-A 배너는 목표를 시각화하는 자리. 상태 4종(선택 전·미리보기·용량 초과 오류·적용 완료)을 한 화면에서 전부 확인한다.',
+      chg:[
+        {w:'<b>D-030-D 신규 화면</b>. 업로드 경로를 문구에서 화면으로 꺼냈다. 사진 보관함 그리드에서 고르면 배너 비율(16:9 영역)에서 어떻게 보이는지 바로 보여주고, 위치를 맞춰 적용한다. 용량이 큰 사진(12MB 타일)을 고르면 오류 상태를 그 자리에서 보여준다. 기기에서 직접 찾는 경로도 같은 화면에 있다.', fb:'회장 2026-10-17: "직접 올리는 UI 는 안보여주지왜 병신인가? 케이스 구분을 못하네?"'}
+      ],
+      flow:[['진입','온보딩·목표 관리·해낼게 관리의 배너 선택기 → 내 사진 올리기'],['이탈','적용 → 들어온 화면으로 복귀(배너 교체됨) · 뒤로 → 목표 관리'],['상태','선택 전 · 미리보기 · 용량 초과 오류 · 적용 완료 토스트']]
     },
     mywordmap: {
       psych:'자기효능감+소속감(내 사람 버전). owner 가 "내가 받은 응원"을 담백하게 되돌아보는 화면. 응원을 요구하지 않고(응원 CTA 없음) 쌓인 단어만 보여줘, 선언자가 외롭지 않다는 정서적 보상을 조용히 준다. 절제된 착지 모션만(폭죽 없음, 브랜드 "조용히").',
@@ -2943,8 +3178,23 @@
     cashstatus:[['진행 조회 로딩 = 클로버 숨쉼(cloverPulse, 모션 샷건 C안 · 스피너 대신)','1300ms · ease-in-out · infinite','"내 돈이 어디쯤" 대기를 브랜드 로딩으로 명시(빈 화면 방지, Lottie 대안)']],
     mypage:[['프로필·활동 행 rise 등장(stagger)','base · decel(90ms 간격)','정보 정렬 · 통합 마이페이지의 블록을 위→아래로 읽게'],
             ['업적 카운트업(4개)','base · rAF','누적 성취 체감']],
-    cashhistory:[['요약 타일 pop-in + 건별 행 stagger 등장(rise)','base · decel(70ms 간격)','돈 축 · 환전 이력을 차분히 스캔·대조']]
+    cashhistory:[['요약 타일 pop-in + 건별 행 stagger 등장(rise)','base · decel(70ms 간격)','돈 축 · 환전 이력을 차분히 스캔·대조']],
+    inviteaccept:[['초대 카드·아바타 진입 rise(stagger)','base · decel(70ms 간격)','누가 불렀는지를 먼저 읽게 하는 순서 안내']],
+    login:[['로그인 시트 진입 rise','base · decel','시트가 올라오는 방향 안내']],
+    legal:[['정책 행 stagger 등장(rise)','base · decel(70ms 간격)','읽을 항목이 위에서 아래로 정렬된다는 신호']],
+    bannerupload:[['사진 보관함 타일 stagger 등장','base · decel(70ms 간격)','고를 것이 여럿임을 형태로 말함'],
+                  ['사진 고르면 배너 미리보기 pop + 적용 버튼 등장','spring 640ms · decel','고른 결과를 즉시 보여주는 상태 피드백']],
+    how:[['안내 블록 stagger 등장(rise)','base · decel(70ms 간격)','읽는 순서 안내']],
+    terms:[['조문 블록 진입 rise','base · decel','문서 진입감']],
+    privacy:[['조문 블록 진입 rise','base · decel','문서 진입감']],
+    admin:[['환전 큐 행 stagger 등장(rise)','base · decel(60ms 간격)','심사 목록 스캔 유도']]
   };
+  // 전 화면 공통 진입 모션. 실측에서 "보이는 자리에 도는 것 0개" 였으므로 공통분을 화면마다 명시한다.
+  const MOTION_COMMON=[
+    ['화면 전이 fade + 위로 8px (전 화면 공통)','base 400ms · decel','방향 안내(공간 모델)'],
+    ['첫 화면 블록 다섯 개 순차 rise (D-030-A)','base 400ms · decel(70ms 간격)','보이는 영역에서 실제로 도는 진입 모션']
+  ];
+  function motionOf(id){ return MOTION_COMMON.concat(MOTION[id]||[]); }
 
   // ── 카운트업 엔진 (rAF 세는 로직 · 11.1절 "최종값만 박지 말고 세는 로직까지") ──
   // 효과적 reduced 판정: OS "동작 줄이기"가 켜져 있어도 리뷰 토글(force-motion)이 ON 이면 모션 재생.
@@ -2998,7 +3248,7 @@
       });
     }
     // 목표 관리 응원자 명단: 실제로 잘린 메시지에만 펼침 chevron 노출(한 줄 접힘 기준을 UI 로 자명하게)
-    if(id==='goaldetail'){ markCheerChevrons(); }
+    applyCheerClamp(scr);          // D-030-C 전 화면 공통(목표 관리만이 아니다)
     // 모션 샷건 C안 계승: 합류(connect)·소속감(belong) 절정에 클로버 잎 파티클(컨페티 아님, D-003 조용히)
     if(id==='connect'){ const s=scr.querySelector('.accepted .ava'); spawnLeaves(scr, s, 560); }
     if(id==='belong'){ const s=scr.querySelector('.bt-ringwrap'); spawnLeaves(scr, s, 420); }
@@ -3023,15 +3273,28 @@
       }
     }, delayMs);
   }
-  // 한 줄 truncate 여부로 chevron·인터랙션 결정: 안 잘리는 짧은 메시지는 chevron 숨기고 탭 비활성
-  function markCheerChevrons(){
-    document.querySelectorAll('#goaldetail [data-view="normal"] .fr').forEach(fr=>{
-      const msg=fr.querySelector('.cheer-msg'); if(!msg) return;
-      const chev=msg.querySelector('.msg-chev');
-      const truncated = msg.scrollWidth > msg.clientWidth + 1;
-      if(msg.classList.contains('full')){ if(chev) chev.classList.remove('hide'); return; }
-      if(truncated){ if(chev) chev.classList.remove('hide'); fr.setAttribute('onclick','toggleCheerMsg(this);return false'); fr.style.cursor='pointer'; }
-      else { if(chev) chev.classList.add('hide'); fr.removeAttribute('onclick'); fr.style.cursor='default'; }
+  // ── D-030-C 응원 메시지 줄넘침: 목록은 두 줄까지 보이고 넘치면 "더 보기" ──
+  // 회장 "응원 메세지 줄넘어가서 짤릴때 어떻게 하기로 했어?". 규칙을 한 곳에서 정하고 네 화면(목표 관리·
+  // 해낼게 관리·친구·친구 상세)의 모든 응원 메시지에 같은 처리를 적용한다. 실제로 잘린 것에만 더 보기가 붙는다.
+  function applyCheerClamp(scope){
+    const root=scope||document;
+    root.querySelectorAll('.cheer-msg, .fr .news span').forEach(msg=>{
+      if(msg.classList.contains('msg-more')) return;
+      // .news 는 아이콘과 글이 나란한 flex 행이라, 그 안에 토글을 끼우면 글 폭을 빼앗아 두 글자씩 끊긴다.
+      // 그래서 토글은 메시지 블록 '아래 줄'에 둔다(목표 관리·해낼게 관리·친구가 같은 모양).
+      const host=msg.closest('.news')||msg;
+      let more=host.nextElementSibling && host.nextElementSibling.classList.contains('msg-more') ? host.nextElementSibling : null;
+      if(!more){
+        more=document.createElement('span'); more.className='msg-more'; more.textContent='더 보기';
+        host.after(more);
+      }
+      const full=msg.classList.contains('full');
+      const truncated = msg.scrollHeight > msg.clientHeight + 1;
+      more.classList.toggle('hide', !(full||truncated));
+      more.textContent = full ? '접기' : '더 보기';
+      const row=msg.closest('.fr');
+      if(row && (full||truncated)){ row.onclick=function(e){ toggleCheerMsg(this); return false; }; row.style.cursor='pointer'; }
+      else if(row){ row.onclick=null; row.style.cursor='default'; }
     });
   }
 
@@ -3049,15 +3312,13 @@
     const flowHtml = '<div class="blk new"><h4><span class="d"></span>진입 · 이탈 flow</h4><div class="flow">' +
       d.flow.map(f=>'<div class="fl"><b>'+f[0]+'</b><span>'+f[1]+'</span></div>').join('') + '</div></div>';
     const opendecHtml = d.opendec ? '<div class="blk"><h4><span class="d" style="background:#8a6bbf"></span>🟣 열린결정 (제품 화면 밖)</h4><p>'+d.opendec+'</p></div>' : '';
-    const m = MOTION[id];
-    const motionHtml = (m && m.length) ? '<div class="blk"><h4><span class="d"></span>동적 인터랙션 (모션 명세)</h4>' +
-      m.map(x=>'<div class="chgitem" style="border-left-color:#39c07a"><div class="w">'+x[0]+'</div><div class="fb" style="font-style:normal">토큰 '+x[1]+' · '+x[2]+'</div></div>').join('') + '</div>' : '';
+    // D-030-A 모션은 오른쪽 패널에 글로 적지 않는다. 프레임 바로 아래 모션 바에서 실제로 돌려 본다.
     el.innerHTML =
       '<div class="blk"><h4><span class="d"></span>심리 · 설득 근거</h4><p>'+d.psych+'</p></div>' +
       '<div class="blk"><h4><span class="d"></span>벤치마크</h4><p>'+d.bench+'</p></div>' +
       '<div class="blk"><h4><span class="d"></span>실구현 · 계승 근거</h4><p>'+d.inherit+'</p></div>' +
       '<div class="blk"><h4><span class="d"></span>PRD · 결정 대응</h4><p>'+d.prd+'</p></div>' +
-      flowHtml + motionHtml + opendecHtml + chgHtml;
+      flowHtml + opendecHtml + chgHtml;
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -3192,8 +3453,10 @@
     document.getElementById('stateGrp').style.opacity = (id==='friends'||id==='goaldetail'||id==='mypage') ? '1':'.4';
     if(id==='dopamine' && !wmSeeded){ wmSeeded=true; wmInit(); }
     renderReview(id);
+    renderMotionBar(id);                       // D-030-A 모션 바(화면별 목록 + 다시 재생)
     animateScreen(id);
     wmCloudAll(document.getElementById(id));   // v3: 떠다니는 워드맵 재배치(화면 폭 확정 후)
+    history.replaceState(null,'','#'+id);      // 보드에서 화면별로 바로 열 수 있게
   }
   let wmSeeded=false;
   document.querySelectorAll('.console .nav').forEach(b=>{ b.addEventListener('click',()=>go(b.dataset.s)); });
@@ -3390,11 +3653,13 @@
       '</button>').join('');
     host.innerHTML =
       '<div class="cp-head">배너 고르기<span class="cp-sub">자동 = 목표에 맞춰 고른 사진</span></div>'+
-      '<div class="cp-row cp-photos">'+tiles+
-        '<label class="cp-up"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>내 사진'+
-        '<input type="file" accept="image/*" hidden onchange="uploadCover(this,\''+targetId+'\')"></label>'+
+      // D-030-D 내 사진 올리기를 맨 앞에 둔다. 끝에 두면 가로 스크롤 밖이라 "직접 올리는 UI 가 안 보인다".
+      '<div class="cp-row cp-photos">'+
+        '<button type="button" class="cp-upgo" onclick="goBannerUpload(\''+targetId+'\')">'+
+          '<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>내 사진 올리기</button>'+
+        tiles+
       '</div>'+
-      '<div class="cp-hint">직접 찍은 사진도 올릴 수 있어요.</div>';
+      '<div class="cp-hint">내 사진을 고르면 배너에 어떻게 보이는지 먼저 확인해요.</div>';
   }
   function pickCover(opt,targetId){
     const target=document.getElementById(targetId); if(!target) return;
@@ -3547,7 +3812,7 @@
   // ── 목표 관리: 응원자 명단 더보기/검색(실배포 CheerList PREVIEW 8 / EXPANDED 20 계승) ──
   function expandCheers(btn){
     document.querySelectorAll('#goaldetail [data-view="normal"] .cheer-hidden').forEach(el=>el.style.display='');
-    markCheerChevrons();
+    applyCheerClamp(document.getElementById('goaldetail'));
     const bar=btn.closest('.cheer-more'); if(bar){ bar.querySelector('.cheer-more-lbl').textContent='전체 목록은 20개까지 보여줘요'; btn.outerHTML='<button type="button" class="cheer-search-trigger" onclick="toggleCheerSearch(this)">나머지는 검색으로 찾기</button>'; }
   }
   function toggleCheerSearch(btn){
@@ -3556,9 +3821,155 @@
   }
   // 응원 메시지 상세 펼치기(실배포는 truncate+title만 · 모바일 전문 볼 자리 신설)
   function toggleCheerMsg(el){
-    const msg=el.querySelector('.cheer-msg'); if(!msg)return;
+    // 목표 관리의 .cheer-msg 와 해낼게 관리·친구·친구 상세의 .news span 이 같은 규칙으로 펼쳐진다.
+    const msg=el.querySelector('.cheer-msg') || el.querySelector('.news span'); if(!msg)return;
     msg.classList.toggle('full');
+    applyCheerClamp(el.closest('.screen')||document);
   }
+
+
+  /* ══════════════════════════════════════════════════════════════════
+     D-030-A 모션 검수 장치 (2026-10-17)
+     ──────────────────────────────────────────────────────────────────
+     실측이 말한 문제: @keyframes 28종이 있는데 로드 직후 "화면 안에서 보이는" 애니메이션 0개,
+     첫 화면 400ms 픽셀 변화 0. 모션이 전부 스크롤 아래에 있거나 이미 끝난 뒤였다.
+     그래서 셋을 둔다. ①진입 시 첫 화면 블록이 순차로 올라온다(CSS, 위 D-030-A 규칙)
+     ②스크롤로 들어오는 블록은 그 시점에 다시 재생한다(IntersectionObserver)
+     ③프레임 바로 아래 모션 바에서 언제든 다시 재생한다(오른쪽 패널에 글로 적지 않는다).
+     ══════════════════════════════════════════════════════════════════ */
+  const MO_SEL = '.fr,.bdg,.ach,.mp-row,.ch-item,.ch-tile,.field,.goalcard,.ach-stage,.achievement-visual,.nextbar,.invite-hero,.kprev,.share-row,.belong-hero,.cash-sum .r,.set-group,.shelf-row,.legal-biz,.bu-ph';
+  function replayEl(el){
+    el.style.animation='none'; void el.offsetWidth; el.style.animation='';
+  }
+  let moObserver=null;
+  function observeInView(){
+    if(moObserver) moObserver.disconnect();
+    moObserver=new IntersectionObserver(entries=>{
+      if(prefersReduced()) return;
+      entries.forEach(e=>{
+        if(!e.isIntersecting) return;
+        const scr=e.target.closest('.screen');
+        if(!scr||!scr.classList.contains('active')) return;
+        replayEl(e.target);
+      });
+    },{threshold:0.25});
+    document.querySelectorAll('.screen '+MO_SEL).forEach(el=>moObserver.observe(el));
+  }
+  // 모션 바: 다시 재생 + 반복 재생 + 순간별 재생
+  let moLoopTimer=null;
+  function buildMotionBars(){
+    document.querySelectorAll('.screen').forEach(scr=>{
+      const frame=scr.querySelector(':scope > .frame'); if(!frame) return;
+      if(scr.querySelector(':scope > .framecol')) return;
+      const col=document.createElement('div'); col.className='framecol';
+      scr.insertBefore(col, frame); col.appendChild(frame);
+      const bar=document.createElement('div'); bar.className='motionbar'; bar.setAttribute('data-motionbar', scr.id);
+      col.appendChild(bar);
+    });
+  }
+  function renderMotionBar(id){
+    const bar=document.querySelector('[data-motionbar="'+id+'"]'); if(!bar) return;
+    const list=motionOf(id);
+    bar.innerHTML =
+      '<div class="mb-head"><span class="mb-t">🎬 이 화면의 모션 '+list.length+'개</span>'+
+        '<button type="button" class="mb-play" onclick="replayMotion(\''+id+'\')">▶ 다시 재생</button>'+
+        '<label class="mb-loop"><input type="checkbox" id="moLoop" '+(moLoopTimer?'checked':'')+' onchange="toggleMotionLoop(this)"> 4초마다 반복</label></div>'+
+      '<div class="mb-list">'+
+        list.map((x,i)=>'<button type="button" class="mb-item" data-mi="'+i+'" onclick="playMoment(\''+id+'\','+i+',this)">'+
+          '<span class="n">'+(i+1)+'. '+x[0]+'</span><span class="m">'+x[1]+' · '+x[2]+'</span></button>').join('')+
+      '</div>'+
+      '<div class="mb-note">진입하면 자동으로 재생되고, 스크롤로 들어오는 블록은 그때 다시 재생됩니다. 놓치면 위 버튼을 누르세요. 이 바는 검수용이고 제품 화면이 아닙니다.</div>';
+  }
+  function replayMotion(id){
+    const scr=document.getElementById(id); if(!scr) return;
+    animateScreen(id);
+    wmCloudAll(scr);
+    scr.querySelectorAll(MO_SEL).forEach(replayEl);
+  }
+  function playMoment(id,i,btn){
+    const bar=btn.closest('.motionbar');
+    bar.querySelectorAll('.mb-item').forEach(b=>b.classList.remove('playing'));
+    btn.classList.add('playing');
+    replayMotion(id);
+    setTimeout(()=>btn.classList.remove('playing'),1400);
+  }
+  function toggleMotionLoop(cb){
+    if(moLoopTimer){ clearInterval(moLoopTimer); moLoopTimer=null; }
+    if(cb.checked){
+      moLoopTimer=setInterval(()=>{
+        const act=document.querySelector('.screen.active'); if(act) replayMotion(act.id);
+      },4000);
+    }
+  }
+
+  /* ── D-030-D 배너 직접 올리기 ── */
+  const BU_PHOTOS=[
+    {f:'cover-run.jpg',    alt:'새벽 공원 길 위의 러닝화'},
+    {f:'cover-study.jpg',  alt:'아침 햇살이 드는 책상 위의 공책과 클로버 화분'},
+    {f:'cover-travel.jpg', alt:'나무 벤치에 놓인 작은 배낭과 종이 지도'},
+    {f:'cover-health.jpg', alt:'아침 주방 선반 위의 물컵과 채소'},
+    {f:'cover-habit.jpg',  alt:'해 뜰 무렵 침대 옆 탁자의 시계와 물컵', big:true},
+    {f:'cover-writing.jpg',alt:'린넨 천 위에 펼쳐진 공책과 만년필'}
+  ];
+  let buTarget='gdCover';
+  function renderBuGrid(){
+    const g=document.getElementById('buGrid'); if(!g) return;
+    g.innerHTML=BU_PHOTOS.map((ph,i)=>
+      '<button type="button" class="bu-ph" data-bi="'+i+'" onclick="buPick(this,'+i+')">'+
+        '<img src="'+COVER_DIR+ph.f+'" alt="'+ph.alt+'">'+(ph.big?'<span class="big">12MB</span>':'')+
+      '</button>').join('');
+  }
+  function buPick(el,i){
+    const ph=BU_PHOTOS[i];
+    const err=document.getElementById('buErr');
+    document.querySelectorAll('#buGrid .bu-ph').forEach(b=>b.classList.remove('sel'));
+    if(ph.big){
+      err.classList.remove('hide');
+      document.getElementById('buCropWrap').style.display='none';
+      document.getElementById('buEmpty').style.display='';
+      return;
+    }
+    err.classList.add('hide');
+    el.classList.add('sel');
+    const img=document.getElementById('buCropImg');
+    img.src=COVER_DIR+ph.f; img.alt=ph.alt+' (배너 비율 미리보기)';
+    document.getElementById('buEmpty').style.display='none';
+    const wrap=document.getElementById('buCropWrap'); wrap.style.display='';
+    replayEl(wrap.querySelector('.bu-crop'));
+  }
+  function buFile(input){
+    const file=input.files&&input.files[0]; if(!file) return;
+    const err=document.getElementById('buErr');
+    if(file.size>10*1024*1024){ err.classList.remove('hide'); return; }
+    err.classList.add('hide');
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=document.getElementById('buCropImg');
+      img.src=e.target.result; img.alt='직접 올린 사진 (배너 비율 미리보기)';
+      document.getElementById('buEmpty').style.display='none';
+      document.getElementById('buCropWrap').style.display='';
+      document.querySelectorAll('#buGrid .bu-ph').forEach(b=>b.classList.remove('sel'));
+    };
+    r.readAsDataURL(file);
+  }
+  function buReset(){
+    document.getElementById('buCropWrap').style.display='none';
+    document.getElementById('buEmpty').style.display='';
+    document.getElementById('buErr').classList.add('hide');
+    document.querySelectorAll('#buGrid .bu-ph').forEach(b=>b.classList.remove('sel'));
+  }
+  function buApply(){
+    const src=document.getElementById('buCropImg').src;
+    ['gdCover','mpCover','obCover'].forEach(tid=>{
+      const t=document.getElementById(tid); if(!t) return;
+      const img=t.querySelector('img'); if(img){ img.src=src; img.alt='직접 올린 배너 사진'; }
+      t.setAttribute('data-custom','1');
+    });
+    go(buTarget==='obCover'?'onboarding':(buTarget==='mpCover'?'mypage':'goaldetail'));
+    const t=document.getElementById(buTarget);
+    if(t) toastInline(t,'내 사진으로 배너를 만들었어요');
+  }
+  function goBannerUpload(targetId){ buTarget=targetId||'gdCover'; buReset(); go('bannerupload'); }
 
   // ── 하단탭 이모지 → 인라인 SVG 아이콘(단색 stroke, clover accent) ──
   const TABICON = {
@@ -3582,9 +3993,21 @@
   // 초기 렌더
   document.querySelectorAll('[data-cover-pick]').forEach(renderCoverPicker);   // D-028-A 배너 선택기
   document.querySelectorAll('.flowrail .fnode').forEach(n=>n.classList.toggle('on', n.dataset.loop==='home'));
-  renderReview('home');
-  animateScreen('home');
+  buildMotionBars();              // D-030-A 프레임 아래 모션 바
+  renderBuGrid();                 // D-030-D 사진 보관함
+  observeInView();                // D-030-A 뷰포트 진입 시 재생
+  const startId=(location.hash||'').replace('#','');
+  const startScreen=startId && document.getElementById(startId) && document.getElementById(startId).classList.contains('screen') ? startId : 'home';
+  renderReview(startScreen);
+  renderMotionBar(startScreen);
+  if(startScreen!=='home'){ go(startScreen); }
+  else { animateScreen('home'); }
   wmCloudAll(document);   // v3: 떠다니는 워드맵 초기 배치(전 화면 · 폭 확정 후)
+  window.addEventListener('hashchange',()=>{
+    const id=(location.hash||'').replace('#','');
+    const el=document.getElementById(id);
+    if(el&&el.classList.contains('screen')&&!el.classList.contains('active')) go(id);
+  });
 </script>
 </body>
 </html>

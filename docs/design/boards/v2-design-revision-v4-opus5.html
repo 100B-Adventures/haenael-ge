@@ -1,0 +1,365 @@
+<!doctype html>
+<!--
+  STAMP | line=v2 | 생성=2026-10-17 03:2x KST | model=claude-opus-5[1m] | agent=product-designer
+  skills=design-review
+  근거=docs/design/chairman-board-memos-20261017.md(D-030-A~F · 보강 실측) · chairman-board-memos-20261016.md
+        · wiki/거버넌스/결정.md D-030·D-029·D-028 · ~/.claude/standards/standard-design.md §11·§11.1·§1.5
+        · ~/.claude/standards/artifact-stamp.md §1 · docs/design/standard-ux-writing.md · docs/qa/why-repeat-failures-20261017.md
+  캡처=390 CSS px · deviceScaleFactor 3(물리 1170px) · 프레임 전체 스크롤 풀페이지
+  고민=모션을 GIF 로 다시 붙일지 고민하다 버렸다. 회장이 세 번 지적한 것은 "녹화를 안 보여준다" 가 아니라
+      "보이는 자리에서 안 돈다" 였고, 실측도 그랬다(로드 직후 보이는 애니메이션 0개). 그래서 보드에는 정지
+      대조만 두고 모션은 프로토타입 원본에서 직접 돌려 보게 했다(standard-design §11.1).
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 V2 디자인 개정 4차 결정 보드 (보드 메모 11건 · D-030)</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+  <style>
+    :root { --bg:#ece9e1; --panel:#fff; --ink:#17150f; --muted:#69645b; --faint:#938d82; --line:#d9d4ca;
+            --green:#1b8a4f; --soft:#e7f4ec; --amber:#8a5a12; --amber-soft:#f6eddb; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:Pretendard,"Apple SD Gothic Neo",sans-serif; }
+    header { position:sticky; top:0; z-index:10; border-bottom:1px solid var(--line); background:rgb(255 255 255 / 94%); backdrop-filter:blur(16px); padding:16px 24px; }
+    header h1 { margin:0; font-size:22px; letter-spacing:-.4px; }
+    header p { max-width:1000px; margin:6px 0 0; color:var(--muted); font-size:14px; line-height:1.6; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+    nav { display:flex; gap:7px; overflow:auto; flex:1; min-width:0; padding-bottom:2px; }
+    nav a { flex:0 0 auto; border-radius:999px; padding:7px 11px; color:var(--green); background:var(--soft); font-size:13px; font-weight:800; text-decoration:none; }
+    .copyall { flex:0 0 auto; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:var(--green); color:#fff;
+               font-size:14px; font-weight:850; cursor:pointer; box-shadow:0 6px 16px rgb(27 138 79 / 28%); }
+    .copyall:active { transform:translateY(1px); }
+    .copyall.done { background:#15663b; }
+    .openproto { flex:0 0 auto; display:inline-flex; align-items:center; min-height:44px; padding:0 16px; border-radius:999px;
+                 background:#17150f; color:#fff; font-size:14px; font-weight:850; text-decoration:none; }
+    main { max-width:1320px; margin:0 auto; padding:22px 24px 10px; }
+    .summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:20px; }
+    .summary div { border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:14px; }
+    .summary strong { display:block; color:var(--green); font-size:22px; }
+    .summary span { color:var(--muted); font-size:13px; line-height:1.45; }
+    .decision { margin-bottom:22px; border:1px solid #b9d9c5; border-radius:16px; background:var(--soft); padding:18px; }
+    .decision h2 { margin:0 0 8px; font-size:17px; }
+    .decision p { margin:0 0 7px; color:#2b4c39; font-size:14px; line-height:1.7; }
+    .decision p:last-child { margin-bottom:0; }
+    table.t { width:100%; border-collapse:collapse; margin-top:12px; background:var(--panel); border-radius:12px; overflow:hidden; }
+    table.t th, table.t td { border-bottom:1px solid var(--line); padding:10px 12px; font-size:13px; text-align:left; line-height:1.6; }
+    table.t th { background:#f3f0ea; font-weight:850; }
+    table.t td.n { font-variant-numeric:tabular-nums; }
+    article { margin-bottom:22px; scroll-margin-top:150px; border:1px solid var(--line); border-radius:18px; background:var(--panel);
+              padding:18px; box-shadow:0 12px 32px rgb(40 36 28 / 8%); }
+    article > h2 { margin:0; font-size:19px; letter-spacing:-.3px; }
+    .meta { margin:5px 0 12px; color:var(--muted); font-size:13px; line-height:1.6; }
+    .motionbtn { display:inline-flex; align-items:center; min-height:44px; padding:0 15px; margin-bottom:14px; border-radius:999px;
+                 background:#1c1b19; color:#e0a94a; font-size:13px; font-weight:850; text-decoration:none; }
+    .motionbtn:hover { background:#2a2823; }
+    .pair { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:14px; align-items:start; }
+    .shots { display:contents; }
+    figure.card { margin:0; }
+    .card { border:1px solid var(--line); border-radius:13px; background:#d7d2c8; padding:10px; }
+    .card h3 { margin:0 0 8px; color:#413c33; font-size:13px; font-weight:850; text-align:center; }
+    .card.ba.after h3 { color:var(--green); }
+    .card img { display:block; width:100%; max-width:390px; margin:0 auto; height:auto; border-radius:7px; background:#fbfaf7;
+                box-shadow:0 6px 18px rgb(0 0 0 / 16%); }
+    .chg { margin:16px 0 0; border-left:3px solid var(--amber); border-radius:0 11px 11px 0; background:var(--amber-soft); padding:13px 15px; }
+    .chg h4 { margin:0 0 9px; color:var(--amber); font-size:13px; font-weight:850; }
+    .chg li { margin-bottom:9px; font-size:13.5px; line-height:1.65; }
+    .chg li:last-child { margin-bottom:0; }
+    .chg ul { margin:0; padding-left:17px; }
+    .chg q { display:block; margin-top:3px; color:#7a6a4a; font-size:13px; font-style:italic; }
+    .chg code { background:#efe4cc; border-radius:4px; padding:1px 5px; font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+    fieldset { display:flex; gap:8px; margin:15px 0 0; border:0; padding:0; }
+    legend { margin-bottom:7px; font-size:13px; font-weight:850; }
+    fieldset label { flex:1; cursor:pointer; }
+    fieldset input { position:absolute; opacity:0; pointer-events:none; }
+    fieldset span { display:flex; min-height:44px; align-items:center; justify-content:center; border:1px solid var(--line);
+                    border-radius:11px; color:var(--muted); background:#fbfaf7; font-size:14px; font-weight:800; }
+    fieldset input:checked + span { border-color:var(--green); color:var(--green); background:var(--soft); box-shadow:0 0 0 2px rgb(27 138 79 / 12%); }
+    .note-label { display:flex; align-items:center; justify-content:space-between; margin-top:13px; font-size:13px; font-weight:850; }
+    .copyone { min-height:34px; padding:0 11px; border:1px solid var(--line); border-radius:9px; background:#fbfaf7; color:var(--muted);
+               font-size:13px; font-weight:800; cursor:pointer; }
+    .copyone:active { background:var(--soft); }
+    textarea { width:100%; min-height:92px; margin-top:7px; resize:vertical; border:1px solid var(--line); border-radius:12px;
+               padding:12px; color:var(--ink); background:#fbfaf7; font:14px/1.6 inherit; }
+    textarea:focus { outline:3px solid rgb(27 138 79 / 18%); border-color:var(--green); }
+    .saved { min-height:18px; margin:5px 0 0; color:var(--green); font-size:13px; }
+    footer { max-width:1320px; margin:0 auto; padding:4px 24px 34px; color:var(--muted); font-size:13px; line-height:1.8; }
+    footer code { background:#e2ded5; border-radius:4px; padding:1px 5px; font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+    .toast { position:fixed; left:50%; bottom:26px; z-index:50; transform:translate(-50%,16px); opacity:0; pointer-events:none;
+             border-radius:999px; background:#17150f; padding:13px 22px; color:#fff; font-size:14px; font-weight:800; transition:.22s; }
+    .toast.on { transform:translate(-50%,0); opacity:1; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>해낼게 V2 디자인 개정 4차 — 보드 메모 11건에 대한 답</h1>
+    <p>모션은 이 보드에서 보지 않습니다. 화면마다 있는 <b>모션 보기</b> 버튼을 누르면 프로토타입 원본이 그 화면으로 열리고,
+       들어가는 순간 모션이 돌고 프레임 아래에서 다시 재생할 수 있습니다. 보드는 정지 대조용입니다.
+       각 화면 아래에서 승인·수정·반려를 고르고 메모를 적으면 입력하는 대로 저장되고, 위 <b>메모·선택 전체 복사</b> 하나로 전부 꺼내집니다.</p>
+    <div class="bar">
+      <a class="openproto" href="../prototypes/social-viral-loop-v3-opus5.html#landing" target="_blank" rel="noopener">프로토타입 원본 열기 (모션 검수)</a>
+      <nav><a href="#landing">랜딩</a><a href="#home">홈 (내 목표)</a><a href="#mypage">해낼게 관리</a><a href="#goaldetail">목표 관리 (상세)</a><a href="#onboarding">온보딩 (목표 만들기)</a><a href="#goalpublic">공개 목표</a><a href="#friends">친구</a><a href="#belong">친구 상세</a><a href="#status">업적</a><a href="#mywordmap">응원 워드맵 (전체 보기)</a><a href="#cashout">환전</a><a href="#legal">약관 및 정책 (신규)</a><a href="#bannerupload">배너 직접 올리기 (신규)</a></nav>
+      <button class="copyall" id="copyAll" type="button">메모·선택 전체 복사</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="summary">
+      <div><strong>0개 → 0개</strong><span>보이는 자리에서 모션이 안 돌던 화면. 지난 판 7개, 이번 판 0개</span></div>
+      <div><strong>19건</strong><span>10-16·10-17 보드 메모 전수. 판정표에 항목별 반영·미반영</span></div>
+      <div><strong>2화면</strong><span>신규: 약관 및 정책 · 배너 직접 올리기</span></div>
+      <div><strong>0종</strong><span>CSS 가 안 걸린 class (검사기 실행 결과)</span></div>
+    </div>
+
+    <div class="decision">
+      <h2>1. 모션 — 없던 게 아니라 보이는 자리에서 안 돌았습니다</h2>
+      <p>헤드리스 390px 로 재어 보니 <code>@keyframes</code> 는 28종 선언돼 있는데, 로드 직후 <b>화면 안에 보이는 실행 애니메이션이 0개</b>였고
+         첫 화면 400ms 동안 픽셀이 한 번도 안 변했습니다. 모션이 전부 스크롤 아래에 있거나 이미 끝난 뒤였습니다.
+         세 번 같은 지적을 하신 이유가 이것이고, 정지 캡처로 보여드린 것이 그 사실을 가렸습니다.</p>
+      <p>고친 것 셋입니다. ①화면에 들어가면 첫 화면 블록이 차례로 올라옵니다 ②스크롤로 들어오는 블록은 그 시점에 다시 재생됩니다
+         ③프레임 바로 아래에 <b>다시 재생 · 4초 반복 · 순간별 재생</b> 바를 뒀습니다. 그리고 오른쪽 검수 패널의 모션 명세 블록은 지웠습니다.
+         모션은 글로 읽는 것이 아니라 돌려 보는 것입니다.</p>
+      <table class="t">
+        <tr><th>화면</th><th>지난 판: 보이는 영역 실행 애니메이션</th><th>이번 판</th><th>400ms 픽셀 변화 표본</th><th>가로 넘침</th></tr>
+        <tr><td>랜딩</td><td>20</td><td><b>25</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>홈 (내 목표)</td><td>0</td><td><b>5</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>해낼게 관리</td><td>3</td><td><b>6</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>목표 관리 (상세)</td><td>23</td><td><b>27</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>온보딩 (목표 만들기)</td><td>4</td><td><b>7</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>공개 목표</td><td>25</td><td><b>29</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>친구</td><td>3</td><td><b>5</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>친구 상세</td><td>26</td><td><b>30</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>업적</td><td>11</td><td><b>15</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>응원 워드맵 (전체 보기)</td><td>33</td><td><b>38</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>환전</td><td>4</td><td><b>9</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>약관 및 정책 (신규)</td><td>화면 없음</td><td><b>5</b></td><td>11 / 11</td><td>0px</td></tr>
+<tr><td>배너 직접 올리기 (신규)</td><td>화면 없음</td><td><b>3</b></td><td>11 / 11</td><td>0px</td></tr>
+      </table>
+      <p style="margin-top:9px">측정 방법: 390px·배율 2 헤드리스에서 화면에 들어간 뒤, 프레임 안에 실제로 보이는 요소의 실행 중 애니메이션을 세고,
+         프레임 상단 420px 을 연속 12장 찍어 첫 장과 달라진 장 수를 셌습니다. 가로 넘침은 25개 화면 전부 0px, 콘솔 오류 0건입니다.</p>
+    </div>
+
+    <div class="decision">
+      <h2>2. 푸터 — 어느 화면에 두고 어느 화면에서 숨기는지 표로 정했습니다</h2>
+      <p>전역 푸터를 없앤다는 것은 <code>&lt;footer&gt;</code> 태그만이 아니라 <b>사업자 정보·이용안내·이용약관·개인정보처리방침 블록 전체</b>라는 뜻으로 확정했습니다.
+         화면마다 다른 상태가 된 것은 규칙이 없었기 때문이라, 이번에 표를 만들고 그대로 구현했습니다. 이 표는 <code>DESIGN.md</code> 에도 박았습니다.</p>
+      <table class="t">
+        <tr><th>노출 형태</th><th>화면</th><th>법적 근거 · 이유</th></tr>
+        <tr><td><b>법적 고지 블록</b><br>(약관·개인정보·이용안내 링크 + 사업자 정보 1행)</td><td>랜딩, 공개 목표</td>
+            <td>전자상거래법 제10조: 사업자 정보를 <b>사이버몰 초기화면</b>에 표시. 비로그인으로 외부에서 직접 닿는 화면이 이 둘뿐입니다. 떠 있는 푸터가 아니라 콘텐츠 말미 블록입니다</td></tr>
+        <tr><td><b>동의 링크만</b><br>(이용약관 · 개인정보처리방침)</td><td>카카오 로그인 시트</td><td>동의를 받는 시점의 고지</td></tr>
+        <tr><td><b>문서 본문</b></td><td>이용안내 · 이용약관 · 개인정보처리방침</td><td>그 화면이 문서 자체</td></tr>
+        <tr><td><b>진입 행 하나</b> (약관 및 정책 ›)</td><td>해낼게 관리 → 약관 및 정책(신규)</td>
+            <td>개인정보 보호법 제30조 제2항 "정보주체가 쉽게 확인할 수 있도록 공개" 의 상시 접근 지점. 토스 전체 &gt; 약관 및 정책, 카카오페이 설정 &gt; 약관·정책, 당근 내 정보 &gt; 약관과 같은 구조</td></tr>
+        <tr><td><b>노출 없음</b></td><td>하단탭을 가진 회원 화면 전부(홈·친구·친구 상세·업적·초대·목표 관리·응원 워드맵·환전 내역), 환전 신청·상태, 결제 성공·실패, 초대 수락, 관리자, 배너 직접 올리기</td>
+            <td>하단탭과 법적 블록이 같은 스크롤에 겹치면 화면이 두 번 끝납니다(D-026-B)</td></tr>
+      </table>
+      <p style="margin-top:9px">통신판매업 신고번호는 확인되지 않아 적지 않았습니다. 값이 확정되면 같은 블록에 한 줄로 들어갑니다.</p>
+    </div>
+
+    <div class="decision">
+      <h2>3. 응원 메시지가 길 때 · 배너를 직접 올릴 때 · 조판 · 제목</h2>
+      <p><b>응원 메시지</b>는 목록에서 <b>두 줄까지</b> 보이고, 넘치면 같은 자리에서 "더 보기", 펼치면 "접기" 입니다.
+         한 줄 말줄임은 140자 메시지에서 대여섯 글자만 남겨 읽을 것이 사라지고, 전문을 다 펼치면 목록 스캔이 깨집니다.
+         목표 관리·해낼게 관리·친구·친구 상세 네 화면에 같은 컴포넌트를 씁니다. 실제로 잘린 메시지에만 더 보기가 붙습니다.</p>
+      <p><b>배너 직접 올리기</b>는 문구에서 화면으로 꺼냈습니다. 선택기의 "내 사진 올리기" 를 맨 앞으로 옮겨(끝에 있으면 가로 스크롤 밖이라 안 보입니다)
+         누르면 전용 화면이 열리고, 고른 사진이 배너 비율에서 어떻게 보이는지 확인한 뒤 적용합니다. 상태 넷을 다 그렸습니다.</p>
+      <p><b>"기본은 꺼둬요"</b>는 줄바꿈 근거가 없었습니다. 더 정확히는 그 문장 자체가 옆 스위치와 중복이라 지웠습니다.
+         같은 기준으로 "금액과 순위는 업적에 들어가지 않아요"(없는 것 설명)와 "24   명이"(숫자와 단위 분리)도 정리했습니다.</p>
+      <p><b>워드맵 제목</b>은 실배포 <code>GoalCard.tsx</code> 규칙으로 되돌렸습니다. 제목이 '게'로 끝나지 않으면 ' 해낼게'를 붙이고 그 조각만 브랜드 색입니다.
+         이미 '게'로 끝나는 제목(2급 자격증 따낼게)에는 붙이지 않습니다. 이 규칙도 <code>DESIGN.md</code> 금지 패턴 10번으로 박았습니다.</p>
+    </div>
+
+    <article id="landing">
+      <h2>랜딩</h2>
+      <p class="meta">비회원이 처음 닿는 초기화면. 하단탭 유지.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#landing" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/landing-v3-390-full.png" alt="랜딩 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/landing-v4-390-full.png" alt="랜딩 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>모션을 이 자리에서 돌게 했습니다.</b> 위 "모션 보기" 를 누르면 프로토타입 원본이 이 화면으로 열리고, 진입하자마자 브랜드·태그·워드맵이 차례로 올라옵니다. 프레임 아래에 다시 재생과 4초 반복이 있습니다. 보드에 정지 캡처만 올리던 방식을 버렸습니다.<q>"동적 모션 안넣냐 ... 디자인 보여줄때 동적모션 포함하거나 있으면 보여주면서 비교하는거 하네스 없냐?"</q></li><li><b>법적 고지 블록을 이 화면에 둡니다.</b> 전자상거래법 제10조가 사업자 정보를 사이버몰 초기화면에 표시하게 합니다. 비로그인으로 외부에서 직접 닿는 화면이 랜딩과 공개 목표뿐이라 이 둘에만 둡니다. 떠 있는 전역 푸터가 아니라 콘텐츠 말미 블록입니다.<q>"전역 푸터를 깔지 않는다는데 아래 사업자 정보 칸은 왜 보이고 ..."</q></li></ul></div>
+      <div data-controls="landing"></div>
+    </article>
+    <article id="home">
+      <h2>홈 (내 목표)</h2>
+      <p class="meta">실배포 (receiver)/me 계승.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#home" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/home-v3-390-full.png" alt="홈 (내 목표) 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/home-v4-390-full.png" alt="홈 (내 목표) 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>진입 모션이 보이는 자리에서 돕니다.</b> 지난 판은 이 화면에서 보이는 영역의 실행 애니메이션이 <b>0개</b>였습니다(측정값). 이번 판은 5개입니다.</li><li><b>목표 제목의 '해낼게'를 브랜드 색으로.</b> 실배포 <code>GoalCard.tsx</code> 규칙 그대로입니다. 제목이 '게'로 끝나는 지난 목표(2급 자격증 따낼게)에는 붙이지 않습니다.<q>"제목에서 '해낼게' 파트 저렇게 되어있었냐?"</q></li></ul></div>
+      <div data-controls="home"></div>
+    </article>
+    <article id="mypage">
+      <h2>해낼게 관리</h2>
+      <p class="meta">회원 최상위 관리면. 하단탭 유지.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#mypage" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/mypage-v3-390-full.png" alt="해낼게 관리 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/mypage-v4-390-full.png" alt="해낼게 관리 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>사업자 정보 칸과 약관·개인정보 링크 나열을 없앴습니다.</b> 이 화면에는 <b>약관 및 정책 ›</b> 한 행만 남고, 내용은 아래 신규 화면이 소유합니다. 토스 전체 &gt; 약관 및 정책, 카카오페이 설정 &gt; 약관·정책과 같은 구조입니다. 어느 화면에 두고 어느 화면에서 숨기는지는 위 표가 정본입니다.<q>"전역 푸터를 깔지 않는다는데 아래 사업자 정보 칸은 왜 보이고 이용안내 이용약관 개인정보처리방침은 왜 여기 있지"</q></li><li><b>모션을 오른쪽에 따로 두지 않습니다.</b> 검수 패널의 "동적 인터랙션(모션 명세)" 블록을 지웠습니다. 모션은 프레임 바로 아래에서 다시 재생해 봅니다.<q>"모션을 오른쪽에 또 따로보여주네"</q></li><li><b>응원 메시지가 두 줄까지 보입니다.</b> 한 줄 말줄임을 버렸습니다. 넘치면 "더 보기", 펼치면 "접기".<q>"응원 메세지 줄넘어가서 짤릴때 어떻게 하기로 했어?"</q></li><li><b>"기본은 꺼둬요" 를 지웠습니다.</b> 켜짐·꺼짐은 옆 스위치가 이미 말합니다. 설명으로 반복하지 않습니다.<q>"'기본은 꺼둬요' 만 줄바꿈한 근거 해명해라."</q></li></ul></div>
+      <div data-controls="mypage"></div>
+    </article>
+    <article id="goaldetail">
+      <h2>목표 관리 (상세)</h2>
+      <p class="meta">응원자 명단·워드맵·환전을 가진 목표 단위 관리 화면.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#goaldetail" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/goaldetail-v3-390-full.png" alt="목표 관리 (상세) 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/goaldetail-v4-390-full.png" alt="목표 관리 (상세) 개정본"></figure><figure class="card ba after"><h3>더 보기를 펼친 상태</h3><img src="shots/v2-design-revision-v4/goaldetail-expanded-v4-390-full.png" alt="목표 관리 (상세) 더 보기를 펼친 상태"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>응원 메시지 2줄 + 더 보기.</b> 실제로 잘린 메시지에만 더 보기가 붙습니다. 짧은 메시지에는 붙지 않습니다. 아래 두 번째 캡처가 펼친 모습입니다.<q>"응원 메세지 줄넘어가서 짤릴때 어떻게 하기로 했어? 개무시했네?"</q></li><li><b>"지금까지 24명이" 의 숫자와 단위를 붙였습니다.</b> 숫자와 단위 사이에 간격이 생겨 "24   명이" 로 읽혔습니다.</li><li><b>제목의 '해낼게' 강조</b>와 <b>배너 선택기의 "내 사진 올리기" 를 맨 앞으로</b>. 끝에 두면 가로 스크롤 밖이라 보이지 않았습니다.<q>"직접 올리는 UI 는 안보여주지왜"</q></li></ul></div>
+      <div data-controls="goaldetail"></div>
+    </article>
+    <article id="onboarding">
+      <h2>온보딩 (목표 만들기)</h2>
+      <p class="meta">목표를 쓰고 배너를 고르는 자리.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#onboarding" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/onboarding-v3-390-full.png" alt="온보딩 (목표 만들기) 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/onboarding-v4-390-full.png" alt="온보딩 (목표 만들기) 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>"내 사진 올리기" 가 선택기 맨 앞에 보입니다.</b> 지난 판은 프리셋 8종 뒤에 숨어 있어 가로로 밀어야 나왔습니다. 누르면 아래 신규 화면으로 갑니다.<q>"직접 올리는 UI 는 안보여주지왜 병신인가? 케이스 구분을 못하네?"</q></li></ul></div>
+      <div data-controls="onboarding"></div>
+    </article>
+    <article id="goalpublic">
+      <h2>공개 목표</h2>
+      <p class="meta">인스타·카톡에서 도착하는 비회원 화면.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#goalpublic" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/goalpublic-v3-390-full.png" alt="공개 목표 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/goalpublic-v4-390-full.png" alt="공개 목표 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>모션은 프로토타입 원본에서 봅니다.</b> 워드맵 단어 착지와 부유, 인원수 카운트업이 진입과 동시에 돌고, 스크롤로 들어오는 블록은 그 시점에 다시 재생됩니다.<q>"동적 모션 개 씨발년아 ... 하네스가 병신인거냐"</q></li><li><b>법적 고지 블록.</b> 랜딩과 같은 이유로 이 화면에도 둡니다(초기화면).</li></ul></div>
+      <div data-controls="goalpublic"></div>
+    </article>
+    <article id="friends">
+      <h2>친구</h2>
+      <p class="meta">친구 목록과 관계 방향.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#friends" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/friends-v3-390-full.png" alt="친구 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/friends-v4-390-full.png" alt="친구 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>응원 메시지 2줄 규칙을 이 화면에도 똑같이 적용했습니다.</b> 화면마다 다른 규칙이 다음 판에 되돌아오는 것을 막습니다.</li></ul></div>
+      <div data-controls="friends"></div>
+    </article>
+    <article id="belong">
+      <h2>친구 상세</h2>
+      <p class="meta">친구의 해낼게와 응원 워드맵.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#belong" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/belong-v3-390-full.png" alt="친구 상세 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/belong-v4-390-full.png" alt="친구 상세 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>제목의 '해낼게' 강조와 응원 메시지 2줄 규칙</b>을 같이 적용했습니다.</li></ul></div>
+      <div data-controls="belong"></div>
+    </article>
+    <article id="status">
+      <h2>업적</h2>
+      <p class="meta">DB로 반증 가능한 지표만.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#status" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/status-v3-390-full.png" alt="업적 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/status-v4-390-full.png" alt="업적 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>"기본은 꺼둬요" 한 조각 줄바꿈을 없앴습니다.</b> 그 문장 자체가 스위치와 중복이라 지웠고, 남은 설명은 한 호흡으로 읽히게 다시 썼습니다.<q>"'기본은 꺼둬요' 만 줄바꿈한 근거 해명해라."</q></li><li><b>"금액과 순위는 업적에 들어가지 않아요" 를 지웠습니다.</b> 없는 것을 설명하지 않습니다(D-028-D).</li></ul></div>
+      <div data-controls="status"></div>
+    </article>
+    <article id="mywordmap">
+      <h2>응원 워드맵 (전체 보기)</h2>
+      <p class="meta">받은 응원을 되돌아보는 읽기 화면.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#mywordmap" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/mywordmap-v3-390-full.png" alt="응원 워드맵 (전체 보기) 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/mywordmap-v4-390-full.png" alt="응원 워드맵 (전체 보기) 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>제목이 "토익 900 <span style="color:#1F9E5A">해낼게</span>" 로 돌아왔습니다.</b> 실배포 GoalCard 규칙(제목이 '게'로 끝나지 않으면 ' 해낼게'를 붙이고 그 조각만 브랜드 색)을 그대로 씁니다.<q>"제목에서 '해낼게' 파트 저렇게 되어있었냐? 진짜 병신인가"</q></li></ul></div>
+      <div data-controls="mywordmap"></div>
+    </article>
+    <article id="cashout">
+      <h2>환전</h2>
+      <p class="meta">돈 축. 하단탭 숨김.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#cashout" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba"><h3>지난 판 (3차)</h3><img src="shots/v2-design-revision-v3/cashout-v3-390-full.png" alt="환전 지난 판"></figure><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/cashout-v4-390-full.png" alt="환전 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>사업자 푸터는 여기 없는 것이 맞습니다.</b> 다만 "없앴다" 가 아니라 표로 정했습니다. 환전은 회원 전용 화면이라 법적 고지의 상시 접근은 해낼게 관리 → 약관 및 정책이 책임집니다. 위 표를 보십시오.<q>"여기서 사업자푸터 보여주다가 이제는 그냥 다 조져버렸녜?"</q></li></ul></div>
+      <div data-controls="cashout"></div>
+    </article>
+    <article id="legal">
+      <h2>약관 및 정책 (신규)</h2>
+      <p class="meta">법적 정보의 단일 상시 접근 지점.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#legal" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/legal-v4-390-full.png" alt="약관 및 정책 (신규) 개정본"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>신규 화면.</b> 해낼게 관리에 흩어져 있던 이용안내·이용약관·개인정보처리방침 링크와 사업자 정보 접힘을 여기로 모았습니다. 개인정보 보호법 제30조 제2항(정보주체가 쉽게 확인할 수 있도록 공개)을 이 한 화면이 충족합니다.</li></ul></div>
+      <div data-controls="legal"></div>
+    </article>
+    <article id="bannerupload">
+      <h2>배너 직접 올리기 (신규)</h2>
+      <p class="meta">프리셋이 아니라 내 사진으로 가는 경로.</p>
+      <a class="motionbtn" href="../prototypes/social-viral-loop-v3-opus5.html#bannerupload" target="_blank" rel="noopener">▶ 이 화면 모션 보기 (프로토타입 원본이 열립니다)</a>
+      <div class="pair"><div class="shots"><figure class="card ba after"><h3>이번 개정 (4차)</h3><img src="shots/v2-design-revision-v4/bannerupload-v4-390-full.png" alt="배너 직접 올리기 (신규) 개정본"></figure><figure class="card ba after"><h3>사진을 고른 상태 (배너 비율 미리보기)</h3><img src="shots/v2-design-revision-v4/bannerupload-sel-v4-390-full.png" alt="배너 직접 올리기 (신규) 사진을 고른 상태 (배너 비율 미리보기)"></figure><figure class="card ba after"><h3>용량 초과 오류 상태</h3><img src="shots/v2-design-revision-v4/bannerupload-err-v4-390-full.png" alt="배너 직접 올리기 (신규) 용량 초과 오류 상태"></figure></div></div>
+      <div class="chg"><h4>이번 판 변경점</h4><ul><li><b>신규 화면.</b> 업로드를 문구가 아니라 화면으로 보여줍니다. 사진을 고르면 배너 비율에서 어떻게 보이는지 바로 확인하고 적용합니다. 상태 넷을 다 그렸습니다: 고르기 전 · 미리보기 · 용량 초과 오류 · 적용(토스트 뒤 들어온 화면 복귀).<q>"직접 올리는 UI 는 안보여주지왜 병신인가? 케이스 구분을 못하네?"</q></li></ul></div>
+      <div data-controls="bannerupload"></div>
+    </article>
+  </main>
+
+  <footer>
+    판정표(메모 19건 전수 반영표) = <code>docs/qa/v2-design-revision-v4-opus5.md</code> ·
+    프로토타입 정본 = <code>docs/design/prototypes/social-viral-loop-v3-opus5.html</code>(파일명 v3 는 승인 세대 표기이고 작업 횟수가 아닙니다. <code>artifact-stamp.md</code> §1) ·
+    디자인 시스템 정본 = <code>DESIGN.md</code>(법적 고지 노출 표 · 응원 메시지 오버플로 · 모션 검수 규칙 · 제목 강조 규칙 추가)
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const KEY = "haenael-v2-revision4";
+    const SCREENS = [];
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("on");
+      clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove("on"), 1800);
+    }
+
+    async function writeClipboard(text) {
+      try { await navigator.clipboard.writeText(text); return true; }
+      catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.cssText = "position:fixed;top:-1000px;left:0;opacity:0";
+        document.body.appendChild(ta); ta.select();
+        const ok = document.execCommand("copy"); ta.remove(); return ok;
+      }
+    }
+
+    function readOne(id) {
+      const choice = localStorage.getItem(`${KEY}-choice:${id}`) || "(선택 없음)";
+      const note = (localStorage.getItem(`${KEY}-note:${id}`) || "").trim() || "(메모 없음)";
+      const title = document.querySelector(`#${id} > h2`).textContent.trim();
+      return { id, title, choice, note };
+    }
+
+    document.querySelectorAll("[data-controls]").forEach((host) => {
+      const id = host.dataset.controls;
+      SCREENS.push(id);
+      host.innerHTML =
+        `<fieldset><legend>이 화면 선택</legend>${["승인", "수정", "반려"]
+          .map((c) => `<label><input type="radio" name="choice-${id}" value="${c}"><span>${c}</span></label>`)
+          .join("")}</fieldset>` +
+        `<div class="note-label"><label for="note-${id}">화면 메모</label>` +
+        `<button type="button" class="copyone" data-copyone="${id}">이 화면만 복사</button></div>` +
+        `<textarea id="note-${id}" placeholder="이 화면에서 고쳐야 할 것을 적어주세요. 입력하는 대로 저장되고, 위 버튼이나 상단 전체 복사로 꺼낼 수 있습니다."></textarea>` +
+        `<p class="saved" aria-live="polite"></p>`;
+
+      const saved = localStorage.getItem(`${KEY}-choice:${id}`);
+      if (saved) { const r = host.querySelector(`input[value="${saved}"]`); if (r) r.checked = true; }
+      host.querySelectorAll("input[type=radio]").forEach((input) =>
+        input.addEventListener("change", () => localStorage.setItem(`${KEY}-choice:${id}`, input.value)));
+
+      const field = host.querySelector("textarea");
+      field.value = localStorage.getItem(`${KEY}-note:${id}`) || "";
+      field.addEventListener("input", () => {
+        localStorage.setItem(`${KEY}-note:${id}`, field.value);
+        const status = field.nextElementSibling;
+        status.textContent = "저장됨";
+        clearTimeout(field._t); field._t = setTimeout(() => { status.textContent = ""; }, 1200);
+      });
+
+      host.querySelector("[data-copyone]").addEventListener("click", async () => {
+        const r = readOne(id);
+        const ok = await writeClipboard(`## ${r.title}\n- 선택: ${r.choice}\n- 메모: ${r.note}\n`);
+        toast(ok ? `"${r.title}" 복사했습니다` : "복사에 실패했습니다. 메모를 직접 긁어 주세요");
+      });
+    });
+
+    document.getElementById("copyAll").addEventListener("click", async (e) => {
+      const stamp = new Date().toLocaleString("ko-KR", { hour12: false });
+      const rows = SCREENS.map(readOne);
+      const body = rows.map((r, i) => `${i + 1}. ${r.title}\n   선택: ${r.choice}\n   메모: ${r.note}`).join("\n\n");
+      const text =
+        `# 해낼게 V2 디자인 개정 4차 보드 — 회장 메모·선택 회수본\n` +
+        `생성: ${stamp}\n` +
+        `보드: docs/design/boards/v2-design-revision-v4-opus5.html\n\n${body}\n`;
+      const ok = await writeClipboard(text);
+      if (ok) {
+        e.target.textContent = "전체 복사 완료";
+        e.target.classList.add("done");
+        setTimeout(() => { e.target.textContent = "메모·선택 전체 복사"; e.target.classList.remove("done"); }, 2200);
+        toast(`${rows.length}개 화면의 선택과 메모를 복사했습니다`);
+      } else { toast("복사에 실패했습니다. 메모를 직접 긁어 주세요"); }
+    });
+  </script>
+</body>
+</html>
