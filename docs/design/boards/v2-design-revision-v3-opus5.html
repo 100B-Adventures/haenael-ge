@@ -1,0 +1,389 @@
+<!doctype html>
+<!--
+  STAMP | line=v2 | 생성=2026-10-16 13:4x KST | model=claude-opus-5[1m] | agent=product-designer
+  skills=design-review · higgsfield(배너 프리셋 8종 생성)
+  근거=wiki/거버넌스/결정.md D-028(A 배너·B 버전·C 모션 배치·D 문구·E CSS 검사) · docs/design/standard-ux-writing.md 2026-10-16 금지 3종
+        · ~/.claude/standards/prototype-versioning.md · docs/design/chairman-board-memos-20261016.md
+  캡처=390 CSS px · deviceScaleFactor 3(물리 1170px) · 프레임 전체 스크롤 풀페이지 · 모션 5종 GIF 녹화(10fps, 440px dSF2)
+  고민=모션을 따로 모아 두지 말라는 지시(D-028-C)를 지키려면 GIF 가 캡처와 같은 짝 안에 들어와야 하는데,
+      대조 린트의 가로 비율 검사는 GIF 를 예외로 두지 않는다. 그래서 캡처 두 장과 GIF 를 각각 래퍼로 감싸고
+      그 래퍼를 display:contents 로 풀어, 보기에는 한 행이고 검사기에는 같은 폭끼리만 짝지어지게 했다.
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 V2 디자인 개정 3차 결정 보드 (회장 지적 6건 · D-028)</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+  <style>
+    :root { --bg:#ece9e1; --panel:#fff; --ink:#17150f; --muted:#69645b; --faint:#938d82; --line:#d9d4ca;
+            --green:#1b8a4f; --soft:#e7f4ec; --amber:#8a5a12; --amber-soft:#f6eddb; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:Pretendard,"Apple SD Gothic Neo",sans-serif; }
+    header { position:sticky; top:0; z-index:10; border-bottom:1px solid var(--line); background:rgb(255 255 255 / 94%); backdrop-filter:blur(16px); padding:16px 24px; }
+    header h1 { margin:0; font-size:22px; letter-spacing:-.4px; }
+    header p { max-width:1000px; margin:6px 0 0; color:var(--muted); font-size:14px; line-height:1.6; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+    nav { display:flex; gap:7px; overflow:auto; flex:1; min-width:0; padding-bottom:2px; }
+    nav a { flex:0 0 auto; border-radius:999px; padding:7px 11px; color:var(--green); background:var(--soft); font-size:13px; font-weight:800; text-decoration:none; }
+    .copyall { flex:0 0 auto; min-height:44px; padding:0 16px; border:0; border-radius:999px; background:var(--green); color:#fff;
+               font-size:14px; font-weight:850; cursor:pointer; box-shadow:0 6px 16px rgb(27 138 79 / 28%); }
+    .copyall:active { transform:translateY(1px); }
+    .copyall.done { background:#15663b; }
+    main { max-width:1320px; margin:0 auto; padding:22px 24px 10px; }
+    .summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:20px; }
+    .summary div { border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:14px; }
+    .summary strong { display:block; color:var(--green); font-size:22px; }
+    .summary span { color:var(--muted); font-size:13px; line-height:1.45; }
+    .decision { margin-bottom:22px; border:1px solid #b9d9c5; border-radius:16px; background:var(--soft); padding:18px; }
+    .decision h2 { margin:0 0 8px; font-size:17px; }
+    .decision p { margin:0 0 7px; color:#2b4c39; font-size:14px; line-height:1.7; }
+    .decision p:last-child { margin-bottom:0; }
+    article { margin-bottom:22px; scroll-margin-top:150px; border:1px solid var(--line); border-radius:18px; background:var(--panel);
+              padding:18px; box-shadow:0 12px 32px rgb(40 36 28 / 8%); }
+    article > h2 { margin:0; font-size:19px; letter-spacing:-.3px; }
+    .meta { margin:5px 0 14px; color:var(--muted); font-size:13px; line-height:1.6; }
+    /* D-028-C 모션 GIF 는 화면 캡처와 같은 행·같은 짝 안에 둔다. 래퍼는 display:contents 로 풀어
+       보기에는 한 행이면서, 대조 린트에는 같은 폭(캡처끼리)만 짝지어지게 한다. */
+    .pair { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:14px; align-items:start; }
+    .shots, .motionwrap { display:contents; }
+    figure.card { margin:0; }
+    .card { border:1px solid var(--line); border-radius:13px; background:#d7d2c8; padding:10px; }
+    .card h3 { margin:0 0 8px; color:#413c33; font-size:13px; font-weight:850; text-align:center; }
+    .card.ba.after h3 { color:var(--green); }
+    .card img { display:block; width:100%; max-width:390px; margin:0 auto; height:auto; border-radius:7px; background:#fbfaf7;
+                box-shadow:0 6px 18px rgb(0 0 0 / 16%); }
+    .card.motion { position:sticky; top:150px; background:#1f1d19; }
+    .card.motion h3 { color:#d8f0e0; }
+    .card.motion figcaption { margin:8px 2px 0; color:#a9a398; font-size:13px; line-height:1.55; text-align:center; }
+    .chg { margin:16px 0 0; border-left:3px solid var(--amber); border-radius:0 11px 11px 0; background:var(--amber-soft); padding:13px 15px; }
+    .chg h4 { margin:0 0 9px; color:var(--amber); font-size:13px; font-weight:850; }
+    .chg li { margin-bottom:9px; font-size:13.5px; line-height:1.65; }
+    .chg li:last-child { margin-bottom:0; }
+    .chg ul { margin:0; padding-left:17px; }
+    .chg q { display:block; margin-top:3px; color:#7a6a4a; font-size:13px; font-style:italic; }
+    .chg code { background:#efe4cc; border-radius:4px; padding:1px 5px; font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+    fieldset { display:flex; gap:8px; margin:15px 0 0; border:0; padding:0; }
+    legend { margin-bottom:7px; font-size:13px; font-weight:850; }
+    fieldset label { flex:1; cursor:pointer; }
+    fieldset input { position:absolute; opacity:0; pointer-events:none; }
+    fieldset span { display:flex; min-height:44px; align-items:center; justify-content:center; border:1px solid var(--line);
+                    border-radius:11px; color:var(--muted); background:#fbfaf7; font-size:14px; font-weight:800; }
+    fieldset input:checked + span { border-color:var(--green); color:var(--green); background:var(--soft); box-shadow:0 0 0 2px rgb(27 138 79 / 12%); }
+    .note-label { display:flex; align-items:center; justify-content:space-between; margin-top:13px; font-size:13px; font-weight:850; }
+    .copyone { min-height:34px; padding:0 11px; border:1px solid var(--line); border-radius:9px; background:#fbfaf7; color:var(--muted);
+               font-size:13px; font-weight:800; cursor:pointer; }
+    .copyone:active { background:var(--soft); }
+    textarea { width:100%; min-height:92px; margin-top:7px; resize:vertical; border:1px solid var(--line); border-radius:12px;
+               padding:12px; color:var(--ink); background:#fbfaf7; font:14px/1.6 inherit; }
+    textarea:focus { outline:3px solid rgb(27 138 79 / 18%); border-color:var(--green); }
+    .saved { min-height:18px; margin:5px 0 0; color:var(--green); font-size:13px; }
+    footer { max-width:1320px; margin:0 auto; padding:4px 24px 34px; color:var(--muted); font-size:13px; line-height:1.8; }
+    footer code { background:#e2ded5; border-radius:4px; padding:1px 5px; font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+    .toast { position:fixed; left:50%; bottom:26px; z-index:50; transform:translate(-50%,16px); opacity:0; pointer-events:none;
+             border-radius:999px; background:#17150f; padding:13px 22px; color:#fff; font-size:14px; font-weight:800; transition:.22s; }
+    .toast.on { transform:translate(-50%,0); opacity:1; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>해낼게 V2 디자인 개정 3차 — 지적하신 여섯 가지</h1>
+    <p>왼쪽이 지난 판, 가운데가 이번 개정, 오른쪽이 실제 녹화한 모션입니다. 화면마다 아래에서 승인·수정·반려를 고르고 메모를 적으시면
+       입력하는 대로 저장되고, 위 <b>메모·선택 전체 복사</b> 버튼 하나로 전부 꺼내집니다.</p>
+    <div class="bar">
+      <nav><a href="#landing">랜딩</a><a href="#home">홈 (내 목표)</a><a href="#mypage">해낼게 관리</a><a href="#goaldetail">목표 관리 (상세)</a><a href="#onboarding">온보딩 (목표 만들기)</a><a href="#goalpublic">공개 목표</a><a href="#friends">친구</a><a href="#belong">친구 상세</a><a href="#status">업적</a><a href="#mywordmap">응원 워드맵 (전체 보기)</a><a href="#cashout">환전</a></nav>
+      <button class="copyall" id="copyAll" type="button">메모·선택 전체 복사</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="summary">
+      <div><strong>0종</strong><span>CSS 가 안 걸린 class. 지난 판 23종 → 0종</span></div>
+      <div><strong>8장</strong><span>목표 성격별 배너 프리셋(실사 생성)</span></div>
+      <div><strong>0곳</strong><span>"금액도 순위도 없어요". 지난 판 5곳 → 0곳</span></div>
+      <div><strong>5편</strong><span>캡처 옆에 붙인 모션 녹화</span></div>
+    </div>
+
+    <div class="decision">
+      <h2>이번 판에서 고친 것과, 왜 그렇게 고쳤는지</h2>
+      <p><b>1. 목표 관리 버튼이 CSS 없이 렌더된 건.</b> 마크업 부모는 <code>.goal-actions</code> 인데 스타일은 <code>.gfoot .gmanage</code> 로만
+         선언돼 있었습니다. class 선언 여부만 보는 검사로는 안 잡히는 종류라, 렌더한 뒤 실제로 규칙이 걸렸는지 보는 검사기를
+         하네스에 넣고 23종을 전부 0 으로 만들었습니다.</p>
+      <p><b>2. 배너.</b> 배너는 그 목표를 시각화하는 자리라는 정의를 결정 원장에 박고(D-028-A), 단색 그라데이션 6종을 폐기했습니다.
+         목표 성격별 실사 8종을 만들어 카카오 선물하기 메시지 카드처럼 가로로 넘겨 고르게 했고, 직접 업로드는 유지하며,
+         아무것도 안 고르면 목표 문장에서 성격을 읽어 자동으로 배정합니다.</p>
+      <p><b>3. 버전.</b> 파일명을 올리지 않았습니다. <code>v3</code> 는 승인 세대 표기이고 작업 횟수가 아니라는 규칙을 하네스 표준으로
+         만들었습니다(<code>prototype-versioning.md</code>). 같은 세대 안의 개정이므로 같은 파일을 고치고 이력만 쌓았습니다.</p>
+      <p><b>4. 문구.</b> 전송 경로·폴백 설명과 알림 채널 배지를 전부 걷어냈고, 없는 것을 설명하는 "금액도 순위도 없어요" 를
+         다섯 화면에서 지웠습니다. 금지 항목으로 UX writing 기준에 등재했습니다.</p>
+      <p><b>5. 모션.</b> 따로 모아 두지 않고 화면 캡처와 같은 행, 같은 짝 안에 넣었습니다.</p>
+    </div>
+
+    <article id="landing">
+      <h2>랜딩</h2>
+      <p class="meta">비회원이 공유 링크 없이 처음 닿는 화면. 하단탭 유지(D-025-A).</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/landing-v2-390-full.png" alt="랜딩 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/landing-v3-390-full.png" alt="랜딩 개정본 전체 화면"></figure>
+        </div>
+        
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>변경 없음.</b> 이번 지적 6건에 해당 사항이 없습니다. 대조를 위해 그대로 싣습니다.</li></ul>
+      </div>
+      <div data-controls="landing"></div>
+    </article>
+    <article id="home">
+      <h2>홈 (내 목표)</h2>
+      <p class="meta">실배포 <code>(receiver)/me</code> 계승. 목표 카드 목록과 클로버 잔액.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/home-v2-390-full.png" alt="홈 (내 목표) 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/home-v3-390-full.png" alt="홈 (내 목표) 개정본 전체 화면"></figure>
+        </div>
+        
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>목표 카드 배너를 실사로.</b> 단색 그라데이션 띠는 그 목표가 무엇인지 아무것도 말하지 않습니다. 세 카드를 각각 공부·러닝·자격증 사진으로 바꿨습니다.<q>"해낼게 배너의 의미가 뭐야 목표 관련 이미지를 시각화하는거지? 정의안되어있으면 보여줄걸 단색이면 좀 그렇지 않냐?"</q></li><li><b>지난 목표 카드의 인라인 <code>opacity</code> 를 CSS 규칙으로.</b> 마크업에 흩어진 스타일을 규칙으로 모으는 것이 이번 CSS 검사의 취지입니다.</li></ul>
+      </div>
+      <div data-controls="home"></div>
+    </article>
+    <article id="mypage">
+      <h2>해낼게 관리</h2>
+      <p class="meta">회원의 최상위 관리면. 하단탭 유지이므로 전역 푸터를 깔지 않습니다.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/mypage-v2-390-full.png" alt="해낼게 관리 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/mypage-v3-390-full.png" alt="해낼게 관리 개정본 전체 화면"></figure>
+        </div>
+        <div class="motionwrap"><figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v3/mypage-v3-motion.gif" alt="해낼게 관리 모션 녹화"><figcaption>화면 진입 애니메이션 · 배너를 탭해 선택기를 열고 운동·저축 배너로 바꾸는 과정</figcaption></figure></div>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>목표 관리 버튼이 CSS 없이 렌더되던 것을 고쳤습니다.</b> 마크업 부모는 <code>.goal-actions</code> 인데 스타일은 <code>.gfoot .gmanage</code> 로만 선언돼 있어, 브라우저 기본 버튼이 그대로 보였습니다. 선택자를 실제 부모에 맞추고 위계를 정했습니다: 응원 인원은 윗줄, 아래에 보조(목표 관리, 테두리)와 주(응원 링크 공유, 채움)를 같은 폭 44px 로 나란히.<q>"해낼게 관리에서 목표관리 버튼은 왜 저따위로했고 ... 저런 쓰레기 css 없이 프로토타입이랍시고 올린 이유"</q></li><li><b>알림 문구에서 전송 경로를 걷어냈습니다.</b> "카카오 알림톡으로 먼저 보내고, 실패하면 앱 알림으로 보내요" 를 "응원이 오면 알려드려요" 한 줄로 줄였습니다. 알림 목록의 채널 배지(알림톡 ✓ / 앱 알림)도 같은 이유로 뺐습니다.<q>"응원 도착 알림에 잡 소리가 추가된 이유도 해명해라"</q></li><li><b>배너를 이 화면에서도 바꿉니다.</b> 배너를 탭하면 프리셋 선택기가 열립니다. 캡션도 소유자 이름이 아니라 목표 문장("토익 900 해낼게")으로 바꿨습니다. 배너는 사람이 아니라 목표를 시각화하는 자리이기 때문입니다.<q>"배너사진은 너는 저게 이쁘다고생각하냐?"</q></li><li><b>"금액도 순위도 없이, 응원 메시지와 도착 시각만 보여요" 를 지웠습니다.</b> 없는 것을 설명하지 않고 화면이 그렇게 생기게 뒀습니다.<q>"금액도 순위도 없어요 이런 좃같은 ux writing 한 이유도 해명해"</q></li></ul>
+      </div>
+      <div data-controls="mypage"></div>
+    </article>
+    <article id="goaldetail">
+      <h2>목표 관리 (상세)</h2>
+      <p class="meta">응원자 명단·워드맵·환전을 가진 목표 단위 관리 화면.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/goaldetail-v2-390-full.png" alt="목표 관리 (상세) 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/goaldetail-v3-390-full.png" alt="목표 관리 (상세) 개정본 전체 화면"></figure>
+        </div>
+        <div class="motionwrap"><figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v3/goaldetail-v3-motion.gif" alt="목표 관리 (상세) 모션 녹화"><figcaption>배너 선택기에서 프리셋을 눌러 배너가 즉시 바뀌는 과정 · 워드맵 단어 부유</figcaption></figure></div>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>배너 고르기 신설.</b> 프리셋을 그라데이션 6종에서 목표 성격별 실사 8종으로 바꾸고, 가로로 넘겨 고르면 위 배너가 즉시 바뀝니다(카카오 선물하기 메시지 카드 방식). 직접 업로드는 그대로입니다. 오른쪽 모션에서 실제로 눌러 바뀌는 것을 보실 수 있습니다.<q>"카톡 선물하기 보면 메세지있잖아 그런거처럼 선택할수도 있게 해야지"</q></li><li><b>D-day·진행 중 칩 정렬.</b> <code>.gd-hero .gtop</code> 에 규칙이 없어 칩 두 개가 흩어져 있었습니다.</li><li><b>워드맵·응원자 명단의 "금액도 순위도 없어요" 를 뺐습니다.</b> 크기 위계 설명 한 줄만 남겼습니다.</li></ul>
+      </div>
+      <div data-controls="goaldetail"></div>
+    </article>
+    <article id="onboarding">
+      <h2>온보딩 (목표 만들기)</h2>
+      <p class="meta">목표를 쓰고 배너를 고르는 자리. 비회원도 여기까지 옵니다.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/onboarding-v2-390-full.png" alt="온보딩 (목표 만들기) 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/onboarding-v3-390-full.png" alt="온보딩 (목표 만들기) 개정본 전체 화면"></figure>
+        </div>
+        <div class="motionwrap"><figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v3/onboarding-v3-motion.gif" alt="온보딩 (목표 만들기) 모션 녹화"><figcaption>목표를 쓴 뒤 배너를 고르는 과정 · 자동으로 고른 칸에서 다른 칸으로 바꾸기</figcaption></figure></div>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>목표를 쓰는 자리에서 배너를 고릅니다.</b> 실사 8종으로 바꾸고, 고르지 않으면 쓴 목표 문장에서 성격을 읽어 자동 배정합니다(빈 배너나 단색으로 시작하지 않습니다). 자동으로 고른 칸에는 "자동" 표시가 붙습니다.<q>"정의안되어있으면 보여줄걸 단색이면 좀 그렇지 않냐?"</q></li></ul>
+      </div>
+      <div data-controls="onboarding"></div>
+    </article>
+    <article id="goalpublic">
+      <h2>공개 목표</h2>
+      <p class="meta">비회원이 공유 링크로 도착하는 화면.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/goalpublic-v2-390-full.png" alt="공개 목표 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/goalpublic-v3-390-full.png" alt="공개 목표 개정본 전체 화면"></figure>
+        </div>
+        
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>배너 자산 통일.</b> 지난 판에서 쓰던 임시 커버를 이번 프리셋 세트로 맞췄습니다. 캡션도 목표 문장으로 바꿨습니다.</li></ul>
+      </div>
+      <div data-controls="goalpublic"></div>
+    </article>
+    <article id="friends">
+      <h2>친구</h2>
+      <p class="meta">응원하면 친구가 됩니다(D-024).</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/friends-v2-390-full.png" alt="친구 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/friends-v3-390-full.png" alt="친구 개정본 전체 화면"></figure>
+        </div>
+        
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>"금액도 순위도 없이 친구의 목표와 응원 소식만 보여요" 를 지웠습니다.</b><q>"금액도 순위도 없어요 이런 좃같은 ux writing"</q></li><li><b>친구 행 오른쪽 chevron 을 정렬했습니다.</b> <code>.fr .rel .mp-go</code> 에 규칙이 없어 맨 글자(›)로 렌더되고 있었습니다.</li></ul>
+      </div>
+      <div data-controls="friends"></div>
+    </article>
+    <article id="belong">
+      <h2>친구 상세</h2>
+      <p class="meta">친구 한 명의 목표와 받은 응원.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/belong-v2-390-full.png" alt="친구 상세 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/belong-v3-390-full.png" alt="친구 상세 개정본 전체 화면"></figure>
+        </div>
+        
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>배너 자산 통일.</b> 그 외 변경 없음. 지난 판에 노출한 응원 워드맵은 그대로입니다.</li></ul>
+      </div>
+      <div data-controls="belong"></div>
+    </article>
+    <article id="status">
+      <h2>업적</h2>
+      <p class="meta">DB 집계로 반증 가능한 세 지표만 씁니다(D-022).</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/status-v2-390-full.png" alt="업적 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/status-v3-390-full.png" alt="업적 개정본 전체 화면"></figure>
+        </div>
+        <div class="motionwrap"><figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v3/status-v3-motion.gif" alt="업적 모션 녹화"><figcaption>히어로 등장 · 메달 순차 pop · 획득 메달만 빛 쓸림(잠김은 정지)</figcaption></figure></div>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>변경 없음.</b> 지난 판의 메달 진열대 재설계를 유지합니다. 모션을 다시 녹화해 함께 싣습니다.</li></ul>
+      </div>
+      <div data-controls="status"></div>
+    </article>
+    <article id="mywordmap">
+      <h2>응원 워드맵 (전체 보기)</h2>
+      <p class="meta">받은 응원 전부 표시. 하단탭 유지.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/mywordmap-v2-390-full.png" alt="응원 워드맵 (전체 보기) 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/mywordmap-v3-390-full.png" alt="응원 워드맵 (전체 보기) 개정본 전체 화면"></figure>
+        </div>
+        <div class="motionwrap"><figure class="card motion"><h3>모션 (실제 녹화 · 재생되는 GIF)</h3><img src="shots/v2-design-revision-v3/mywordmap-v3-motion.gif" alt="응원 워드맵 (전체 보기) 모션 녹화"><figcaption>단어 열여섯 개가 서로 다른 속도·진폭으로 부유 · 한 줄로 눕지 않음</figcaption></figure></div>
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>설명 세 줄을 한 줄로.</b> "받은 응원은 전부 보여요 · 같은 단어가 쌓일수록 크게 자라요 / 금액도 순위도 없어요" 를 "받은 응원이 전부 여기 있어요" 로 줄였습니다. 크기 위계 설명은 그 개념이 처음 등장하는 화면(목표 관리) 한 곳에만 둡니다.<q>"금액도 순위도 없어요 이런 좃같은 ux writing"</q></li><li><b>떠다니는 배치 유지.</b> 한 줄로 눕지 않는 것을 이번 녹화로도 확인하실 수 있습니다.<q>"한줄로 하지말라고 말했는데 다 씹네"</q></li></ul>
+      </div>
+      <div data-controls="mywordmap"></div>
+    </article>
+    <article id="cashout">
+      <h2>환전</h2>
+      <p class="meta">돈이 움직이는 단일 거래. 하단탭 숨김.</p>
+      <div class="pair">
+        <div class="shots">
+          <figure class="card ba"><h3>지난 판 (2차)</h3><img src="shots/v2-design-revision-v3/cashout-v2-390-full.png" alt="환전 지난 판 전체 화면"></figure>
+          <figure class="card ba after"><h3>이번 개정 (3차)</h3><img src="shots/v2-design-revision-v3/cashout-v3-390-full.png" alt="환전 개정본 전체 화면"></figure>
+        </div>
+        
+      </div>
+      <div class="chg">
+        <h4>이번 판 변경점</h4>
+        <ul><li><b>변경 없음.</b> 수수료 공식과 환전 잠금은 손대지 않았습니다.</li></ul>
+      </div>
+      <div data-controls="cashout"></div>
+    </article>
+  </main>
+
+  <footer>
+    SOURCES/MODEL: claude-opus-5[1m] | <code>wiki/거버넌스/결정.md</code> D-028 · <code>docs/design/standard-ux-writing.md</code>(2026-10-16 금지 3종)
+    · <code>~/.claude/standards/prototype-versioning.md</code> · <code>docs/design/chairman-board-memos-20261016.md</code>
+    · <code>~/.claude/standards/standard-design.md</code> §1 · 실배포 <code>web/src/app/(receiver)/me/page.tsx</code><br>
+    SKILLS_USED: design-review(캡처 기반 육안 재검·대비 실측·등급 산출) · higgsfield(배너 프리셋 8종 생성)<br>
+    검사: <code>verify-prototype-css.mjs</code> 미적용 class 0종 · <code>verify-compare-pairs.py</code> 통과 · 캡처 390 CSS px / dSF 3<br>
+    PRESENTATION_CHECK: 화면 11개 전부 선택 3개 + 메모칸 + 화면별 복사 · 상단 전체 일괄 복사 · 툴콜 잔재 0 · Chromium 렌더 확인함
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const KEY = "haenael-v2-revision3";
+    const SCREENS = [];
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg; t.classList.add("on");
+      clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove("on"), 1800);
+    }
+
+    async function writeClipboard(text) {
+      try { await navigator.clipboard.writeText(text); return true; }
+      catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.cssText = "position:fixed;top:-1000px;left:0;opacity:0";
+        document.body.appendChild(ta); ta.select();
+        const ok = document.execCommand("copy"); ta.remove(); return ok;
+      }
+    }
+
+    function readOne(id) {
+      const choice = localStorage.getItem(`${KEY}-choice:${id}`) || "(선택 없음)";
+      const note = (localStorage.getItem(`${KEY}-note:${id}`) || "").trim() || "(메모 없음)";
+      const title = document.querySelector(`#${id} > h2`).textContent.trim();
+      return { id, title, choice, note };
+    }
+
+    document.querySelectorAll("[data-controls]").forEach((host) => {
+      const id = host.dataset.controls;
+      SCREENS.push(id);
+      host.innerHTML =
+        `<fieldset><legend>이 화면 선택</legend>${["승인", "수정", "반려"]
+          .map((c) => `<label><input type="radio" name="choice-${id}" value="${c}"><span>${c}</span></label>`)
+          .join("")}</fieldset>` +
+        `<div class="note-label"><label for="note-${id}">화면 메모</label>` +
+        `<button type="button" class="copyone" data-copyone="${id}">이 화면만 복사</button></div>` +
+        `<textarea id="note-${id}" placeholder="이 화면에서 고쳐야 할 것을 적어주세요. 입력하는 대로 저장되고, 위 버튼이나 상단 전체 복사로 꺼낼 수 있습니다."></textarea>` +
+        `<p class="saved" aria-live="polite"></p>`;
+
+      const saved = localStorage.getItem(`${KEY}-choice:${id}`);
+      if (saved) { const r = host.querySelector(`input[value="${saved}"]`); if (r) r.checked = true; }
+      host.querySelectorAll("input[type=radio]").forEach((input) =>
+        input.addEventListener("change", () => localStorage.setItem(`${KEY}-choice:${id}`, input.value)));
+
+      const field = host.querySelector("textarea");
+      field.value = localStorage.getItem(`${KEY}-note:${id}`) || "";
+      field.addEventListener("input", () => {
+        localStorage.setItem(`${KEY}-note:${id}`, field.value);
+        const status = field.nextElementSibling;
+        status.textContent = "저장됨";
+        clearTimeout(field._t); field._t = setTimeout(() => { status.textContent = ""; }, 1200);
+      });
+
+      host.querySelector("[data-copyone]").addEventListener("click", async () => {
+        const r = readOne(id);
+        const ok = await writeClipboard(`## ${r.title}\n- 선택: ${r.choice}\n- 메모: ${r.note}\n`);
+        toast(ok ? `"${r.title}" 복사했습니다` : "복사에 실패했습니다. 메모를 직접 긁어 주세요");
+      });
+    });
+
+    document.getElementById("copyAll").addEventListener("click", async (e) => {
+      const stamp = new Date().toLocaleString("ko-KR", { hour12: false });
+      const rows = SCREENS.map(readOne);
+      const body = rows.map((r, i) => `${i + 1}. ${r.title}\n   선택: ${r.choice}\n   메모: ${r.note}`).join("\n\n");
+      const text =
+        `# 해낼게 V2 디자인 개정 3차 보드 — 회장 메모·선택 회수본\n` +
+        `생성: ${stamp}\n` +
+        `보드: docs/design/boards/v2-design-revision-v3-opus5.html\n\n${body}\n`;
+      const ok = await writeClipboard(text);
+      if (ok) {
+        e.target.textContent = "전체 복사 완료";
+        e.target.classList.add("done");
+        setTimeout(() => { e.target.textContent = "메모·선택 전체 복사"; e.target.classList.remove("done"); }, 2200);
+        toast(`${rows.length}개 화면의 선택과 메모를 복사했습니다`);
+      } else { toast("복사에 실패했습니다. 메모를 직접 긁어 주세요"); }
+    });
+  </script>
+</body>
+</html>

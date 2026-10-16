@@ -1,5 +1,21 @@
 <!DOCTYPE html>
 <!--
+  변경 이력은 최신순(위가 최신)이다. 파일명 v3 는 승인 세대 표기이고 작업 횟수가 아니다
+  (정본 = ~/.claude/standards/prototype-versioning.md · D-028-B). 같은 세대 안의 개정은 이 파일을 고친다.
+
+  2026-10-16 V2 design 개정 3차(D-028-A·D·E · 회장 지적 6건).
+  - CSS 미적용 class 0: 목표 카드의 "목표 관리" 버튼이 마크업 부모는 .goal-actions 인데 선택자가 .gfoot .gmanage 라
+    스타일이 한 줄도 안 걸린 채 브라우저 기본 버튼으로 렌더됐다. 선택자를 실제 부모에 맞추고, 같은 사고를 낸
+    23종 class 전부에 실제 위계·간격·상태 규칙을 줬다. 검사 = verify-prototype-css.mjs (미적용 0종).
+  - 목표 카드 액션 위계: 응원 인원을 윗줄로 분리하고, 보조(목표 관리, 테두리)와 주(응원 링크 공유, 채움)를
+    같은 폭 44px 버튼 두 개로 나란히 뒀다.
+  - 배너 재정의(D-028-A): 배너는 그 목표를 시각화하는 자리다. 단색 그라데이션 프리셋 6종을 폐기하고 목표 성격별
+    실사 8종(Higgsfield 생성)으로 바꿨다. 카카오 선물하기 메시지 카드처럼 가로로 넘겨 고르면 위 배너가 즉시
+    바뀌고, 직접 업로드도 유지하며, 아무것도 안 고르면 목표 문장에서 성격을 읽어 자동 배정한다.
+  - 문구(D-028-D): 전송 경로·폴백 설명("카카오 알림톡으로 먼저 보내고, 실패하면 앱 알림으로")과 알림 채널 배지를
+    전부 걷어냈다. 없는 것을 설명하는 "금액도 순위도 없어요" 를 다섯 화면에서 전면 제거했다.
+  - 모션 증거는 보드에서 화면 캡처와 같은 짝 안에 둔다(D-028-C).
+
   2026-10-15 회장 화면별 지시 반영 1차(D-025).
   - 랜딩·공개 목표: 실제 응원 메시지형 워드맵, 하트, 빈도 가중 부유 모션. 공개 목표는 배너, D-29·진행 중 칩, 목표·WHY 순서로 정리했다.
   - 해낼게 관리: 마이페이지 명칭을 폐기하고 커버·상태·WHY·응원 인원·공유 CTA를 추가했다.
@@ -935,12 +951,20 @@
   .biz summary:after{content:'›';margin-left:auto;color:var(--faint);transition:transform .2s;}
   .biz[open] summary:after{transform:rotate(90deg);}
   .biz .bz{font-size:13px;color:var(--faint);line-height:1.7;margin-top:9px;}
-  /* 목표 카드 관리 진입 (회장 "관리인데 상세관리로는 어떻게 가며") */
-  .gfoot .gmanage{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 14px;border-radius:var(--r-full);
-    border:1px solid var(--clover);color:var(--clover-ink);background:#fff;font-size:13px;font-weight:800;cursor:pointer;}
-  .gfoot .gmanage:active{background:var(--clover-soft);}
-  .goal-actions{display:flex;gap:8px;align-items:center;margin-top:12px;}
-  .goal-actions .gcheer{flex:1;font-size:13px;color:var(--muted);font-weight:700;}
+  /* ── D-028-E 목표 카드 액션 행 재설계 ──
+     지난 판은 마크업 부모가 .goal-actions 인데 선택자를 .gfoot .gmanage 로 써서 "목표 관리" 버튼에
+     CSS 가 한 줄도 안 걸렸다(브라우저 기본 버튼으로 렌더). 선택자를 실제 부모에 맞추고,
+     동시에 위계를 정한다: 공유하기 = 주 행동(채움), 목표 관리 = 보조 행동(테두리). 둘 다 44px 터치.
+     응원 인원은 버튼과 경쟁하지 않게 윗줄로 분리했다. */
+  .goal-actions{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);}
+  .goal-actions .gcheer{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--clover-ink);}
+  .goal-actions .ga-btns{display:flex;gap:8px;margin-top:10px;}
+  .goal-actions .gmanage{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:0 12px;
+    border-radius:var(--r-full);border:1.5px solid var(--clover);background:var(--surface);color:var(--clover-ink);
+    font-family:var(--font);font-size:13.5px;font-weight:800;letter-spacing:-.2px;cursor:pointer;transition:background var(--motion-fast) var(--ease-standard);}
+  .goal-actions .gmanage:active{background:var(--clover-soft);}
+  .goal-actions .gmanage svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .goal-actions .gview{flex:1;min-height:44px;padding:0 12px;font-size:13.5px;letter-spacing:-.2px;}
   /* 커버 사진 (회장 "배너사진은 너는 저게 이쁘다고생각하냐") */
   .cover.photo{position:relative;background:#E7E2D8;}
   .cover.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
@@ -966,6 +990,76 @@
   .belong-wm-head{display:flex;align-items:baseline;justify-content:space-between;margin-top:20px;}
   .belong-wm-head .t{font-size:15px;font-weight:900;}
   .belong-wm-head .a{font-size:13px;font-weight:800;color:var(--clover-ink);cursor:pointer;}
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     2026-10-16 V2 design 개정 3차 (D-028-A 배너 · D-028-E CSS 미적용 class 0)
+     ══════════════════════════════════════════════════════════════════════════ */
+
+  /* ── D-028-A 목표 배너 = 그 목표를 시각화하는 자리 ──
+     회장: "해낼게 배너의 의미가 뭐야 목표 관련 이미지를 시각화하는거지? ... 카톡 선물하기 보면
+     메세지있잖아 그런거처럼 선택할수도 있게 해야지". 그래서 ①프리셋은 단색 띠가 아니라 목표 성격별
+     실사 8종 ②카카오 선물하기 메시지 카드처럼 가로로 넘겨 고르고 위의 배너가 즉시 바뀐다
+     ③직접 업로드 유지 ④아무것도 안 고르면 목표 문장에서 성격을 읽어 자동 배정한다. */
+  .cp-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:2px 2px 9px;font-size:13.5px;font-weight:800;color:var(--ink);}
+  .cp-head .cp-sub{font-size:13px;font-weight:700;color:var(--faint);}
+  .cp-photos{display:flex;gap:10px;overflow-x:auto;padding:4px 1px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+  .cp-photos::-webkit-scrollbar{height:0;}
+  .cp-photos .cp-opt{flex:0 0 auto;width:98px;height:auto;padding:0;border:0;border-radius:0;overflow:visible;background:none;
+    scroll-snap-align:start;font-family:var(--font);text-align:left;cursor:pointer;}
+  .cp-photos .cp-opt .cp-th{position:relative;display:block;width:98px;height:64px;border-radius:12px;overflow:hidden;
+    background:var(--warm);border:2px solid transparent;box-shadow:0 2px 7px rgba(22,20,15,.09);}
+  .cp-photos .cp-opt .cp-th img{display:block;width:100%;height:100%;object-fit:cover;}
+  .cp-photos .cp-opt .cp-lb{display:block;margin-top:7px;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:-.2px;word-break:keep-all;}
+  .cp-photos .cp-opt.sel .cp-th{border-color:var(--clover);box-shadow:0 0 0 3px var(--clover-soft),0 5px 14px rgba(27,138,79,.2);}
+  .cp-photos .cp-opt.sel .cp-lb{color:var(--clover-ink);font-weight:800;}
+  .cp-photos .cp-opt.sel .cp-th:after{content:"✓";position:absolute;right:5px;top:5px;width:19px;height:19px;border-radius:var(--r-full);
+    background:var(--clover);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+  .cp-photos .cp-opt .cp-auto{display:inline-block;margin-left:5px;padding:1px 7px;border-radius:var(--r-full);
+    background:var(--clover-soft);color:var(--clover-ink);font-size:13px;font-weight:800;line-height:1.5;}
+  .cp-photos .cp-up{width:98px;height:64px;border-radius:12px;align-self:flex-start;gap:3px;}
+  /* 목표 관리 배너 히어로: 사진 위에 "배너 바꾸기" 와 목표 문장 캡션 */
+  .gd-cover.photo{background:#E7E2D8;}
+  /* 배너 바꾸기 칩: 목표 관리 전용이던 것을 사진 배너 공용으로 올린다(해낼게 관리에서도 바로 바꾼다) */
+  .cover.photo .cov-edit{position:absolute;right:10px;top:10px;z-index:3;display:flex;align-items:center;gap:5px;
+    padding:5px 10px;border-radius:var(--r-full);background:rgba(14,22,16,.46);color:#fff;font-size:13px;font-weight:800;}
+  .cover.photo .cov-edit svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .gd-cover.photo .cov-wm{z-index:3;}
+  /* 목표 카드 상단 배너도 같은 사진 체계를 쓴다(단색 띠 폐기) */
+  .goalcard .cover.card-cover.photo .cov-cap{left:14px;bottom:10px;right:42px;}
+
+  /* ── D-028-E 아무 CSS 규칙에도 안 걸리던 class 를 0 으로 ──
+     회장: "저런 쓰레기 css 없이 프로토타입이랍시고 올린 이유". 빈 규칙으로 린트만 통과시키지 않고,
+     그 요소가 원래 가져야 했던 위계·간격·상태 표현을 준다. 검사 = verify-prototype-css.mjs */
+  html.force-motion{scroll-behavior:smooth;}                                /* 검수 셸: 모션 강제 재생 모드 */
+  .console .nav{min-height:30px;letter-spacing:-.2px;}
+  .console .st{min-height:30px;letter-spacing:-.2px;}
+  .set-sw.on{filter:drop-shadow(0 2px 7px rgba(27,138,79,.26));}            /* 켜짐을 그림자로도 말한다 */
+  .fr .rel .mp-go{align-self:center;font-size:17px;line-height:1;color:var(--faint);}   /* 친구 행 chevron 이 맨 글자였다 */
+  .fr.cheer-hidden{animation:rise 260ms var(--ease-decel) both;}            /* 더 보기로 드러나는 행의 등장 */
+  .gd-hero .gtop{display:flex;align-items:center;gap:7px;margin-bottom:2px;} /* D-day·상태 칩이 줄바꿈으로 흩어졌다 */
+  .ach.lock{cursor:default;}
+  .goalcard.nocover-past{opacity:.72;}                                      /* 인라인 style 을 규칙으로 */
+  .review .blk.chg{border-left:3px solid #c98a2b;}
+  .split-bal .sbi.avail{background:var(--clover-soft);border-color:#cfe8d8;} /* 환전 가능 타일만 구분 */
+  .gchip .lb{font-weight:700;letter-spacing:-.2px;}
+  .share-row .sbtn.kakao{border-color:#EFD95B;}
+  .share-row .sbtn.link{border-color:var(--line);}
+  .prog.quiet{background:var(--amber-soft);}                                /* 트랙 색이 채움(amber)과 어긋났다 */
+  .mp-profile .mp-pf{flex:1;min-width:0;}                                   /* 긴 이름·소개가 아바타를 밀어냈다 */
+  .ch-tile.amber{background:var(--amber-soft);border-color:var(--amber-line);}
+  .bt-ringwrap .bt-ring.r1{inset:-5px;}
+  .bt-ringwrap .bt-ring.r2{inset:-10px;border-color:var(--clover-soft);}
+  .bt-avs .bt-av.more{background:var(--clover-soft);color:var(--clover-ink);font-size:13px;font-weight:800;}
+  .ob-cover{height:92px;border-radius:var(--r-md);margin-top:2px;}          /* 인라인 style 을 규칙으로 */
+  .invite-kicker{margin-top:16px;font-size:13px;font-weight:800;color:var(--clover-ink);}
+
+  /* ── design-review 3차: 44px 터치 하한 미달 버튼 교정 (standard-design §5 · D-023 과 같은 뿌리) ──
+     수치는 그대로 두고 터치 영역만 44px 로 올린다(글자 크기·색은 DESIGN.md 토큰 소관). */
+  .topbell{width:44px;height:44px;}
+  .acts .logout{min-height:44px;padding:0 4px;display:inline-flex;align-items:center;}
+  .balance .bcta{min-height:44px;padding:0 14px;display:inline-flex;align-items:center;}
+  .goalcard .gfoot .gview{min-height:44px;padding:0 16px;}
+  .cheer-more button{min-height:44px;padding:0 10px;}
 </style>
 </head>
 <body>
@@ -1214,9 +1308,9 @@
       <div class="notif-pop">
         <div class="nh"><span class="nt">알림</span><button class="nc" onclick="closeNotif(this)">닫기</button></div>
         <ul>
-          <li class="un" onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">알림톡 ✓ · 10월 1일 09:12</div></div><span class="ndot"></span></li>
-          <li class="un" onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">앱 알림 · 9월 30일 21:40</div></div><span class="ndot"></span></li>
-          <li onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">알림톡 ✓ · 9월 28일 14:02</div></div></li>
+          <li class="un" onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">10월 1일 09:12</div></div><span class="ndot"></span></li>
+          <li class="un" onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">9월 30일 21:40</div></div><span class="ndot"></span></li>
+          <li onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">9월 28일 14:02</div></div></li>
         </ul>
       </div>
       <div class="app"><div class="pad">
@@ -1239,7 +1333,7 @@
         </div>
 
         <div class="goalcard">
-          <div class="cover card-cover c1"><span class="cov-wm">🍀</span></div>
+          <div class="cover card-cover photo"><img src="../assets/v2-cover-presets/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-wm">🍀</span></div>
           <div class="gtop"><span class="chip dday">D-12</span><span class="chip status">진행 중</span></div>
           <h3>토익 900 해낼게</h3>
           <div class="greason">교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
@@ -1255,7 +1349,7 @@
         </div>
 
         <div class="goalcard">
-          <div class="cover card-cover c4"><span class="cov-wm">🍀</span></div>
+          <div class="cover card-cover photo"><img src="../assets/v2-cover-presets/cover-run.jpg" alt="새벽 공원 길 위의 러닝화"><span class="shade"></span><span class="cov-wm">🍀</span></div>
           <div class="gtop"><span class="chip dday">D-40</span><span class="chip status">진행 중</span></div>
           <h3>주 3회 러닝 습관 만들게</h3>
           <div class="greason">작년에 세 번 실패해서 이번엔 친구랑 같이 한다.</div>
@@ -1277,8 +1371,8 @@
         </div>
 
         <div class="home-past">지난 목표</div>
-        <div class="goalcard nocover-past" style="opacity:.72">
-          <div class="cover card-cover c5"><span class="cov-wm">🍀</span></div>
+        <div class="goalcard nocover-past">
+          <div class="cover card-cover photo"><img src="../assets/v2-cover-presets/cover-career.jpg" alt="자격증 교재와 노트북이 놓인 책상"><span class="shade"></span><span class="cov-wm">🍀</span></div>
           <div class="gtop"><span class="chip status" style="background:var(--warm);color:var(--muted)">완료</span></div>
           <h3>2급 자격증 따낼게</h3>
           <div class="gfoot">
@@ -1308,20 +1402,9 @@
           <div style="width:44px"></div>
         </div>
 
-        <!-- v5: 목표 커버 사진. 탭하면 선택기 토글(프리셋 6종 + 내 사진 업로드). 커스텀=자기 해낼게 꾸미기 -->
-        <div class="cover gd-cover c1" id="gdCover" onclick="toggleCoverPick('gdCoverPick')"><span class="cov-edit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>커버 바꾸기</span><span class="cov-wm">🍀</span></div>
-        <div class="cover-pick" id="gdCoverPick" style="display:none">
-          <div class="cp-row">
-            <span class="cp-opt cover c1 sel" onclick="pickCover(this,'gdCover','c1')"></span>
-            <span class="cp-opt cover c2" onclick="pickCover(this,'gdCover','c2')"></span>
-            <span class="cp-opt cover c3" onclick="pickCover(this,'gdCover','c3')"></span>
-            <span class="cp-opt cover c4" onclick="pickCover(this,'gdCover','c4')"></span>
-            <span class="cp-opt cover c5" onclick="pickCover(this,'gdCover','c5')"></span>
-            <span class="cp-opt cover c6" onclick="pickCover(this,'gdCover','c6')"></span>
-            <label class="cp-up"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>내 사진<input type="file" accept="image/*" hidden onchange="uploadCover(this,'gdCover')"></label>
-          </div>
-          <div class="cp-hint">기본 커버 중에 고르거나, 내 사진으로 꾸밀 수 있어요</div>
-        </div>
+        <!-- D-028-A 목표 배너 = 그 목표를 시각화하는 자리. 탭하면 프리셋 사진 여덟 종을 가로로 넘겨 고르고, 직접 올릴 수도 있다. -->
+        <div class="cover gd-cover photo" id="gdCover" data-ck="study" onclick="toggleCoverPick('gdCoverPick')"><img src="../assets/v2-cover-presets/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-edit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>배너 바꾸기</span><span class="cov-wm">🍀</span></div>
+        <div class="cover-pick" id="gdCoverPick" data-cover-pick="gdCover" data-auto="study" style="display:none"></div>
 
         <!-- v4 FIX4: 별도 수정폼 토글 제거 → 제목·이유·마감을 그 자리에서 탭해 인라인 편집 -->
         <div class="gd-hero">
@@ -1331,7 +1414,7 @@
         </div>
 
         <div class="gd-sect">응원 워드맵</div>
-        <div class="wm-count" style="margin-top:2px"><span>지금까지</span> <span class="n"><span data-count="24">24</span></span> <span>명이 이 단어들로 응원했어요</span></div>
+        <div class="wm-count" style="margin-top:2px"><span>지금까지</span> <span class="n"><span data-count="24">24</span></span><span>명이 이 단어들로 응원했어요</span></div>
         <div class="wordmap cloud" id="wordmapGd" style="margin-top:10px">
           <div class="wm-goalword">🍀 토익 900 해낼게</div>
           <span class="wm-word s3">화이팅</span>
@@ -1343,7 +1426,7 @@
           <span class="wm-word s1">잘하고 있어</span>
           <span class="wm-word s1">대단하다</span>
         </div>
-        <div class="quietnote">같은 단어가 쌓일수록 크게 자라요 · 금액도 순위도 없어요</div>
+        <div class="quietnote">같은 단어가 쌓일수록 크게 자라요</div>
 
         <div class="gd-sect">이 목표를 응원한 사람</div>
         <!-- 정상 상태 -->
@@ -1435,14 +1518,13 @@
               </div>
             </div>
           </div>
-          <div class="quietnote">금액도 순위도 없어요</div>
         </div>
         <!-- 빈 상태 (아직 응원 없음) -->
         <div data-view="cold" style="display:none">
           <div class="cold" style="padding:26px 8px 8px">
             <div class="clover">🍀</div>
             <h2>아직 응원이 없어요</h2>
-            <p>응원 링크를 친구에게 보내면 여기에 응원한 사람이 한 명씩 쌓여요. 금액도 순위도 아닌, 누가 몇 번 밀어줬는지만 조용히요.</p>
+            <p>응원 링크를 친구에게 보내면 여기에 응원한 사람이 한 명씩 쌓여요.</p>
             <button class="btn pri" onclick="linkCopied(this)">응원 링크 복사하기</button>
           </div>
         </div>
@@ -1491,7 +1573,6 @@
               <div class="rel"><span class="relbadge">🍀 4번</span><span class="relmeta">2일 전</span></div>
             </a>
           </div>
-          <div class="quietnote">금액도 순위도 없어요</div>
         </div>
 
         <div class="gd-sect">모은 클로버 · 환전</div>
@@ -1541,7 +1622,7 @@
           <h2>토익 900 해낼게</h2>
           <div class="greason">친구들이 보내준 응원이 단어로 쌓였어요.</div>
         </div>
-        <div class="wm-count" style="margin-top:18px"><span>지금까지</span> <span class="n" data-count="24">24</span> <span>명이 이 단어들로 응원했어요</span></div>
+        <div class="wm-count" style="margin-top:18px"><span>지금까지</span> <span class="n" data-count="24">24</span><span>명이 이 단어들로 응원했어요</span></div>
         <!-- D-025-F 전체 표시(12개 상한 폐기) + D-027-E 떠다니는 배치 -->
         <div class="wordmap cloud" id="wordmap3" style="margin-top:10px;min-height:330px">
           <div class="wm-goalword">🍀 토익 900 해낼게</div>
@@ -1560,7 +1641,7 @@
           <span class="wm-word s1">꿈</span>
           <span class="wm-word s1">힘내</span>
         </div>
-        <div class="quietnote">받은 응원은 전부 보여요 · 같은 단어가 쌓일수록 크게 자라요<br>금액도 순위도 없어요</div>
+        <div class="quietnote">받은 응원이 전부 여기 있어요</div>
         <div style="height:20px"></div>
       </div></div>
       <div class="tabbar">
@@ -1638,7 +1719,7 @@
         <div style="display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center">
           <div style="width:100%;height:128px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--clover-soft),var(--warm));position:relative"><span style="position:absolute;right:12px;bottom:10px;font-size:22px">🍀</span></div>
           <div style="width:64px;height:64px;margin-top:-32px;border:4px solid var(--bg);border-radius:50%;background:var(--clover-soft);color:var(--clover-ink);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:1">서</div>
-          <div class="k" style="margin-top:16px;color:var(--clover-ink);font-size:13px;font-weight:800">함께 응원할 친구 초대</div>
+          <div class="invite-kicker">함께 응원할 친구 초대</div>
           <h2 style="margin-top:8px;font-size:24px;line-height:1.35;letter-spacing:-.8px">서연님이 함께 해내자고<br>초대했어요</h2>
           <p style="margin:10px 0 20px;color:var(--muted);font-size:14px;line-height:1.55">“토익 900 해낼게” 목표를 보고<br>서로 조용히 응원할 수 있어요.</p>
           <button class="cbtn pri" onclick="go('friends')">로그인하고 초대 수락하기</button>
@@ -1699,7 +1780,6 @@
               <div class="rel"><span class="relationship-direction mutual">서로 응원</span><span class="mp-go">›</span></div>
             </a>
           </div>
-          <div class="quietnote">금액도 순위도 없이 친구의 목표와 응원 소식만 보여요</div>
         </div>
 
         <!-- 희소 상태 (1명): 빈 여백을 다음 행동으로 전환 -->
@@ -1827,7 +1907,7 @@
       <div class="notif-pop">
         <div class="nh"><span class="nt">알림</span><button class="nc" onclick="closeNotif(this)">닫기</button></div>
         <ul>
-          <li class="un" onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">알림톡 ✓ · 10월 1일 09:12</div></div><span class="ndot"></span></li>
+          <li class="un" onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">10월 1일 09:12</div></div><span class="ndot"></span></li>
           <li onclick="closeNotif(this)"><span class="ne">🍀</span><div class="nx"><div class="nmsg">조용한 응원이 도착했어요 🍀</div><div class="nmeta">앱 알림 · 9월 28일 14:02</div></div></li>
         </ul>
       </div>
@@ -1866,17 +1946,20 @@
 
         <div class="mp-sect">내 해낼게</div>
         <div data-mypage-view="normal">
-          <!-- D-027-C 커버를 단색 띠에서 실제 사진으로 교체 -->
-          <div class="cover pub-cover photo"><img src="../assets/v2-design-revision-v2/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-cap">서연이의 해낼게</span><span class="cov-wm">🍀</span></div>
+          <!-- D-028-A 배너는 목표를 시각화하는 자리. 여기서도 바로 바꿀 수 있다. -->
+          <div class="cover pub-cover photo" id="mpCover" data-ck="study" onclick="toggleCoverPick('mpCoverPick')"><img src="../assets/v2-cover-presets/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-cap">토익 900 해낼게</span><span class="cov-edit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>배너 바꾸기</span><span class="cov-wm">🍀</span></div>
+          <div class="cover-pick" id="mpCoverPick" data-cover-pick="mpCover" data-auto="study" style="display:none"></div>
           <div class="goalcard" style="margin-top:0">
             <div class="gtop"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
             <h3>토익 900 해낼게</h3>
             <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
             <!-- D-027-C 목표 상세 관리 진입 신설: 응원자 명단·환전·편집은 목표 관리 화면이 소유한다 -->
             <div class="goal-actions">
-              <span class="gcheer">19명이 응원했어요</span>
-              <button class="gmanage" onclick="go('goaldetail')">목표 관리 ›</button>
-              <button class="gview" onclick="linkCopied(this)">공유하기</button>
+              <span class="gcheer">🍀 19명이 응원했어요</span>
+              <div class="ga-btns">
+                <button class="gmanage" onclick="go('goaldetail')"><svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2.3"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="17" r="2.3"/></svg>목표 관리</button>
+                <button class="gview" onclick="linkCopied(this)">응원 링크 공유</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1933,7 +2016,6 @@
               <div class="rel"><span class="relbadge">응원 보냄</span><span class="relmeta">1주 전</span></div>
             </a>
           </div>
-          <div class="quietnote">금액도 순위도 없이, 응원 메시지와 도착 시각만 보여요</div>
         </div>
         <div class="empty-next" data-mypage-view="scarce" style="display:none">
           <div><div style="font-size:28px">💌</div><h3>첫 응원을 받아볼까요?</h3><p>목표를 공개하고 친구 한 명에게 공유하면 첫 응원이 시작돼요.</p><button class="btn pri" onclick="go('connect')">친구 초대하기</button></div>
@@ -1944,7 +2026,7 @@
         <!-- D-027-C 알림 토글 재설계: 카드 두 장 나열 → 한 카드 안의 행 묶음. 스위치는 46x27 트랙을 44px 터치영역이 감싼다. -->
         <div class="set-group">
           <div class="set-row">
-            <div class="sx"><div class="sl">응원 도착 알림</div><div class="sd">응원이 오면 알려드려요.<br>카카오 알림톡으로 먼저 보내고, 실패하면 앱 알림으로 보내요.</div></div>
+            <div class="sx"><div class="sl">응원 도착 알림</div><div class="sd">응원이 오면 알려드려요.</div></div>
             <div class="set-sw on" role="switch" aria-checked="true" aria-label="응원 도착 알림" onclick="this.classList.toggle('on')"><i></i></div>
           </div>
           <div class="set-row">
@@ -1952,7 +2034,7 @@
             <div class="set-sw" role="switch" aria-checked="false" aria-label="마케팅 소식 받기" onclick="this.classList.toggle('on')"><i></i></div>
           </div>
         </div>
-        <div class="set-note">카카오로 가입하면 전화번호 동의를 따로 묻지 않아요.</div>
+        <div class="set-note">알림은 언제든 여기서 끌 수 있어요.</div>
 
         <!-- 계정 -->
         <div class="mp-sect">계정</div>
@@ -2046,7 +2128,7 @@
           <div style="width:44px"></div>
         </div>
 
-        <div class="cover belong-cover photo"><img src="../assets/v2-design-revision-v2/cover-run.jpg" alt="새벽 공원 길 위의 러닝화"><span class="shade"></span><span class="cov-cap">도경이의 평점 4.0 해낼게</span><span class="cov-wm">🍀</span></div>
+        <div class="cover belong-cover photo"><img src="../assets/v2-cover-presets/cover-run.jpg" alt="새벽 공원 길 위의 러닝화"><span class="shade"></span><span class="cov-cap">도경이의 평점 4.0 해낼게</span><span class="cov-wm">🍀</span></div>
         <div class="belong-hero">
           <h2>도경의 해낼게</h2>
           <span class="relationship-direction mutual">서로 응원</span>
@@ -2195,7 +2277,7 @@
         <div class="relogin" style="margin:0 0 14px;font-size:13px">내 목표가 있으신가요? <a onclick="go('login')">카카오로 로그인</a></div>
         <h1 class="public-goal-heading">토익 900 <span class="haenael">해낼게</span></h1>
         <div class="public-goal-chips"><span class="chip dday">D-29</span><span class="chip status">진행 중</span></div>
-        <div class="cover pub-cover photo"><img src="../assets/v2-design-revision-v2/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-cap">서연이의 해낼게</span><span class="cov-wm">🍀</span></div>
+        <div class="cover pub-cover photo"><img src="../assets/v2-cover-presets/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-cap">토익 900 해낼게</span><span class="cov-wm">🍀</span></div>
         <div class="goalcard" style="margin-top:0">
           <div class="greason"><b>WHY</b><br>교환학생 지원 마감 전에 점수를 만들어야 해서.</div>
         </div>
@@ -2267,20 +2349,9 @@
         <div class="field"><label>언제까지</label><div class="inp">2026년 10월 7일</div></div>
         <!-- v5: 커버 사진(선택). 기본 프리셋 배정 + 커스텀. 스킵 시 기본 커버로 -->
         <div class="field">
-          <label>목표 커버 <span style="color:var(--faint);font-weight:600">(선택 · 안 고르면 기본 커버)</span></label>
-          <div class="cover ob-cover c1" id="obCover" style="height:92px;border-radius:var(--r-md);margin-top:2px"><span class="cov-wm">🍀</span></div>
-          <div class="cover-pick" style="margin-top:8px">
-            <div class="cp-row">
-              <span class="cp-opt cover c1 sel" onclick="pickCover(this,'obCover','c1')"></span>
-              <span class="cp-opt cover c2" onclick="pickCover(this,'obCover','c2')"></span>
-              <span class="cp-opt cover c3" onclick="pickCover(this,'obCover','c3')"></span>
-              <span class="cp-opt cover c4" onclick="pickCover(this,'obCover','c4')"></span>
-              <span class="cp-opt cover c5" onclick="pickCover(this,'obCover','c5')"></span>
-              <span class="cp-opt cover c6" onclick="pickCover(this,'obCover','c6')"></span>
-              <label class="cp-up"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>내 사진<input type="file" accept="image/*" hidden onchange="uploadCover(this,'obCover')"></label>
-            </div>
-            <div class="cp-hint">자기 해낼게를 꾸며 응원받아요 · 나중에 바꿀 수 있어요</div>
-          </div>
+          <label>목표 배너</label>
+          <div class="cover ob-cover photo" id="obCover" data-ck="study"><img src="../assets/v2-cover-presets/cover-study.jpg" alt="아침 햇살이 드는 책상 위의 공책과 클로버 화분"><span class="shade"></span><span class="cov-wm">🍀</span></div>
+          <div class="cover-pick" data-cover-pick="obCover" data-auto="study" style="margin-top:8px"></div>
         </div>
         <button class="cbtn pri" style="margin-top:22px" onclick="go('login')">저장하고 응원 링크 만들기</button>
         <p style="font-size:13px;color:var(--faint);text-align:center;margin-top:10px;line-height:1.6">저장하려면 카카오 로그인이 필요해요.<br>쓴 내용은 사라지지 않아요.</p>
@@ -2533,7 +2604,7 @@
   <b>근거</b> haenael-v2-blueprint-v1.0.0-opus48.md(§3.4·§5·§6) · idea-ledger #11·#12·#13·2026-09-15·2026-09-21 · one-thing.md · 결정.md D-003·D-009 · 계승 프로토 friends-invite-v1·landing-wordmap-i18n-v2<br>
   <b>2026-10-03 v6 개정(회장 9342 7라운드 · 모션 가시성 결함 + 워드맵 동적 모션)</b> ①<b>★모션이 안 보인 근본원인 = 회장 Mac "동작 줄이기(Reduce Motion)" 켜짐</b>: 두 파일의 <code>@media (prefers-reduced-motion: reduce)</code>가 모든 모션을 .001ms 로 꺼버려 6라운드 내내 회장 화면에서 모션이 안 보였다(헤드리스는 이 설정 미상속이라 재생돼 보임). reduce 억제를 <code>:root:not(.force-motion)</code>로 가두고, 콘솔 상단에 <b>"🎬 모션 미리보기" 토글(기본 ON)</b>을 둬 회장이 자기 Mac 설정을 안 바꾸고도 모션을 본다. 실유저가 Reduce Motion 켜면 모션 없음(접근성 유지). ②<b>워드맵 동적 모션</b>(회장 요청 "둥둥 떠다니거나 입력할 때 신기한 동적 모션"): <b>앰비언트 루프</b>(단어가 은은히 상하 부유, 서로 다른 위상·속도·진폭, infinite) + <b>입력 마이크로 인터랙션</b>(새 응원 단어 적립 시 pop + 클로버 번짐 bloom, 이웃 단어 nudge 반응). dopamine·mywordmap·goalpublic 워드맵 전부. 폭죽 아님, D-003 "조용히", 금액·순위 0. 용어 = motion-concepts 표준(앰비언트 루프·마이크로 인터랙션). 커버·레이아웃 구조 미변경. em dash 0.<br>
   <b>2026-10-02 v5 개정(회장 9342 6라운드 · 목표 커버 사진 추가)</b> 회장 결정 "기본 커버 제공하되 유저가 커스텀할 수 있어야 한다. 어쨌든 자기 해낼게를 꾸며서 응원받는 것이니." ①<b>목표 커버 개념 신설</b>: 브랜드 톤 잔잔한 프리셋 6종(CSS 그라데이션, 실사 에셋이 인물 초상뿐이라 그라데이션으로, 커스텀 업로드는 실사). 기본 프리셋 자동 배정, 유저가 프리셋 선택 또는 <b>내 사진 업로드</b>(FileReader 실미리보기). ②<b>반영 위치</b>: 온보딩 목표 생성(커버 선택 단계·선택이지 필수 아님·스킵 시 기본) · 목표 관리(goaldetail 상단 커버 히어로, 탭하면 선택기 토글) · 홈 목표 카드 썸네일(목표마다 다른 톤) · 공개뷰(goalpublic 커버 배너+선언자 캡션) · 친구 해낼게(belong 커버 배너). ③커버는 응원하는 사람에게 목표 맥락을 주는 요소. ④<b>배포 미존재·프로토 신규</b>(현 배포 앱에 목표 사진 필드 없음, screen-inventory 신규 표기). D-003 무관(금액·순위 아님). em dash 0, prefers-reduced-motion 유지, 모션 수위(connect/belong 변형)는 이번 미변경.<br>
-  <b>2026-10-02 v4 개정(회장 9342 실사용 5라운드 지적 · 모션 깜빡임 근본수정)</b> ①<b>★모션 깜빡임 근본수정(FIX1, 최우선)</b>: v3 는 재생을 위해 <code>animateScreen</code>이 <code>.active</code>를 remove→reflow→add 로 재장착했는데, <code>.active</code>가 display(none↔flex)까지 쥐고 있어 remove 순간 화면이 display:none 이 되고 reflow 가 그 none 을 커밋 → 전환마다 한 프레임 화면이 사라졌다 떴다(CPU 부하 때 그 프레임이 길어져 "깜빡거리기만 하고 안 보임"). <b>표시(.active=display:flex, 전환 내내 유지)와 애니 재장착(<code>[data-anim="run"]</code> 속성 토글)을 분리</b>, 부모 fade·모든 자식 stagger 는 data-anim 게이트로만 재생되고 display 는 내내 flex 라 none 프레임이 0. prefers-reduced-motion 존중. ②<b>응원 상세 = 전 행 일관 인라인 아코디언</b>: 모든 행에 동일 토글, 실제 잘린 메시지에만 chevron 노출(한 줄 접힘 기준을 UI 로 자명하게). ③<b>카운트·사족 정리</b>: 총 인원수는 헤더 1곳, 행 배지 "🍀 N번"으로 간결화, "🤫 여기 N번 응원은..." 설명형 사족 전부 삭제 → "금액도 순위도 없어요" 한 줄. ④<b>편집 = 직관적 인라인 수정</b>: 하단 &lt;details&gt; 수정폼 제거, 제목·이유·마감을 그 자리에서 탭해 인풋 인플레이스. ⑤<b>워드맵 보기 라우팅 교정</b>: owner "워드맵 보기" → dopamine(응원하는 사람 맥락)에서 <b>owner 읽기뷰(mywordmap) 신설</b>로 교정(비회원 랜딩 아님). ⑥<b>절제된 생동 모션</b>: D-003 "조용히" 1선 = 컨페티 폭죽 금지, 워드맵 단어 부드러운 착지·countBump 만. ⑦내 목표엔 "조용히 응원하기" 없음 유지(자기 목표 자기응원 안 함). em dash 0, 아트보드 주석 0.<br>
+  <b>2026-10-02 v4 개정(회장 9342 실사용 5라운드 지적 · 모션 깜빡임 근본수정)</b> ①<b>★모션 깜빡임 근본수정(FIX1, 최우선)</b>: v3 는 재생을 위해 <code>animateScreen</code>이 <code>.active</code>를 remove→reflow→add 로 재장착했는데, <code>.active</code>가 display(none↔flex)까지 쥐고 있어 remove 순간 화면이 display:none 이 되고 reflow 가 그 none 을 커밋 → 전환마다 한 프레임 화면이 사라졌다 떴다(CPU 부하 때 그 프레임이 길어져 "깜빡거리기만 하고 안 보임"). <b>표시(.active=display:flex, 전환 내내 유지)와 애니 재장착(<code>[data-anim="run"]</code> 속성 토글)을 분리</b>, 부모 fade·모든 자식 stagger 는 data-anim 게이트로만 재생되고 display 는 내내 flex 라 none 프레임이 0. prefers-reduced-motion 존중. ②<b>응원 상세 = 전 행 일관 인라인 아코디언</b>: 모든 행에 동일 토글, 실제 잘린 메시지에만 chevron 노출(한 줄 접힘 기준을 UI 로 자명하게). ③<b>카운트·사족 정리</b>: 총 인원수는 헤더 1곳, 행 배지 "🍀 N번"으로 간결화, "🤫 여기 N번 응원은..." 설명형 사족 전부 삭제(3차에서 남은 한 줄까지 제거). ④<b>편집 = 직관적 인라인 수정</b>: 하단 &lt;details&gt; 수정폼 제거, 제목·이유·마감을 그 자리에서 탭해 인풋 인플레이스. ⑤<b>워드맵 보기 라우팅 교정</b>: owner "워드맵 보기" → dopamine(응원하는 사람 맥락)에서 <b>owner 읽기뷰(mywordmap) 신설</b>로 교정(비회원 랜딩 아님). ⑥<b>절제된 생동 모션</b>: D-003 "조용히" 1선 = 컨페티 폭죽 금지, 워드맵 단어 부드러운 착지·countBump 만. ⑦내 목표엔 "조용히 응원하기" 없음 유지(자기 목표 자기응원 안 함). em dash 0, 아트보드 주석 0.<br>
   <b>2026-09-26 개정(확정 결함 3건)</b> ①비회원 유저타입을 왼쪽 레일 독립축(①)으로 그룹핑 · landing·onboarding·goalpublic·dopamine·결제·login·terms·privacy를 회원(②)·관리자(③)축과 나란히. goalpublic 검수패널에 g/[slug] owner바 숨김·인원수만·로그인유도·게스트 응원/신고 6분기를 file:line으로 명기 + 프레임에 게스트 신고 진입점 노출 ②하단 탭바 6곳 이모지(🏠👥🍀➕🏅)를 인라인 SVG 5종(house·users·clover·user-plus·medal)으로 정적 교체 · 이모지 잔존 0(grep 확인) ③terms·privacy 죽은 링크 해소: terms/page.tsx(293줄)·privacy/page.tsx(318줄) 핵심 조문 담은 실프레임 신규 추가 + 로그인 시트 법적 링크 연결. 커버리지 계승 10→12·연결 4→2<br>
   <b>고민 한 줄</b> 회장이 원한 "게이미·소속감·도파민"을 넣되, 전부 응원자 축에만 얹고 <b>금액·순위는 토글 옵션으로조차 두지 않고 구조에서 완전히 제거</b>해 D-003 "지갑은 조용하게"를 지켰다(업적은 횟수·꾸준함으로만). 도파민은 워드맵 실시간 적립이라는 조용한 종류로만.<br>
   <b>2026-09-30 v2.1 개정(회장 9342 실사용 지적 5건)</b> ①<b>목표 상세·수정 화면(goaldetail) 신설</b>: 홈 "수정" 죽은 칩(onclick 없음)의 목적지. me/page.tsx GoalEditSheet(제목·이유·마감 편집·update_goal)·응원 링크 복사·친구뷰 미리보기·워드맵·SplitBalanceCard 잔액·환전·목표 종료 계승 집약. ev-20260930-24(허위 계승=노트만·화면 없음) 시정 ②<b>비회원 하단탭 노출</b>(landing·goalpublic): 회원 전용 탭 잠금 뱃지 → 온보딩 유도(점진 등록) ③<b>하단탭 "응원" 재정의</b>: 옛 도파민 워드맵(받는 화면) → 신규 "내 응원"(mycheers, 내가 보낸 응원 목록·응원자 리텐션). 도파민은 목표 카드 워드맵 보기·공개목표에서만 진입 ④<b>워딩 "내 지위" → "스트릭"</b> + status 히어로를 연속 기록 축으로 재구성(ux-writing 하우스보이스 C, em dash 0) ⑤<b>belong 헤더 "도경이의 응원자" → "도경이의 해낼게"</b> 명확화. 신규 2화면 animateScreen·모션 토큰·SVG 탭 아이콘 유지, 커버리지 표 반영.<br>
@@ -2553,6 +2624,7 @@
       prd: '실배포 계승 화면. 다중목표=설계 4.4~4.6절. v2 변경분(하단탭 신규 진입점)만 이번 스코프. PRD 정본은 기존 receiver-home 유지 + 소셜 진입점 plan 승격 대기.',
       flow: [['진입','앱 실행 · 로그인 후 랜딩 · 모든 화면 하단탭 "홈"'],['이탈','목표 카드 "관리" → 목표 관리 · "워드맵 보기" → 내 워드맵 읽기뷰 · 하단탭 → 친구/초대/업적'],['핵심','v2 루프의 관문 · 여기 하단탭 신규 진입점에서 모든 소셜 화면이 갈라진다']],
       chg: [
+        {w:'<b>D-028-A 목표 카드 배너를 실사로</b>. 단색 그라데이션 띠는 그 목표가 무엇인지 아무것도 말하지 않는다. 세 카드 모두 목표 성격에 맞는 사진(공부·러닝·자격증)으로 바꿨다. <b>D-028-E</b> 지난 목표 카드의 인라인 opacity 를 CSS 규칙으로 옮겼다.', fb:'회장 2026-10-16: "해낼게 배너의 의미가 뭐야 목표 관련 이미지를 시각화하는거지? 단색이면 좀 그렇지 않냐"'},
         {w:'<b>v5 목표 카드 커버 사진</b>. 각 목표 카드 상단에 커버 썸네일 배너 추가(기본 프리셋 배정, 목표마다 다른 톤). 응원하는 사람에게 목표 맥락을 주고, 선언자가 자기 해낼게를 꾸미는 요소. <b>배포 미존재·프로토 신규</b>. D-003 무관(금액·순위 아님).', fb:'회장 결정: "기본 커버 제공하되 유저가 커스텀. 자기 해낼게를 꾸며서 응원받는 것"'},
         {w:'<b>목표 카드 진입 칩 "수정" → "관리"</b>로 워딩·아이콘(연필→설정) 변경. 이 칩이 여는 화면의 1급 목적이 편집이 아니라 "응원자 명단 보기 + 환전"이라 워딩을 맞췄다. 죽은 칩(onclick 없음)을 살아있는 목표 관리 화면으로 연결(죽은 칩 0).', fb:'회장 9342: "수정이 아니라 관리나 보기정도가 적절" · "수정 눌러도 반응 없구만"'},
         {w:'<b>하단탭 5→4개</b>(홈·친구·초대·업적). "응원" 탭은 친구 탭과 성격이 겹쳐 폐지, "스트릭" 탭은 "업적"으로 워딩 개정. 전 화면 공유 셸에 홈 탭 유지(어느 화면에서든 홈 복귀).', fb:'회장 9342: "친구 탭이랑 응원 탭이랑 성격 같은거 아니냐" · "스트릭보단 업적"'}
@@ -2564,12 +2636,13 @@
       inherit:'계승(실배포): ①응원자 명단 = cheer 테이블 → me/page.tsx:161-199 owner cheer 목록(status=CONFIRMED·deleted null·created_at 내림차순, 랭킹 금지) + CheerList.tsx(익명이면 "익명의 누군가"·display_name NULL). D-003 때문에 프로토는 clover_amount 대신 "N번 응원"·시점만 노출(CheerList의 owner 금액 표시는 의도적으로 걷음). ②환전 = SplitBalanceCard.tsx 총/잠금/가능 + /cashout 진입(pending 시 /cashout/status). ③편집 = GoalEditSheet.tsx 제목·이유·마감·update_goal RPC. ④목표 종료 = goal_status_enum(ACTIVE/CLOSED/DELETED, database.types.ts:1320) · 현재 배포엔 노출 진입점이 없어 신규(열린결정).',
       prd:'실배포 me/page.tsx 응원자 조회·SplitBalanceCard·GoalEditSheet를 목표 단위 관리 화면으로 재편. v2.2 재설계 화면. PRD 정본은 receiver-home 유지 + 목표 관리 라우트 plan 승격 대기.',
       chg: [
+        {w:'<b>D-028-A 배너 고르기</b>. 프리셋을 그라데이션 6종에서 목표 성격별 실사 8종으로 바꾸고, 가로로 넘겨 고르면 위 배너가 즉시 바뀌는 선택기를 넣었다(카카오 선물하기 메시지 카드 방식). 직접 업로드 유지. <b>D-028-E</b> D-day·상태 칩이 들어 있는 .gd-hero .gtop 에 규칙이 없어 칩이 흩어져 있던 것을 정렬했다. <b>D-028-D</b> 워드맵·응원자 명단의 "금액도 순위도 없어요" 를 뺐다.', fb:'회장 2026-10-16: "카톡 선물하기 보면 메세지있잖아 그런거처럼 선택할수도 있게 해야지" · "금액도 순위도 없어요 이런 좃같은 ux writing"'},
         {w:'<b>D-027-E 워드맵 떠다니는 배치</b>. 목표 관리 화면의 워드맵도 같은 엔진으로 교체했다(한 줄 금지를 한 화면만 고치면 다음 판에 되돌아온다).', fb:'회장 2026-10-16 보드 메모: "한줄로 하지말라고"'},
         {w:'<b>v6.2 워드맵을 목표 관리의 주 콘텐츠로 인라인 표출</b>. 전엔 관리에서 "워드맵 보기"를 눌러 한 뎁스 아래 읽기뷰로 가야 했는데, 이제 관리 화면에 들어오면 응원 단어 워드맵이 히어로 바로 아래에 바로 보인다("응원 워드맵" 섹션). "보기" 탭 한 번 제거, 홈 카드의 "워드맵 보기"·"기록 보기"도 관리로 직접 착지. 금액·순위 0.', fb:'회장 2026-10-05: "워드맵을 한 뎁스 아래로 숨기지 말고 관리 화면에 바로 보이게, 주 콘텐츠로 올려라."'},
         {w:'<b>v5 목표 커버 사진</b>. 상단에 커버 히어로 추가, 탭하면 선택기 토글(기본 프리셋 6종 + 내 사진 업로드). 커스텀=자기 해낼게 꾸미기. 선택이지 필수 아님(기본 프리셋 배정). <b>배포 미존재·프로토 신규</b>. D-003 무관.', fb:'회장 결정: "기본 커버 제공하되 유저가 커스텀할 수 있어야. 자기 해낼게를 꾸며서 응원받는 것"'},
         {w:'<b>v4 편집 = 직관적 인라인 수정</b>. v2.2 의 하단 &lt;details&gt; "목표 정보 수정" 토글폼을 제거하고, 제목·이유·마감을 상단 헤더에서 <b>그 자리에서 탭하면 인풋 인플레이스</b>로 바꿔 저장(필드 단위 update_goal). 별도 수정 컴포넌트를 켜지 않는다.', fb:'회장 9342: "내 해낼게 편집은 따로 수정 컴포넌트 켜는게 아니라 직관적으로 눌러서 수정하는 방법이 낫지않을까?"'},
         {w:'<b>v4 응원자 명단 = 전 행 일관 인라인 아코디언</b>. v2.2 는 미리보기 행만 chevron·펼침이 붙고 숨김/익명 행은 불일치했다. 이제 모든 행에 같은 토글을 달고, <b>실제로 잘린 메시지에만 chevron 을 노출</b>(한 줄 접힘 기준을 UI 로 자명하게). 짧아서 안 잘리는 메시지는 chevron 숨김·탭 비활성.', fb:'회장 9342: "응원 상세메세지 한 줄도 접는건 의도한거야 기준있음?"'},
-        {w:'<b>v4 카운트·사족 정리</b>. 총 인원수는 섹션 헤더 한 곳("지금까지 N명이 응원했어요"), 행별 배지는 "🍀 N번"으로 간결화. "🤫 여기 N번 응원은 몇 번 밀어줬는지만... 순위로 보이지 않습니다" 류 설명형 사족은 전부 삭제하고 "금액도 순위도 없어요" 한 줄로 축약.', fb:'회장 9342: "몇명이 응원했는지 UI는 개같네 · \'🤫 여기 N번 응원은...\' 이런 워딩 존나 사족 개같지않냐 ux_writing 따른거야?"'},
+        {w:'<b>v4 카운트·사족 정리</b>. 총 인원수는 섹션 헤더 한 곳("지금까지 N명이 응원했어요"), 행별 배지는 "🍀 N번"으로 간결화. "🤫 여기 N번 응원은 몇 번 밀어줬는지만... 순위로 보이지 않습니다" 류 설명형 사족은 전부 삭제했다(3차에서 남은 한 줄까지 제거).', fb:'회장 9342: "몇명이 응원했는지 UI는 개같네 · \'🤫 여기 N번 응원은...\' 이런 워딩 존나 사족 개같지않냐 ux_writing 따른거야?"'},
         {w:'<b>v4 워드맵 보기 라우팅 교정</b>. owner 의 "워드맵 보기"가 응원 적립 연출(dopamine, 응원하는 사람 맥락)로 가던 것을 <b>owner 자기 워드맵 읽기뷰(mywordmap)</b>로 교정. 비회원 랜딩(goalpublic) 아님, 응원 CTA·로그인 유도 없이 쌓인 단어만 읽는 화면.', fb:'회장 9342: "워드맵 보기 누르면 비회원이 보는 랜딩으로 가는거냐?"'},
         {w:'<b>v4 "조용히 응원하기" 없음 유지(확인)</b>. 내 목표 관리 화면에는 응원 버튼이 없다(자기 목표를 자기가 응원하지 않음). 현재 없음이 정확, 유지.', fb:'회장 9342: "내 해낼게에서도 조용히 응원하기는 있는게맞아?" → 없는 게 맞음'},
         {w:'[v2.2 유지] 1급 목적 = 응원자 명단 + 환전(JTBD). 응원자 명단은 빈/정상/과다(긴 이름·많은 응원자) 3상태. 금액·순위는 어느 상태에도 0(D-003).', fb:'ev-20261001-10 시정 · D-003 "지갑은 조용하게"'}
@@ -2582,6 +2655,7 @@
       inherit:'계승(실배포): (receiver)/wordmap/[goalId]/page.tsx:72-112 get_wordmap RPC → Wordmap.tsx normalizeWords·getSizeTier(동일 단어 합산→빈도 ratio→s1/s2/s3 크기, 전체 표시). owner 읽기 맥락이라 응원 오버레이(CheerPaymentButton)·비회원 로그인 유도 없이 워드맵만 렌더.',
       prd:'실배포 wordmap 라우트의 owner 읽기 상태. dopamine(응원 적립 연출)·goalpublic(비회원 도착) 과 같은 라우트의 다른 진입 맥락. v4 신규 분리 화면.',
       chg:[
+        {w:'<b>D-028-D 없는 것을 설명하지 않는다</b>. "받은 응원은 전부 보여요 · 같은 단어가 쌓일수록 크게 자라요 / 금액도 순위도 없어요" 세 줄을 "받은 응원이 전부 여기 있어요" 한 줄로 줄였다. 크기 위계 설명은 그 개념이 처음 등장하는 화면(목표 관리) 한 곳에만 남긴다.', fb:'회장 2026-10-16: "금액도 순위도 없어요 이런 좃같은 ux writing"'},
         {w:'<b>D-027-E 떠다니는 배치로 전면 교체</b>. CSS flex 줄바꿈은 폭이 모자라면 반드시 줄을 만든다. 그 구조를 버리고 단어 실측 크기로 타원 나선 배치(겹침 0)를 JS 가 계산한다. 390px 에서도 줄이 생기지 않는다.', fb:'회장 2026-10-16 보드 메모: "한줄로 하지말라고 말했는데 다 씹네 내가 요청한거는 어디 좆박고 그냥 무시하냐?"'},
         {w:'<b>전체 표시 유지 + 14개 배치 검증</b>. 12개 상한 폐기(D-025-F)로 늘어난 단어도 줄로 눕지 않게, 면적이 모자라면 세로로 영역을 늘려 담는다.', fb:'회장 2026-10-15: "워드맵에서는 다 보여줘야지 · 12개 표시는 병신같다"'},
         {w:'<b>v6.2 전용 전체화면 읽기뷰로 격하(진입 뎁스 제거)</b>. 워드맵이 목표 관리(goaldetail)에 인라인으로 올라오면서, 이 독립 화면은 더 이상 필수 경로가 아니다. 워드맵의 1차 표출면은 관리 화면이고, 이 화면은 "전체화면으로 크게 보기"용 보조면으로만 남는다(검수용으로 유지).', fb:'회장 2026-10-05: "워드맵을 한 뎁스 아래로 숨기지 마라" → 인라인이 주, 이 화면은 보조'},
@@ -2618,6 +2692,7 @@
       inherit: '계승: friends-invite-v1의 .fr 행·콜드스타트 3스텝·오버플로 렌더 로직. D-022에 따라 N번 함께·N주 연속은 제거하고, D-026-D에 따라 DB 응원 귀속으로 계산한 관계 방향은 복원했다. 카드 클릭 → 친구 상세 라우팅은 유지한다.',
       prd: 'D-022(DB 원장에서 반증 가능한 지표만) · D-009(콜드스타트 정직) · D-003(금액·랭킹 금지).',
       chg: [
+        {w:'<b>D-028-D·E</b> 목록 하단의 "금액도 순위도 없이..." 설명을 뺐고, 친구 행 오른쪽 chevron 이 규칙 없이 맨 글자로 렌더되던 것(.fr .rel .mp-go)을 정렬·크기·색까지 맞췄다.', fb:'회장 2026-10-16: "금액도 순위도 없어요 이런 좃같은 ux writing 한 이유도 해명해"'},
         {w:'<b>D-026-D 관계 방향 복원</b>. 친구 행마다 내가 응원함·응원받음·서로 응원을 한 번만 표시한다. 방향은 supporter attribution과 목표 소유자를 양방향 대조해 계산하며, UUID low/high 순서는 의미로 쓰지 않는다.', fb:'회장 2026-10-16: "내가 응원한건지 응원 받은건지 서로 응원한지가 중요하지않을까?"'},
         {w:'<b>D-022 정합화</b>. 친구별 N번 함께·N주 연속을 제거하고 ACTIVE 친구 연결 상태만 표시한다.', fb:'회장 확정 D-022: DB 원장에서 반증할 수 없는 지표 금지'},
         {w:'친구 아바타 3종(도경·서연·민서) + 과다상태 목록 아바타를 <b>이니셜 원 → Higgsfield 실사</b>로 전량 교체.', fb:'회장: "힉스필드는 안씀?" · 친구목록이 인물 자리의 핵심'},
@@ -2648,6 +2723,9 @@
       inherit:'계승(실배포): ①상단 🔔 = ReceiverShell.tsx ReceiverTopBar(home 변형) + NotificationBadge.tsx(드롭다운·CHEER_RECEIVED·읽음처리·채널배지·빈상태) ②환전 내역 진입 = me/page.tsx:337-348 cashout-history-link + cashout/history/page.tsx ③업적 = 소셜 status 화면 ④로그아웃 = ReceiverShell LogoutButton ⑤법적 링크·사업자 정보 = Footer.tsx. ⑥응원 내역 = cheer 테이블(받은: owner 기준, 보낸: supporter 기준) → "N번 응원"·메시지·시점만(clover_amount 미노출, D-003). ⑦프로필 수정 = 이름·소개·아바타 update(프로필 필드), 별도 화면 없이 인라인. v3 신규 통합 셸 + v6.2 응원내역·프로필수정.',
       prd:'하단탭 4개(홈·친구·초대·마이페이지) 중 4번째. 업적·환전내역·환경설정·계정을 흡수(업적·설정 단독 탭 폐지). PRD 정본은 receiver-home 유지 + 마이페이지 라우트 plan 승격 대기.',
       chg:[
+        {w:'<b>D-028-E 목표 관리 버튼이 CSS 없이 렌더되던 것을 고쳤다</b>. 마크업 부모는 .goal-actions 인데 스타일은 .gfoot .gmanage 로만 선언돼 있어 브라우저 기본 버튼이 그대로 보였다. 선택자를 실제 부모에 맞추고 위계를 정했다: 응원 인원은 윗줄, 아래에 보조(목표 관리, 테두리)와 주(응원 링크 공유, 채움)를 같은 폭 44px 로 나란히. 알림 스위치의 켜짐 상태(.set-sw.on)와 프로필 텍스트 블록(.mp-pf)도 규칙이 없던 자리였다.', fb:'회장 2026-10-16: "해낼게 관리에서 목표관리 버튼은 왜 저따위로했고 ... 저런 쓰레기 css 없이 프로토타입이랍시고 올린 이유"'},
+        {w:'<b>D-028-D 알림 문구에서 전송 경로를 걷어냈다</b>. "카카오 알림톡으로 먼저 보내고, 실패하면 앱 알림으로 보내요" 를 "응원이 오면 알려드려요" 한 줄로 줄였다. 알림 목록의 채널 배지(알림톡 ✓ / 앱 알림)도 같은 이유로 뺐다. 사용자는 어떤 길로 왔는지 알 필요가 없고, 실패하면 어떻게 되는지는 더더욱 아니다.', fb:'회장 2026-10-16: "응원 도착 알림에 잡 소리가 추가된 이유도 해명해라"'},
+        {w:'<b>D-028-A 이 화면에서도 배너를 바꿀 수 있다</b>. 배너를 탭하면 같은 선택기가 열린다. 캡션도 소유자 이름이 아니라 목표 문장으로 바꿨다(배너는 사람이 아니라 목표를 시각화한다).', fb:'회장 2026-10-16: "배너사진은 너는 저게 이쁘다고생각하냐?"'},
         {w:'<b>D-027-C 푸터 제거</b>. 이 화면에 남아 있던 전역 사업자 푸터를 없애고, 사업자 정보는 계정 블록 아래 접힘으로 옮겼다. 하단탭 유지 화면에 푸터를 깔지 않는다는 기준(하단탭 기준 7항)을 이 화면에서 실제로 지킨다.', fb:'회장 2026-10-16 보드 메모: "푸터 없앤다며? 여기엔 왜있고"'},
         {w:'<b>D-027-C 로그아웃 위치 교정</b>. 상단 헤더에서 빼고 계정 블록 한 곳에만 뒀다. 상단에는 자주 쓰는 알림만 남는다.', fb:'회장 2026-10-16 보드 메모: "로그아웃은 왜 저 위치에 있꼬"'},
         {w:'<b>D-027-C 알림 토글 재설계</b>. 카드 두 장 나열을 한 카드 안 두 행으로 묶고, 스위치를 46x27 트랙 + 44px 터치영역으로 통일했다(role=switch).', fb:'회장 2026-10-16 보드 메모: "알림 토글 버튼은 왜 저지랄이고"'},
@@ -2750,6 +2828,7 @@
       flow:[['진입','랜딩 시작하기 · how 나도 시작하기'],['이탈','저장 → 로그인(login) → 회원 홈 · 응원 링크 생성']],
       opendec:'없음(폼 자체는 실배포 그대로 계승).',
       chg:[
+        {w:'<b>D-028-A 목표를 쓰는 자리에서 배너를 고른다</b>. 그라데이션 6종을 실사 8종으로 바꾸고, 고르지 않으면 쓴 목표 문장에서 성격을 읽어 자동 배정한다(빈 배너로 시작하지 않는다).', fb:'회장 2026-10-16: "정의안되어있으면 보여줄걸 단색이면 좀 그렇지 않냐?"'},
         {w:'<b>v5 커버 사진 선택 단계</b>. 목표 생성 폼에 커버 선택을 추가(기본 프리셋 6종 중 하나 자동 배정 + 내 사진 업로드). <b>선택이지 필수 아님</b>, 안 고르면 기본 커버. "자기 해낼게를 꾸며 응원받는" 진입점. <b>배포 미존재·프로토 신규</b>.', fb:'회장 결정: "기본 커버 제공하되 유저가 커스텀할 수 있어야 한다"'},
         {w:'상단에 3단계 진행바(3 중 2)를 추가하고 착오름 모션을 얹었습니다. 필드는 순차 등장합니다. 폼 필드·문구·저장 로직은 실배포 그대로입니다.',fb:'회장 2026-09-29: "동적 연출을 정지 화면들로 확대" (목표작성 진행 피드백·Zeigarnik·endowed progress).'}]
     },
@@ -3272,36 +3351,77 @@
     frame.appendChild(t); setTimeout(()=>t.remove(),1500);
   }
 
-  // ── v5: 목표 커버 사진 (기본 프리셋 배정 + 커스텀 업로드) ──
-  const COVER_PRESETS=['c1','c2','c3','c4','c5','c6'];
+  // ── D-028-A 목표 배너 (프리셋 사진 고르기 + 직접 업로드 + 목표에 맞춘 자동 배정) ──
+  // 회장 2026-10-16: "해낼게 배너의 의미가 뭐야 목표 관련 이미지를 시각화하는거지? ... 카톡 선물하기 보면
+  //   메세지있잖아 그런거처럼 선택할수도 있게 해야지". 종전 프리셋은 단색 그라데이션 6종이라 목표를
+  //   시각화하지 못했다. 목표 성격 8종의 실사(Higgsfield 생성)로 바꾸고, 가로로 넘겨 고르면 위 배너가 즉시 바뀐다.
+  const COVER_DIR='../assets/v2-cover-presets/';
+  const COVER_PRESETS=[
+    {k:'study',   lb:'공부·시험',    f:'cover-study.jpg',   alt:'아침 햇살이 드는 책상 위의 공책과 클로버 화분',  kw:['토익','토플','공부','시험','수능','학점','영어','합격','독서','책']},
+    {k:'run',     lb:'운동·달리기',  f:'cover-run.jpg',     alt:'새벽 공원 길 위의 러닝화',                      kw:['러닝','달리','마라톤','운동','헬스','등산','수영','근력']},
+    {k:'health',  lb:'건강·식단',    f:'cover-health.jpg',  alt:'아침 주방 선반 위의 물컵과 채소',                kw:['다이어트','체중','식단','건강','감량','금주','채식']},
+    {k:'career',  lb:'자격증·취업',  f:'cover-career.jpg',  alt:'자격증 교재와 노트북이 놓인 책상',               kw:['자격증','취업','이직','포트폴리오','면접','코딩','승진']},
+    {k:'money',   lb:'저축·돈 모으기',f:'cover-money.jpg',  alt:'나무 식탁 위의 작은 저금통과 공책',              kw:['저축','적금','돈','모으','가계부','절약','투자']},
+    {k:'writing', lb:'글쓰기·기록',  f:'cover-writing.jpg', alt:'린넨 천 위에 펼쳐진 공책과 만년필',              kw:['글쓰기','블로그','일기','기록','그림','작곡','연주']},
+    {k:'habit',   lb:'습관·루틴',    f:'cover-habit.jpg',   alt:'해 뜰 무렵 침대 옆 탁자의 시계와 물컵',          kw:['습관','루틴','기상','미라클','금연','명상','스트레칭']},
+    {k:'travel',  lb:'여행·도전',    f:'cover-travel.jpg',  alt:'나무 벤치에 놓인 작은 배낭과 종이 지도',         kw:['여행','도전','버킷','일주','완주','출장']}
+  ];
+  const coverOf=k=>COVER_PRESETS.find(p=>p.k===k)||COVER_PRESETS[0];
+  // 아무것도 안 고른 경우에도 목표 성격에 맞는 기본 이미지를 보여준다(D-028-A 마지막 문장).
+  function autoCoverKey(title){
+    const t=(title||'');
+    for(const p of COVER_PRESETS){ if(p.kw.some(w=>t.includes(w))) return p.k; }
+    return 'study';
+  }
   function toggleCoverPick(id){
     const el=document.getElementById(id); if(!el) return;
     el.style.display = (el.style.display==='none'||!el.style.display) ? 'block' : 'none';
   }
-  // 프리셋 선택: 대상 커버에 프리셋 클래스 적용(업로드 이미지 제거), 선택기 체크 이동
-  function pickCover(opt,targetId,cls){
+  // 선택기 마크업은 한 곳에서만 만든다(세 화면이 같은 컴포넌트를 쓴다 · 손으로 복제하면 또 어긋난다)
+  function renderCoverPicker(host){
+    const targetId=host.dataset.coverPick;
     const target=document.getElementById(targetId); if(!target) return;
-    COVER_PRESETS.forEach(c=>target.classList.remove(c));
-    target.classList.add(cls);
-    target.style.backgroundImage='';           // 업로드 이미지 걷어내고 프리셋으로
+    const cur=target.dataset.ck||'study';
+    const auto=host.dataset.auto||'';
+    const tiles=COVER_PRESETS.map(p=>
+      '<button type="button" class="cp-opt'+(p.k===cur?' sel':'')+'" data-ck="'+p.k+'" onclick="pickCover(this,\''+targetId+'\')">'+
+        '<span class="cp-th"><img src="'+COVER_DIR+p.f+'" alt="'+p.alt+'"></span>'+
+        '<span class="cp-lb">'+p.lb+(p.k===auto?'<span class="cp-auto">자동</span>':'')+'</span>'+
+      '</button>').join('');
+    host.innerHTML =
+      '<div class="cp-head">배너 고르기<span class="cp-sub">자동 = 목표에 맞춰 고른 사진</span></div>'+
+      '<div class="cp-row cp-photos">'+tiles+
+        '<label class="cp-up"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>내 사진'+
+        '<input type="file" accept="image/*" hidden onchange="uploadCover(this,\''+targetId+'\')"></label>'+
+      '</div>'+
+      '<div class="cp-hint">직접 찍은 사진도 올릴 수 있어요.</div>';
+  }
+  function pickCover(opt,targetId){
+    const target=document.getElementById(targetId); if(!target) return;
+    const p=coverOf(opt.dataset.ck);
+    const img=target.querySelector('img');
+    if(img){ img.src=COVER_DIR+p.f; img.alt=p.alt; }
+    target.dataset.ck=p.k;
+    target.style.backgroundImage='';
     target.removeAttribute('data-custom');
     const row=opt.closest('.cp-row');
-    if(row){ row.querySelectorAll('.cp-opt').forEach(o=>o.classList.remove('sel')); opt.classList.add('sel'); }
-    toastInline(target,'커버를 바꿨어요');
+    if(row){ row.querySelectorAll('.cp-opt').forEach(o=>o.classList.remove('sel')); row.querySelector('.cp-up')?.classList.remove('sel'); }
+    opt.classList.add('sel');
+    toastInline(target,p.lb+' 배너로 바꿨어요');
   }
-  // 내 사진 업로드: FileReader 로 실제 미리보기(프로토 로컬, 서버 없음). D-003 무관.
+  // 내 사진 업로드: FileReader 로 실제 미리보기(프로토 로컬, 서버 없음)
   function uploadCover(input,targetId){
     const target=document.getElementById(targetId); const file=input.files&&input.files[0];
     if(!target||!file) return;
     const r=new FileReader();
     r.onload=e=>{
-      COVER_PRESETS.forEach(c=>target.classList.remove(c));
-      target.style.backgroundImage='url('+e.target.result+')';
+      const img=target.querySelector('img');
+      if(img){ img.src=e.target.result; img.alt='직접 올린 배너 사진'; }
       target.setAttribute('data-custom','1');
       const row=input.closest('.cp-row');
       if(row){ row.querySelectorAll('.cp-opt').forEach(o=>o.classList.remove('sel')); }
       input.closest('.cp-up')?.classList.add('sel');
-      toastInline(target,'내 사진으로 커버를 꾸몄어요');
+      toastInline(target,'내 사진으로 배너를 꾸몄어요');
     };
     r.readAsDataURL(file);
   }
@@ -3460,6 +3580,7 @@
   injectTabIcons();
 
   // 초기 렌더
+  document.querySelectorAll('[data-cover-pick]').forEach(renderCoverPicker);   // D-028-A 배너 선택기
   document.querySelectorAll('.flowrail .fnode').forEach(n=>n.classList.toggle('on', n.dataset.loop==='home'));
   renderReview('home');
   animateScreen('home');
