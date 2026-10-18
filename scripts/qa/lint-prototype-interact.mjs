@@ -44,9 +44,9 @@ const CLICK_BUDGET = 14;      // 화면당 클릭 상한. 전수는 조합 폭�
 const SHELL = '.review, .flowmap, .flowrail, .console, .motionbar, .stamp, .changelog, .coverage, .notes';
 
 // ── 자기검증(self-test): 본 검사 전에 픽스처를 먼저 돌린다 ──────────────────────────
-// 왜: 2026-10-19 이 검사기를 신설한 직후, addScriptTag 의 템플릿 리터럴이 정규식 이스케이프를
+// 왜: 2026-10-19 이 린트를 신설한 직후, addScriptTag 의 템플릿 리터럴이 정규식 이스케이프를
 //   먹어(백틱 문자열에서 백슬래시 s 는 그냥 s 가 된다) 카피 축이 조용히 전건 PASS 를 냈다.
-//   "결함 0건" 과 "검사기 고장" 은 출력이 똑같아서 구별할 수단이 없었다. 구별할 수단이 없는
+//   "결함 0건" 과 "린트 고장" 은 출력이 똑같아서 구별할 수단이 없었다. 구별할 수단이 없는
 //   검사는 장식이고, 장식을 통과로 세면 그 자리에서 회장이 first QA 를 하게 된다.
 //   그래서 4축 각각에 알려진 결함을 심은 픽스처를 두고, 매 실행 전에 그것을 못 잡으면 본 검사를
 //   아예 돌리지 않고 종료코드 2 로 멈춘다. 끄기 = SKIP_SELFTEST=1 (CI 에서는 끄지 마라).
@@ -65,7 +65,7 @@ async function selfTest(){
   try { r = JSON.parse(out); } catch { return { ok:false, why:'픽스처 실행 출력을 파싱할 수 없다' }; }
   const dead = ['A','B','C','D','E'].filter((k,i)=>[r.nA,r.nB,r.nC,r.nD,r.nE][i] === 0);
   return dead.length
-    ? { ok:false, why:`픽스처에 심어 둔 결함을 축 ${dead.join('·')} 가 잡지 못했다(각 축 >=1 이어야 한다). 검사기가 고장난 것이지 결함이 없는 것이 아니다.`, counts:r }
+    ? { ok:false, why:`픽스처에 심어 둔 결함을 축 ${dead.join('·')} 가 잡지 못했다(각 축 >=1 이어야 한다). 린트가 고장난 것이지 결함이 없는 것이 아니다.`, counts:r }
     : { ok:true, counts:{ A:r.nA, B:r.nB, C:r.nC, D:r.nD, E:r.nE } };
 }
 
@@ -114,7 +114,7 @@ async function runScenarios(page){
           const now = await page.evaluate((s2)=>window.__ix.pickFingerprint(s2), st.expect.fingerprintOf);
           if(st.expect.notMatches){
             if(new RegExp(st.expect.notMatches).test(now)){
-              failed = `${st.expect.message||'기대와 다르다'} (지문 "${now}" 가 금지 패턴 /${st.expect.notMatches}/ 에 걸렸다)`; break;
+              failed = `${st.expect.message||'기대와 다르다'} (해시 "${now}" 가 금지 패턴 /${st.expect.notMatches}/ 에 걸렸다)`; break;
             }
           } else {
             const want = String(st.expect.equals||'').startsWith('mark:')
@@ -264,7 +264,7 @@ window.__ix = {
     });
   },
 
-  // ── E 왕복 상태소실: 켜져 있는 선택의 지문 ──────────────────────────────────
+  // ── E 왕복 상태소실: 켜져 있는 선택의 해시 ──────────────────────────────────
   // "무엇이 몇 개 켜졌나" 가 아니라 "어느 항목이 켜졌나" 를 비교해야 리셋을 잡는다.
   // 개수만 보면 study -> health 리셋이 1개 -> 1개 라서 통과한다(2026-10-19 실측).
   pickFingerprint(frameSel){

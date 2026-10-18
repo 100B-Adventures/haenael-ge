@@ -1,7 +1,7 @@
 {
   "_why": "회장이 조작으로 찾은 결함 중 다중 단계 경로(화면 A 에서 조작 -> 화면 B 로 이동 -> 적용 -> 화면 A 복귀)는 축 검사만으로 잡히지 않는다. 그런 경로는 여기 한 줄로 추가한다. 스크립트를 새로 만들지 않는다(CLAUDE.md §9 구멍 하나에 검사 하나 금지). lint-prototype-interact.mjs --scenarios 가 이 파일을 읽어 실행한다.",
   "_steps": "go(화면이동) · click(CSS 선택자) · call(페이지 전역 함수 호출) · wait(ms)",
-  "_expect": "fingerprintOf 로 지금 켜진 선택의 지문을 재고 equals(mark:<이름> 으로 앞 단계 지문 참조) 또는 notMatches(정규식) 로 판정한다.",
+  "_expect": "fingerprintOf 로 지금 켜진 선택의 해시를 재고 equals(mark:<이름> 으로 앞 단계 해시 참조) 또는 notMatches(정규식) 로 판정한다.",
   "scenarios": [
     {
       "id": "cover-picker-upload-owns-selection",

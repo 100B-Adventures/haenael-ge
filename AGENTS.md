@@ -14,6 +14,6 @@ node ../scripts/qa/measure-motion-v4.mjs              # 모션 2축(screencast �
 node ~/.claude/harness/bin/verify-prototype-css.mjs <파일>   # 렌더 후 CSS 미적용 class
 ```
 
-`lint-prototype-interact.mjs` 는 매 실행 전 `scripts/qa/fixtures/interact-known-defects.html` 로 자기검증을 거친다. 5축 중 하나라도 픽스처 결함을 못 잡으면 본 검사를 돌리지 않고 종료코드 2 로 멈춘다. 검사기 고장과 결함 0건을 구별할 수 없으면 그 검사는 장식이기 때문이다.
+`lint-prototype-interact.mjs` 는 매 실행 전 `scripts/qa/fixtures/interact-known-defects.html` 로 자기검증을 거친다. 5축 중 하나라도 픽스처 결함을 못 잡으면 본 검사를 돌리지 않고 종료코드 2 로 멈춘다. 린트 고장과 결함 0건을 구별할 수 없으면 그 검사는 장식이기 때문이다.
 
 새로 발견된 결함이 여러 단계를 거쳐야 드러나는 것이면(화면 A 조작 → 화면 B 적용 → 화면 A 복귀 같은 경로) **스크립트를 새로 만들지 말고** `scripts/qa/fixtures/interact-scenarios.json` 에 시나리오 한 줄을 추가한다.
