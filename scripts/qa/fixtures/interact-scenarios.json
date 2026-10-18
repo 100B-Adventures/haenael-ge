@@ -1,0 +1,38 @@
+{
+  "_why": "회장이 조작으로 찾은 결함 중 다중 단계 경로(화면 A 에서 조작 -> 화면 B 로 이동 -> 적용 -> 화면 A 복귀)는 축 검사만으로 잡히지 않는다. 그런 경로는 여기 한 줄로 추가한다. 스크립트를 새로 만들지 않는다(CLAUDE.md §9 구멍 하나에 검사 하나 금지). lint-prototype-interact.mjs --scenarios 가 이 파일을 읽어 실행한다.",
+  "_steps": "go(화면이동) · click(CSS 선택자) · call(페이지 전역 함수 호출) · wait(ms)",
+  "_expect": "fingerprintOf 로 지금 켜진 선택의 지문을 재고 equals(mark:<이름> 으로 앞 단계 지문 참조) 또는 notMatches(정규식) 로 판정한다.",
+  "scenarios": [
+    {
+      "id": "cover-picker-upload-owns-selection",
+      "why": "회장 2026-10-19: '온보딩 목표작성에서 배너고르기에서 왼쪽으로 내 사진 올리기 하려고 하면 왜 자동으로 다시 포인터 세팅되고 체크표시는 두개냐고'. 2026-10-19 실측: 사진 보관함에서 buApply() 로 내 사진을 배너에 적용해도 프리셋 타일의 선택 표시(.cp-opt.sel)가 그대로 켜져 있다. 배너는 내 사진인데 체크는 프리셋을 가리키므로 사용자에게는 선택이 되돌아간 것처럼, 또는 두 곳이 켜진 것처럼 보인다. 선택 상태가 한 곳(SSOT)에 없고 프리셋 렌더와 업로드 적용이 각자 쓰는 것이 원인이다.",
+      "steps": [
+        {
+          "go": "onboarding"
+        },
+        {
+          "click": "#onboarding .cp-opt:nth-of-type(3)"
+        },
+        {
+          "click": "#onboarding .cp-upgo"
+        },
+        {
+          "click": "#bannerupload .bu-ph:nth-of-type(2)"
+        },
+        {
+          "call": "buApply"
+        },
+        {
+          "go": "onboarding"
+        },
+        {
+          "expect": {
+            "fingerprintOf": "#onboarding .frame",
+            "notMatches": "cp-opt:",
+            "message": "내 사진을 배너로 적용했는데 프리셋 타일의 선택 표시가 여전히 켜져 있다. 배너는 내 사진인데 체크는 프리셋을 가리킨다."
+          }
+        }
+      ]
+    }
+  ]
+}

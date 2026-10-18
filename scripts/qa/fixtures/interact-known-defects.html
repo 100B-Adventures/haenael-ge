@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>interact lint 픽스처</title>
+<!-- lint-prototype-interact.mjs 의 4축이 실제로 작동하는지 검증하는 픽스처.
+     4축 각각에 "반드시 잡혀야 하는" 결함을 하나씩 심어 두었다. 검사기가 이 파일에서
+     A·B·C·D 를 모두 >=1 건 잡지 못하면 검사기가 망가진 것이다(검출 0 = 통과 아님).
+     왜 이 픽스처가 필요한가: 2026-10-19 신설 당시 addScriptTag 의 템플릿 리터럴이
+     정규식 이스케이프를 먹어 카피 축이 조용히 전건 PASS 를 냈다. 검사기의 침묵과
+     결함 0건은 구별이 불가능하고, 구별할 수단이 없으면 그 검사는 장식이다. -->
+<style>
+  body{margin:0;font-family:system-ui,sans-serif;}
+  section.screen{display:none;}
+  section.screen.active{display:flex;}
+  .frame{position:relative;width:390px;height:844px;overflow:hidden;border:1px solid #ccc;}
+  .body{height:100%;overflow-y:auto;padding:16px;box-sizing:border-box;}
+  /* A축: 하단 고정 CTA(absolute + z-index). 콘텐츠 하단 여백이 없어 마지막 블록을 덮는다. */
+  .gp-cta{position:absolute;left:0;right:0;bottom:0;z-index:12;height:120px;background:#fff;
+          border-top:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .pick > div{padding:10px;border:1px solid #ddd;margin:6px 0;}
+  .pick > div.on{border-color:#2a7;background:#eafff3;}
+</style></head><body>
+
+<!-- A + D -->
+<section class="screen active" id="fx_overlap"><div class="frame"><div class="body">
+  <h2>겹침 픽스처</h2>
+  <p style="height:700px">스크롤 콘텐츠. 하단 padding 이 CTA 높이를 확보하지 않았다.</p>
+  <p class="last">이 마지막 문장은 고정 CTA 밑으로 숨는다. A축이 이걸 잡아야 한다.</p>
+  <div class="gp-cta">🍀 응원하기</div>
+</div></div></section>
+
+<!-- B: 단일 선택 그룹에 두 개가 켜져 있다 -->
+<section class="screen" id="fx_multi"><div class="frame"><div class="body">
+  <h2>단일선택 픽스처</h2>
+  <div class="pick" data-cover-pick>
+    <div class="on">기본 배너</div>
+    <div class="on">내 사진 올리기</div>
+    <div>갤러리</div>
+  </div>
+</div></div></section>
+
+<!-- C: onclick 이 붙었지만 아무것도 하지 않는 컨트롤 -->
+<section class="screen" id="fx_dead"><div class="frame"><div class="body">
+  <h2>죽은 조작 픽스처</h2>
+  <button onclick="void 0">아무 일도 일어나지 않는 버튼</button>
+</div></div></section>
+
+<!-- D: 인칭·높임 혼용 + em dash + AI 투 -->
+<section class="screen" id="fx_copy"><div class="frame"><div class="body">
+  <h2>카피 픽스처</h2>
+  <p>네 응원이 여기 쌓였어요.</p>
+  <p>이것은 em dash — 가 들어간 문장이다.</p>
+  <p>열리는 것들 을 확인해 보세요.</p>
+  <p>네 번째 메달을 받았어요. 이건 수사이므로 잡히면 오탐이다.</p>
+</div></div></section>
+
+<!-- E: 선택을 바꿔도 화면을 떠났다 돌아오면 기본값으로 리셋된다(상태가 DOM 에만 있고 보존되지 않음) -->
+<section class="screen" id="fx_lost"><div class="frame"><div class="body">
+  <h2>왕복 상태소실 픽스처</h2>
+  <div class="pick" id="lostPick">
+    <div class="on" data-ck="a">기본값 A</div>
+    <div data-ck="b">선택지 B</div>
+    <div data-ck="c">선택지 C</div>
+  </div>
+</div></div></section>
+
+<script>
+  // 이 픽스처의 결함: 화면에 들어올 때마다 선택을 기본값으로 다시 그린다.
+  // 실제 프로토타입의 renderCoverPicker 가 같은 모양이었다(2026-10-19 실측).
+  function resetLostPick(){
+    var g=document.getElementById('lostPick'); if(!g) return;
+    [].forEach.call(g.children,function(c){ c.classList.remove('on'); });
+    g.children[0].classList.add('on');
+  }
+  document.addEventListener('click',function(e){
+    var it=e.target.closest('#lostPick > div'); if(!it) return;
+    [].forEach.call(it.parentElement.children,function(c){ c.classList.remove('on'); });
+    it.classList.add('on');
+  });
+
+  function go(id){
+    if(id==='fx_lost') setTimeout(resetLostPick,0);
+    document.querySelectorAll('section.screen').forEach(s=>s.classList.remove('active'));
+    var el=document.getElementById(id); if(el) el.classList.add('active');
+  }
+  window.go=go; go('fx_overlap');
+</script>
+</body></html>
