@@ -19,6 +19,20 @@
 //   C 죽은 조작    클릭 가능 요소를 눌렀는데 ①화면 전환 0 ②DOM 변화 0 ③스크롤 변화 0. 아무 반응이 없는 컨트롤.
 //   D 카피 규칙    인칭·높임 혼용(반말 지시어 + 존댓말 종결), em dash, AI 투 상투어.
 //                 = "네 응원이 여기 쌓였어요" 그 모양.
+//   F 여백 비대칭  **카드 안에서만** 본다. 카드(배경·테두리·둥근 모서리를 가진 박스)의 위아래 padding 이
+//                 다르거나, 카드 안 한 줄 캡션의 위 공간과 아래 공간이 다르다.
+//                 = "'카카오톡으로 이렇게 전해져요' 위 여백은 아래 여백이랑 다른거냐" 그 모양.
+//                 2026-10-19 실측: connect 화면의 .kprev 카드 안에서 캡션 위 18px, 아래 8px.
+//                 ★범위를 카드로 좁힌 이유: 처음에 모든 컨테이너를 보니 77건이 나왔고 대부분 오탐이었다.
+//                 섹션 제목(h1~h6) 위를 넓게 두는 것은 타이포그래피 표준이고, 화면 전체 패딩에서
+//                 하단을 더 주는 것도 표준 관행이다. 의도와 실수를 기계가 구별할 수 있는 범위가
+//                 "한 카드 안의 대칭" 이다. 카드는 테두리가 눈에 보이므로 비대칭이 바로 읽힌다.
+//                 ★그런데 카드로 좁혀도 8건 중 회장 지적과 일치하는 것은 1건이고 6건은 "라벨 + 그 값"
+//                 묶음(위 11px / 아래 3px 처럼 작게 벌어진 것)으로 정상이었다. 의도와 실수를 이 축이
+//                 안정적으로 구별하지 못한다. 그래서 **F 는 경고이고 종료코드에 넣지 않는다.**
+//                 거짓 경보를 차단 조건으로 세우면 린트 전체가 무시되고, 그것이 린트를 죽이는 길이다.
+//                 근본 처방은 수직 간격을 spacing scale 토큰으로 정의하고 카드 내부 여백을 그 토큰으로
+//                 통일하는 것이다(DESIGN.md 과제). 토큰이 생기면 이 축을 "토큰 밖 값" 검사로 바꾼다.
 //   E 왕복 상태소실 선택을 바꾼 뒤 다른 화면을 거쳐 돌아오면 그 선택이 기본값으로 되돌아간다.
 //                 = "내 사진 올리기 하려고 하면 왜 자동으로 다시 포인터 세팅되고" 그 모양.
 //                 2026-10-19 실측: bannerupload 에서 사진을 적용하고 온보딩으로 돌아오면
@@ -34,11 +48,12 @@ import path from 'node:path';
 const argv = process.argv.slice(2);
 const AS_JSON = argv.includes('--json');
 const axisArg = (argv.find((a) => a.startsWith('--axis=')) || '').slice(7);
-const AXES = new Set((axisArg || 'A,B,C,D,E').split(',').map((s) => s.trim().toUpperCase()));
+const AXES = new Set((axisArg || 'A,B,C,D,E,F').split(',').map((s) => s.trim().toUpperCase()));
 const rest = argv.filter((a) => !a.startsWith('--'));
 const target = path.resolve(rest[0] || '../docs/design/prototypes/social-viral-loop-v3-opus5.html');
 
-const OVERLAP_MIN = 4;        // 교차 높이 하한(px). 서브픽셀·테두리 겹침은 결함이 아니다.
+const OVERLAP_MIN = 4;
+const SPACING_MIN_DIFF = 8;   // 위아래 공간 차이 하한(px). 이보다 작으면 시각적으로 비대칭으로 읽히지 않는다.        // 교차 높이 하한(px). 서브픽셀·테두리 겹침은 결함이 아니다.
 const CLICK_BUDGET = 14;      // 화면당 클릭 상한. 전수는 조합 폭발이라 상위 N개만 본다.
 
 const SHELL = '.review, .flowmap, .flowrail, .console, .motionbar, .stamp, .changelog, .coverage, .notes';
@@ -63,10 +78,10 @@ async function selfTest(){
   }
   let r;
   try { r = JSON.parse(out); } catch { return { ok:false, why:'픽스처 실행 출력을 파싱할 수 없다' }; }
-  const dead = ['A','B','C','D','E'].filter((k,i)=>[r.nA,r.nB,r.nC,r.nD,r.nE][i] === 0);
+  const dead = ['A','B','C','D','E','F'].filter((k,i)=>[r.nA,r.nB,r.nC,r.nD,r.nE,r.nF][i] === 0);
   return dead.length
     ? { ok:false, why:`픽스처에 심어 둔 결함을 축 ${dead.join('·')} 가 잡지 못했다(각 축 >=1 이어야 한다). 린트가 고장난 것이지 결함이 없는 것이 아니다.`, counts:r }
-    : { ok:true, counts:{ A:r.nA, B:r.nB, C:r.nC, D:r.nD, E:r.nE } };
+    : { ok:true, counts:{ A:r.nA, B:r.nB, C:r.nC, D:r.nD, E:r.nE, F:r.nF } };
 }
 
 const IS_FIXTURE = /interact-known-defects\.html$/.test(target);
@@ -76,7 +91,7 @@ if (!IS_FIXTURE && process.env.SKIP_SELFTEST !== '1') {
     console.error(`\u26d4 자기검증 실패: ${st.why}`);
     process.exit(2);
   }
-  if (!AS_JSON) console.log(`자기검증 통과(픽스처 A${st.counts.A}·B${st.counts.B}·C${st.counts.C}·D${st.counts.D}·E${st.counts.E})`);
+  if (!AS_JSON) console.log(`자기검증 통과(픽스처 A${st.counts.A}·B${st.counts.B}·C${st.counts.C}·D${st.counts.D}·E${st.counts.E}·F${st.counts.F})`);
 }
 
 
@@ -277,6 +292,66 @@ window.__ix = {
       .sort().join('|');
   },
 
+  // ── F 여백 비대칭 ───────────────────────────────────────────────────────────
+  // 두 가지만 본다. 오탐을 줄이려고 "의도적으로 다를 수 있는" 경우는 제외한다.
+  //   F1 컨테이너의 padding-top 과 padding-bottom 이 다름(차이 >= minDiff)
+  //   F2 한 줄 라벨(짧은 텍스트, 1줄)의 위 공간과 아래 공간이 다름(차이 >= minDiff)
+  //      위 공간 = 이전 형제와의 간격, 없으면 부모 padding-top
+  //      아래 공간 = 다음 형제와의 간격, 없으면 부모 padding-bottom
+  // 섹션 제목처럼 위를 넓게 두는 것이 의도인 경우가 있으므로 라벨은 24자 이하 1줄만 본다.
+  spacing(frameSel, minDiff){
+    const frame = document.querySelector(frameSel);
+    if(!frame) return [];
+    const out = [];
+    const px = v => parseFloat(v) || 0;
+    // 카드 = 배경이 깔렸거나 테두리가 있거나 모서리가 둥근 박스. 테두리가 눈에 보이므로 비대칭이 읽힌다.
+    const isCard = (el) => {
+      const cs = getComputedStyle(el);
+      const bg = cs.backgroundColor || '';
+      const hasBg = bg && bg !== 'transparent' && !/rgba\(0,\s*0,\s*0,\s*0\)/.test(bg);
+      const hasBorder = px(cs.borderTopWidth) > 0 || px(cs.borderLeftWidth) > 0;
+      const hasRadius = px(cs.borderTopLeftRadius) >= 6;
+      const hasShadow = cs.boxShadow && cs.boxShadow !== 'none';
+      return (hasBg || hasBorder || hasShadow) && hasRadius;
+    };
+    for(const el of frame.querySelectorAll('*')){
+      if(el.closest(this.shellSel)) continue;
+      const cs = getComputedStyle(el);
+      if(cs.display==='none' || cs.visibility==='hidden') continue;
+      const r = el.getBoundingClientRect();
+      if(r.width < 80 || r.height <= 0) continue;
+
+      // F1 카드 자신의 위아래 padding 비대칭
+      if(el.children.length >= 2 && isCard(el)){
+        const pt = px(cs.paddingTop), pb = px(cs.paddingBottom);
+        if(pt>0 && pb>0 && Math.abs(pt-pb) >= minDiff){
+          out.push({ kind:'카드 위아래 padding 비대칭', sel:el.tagName.toLowerCase()+'.'+String(el.className||'').split(' ')[0],
+                     top:Math.round(pt), bottom:Math.round(pb), text:(el.textContent||'').trim().slice(0,24) });
+        }
+      }
+
+      // F2 카드 안 한 줄 캡션의 위아래 공간 비대칭
+      if(/^H[1-6]$/.test(el.tagName)) continue;          // 제목은 위를 넓게 두는 것이 표준이다
+      const txt = (el.textContent||'').trim();
+      const ownText = [...el.childNodes].some(n=>n.nodeType===3 && n.textContent.trim());
+      if(!ownText || txt.length===0 || txt.length>24) continue;
+      if(r.height > 30) continue;
+      const parent = el.parentElement; if(!parent) continue;
+      if(!isCard(parent)) continue;                      // 카드 안이 아니면 보지 않는다
+      const pcs = getComputedStyle(parent);
+      if(pcs.display === 'flex' || pcs.display === 'grid') continue;
+      const prev = el.previousElementSibling, next = el.nextElementSibling;
+      const above = prev ? Math.round(r.top - prev.getBoundingClientRect().bottom) : Math.round(px(pcs.paddingTop));
+      const below = next ? Math.round(next.getBoundingClientRect().top - r.bottom) : Math.round(px(pcs.paddingBottom));
+      if(above >= 0 && below >= 0 && Math.abs(above-below) >= minDiff){
+        out.push({ kind:'카드 안 캡션 위아래 공간 비대칭', sel:el.tagName.toLowerCase()+'.'+String(el.className||'').split(' ')[0],
+                   top:above, bottom:below, text:txt.slice(0,24) });
+      }
+    }
+    const seen = new Set();
+    return out.filter(o=>{ const k=o.kind+'|'+o.sel+'|'+o.text; if(seen.has(k)) return false; seen.add(k); return true; });
+  },
+
   snapshot(frameSel){
     const frame = document.querySelector(frameSel);
     const sc = frame ? frame.querySelector('[class*=scroll],.body,.sheet') : null;
@@ -333,10 +408,11 @@ for (const id of ids) {
   await pg.evaluate(() => document.getAnimations().forEach((a) => { try { a.cancel(); } catch {} }));
   await pg.waitForTimeout(100);
 
-  const row = { id, overlap: [], multi: [], dead: [], copy: [], lost: [] };
+  const row = { id, overlap: [], multi: [], dead: [], copy: [], lost: [], space: [] };
 
   if (AXES.has('A')) row.overlap = await pg.evaluate(([s, m]) => window.__ix.overlap(s, m), [frameSel, OVERLAP_MIN]);
   if (AXES.has('D')) row.copy = await pg.evaluate((s) => window.__ix.copy(s), frameSel);
+  if (AXES.has('F')) row.space = await pg.evaluate(([s, m]) => window.__ix.spacing(s, m), [frameSel, SPACING_MIN_DIFF]);
   if (AXES.has('B')) row.multi = await pg.evaluate((s) => window.__ix.multiSelect(s), frameSel);
 
   if (AXES.has('B') || AXES.has('C')) {
@@ -422,7 +498,7 @@ for (const id of ids) {
   const seen = new Set();
   row.multi = row.multi.filter((v) => { const k = v.group + '|' + v.count + '|' + (v.items || []).join(','); if (seen.has(k)) return false; seen.add(k); return true; });
 
-  if (row.overlap.length || row.multi.length || row.dead.length || row.copy.length || row.lost.length) report.push(row);
+  if (row.overlap.length || row.multi.length || row.dead.length || row.copy.length || row.lost.length || row.space.length) report.push(row);
 }
 
 // 시나리오는 축 검사가 끝난 뒤 깨끗한 상태에서 돌린다
@@ -449,21 +525,23 @@ await pg.evaluate(() => window.go('home')).catch(() => {});
 await b.close();
 
 const tally = (k) => report.reduce((a, r) => a + r[k].length, 0);
-const nA = tally('overlap'), nB = tally('multi'), nC = tally('dead'), nD = tally('copy'), nE = tally('lost');
+const nA = tally('overlap'), nB = tally('multi'), nC = tally('dead'), nD = tally('copy'), nE = tally('lost'), nF = tally('space');
 const nS = scenarioFails.length;
+// F 는 경고라서 total 에 넣지 않는다(위 주석 참조). 판정 줄에 따로 센다.
 const total = nA + nB + nC + nD + nE + nS;
 
 if (AS_JSON) {
-  console.log(JSON.stringify({ target, screens: ids.length, nA, nB, nC, nD, nE, nS, total, report, scenarioFails }, null, 2));
+  console.log(JSON.stringify({ target, screens: ids.length, nA, nB, nC, nD, nE, nF, nS, total, report, scenarioFails }, null, 2));
 } else {
   console.log(`대상: ${target}`);
-  console.log(`화면 ${ids.length}개 · A 겹침 ${nA} · B 단일선택위반 ${nB} · C 죽은조작 ${nC} · D 카피 ${nD} · E 왕복상태소실 ${nE}`);
+  console.log(`화면 ${ids.length}개 · A 겹침 ${nA} · B 단일선택위반 ${nB} · C 죽은조작 ${nC} · D 카피 ${nD} · E 왕복상태소실 ${nE} · F 여백비대칭 ${nF}(경고)`);
   for (const r of report) {
     console.log(`\n[${r.id}]`);
     for (const o of r.overlap) console.log(`  A 겹침 ${o.overlapPx}px  ${o.fixed}("${o.fixedText}") 가 ${o.covered}("${o.coveredText}") 를 덮음`);
     for (const o of r.multi)   console.log(`  B 단일선택위반 ${o.group} 에 ${o.count}개 켜짐 [${(o.items||[]).join(' / ')}]${o.after ? `  (클릭: ${o.after})` : ''}`);
     for (const o of r.dead)    console.log(`  C 죽은조작 ${o.tag}.${o.cls} "${o.text}"`);
     for (const o of r.copy)    console.log(`  D ${o.kind}  "${o.text}"  ${o.sel}`);
+    for (const o of r.space)   console.log(`  F ${o.kind}  위 ${o.top}px / 아래 ${o.bottom}px  ${o.sel} "${o.text}"`);
     for (const o of r.lost)    console.log(`  E 왕복상태소실 "${o.picked}" 선택 후 ${o.via} 경유 복귀하니 선택이 바뀜 [${o.before} -> ${o.after}]`);
   }
   for (const f of scenarioFails) {
@@ -471,6 +549,7 @@ if (AS_JSON) {
     console.log(`  S 실패  ${f.detail}`);
     if (f.why) console.log(`  근거    ${f.why.slice(0, 160)}`);
   }
-  console.log(`\n판정: ${total === 0 ? 'PASS (0건)' : 'FAIL (' + total + '건)'}`);
+  console.log(`\n판정: ${total === 0 ? 'PASS (0건)' : 'FAIL (' + total + '건)'}`
+    + (nF ? `  · F 경고 ${nF}건은 차단하지 않는다(라벨과 값 묶음이 정상인 경우가 섞인다). 눈으로 판단하고, 근본 처방은 간격 토큰화다.` : ''));
 }
 process.exit(total === 0 ? 0 : 1);

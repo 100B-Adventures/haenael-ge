@@ -8,10 +8,15 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: design       # 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
+current_stage: design       # 2026-10-19 03:4x 회장 1차 승인(조건부: R1~R10 해결 후 승격). 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
 approved_stages: [plan]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
+  # ⚠ 2026-10-19 핀 불일치 (컨트롤러 확인): 아래 design 핀은 `social-viral-loop-v2-opus48.html` 인데
+  #   2026-10-14 REOPEN 이후 실제 작업 정본은 `social-viral-loop-v3-opus5.html` 다. 지금 핀은 낡았다.
+  #   회장이 2026-10-19 03:4x 에 "이정도로 프로토타입 1차 승인" 했으나 같은 문장에서 "병신짓 해결하고"
+  #   를 조건으로 달았으므로, 6차 개정(R1~R10)이 닫히고 상호작용 린트가 통과한 시점에 `/approve design`
+  #   으로 핀을 v3-opus5 와 그 sha256 으로 갱신한다. 그 전에 핀을 바꾸면 미완 산출물을 승인하는 것이다.
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
   build:      { entered: 2026-10-13 10:20, completed: 2026-10-13 17:12 }
