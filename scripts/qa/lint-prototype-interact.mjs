@@ -286,7 +286,11 @@ window.__ix = {
     const frame = document.querySelector(frameSel);
     if(!frame) return '';
     const ON = '.on,.sel,.selected,.checked,.is-on,[aria-checked="true"],[aria-selected="true"]';
+    // 모달(바텀시트·다이얼로그)은 '선택' 이 아니라 떠 있는 레이어다. 화면을 떠나면 닫히는 것이 정상 동작이므로
+    // 왕복 비교에서 제외한다. 역할로 판정한다(class 이름으로 예외를 두면 다음 컴포넌트에서 또 샌다).
+    const MODAL = '[role="dialog"],[aria-modal="true"]';
     return [...frame.querySelectorAll(ON)]
+      .filter(el=>!el.closest(MODAL))
       .filter(el=>{ const cs=getComputedStyle(el); return cs.display!=='none' && cs.visibility!=='hidden'; })
       .map(el=>String(el.className||'').split(' ')[0]+':'+((el.dataset&&el.dataset.ck)||(el.textContent||'').trim().slice(0,12)))
       .sort().join('|');

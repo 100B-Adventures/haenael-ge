@@ -8,15 +8,13 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: design       # 2026-10-19 03:4x 회장 1차 승인(조건부: R1~R10 해결 후 승격). 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
-approved_stages: [plan]
+current_stage: eng-design   # 2026-10-19 04:1x design 승격(조건 충족, 검사 6종 통과). 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
+approved_stages: [plan, design]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
-  # ⚠ 2026-10-19 핀 불일치 (컨트롤러 확인): 아래 design 핀은 `social-viral-loop-v2-opus48.html` 인데
-  #   2026-10-14 REOPEN 이후 실제 작업 정본은 `social-viral-loop-v3-opus5.html` 다. 지금 핀은 낡았다.
-  #   회장이 2026-10-19 03:4x 에 "이정도로 프로토타입 1차 승인" 했으나 같은 문장에서 "병신짓 해결하고"
-  #   를 조건으로 달았으므로, 6차 개정(R1~R10)이 닫히고 상호작용 린트가 통과한 시점에 `/approve design`
-  #   으로 핀을 v3-opus5 와 그 sha256 으로 갱신한다. 그 전에 핀을 바꾸면 미완 산출물을 승인하는 것이다.
+  # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.
+  #   6차 개정 R1~R10 반영 + 출고 검사 6종을 컨트롤러가 직접 순차 실행해 전부 통과했다.
+  #   핀을 v2-opus48 에서 v3-opus5 로 옮기고 sha256 을 재계산했다(낡은 핀은 아래 superseded 로 남긴다).
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
   build:      { entered: 2026-10-13 10:20, completed: 2026-10-13 17:12 }
@@ -34,7 +32,10 @@ approved_artifacts:
     - { path: docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md, version: 1.0.0, status: approved, label: "V2 청사진" }
   design:
     # v2 소셜 바이럴 루프 라운드 (2026-09-16 ~ 2026-10-12). core 라인에서 이관.
-    - { path: docs/design/prototypes/social-viral-loop-v2-opus48.html, version: 2.0.0, status: approved, label: "소셜 바이럴 루프 v2 프로토타입(하단탭·모션 포함)", sha256: cf4a78fe7041c00f8f4336fcbbb3107f2230f404b1f1116840dcaf469bdb9626 }
+    - { path: docs/design/prototypes/social-viral-loop-v3-opus5.html, version: 3.0.0, status: approved, label: "소셜 바이럴 루프 v3 프로토타입(6차 개정, 회장 지적 R1~R10 반영)", sha256: f9398150755d42b2afbf5bdd7b6d982fd52b10ba8b6dd7da9b1ff72b3b9dca0c }
+    - { path: DESIGN.md, version: unversioned, status: approved, label: "디자인 시스템(수직 간격 토큰·접기 규칙·상호작용 출고 검사 신설)", sha256: 0ddeed8caff763de7b91ed5a0c178bf406c59a6ccefa65dcf5f057929e04c24a }
+    - { path: docs/design/standard-ux-writing.md, version: unversioned, status: approved, label: "UX 라이팅 말투 규칙", sha256: 06e4ba1007bbb37c552d6c56a4fdfe4abbe86bcc06c9776dc4579b009fe26ece }
+    - { path: docs/design/prototypes/social-viral-loop-v2-opus48.html, version: 2.0.0, status: superseded, label: "소셜 바이럴 루프 v2 프로토타입(v3 로 대체됨 2026-10-19)", sha256: cf4a78fe7041c00f8f4336fcbbb3107f2230f404b1f1116840dcaf469bdb9626 }
     - { path: docs/design/prototypes/core-viral-motion-shotgun-v1-opus48.html, version: 1.0.0, status: approved, label: "바이럴 모션 샷건", sha256: a5d87276065b4bd4968ac201f11b259f437aa1dc9b43f4886b5ddf78051122b2 }
     - { path: docs/design/motion-concepts-haenael-ge.html, version: unversioned, status: approved, label: "모션 컨셉", sha256: 42abb59bf55b514f2388f0de8ce935c46bcf56e67a6fac7a3c6bb56aeb442690 }
     - { path: docs/design/prototypes/screen-inventory-v3.md, version: 3.0.0, status: approved, label: "화면 인벤토리 v3", sha256: a61efc9fdfce3e8643895661706c229f8882dc9ecd1176fcef291e9c085aa267 }
