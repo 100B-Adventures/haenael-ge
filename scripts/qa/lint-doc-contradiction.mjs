@@ -121,6 +121,30 @@ for (const f of files) {
   docs.push({ name: path.relative(repo, p), text: fs.readFileSync(p, 'utf8') });
 }
 const findings = scan(reg, docs);
+
+// ── C 레지스트리 미등재 ───────────────────────────────────────────────────────
+// 왜: 이 검사는 등재된 사실만 본다. 설계 문서가 모순표(§A.9 같은 "같은 사실이 두 곳에 적혔던 자리")에
+//   행을 더해도 레지스트리에 줄이 늘지 않으면 그 사실은 다음 판에 다시 어긋날 수 있고 검사는 침묵한다.
+//   그 연결이 사람 기억에 걸려 있는 것이 바로 D-032 가 금지한 형태다(규칙을 기억에 두면 매 판 재협상된다).
+//   그래서 모순표 행수와 등재 사실 수를 대조해 차이를 표면화한다. 막지 않고 알린다. 모순표의 어떤 행은
+//   레지스트리로 옮길 값이 아니기 때문이다(예: 문서 수 세기). 숫자가 벌어지면 사람이 판단할 자리다.
+const TABLE_RE = /같은 사실이 두 곳에 적혔?던 자리/;
+let tableRows = 0, tableDoc = null;
+for (const d of docs) {
+  const lines = d.text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (!TABLE_RE.test(lines[i]) || !/^#{2,4}\s/.test(lines[i])) continue;
+    tableDoc = d.name;
+    for (let j = i + 1; j < lines.length && !/^#{2,4}\s/.test(lines[j]); j++) {
+      // 표 본문 행만 센다(헤더와 구분선 제외).
+      if (/^\|/.test(lines[j]) && !/^\|\s*[-:| ]+\|?\s*$/.test(lines[j]) && !/^\|\s*#\s*\|/.test(lines[j])) tableRows++;
+    }
+    break;
+  }
+  if (tableDoc) break;
+}
+const unregistered = tableDoc ? Math.max(0, tableRows - reg.facts.length) : 0;
+
 const A = findings.filter((f) => f.axis === 'A').length;
 const B = findings.filter((f) => f.axis === 'B').length;
 
@@ -130,6 +154,10 @@ if (AS_JSON) {
   console.log(`\n사실 레지스트리: ${path.relative(repo, regPath)} (${reg.facts.length}건)`);
   console.log(`문서 ${docs.length}종: ${docs.map((d) => path.basename(d.name)).join(', ')}`);
   console.log(`\nA 금지값 ${A}건 · B 값 분기 ${B}건`);
+  if (tableDoc) {
+    console.log(`C 레지스트리 대조: 모순표 ${tableRows}행(${path.basename(tableDoc)}) 대 등재 사실 ${reg.facts.length}건` +
+      (unregistered > 0 ? `  ⚠ ${unregistered}건이 등재되지 않았을 수 있다. 레지스트리에 줄을 추가할지 판단하라(막지 않는다).` : '  일치'));
+  }
   for (const f of findings) {
     console.log(`\n  ${f.axis} ${f.fact.id}  ${f.fact.사실}`);
     console.log(`     ${f.note}`);

@@ -30,7 +30,7 @@ web/src/
     page.tsx                    ← 랜딩
     layout.tsx
     globals.css                 ← :root 토큰 정본
-    how/page.tsx                ← 이용안내 (R1 로 사업자 정보를 소유하게 됨)
+    how/page.tsx                ← 이용안내. 법적 고지를 소유하지 않는다(D-040)
     terms/page.tsx  privacy/page.tsx  child-safety/page.tsx
     g/[slug]/page.tsx           ← 공개 목표 (비로그인 SSR)
     invite/[token]/page.tsx     ← 초대 미리보기·수락 (비회원 경계)
