@@ -158,6 +158,105 @@ function scanFieldSets(reg, docs) {
   return out;
 }
 
+// ── E·F·G 범용 축: 문서 구조 불변식 ────────────────────────────────────────────
+// 왜 레지스트리 없이 범용으로 도나 (2026-10-20, Codex 6차 반려):
+//   Codex 가 "자동 모순 검사 PASS 뒤에 숨어 있던" 불일치 3종을 찾았다. 문서 상단 버전이 v1.2.2 인데
+//   변경 이력은 v1.2.3 · 목차 앵커 3개 깨짐 · 적어 둔 테스트 수(48건·106개)가 실제 계수(51개·109개)와 다름.
+//   셋 다 "같은 사실의 두 값" 이고 내 B축이 봐야 할 종류인데, **레지스트리에 그 사실이 없어서 못 봤다.**
+//   사실을 하나씩 등재하는 방식은 이 종류를 따라가지 못한다. 문서마다 생기고 판마다 바뀌기 때문이다.
+//   그래서 등재가 필요 없는 불변식으로 만든다. 헌법 §9 의 "구멍 하나에 검사 하나를 만들지 마라" 는
+//   도메인 사실에는 레지스트리를, 구조 불변식에는 범용 축을 쓰라는 뜻으로 읽는다.
+//
+//   그리고 이 셋은 **작성자 자기신고를 대체한다.** 설계자가 "목차 앵커 146/146" 을 매 판 적었고 컨트롤러는
+//   그것을 실측하지 않았고 Codex 가 세 판 연속 그 자리를 깼다. 자기신고는 증거가 아니다(헌법 §3).
+
+// GitHub 의 헤딩 앵커 규칙. 소문자화하고, 공백을 하이픈으로, 영숫자·하이픈·밑줄·유니코드 글자 외를 버린다.
+// 버려진 자리에 하이픈을 넣지 않기 때문에 `+`·`~`·`=` 가 섞인 제목은 **이중 하이픈이 남는다.**
+// 2026-10-20 에 깨진 링크 3개가 전부 그 경우였다(`FR-W12~21` 등).
+function ghSlug(text) {
+  return text
+    .replace(/<[^>]+>/g, '')
+    .replace(/`/g, '')
+    .replace(/\*\*/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .trim()
+    .toLowerCase()
+    .replace(/[ \t]/g, '-')
+    .replace(/[^\p{L}\p{N}_-]/gu, '');
+}
+
+function scanStructure(docs) {
+  const out = [];
+  for (const d of docs) {
+    const lines = d.text.split('\n');
+
+    // ── E축: 파일명 버전 · 상단 버전 표기 · 변경 이력 최신 행이 같은가 ─────────────
+    const fnV = (d.name.match(/v(\d+\.\d+\.\d+)/) || [])[1];
+    let headV = null, histV = null;
+    for (let i = 0; i < Math.min(lines.length, 40); i++) {
+      const m = lines[i].match(/버전[^\n]{0,20}?v?(\d+\.\d+\.\d+)/);
+      if (m) { headV = m[1]; break; }
+    }
+    // 변경 이력 표에서 가장 높은 버전을 집는다(최신순·과거순 어느 쪽이어도 된다).
+    const hist = [...d.text.matchAll(/^\|\s*\**v?(\d+\.\d+\.\d+)\**\s*\|/gm)].map((m) => m[1]);
+    if (hist.length) {
+      histV = hist.sort((a, b) => {
+        const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+        return pb[0] - pa[0] || pb[1] - pa[1] || pb[2] - pa[2];
+      })[0];
+    }
+    const vs = [['파일명', fnV], ['상단 버전 표기', headV], ['변경 이력 최신', histV]].filter((x) => x[1]);
+    const distinct = [...new Set(vs.map((x) => x[1]))];
+    if (vs.length >= 2 && distinct.length > 1) {
+      out.push({ axis: 'E', file: d.name, note: `버전이 ${distinct.length} 값으로 갈렸다: ` + vs.map((x) => `${x[0]}=${x[1]}`).join(' / '),
+        why: '파일명만 올리고 문서 안 버전 표기를 안 고치면, 구현자가 문서 상단을 보고 구 계약으로 짓는다. Codex 6차가 api-contract·architecture 두 문서에서 이것을 잡았다.' });
+    }
+
+    // ── F축: 목차 앵커가 실제 헤딩에서 생성되는 앵커와 맞는가 ─────────────────────
+    const heads = new Set();
+    for (const l of lines) {
+      const m = l.match(/^#{2,6}\s+(.*)$/);
+      if (m) heads.add(ghSlug(m[1]));
+    }
+    if (heads.size) {
+      const broken = [];
+      for (let i = 0; i < lines.length; i++) {
+        for (const m of lines[i].matchAll(/\[[^\]]*\]\(#([^)]+)\)/g)) {
+          const a = m[1].toLowerCase();
+          if (!heads.has(a)) broken.push({ line: i + 1, anchor: a });
+        }
+      }
+      if (broken.length) {
+        out.push({ axis: 'F', file: d.name, note: `목차 앵커 ${broken.length}개가 어느 헤딩에도 닿지 않는다: ` + broken.slice(0, 5).map((b) => `${b.line}행 #${b.anchor}`).join(', ') + (broken.length > 5 ? ' …' : ''),
+          why: 'standard-doc-review 구조 규격은 링크 하나라도 무효면 통과가 아니다. `+`·`~`·`=` 가 섞인 제목은 그 자리에 하이픈이 남지 않아 이중 하이픈이 생기고, 목차가 그것을 반영하지 않으면 깨진다.' });
+      }
+    }
+  }
+
+  // ── G축: 문서가 적어 둔 테스트 수치가 실제 계수와 맞는가 ───────────────────────
+  // 정의 = `### <ID>` 형태의 고유 테스트 ID. 참조 = 문서 전체에서 쓰인 테스트 ID.
+  const corpus = docs.map((d) => d.text).join('\n');
+  const defined = new Set([...corpus.matchAll(/^#{2,4}\s+([A-Z]{2,3}-\d{2})\b/gm)].map((m) => m[1]));
+  const referenced = new Set([...corpus.matchAll(/\b([A-Z]{2,3}-\d{2})\b/g)].map((m) => m[1]));
+  for (const d of docs) {
+    for (const m of d.text.matchAll(/(?:TC|테스트)[^\n]{0,24}?(\d+)\s*(?:건|개)/g)) {
+      const claimed = Number(m[1]);
+      if (claimed !== defined.size && Math.abs(claimed - defined.size) <= 20 && defined.size > 0) {
+        out.push({ axis: 'G', file: d.name, note: `적어 둔 테스트 수 ${claimed} 와 실제 고유 정의 ${defined.size} 가 다르다 ("${m[0].trim()}")`,
+          why: '수치를 손으로 적고 판이 바뀔 때 갱신하지 않으면 그 숫자가 곧 거짓이 된다. Codex 6차가 test-plan 의 48건과 실제 51개를 잡았다. 테스트가 48개만 돌면 3개는 검증되지 않는다.' });
+      }
+    }
+    for (const m of d.text.matchAll(/참조[^\n]{0,16}?ID[^\n]{0,12}?(\d+)\s*(?:개|건)/g)) {
+      const claimed = Number(m[1]);
+      if (claimed !== referenced.size && Math.abs(claimed - referenced.size) <= 30 && referenced.size > 0) {
+        out.push({ axis: 'G', file: d.name, note: `적어 둔 참조 테스트 ID 수 ${claimed} 와 실제 ${referenced.size} 가 다르다 ("${m[0].trim()}")`,
+          why: '같은 이유다. 검사 출력을 문서에 옮겨 적었으면 판이 바뀔 때 다시 돌려 갱신해야 한다.' });
+      }
+    }
+  }
+  return out;
+}
+
 // ── 자기검증 ──────────────────────────────────────────────────────────────────
 const FIXTURE = path.join(repo, 'scripts/qa/fixtures/doc-contradiction-known.md');
 function selfTest() {
@@ -195,6 +294,7 @@ for (const f of files) {
 }
 const findings = scan(reg, docs);
 const fsFindings = scanFieldSets(reg, docs);
+const stFindings = scanStructure(docs);
 
 // ── C 레지스트리 미등재 ───────────────────────────────────────────────────────
 // 왜: 이 검사는 등재된 사실만 본다. 설계 문서가 모순표(§A.9 같은 "같은 사실이 두 곳에 적혔던 자리")에
@@ -242,6 +342,20 @@ if (AS_JSON) {
   } else if ((reg.field_sets || []).length) {
     console.log(`D 필드 집합 ${reg.field_sets.length}대상 일치`);
   }
+  if (stFindings.length) {
+    const byAxis = { E: '버전 표기 불일치', F: '목차 앵커 깨짐', G: '적어 둔 수치 불일치' };
+    for (const ax of ['E', 'F', 'G']) {
+      const g = stFindings.filter((x) => x.axis === ax);
+      if (!g.length) continue;
+      console.log(`\n${ax} ${byAxis[ax]} ${g.length}건`);
+      for (const x of g) {
+        console.log(`     ${path.basename(x.file)}: ${x.note}`);
+        console.log(`     왜 중요한가: ${x.why}`);
+      }
+    }
+  } else {
+    console.log('E 버전 표기 · F 목차 앵커 · G 적어 둔 수치: 0건');
+  }
   if (tableDoc) {
     console.log(`C 레지스트리 대조: 모순표 ${tableRows}행(${path.basename(tableDoc)}) 대 등재 사실 ${reg.facts.length}건` +
       (unregistered > 0 ? `  ⚠ ${unregistered}건이 등재되지 않았을 수 있다. 레지스트리에 줄을 추가할지 판단하라(막지 않는다).` : '  일치'));
@@ -253,7 +367,7 @@ if (AS_JSON) {
     else console.log(`       · ${f.file}:${f.line}  ${f.text}`);
     console.log(`     왜 중요한가: ${f.fact.why}`);
   }
-  const tot = findings.length + fsFindings.length;
+  const tot = findings.length + fsFindings.length + stFindings.length;
   console.log(`\n판정: ${tot === 0 ? 'PASS (0건)' : 'FAIL (' + tot + '건)'}`);
 }
-process.exit(findings.length === 0 && fsFindings.length === 0 ? 0 : 1);
+process.exit(findings.length === 0 && fsFindings.length === 0 && stFindings.length === 0 ? 0 : 1);
