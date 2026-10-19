@@ -35,8 +35,29 @@ const regIdx = argv.indexOf('--registry');
 const regPath = regIdx >= 0 ? path.resolve(argv[regIdx + 1]) : path.join(repo, 'qa/contracts/doc-facts-v2-r6.json');
 const files = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--registry');
 
+// 모순표(§A.9 "같은 사실이 두 곳에 적혔던 자리") 구간의 줄 번호를 모은다.
+// 왜: 그 표는 **설계상 두 서술을 나란히 적는 곳**이다. 거기에 옛 값과 새 값이 함께 있는 것은 모순이 아니라
+//   기록이다. 2026-10-20 에 F14 를 등재하자 그 표의 14행이 바로 오탐으로 잡혔다. 줄마다 표지를 거는 방식은
+//   표의 모든 행에 표지를 요구하므로 작성자에게 부담이고 빠뜨리면 다시 오탐이 난다. 구간으로 면제한다.
+function tableRanges(docs) {
+  const RE = /같은 사실이 두 곳에 적혔?던 자리/;
+  const out = new Map();
+  for (const d of docs) {
+    const lines = d.text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      if (!RE.test(lines[i]) || !/^#{2,4}\s/.test(lines[i])) continue;
+      let end = i + 1;
+      while (end < lines.length && !/^#{2,4}\s/.test(lines[end])) end++;
+      out.set(d.name, [i + 1, end]);
+      break;
+    }
+  }
+  return out;
+}
+
 function scan(reg, docs) {
   const marks = reg.회고_면제_표지 || [];
+  const ranges = tableRanges(docs);
   // 계약 서술이 아닌 자리(검사 방법의 grep 인용, 명령줄 전문)를 값 비교에서 뺀다.
   const exempt = (reg.면제_정규식 || []).map((r) => new RegExp(r));
   const findings = [];
@@ -52,7 +73,9 @@ function scan(reg, docs) {
       const lines = d.text.split('\n');
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        const retro = marks.some((k) => line.includes(k)) || exempt.some((r) => r.test(line));
+        const rg = ranges.get(d.name);
+        const inTable = rg && i + 1 >= rg[0] && i + 1 <= rg[1];
+        const retro = inTable || marks.some((k) => line.includes(k)) || exempt.some((r) => r.test(line));
         for (const pr of probes) {
           pr.re.lastIndex = 0;
           let m;
