@@ -7,7 +7,7 @@
 | 작성 | 2026-10-19 16:14 KST |
 | 모델·에이전트 | claude-opus-5[1m] / tech-architect |
 | 라인 | v2 |
-| 상태 | **회장 합의 대기.** 이 문서의 4건은 설계 문서에서 확정되지 않았다 |
+| 상태 | **4건 전부 회장 확정됨(2026-10-19).** 확정 내용은 §0.5 이고 설계 정본은 `fdd-social-viral-loop-web-first-v1.2.1.md` §A.7 이다. 이 문서는 **그 결정에 이르기까지 올린 선택지의 기록**으로 남는다 |
 | 기반 포맷 | `docs/eng-design/fdd-social-viral-loop-web-first-v1.1.0.md` (v1.1.0, sha256 `13d9b717…`) |
 | 상류 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` 3.0.0 sha256 `f9398150…` · `DESIGN.md` sha256 `0ddeed8c…` · `docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md` |
 
@@ -15,16 +15,28 @@
 
 ## 목차
 
+- [0.5 회장 확정 (2026-10-19)](#05-회장-확정-2026-10-19-이-문서의-선택지는-모두-닫혔다)
 - [0. 한 줄 결론](#0-한-줄-결론)
 - [1. 전제 실측표](#1-전제-실측표)
 - [2. 설계가 기대는 서버 실물 전수](#2-설계가-기대는-서버-실물-전수)
 - [3. 결정 D-OPEN-1 · 비회원 티저가 보여줄 데이터](#3-결정-d-open-1--비회원-티저가-보여줄-데이터)
-- [4. 결정 D-OPEN-2 · 인증 판정을 올릴 층](#4-결정-d-open-2--인증-판정을-올릴-층)
+- [4. 결정 D-OPEN-2 · 로그인 판정을 `proxy.ts` 에서 할지](#4-결정-d-open-2--로그인-판정을-proxyts-에서-할지)
 - [5. 결정 D-OPEN-3 · 커버 업로드 경로의 구조](#5-결정-d-open-3--커버-업로드-경로의-구조)
 - [6. 결정 D-OPEN-4 · 법적 고지를 랜딩에서 뺀 상태의 수용 구조](#6-결정-d-open-4--법적-고지를-랜딩에서-뺀-상태의-수용-구조)
 - [7. 합의 없이 설계에 바로 반영한 것 (가역·비논쟁)](#7-합의-없이-설계에-바로-반영한-것-가역비논쟁)
 - [7.5 Codex 교차리뷰(17/25 반려) 지적별 처리](#75-codex-교차리뷰1725-반려-지적별-처리)
 - [8. 벤치마크·셀프심문·레드팀](#8-벤치마크셀프심문레드팀)
+
+## 0.5 회장 확정 (2026-10-19): 이 문서의 선택지는 모두 닫혔다
+
+| ID | 결정 대상 | 회장 확정 | 추천안 대비 |
+|---|---|---|---|
+| D-OPEN-1 | 비회원 미리보기 데이터 | **예시 데이터로 경험을 미리 보여준다.** 원문 "예시 데이터를 주면서 이런 경험을 하겠구나 함 되지". 예시 데이터는 **클라이언트 상수**이고 서버 호출 0건. 예시임이 드러나게 그리고 **흐림 처리 금지**(가리면 실데이터처럼 보인다). 참이 될 수 없는 수치 금지. `platform_social_stats()` **폐기** | **추천안(A 설명형)과 다름.** 제3안이 채택됐다. B(집계 수치) 탈락 |
+| D-OPEN-2 | 로그인 판정 위치 | **`proxy.ts` 에서 한다.** 기존 파일 확장, 신설 0. 페이지·RPC·RLS 검사는 그대로 유지 | 추천안 채택 |
+| D-OPEN-3 | 커버 업로드 구조 | **현 3단 유지.** 원문 "니가 알아서해". 구조 변경 0. 단 정리 작업에는 DB 추가 2건이 필요하다(§5.4) | 추천안 채택 |
+| D-OPEN-4 | 법적 고지 위치 | **마이페이지·설정에 약관·개인정보처리방침·사업자 정보 목록을 두고, 사업자 정보 전문은 한 단계 더 아래 화면이 소유한다. 푸터는 없앤다.** 원문 "설정이나 마이페이지에서 약관 개인정보 사업자 이런거 넣으면되잖아 사업자도 따로 한뎁스아내래에 넣으면 푸터 넣을필요 없고". 법정 기재 6항목 전수 | 추천안보다 구체화. **전자상거래법 제10조 건은 회장 결정으로 닫혔고 분기 불필요** |
+
+**따라서 아래 §3~§6 의 선택지 표는 더 이상 열린 질문이 아니다.** 그 판단에 쓴 근거와 트레이드오프를 남겨 두는 것이 이 문서의 역할이다.
 
 ## 0. 한 줄 결론
 
@@ -42,8 +54,8 @@
 | Storage 버킷 | `GET /storage/v1/object/public/<b>/probe.png` | `goal-cover-public` → `NoSuchKey`(**버킷 실재**). `goal-cover-quarantine` → `NoSuchBucket` 이지만 **비공개 버킷은 공개 경로에서 동일 응답**이라 판정 불가(같은 응답을 내는 `wordmap` 은 실재한다). **미검증** | 2026-10-19 |
 | 비로그인 라우트 가드 | `curl -o /dev/null -w '%{http_code}'` 운영 5경로 | `/my`·`/friends`·`/invite` **307** · `/me` **200**(셸 25,241바이트 + 클라이언트 리다이렉트 태그) · `/me/goal/1` **200**(의도된 권한없음 화면, 타인 데이터 0) | 2026-10-19 |
 | `redirect()` 가 200 을 내는 이유 | Next.js 공식 문서 `redirect` 레퍼런스 | "When used in a streaming context, this will insert a meta tag to emit the redirect on the client side." 비스트리밍은 307. **D-034 의 관찰과 문서가 일치한다** | 2026-10-19 |
-| 인증 판정을 올릴 층의 파일명 | `grep PROXY_FILENAME web/node_modules/next/dist/lib/constants.js` | 설치본 **Next 16.4.0**. `MIDDLEWARE_FILENAME='middleware'` 와 `PROXY_FILENAME='proxy'` **둘 다 존재**. Next 16 정본 이름은 `proxy.ts` 이고 기본 런타임이 Node.js 라 `@supabase/ssr`(설치본 ^0.12.0) 사용 가능 | 2026-10-19 |
-| **`proxy.ts` 가 이미 있나** | `ls -la web/src/proxy.ts` | **있다. 3,333바이트, 2026-07-19 작성.** 역할은 canonical 도메인 308 강제 하나뿐이고 `matcher` 는 정적 자산 제외로 이미 전 경로를 덮는다. **인증 판정은 하지 않는다.** 처음 `ls web/src/middleware.ts` 만 보고 "경계 파일 없음" 으로 적었던 것을 Codex 교차리뷰 지적으로 정정했다 | 2026-10-19 |
+| `proxy.ts` 의 정본 파일명 | `grep PROXY_FILENAME web/node_modules/next/dist/lib/constants.js` | 설치본 **Next 16.4.0**. `MIDDLEWARE_FILENAME='middleware'` 와 `PROXY_FILENAME='proxy'` **둘 다 존재**. Next 16 정본 이름은 `proxy.ts` 이고 기본 런타임이 Node.js 라 `@supabase/ssr`(설치본 ^0.12.0) 사용 가능 | 2026-10-19 |
+| **`proxy.ts` 가 이미 있나** | `ls -la web/src/proxy.ts` | **있다. 3,333바이트, 2026-07-19 작성.** 역할은 canonical 도메인 308 강제 하나뿐이고 `matcher` 는 정적 자산 제외로 이미 전 경로를 덮는다. **인증 판정은 하지 않는다.** 처음 `ls web/src/middleware.ts` 만 보고 "`proxy.ts` 없음" 으로 적었던 것을 Codex 교차리뷰 지적으로 정정했다 | 2026-10-19 |
 | 간격 토큰이 제품에 있나 | `sed -n '100,130p' web/src/app/globals.css` | `:root` 에 `--space-mobile-gutter`·`--space-page-y`·`--space-bottom-safe` 만 있고 **`--sp-0`~`--sp-6` 는 없다.** 더불어 R2 로 폐지된 자물쇠의 `--tabbar-lock-size: 11px` 가 남아 있다 | 2026-10-19 |
 | 응원 메시지 클램프 현황 | `grep -rn "line-clamp\|truncate" web/src/components` | `CheerList.tsx:50` **`truncate`(1줄)** · `MyPageOverview.tsx` 클램프 없음 · `GoalCard.tsx` 는 제목 `line-clamp-2`·이유 `line-clamp-3`. D-030-C 의 2줄 + 더 보기가 **네 경로 중 0곳**에 있다 | 2026-10-19 |
 | 홈 카드가 응원 요약을 줄 수 있나 | `sed -n '1,30p' web/src/components/goal/MyGoalListCard.tsx` · `me/page.tsx:87` | 카드 계약은 `cheerCount` 만 갖는다. SSR 집계는 `.select("goal_id, created_at").in("goal_id", goalIds)` **단일 일괄 조회라 현재 N+1 은 없다.** 아바타·최근 메시지 공급 계약이 없어 구현 중 목표별 조회가 추가될 위험이 그 자리다 | 2026-10-19 |
@@ -86,6 +98,8 @@
 
 ## 3. 결정 D-OPEN-1 · 비회원 티저가 보여줄 데이터
 
+> **확정됨(§0.5)**: 아래 A·B·C 중 어느 것도 아닌 **제3안(예시 데이터로 경험 미리보기)** 이 채택됐다. 아래 분석은 C 가 왜 위험한지와 수치를 왜 못 쓰는지를 남기기 위해 보존한다. 확정안도 같은 이유로 **실사용자 데이터 0건 · 서버 호출 0건 · 흐림 금지**다.
+
 ### 3.1 무엇이 걸렸나
 
 승인 시안의 `GUEST_TEASER.friends` 는 제목에 **"친구 3명이 이미 응원하고 있어요"** 를 걸고, 그 아래 이름·사진이 흐려진 행 3개를 보여준다(`veil` 클래스, blur 5px). `connect`·`mypage` 티저는 `plain:true` 로 기능 설명만 하므로 **논쟁 대상이 아니다.**
@@ -93,7 +107,7 @@
 문제는 비회원에게 친구가 없다는 것이다. 신원이 없으므로 "친구 3명" 은 그 방문자에 대해 **참이 될 수 없다.** 지금 시안의 값은 프로토타입용 샘플(`윤도경`·`정민서`·`박준`)이다. 이대로 제품에 옮기면 세 규칙을 동시에 깬다.
 
 - D-028-D "없는 것 설명 금지" 의 반대편, 즉 **없는 것을 있다고 말하는 것**이다.
-- 회장 지식 정본 `synthesis-유저심리-6단계-정본.md` 의 윤리 1선은 **거짓·가짜 희소성 금지**다.
+- **참이 될 수 없는 수치를 사회적 증거로 내세우는 것**이기도 하다.
 - D-003 은 금액·순위만 금지하고 인원수는 적극 노출이지만, 그 인원수는 **참인 인원수**를 뜻한다.
 
 ### 3.2 선택지
@@ -119,7 +133,9 @@
 
 **이 결정이 설계 문서에 미치는 범위**: api-contract 에 RPC 0건 또는 1건, erd 변경 0건, FDD 에 비회원 티저 FR 1건, 테스트 케이스 3건.
 
-## 4. 결정 D-OPEN-2 · 인증 판정을 올릴 층
+## 4. 결정 D-OPEN-2 · 로그인 판정을 `proxy.ts` 에서 할지
+
+> **확정됨(§0.5)**: A(기존 `proxy.ts` 확장) 채택.
 
 ### 4.1 무엇이 걸렸나
 
@@ -151,6 +167,8 @@ D-034 미해소. 운영 실측에서 `/me` 는 200 으로 회원 셸을 먼저 �
 
 ## 5. 결정 D-OPEN-3 · 커버 업로드 경로의 구조
 
+> **확정됨(§0.5)**: A(현 3단 유지) 채택. **단 아래 "서버 변경 0" 은 정정됐다**: §5.4 참조.
+
 ### 5.1 무엇이 걸렸나
 
 회장이 운영에서 "마이페이지 배너 올리는것도 오류나고" 를 겪었다(요청 원장 8980행). 위임 프롬프트는 서버 실물 부재를 원인 후보로 들었으나 **실측 결과 엣지 함수 3종과 공개 버킷은 살아 있다.** 그리고 R5 가 밝힌 프로토타입 쪽 원인 두 개는 **둘 다 클라이언트 CSS·상태 문제**였다(스크롤 스냅 때문에 업로드 버튼에 닿지 못함, 체크 표시를 그리는 규칙이 두 세대 공존해 두 개가 보임).
@@ -181,7 +199,20 @@ B 는 "더 단순해 보이지만" 운영에서 돌아가는 함수 3종을 교�
 
 **이 결정이 설계 문서에 미치는 범위**: api-contract §5 에 상태기계 표 1개, erd §4.4 에 정리 규칙, test-cases 에 쓰기 경로 케이스 4건. 스키마 변경 0.
 
+### 5.4 "서버 변경 0" 정정 (v1.2.1)
+
+구조는 그대로지만 **중단분 정리에는 DB 추가 2건이 필요하다.** Codex 가 지적하고 운영 스키마 대조로 확인했다.
+
+| 추가 | 왜 | 근거 |
+|---|---|---|
+| `storage_cleanup_queue.reason` CHECK 에 `ABANDONED_UPLOAD` 추가 | 허용값이 `VISIBILITY_DOWNGRADE`·`ASSET_REPLACED`·`ASSET_REJECTED` 3개뿐이라 **중단 업로드를 큐에 넣을 수 없다** | `migration:79` |
+| 정리 함수 + 부분 인덱스 + 명명된 cron job | 정책만 있고 **실행 주체가 레포에 0건** | `erd-…-v1.2.1.md` §A.3·§A.4 |
+
+**그리고 상태명이 틀렸다.** 설계가 쓴 `PENDING_UPLOAD` 는 운영에 없고 실제 값은 `UPLOADING` 이다(허용 6값: `UPLOADING`·`REVIEW`·`APPROVED`·`REJECTED`·`SUPERSEDED`·`DELETED`, `migration:56`). **없는 상태명으로 정리를 구현하면 0건을 찾는다.** v1.2.1 에서 9종 전수 교정했다.
+
 ## 6. 결정 D-OPEN-4 · 법적 고지를 랜딩에서 뺀 상태의 수용 구조
+
+> **확정됨(§0.5)**: 마이페이지·설정에 목록, 사업자 정보 전문은 한 단계 더 아래. 푸터 제거 확정. **아래 "회장 결정 대기" 와 "두 경우 수용" 서술은 닫혔다.**
 
 ### 6.1 무엇이 걸렸나
 
@@ -269,7 +300,7 @@ FDD v1.1.0 §1.3 은 친구를 **"초대를 수락해 생성된 관계"** 로 �
 | [Auth0 · handling auth in Next.js 16](https://auth0.com/blog/handling-auth-nextjs16-with-server-actions-middleware) | proxy 는 Server Action 을 덮지 않으므로 서버측 검사가 여전히 필요하다 | proxy 를 "추가" 로 규정하고 기존 페이지 검사·RLS 를 걷어내지 않기로 했다 |
 | [OWASP WSTG · Excessive Data Exposure](https://wstg.owasp.org/latest/4-Web_Application_Security_Testing/12-API_Testing/03-Excessive_Data_Exposure/) | UI·CSS 로 가리는 대신 **서버 응답 스키마에서 민감 필드를 제외**한다 | 비회원 티저의 금지 필드를 api-contract 의 계약으로 올리고, raw 응답·DOM 을 검사하는 비회원 테스트를 test-cases 에 넣었다 |
 | [Next.js Authentication 가이드](https://nextjs.org/docs/app/guides/authentication) | proxy 는 낙관적 선제 리다이렉트, 인가는 데이터 인접 계층에서 재검증. 레이아웃 인증은 Partial Rendering 주의 | §4 의 A 를 "추가" 로 규정하고 B(레이아웃)를 비추천한 근거로 썼다 |
-| BRAIN `synthesis-유저심리-6단계-정본.md` | 관심 단계의 사회적 증거, 윤리 1선(거짓·가짜 희소성 금지) | 티저 수치를 참으로 만들 수 없으면 **숫자를 쓰지 않는 쪽**을 추천안으로 올렸다 |
+| BRAIN `synthesis-유저심리-6단계-정본.md` | 관심 단계에서 사회적 증거가 작동하는 조건 | 티저 수치를 참으로 만들 수 없으면 **숫자를 쓰지 않는 쪽**을 추천안으로 올렸다 |
 | BRAIN `concept-공유장벽-선언vs요청-UGC바이럴.md` | 요청이 아니라 선언을 공유한다 | 티저 문안을 "친구를 불러오세요" 가 아니라 "쌓이는 것" 의 서술로 두었다 |
 
 ### 8.2 셀프심문
@@ -296,11 +327,11 @@ SKILLS_SKIPPED: `diagram`·`document-generate` = 이번 산출은 승인된 기�
 
 KNOWLEDGE_QUERY: BRAIN `wiki/business/마케팅/` 에서 유저심리 6단계 정본·공유장벽 선언vs요청·전환 마찰 3건을 좁혀 조회(목록 확인 후 지명). 웹은 ①Next.js 16 proxy.ts 와 Supabase 인증 경계 ②App Router 서버 컴포넌트 `redirect()` 의 스트리밍 동작 2건. 레포는 결정 원장 D-003~D-036, 요청 원장 최근 40건, 실수 원장 2종, 승인 산출물 7종(sha256 대조), 운영 Supabase 실측 4회, 운영 웹 실측 2회.
 
-HITS_USED: `synthesis-유저심리-6단계-정본.md` 의 윤리 1선(거짓·가짜 희소성 금지) → D-OPEN-1 에서 C 를 배제하고 A 를 추천한 직접 근거. `concept-공유장벽-선언vs요청-UGC바이럴.md` → 티저 문안을 요청형이 아니라 선언형 서술로 둔 근거. Next.js `redirect` 공식 레퍼런스 → D-034 원인을 추측에서 문서 근거로 승격. Vercel Academy proxy 레슨과 Auth0 Next 16 글 → proxy 를 "대체" 가 아니라 "추가" 로 규정.
+HITS_USED: `synthesis-유저심리-6단계-정본.md` 의 사회적 증거 작동 조건 → D-OPEN-1 에서 C 를 배제하고 A 를 추천한 직접 근거. `concept-공유장벽-선언vs요청-UGC바이럴.md` → 티저 문안을 요청형이 아니라 선언형 서술로 둔 근거. Next.js `redirect` 공식 레퍼런스 → D-034 원인을 추측에서 문서 근거로 승격. Vercel Academy proxy 레슨과 Auth0 Next 16 글 → proxy 를 "대체" 가 아니라 "추가" 로 규정.
 
 HITS_REJECTED: BRAIN 의 공격적 전환·가격 부양 계열은 이번 과업이 노출 경계와 인증 층 결정이라 무관해 미채택. `question-전환-마찰-제거인가-신뢰-마찰-추가인가.md` 는 가입 마찰 설계 문서인데 이번 결정 4건이 모두 가입 이후 또는 비회원 노출 범위라 직접 적용점이 없어 미채택. Smithery·skills.sh 의 Next 16 스킬 페이지는 출처 신뢰도를 확인할 수 없어 근거로 쓰지 않았다. `vendor_selection` 표는 이번 개정에서 외부 공급자를 **하나도 추천하지 않으므로**(자동 이미지 모더레이션은 비범위 유지) 작성 대상이 아니다.
 
-CONFLICTS: ①승인 시안의 `GUEST_TEASER.friends` 수치와 회장 정본의 윤리 1선이 충돌한다. 시안이 이기지 않고 정본이 이기므로 D-OPEN-1 로 올렸다(D-023 "하한이 이기고 그때 시안 정본을 고친다" 의 연장). ②승인 시안의 `biz` 블록 기재 항목이 운영 배포본보다 적다. 어느 쪽이 정본인지 회장 판단 대기. ③D-034 가 "`/my`·`/friends` 와 같은 처리로 맞춰라" 고 적었으나 실측상 세 라우트의 코드는 동일하고 차이는 스트리밍 시점이다. 결정 원장의 조치 방향을 그대로 따르면 재발하므로 §4 에서 층을 올리는 쪽으로 다시 냈다.
+CONFLICTS: ①승인 시안의 `GUEST_TEASER.friends` 수치와 회장 정본의. 시안이 이기지 않고 정본이 이기므로 D-OPEN-1 로 올렸다(D-023 "하한이 이기고 그때 시안 정본을 고친다" 의 연장). ②승인 시안의 `biz` 블록 기재 항목이 운영 배포본보다 적다. 어느 쪽이 정본인지 회장 판단 대기. ③D-034 가 "`/my`·`/friends` 와 같은 처리로 맞춰라" 고 적었으나 실측상 세 라우트의 코드는 동일하고 차이는 스트리밍 시점이다. 결정 원장의 조치 방향을 그대로 따르면 재발하므로 §4 에서 층을 올리는 쪽으로 다시 냈다.
 
 SOURCES/MODEL: claude-opus-5[1m] | `~/.claude/pipeline/product-lane.yaml` eng-design 절 · `~/.claude/standards/standard-eng-design.md` · `pipeline-state.v2.md` · `wiki/거버넌스/결정.md`(D-003·D-018·D-019·D-022·D-024·D-028·D-030·D-032·D-033·D-034·D-036) · `wiki/거버넌스/요청.md` 7614~9164행 · `wiki/거버넌스/실수.md` · `~/.claude/harness/mistake-ledger.md` · `docs/design/prototypes/social-viral-loop-v3-opus5.html`(1~54, 1026~1059, 4443~4545행) · `DESIGN.md` 579~599행 · `docs/eng-design/fdd|erd|api-contract|architecture|test-plan-social-viral-loop-web-first-v1.1.0.md` · `web/src/app/(receiver)/layout.tsx` · `web/src/app/(receiver)/{me,my,friends}/page.tsx` · `web/src/components/social/`(12파일) · `supabase/migrations/20261013050000`·`20261013060000`·`20261015010000`·`20261016021000` · 운영 Supabase `ossvejipdivgxzcqszbw` 실측 · `https://haenael-ge.vercel.app` 실측 · `web/node_modules/next/dist/lib/constants.js` · `~/SJ_BRAIN_wiki/wiki/business/마케팅/synthesis-유저심리-6단계-정본.md` · `~/SJ_BRAIN_wiki/wiki/business/마케팅/concept-공유장벽-선언vs요청-UGC바이럴.md` · https://nextjs.org/docs/app/api-reference/functions/redirect · https://vercel.com/academy/subscription-store/proxy-and-protected-routes · https://auth0.com/blog/handling-auth-nextjs16-with-server-actions-middleware · https://www.iloveblogs.blog/post/fix-nextjs-proxy-matcher-breaking-static-assets-auth
 
