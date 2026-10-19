@@ -85,6 +85,56 @@ function scan(reg, docs) {
   return findings;
 }
 
+// ── D 필드 집합 불일치 ────────────────────────────────────────────────────────
+// 왜: B축은 "한 사실의 값" 을 보므로 "여러 필드의 집합" 을 보지 못한다. 그래서 같은 응답의 필드 목록이
+//   허용 목록·정상 응답 JSON·테스트에 서로 다르게 적힌 것을 한 번도 잡지 못했다(Codex 5차 P0-1).
+//   OWASP 가 요구하는 것은 응답 스키마 강제이고, 같은 응답의 필드가 세 갈래면 그 보호가 작동하지 않는다.
+//   각 source 의 앵커 줄부터 span 줄까지에서 snake_case 토큰을 모아 집합으로 만들고 서로 비교한다.
+function scanFieldSets(reg, docs) {
+  const out = [];
+  for (const fs of reg.field_sets || []) {
+    const ignore = new Set(fs.ignore || []);
+    const ex = new RegExp(fs.extract, 'g');
+    const sets = [];
+    for (const src of fs.sources) {
+      const are = new RegExp(src.anchor);
+      const found = new Set();
+      let seenAt = null;
+      for (const d of docs) {
+        const lines = d.text.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          if (!are.test(lines[i])) continue;
+          seenAt = `${d.name}:${i + 1}`;
+          for (let j = i; j < Math.min(lines.length, i + 1 + (src.span || 5)); j++) {
+            ex.lastIndex = 0;
+            let m;
+            while ((m = ex.exec(lines[j]))) {
+              const tok = m[1];
+              if (!ignore.has(tok)) found.add(tok);
+              if (ex.lastIndex === m.index) ex.lastIndex++;
+            }
+          }
+          break;
+        }
+        if (seenAt) break;
+      }
+      if (seenAt) sets.push({ name: src.name, at: seenAt, fields: found });
+    }
+    if (sets.length < 2) continue;
+    // 모든 집합이 같은가. 다르면 각 쌍의 차집합을 보고한다.
+    const base = sets[0];
+    const diffs = [];
+    for (let i = 1; i < sets.length; i++) {
+      const a = base.fields, b = sets[i].fields;
+      const onlyA = [...a].filter((x) => !b.has(x));
+      const onlyB = [...b].filter((x) => !a.has(x));
+      if (onlyA.length || onlyB.length) diffs.push({ pair: `${base.name} 대 ${sets[i].name}`, onlyA, onlyB, atA: base.at, atB: sets[i].at });
+    }
+    if (diffs.length) out.push({ fs, sets, diffs });
+  }
+  return out;
+}
+
 // ── 자기검증 ──────────────────────────────────────────────────────────────────
 const FIXTURE = path.join(repo, 'scripts/qa/fixtures/doc-contradiction-known.md');
 function selfTest() {
@@ -121,6 +171,7 @@ for (const f of files) {
   docs.push({ name: path.relative(repo, p), text: fs.readFileSync(p, 'utf8') });
 }
 const findings = scan(reg, docs);
+const fsFindings = scanFieldSets(reg, docs);
 
 // ── C 레지스트리 미등재 ───────────────────────────────────────────────────────
 // 왜: 이 검사는 등재된 사실만 본다. 설계 문서가 모순표(§A.9 같은 "같은 사실이 두 곳에 적혔던 자리")에
@@ -154,6 +205,20 @@ if (AS_JSON) {
   console.log(`\n사실 레지스트리: ${path.relative(repo, regPath)} (${reg.facts.length}건)`);
   console.log(`문서 ${docs.length}종: ${docs.map((d) => path.basename(d.name)).join(', ')}`);
   console.log(`\nA 금지값 ${A}건 · B 값 분기 ${B}건`);
+  if (fsFindings.length) {
+    console.log(`D 필드 집합 불일치 ${fsFindings.length}건`);
+    for (const f of fsFindings) {
+      console.log(`\n  D ${f.fs.id}  ${f.fs.대상}`);
+      for (const d of f.diffs) {
+        console.log(`     ${d.pair}`);
+        if (d.onlyA.length) console.log(`       앞에만: ${d.onlyA.join(', ')}  (${d.atA})`);
+        if (d.onlyB.length) console.log(`       뒤에만: ${d.onlyB.join(', ')}  (${d.atB})`);
+      }
+      console.log(`     왜 중요한가: ${f.fs.why}`);
+    }
+  } else if ((reg.field_sets || []).length) {
+    console.log(`D 필드 집합 ${reg.field_sets.length}대상 일치`);
+  }
   if (tableDoc) {
     console.log(`C 레지스트리 대조: 모순표 ${tableRows}행(${path.basename(tableDoc)}) 대 등재 사실 ${reg.facts.length}건` +
       (unregistered > 0 ? `  ⚠ ${unregistered}건이 등재되지 않았을 수 있다. 레지스트리에 줄을 추가할지 판단하라(막지 않는다).` : '  일치'));
@@ -165,6 +230,7 @@ if (AS_JSON) {
     else console.log(`       · ${f.file}:${f.line}  ${f.text}`);
     console.log(`     왜 중요한가: ${f.fact.why}`);
   }
-  console.log(`\n판정: ${findings.length === 0 ? 'PASS (0건)' : 'FAIL (' + findings.length + '건)'}`);
+  const tot = findings.length + fsFindings.length;
+  console.log(`\n판정: ${tot === 0 ? 'PASS (0건)' : 'FAIL (' + tot + '건)'}`);
 }
-process.exit(findings.length === 0 ? 0 : 1);
+process.exit(findings.length === 0 && fsFindings.length === 0 ? 0 : 1);
