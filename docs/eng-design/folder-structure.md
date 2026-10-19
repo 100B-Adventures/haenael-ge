@@ -2,6 +2,8 @@
 
 > 기준 시각: 2026-08-29 04:54 KST
 > 원칙: 아래 트리는 목표 구조가 아니라 `rg --files`로 확인한 실제 구조다. 일부 파일은 대표만 표시한다.
+>
+> **v2 라인(2026-10-19 갱신)**: V2 소셜 바이럴 루프의 폴더 구조·추가 파일·임포트 경계는 [folder-structure-social-viral-loop-web-first-v1.2.0.md](./folder-structure-social-viral-loop-web-first-v1.2.0.md) 가 정본이다. 이 문서는 2026-08-29 기준 v1 운영 구조다.
 
 ## 목차
 
