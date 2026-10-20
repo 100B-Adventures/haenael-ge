@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Collapsible } from "./Collapsible";
 
 export function ClampText({
   children,
@@ -21,8 +21,7 @@ export function ClampText({
   // 측정하면 scrollHeight와 clientHeight가 같아지는 자기참조 데드락이 생긴다.
   const generatedId = useId();
   const contentId = controlsId ?? `clamp-${generatedId.replaceAll(":", "")}`;
-  const [overflows, setOverflows] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState<boolean | null>(null);
   useLayoutEffect(() => {
     const node = measureRef.current;
     if (!node) return;
@@ -35,22 +34,21 @@ export function ClampText({
   }, [children]);
 
   return (
-    <div data-collapsible={overflows ? "enabled" : "disabled"}>
-      <p id={contentId} ref={measureRef} title={title} className={`${className}${expanded ? "" : " clamp-text"}`.trim()}>
-        {children}
-      </p>
-      {overflows && (
-        <button
-          type="button"
-          className={`collapse-chevron${expanded ? " is-expanded" : ""}`}
-          aria-label={`${toggleLabel} ${expanded ? "접기" : "펼치기"}`}
-          aria-expanded={expanded}
-          aria-controls={contentId}
-          onClick={() => setExpanded((value) => !value)}
+    <Collapsible
+      policy={{ auxiliary: true, exceedsLimit: overflows === true, hasCollapsedContext: true }}
+      controlsId={contentId}
+      toggleLabel={toggleLabel}
+    >
+      {(expanded) => (
+        <p
+          id={contentId}
+          ref={measureRef}
+          title={title}
+          className={`${className}${overflows === null || (overflows && !expanded) ? " clamp-text" : ""}`.trim()}
         >
-          <ChevronDown aria-hidden="true" />
-        </button>
+          {children}
+        </p>
       )}
-    </div>
+    </Collapsible>
   );
 }

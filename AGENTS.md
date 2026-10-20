@@ -45,11 +45,12 @@ node scripts/qa/lint-requirement-coverage.mjs <추적성 문서> <테스트 케�
 
 ## Supabase 서버 계약 출고 조건
 
-Storage cleanup·소셜 대시보드 서버 자산을 바꾸면 아래 네 명령을 모두 실행한다. CI의 `supabase-server-contracts` 잡도 같은 순서로 실행한다. 파일 존재나 단일 세션 PASS를 동시성·예약 실행·인덱스 효과의 증거로 대신하지 않는다.
+Storage cleanup·소셜 대시보드 서버 자산을 바꾸면 아래 다섯 명령을 모두 실행한다. CI의 `supabase-server-contracts` 잡도 같은 순서로 실행한다. 파일 존재나 단일 세션 PASS를 동시성·pg_cron 스케줄 실행·인덱스 효과의 증거로 대신하지 않는다.
 
 ```bash
 npx supabase test db
 node scripts/qa/verify-storage-cleanup-schedules.mjs
 node scripts/qa/verify-storage-cleanup-concurrency.mjs
+node scripts/qa/verify-storage-cleanup-runtime.mjs
 node scripts/qa/verify-cheer-summary-index.mjs
 ```

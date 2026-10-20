@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const repo = new URL("../..", import.meta.url).pathname;
+const dbContainer = process.env.SUPABASE_DB_CONTAINER ?? "supabase_db_haenael-ge";
 const statusText = execFileSync("supabase", ["status", "-o", "env"], {
   cwd: repo,
   encoding: "utf8",
@@ -57,9 +58,36 @@ const invoke = (token, apikey = anonKey) => fetchWithRetry(functionUrl, {
 function sql(statement) {
   return execFileSync(
     "docker",
-    ["exec", "-i", "supabase_db_haenael-ge", "psql", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-At"],
+    ["exec", "-i", dbContainer, "psql", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-At"],
     { input: statement, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
   ).trim();
+}
+
+const vaultNames = ["storage_cleanup_worker_url", "edge_invoke_publishable_key", "storage_cleanup_internal_token"];
+const originalVault = JSON.parse(sql(`
+  SELECT COALESCE(jsonb_agg(jsonb_build_object(
+    'name', name,
+    'secret', decrypted_secret,
+    'description', description
+  ) ORDER BY name), '[]'::jsonb)::text
+  FROM vault.decrypted_secrets
+  WHERE name = ANY(ARRAY['${vaultNames.join("','")}']);
+`));
+const originalVaultNames = new Set(originalVault.map((row) => row.name));
+const originalCronSchedule = sql("SELECT schedule FROM cron.job WHERE jobname='drain-storage-cleanup-queue';");
+const encodedSqlText = (value) => `convert_from(decode('${Buffer.from(value).toString("base64")}','base64'),'UTF8')`;
+function upsertVaultSecret(name, value, description) {
+  sql(`
+    SELECT vault.update_secret(id, ${encodedSqlText(value)}, name, ${encodedSqlText(description)})
+    FROM vault.secrets WHERE name='${name}';
+    SELECT vault.create_secret(${encodedSqlText(value)}, '${name}', ${encodedSqlText(description)})
+    WHERE NOT EXISTS (SELECT 1 FROM vault.secrets WHERE name='${name}');
+  `);
+}
+function restoreVault() {
+  for (const row of originalVault) upsertVaultSecret(row.name, row.secret, row.description ?? "");
+  const createdNames = vaultNames.filter((name) => !originalVaultNames.has(name));
+  if (createdNames.length) sql(`DELETE FROM vault.secrets WHERE name IN ('${createdNames.join("','")}');`);
 }
 
 async function waitForFunction() {
@@ -121,16 +149,10 @@ async function observeCronInvocation() {
   const baselineRunId = Number(sql("SELECT coalesce(max(runid),0) FROM cron.job_run_details WHERE jobid=(SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue');"));
   const baselineResponseId = Number(sql("SELECT coalesce(max(id),0) FROM net._http_response;"));
   const baselineInvocations = functionInvocationCount();
-  sql(`
-    DELETE FROM vault.secrets WHERE name IN ('storage_cleanup_worker_url','edge_invoke_publishable_key','storage_cleanup_internal_token');
-    SELECT vault.create_secret('http://kong:8000/functions/v1/storage-cleanup-worker','storage_cleanup_worker_url','local runtime verification');
-    SELECT vault.create_secret('${anonKey}','edge_invoke_publishable_key','local runtime verification');
-    SELECT vault.create_secret('${cleanupToken}','storage_cleanup_internal_token','local runtime verification');
-    SELECT cron.alter_job(
-      (SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'),
-      schedule := '* * * * *'
-    );
-  `);
+  upsertVaultSecret("storage_cleanup_worker_url", "http://kong:8000/functions/v1/storage-cleanup-worker", "local runtime verification");
+  upsertVaultSecret("edge_invoke_publishable_key", anonKey, "local runtime verification");
+  upsertVaultSecret("storage_cleanup_internal_token", cleanupToken, "local runtime verification");
+  sql("SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), schedule := '* * * * *');");
   cronConfigured = true;
 
   for (let attempt = 0; attempt < 45; attempt += 1) {
@@ -280,14 +302,17 @@ try {
 } finally {
   try {
     sql(`
-      ${cronConfigured ? "SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), schedule := '*/10 * * * *');" : ""}
-      DELETE FROM vault.secrets WHERE name IN ('storage_cleanup_worker_url','edge_invoke_publishable_key','storage_cleanup_internal_token');
+      ${cronConfigured ? `SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), schedule := '${originalCronSchedule.replaceAll("'", "''")}');` : ""}
       DELETE FROM public.storage_cleanup_queue WHERE object_path LIKE 'runtime-cleanup/${runId}/%';
+      DELETE FROM public.goal_cover_asset WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}');
+      DELETE FROM public.social_cheer_member_attribution WHERE cheer_id IN (SELECT id FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}'));
+      DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}');
       DELETE FROM public.goal WHERE slug='${goalSlug}';
       DELETE FROM public.member WHERE id='${owner}';
       DELETE FROM auth.users WHERE id='${owner}';
     `);
   } catch {}
+  try { restoreVault(); } catch {}
   server.kill("SIGTERM");
   closeSync(logFd);
   rmSync(secretDir, { recursive: true, force: true });

@@ -10,6 +10,7 @@ const repoRoot = resolve(scriptDir, "../..");
 const contractPath = join(repoRoot, "qa/contracts/deploy-env.contract.json");
 const contract = JSON.parse(readFileSync(contractPath, "utf8"));
 const args = process.argv.slice(2);
+const dbContainer = process.env.SUPABASE_DB_CONTAINER ?? "supabase_db_haenael-ge";
 
 function argValue(name, fallback = undefined) {
   const index = args.indexOf(name);
@@ -116,7 +117,7 @@ async function parseVaultNames(source) {
   if (source === "local-db") {
     const raw = execFileSync(
       "docker",
-      ["exec", "-i", "supabase_db_haenael-ge", "psql", "-U", "postgres", "-d", "postgres", "-At", "-c", "SELECT name FROM vault.secrets ORDER BY name;"],
+      ["exec", "-i", dbContainer, "psql", "-U", "postgres", "-d", "postgres", "-At", "-c", "SELECT name FROM vault.secrets ORDER BY name;"],
       { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
     );
     return new Set(raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean));

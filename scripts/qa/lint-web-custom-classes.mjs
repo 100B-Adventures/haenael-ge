@@ -10,14 +10,24 @@ const ts = require(resolve(repo, "web/node_modules/typescript"));
 const sourceRoot = resolve(repo, "web/src");
 const css = readFileSync(resolve(sourceRoot, "app/globals.css"), "utf8");
 const boundaryFixture = readFileSync(resolve(repo, "scripts/qa/fixtures/web-custom-class-boundary.css"), "utf8");
-const prefixes = /^(?:social|cheer|receiver|landing|guest|collapse|clamp|legal|business|my-cheer|tabbar|invite)-/;
+const prefixContract = JSON.parse(readFileSync(resolve(repo, "qa/contracts/web-custom-class-prefixes.json"), "utf8"));
+const prefixes = new Set(prefixContract.prefixes);
+const tailwindUtilityPatterns = (prefixContract.tailwindUtilityPatterns ?? []).map((pattern) => new RegExp(pattern));
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const hasClassRule = (stylesheet, token) => new RegExp(`\\.${escapeRegExp(token)}(?=[\\s.#:[>+~,({])`).test(stylesheet.replace(/\/\*[\s\S]*?\*\//g, ""));
-if (hasClassRule(boundaryFixture, "cheer-list") || !hasClassRule(boundaryFixture, "cheer-list-reset")) {
+const definedClasses = (stylesheet) => new Set([...stylesheet.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/\.([a-z][a-z0-9_-]*)/g)].map((match) => match[1]));
+const customPrefix = (token) => token.includes("-") ? token.split("-", 1)[0] : null;
+const fixtureUnknownPrefixes = [...definedClasses(boundaryFixture)]
+  .map(customPrefix)
+  .filter((prefix) => prefix && !prefixes.has(prefix));
+if (hasClassRule(boundaryFixture, "cheer-list") || !hasClassRule(boundaryFixture, "cheer-list-reset") || !fixtureUnknownPrefixes.includes("reviewnew")) {
   console.error("WEB_CUSTOM_CLASS_FIXTURE_FAIL boundary_match");
   process.exit(2);
 }
-console.log("WEB_CUSTOM_CLASS_FIXTURE_PASS false_positive=cheer-list");
+console.log("WEB_CUSTOM_CLASS_FIXTURE_PASS false_positive=cheer-list unknown_prefix=reviewnew");
+const cssClasses = definedClasses(css);
+const cssPrefixes = [...new Set([...cssClasses].map(customPrefix).filter(Boolean))];
+const unknownCssPrefixes = cssPrefixes.filter((prefix) => !prefixes.has(prefix)).sort();
 const files = [];
 function walk(dir) {
   for (const name of readdirSync(dir)) {
@@ -30,7 +40,8 @@ walk(sourceRoot);
 const used = new Set();
 function addTokens(value) {
   for (const token of value.split(/\s+/)) {
-    if (prefixes.test(token) && !token.endsWith("-")) used.add(token);
+    const prefix = customPrefix(token);
+    if (prefix && prefixes.has(prefix) && !token.endsWith("-")) used.add(token);
   }
 }
 for (const file of files) {
@@ -86,10 +97,10 @@ for (const file of files) {
   };
   visit(sourceFile);
 }
-const missing = [...used].filter((token) => !hasClassRule(css, token)).sort();
-console.log(`WEB_CUSTOM_CLASS_LINT used=${used.size} missing=${missing.length}`);
-if (missing.length) {
-  console.error(`WEB_CUSTOM_CLASS_LINT_FAIL ${missing.join(",")}`);
+const missing = [...used].filter((token) => !hasClassRule(css, token) && !tailwindUtilityPatterns.some((pattern) => pattern.test(token))).sort();
+console.log(`WEB_CUSTOM_CLASS_LINT prefixes=${prefixes.size} css_prefixes=${cssPrefixes.length} used=${used.size} missing=${missing.length} unknown_prefixes=${unknownCssPrefixes.length}`);
+if (missing.length || unknownCssPrefixes.length) {
+  console.error(`WEB_CUSTOM_CLASS_LINT_FAIL missing=${missing.join(",") || "none"} unknown_prefixes=${unknownCssPrefixes.join(",") || "none"}`);
   process.exit(1);
 }
-console.log("WEB_CUSTOM_CLASS_LINT_PASS missing=0");
+console.log("WEB_CUSTOM_CLASS_LINT_PASS missing=0 unknown_prefixes=0");

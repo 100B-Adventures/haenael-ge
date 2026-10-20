@@ -47,6 +47,7 @@ jobs:
         run: |
           node scripts/qa/verify-storage-cleanup-schedules.mjs
           node scripts/qa/verify-storage-cleanup-concurrency.mjs
+          node scripts/qa/verify-storage-cleanup-runtime.mjs
 
       - name: 소셜 대시보드 인덱스 효과
         run: node scripts/qa/verify-cheer-summary-index.mjs

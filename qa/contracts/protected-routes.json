@@ -1,8 +1,9 @@
 {
-  "exact": ["/me", "/my", "/friends", "/invite", "/cashout", "/wordmap"],
-  "prefix": ["/me/", "/my/", "/friends/", "/cashout/", "/wordmap/"],
+  "exact": ["/admin", "/me", "/my", "/friends", "/invite", "/cashout", "/wordmap"],
+  "prefix": ["/admin/", "/me/", "/my/", "/friends/", "/cashout/", "/wordmap/"],
   "scanRoots": ["/onboarding", "/invite/"],
   "notes": {
+    "/admin": "protected root and prefix: 관리자 페이지와 향후 하위 라우트는 인증 전에 차단한다",
     "/invite": "exact-only protected root: 초대 생성은 인증이 필요하다",
     "/onboarding": "public: 가입 온보딩은 인증 전에도 접근한다",
     "/invite/": "public-prefix: /invite 자체는 보호하지만 /invite/[token] 미리보기는 공개한다"

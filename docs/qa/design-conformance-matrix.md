@@ -11,6 +11,7 @@
 | 초대 생성 390·1280px | 생성·복사 feedback·7일 만료 | 초기 화면 두 폭 실측 PASS | 🔶 부분 | actual PNG 2장. 생성·복사 완료 상태와 승인 원본 대조 미완료 |
 | 초대 수락 390·1280px | preview·로그인 복귀·error card | 비로그인 preview 두 폭 실측 PASS | 🔶 부분 | actual PNG 2장. 로그인 복귀·error 상태 대조 미완료 |
 | 커버 검수 390·1280px | review queue·approve·reject | 관리자 queue 두 폭 실측 PASS | 🔶 부분 | actual PNG 2장. approve·reject 상태 대조 미완료 |
+| 사업자 정보 `/my/legal` | 마이페이지 1단 링크에서 진입한 2단 화면 본문이 법정 기재 6항목을 직접 소유하고 전역 푸터는 없음 | 페이지 본문은 제목만 있고 `ConditionalFooter`가 법정 기재 6항목을 렌더함 | 불일치 | D-040 §4와 구현 구조 대조. 승인 시안 대 실제 화면 픽셀 대조는 미확인 |
 | 하단 탭 라벨 | 승인 시안 10px | 구현 13px | 미결 결정 | 10px는 시안 일치·가독성 기준 실패, 13px는 가독성 통과·시안 불일치. QA에서 값 변경 없음 |
 
 production-mode actual 화면은 7화면 × 2폭, 총 14조합에서 실측했다. 다만 승인 원본과 같은 폭의 side-by-side 또는 pixel diff가 없고 empty·error·과다 상태가 빠졌으므로 디자인 QA는 계속 FAIL이다. 실제 화면 증거는 `docs/qa/evidence/v2-social-viral-loop-reverify-v1/`에 있다.

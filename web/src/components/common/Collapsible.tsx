@@ -19,6 +19,7 @@ export function Collapsible({
   className = "",
   warnWhenDisabled = false,
   controlsId,
+  toggleLabel = "내용",
   onExpandedChange,
 }: {
   policy: CollapsePolicy;
@@ -26,6 +27,7 @@ export function Collapsible({
   className?: string;
   warnWhenDisabled?: boolean;
   controlsId?: string;
+  toggleLabel?: string;
   onExpandedChange?: (expanded: boolean) => void;
 }) {
   const enabled = shouldCollapse(policy);
@@ -40,7 +42,7 @@ export function Collapsible({
         <button
           type="button"
           className={`collapse-chevron${expanded ? " is-expanded" : ""}`}
-          aria-label={expanded ? "내용 접기" : "내용 펼치기"}
+          aria-label={`${toggleLabel} ${expanded ? "접기" : "펼치기"}`}
           aria-expanded={expanded}
           aria-controls={controlsId}
           onClick={() =>

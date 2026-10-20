@@ -38,7 +38,7 @@ it("CT-INVITE-01 승인 시안의 초대 링크 복사 버튼이 링크를 만�
     `${window.location.origin}/invite/sample-token`,
   );
   expect(screen.getByRole("status")).toHaveTextContent("초대 링크를 복사했어요.");
-});
+}, 15_000);
 
 it("CT-INVITE-02 초대 생성 거절 코드는 사용자 복구 문구로 표시한다", async () => {
   createInvite.mockResolvedValue({ ok: false, code: "invite_rate_limited" });

@@ -2,55 +2,24 @@
 
 import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
-const dockerArgs = ["exec", "-i", "supabase_db_haenael-ge", "psql", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-qAt"];
+const repo = resolve(new URL("../..", import.meta.url).pathname);
+const container = process.env.SUPABASE_DB_CONTAINER ?? "supabase_db_haenael-ge";
+const dockerArgs = ["exec", "-i", container, "psql", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-qAt"];
 const sql = (statement) => execFileSync("docker", dockerArgs, { input: statement, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] }).trim();
 const suffix = randomBytes(5).toString("hex");
 const prefix = `idx-${suffix}`;
 const owner = randomUUID();
 const other = randomUUID();
 
-const dashboardSummaryQuery = `
-WITH owned_goals AS (
-  SELECT g.* FROM public.goal AS g
-  WHERE g.member_id = '${owner}'::uuid AND g.deleted_at IS NULL AND g.status <> 'DELETED'
-), cheer_counts AS (
-  SELECT c.goal_id, count(*)::integer AS cheer_count
-  FROM public.cheer AS c JOIN owned_goals AS g ON g.id = c.goal_id
-  WHERE c.status = 'CONFIRMED' AND c.deleted_at IS NULL AND NOT c.is_welcome
-  GROUP BY c.goal_id
-), recent_cheer_rows AS (
-  SELECT g.id AS goal_id, recent.id, recent.created_at, recent.message,
-    recent.is_anonymous, recent.supporter_name, recent.profile_image, recent.position
-  FROM owned_goals AS g
-  CROSS JOIN LATERAL (
-    SELECT c.id, c.created_at, c.message, c.is_anonymous,
-      CASE WHEN c.is_anonymous THEN NULL ELSE COALESCE(m.nickname, c.display_name) END AS supporter_name,
-      CASE WHEN c.is_anonymous THEN NULL ELSE m.profile_image END AS profile_image,
-      row_number() OVER (ORDER BY c.created_at DESC, c.id DESC) AS position
-    FROM public.cheer AS c
-    LEFT JOIN public.social_cheer_member_attribution AS a ON a.cheer_id = c.id
-    LEFT JOIN public.member AS m ON m.id = a.supporter_member_id
-    WHERE c.goal_id = g.id AND c.status = 'CONFIRMED'
-      AND c.deleted_at IS NULL AND NOT c.is_welcome
-    ORDER BY c.created_at DESC, c.id DESC LIMIT 3
-  ) AS recent
-), cheer_summary AS (
-  SELECT r.goal_id,
-    jsonb_agg(jsonb_build_object('profile_image', r.profile_image, 'is_anonymous', r.is_anonymous)
-      ORDER BY r.created_at DESC, r.id DESC) AS supporter_avatars,
-    (jsonb_agg(jsonb_build_object('supporter_name', r.supporter_name, 'message', r.message,
-      'created_at', r.created_at, 'is_anonymous', r.is_anonymous)
-      ORDER BY r.created_at DESC, r.id DESC) FILTER (WHERE r.position = 1))->0 AS recent_cheer
-  FROM recent_cheer_rows AS r GROUP BY r.goal_id
-)
-SELECT jsonb_agg(jsonb_build_object(
-  'goal_id', g.id, 'cheer_count', COALESCE(cc.cheer_count, 0),
-  'supporter_avatars', COALESCE(s.supporter_avatars, '[]'::jsonb), 'recent_cheer', s.recent_cheer
-))
-FROM owned_goals AS g
-LEFT JOIN cheer_counts AS cc ON cc.goal_id = g.id
-LEFT JOIN cheer_summary AS s ON s.goal_id = g.id`;
+const migrationPath = resolve(repo, "supabase/migrations/20261020012000_social_dashboard_cheer_summary.sql");
+const migration = readFileSync(migrationPath, "utf8");
+const queryMatch = migration.match(/BEGIN\s+(WITH owned_goals[\s\S]*?)\s+INTO v_result;/);
+if (!queryMatch) throw new Error("dashboard_query_not_extracted_from_migration");
+const dashboardSummaryQuery = queryMatch[1].replace(/\bv_uid\b/g, `'${owner}'::uuid`);
+const normalizedMigrationQuery = queryMatch[1].replace(/\s+/g, " ").trim();
 
 function explain(statement) {
   const raw = sql(statement);
@@ -107,7 +76,7 @@ try {
   const recentRowsWithIndex = Math.min(...withIndex.cheer_access.map((node) => node.actual_rows));
   const recentRowsWithoutIndex = Math.min(...withoutIndex.cheer_access.map((node) => node.actual_rows));
   const recentRowsImproved = recentRowsWithIndex < recentRowsWithoutIndex;
-  console.log(JSON.stringify({ enable_seqscan: seqscan, fixture_goals: 100, fixture_cheers: 6000, with_index: withIndex, without_index: withoutIndex, index_used: indexUsed, shared_hit_blocks_improved: buffersImproved, recent_branch_rows: { with_index: recentRowsWithIndex, without_index: recentRowsWithoutIndex, improved: recentRowsImproved } }));
+  console.log(JSON.stringify({ query_source: "my_social_dashboard migration body", query_chars: normalizedMigrationQuery.length, enable_seqscan: seqscan, fixture_goals: 100, fixture_cheers: 6000, with_index: withIndex, without_index: withoutIndex, index_used: indexUsed, shared_hit_blocks_improved: buffersImproved, recent_branch_rows: { with_index: recentRowsWithIndex, without_index: recentRowsWithoutIndex, improved: recentRowsImproved } }));
   if (seqscan !== "on" || !indexUsed || !recentRowsImproved || withIndex.result_rows !== withoutIndex.result_rows) process.exitCode = 1;
 } finally {
   sql(`

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "tailwindUtilityPatterns": ["^my-(?:auto|px|[0-9]+(?:\\.[0-9]+)?)$"],
+  "prefixes": [
+    "achievement",
+    "business",
+    "cheer",
+    "clamp",
+    "collapse",
+    "cover",
+    "friend",
+    "friends",
+    "goal",
+    "guest",
+    "invite",
+    "is",
+    "landing",
+    "legal",
+    "my",
+    "public",
+    "receiver",
+    "social",
+    "split",
+    "wordmap"
+  ]
+}
