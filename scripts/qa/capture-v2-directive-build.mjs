@@ -1,5 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { createServer } from "node:http";
+import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
 const require = createRequire(resolve("web/package.json"));
@@ -15,6 +17,18 @@ const outputDir = resolve(
     "docs/qa/evidence/v2-directive-build-v2-gpt-codex",
 );
 const password = "haenael-v1-v2-local-fixture-2026!";
+
+function runCommand(command, args) {
+  return new Promise((resolveRun, rejectRun) => {
+    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => { stdout += chunk; });
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.once("error", rejectRun);
+    child.once("close", (status) => resolveRun({ status, stdout, stderr }));
+  });
+}
 
 function required(name) {
   const value = process.env[name]?.trim();
@@ -58,6 +72,7 @@ const routes = [
   ["landing", "/", false, "body"],
   ["public-goal", `/g/${state.ownerSlug}`, false, "[data-testid=goal-public-page]"],
   ["manage", "/my", true, "[data-testid=my-page]"],
+  ["business-information", "/my/legal", true, "[data-testid=business-information-page]"],
   ["friends", "/friends", true, "[data-testid=friends-page]"],
   ["friend-detail", `/friends/${state.friendId}?goal=${state.friendGoalId}`, true, "[data-testid=friend-detail-page]"],
   ["achievements", "/me/achievements", true, "[data-testid=achievements-page]"],
@@ -123,8 +138,20 @@ try {
         sparseFriendNextAction: Boolean(document.querySelector("[data-testid=friends-sparse-next-step]")),
         emptyGoalNextAction: Boolean(document.querySelector("[data-testid=my-goals-empty] a")),
         emptyCheerNextAction: Boolean(document.querySelector("[data-testid=received-cheers-empty] a")),
+        businessInformationTerms: document.querySelectorAll("[data-testid=business-information] dt").length,
+        businessInformationTermsInViewport: [...document.querySelectorAll("[data-testid=business-information] dt")]
+          .filter((element) => {
+            const rect = element.getBoundingClientRect();
+            return rect.top >= 0 && rect.bottom <= window.innerHeight;
+          }).length,
+        commerceRegistrationPending: document.body.textContent?.includes("통신판매업 신고번호 · 확인 중") ?? false,
       };
     });
+    let viewportFile = null;
+    if (label === "business-information") {
+      viewportFile = `${label}-390x844.png`;
+      await page.screenshot({ path: resolve(outputDir, viewportFile), fullPage: false });
+    }
     // 결정 보드용 full-page 캡처에서는 fixed 하단탭을 문서 맨 아래에 한 번만 둔다.
     // 실제 fixed 동작과 노출 여부는 위 metrics에서 스타일 변경 전에 계측한다.
     await page.addStyleTag({
@@ -132,7 +159,7 @@ try {
     });
     const file = `${label}-390-full.png`;
     await page.screenshot({ path: resolve(outputDir, file), fullPage: true });
-    results.push({ label, path, status: response?.status() ?? null, consoleErrors, pageErrors, metrics, file });
+    results.push({ label, path, status: response?.status() ?? null, consoleErrors, pageErrors, metrics, file, viewportFile });
     await context.close();
   }
 } finally {
@@ -146,7 +173,54 @@ await writeFile(
 const failures = results.filter((result) =>
   result.status !== 200 || result.consoleErrors.length || result.pageErrors.length ||
   result.metrics.overflowX || result.metrics.width !== 390 ||
-  result.metrics.forbiddenWordmapFragments.length > 0
+  result.metrics.forbiddenWordmapFragments.length > 0 ||
+  (result.label === "business-information" && (
+    result.metrics.businessInformationTerms !== 6 ||
+    result.metrics.businessInformationTermsInViewport !== 6 ||
+    !result.metrics.commerceRegistrationPending ||
+    !result.viewportFile
+  ))
 );
 console.log(`full-page captures=${results.length} failures=${failures.length}`);
 if (failures.length) process.exitCode = 2;
+
+if (process.env.MEASURE_BUSINESS_INFORMATION === "1") {
+  const bridge = createServer((request, response) => {
+    if (request.url !== "/business-information") {
+      response.writeHead(404).end();
+      return;
+    }
+    response.setHeader("Set-Cookie", authCookieRows.map(({ name, value }) =>
+      `${name}=${value}; Path=/; SameSite=Lax`));
+    response.writeHead(302, { Location: `${baseUrl}/my/legal` }).end();
+  });
+  await new Promise((resolveListen, reject) => {
+    bridge.once("error", reject);
+    bridge.listen(0, "127.0.0.1", resolveListen);
+  });
+  const address = bridge.address();
+  if (!address || typeof address === "string") throw new Error("mobile measurement bridge missing");
+  const target = `http://127.0.0.1:${address.port}/business-information`;
+  const measureScript = resolve(process.env.HOME ?? "", ".claude/harness/bin/mobile-ergonomics-measure.mjs");
+  const measurements = [];
+  try {
+    for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
+      const measured = await runCommand(
+        process.execPath,
+        [measureScript, target, "--width", String(width), "--json"],
+      );
+      const line = measured.stdout.trim().split("\n").filter(Boolean).at(-1);
+      measurements.push({ width, exit: measured.status, result: line ? JSON.parse(line) : null });
+    }
+  } finally {
+    await new Promise((resolveClose) => bridge.close(resolveClose));
+  }
+  await writeFile(
+    resolve(outputDir, "business-information-mobile-ergonomics.json"),
+    `${JSON.stringify(measurements, null, 2)}\n`,
+  );
+  const measurementFailures = measurements.filter((measurement) =>
+    measurement.exit !== 0 || !measurement.result?.pass);
+  console.log(`business mobile measurements=${measurements.length} failures=${measurementFailures.length}`);
+  if (measurementFailures.length) process.exitCode = 2;
+}

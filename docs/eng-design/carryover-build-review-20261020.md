@@ -124,3 +124,16 @@
 | R19 | P0 | **제품 `/my/legal` 화면 본문이 비어 있다. 시안과 불일치다.** product-designer 가 같은 390x844 에서 시안과 dev 를 나란히 열어 대조했다. 시안은 2단 본문에 법정 기재 6항목과 통신판매업 신고번호 `확인 중` 을 그리는데, **dev 는 본문 가시 항목 0 이고 헤더와 하단 탭만 보인다.** 전역 푸터가 사업자 정보를 그리지만 844px 첫 화면 밖이라 2단 전문을 대신하지 못한다. 3차 리뷰 m8 이 "QA 대조 항목으로 올린다" 고 남긴 자리이고 **렌더로 확정됐다.** D-040 이 정한 소유 구조(마이페이지 1단 목록 + 그 아래 한 단계가 전문을 소유)가 제품에서 성립하지 않는다. | 예 | dev 390x844 첫 화면에서 법정 기재 6항목이 **본문에** 보이는 캡처 · 시안과 같은 조건 대조에서 일치 판정 |
 
 > STAMP: 생성 2026-10-21 04:10 KST. 모델 claude-opus-5[1m]. 역할 컨트롤러. 근거 = 4차 Codex 자기신고 3행과 product-designer 의 시안·dev 390x844 육안 대조. 상태 발주 대기.
+
+## 5차 종료 판정 (2026-10-21)
+
+| # | 판정 | 종료 증거 |
+|---|---|---|
+| R10 | 닫힘 | `cron_jobs_active=3`, Vault 누락 0, `vault_and_ops_unchanged=true`, 파괴적 DELETE 0 |
+| R11 | 닫힘 | 잘못된 URL 실제 HTTP 404, 잘못된 내부 토큰 실제 HTTP 403. 각 실패 뒤 독립 배수 경보 `STORAGE_CLEANUP_DRAIN_STALLED`, `stalled_count=1` |
+| R18 | 닫힘 | `ops_event` INSERT 차단 직접 호출 exit 3, PostgreSQL warning·error 관찰, cron `failed` |
+| R19 | 닫힘 | dev 390×844 `/my/legal` HTTP 200, console·page error 0, 법정 기재 6/6 첫 화면 본문 노출, 통신판매업 신고번호 `확인 중`, 모바일 9폭 9/9 |
+
+상세 실행 출력과 캡처: `docs/qa/evidence/v2-r10-r11-r18-r19-v1-gpt-codex/`. 운영 Supabase 쓰기와 운영 배포는 0건이다.
+
+> STAMP: 종료 2026-10-21 04:38 KST. 모델 gpt-codex(API model ID 미노출). 역할 code-builder. 스킬 haenael-supabase-build. 근거 = 로컬 Supabase 실제 pg_net·pg_cron·실패 주입, Vitest·pgTAP·Next dev·헤드리스 Chromium. 운영 미반영.

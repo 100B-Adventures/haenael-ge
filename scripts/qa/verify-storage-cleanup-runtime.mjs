@@ -200,12 +200,15 @@ async function waitForPgNetResponse(requestId) {
 async function injectDrainFailureProbe({ name, url, token, expectedStatus }) {
   const objectPath = `runtime-cleanup/${runId}/r11-${name}.png`;
   const queueId = Number(sql(`
-    INSERT INTO public.storage_cleanup_queue(
-      goal_id, bucket_id, object_path, reason, created_at
+    WITH inserted AS (
+      INSERT INTO public.storage_cleanup_queue(
+        goal_id, bucket_id, object_path, reason, created_at
+      )
+      SELECT id, 'goal-cover-quarantine', '${objectPath}', 'ABANDONED_UPLOAD', now()-interval '21 minutes'
+      FROM public.goal WHERE slug='${goalSlug}'
+      RETURNING id
     )
-    SELECT id, 'goal-cover-quarantine', '${objectPath}', 'ABANDONED_UPLOAD', now()-interval '21 minutes'
-    FROM public.goal WHERE slug='${goalSlug}'
-    RETURNING id;
+    SELECT id FROM inserted;
   `));
   const eventBaseline = Number(sql("SELECT coalesce(max(id),0) FROM public.ops_event;"));
   const requestId = Number(sql(`

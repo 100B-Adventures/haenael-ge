@@ -6,7 +6,7 @@ import { COMMERCE_REGISTRATION } from "@/lib/legal/exposure";
 
 export default function BusinessInformationPage() {
   return (
-    <ReceiverPageShell testId="business-information-page">
+    <ReceiverPageShell testId="business-information-page" bottomSafe>
       <header className="social-detail-head">
         <Link href="/my" aria-label="관리로 돌아가기">‹</Link>
         <strong>사업자 정보</strong>

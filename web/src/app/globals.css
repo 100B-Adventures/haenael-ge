@@ -407,6 +407,8 @@
     color: var(--foreground);
   }
 
+  .social-detail-head > a:active { background: var(--muted); }
+
   .social-detail-head svg { width: 1.25rem; height: 1.25rem; }
   .social-detail-head > strong,
   .social-detail-head > .receiver-wordmark { font-size: var(--text-wordmark); font-weight: 900; }

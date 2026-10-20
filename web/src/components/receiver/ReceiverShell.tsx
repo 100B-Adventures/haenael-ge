@@ -39,12 +39,12 @@ export function ReceiverPageShell({
   className = "",
 }: ReceiverPageShellProps) {
   return (
-    <div
+    <main
       className={`receiver-page-frame${bottomSafe ? " receiver-page-frame--bottom-safe" : ""} ${className}`.trim()}
       data-testid={testId}
     >
       {children}
-    </div>
+    </main>
   );
 }
 

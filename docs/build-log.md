@@ -1,5 +1,17 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-21 4차 회수 R10·R11·R18·R19 종료
+
+- R10은 스케줄 검증 직전·직후 Vault 3종과 전체 `ops_event` fingerprint 동일, 파괴적 DELETE 0건을 다시 관찰했다.
+- R11은 `pg_net`에 잘못된 함수 URL과 잘못된 내부 토큰을 각각 주입해 실제 HTTP 404·403을 만들었다. 디스패치 결과와 독립된 큐 배수 감시가 두 경우 모두 `STORAGE_CLEANUP_DRAIN_STALLED`를 기록했다.
+- R18은 `ops_event` INSERT를 강제로 막았다. 직접 호출의 PostgreSQL warning·error, cron `failed`를 모두 관찰했다.
+- R19는 `/my` 본문에 정책 링크 3개, `/my/legal` 본문에 법정 기재 6항목과 통신판매업 신고번호 `확인 중`을 구현했다. 전역 푸터는 이 두 경로의 내용을 더 이상 소유하지 않는다.
+- dev 390×844에서 `/my/legal` HTTP 200, console·page error 0, 본문 6/6 첫 화면 노출을 확인했다. 모바일 360·390·412·600·700·780·820·900·1000은 9/9 통과했다.
+- 최신 소스에서 TypeScript·lint·QA 계약, Vitest 370/370, pgTAP 369/369, Next build, Storybook build가 통과했다. 디자인 토큰 신규 위반은 0건이다.
+- 운영 Supabase 쓰기와 운영 배포는 실행하지 않았다.
+
+> STAMP: 생성 2026-10-21 04:38 KST. 모델 gpt-codex(API model ID 미노출). 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 4차 회수 레지스트리, 로컬 Supabase·pg_net·pg_cron·Vitest·pgTAP·Next·헤드리스 Chromium. 운영 미반영.
+
 ## 2026-10-21 3차 교차 코드리뷰 R10~R18
 
 - R10은 스케줄 검증을 읽기 전용으로 바꾸고 Vault 3종과 `ops_event`의 실행 전후 fingerprint 동일성, 파괴적 DELETE 0건을 관찰했다.

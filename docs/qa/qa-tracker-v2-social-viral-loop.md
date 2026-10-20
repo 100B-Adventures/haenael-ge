@@ -1,15 +1,17 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
-## 2026-10-21 4차 회수 R10·R11·R18·R19 재검증 착수
+## 2026-10-21 4차 회수 R10·R11·R18·R19 재검증 종료
 
 | 요청 번호 | 범위 | 현재 판정 | 종료 증거 |
 |---|---|---|---|
-| BUILD-REVIEW-R10 | 검증 중 Vault 3종·`ops_event` 비파괴 보존 | ❌ NG | 실행 전후 fingerprint와 파괴적 DELETE 0건을 이번 판에서 다시 관찰하기 전 |
-| BUILD-REVIEW-R11 | 잘못된 URL·권한 거부에서 큐 배수 정체 경보 | ❌ NG | 두 실패를 각각 주입한 뒤 독립 배수 경보 발화를 관찰하기 전 |
-| BUILD-REVIEW-R18 | 감사 기록 실패 시 최후 수단 흔적·실패 상태 | ❌ NG | 기록 실패를 주입해 PostgreSQL warning과 실패 상태를 함께 관찰하기 전 |
-| BUILD-REVIEW-R19 | `/my/legal` 본문 법정 기재 6항목 | ❌ NG | 390×844 dev 첫 화면 본문 캡처와 시안 정합 판정 전 |
+| BUILD-REVIEW-R10 | 검증 중 Vault 3종·`ops_event` 비파괴 보존 | ✅ 닫힘 | `vault_and_ops_unchanged=true`, `destructive_delete_statements=0` |
+| BUILD-REVIEW-R11 | 잘못된 URL·권한 거부에서 큐 배수 정체 경보 | ✅ 닫힘 | 실제 HTTP 404·403 각각 주입, 두 경우 모두 `STORAGE_CLEANUP_DRAIN_STALLED`, `stalled_count=1` |
+| BUILD-REVIEW-R18 | 감사 기록 실패 시 최후 수단 흔적·실패 상태 | ✅ 닫힘 | 직접 호출 exit 3, warning·error 관찰, cron `failed` 관찰 |
+| BUILD-REVIEW-R19 | `/my/legal` 본문 법정 기재 6항목 | ✅ 닫힘 | dev 390×844에서 본문 6/6 첫 화면 노출, `확인 중`, HTTP 200·console/page error 0, 모바일 9폭 9/9 |
 
 원인 분석: 직전 판은 R10·R11·R18의 구현과 일부 출력은 만들었지만, 최신 레지스트리가 요구하는 실패 주입별 종료 증거까지 확보하지 못했다. R19는 법적 정보가 전역 레이아웃 뒤쪽에서 렌더될 뿐 2단 페이지 본문이 비어 있어, 경로 소유권과 가시 위치를 서로 다른 것으로 취급한 결함이다.
+
+종료 증거: `docs/qa/evidence/v2-r10-r11-r18-r19-v1-gpt-codex/`. 운영 Supabase 쓰기와 운영 배포는 0건이다.
 
 ## 2026-10-21 3차 교차 코드리뷰 BLOCK 재작업 착수
 
