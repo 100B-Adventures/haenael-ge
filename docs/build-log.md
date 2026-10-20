@@ -1,5 +1,17 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-21 3차 교차 코드리뷰 R10~R18
+
+- R10은 스케줄 검증을 읽기 전용으로 바꾸고 Vault 3종과 `ops_event`의 실행 전후 fingerprint 동일성, 파괴적 DELETE 0건을 관찰했다.
+- R11은 HTTP enqueue 성공과 분리된 큐 배수 감시 함수를 추가했다. 21분 정체 PENDING 1건과 `STORAGE_CLEANUP_DRAIN_STALLED` 감사 이벤트 1건을 실제 DB에서 확인했다.
+- R12~R13은 `ClampText`의 `Collapsible` 단일 집행자 경유와 custom class 접두사 계약을 고정했다. 미등재 `reviewnew` fixture는 반려되고 실제 접두사 20개는 누락 0이다.
+- R14는 pgTAP과 서버 런타임 4종을 PR #11 자동 검사에 연결했다. 원격 계약·단위·빌드 잡은 통과했지만 서버 잡이 깨끗한 DB의 기존 권한 드리프트 5건을 발견했다. 교정 migration은 로컬 pgTAP 369/369를 통과했으나 승인 게이트가 후속 branch push를 막아 원격 재실행은 미검증이다.
+- R15~R18은 중첩 보호 라우트, 실제 migration 함수 본문 EXPLAIN, 초대 카드 반복 안정성, 감사 기록 실패 시 PostgreSQL warning과 cron 실패 상태를 각각 실행 출력으로 고정했다.
+- 전체 로컬 회귀는 TypeScript rc=0, lint rc=0, `test:qa-contracts` 8 mutation PASS, Vitest 369/369, pgTAP 369/369, Next build 18화면, dev HTTP 200·console/page error 0, 모바일 9폭 9/9다.
+- 운영 Supabase와 운영 Vercel에는 쓰거나 배포하지 않았다. Mermaid SVG도 다시 렌더하지 않았다.
+
+> STAMP: 생성 2026-10-21 01:53 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 3차 리뷰 레지스트리, 로컬 Supabase·Vitest·pgTAP·Next·헤드리스 Chromium, PR #11 Actions. 운영 미반영, R14 원격 재실행 미검증.
+
 ## 2026-10-21 2차 교차 코드리뷰 R1~R9
 
 - R1은 `(receiver)` 실제 폴더를 역스캔한다. 미등재 폴더 반려, 제거 후 통과, 명시적 public 통과를 각각 관찰했다.
