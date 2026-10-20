@@ -293,5 +293,125 @@
     "F15 큐 점유 유효기간·소유권": "이 검사의 축이 아니다. v1.2.2 에는 `lock_token`·`p_lease` 가 **한 건도 없었다**(실측 0건). 즉 모순이 아니라 **부재**다. A축은 금지값, B축은 값 분기, D축은 필드 집합을 보고 셋 다 '적힌 것들이 서로 다른가' 를 묻는다. '있어야 할 것이 없는가' 는 요구 커버리지 검사가 보는 축이고, 설계 계약 요소의 필수 존재는 아직 어느 검사도 보지 않는다. 지어내서 넣으면 잡지도 못하면서 통과만 내므로 넣지 않고 공백을 밝힌다.",
     "F4 비회원 허용 필드 범위": "FS1(field_sets)이 같은 자리를 본다. facts 에 또 넣으면 같은 결함을 두 번 세어 건수가 부풀려진다.",
     "F9 소셜 RPC 운영 현황 · F10 결정 4건 상태": "v1.2.2 에서 닫혔고 재발 가능성이 낮아 후순위. 재발하면 그때 등재한다."
-  }
+  },
+  "_planned_assets_왜": "설계가 '신설하겠다' 고 선언한 서버 자산을 레지스트리에 두고 **구현 참조 수를 기계가 센다.** 회장이 두 번 같은 것을 지적했다. 2026-10-13 '미니앱을 저장소 반영 완료로 보고했는데 그 화면이 부르는 엣지 함수와 RPC 5종이 운영에 0건이라 껍데기였다' 와 2026-10-14 '커버 업로드용 엣지 함수 3종이 운영에 배포되지 않은 채 화면만 올라갔다'. 헌법 §5 가 '기능 완료를 말하기 전 그 기능이 기대는 서버 실물을 세라' 로 박혀 있지만 **세는 주체가 사람이었다.** 그래서 설계자가 같은 목록을 10건이라 적었다가 다음 판에 13건으로 고쳤다(2026-10-20). 손으로 세면 낡는다. 이 축은 막지 않고 표면화한다. 설계 단계에서는 전부 0 이 정상이고(계획이므로), build 단계에서는 0 이 아니어야 한다. 같은 표가 설계의 선언 검사와 build 의 진척 계수를 겸한다.",
+  "planned_assets": [
+    {
+      "id": "PA-01",
+      "종류": "엣지 함수",
+      "token": "storage-cleanup-worker",
+      "expect_in": [
+        "supabase/functions/"
+      ],
+      "why": "큐를 읽어 Storage 객체를 지우는 소비자. 이것이 없으면 DB 행만 지워지고 객체가 남아 허위 완료가 된다(Codex 4차 레드팀)"
+    },
+    {
+      "id": "PA-02",
+      "종류": "RPC 함수",
+      "token": "claim_storage_cleanup_batch",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "선택과 점유를 한 트랜잭션에서 한다. 없으면 10분 주기가 겹칠 때 같은 객체를 두 worker 가 지운다"
+    },
+    {
+      "id": "PA-03",
+      "종류": "RPC 함수",
+      "token": "settle_storage_cleanup",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "lock_token 일치 행만 갱신한다. 없으면 재수집된 행을 이전 worker 가 나중에 DONE 으로 덮는다"
+    },
+    {
+      "id": "PA-04",
+      "종류": "RPC 함수",
+      "token": "purge_abandoned_goal_covers",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "중단 업로드와 고아 tombstone 을 큐에 등록한다"
+    },
+    {
+      "id": "PA-05",
+      "종류": "공유 모듈",
+      "token": "cleanup-auth",
+      "expect_in": [
+        "supabase/functions/_shared/"
+      ],
+      "why": "내부 토큰의 상수시간 비교와 fail-closed. notify-auth 의 형태를 재사용한다"
+    },
+    {
+      "id": "PA-06",
+      "종류": "컬럼",
+      "token": "lock_token",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "점유 소유권 표식"
+    },
+    {
+      "id": "PA-07",
+      "종류": "컬럼",
+      "token": "locked_at",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "점유 시각. lease 만료 판정의 기준"
+    },
+    {
+      "id": "PA-08",
+      "종류": "CHECK 값",
+      "token": "ABANDONED_UPLOAD",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "정리 큐의 중단 업로드 사유"
+    },
+    {
+      "id": "PA-09",
+      "종류": "cron job",
+      "token": "drain-storage-cleanup-queue",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "10분 주기로 worker 를 깨운다"
+    },
+    {
+      "id": "PA-10",
+      "종류": "cron job",
+      "token": "purge-abandoned-goal-covers",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "중단 업로드 정리 주기"
+    },
+    {
+      "id": "PA-11",
+      "종류": "설정 절",
+      "token": "functions.storage-cleanup-worker",
+      "expect_in": [
+        "supabase/config.toml"
+      ],
+      "why": "verify_jwt=false 선언. 없으면 게이트웨이가 JWT 를 요구해 cron 호출이 막힌다"
+    },
+    {
+      "id": "PA-12",
+      "종류": "인덱스",
+      "token": "storage_cleanup_queue_claimable_idx",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "점유 가능 행 조회용 부분 인덱스"
+    },
+    {
+      "id": "PA-13",
+      "종류": "화면",
+      "token": "my/legal",
+      "expect_in": [
+        "web/src/app/"
+      ],
+      "why": "사업자 정보 전문을 소유하는 2단 화면(D-040)"
+    }
+  ]
 }

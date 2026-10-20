@@ -257,6 +257,43 @@ function scanStructure(docs) {
   return out;
 }
 
+// ── H축: 설계가 선언한 신설 서버 자산의 구현 참조 계수 ───────────────────────────
+// 왜 (2026-10-20): 회장이 같은 것을 두 번 지적했다. "미니앱을 저장소 반영 완료로 보고했는데 그 화면이
+//   부르는 엣지 함수와 RPC 5종이 운영에 0건이라 껍데기였다"(10-13), "커버 업로드용 엣지 함수 3종이
+//   운영에 배포되지 않은 채 화면만 올라갔다"(10-14). 헌법 §5 가 "기능 완료를 말하기 전 그 기능이 기대는
+//   서버 실물을 세라" 로 박혀 있지만 **세는 주체가 사람이었다.** 그래서 설계자가 같은 목록을 10건이라
+//   적었다가 다음 판에 13건으로 고쳤다. 손으로 세면 낡는다.
+//   이 축은 막지 않고 표면화한다. 설계 단계에서 전부 0 은 정상이고(계획이므로) build 단계에서 0 이면
+//   그것이 "화면만 있음" 이다. 같은 표가 설계의 선언 검사와 build 의 진척 계수를 겸한다.
+function scanPlannedAssets(reg, repo) {
+  const rows = [];
+  for (const a of reg.planned_assets || []) {
+    let hits = 0;
+    const files = new Set();
+    for (const dir of a.expect_in) {
+      const base = path.join(repo, dir);
+      if (!fs.existsSync(base)) continue;
+      const stack = [base];
+      while (stack.length) {
+        const cur = stack.pop();
+        let st;
+        try { st = fs.statSync(cur); } catch { continue; }
+        if (st.isDirectory()) {
+          if (/node_modules|\.next|\.git/.test(cur)) continue;
+          for (const e of fs.readdirSync(cur)) stack.push(path.join(cur, e));
+          continue;
+        }
+        if (!/\.(ts|tsx|sql|toml|js|mjs)$/.test(cur)) continue;
+        try {
+          if (fs.readFileSync(cur, 'utf8').includes(a.token)) { hits++; files.add(path.relative(repo, cur)); }
+        } catch {}
+      }
+    }
+    rows.push({ ...a, hits, files: [...files].slice(0, 2) });
+  }
+  return rows;
+}
+
 // ── 자기검증 ──────────────────────────────────────────────────────────────────
 const FIXTURE = path.join(repo, 'scripts/qa/fixtures/doc-contradiction-known.md');
 function selfTest() {
@@ -295,6 +332,7 @@ for (const f of files) {
 const findings = scan(reg, docs);
 const fsFindings = scanFieldSets(reg, docs);
 const stFindings = scanStructure(docs);
+const paRows = scanPlannedAssets(reg, repo);
 
 // ── C 레지스트리 미등재 ───────────────────────────────────────────────────────
 // 왜: 이 검사는 등재된 사실만 본다. 설계 문서가 모순표(§A.9 같은 "같은 사실이 두 곳에 적혔던 자리")에
@@ -355,6 +393,15 @@ if (AS_JSON) {
     }
   } else {
     console.log('E 버전 표기 · F 목차 앵커 · G 적어 둔 수치: 0건');
+  }
+  if (paRows.length) {
+    const done = paRows.filter((r) => r.hits > 0).length;
+    console.log(`\nH 선언한 신설 서버 자산 ${paRows.length}건 중 구현 참조 있는 것 ${done}건 (막지 않는다)`);
+    for (const r of paRows) {
+      const mark = r.hits > 0 ? `있음(${r.hits}곳: ${r.files.join(', ')})` : '0곳';
+      console.log(`     ${r.id} ${r.종류} \`${r.token}\` ${mark}`);
+    }
+    if (done === 0) console.log('     설계 단계에서는 전부 0 이 정상이다. build 단계에서 0 이면 그것이 화면만 있음이다.');
   }
   if (tableDoc) {
     console.log(`C 레지스트리 대조: 모순표 ${tableRows}행(${path.basename(tableDoc)}) 대 등재 사실 ${reg.facts.length}건` +
