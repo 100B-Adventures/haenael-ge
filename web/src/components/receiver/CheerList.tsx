@@ -50,7 +50,12 @@ function CheerItem({
           {name}
         </p>
         {cheer.message && (
-          <ClampText title={cheer.message} className="mt-1 text-[length:var(--text-label-small)]! leading-[normal] text-muted-foreground">
+          <ClampText
+            title={cheer.message}
+            controlsId={`cheer-message-${cheer.id}`}
+            toggleLabel={`${ordinal}번째 응원 내용`}
+            className="mt-1 text-[length:var(--text-label-small)]! leading-[normal] text-muted-foreground"
+          >
             {cheer.message}
           </ClampText>
         )}

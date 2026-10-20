@@ -1,0 +1,2 @@
+/* The linter must not treat this as a definition of .cheer-list. */
+.cheer-list-reset { display: inline-flex; }

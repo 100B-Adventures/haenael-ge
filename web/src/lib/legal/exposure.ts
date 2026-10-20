@@ -3,7 +3,8 @@ export type LegalExposureMode = "none" | "link" | "biz" | "page";
 export const LEGAL_EXPOSURE = {
   landing: "none",
   how: "none",
-  myLegal: "page",
+  my: "link",
+  myLegal: "biz",
   terms: "page",
   privacy: "page",
 } as const satisfies Record<string, LegalExposureMode>;
@@ -18,6 +19,7 @@ export const BUSINESS_INFORMATION = {
 } as const;
 
 export function legalExposureForPath(pathname: string): LegalExposureMode {
+  if (pathname === "/my") return LEGAL_EXPOSURE.my;
   if (pathname === "/my/legal") return LEGAL_EXPOSURE.myLegal;
   if (pathname === "/terms") return LEGAL_EXPOSURE.terms;
   if (pathname === "/privacy") return LEGAL_EXPOSURE.privacy;

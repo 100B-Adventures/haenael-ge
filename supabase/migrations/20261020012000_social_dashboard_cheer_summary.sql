@@ -23,28 +23,47 @@ BEGIN
     WHERE g.member_id = v_uid
       AND g.deleted_at IS NULL
       AND g.status <> 'DELETED'
-  ), cheer_ranked AS (
-    SELECT
-      c.goal_id,
-      c.id,
-      c.created_at,
-      c.message,
-      c.is_anonymous,
-      CASE WHEN c.is_anonymous THEN NULL ELSE COALESCE(m.nickname, c.display_name) END AS supporter_name,
-      CASE WHEN c.is_anonymous THEN NULL ELSE m.profile_image END AS profile_image,
-      row_number() OVER (PARTITION BY c.goal_id ORDER BY c.created_at DESC, c.id DESC) AS position,
-      count(*) OVER (PARTITION BY c.goal_id) AS cheer_count
+  ), cheer_counts AS (
+    SELECT c.goal_id, count(*)::integer AS cheer_count
     FROM public.cheer AS c
     JOIN owned_goals AS g ON g.id = c.goal_id
-    LEFT JOIN public.social_cheer_member_attribution AS a ON a.cheer_id = c.id
-    LEFT JOIN public.member AS m ON m.id = a.supporter_member_id
     WHERE c.status = 'CONFIRMED'
       AND c.deleted_at IS NULL
       AND NOT c.is_welcome
+    GROUP BY c.goal_id
+  ), recent_cheer_rows AS (
+    SELECT
+      g.id AS goal_id,
+      recent.id,
+      recent.created_at,
+      recent.message,
+      recent.is_anonymous,
+      recent.supporter_name,
+      recent.profile_image,
+      recent.position
+    FROM owned_goals AS g
+    CROSS JOIN LATERAL (
+      SELECT
+        c.id,
+        c.created_at,
+        c.message,
+        c.is_anonymous,
+        CASE WHEN c.is_anonymous THEN NULL ELSE COALESCE(m.nickname, c.display_name) END AS supporter_name,
+        CASE WHEN c.is_anonymous THEN NULL ELSE m.profile_image END AS profile_image,
+        row_number() OVER (ORDER BY c.created_at DESC, c.id DESC) AS position
+      FROM public.cheer AS c
+      LEFT JOIN public.social_cheer_member_attribution AS a ON a.cheer_id = c.id
+      LEFT JOIN public.member AS m ON m.id = a.supporter_member_id
+      WHERE c.goal_id = g.id
+        AND c.status = 'CONFIRMED'
+        AND c.deleted_at IS NULL
+        AND NOT c.is_welcome
+      ORDER BY c.created_at DESC, c.id DESC
+      LIMIT 3
+    ) AS recent
   ), cheer_summary AS (
     SELECT
       r.goal_id,
-      max(r.cheer_count)::integer AS cheer_count,
       COALESCE(
         jsonb_agg(
           jsonb_build_object(
@@ -64,7 +83,7 @@ BEGIN
           ) ORDER BY r.created_at DESC, r.id DESC
         ) FILTER (WHERE r.position = 1)
       )->0 AS recent_cheer
-    FROM cheer_ranked AS r
+    FROM recent_cheer_rows AS r
     GROUP BY r.goal_id
   )
   SELECT jsonb_build_object(
@@ -81,13 +100,14 @@ BEGIN
           'due_date', g.due_date,
           'status', g.status,
           'cover_preset_key', g.cover_preset_key,
-          'cheer_count', COALESCE(s.cheer_count, 0),
+          'cheer_count', COALESCE(cc.cheer_count, 0),
           'supporter_avatars', COALESCE(s.supporter_avatars, '[]'::jsonb),
           'recent_cheer', s.recent_cheer
         )
         ORDER BY CASE WHEN g.status = 'ACTIVE' THEN 0 ELSE 1 END, g.created_at DESC, g.id DESC
       )
       FROM owned_goals AS g
+      LEFT JOIN cheer_counts AS cc ON cc.goal_id = g.id
       LEFT JOIN cheer_summary AS s ON s.goal_id = g.id
     ), '[]'::jsonb),
     'friend_count', (

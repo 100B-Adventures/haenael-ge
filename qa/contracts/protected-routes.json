@@ -3,6 +3,7 @@
   "prefix": ["/me/", "/my/", "/friends/", "/cashout/", "/wordmap/"],
   "scanRoots": ["/onboarding", "/invite/"],
   "notes": {
+    "/invite": "exact-only protected root: 초대 생성은 인증이 필요하다",
     "/onboarding": "public: 가입 온보딩은 인증 전에도 접근한다",
     "/invite/": "public-prefix: /invite 자체는 보호하지만 /invite/[token] 미리보기는 공개한다"
   }

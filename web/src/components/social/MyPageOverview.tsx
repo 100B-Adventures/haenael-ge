@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
 import { ClampText } from "@/components/common/ClampText";
-import { LegalLinkList } from "@/components/common/LegalFooter";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import type { MySocialDashboard } from "@/lib/social/contracts";
@@ -224,7 +223,6 @@ export function MyPageOverview({
         </div>
         {saveError && <p className="social-error" role="alert">설정을 저장하지 못했어요. 다시 시도해 주세요.</p>}
         <Link href="/how" className="my-guide-link">이용안내</Link>
-        <LegalLinkList />
       </section>
 
       <section aria-labelledby="my-account-heading">

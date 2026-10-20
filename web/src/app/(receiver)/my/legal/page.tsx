@@ -1,6 +1,5 @@
 import Link from "next/link";
 // D-040 route implementation token: my/legal
-import { LegalFooter } from "@/components/common/LegalFooter";
 import { ReceiverPageShell } from "@/components/receiver/ReceiverShell";
 
 export default function BusinessInformationPage() {
@@ -11,7 +10,6 @@ export default function BusinessInformationPage() {
         <strong>사업자 정보</strong>
         <span aria-hidden="true" />
       </header>
-      <LegalFooter mode="biz" />
     </ReceiverPageShell>
   );
 }

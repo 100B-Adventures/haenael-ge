@@ -26,6 +26,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  supabase-server-contracts:
+    name: Supabase pgTAP + 서버 런타임 계약
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 로컬 Supabase 기동
+        run: npx supabase start
+
+      - name: pgTAP 전수
+        run: npx supabase test db
+
+      - name: Storage cleanup 스케줄·동시성 계약
+        run: |
+          node scripts/qa/verify-storage-cleanup-schedules.mjs
+          node scripts/qa/verify-storage-cleanup-concurrency.mjs
+
+      - name: 소셜 대시보드 인덱스 효과
+        run: node scripts/qa/verify-cheer-summary-index.mjs
+
+      - name: 로컬 Supabase 종료
+        if: always()
+        run: npx supabase stop --no-backup
+
   qa-contracts:
     name: 배포 환경·환전 층간 계약
     runs-on: ubuntu-latest  # 공개 저장소는 GitHub 호스팅 분이 무료다. 온프렘 러너 그룹은 공개 저장소를 허용하지 않으므로(allows_public_repositories=false) 호스팅 러너를 쓴다(2026-10-12).

@@ -42,3 +42,14 @@ node scripts/qa/lint-requirement-coverage.mjs <추적성 문서> <테스트 케�
 새 모순이 나오면 **스크립트가 아니라** `qa/contracts/doc-facts-v2-r6.json` 에 줄을 추가한다. 도메인 사실은 `facts`·`field_sets`·`planned_assets` 에, 문서 구조 불변식은 범용 축이 이미 본다.
 
 **축을 새로 만들 때는 주석에 "보는 것"과 "보지 않는 것"을 함께 적는다.** 안 적으면 인접한 결함을 통과시킨다. 실제로 세 번 그랬다. `B` 축이 필드 집합을 못 봤고, 레지스트리가 구조 불변식을 못 봤고, `F` 축이 제목 겹침을 통과시켰다(앵커가 중복 제목에서 생성되므로 목차와는 맞았다).
+
+## Supabase 서버 계약 출고 조건
+
+Storage cleanup·소셜 대시보드 서버 자산을 바꾸면 아래 네 명령을 모두 실행한다. CI의 `supabase-server-contracts` 잡도 같은 순서로 실행한다. 파일 존재나 단일 세션 PASS를 동시성·예약 실행·인덱스 효과의 증거로 대신하지 않는다.
+
+```bash
+npx supabase test db
+node scripts/qa/verify-storage-cleanup-schedules.mjs
+node scripts/qa/verify-storage-cleanup-concurrency.mjs
+node scripts/qa/verify-cheer-summary-index.mjs
+```
