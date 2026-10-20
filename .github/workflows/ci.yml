@@ -41,6 +41,10 @@ jobs:
         with:
           version: 2.109.0
 
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       - name: 로컬 Supabase 기동
         run: supabase start
 

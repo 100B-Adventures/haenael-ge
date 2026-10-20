@@ -490,7 +490,7 @@ test.beforeAll(async () => {
         CASHOUT_ACCOUNT_ENCRYPTION_KEY: "e".repeat(40),
         CASHOUT_ACCOUNT_FINGERPRINT_KEY: "f".repeat(40),
       },
-      stdio: "ignore",
+      stdio: "inherit",
     },
   );
   await waitForApp(`${APP_URL}/`);
@@ -707,7 +707,7 @@ test.describe("수동 환전: happy + edge", () => {
     await expect(page.getByTestId("wordmap-overflow-summary")).toHaveText("6개 표시 · 94개는 전체 워드맵에서 확인");
     await page.screenshot({ path: path.join(CAPTURE_DIR, "me-390.png"), fullPage: true });
 
-    await page.getByRole("button", { name: "더 보기" }).click();
+    await page.getByRole("button", { name: "응원 목록 펼치기" }).click();
     await expect(page.getByTestId("receiver-cheer-list").getByTestId("cheer-item")).toHaveCount(20);
     await expect(page.getByTestId("receiver-cheer-card")).toContainText("80개는 검색으로 찾기");
     const cheerCardBox = await page.getByTestId("receiver-cheer-card").boundingBox();
@@ -725,7 +725,8 @@ test.describe("수동 환전: happy + edge", () => {
       page.getByRole("button", { name: "찾기", exact: true }).click(),
     ]);
     await expect(page.getByTestId("receiver-cheer-list")).toContainText("121번째 응원 메시지예요");
-    await expect(page.getByTestId("cheer-overflow-summary")).toHaveText("1개 찾았어요전체 목록");
+    await expect(page.getByTestId("cheer-overflow-summary")).toHaveText("1개 찾았어요");
+    await expect(page.getByRole("link", { name: "전체 목록" })).toBeVisible();
     expect(cheerSearchRequests).toContain("message:121번째");
     await expect(page.getByTestId("receiver-home-loading")).toHaveCount(0);
     await page.waitForLoadState("networkidle");

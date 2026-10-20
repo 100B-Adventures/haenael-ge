@@ -1,5 +1,5 @@
 ---
-version: "2.1.0"
+version: "2.1.1"
 name: 해낼게
 description: 친구의 목표에 조용히 돈으로 응원하는 링크 인 바이오형 모바일 웹 디자인 시스템
 colors:
@@ -69,6 +69,11 @@ typography:
     fontSize: 12px
     fontWeight: 400
     lineHeight: 1.625
+  body:
+    fontFamily: Pretendard
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.5
   label-small:
     fontFamily: Pretendard
     fontSize: 11.5px
@@ -335,6 +340,7 @@ motion:
 | 주 CTA | `text-[15px] font-extrabold` | 15px / 800 [실측 `web/src/components/cashout/CashoutRequestForm.tsx`:317-323, `web/src/components/goal/GoalEditSheet.tsx`:310-315] | 환전 신청, 저장 |
 | 입력 라벨 | `text-[12.5px] font-bold` | 12.5px / 700 [실측 `web/src/components/cashout/CashoutRequestForm.tsx`:213-216,236-241] | 은행·계좌·예금주 라벨 |
 | 본문 설명 | `text-[12px] leading-relaxed` | 12px / 400 / 약 1.625 [실측 `web/src/app/(receiver)/cashout/status/page.tsx`:88-90] | 상태 이유, 다음 행동 |
+| 본문 링크 | `font-size: var(--text-body)` | 16px / 400 / 1.5 [실측 `web/src/app/globals.css`, `web/src/components/common/LegalFooter.tsx`] | 마이페이지 약관·개인정보처리방침 진입 |
 | 작은 라벨 | inline size·weight | 11.5px / 700 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:75-83,91-102] | 분할 잔액 양쪽 라벨 |
 | 마이크로 메타 | inline size | 10.5px / 400~600 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:34,42,49,85,105] | 등가 금액, 보조 메타 |
 | 관리자 제목 | `text-3xl font-black tracking-[-0.04em]` | 30px / 900 / `-0.04em` [실측 `web/src/app/admin/page.tsx`:157-161] | 관리자 대시보드 H1 |

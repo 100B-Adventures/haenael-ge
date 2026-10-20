@@ -412,12 +412,12 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("OPS-ALERT-01 관리자 화면이 ops_event 경보를 실제 수신한다", async ({ browser }) => {
-    const { data: inserted, error: insertError } = await admin.from("ops_event" as never)
+    const { data: inserted, error: insertError } = await admin.from("ops_event")
       .insert({
         event_type: "STORAGE_CLEANUP_DRAIN_STALLED",
         severity: "ERROR",
         details: { stalled_count: 2, source: `playwright-${runId}` },
-      } as never)
+      })
       .select("id")
       .single();
     if (insertError || !inserted) throw insertError ?? new Error("ops_alert_fixture_failed");
@@ -436,7 +436,7 @@ test.describe("V2 web-first social slice", () => {
       expect(consoleErrors).toEqual([]);
       await context.close();
     } finally {
-      await admin.from("ops_event" as never).delete().eq("id", (inserted as { id: number }).id);
+      await admin.from("ops_event").delete().eq("id", inserted.id);
     }
   });
 

@@ -133,8 +133,6 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  // 이 migration에서 추가한 RPC는 다음 타입 생성 시 database.types.ts에 반영된다.
-  // 그 전에도 생성 파일 전체를 수동 편집하지 않도록 호출 경계에서 반환 DTO를 명시한다.
   async function callAdminRpc<T>(
     name: AdminRpcName,
     args?: AdminRpcArgs,
@@ -157,7 +155,7 @@ export default async function AdminPage() {
     callAdminRpc<AdminCashout[]>("admin_list_cashouts_v2", { p_limit: 100 }),
     callAdminRpc<CoverReviewItem[]>("admin_list_goal_covers", { p_limit: 100 }),
     serviceClient
-      .from("ops_event" as never)
+      .from("ops_event")
       .select("id,event_type,severity,details,created_at")
       .in("severity", ["ERROR", "WARN"])
       .order("created_at", { ascending: false })

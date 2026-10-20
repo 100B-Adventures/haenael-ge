@@ -16,6 +16,8 @@ export function shouldCollapse(policy: CollapsePolicy) {
 export function Collapsible({
   policy,
   children,
+  collapsedContent,
+  expandedContent,
   className = "",
   warnWhenDisabled = false,
   controlsId,
@@ -23,7 +25,9 @@ export function Collapsible({
   onExpandedChange,
 }: {
   policy: CollapsePolicy;
-  children: (expanded: boolean) => React.ReactNode;
+  children?: (expanded: boolean) => React.ReactNode;
+  collapsedContent?: React.ReactNode;
+  expandedContent?: React.ReactNode;
   className?: string;
   warnWhenDisabled?: boolean;
   controlsId?: string;
@@ -35,9 +39,14 @@ export function Collapsible({
   if (warnWhenDisabled && !enabled && process.env.NODE_ENV !== "production") {
     console.warn("Collapsible ignored: all three collapse conditions are required.");
   }
+  const content = children
+    ? children(enabled ? expanded : true)
+    : enabled && !expanded
+      ? collapsedContent
+      : (expandedContent ?? collapsedContent);
   return (
     <div className={className} data-collapsible={enabled ? "enabled" : "disabled"}>
-      {children(enabled ? expanded : true)}
+      {content}
       {enabled && (
         <button
           type="button"

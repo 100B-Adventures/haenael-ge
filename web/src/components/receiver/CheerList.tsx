@@ -120,6 +120,7 @@ export function CheerList({
         <Collapsible
           policy={{ auxiliary: true, exceedsLimit: totalCount > PREVIEW_LIMIT, hasCollapsedContext: true }}
           controlsId="receiver-cheer-list"
+          toggleLabel="응원 목록"
           onExpandedChange={(expanded) => { if (!expanded) setSearchOpen(false); }}
         >
           {(expanded) => {

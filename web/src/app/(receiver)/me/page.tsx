@@ -229,6 +229,27 @@ export default async function ReceiverHomePage({
       : 1;
 
   const cleanTitle = (goal.title ?? "").replace(/\s*해낼게\s*$/, "").trim();
+  const renderPastGoals = (limit?: number) => (
+    <div className="mt-2">
+      {pastGoals
+        .filter((pastGoal) => pastGoal.id !== goal.id)
+        .slice(0, limit)
+        .map((pastGoal) => (
+          <MyGoalListCard
+            key={pastGoal.id}
+            goal={{
+              id: pastGoal.id,
+              slug: pastGoal.slug,
+              title: stripSuffix(pastGoal.title),
+              due_date: pastGoal.due_date,
+              status: pastGoal.status as "ACTIVE" | "CLOSED" | "DELETED",
+              cheerSummary: cheerSummaryByGoal.get(pastGoal.id) ?? emptyCheerSummary,
+              coverPresetKey: pastGoal.cover_preset_key,
+            }}
+          />
+        ))}
+    </div>
+  );
 
   return (
     <>
@@ -445,27 +466,11 @@ export default async function ReceiverHomePage({
         {pastGoals.length > 0 && (
           <section className="mt-6" data-testid="past-goals-section">
             <p className="py-2 text-[13px] font-bold text-muted-foreground">지난 목표 {pastGoals.length}개</p>
-            <Collapsible policy={{ auxiliary: true, exceedsLimit: pastGoals.length > 8, hasCollapsedContext: true }}>
-              {(expanded) => <div className="mt-2">
-              {pastGoals
-                .filter((g) => g.id !== goal.id)
-                .slice(0, expanded ? undefined : 8)
-                .map((g) => (
-                  <MyGoalListCard
-                    key={g.id}
-                    goal={{
-                      id: g.id,
-                      slug: g.slug,
-                      title: stripSuffix(g.title),
-                      due_date: g.due_date,
-                      status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
-                      cheerSummary: cheerSummaryByGoal.get(g.id) ?? emptyCheerSummary,
-                      coverPresetKey: g.cover_preset_key,
-                    }}
-                  />
-                ))}
-              </div>}
-            </Collapsible>
+            <Collapsible
+              policy={{ auxiliary: true, exceedsLimit: pastGoals.length > 8, hasCollapsedContext: true }}
+              collapsedContent={renderPastGoals(8)}
+              expandedContent={renderPastGoals()}
+            />
           </section>
         )}
       </ReceiverPageShell>

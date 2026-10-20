@@ -800,6 +800,30 @@ export type Database = {
           },
         ]
       }
+      ops_event: {
+        Row: {
+          created_at: string
+          details: Json
+          event_type: string
+          id: number
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: never
+          severity: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: never
+          severity?: string
+        }
+        Relationships: []
+      }
       payment: {
         Row: {
           amount_krw: number
@@ -1042,6 +1066,9 @@ export type Database = {
           created_at: string
           goal_id: number
           id: number
+          lease_until: string | null
+          lock_token: string | null
+          locked_at: string | null
           object_path: string
           reason: string
           status: string
@@ -1053,6 +1080,9 @@ export type Database = {
           created_at?: string
           goal_id: number
           id?: never
+          lease_until?: string | null
+          lock_token?: string | null
+          locked_at?: string | null
           object_path: string
           reason: string
           status?: string
@@ -1064,6 +1094,9 @@ export type Database = {
           created_at?: string
           goal_id?: number
           id?: never
+          lease_until?: string | null
+          lock_token?: string | null
+          locked_at?: string | null
           object_path?: string
           reason?: string
           status?: string
@@ -1321,6 +1354,15 @@ export type Database = {
         }[]
       }
       cashout_require_kyc: { Args: never; Returns: boolean }
+      claim_storage_cleanup_batch: {
+        Args: { p_lease?: string; p_limit?: number }
+        Returns: {
+          bucket_id: string
+          id: number
+          lock_token: string
+          object_path: string
+        }[]
+      }
       claim_toss_webhook: {
         Args: {
           p_event_type: string
@@ -1428,6 +1470,10 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       min_cashout_clover: { Args: never; Returns: number }
+      monitor_storage_cleanup_drain: {
+        Args: { p_stale_after?: string }
+        Returns: number
+      }
       my_cashout_history: {
         Args: { p_limit?: number }
         Returns: {
@@ -1464,6 +1510,10 @@ export type Database = {
       }
       my_friend_goals: { Args: never; Returns: Json }
       my_social_dashboard: { Args: never; Returns: Json }
+      purge_abandoned_goal_covers: {
+        Args: { p_older_than?: string }
+        Returns: number
+      }
       purge_expired_cashout_accounts: {
         Args: { p_limit?: number }
         Returns: number
@@ -1504,11 +1554,19 @@ export type Database = {
           status: Database["public"]["Enums"]["payment_status_enum"]
         }[]
       }
+      record_storage_cleanup_schedule_failure: {
+        Args: { p_message: string; p_sqlstate: string; p_stage: string }
+        Returns: number
+      }
       release_toss_webhook: {
         Args: { p_transmission_id: string }
         Returns: undefined
       }
       remove_friend: { Args: { friend_member_id: string }; Returns: Json }
+      requeue_orphan_cover_tombstones: {
+        Args: { p_older_than?: string }
+        Returns: number
+      }
       set_goal_cover_preset: {
         Args: { goal_id: number; preset_key: string }
         Returns: Json
@@ -1516,6 +1574,22 @@ export type Database = {
       set_goal_visibility: {
         Args: { goal_id: number; visibility: string }
         Returns: Json
+      }
+      settle_storage_cleanup: {
+        Args: { p_id: number; p_lock_token: string; p_ok: boolean }
+        Returns: boolean
+      }
+      social_backfill_confirmed_cheer_friendships: {
+        Args: never
+        Returns: number
+      }
+      social_connect_cheer_members: {
+        Args: { p_cheer_id: number }
+        Returns: undefined
+      }
+      social_has_confirmed_cheer: {
+        Args: { p_owner_member_id: string; p_supporter_member_id: string }
+        Returns: boolean
       }
       social_is_active_friend: {
         Args: { p_member_a: string; p_member_b: string }
