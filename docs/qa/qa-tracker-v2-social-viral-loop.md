@@ -10,19 +10,19 @@
 
 | 요청 번호 | 범위 | 현재 판정 | 종료 증거 |
 |---|---|---|---|
-| BUILD-REVIEW-R1 | 보호 라우트 실제 폴더와 계약의 양방향 대조 | ❌ NG | 미등재 실제 라우트가 현 린트를 통과하는 결함 재확인. 임시 라우트 반려·제거 후 통과·명시적 public 통과를 아직 관찰하지 않음 |
-| BUILD-REVIEW-R2 | Vault 누락 시 pg_cron 실패 신호와 배포 전 검증 | ❌ NG | Vault 누락 상태의 실제 스케줄 실행에서 `ops_event` 기록을 아직 관찰하지 않음 |
-| BUILD-REVIEW-R3 | 로컬 서버 계약 검증의 CI·출고 조건 편입 | ❌ NG | 스크립트 3종과 pgTAP이 CI에서 자동 실행되지 않음 |
-| BUILD-REVIEW-R4 | 실제 대시보드 질의의 인덱스 효과 | ❌ NG | 기본 플래너 설정의 실제 RPC 질의 개선 전후 수치 없음 |
-| BUILD-REVIEW-R5 | 법적 고지 노출 단일정본 | ❌ NG | 하드코딩된 렌더 경로가 노출 규칙을 우회함 |
-| BUILD-REVIEW-R6 | 제품 CSS class 경계 검사 | ❌ NG | 부분문자열 위양성·동적 class 누락 픽스처 미검증 |
-| BUILD-REVIEW-R7 | 구 초대 응답의 변환·렌더 통합 | ❌ NG | 6필드 응답이 변환 함수를 거치지 않는 동어반복 테스트 |
-| BUILD-REVIEW-R8 | 메시지별 셰브론 접근성과 첫 페인트 | ❌ NG | 실제 390px 브라우저에서 라벨 중복·깜빡임 미관찰 |
-| BUILD-REVIEW-R9 | 병렬 점유 실행 구간 겹침 | ❌ NG | 두 DB 세션의 backend PID·점유 시각 겹침 어서션 없음 |
+| BUILD-REVIEW-R1 | 보호 라우트 실제 폴더와 계약의 양방향 대조 | ✅ 닫힘 | 임시 미등재 폴더 `missing=1`, 제거 후 0, `/onboarding` public 통과 |
+| BUILD-REVIEW-R2 | Vault 누락 시 pg_cron 실패 신호와 배포 전 검증 | ✅ 닫힘 | 실제 pg_cron `succeeded|DO`, `ops_event runtime_secret_missing|P0001`, Vault 누락 3건 반려, provisioner 2회 rc=0 |
+| BUILD-REVIEW-R3 | 로컬 서버 계약 검증의 CI·출고 조건 편입 | ✅ 닫힘 | CI 잡·AGENTS 명령 등재, actionlint와 로컬 job-equivalent 통과. 원격 GitHub Actions는 push 전이라 미검증 |
+| BUILD-REVIEW-R4 | 실제 대시보드 질의의 인덱스 효과 | ✅ 닫힘 | `enable_seqscan=on`, 실제 CTE 최근 분기 60행→3행, 최종 shared hit 119→87 |
+| BUILD-REVIEW-R5 | 법적 고지 노출 단일정본 | ✅ 닫힘 | `/my=link`, `/my/legal=biz`, `ConditionalFooter` 렌더 테스트 통과 |
+| BUILD-REVIEW-R6 | 제품 CSS class 경계 검사 | ✅ 닫힘 | 위양성 fixture 반려, AST 수집 class 73개·누락 0 |
+| BUILD-REVIEW-R7 | 구 초대 응답의 변환·렌더 통합 | ✅ 닫힘 | 6필드 객체→`asInvitePreview`→카드 렌더 표적 테스트 통과 |
+| BUILD-REVIEW-R8 | 메시지별 셰브론 접근성과 첫 페인트 | ✅ 닫힘 | 390px Chromium 라벨 중복 0, 짧은 메시지 셰브론 mutation 0, console error 0 |
+| BUILD-REVIEW-R9 | 병렬 점유 실행 구간 겹침 | ✅ 닫힘 | backend PID 2개, windows_overlap=true, claim 교집합 0 |
 
 원인 분석: 1차 재작업은 스크립트가 출력한 PASS를 증거로 채택했지만, 일부 스크립트가 요구 계약의 반대 방향을 순회하거나 실제 런타임 실패를 발화하지 않았다. 또한 검증 명령이 CI와 출고 조건에 연결되지 않아 수동 실행 한 번으로 끝났다. 이번 판은 각 R 항목이 요구하는 실패 재현과 종료 출력을 직접 관찰하기 전까지 NG를 유지한다.
 
-STAMP: 2026-10-21 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 2차 교차 리뷰 BLOCK 재작업 착수, 운영 미반영
+STAMP: 2026-10-21 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 R1~R9 로컬 종료, 원격 CI·운영 미검증
 
 ## 2026-10-20 교차 코드리뷰 BLOCK 이관
 

@@ -67,4 +67,22 @@
 | R8 | P2 | `ClampText` 의 ARIA 복원이 목록 셰브론까지만이다. 메시지별 셰브론에 `aria-controls` 가 없고 `aria-label` 이 목록 셰브론과 같아 실제 브라우저에서 동일 라벨 버튼이 여러 개 생긴다(jsdom 은 높이 0 이라 안 떠서 테스트가 통과한다). `overflows` 초기값이 `null` 이라 짧은 메시지도 첫 페인트에 셰브론이 한 프레임 보인다. | 예 | 실제 브라우저 폭 390 에서 라벨 중복 0 과 첫 페인트 깜빡임 없음을 관찰 |
 | R9 | P2 | `verify-storage-cleanup-concurrency.mjs` 가 두 세션의 claim 시각 겹침을 어서션하지 않는다. `pg_sleep(2)` 로 사실상 보장되지만 느린 머신에서 순차 실행이 되어도 `intersection=[]` 로 PASS 한다. `pg_backend_pid` 와 claim 시각을 함께 출력해 겹침을 어서션해라. | 아니오 | 겹침 어서션이 든 출력 |
 
+## 2차 종료 판정 (2026-10-21)
+
+| # | 판정 | 종료 증거 |
+|---|---|---|
+| R1 | 닫힘 | 실제 `(receiver)` 폴더 7개 역스캔. 미등재 임시 폴더는 `missing=1`로 반려, 제거 후 `missing=0`, `/onboarding` public 등재 통과 |
+| R2 | 닫힘 | Vault 3종 삭제 뒤 실제 pg_cron 실행 `succeeded|DO`, `ops_event=runtime_secret_missing|P0001`. env 검사 누락 3에서 rc=1, provisioner 2회 rc=0 |
+| R3 | 닫힘 | CI `supabase-server-contracts` 잡과 AGENTS 출고 명령 4종 등재. actionlint 통과, 같은 명령의 로컬 job-equivalent 실행 통과. 원격 GitHub Actions는 push 전이라 미검증 |
+| R4 | 닫힘 | 기본 `enable_seqscan=on`, 실제 대시보드 CTE, 목표 100·응원 6,000. 인덱스 사용 시 최근 분기 3행, 제거 시 60행. 최종 실행 shared hit 87 대 119 |
+| R5 | 닫힘 | `/my=link`, `/my/legal=biz`를 `LEGAL_EXPOSURE`에서 결정. `ConditionalFooter`가 링크 3개와 사업자 정보 6개를 각각 렌더하는 테스트 통과 |
+| R6 | 닫힘 | 경계 fixture에서 `.cheer-list-reset`이 `.cheer-list`를 만족하지 않음을 확인. TypeScript AST로 `className`, `cn()`, 변수·조건식을 수집해 73개, 누락 0 |
+| R7 | 닫힘 | 6필드 legacy 객체가 `asInvitePreview`를 실제 통과한 결과로 `InviteAcceptCard` 렌더. 관련 표적 테스트 통과 |
+| R8 | 닫힘 | 390px Chromium에서 라벨 `1번째 응원 내용 펼치기` 1개, `aria-controls=cheer-message-1`, 짧은 2·3번째 버튼 mutation 0, console error 0 |
+| R9 | 닫힘 | 독립 backend PID 2144·2145, 실행 구간 겹침 true, claim 교집합 0, 짧은 lease 탈취 0 |
+
+종합 회귀: TypeScript rc=0, oxlint rc=0, `test:qa-contracts` rc=0, Vitest 65파일 369/369, pgTAP 21파일 365/365, Next build 18/18, dev `/how` HTTP 200·console error 0. 운영 Supabase 쓰기와 운영 배포는 0건이다.
+
+> STAMP: 종료 2026-10-21 KST. 모델 gpt-6.1-sol. 역할 code-builder. 스킬 haenael-supabase-build. 근거 = 로컬 Supabase 실제 pg_cron·Vault·병렬 DB·EXPLAIN, Vitest·pgTAP·Next·Storybook. 원격 CI와 운영은 미검증.
+
 > STAMP: 생성 2026-10-21 00:05 KST. 모델 claude-opus-5[1m]. 역할 컨트롤러. 근거 = 2차 교차 리뷰 판정과 컨트롤러 직접 재확인(R1 은 린트 본문 9행의 `contract.scanRoots` 순회, R2 는 `vaultSecrets` 참조처 전수 grep 2건). 상태 발주 대기.

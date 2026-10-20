@@ -1,5 +1,17 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-21 2차 교차 코드리뷰 R1~R9
+
+- R1은 `(receiver)` 실제 폴더를 역스캔한다. 미등재 폴더 반려, 제거 후 통과, 명시적 public 통과를 각각 관찰했다.
+- R2는 Vault 누락 상태의 실제 pg_cron 실행이 `ops_event.runtime_secret_missing`을 남긴다. 배포 env 검사도 Vault 3종을 fail-closed로 확인하고, provisioner는 2회 재실행된다.
+- R3은 pgTAP과 런타임 검증 3종을 CI와 AGENTS 출고 조건에 올렸다. actionlint와 동일 명령 로컬 실행은 통과했고, 원격 GitHub Actions는 push 전이라 미검증이다.
+- R4는 실제 대시보드 CTE를 goal별 최근 3건 LATERAL 질의로 바꿨다. 기본 플래너에서 최근 분기 60행에서 3행, 최종 실행 shared hit 119에서 87을 관찰했다.
+- R5~R9는 legal 노출 단일정본, CSS class 경계·AST 수집, legacy 초대 변환 통합, 메시지별 ARIA·첫 렌더, 두 DB 세션 실행 구간 겹침을 테스트와 실제 브라우저·DB 출력으로 고정했다.
+- TypeScript, oxlint, `test:qa-contracts`, Vitest 65파일 369/369, pgTAP 21파일 365/365, Next build 18/18, Storybook build, dev `/how` 200·console error 0을 관찰했다.
+- 운영 Supabase·Vercel 쓰기와 배포는 하지 않았다. Mermaid SVG도 다시 렌더하지 않았다.
+
+> STAMP: 생성 2026-10-21 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 2차 리뷰 레지스트리와 로컬 pg_cron·Vault·병렬 DB·EXPLAIN·브라우저·전체 회귀 로그. 운영 미반영.
+
 ## 2026-10-20 교차 코드리뷰 BLOCK 해소
 
 - 레지스트리 15행 중 1~14를 코드·테스트·로컬 런타임으로 닫았다. 15번 Mermaid renderer는 P3 건너뜀 허용과 재렌더 금지에 따라 변경하지 않았다.
