@@ -8,7 +8,7 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude
-current_stage: eng-design   # 2026-10-19 04:1x design 승격(조건 충족, 검사 6종 통과). 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
+current_stage: build   # 2026-10-20 15:4x eng-design 승격(회장 지시). 종전 주석: 2026-10-19 04:1x design 승격(조건 충족, 검사 6종 통과). 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
 approved_stages: [plan, design]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
@@ -42,12 +42,21 @@ approved_artifacts:
     - { path: docs/design/prototypes/ui-evidence-friends-invite.txt, version: unversioned, status: approved, label: "친구·초대 화면 실측 증거", sha256: 8e40b2440152cf68f07b5973c0ea0c1eeca1e57f8721aedbedddd50c2b7a91e2 }
     - { path: docs/design/prototypes/ui-evidence-landing-wordmap-i18n.txt, version: unversioned, status: approved, label: "랜딩·워드맵 다국어 실측 증거", sha256: a71a49d17dc4475d30308516a0c2f423bc8285256d288097ac5691e016d227e8 }
   eng-design:
-    # V2 웹 우선 슬라이스 설계 (2026-10-13, Codex tech-architect). 거버넌스 D-018·D-019.
-    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 기능설계", sha256: 13d9b717e839020198b2a1d4f9abda6ad0d021c8a980efa804df08e9c06acc8f }
-    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 데이터 구조", sha256: df77ccfe23ba369a28854355fafe7260b5a9e7bba5a8ed515c93449f23d37109 }
-    - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 서버 함수 계약", sha256: ab54f04fd13fa3d8fd4ca256a2d37c113bea89995d344bbacc0491d760b0ba0c }
-    - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 시스템 구성도(다이어그램 7종)", sha256: b2a7f81a68583886cd39e81b4462f976b020cd0fbb8297e772ca8675cc6bff71 }
-    - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: approved, label: "V2 웹 우선 테스트 계획", sha256: 78a945e1061448af7a56356485d2c39f301f06bcb370cd8c60ea39c8f24bc7cd }
+    # V2 웹 우선 슬라이스 설계 v1.2.5 (2026-10-20 승격). 6차 개정 요구 R1~R10 + 거버넌스 3건 반영.
+    # 회장 지시로 승격했다. Codex 재검수 8차까지 돌았고 설계 실체는 v1.2.4 에서 섰다. 미해소 지적은 build 선행 과제로 이관(아래 승인 로그).
+    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "V2 웹 우선 소셜 루프 FDD(요구 추적성·비회원 계약·정리 경로)", sha256: e0265938801e2f7ff3eefca12312c6e75c1c269641aa9b0b20394443556eb01c }
+    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "데이터 구조와 정리 계약(큐 점유·lease·소유권 토큰·함수 4종)", sha256: 825688efa769fb7f73bc2ccbebeb9c7d663f4db7d1f4a35ac031567617beecd9 }
+    - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "API 계약(비회원 3필드·오류 형태·엔드포인트별 허용 목록)", sha256: c3799cc792b5881cf8d8c9e14570c17e5687144acb17a75aadb41f6ced700662 }
+    - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "아키텍처(공개범위 경계·인증 흐름·정리 파이프라인)", sha256: 24eac9d60ebb3e4cc482d42bba9c963b8ee2a949c0f9e2ece57a32898b60d890 }
+    - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "테스트 전략", sha256: 1a5badbf8be03aae6c9ee498f1fa15a6a9e3a3788b1e9863f31408d37b80e5e2 }
+    - { path: docs/eng-design/test-cases-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "테스트 케이스 56종(CV·EA·GT·AU 계열)", sha256: a0c10444ebda2b44fbf29c24c420790831697168fe136a44b4e8f021f94102f1 }
+    - { path: docs/eng-design/folder-structure-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "폴더 구조와 신설 파일", sha256: 9a6e3383f7b7319d0e986f94b262a614e700cbadd753a0bb1dbf5a2917978bfe }
+    - { path: docs/eng-design/design-patterns-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "설계 패턴과 쓰기 경로 규칙", sha256: 2d1db109fa08eecbd017d191e494e0404cad78a683d4632020ac801f47ffb4f6 }
+    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 기능설계", sha256: 13d9b717e839020198b2a1d4f9abda6ad0d021c8a980efa804df08e9c06acc8f }
+    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 데이터 구조", sha256: df77ccfe23ba369a28854355fafe7260b5a9e7bba5a8ed515c93449f23d37109 }
+    - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 서버 함수 계약", sha256: ab54f04fd13fa3d8fd4ca256a2d37c113bea89995d344bbacc0491d760b0ba0c }
+    - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 시스템 구성도(다이어그램 7종)", sha256: b2a7f81a68583886cd39e81b4462f976b020cd0fbb8297e772ca8675cc6bff71 }
+    - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 테스트 계획", sha256: 78a945e1061448af7a56356485d2c39f301f06bcb370cd8c60ea39c8f24bc7cd }
   build:
     - { path: docs/build-log.md, version: unversioned, status: approved, label: "V2 build 구현·검증 로그(1차+2차 슬라이스)", sha256: e3612a5a434123d1d39cf1a14fb1b8951f0843241148e046de3eb7fbb19af100 }
     - { path: supabase/migrations/20261013050000_social_viral_loop_web_first.sql, version: unversioned, status: approved, label: "V2 소셜 스키마(운영 미적용)" }
@@ -127,6 +136,20 @@ override_expires: ""
 ### ship ⬜
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-20 15:4x · eng-design 승격 (v1.2.5). 회장 지시로 왕복을 끊었다
+
+- **회장 원문**: "꼼꼼히 하는건 좋은데 뭔 놈의 기술설계를 8차까지 가냐? 복잡한 앱도 아니고 그냥 간단한 CRU 수준인데 어이가 없네. 왜 니 응답에는 기술설계에서 뭐때문에 그렇게 도는지 설명이 단하나도 없냐? 개발해 난 이따위 수준의 기능이 기술설계를 10차까지 돌일이 아니라고 판단하는데?"
+- **승격 근거**: 컨트롤러 재검증으로 차단 축 전부 0건(모순 검사 A·B·D·E·F·G·I·L 과 FS), 요구 커버리지 A 0건 B 0건(참조 테스트 ID 114개), 고유 TC 정의 56개, verify-agent-quality PASS, sha256 8종 대조 일치.
+- **★Codex 판정은 RETAKE 였고 그 위에 회장 지시로 승격했다. 숨기지 않고 적는다.** 8차 15/25. 미해소 지적 3건은 아래 build 선행 과제로 이관했다.
+- **왜 8차까지 돌았나(회장 질문에 대한 답)**: 설계 실체는 **v1.2.4 에서 섰다.** 4차에서 저장소 객체가 남는 허위 완료 경로, 5차에서 큐 동시성(점유·lease·소유권 토큰), 6차에서 인증 계약, 7차에서 설명과 SQL 과 테스트가 서로 다른 계약을 닫았다. **그 뒤 세 판은 문서 위생이었다** — 버전 표기, 목차 앵커, 적어 둔 수치, 제목 겹침, 증거 폴더 누락. 구현을 바꾸지 않는 것들이다. 그런데 `standard-doc-review.md` 가 **"어느 축이든 1점이면 총점 무관 반려"** 를 걸었고 정밀성 축이 문서 정합을 본다. 그래서 설계 실체가 서 있어도 오타와 수치로 전체가 반려됐다. **그 규칙이 설계 실체와 문서 위생을 구별하지 않는 것이 구조적 원인이고, 컨트롤러가 그 구분을 하지 않고 여덟 판을 돈 것이 판단 실패다.**
+- **build 선행 과제로 이관한 Codex 미해소 지적**
+  1. 큐의 `path` 단독 비교를 `bucket_id` + `object_path` **쌍 비교**로. 유일한 구현 계약 지적이고 설계자에게 그 1건만 고치게 했다.
+  2. 다이어그램 렌더 증거 폴더 재생성. L축이 잡고 있다.
+  3. 추적성 매트릭스 R2·R5 의 서버 계약 칸을 **실제 구현된 함수 목록으로** 채운다. 설계 때 글로 채우면 또 낡는다.
+  4. ERD 자산 수치 불일치. H축이 14건을 세므로 **문서 수치를 지우는 쪽**으로 간다.
+- **상류 핀**: 프로토타입 `social-viral-loop-v3-opus5.html` 3.0.0 · `DESIGN.md` · `standard-ux-writing.md`. D-041(시안 법적 고지 노출 설정 교정)은 승격 뒤 과제로 남는다.
+
 
 ### 2026-10-14 05:1x · ⟲ REOPEN design · 회장이 운영에서 확인한 불일치·기획 오류·기능 장애
 

@@ -26,6 +26,7 @@
     - [A.4.3 원자적 점유 claim_storage_cleanup_batch](#a43-원자적-점유-claim_storage_cleanup_batch-p0)
     - [A.4.4 cron 호출 인증 계약](#a44-cron-호출-인증-계약-확정)
     - [A.4.5 배치 삭제의 부분 성공 판정](#a45-배치-삭제의-부분-성공-판정-p1)
+    - [A.4.7 객체 식별자는 버킷과 경로의 쌍](#a47-객체-식별자는-bucket_id-와-object_path-의-쌍이다)
     - [A.4.6 settle 이후 종료 구간](#a46-settle-이후-종료-구간-tombstone-영구-잔존-p1)
   - [A.5 되돌리는 법](#a5-되돌리는-법)
   - [A.6 운영 `goal_cover_asset` 스키마 전수 (관찰됨)](#a6-운영-goal_cover_asset-스키마-전수-관찰됨)
@@ -167,7 +168,8 @@ BEGIN
       AND a.created_at < now() - p_older_than
       AND NOT EXISTS (                               -- 열린 큐 행이 없는 것만
         SELECT 1 FROM public.storage_cleanup_queue AS q
-        WHERE q.object_path = a.quarantine_path
+        WHERE q.bucket_id = 'goal-cover-quarantine'  -- 식별자는 버킷+경로 쌍이다(§A.4.7)
+          AND q.object_path = a.quarantine_path
           AND q.status IN ('PENDING', 'FAILED')
       )
       AND NOT EXISTS (                               -- 활성 커버는 어떤 경우에도 건드리지 않는다
@@ -268,6 +270,7 @@ v1.2.1 은 "별도 소비자가 객체를 삭제한다" 고만 적었다. **그 
 | 실행 트리거 | Supabase Cron job **`drain-storage-cleanup-queue`**, `*/10 * * * *`(10분). `pg_net` 으로 그 엣지 함수에 POST. 인증 계약은 §A.4.4 |
 | 입력 배치 | **`claim_storage_cleanup_batch(p_limit, p_lease)` RPC 1회**가 선택과 점유를 한 트랜잭션에서 한다(§A.4.3). 기본 200행 |
 | 삭제 호출 | 같은 `bucket_id` 끼리 묶어 Storage API `remove([paths])` **1회 일괄**. 행마다 호출하지 않는다 |
+| 객체 식별자 | **`bucket_id` + `object_path` 쌍**으로 다룬다. path 단독 비교를 쓰지 않는다(§A.4.7) |
 | **부분 성공 판정** | `remove()` 는 **삭제된 객체 배열을 반환한다.** 요청 path 와 반환 path 를 **1:1 대조**해 반환된 것만 `DONE` 으로 닫는다(§A.4.5). 최상위 오류가 없다고 전 행을 `DONE` 으로 바꾸지 않는다 |
 | 멱등성 | **이미 없는 객체의 삭제는 성공으로 본다.** 다만 그 판정은 `remove()` 반환 배열이 아니라 **삭제 후 조회로 부재를 확인**해 내린다(§A.4.5) |
 | 성공 전이 | `settle_storage_cleanup` **한 트랜잭션 안에서** 큐를 `DONE` 으로 닫고 **같은 문장에서 tombstone 자산을 하드 삭제한다**(§A.4.6). 별도 호출로 쪼개지 않는다. 갱신은 `lock_token` 조건부다(§A.4.3) |
@@ -459,7 +462,8 @@ BEGIN
   -- 같은 트랜잭션에서 tombstone 을 지운다. 별도 호출로 쪼개면 그 사이가 구멍이 된다.
   IF p_ok THEN
     DELETE FROM public.goal_cover_asset AS a
-    WHERE a.quarantine_path = v_path
+    WHERE v_bucket = 'goal-cover-quarantine'          -- 식별자는 버킷+경로 쌍이다(§A.4.7)
+      AND a.quarantine_path = v_path
       AND a.status = 'DELETED'
       AND NOT EXISTS (SELECT 1 FROM public.goal AS g WHERE g.active_cover_asset_id = a.id);
   END IF;
@@ -484,6 +488,22 @@ GRANT EXECUTE ON FUNCTION public.settle_storage_cleanup(bigint, uuid, boolean) T
 **관측**: `status='DELETED'` 이고 열린 큐 행이 없는 자산 건수. **이 값이 0 이 아니고 줄지 않으면 복구 경로가 안 도는 것이다.**
 
 테스트 = CV-12.
+
+#### A.4.7 객체 식별자는 `bucket_id` 와 `object_path` 의 쌍이다
+
+Codex 레드팀 지적: **"큐 스키마와 Storage API 모두 버킷을 객체 식별자의 일부로 취급하며, 두 namespace 가 영원히 겹치지 않는다는 CHECK 도 없다. path 단독 비교는 안전 계약이 아니다."** 지적이 맞다. 두 자리에서 `object_path` 만 비교하고 있었고, **그 둘은 서로 다른 버킷의 같은 경로를 같은 객체로 본다.**
+
+| 자리 | 종전 | 고친 것 |
+|---|---|---|
+| `requeue_orphan_cover_tombstones()` 의 "열린 큐 행이 없는 것만" | `q.object_path = a.quarantine_path` | **`q.bucket_id = 'goal-cover-quarantine' AND` 를 앞에 둔다** |
+| `settle_storage_cleanup()` 의 tombstone 삭제 | `a.quarantine_path = v_path` | **큐 행의 `bucket_id` 가 격리 버킷일 때만 삭제한다** |
+| 소비자의 삭제 호출 | 이미 버킷별로 묶어 `remove()` 를 부른다 | 변경 없음(원래 쌍으로 다룬다) |
+
+**반론을 세우고 기각했다.** "공개 버킷과 격리 버킷의 경로 형식이 지금 달라 충돌 가능성이 낮다"(격리는 `<uid>/<goal_id>/<asset_id>.<ext>`, 공개는 승인 시 복사된 경로). 그러나 **그 차이를 강제하는 제약이 없다.** 한쪽 경로 규칙이 바뀌면 조용히 겹치고, 그때 지워지는 것은 **승인된 공개 커버**다. 가능성이 낮은 것과 막혀 있는 것은 다르다.
+
+**CHECK 로 강제하지 않은 이유.** "두 namespace 가 겹치지 않음" 을 CHECK 로 쓰려면 경로 형식을 제약으로 고정해야 하고, 그러면 경로 규칙을 바꿀 때마다 운영 제약을 바꿔야 한다. **식별자가 쌍이면 쌍으로 비교한다**가 더 싸고 정확하다.
+
+**테스트**: CV-13.
 
 #### A.4.5 배치 삭제의 부분 성공 판정 (P1)
 Supabase Storage `remove([paths])` 는 **삭제된 객체 배열을 반환한다.** 최상위 오류가 없어도 **일부 path 만 반환될 수 있다.** v1.2.2 는 "성공하면 전 행을 `DONE`" 으로 적어, 지워지지 않은 객체까지 닫힐 수 있었다. **CV-09 로 닫으려 한 허위 완료의 변형이다**(Codex 5차 P1).

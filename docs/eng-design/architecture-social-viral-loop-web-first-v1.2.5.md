@@ -179,7 +179,7 @@ flowchart LR
   end
 
   subgraph MINI_BOUNDARY["2차 배포 경계: 앱인토스"]
-    TOSS_USER["토스 사용자"] -.-> MINI["Vite 8 + React 19 + TypeScript 6<br/>supabase-js + apps-in-toss 3.2.0<br/>CSR, 토스 CDN 미니앱"]
+    TOSS_USER["토스 사용자"] -.-> MINI["Vite 8 + React 19 + TypeScript 6<br/>supabase-js + apps-in-toss 3.2.0<br/>CSR. .ait 번들을 토스 인프라에 배포"]
   end
 
   subgraph SUPABASE_BOUNDARY["공통 백엔드 경계: Supabase"]
@@ -515,7 +515,7 @@ flowchart LR
   MAIN -.-> MINI_BUILD["2차: miniapp build 및 ait build"]
   MINI_BUILD -.-> AIT[".ait 번들"]
   AIT -.-> CONSOLE["앱인토스 콘솔 업로드 및 검수"]
-  CONSOLE -.-> TOSSCDN["토스 CDN 호스팅"]
+  CONSOLE -.-> TOSSCDN["토스 인프라 배포 호스팅"]
   TOSSCDN -.-> SUPAPROD
 ```
 
@@ -591,7 +591,7 @@ PUBLIC 목표의 승인 커버만 `goal-cover-public`에 복사한다. FRIENDS �
 | [Supabase Architecture](https://supabase.com/docs/guides/getting-started/architecture)·[Auth Architecture](https://supabase.com/docs/guides/auth/architecture) | Auth, Postgres, Storage, Functions가 한 프로젝트의 공통 Postgres로 수렴 | 웹과 미니앱이 같은 JWT·RLS·RPC를 쓰는 공통 백엔드 경계로 적용 |
 | [Supabase Secure Data](https://supabase.com/docs/guides/database/secure-data)·[Storage Access Control](https://supabase.com/docs/guides/storage/security/access-control) | 공개 키는 RLS와 함께 쓰며 service role은 백엔드에만 둠. Storage는 객체 정책과 RLS로 통제 | Postgres RLS와 public Storage URL을 다른 보안 경계로 그려 ARC-R05를 표면화 |
 | [Vercel Git Deployments](https://vercel.com/docs/git)·[GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) | production branch 자동배포와 호스팅 러너의 실행 경계 | 공개 저장소 `main` 머지, `ubuntu-latest`, Vercel 자동배포를 별도 노드로 표현 |
-| [앱인토스 개요](https://developers-apps-in-toss.toss.im/intro/overview.html)·[토스 로그인](https://developers-apps-in-toss.toss.im/bedrock/reference/framework/%EB%A1%9C%EA%B7%B8%EC%9D%B8/appLogin.html) | 번들 콘솔 업로드 후 토스 CDN 호스팅, 인가 코드는 서버 교환 | 미니앱을 2차 독립 배포로 두고 `auth-toss`를 서버 경계에 배치 |
+| [앱인토스 개요](https://developers-apps-in-toss.toss.im/intro/overview.html)·[토스 로그인](https://developers-apps-in-toss.toss.im/bedrock/reference/framework/%EB%A1%9C%EA%B7%B8%EC%9D%B8/appLogin.html) | 번들 콘솔 업로드 후 토스 인프라 배포 호스팅, 인가 코드는 서버 교환 | 미니앱을 2차 독립 배포로 두고 `auth-toss`를 서버 경계에 배치 |
 
 ## 11. 자기심문과 레드팀
 ### 11.1 셀프심문
@@ -617,7 +617,7 @@ PUBLIC 목표의 승인 커버만 `goal-cover-public`에 복사한다. FRIENDS �
 | v1.0.1 | 2026-10-13 | D-019로 ARC-R05 종결. FRIENDS private Storage와 120초 Presigned URL 확정 | code-builder / gpt-5-codex |
 | v1.0.0 | 2026-10-13 | 웹 1차·모바일 2차 공통 백엔드, 소셜·인증·결제·환전·RLS·배포 구성도 신설 | tech-architect / gpt-5-codex |
 
-KNOWLEDGE_QUERY: BRAIN `business/index.md`와 `cto/index.md`에서 해낼게 공유장벽, PWA·WebView·미니앱, Supabase RLS, 공개·비공개 객체 경계를 검색했다. 외부에서는 C4 context·deployment, arc42 building block, Supabase architecture·Auth·RLS·Storage, Vercel Git 배포, GitHub 호스팅 러너, 앱인토스 CDN 배포·토스 로그인을 검색했다.
+KNOWLEDGE_QUERY: BRAIN `business/index.md`와 `cto/index.md`에서 해낼게 공유장벽, PWA·WebView·미니앱, Supabase RLS, 공개·비공개 객체 경계를 검색했다. 외부에서는 C4 context·deployment, arc42 building block, Supabase architecture·Auth·RLS·Storage, Vercel Git 배포, GitHub 호스팅 러너, 앱인토스 인프라 배포 배포·토스 로그인을 검색했다.
 
 HITS_USED: `concept-공유장벽-선언vs요청-UGC바이럴.md`는 초대가 추천 매칭이 아닌 선언 링크에서 시작해야 한다는 제품 경계에 사용했다. `concept-PWA-WebView-하이브리드-미니앱.md`는 미니앱을 웹과 별도 채널 어댑터로 두는 데 사용했다. `concept-Supabase-Firebase-RLS-비용구조.md`는 DB RLS를 최종 인가 경계로, `concept-S3-Presigned-URL-임시-출입증.md`는 공개 버킷과 친구공개가 충돌한다는 판정에 사용했다. 외부 공식 문서는 구성도 수준과 배포·인증·Storage 경계를 검증하는 데 사용했다.
 
