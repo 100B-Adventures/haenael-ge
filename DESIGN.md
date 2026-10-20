@@ -224,10 +224,10 @@ motion:
 /* text */
 --ink           #16140F   본문 primary     (foreground)        대비 16:1 ✅
 --muted         #6F6A60   보조 텍스트       (muted-foreground)  대비 4.7:1 ✅
---faint         #9C968B   placeholder/장식  (bg 위 대비 2.81:1, WCAG 미달)
+--faint         #9C968B   장식·비활성 전용  (bg 위 대비 2.81:1, WCAG 미달. D-029 로 읽는 글자 사용처 전부 --muted 로 이관, 2026-10-20)
 
 /* brand: clover green = 성장 + 안전 + "클로버" 네이밍 정합 */
---clover        #1B8A4F   primary 채움(버튼 bg). 흰 텍스트 대비 **4.38:1** ⚠️ AA(4.5) 미달, 회장 보류 중
+--clover        #1B8A4F   primary 채움(버튼 bg)·테두리·점 전용. 흰 배경 위 글자색 금지(4.38:1, AA 미달). 글자용 초록은 --clover-ink (D-029, 2026-10-20)
 --clover-bright #1F9E5A   강조/아이콘/링크(채움 위에서만, 본문 텍스트 금지, 대비 3:1)
 --clover-soft   #E7F4EC   primary 틴트 bg(칩·하이라이트)
 --clover-ink    #14613A   클로버 위 텍스트가 필요할 때
@@ -482,7 +482,7 @@ motion:
 | **① 문서 셸** | `<html lang="ko">` + Pretendard 변수 + `bg-background` + Footer + Toaster(Sonner, `position="top-center"`, `richColors`) | ✅ 공유. `web/src/app/layout.tsx` |
 | **② 페이지 셸** | `<main className="min-h-svh">` + 배경 `#FBFAF7` + §3.7 좌우 여백 22px + 상하 여백 + 최대 폭 컨테이너 | ✅ `ReceiverPageShell` + `.receiver-page-frame` 공유 |
 | **③ 상단 바** | 좌 = "해낼게." 워드마크(닷 = `--clover-bright`, 12.5px/800), 우 = NotificationBadge + LogoutButton. 아래 여백 20px | ✅ `ReceiverTopBar`의 `home`·`detail` 변형 |
-| **④ 하단 회수 링크** | 하위 화면은 본문 끝에 "홈으로 돌아가기"(12px, `--faint`) 1개 | ✅ `BackHomeLink` 공유 |
+| **④ 하단 회수 링크** | 하위 화면은 본문 끝에 "홈으로 돌아가기"(12px, `--muted`. D-029 로 --faint 에서 이관) 1개 | ✅ `BackHomeLink` 공유 |
 
 **규칙 (신규 화면은 이걸 상속한다).**
 - 받는사람 라인의 모든 화면은 ②를 그대로 상속하고 본문만 채운다. 배경색·좌우 여백·상하 여백을 화면에서 새로 정하지 않는다.

@@ -39,7 +39,7 @@ export function ReportButton({
     <>
       <button
         type="button"
-        className={`flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center gap-1 rounded-lg transition-opacity hover:opacity-70 active:opacity-70 focus-visible:outline-none focus-visible:ring-2 ${className ?? ""} [font-size:var(--text-wordmark)]! [color:var(--faint)]!`}
+        className={`flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center gap-1 rounded-lg transition-opacity hover:opacity-70 active:opacity-70 focus-visible:outline-none focus-visible:ring-2 ${className ?? ""} [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!`}
         onClick={() => setOpen(true)}
         aria-label="신고하기"
         data-testid="report-button"

@@ -80,7 +80,7 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="mb-1 text-[length:var(--text-meta-micro)]! text-[var(--faint)]">
+          <p className="mb-1 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
             내 응원 링크
           </p>
           <p

@@ -90,7 +90,7 @@ export function BackHomeLink({
   return (
     <Link
       href={href}
-      className="mt-6 block text-center text-xs font-semibold text-[var(--faint)]"
+      className="mt-6 block text-center text-xs font-semibold text-[var(--muted-color)]"
     >
       {label}
     </Link>

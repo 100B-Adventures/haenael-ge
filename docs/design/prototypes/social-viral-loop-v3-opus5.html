@@ -346,12 +346,12 @@
 
   /* 하단 탭바 (네이티브 앱 셸 · 전 화면 공통) */
   .tabbar{flex:0 0 auto;height:64px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:stretch;}
-  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;font-size:13px;font-weight:700;color:var(--faint);cursor:pointer;}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;}
   .tabbar a .ic{font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;height:22px;}
   .tabbar a .ic svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
-  .tabbar a.on{color:var(--clover);}
+  .tabbar a.on{color:var(--clover-ink);}
   .tabbar a.on .ic svg{stroke:var(--clover);}
-  .tabbar a:not(.on){color:var(--faint);}
+  .tabbar a:not(.on){color:var(--muted);}
 
   /* 상단 헤더 */
   .head{display:flex;align-items:center;justify-content:space-between;padding:6px 0 2px;min-height:44px;}
@@ -372,7 +372,7 @@
   .notif-pop.open{display:block;}
   .notif-pop .nh{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--line);}
   .notif-pop .nh .nt{font-size:13px;font-weight:800;color:var(--ink);}
-  .notif-pop .nh .nc{font-size:13px;color:var(--faint);background:none;border:none;cursor:pointer;}
+  .notif-pop .nh .nc{font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer;}
   .notif-pop ul{max-height:280px;overflow-y:auto;list-style:none;}
   .notif-pop li{display:flex;gap:10px;align-items:flex-start;padding:12px 15px;border-bottom:1px solid var(--warm);cursor:pointer;}
   .notif-pop li:last-child{border-bottom:none;}
@@ -380,12 +380,12 @@
   .notif-pop li .ne{font-size:17px;flex:0 0 auto;}
   .notif-pop li .nx{flex:1;min-width:0;}
   .notif-pop li .nx .nmsg{font-size:13px;font-weight:600;color:var(--ink);line-height:1.4;}
-  .notif-pop li .nx .nmeta{font-size:13px;color:var(--faint);margin-top:3px;}
+  .notif-pop li .nx .nmeta{font-size:13px;color:var(--muted);margin-top:3px;}
   .notif-pop li .ndot{width:8px;height:8px;border-radius:50%;background:var(--clover-ink);flex:0 0 auto;margin-top:5px;}
-  .notif-empty{padding:30px 15px;text-align:center;font-size:13px;color:var(--faint);}
+  .notif-empty{padding:30px 15px;text-align:center;font-size:13px;color:var(--muted);}
 
   .sub{font-size:13px;font-weight:700;color:var(--muted);margin:20px 2px 8px;display:flex;align-items:center;justify-content:space-between;}
-  .sub .cnt{color:var(--faint);font-weight:700;}
+  .sub .cnt{color:var(--muted);font-weight:700;}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);}
 
@@ -409,7 +409,7 @@
   .relationship-direction{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 9px;border-radius:var(--r-full);background:var(--clover-soft);color:var(--clover-ink);font-size:13px;font-weight:800;white-space:nowrap;}
   .relationship-direction.incoming{background:var(--amber-soft);color:var(--amber-ink);}
   .relationship-direction.mutual{background:var(--violet-soft);color:var(--violet-ink);}
-  .relmeta{font-size:13px;color:var(--faint);font-weight:700;white-space:nowrap;}
+  .relmeta{font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap;}
   .badge-you{font-size:13px;font-weight:800;padding:2px 6px;border-radius:var(--r-full);background:var(--warm);color:var(--muted);white-space:nowrap;}
 
   /* ── 콜드스타트 (친구 0명) · 가짜 친구 금지(D-009 경계). 정직한 빈 상태. ── */
@@ -480,7 +480,7 @@
   .nextbar .lab b{color:var(--ink);font-weight:800;}
   .nextbar .track{height:8px;background:var(--warm);border-radius:var(--r-full);overflow:hidden;margin-top:9px;}
   .nextbar .track i{display:block;height:100%;background:var(--clover);border-radius:var(--r-full);}
-  .nextbar .hint{font-size:13px;color:var(--faint);margin-top:8px;line-height:1.5;word-break:keep-all;}
+  .nextbar .hint{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;word-break:keep-all;}
 
   /* 뱃지 컬렉션 · D-022 허용 집계만 사용, 금액·순위 무관 */
   .badges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
@@ -488,7 +488,7 @@
   .bdg.lock{opacity:.5;}
   .bdg .e{font-size:26px;line-height:1;}
   .bdg .bn{font-size:13px;font-weight:800;margin-top:7px;letter-spacing:-.2px;}
-  .bdg .bd{font-size:13px;color:var(--faint);font-weight:700;margin-top:3px;line-height:1.35;}
+  .bdg .bd{font-size:13px;color:var(--muted);font-weight:700;margin-top:3px;line-height:1.35;}
 
   /* 환경설정 토글 카드 (등급 등 가역 설정 · 금액·순위 노출 없음, D-003) */
   .toggle-card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;margin-top:12px;}
@@ -523,7 +523,7 @@
   .reinvite .rx{flex:1;}
   .reinvite .rx .rt{font-size:13px;font-weight:800;}
   .reinvite .rx .rd{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;word-break:keep-all;}
-  .reinvite .go{font-size:18px;color:var(--faint);}
+  .reinvite .go{font-size:18px;color:var(--muted);}
 
   /* ── 도파민 순간 화면 (워드맵 실시간 적립) ── */
   .dopa-top{text-align:center;padding:12px 6px 2px;}
@@ -699,7 +699,7 @@
   .cp-row:not(.cp-photos) .cp-opt.sel::after{content:"✓";position:absolute;right:4px;top:3px;font-size:13px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);}
   .cp-up{flex:0 0 auto;width:64px;height:46px;border-radius:11px;border:1.5px dashed var(--clover);background:var(--clover-soft);color:var(--clover-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:13px;font-weight:800;}
   .cp-up svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-  .cover-pick .cp-hint{font-size:13px;color:var(--faint);margin-top:3px;font-weight:600;}
+  .cover-pick .cp-hint{font-size:13px;color:var(--muted);margin-top:3px;font-weight:600;}
   /* 목표관리 큰 커버 히어로(탭하면 선택기 토글) */
   .gd-cover{height:120px;border-radius:var(--r-md);margin-bottom:2px;cursor:pointer;}
   .gd-cover .cov-edit{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.42);color:#fff;font-size:13px;font-weight:800;padding:5px 10px;border-radius:var(--r-full);display:flex;align-items:center;gap:5px;}
@@ -748,7 +748,7 @@
   .cheerbar.past .cb-ava .cb-more{background:var(--faint);}
   #home .cheerbar .cb-t{animation:cheerBreathe 2800ms ease-in-out infinite;}
   #home .cheerbar.past .cb-t{animation:none;}
-  .home-past{font-size:13px;font-weight:700;color:var(--faint);margin:20px 2px 2px;}
+  .home-past{font-size:13px;font-weight:700;color:var(--muted);margin:20px 2px 2px;}
   .gactions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
   .gchip{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--muted);background:var(--warm);border:1px solid var(--line);border-radius:var(--r-full);padding:7px 11px;cursor:pointer;}
   .gchip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
@@ -795,9 +795,9 @@
   .landing-hero h1 .d{color:var(--clover-bright);}
   .landing-hero .tag{font-size:15.5px;font-weight:600;color:var(--muted);}
   .landing-hero .gap{font-size:13px;font-weight:700;color:var(--clover-ink);background:var(--clover-soft);border-radius:var(--r-full);padding:6px 13px;}
-  .step3{display:flex;justify-content:center;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--faint);margin-bottom:12px;}
+  .step3{display:flex;justify-content:center;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px;}
   .step3 b{color:var(--clover-ink);font-weight:700;}
-  .relogin{text-align:center;font-size:13px;color:var(--faint);margin-top:10px;}
+  .relogin{text-align:center;font-size:13px;color:var(--muted);margin-top:10px;}
   .relogin a{position:relative;color:var(--clover-ink);font-weight:700;text-decoration:underline;text-underline-offset:2px;}
   /* 카카오 로그인 시트 */
   .sheet-dim{position:absolute;inset:0;background:rgba(0,0,0,.34);display:flex;align-items:flex-end;}
@@ -806,7 +806,7 @@
   .sheet h2{font-size:19px;font-weight:900;letter-spacing:-.3px;color:var(--ink);text-align:center;}
   .sheet .sub2{font-size:13px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.6;}
   .kakao-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#FEE500;color:#191600;font-weight:800;font-size:15px;border:none;border-radius:14px;padding:15px;margin-top:20px;cursor:pointer;}
-  .sheet .legal{font-size:13px;color:var(--faint);text-align:center;margin-top:14px;line-height:1.6;}
+  .sheet .legal{font-size:13px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6;}
   .sheet .legal a{color:var(--muted);text-decoration:underline;}
   /* 환전 신청 완료 */
   .cash-done{background:var(--clover-soft);border:1px solid #cfe8d8;border-radius:var(--r-md);padding:24px;text-align:center;margin-top:8px;}
@@ -821,7 +821,7 @@
   .field{margin-top:16px;}
   .field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:7px;}
   .field .inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:14px;color:var(--ink);background:var(--surface);}
-  .field .inp.ph{color:var(--faint);}
+  .field .inp.ph{color:var(--muted);}
   .cash-sum{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:var(--sp-1) 14px;margin-top:var(--sp-4);}
   .cash-sum .r{display:flex;justify-content:space-between;padding:var(--sp-3) 0;border-bottom:1px solid var(--line);font-size:13px;}
   .cash-sum .r:last-child{border-bottom:none;}
@@ -833,14 +833,14 @@
   .step-row .dot{width:22px;height:22px;border-radius:var(--r-full);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
   .step-row .dot.done{background:var(--clover);color:#fff;}
   .step-row .dot.now{background:var(--clover-soft);color:var(--clover-ink);border:2px solid var(--clover);}
-  .step-row .dot.wait{background:var(--warm);color:var(--faint);}
+  .step-row .dot.wait{background:var(--warm);color:var(--muted);}
   .step-row .sx{padding-bottom:16px;}
   .step-row .st{font-size:13px;font-weight:800;color:var(--ink);}
   .step-row .sd{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5;}
   .step-line{width:2px;background:var(--line);margin-left:10px;height:16px;}
   /* 관리자(데스크톱 우선 · 프레임엔 카드형 목록) */
   .admin-h{margin-bottom:6px;}
-  .admin-h .k{font-size:13px;font-weight:800;color:var(--clover);}
+  .admin-h .k{font-size:13px;font-weight:800;color:var(--clover-ink);}
   .admin-h h1{font-size:22px;font-weight:900;letter-spacing:-.5px;color:var(--ink);margin-top:4px;}
   .admin-h p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:8px;}
   .admin-sec{margin-top:18px;}
@@ -891,7 +891,7 @@
   .mp-row .mp-rx{flex:1;min-width:0;}
   .mp-row .mp-rt{font-size:13.5px;font-weight:800;color:var(--ink);}
   .mp-row .mp-rd{font-size:13px;color:var(--muted);margin-top:3px;}
-  .mp-row .mp-go{font-size:18px;color:var(--faint);flex:0 0 auto;}
+  .mp-row .mp-go{font-size:18px;color:var(--muted);flex:0 0 auto;}
   .mp-links{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding:0 2px;}
   .mp-links a{font-size:13px;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
   .mp-logout-btn{display:block;width:100%;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;font-size:13.5px;font-weight:800;color:var(--ink);cursor:pointer;margin-top:4px;}
@@ -903,7 +903,7 @@
   .mp-ava-wrap{position:relative;flex:0 0 auto;cursor:pointer;}
   .mp-ava-edit{position:absolute;right:0;bottom:0;width:20px;height:20px;border-radius:var(--r-full);background:var(--clover);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);}
   .mp-pf .mp-intro{font-size:13px;color:var(--ink);margin-top:4px;line-height:1.45;word-break:keep-all;cursor:pointer;}
-  .mp-pf .mp-intro .edot,.mp-pf .mp-nm .edot{font-size:13px;margin-left:5px;color:var(--faint);}
+  .mp-pf .mp-intro .edot,.mp-pf .mp-nm .edot{font-size:13px;margin-left:5px;color:var(--muted);}
   .mp-ava-pick{margin-top:10px;}
   .mp-ava-pick .cp-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
   .ava-opt{width:40px;height:40px;border-radius:var(--r-full);overflow:hidden;border:2px solid var(--line);cursor:pointer;flex:0 0 auto;}
@@ -919,13 +919,13 @@
   /* ══ v3: 환전 내역 (/cashout/history 계승 실프레임) ══ */
   .ch-tiles{display:flex;gap:var(--sp-2);margin-top:var(--sp-2);}
   .ch-tile{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3) 11px;}
-  .ch-tile .k{font-size:13px;color:var(--faint);font-weight:700;line-height:1.35;}
+  .ch-tile .k{font-size:13px;color:var(--muted);font-weight:700;line-height:1.35;}
   .ch-tile .v{font-size:16px;font-weight:900;color:var(--clover-ink);margin-top:var(--sp-1);letter-spacing:-.3px;}
   .ch-tile.amber .v{color:var(--amber-ink);}
   .ch-item{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none;cursor:pointer;}
   .ch-item:last-child{border-bottom:none;}
   .ch-x{min-width:0;}
-  .ch-d{font-size:13px;color:var(--faint);font-weight:700;}
+  .ch-d{font-size:13px;color:var(--muted);font-weight:700;}
   .ch-amt{font-size:14px;font-weight:900;color:var(--ink);margin-top:4px;letter-spacing:-.3px;}
   .ch-sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45;word-break:keep-all;}
   .ch-sub.ch-rej{color:var(--danger-ink);}
@@ -955,7 +955,7 @@
   .field input.inpf,.field textarea.inpf{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:14px;color:var(--ink);background:var(--surface);font-family:inherit;outline:none;box-sizing:border-box;}
   .field input.inpf:focus,.field textarea.inpf:focus{border-color:var(--clover);}
   .field textarea.inpf{resize:none;line-height:1.5;}
-  .field .cnt{display:block;text-align:right;font-size:13px;color:var(--faint);margin-top:5px;}
+  .field .cnt{display:block;text-align:right;font-size:13px;color:var(--muted);margin-top:5px;}
   .gd-hero{margin-top:4px;}
   .gd-hero h2{font-size:21px;font-weight:900;letter-spacing:-.4px;color:var(--ink);line-height:1.3;margin-top:9px;}
   .gd-hero .greason{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;word-break:keep-all;}
@@ -969,7 +969,7 @@
   /* 라벨과 그 값은 한 덩어리다. 가장 작은 간격으로 붙인다(--sp-1). */
   .split-bal .sbi .v{font-size:16px;font-weight:900;color:var(--ink);margin-top:var(--sp-1);letter-spacing:-.3px;}
   .split-bal .sbi.avail .v{color:var(--clover-ink);}
-  .av.anon{background:var(--warm) !important;color:var(--faint);font-size:16px;font-weight:800;}
+  .av.anon{background:var(--warm) !important;color:var(--muted);font-size:16px;font-weight:800;}
   /* ══ v3: 목표 관리 응원자 명단 = 실배포 CheerList(PREVIEW 8 / EXPANDED 20 + 검색 + 메시지 상세) 계승 ══ */
   .cheer-msg{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .cheer-msg.full{white-space:normal;word-break:keep-all;}
@@ -997,17 +997,17 @@
   .cheer-search input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;background:var(--surface);color:var(--ink);font-family:inherit;outline:none;}
   .cheer-search input:focus{border-color:var(--clover);}
   .cheer-search .find{flex:0 0 auto;background:var(--clover);color:#fff;border:none;border-radius:10px;padding:0 15px;font-size:13px;font-weight:800;cursor:pointer;}
-  .msg-chev{font-size:13px;color:var(--faint);font-weight:700;margin-left:4px;transition:transform .2s;}
+  .msg-chev{font-size:13px;color:var(--muted);font-weight:700;margin-left:4px;transition:transform .2s;}
   .cheer-msg.full .msg-chev{transform:rotate(180deg);}
   .msg-chev.hide{display:none;}
   /* v4 FIX6: 사족 설명 대신 담백한 한 줄(브랜드 "조용히") */
-  .quietnote{font-size:13px;color:var(--faint);text-align:center;margin-top:12px;font-weight:600;letter-spacing:-.2px;}
+  .quietnote{font-size:13px;color:var(--muted);text-align:center;margin-top:12px;font-weight:600;letter-spacing:-.2px;}
   /* v4 FIX4: 제목·이유·마감 인라인 편집(별도 수정폼 토글 없음) */
   .gd-hero [data-edit]{cursor:pointer;}
   .gd-hero h2[data-edit],.gd-hero .greason[data-edit]{transition:opacity .15s;}
   .gd-hero h2[data-edit]:hover,.gd-hero .greason[data-edit]:hover{opacity:.66;}
   .gd-hero .chip.dday[data-edit]:hover{opacity:.72;}
-  .edot{font-size:13px;color:var(--faint);margin-left:7px;font-weight:700;vertical-align:middle;}
+  .edot{font-size:13px;color:var(--muted);margin-left:7px;font-weight:700;vertical-align:middle;}
   .gd-hero h2 .edot{font-size:13px;}
   /* 편집 연필은 마지막 어절과 한 덩어리로 움직인다. 혼자 떨어지면 글자 한 개짜리 고아 줄이 된다. */
   .nowrap-edit{white-space:nowrap;}
@@ -1019,8 +1019,8 @@
   .gd-edit>summary::-webkit-details-marker{display:none;}
   .gd-edit>summary .sm-ic{width:16px;height:16px;flex:0 0 auto;color:var(--muted);}
   .gd-edit>summary .sm-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
-  .gd-edit>summary .sm-sub{font-size:13px;font-weight:700;color:var(--faint);margin-left:auto;}
-  .gd-edit>summary .sm-chev{color:var(--faint);font-weight:700;transition:transform .2s;}
+  .gd-edit>summary .sm-sub{font-size:13px;font-weight:700;color:var(--muted);margin-left:auto;}
+  .gd-edit>summary .sm-chev{color:var(--muted);font-weight:700;transition:transform .2s;}
   .gd-edit[open]>summary .sm-chev{transform:rotate(90deg);}
   .gd-edit-body{padding:2px 15px 16px;border-top:1px solid var(--line);}
   /* ══ v2.1 → R6차(2026-10-19): 비회원 하단탭. 잠금 배지 폐지, 전환 유도로 대체 ══ */
@@ -1054,7 +1054,7 @@
     padding:3px 8px;border-radius:var(--r-full);}
   /* 타인 정보는 가린다. 선택적 가림이지 전면 블러가 아니다(이름·얼굴만, 응원 숫자는 보인다). */
   .teaser .tsrow.veil .av,.teaser .tsrow.veil .t1,.teaser .tsrow.veil .t2{filter:blur(5px);}
-  .teaser .tsnote{margin-top:10px;font-size:13px;color:var(--faint);font-weight:600;word-break:keep-all;}
+  .teaser .tsnote{margin-top:10px;font-size:13px;color:var(--muted);font-weight:600;word-break:keep-all;}
   .teaser .kakao-btn{margin-top:14px;}
   .teaser .tsclose{width:100%;min-height:44px;margin-top:4px;border:0;background:none;color:var(--muted);
     font-size:13.5px;font-weight:700;font-family:var(--font);cursor:pointer;}
@@ -1083,7 +1083,7 @@
     wmFloat2 var(--wmdur,4600ms) ease-in-out .95s infinite;}
   .wordmap.cloud .wm-word.wmnudge{animation:wmNudge .5s ease-out both,
     wmFloat2 var(--wmdur,4600ms) ease-in-out .7s infinite;}
-  .wm-legend{display:flex;justify-content:center;gap:12px;margin-top:9px;font-size:13px;color:var(--faint);font-weight:600;}
+  .wm-legend{display:flex;justify-content:center;gap:12px;margin-top:9px;font-size:13px;color:var(--muted);font-weight:600;}
   .wm-legend i{font-style:normal;color:var(--clover-ink);font-weight:800;}
 
   /* ── D-027-D 업적 화면 전면 재디자인 ──
@@ -1119,9 +1119,9 @@
   .ach .ad{font-size:13px;color:var(--muted);margin-top:3px;word-break:keep-all;line-height:1.35;}
   .ach.lock .medal{filter:grayscale(1) brightness(1.08) contrast(.82);box-shadow:none;background:#EDE9E1;}
   .ach.lock .medal:after{content:'';position:absolute;inset:0;background:rgba(244,239,230,.52);}
-  .ach.lock .an,.ach.lock .ad{color:var(--faint);font-weight:700;}
+  .ach.lock .an,.ach.lock .ad{color:var(--muted);font-weight:700;}
   .ach .lockic{position:absolute;right:calc(50% - 40px);top:48px;width:22px;height:22px;border-radius:var(--r-full);background:#fff;
-    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--faint);}
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);}
   /* 획득 배지 빛 쓸림: 수집한 것만 살아 있다는 신호(잠김은 정지) */
   @keyframes achSheen{0%{transform:translateX(-120%) rotate(18deg);opacity:0;}
     12%{opacity:.85;}42%{opacity:.5;}100%{transform:translateX(220%) rotate(18deg);opacity:0;}}
@@ -1151,14 +1151,14 @@
     box-shadow:0 2px 5px rgba(22,20,15,.22);transition:transform .22s cubic-bezier(.2,1.1,.35,1);}
   .set-sw.on i{background:var(--clover);}
   .set-sw.on i:after{transform:translateX(19px);}
-  .set-note{font-size:13px;color:var(--faint);margin-top:9px;line-height:1.5;word-break:keep-all;}
+  .set-note{font-size:13px;color:var(--muted);margin-top:9px;line-height:1.5;word-break:keep-all;}
   /* 사업자 정보: 하단탭 화면에 전역 푸터를 깔지 않고(기준 문서 7항) 화면 안에서 펼쳐 본다 */
   .biz{margin-top:10px;border-top:1px solid var(--line);padding-top:12px;}
   .biz summary{list-style:none;cursor:pointer;font-size:13px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:6px;}
   .biz summary::-webkit-details-marker{display:none;}
-  .biz summary:after{content:'›';margin-left:auto;color:var(--faint);transition:transform .2s;}
+  .biz summary:after{content:'›';margin-left:auto;color:var(--muted);transition:transform .2s;}
   .biz[open] summary:after{transform:rotate(90deg);}
-  .biz .bz{font-size:13px;color:var(--faint);line-height:1.7;margin-top:9px;}
+  .biz .bz{font-size:13px;color:var(--muted);line-height:1.7;margin-top:9px;}
   /* ── D-028-E 목표 카드 액션 행 재설계 ──
      지난 판은 마크업 부모가 .goal-actions 인데 선택자를 .gfoot .gmanage 로 써서 "목표 관리" 버튼에
      CSS 가 한 줄도 안 걸렸다(브라우저 기본 버튼으로 렌더). 선택자를 실제 부모에 맞추고,
@@ -1203,7 +1203,7 @@
   .screen[data-cta] .app > .pad{padding-bottom:20px;}
   /* 44px 터치 버튼을 광학 정렬하려고 버튼에 음수 마진을 주면 그만큼 부모의 가로 스크롤 영역이 넓어진다.
      당기는 주체를 줄(.gp-bar)로 옮긴다. 보이는 위치는 같고 넘침만 사라진다. */
-  .gp-more{width:44px;height:44px;margin-right:0;border:0;background:none;color:var(--faint);font-size:20px;line-height:1;
+  .gp-more{width:44px;height:44px;margin-right:0;border:0;background:none;color:var(--muted);font-size:20px;line-height:1;
     display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:var(--r-full);}
   .gp-more:active{background:var(--warm);}
   .gp-sheet{position:absolute;right:16px;top:70px;z-index:40;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
@@ -1229,7 +1229,7 @@
      실사 8종 ②카카오 선물하기 메시지 카드처럼 가로로 넘겨 고르고 위의 배너가 즉시 바뀐다
      ③직접 업로드 유지 ④아무것도 안 고르면 목표 문장에서 성격을 읽어 자동 배정한다. */
   .cp-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:2px 2px 9px;font-size:13.5px;font-weight:800;color:var(--ink);}
-  .cp-head .cp-sub{font-size:13px;font-weight:700;color:var(--faint);}
+  .cp-head .cp-sub{font-size:13px;font-weight:700;color:var(--muted);}
   .cp-photos{display:flex;gap:10px;overflow-x:auto;padding:4px 1px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
   /* R5 2026-10-19: '내 사진 올리기'를 가로 스크롤 줄 밖으로 뺀다.
      원인은 CSS scroll snapping 이었다. scroll-snap-align 이 .cp-opt(프리셋 타일)에만 붙어 있어
@@ -1273,7 +1273,7 @@
   .console .nav{min-height:30px;letter-spacing:-.2px;}
   .console .st{min-height:30px;letter-spacing:-.2px;}
   .set-sw.on{filter:drop-shadow(0 2px 7px rgba(27,138,79,.26));}            /* 켜짐을 그림자로도 말한다 */
-  .fr .rel .mp-go{align-self:center;font-size:17px;line-height:1;color:var(--faint);}   /* 친구 행 chevron 이 맨 글자였다 */
+  .fr .rel .mp-go{align-self:center;font-size:17px;line-height:1;color:var(--muted);}   /* 친구 행 chevron 이 맨 글자였다 */
   .fr.cheer-hidden{animation:rise 260ms var(--ease-decel) both;}            /* 더 보기로 드러나는 행의 등장 */
   .gd-hero .gtop{display:flex;align-items:center;gap:7px;margin-bottom:2px;} /* D-day·상태 칩이 줄바꿈으로 흩어졌다 */
   .ach.lock{cursor:default;}
@@ -1427,7 +1427,7 @@
   .legalfoot .lf-links{display:flex;gap:13px;flex-wrap:wrap;}
   .legalfoot .lf-links{align-items:center;}
   .legalfoot .lf-links a{position:relative;display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
-  .legalfoot .lf-biz{margin-top:9px;font-size:13px;color:var(--faint);line-height:1.7;}
+  .legalfoot .lf-biz{margin-top:9px;font-size:13px;color:var(--muted);line-height:1.7;}
   /* R1·R8 2026-10-19: 사업자 정보 <details> 접힘 변형 삭제.
      접힘 규칙 ③(접힌 상태에서 내용을 알 수 있어야 한다)을 법적 고지가 지킬 수 없고,
      랜딩은 아예 'none' 이 됐으며 이용안내·약관 화면은 전문을 펼쳐 둔다. */
@@ -1436,7 +1436,7 @@
   /* 약관 및 정책 화면: 관리 화면의 행 컴포넌트를 그대로 쓴다(같은 데이터는 같은 모양) */
   .legal-biz{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:15px;}
   .legal-biz .lb-t{font-size:13px;font-weight:800;color:var(--muted);}
-  .legal-biz .lb-d{margin-top:8px;font-size:13px;color:var(--faint);line-height:1.8;}
+  .legal-biz .lb-d{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.8;}
 
   /* ── D-030-C 응원 메시지 줄넘침: 목록은 2줄까지, 넘치면 "더 보기" ──
      규칙 = docs/design/DESIGN.md §4 오버플로. 한 줄 말줄임은 메시지가 거의 안 보여 응원을 읽는 화면의
@@ -1447,7 +1447,7 @@
   .cheer-msg.full,.fr .news span.full{-webkit-line-clamp:unset;display:block;}
   /* 터치 영역: 글자는 13px 이지만 위아래 여백으로 눌리는 면을 넓힌다. 행 전체도 같은 토글을 받는다(44px 하한은 행이 충족). */
   /* 토글은 글자가 아니라 방향(꺾쇠)으로만 말한다. 목록 행마다 '더 보기' 한 줄을 쓰지 않는다. */
-  .msg-more{display:flex;align-items:center;justify-content:center;width:100%;height:22px;margin-top:1px;cursor:pointer;color:var(--faint);}
+  .msg-more{display:flex;align-items:center;justify-content:center;width:100%;height:22px;margin-top:1px;cursor:pointer;color:var(--muted);}
   .msg-more svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s var(--ease-decel);}
   .msg-more.open svg{transform:rotate(180deg);}
   .msg-more.hide{display:none;}
@@ -1475,7 +1475,7 @@
   .bu-err.hide{display:none;}
   .bu-empty{margin-top:var(--sp-4);background:var(--surface);border:1.5px dashed var(--line);border-radius:var(--r-md);padding:var(--sp-5) 16px;text-align:center;}
   .bu-empty .e1{font-size:13px;font-weight:800;color:var(--muted);}
-  .bu-empty .e2{margin-top:var(--sp-1);font-size:13px;color:var(--faint);line-height:1.6;}
+  .bu-empty .e2{margin-top:var(--sp-1);font-size:13px;color:var(--muted);line-height:1.6;}
   .bu-acts{display:flex;gap:9px;margin-top:16px;}
   /* 두 버튼이 같은 폭으로 나란히 선다. 라벨은 한 줄을 유지한다(ux-writing 줄바꿈 규칙: 버튼은 한 줄). */
   .bu-acts .cbtn{flex:1 1 0;min-width:0;margin-top:0;white-space:nowrap;}
@@ -2774,7 +2774,7 @@
         </div>
         <div class="ob-prog"><div class="track"><i></i></div><span class="lab">3 중 2</span></div>
         <div class="field"><label>목표 한 줄</label><div class="inp">토익 900 해낼게</div></div>
-        <div class="field"><label>왜 해내고 싶어요? <span style="color:var(--faint);font-weight:600">(선택)</span></label><div class="inp" style="min-height:64px">교환학생 지원 마감 전에 점수를 만들어야 해서.</div></div>
+        <div class="field"><label>왜 해내고 싶어요? <span style="color:var(--muted);font-weight:600">(선택)</span></label><div class="inp" style="min-height:64px">교환학생 지원 마감 전에 점수를 만들어야 해서.</div></div>
         <div class="field"><label>언제까지</label><div class="inp">2026년 10월 7일</div></div>
         <!-- v5: 커버 사진(선택). 기본 프리셋 배정 + 커스텀. 스킵 시 기본 커버로 -->
         <div class="field">
@@ -2783,7 +2783,7 @@
           <div class="cover-pick" data-cover-pick="obCover" data-auto="study" style="margin-top:8px"></div>
         </div>
         <button class="cbtn pri" style="margin-top:22px" onclick="go('login')">저장하고 응원 링크 만들기</button>
-        <p style="font-size:13px;color:var(--faint);text-align:center;margin-top:10px;line-height:1.6">저장하려면 카카오 로그인이 필요해요.<br>쓴 내용은 사라지지 않아요.</p>
+        <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6">저장하려면 카카오 로그인이 필요해요.<br>쓴 내용은 사라지지 않아요.</p>
       </div></div>
     </div>
     <div class="review" data-review="onboarding"></div>
@@ -2843,7 +2843,7 @@
         <div class="field"><label>계좌번호</label><div class="inp">1234-56-789012</div></div>
         <div class="field"><label>예금주</label><div class="inp">조서연</div></div>
         <button class="cbtn pri" style="margin-top:20px" onclick="submitCashout(this)">환전 신청하기</button>
-        <p style="font-size:13px;color:var(--faint);text-align:center;margin-top:10px;line-height:1.6">친구 응원으로 모인 클로버만 환전할 수 있어요.<br>웰컴·부스트 클로버는 환전 대상이 아니에요.</p>
+        <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6">친구 응원으로 모인 클로버만 환전할 수 있어요.<br>웰컴·부스트 클로버는 환전 대상이 아니에요.</p>
         <button class="cbtn ghost" onclick="go('mypage')">마이페이지로 돌아가기</button>
       </div></div>
     </div>
@@ -2948,7 +2948,7 @@
         <div class="head"><button class="back" onclick="go('login')">‹</button><div class="brand">이용약관</div><div style="width:44px"></div></div>
         <div class="legal-doc">
           <h1>이용약관</h1>
-          <p style="color:var(--faint)">표준 템플릿 기반의 잠정 문서로, 정식 법률 검토를 대체하지 않으며 결제 등 기능 활성화에 따라 개정될 수 있습니다.</p>
+          <p style="color:var(--muted)">표준 템플릿 기반의 잠정 문서로, 정식 법률 검토를 대체하지 않으며 결제 등 기능 활성화에 따라 개정될 수 있습니다.</p>
           <h3>제1조 (목적)</h3><p>목표 선언 및 응원 서비스의 이용과 관련한 회사와 회원 간 권리·의무·책임을 규정합니다.</p>
           <h3>제2조 (정의)</h3><p>회원(카카오 로그인 가입자), 목표("○○ 해낼게" 목표 액자), 응원(클로버 결제로 지지 표시), 클로버(응원 가상 단위·환전 가능), 워드맵(응원 메시지 시각화).</p>
           <h3>제7조 (유료 서비스 · 응원 결제 및 환전)</h3>
@@ -2957,7 +2957,7 @@
           <p><b>환전 요건</b>: 웰컴 클로버 포함 30개 이상이면 자격 충족. 웰컴·잠김·진행분을 제외한 지급 가능 클로버만 신청할 수 있습니다.</p>
           <h3>제7조의3 (클로버 유효기간 · 낙전수입)</h3><p>클로버는 적립일로부터 <b>5년</b> 유효(상사채권 소멸시효 준함). 소멸 30일을 앞두고 알림톡·인앱으로 고지하며, 소멸분 총량은 연 1회 이상 공지합니다. 웰컴 클로버는 애초에 환전 대상이 아닙니다.</p>
           <h3>제10조 (환전 지급 기준 요약)</h3><p>지급 대상 = 총잔액 − 웰컴 − 유효기간 경과분 · 원화 = 지급대상 × 단가 · 이용수수료 = 원화 × 10%(+VAT) · 원천징수 = (원화 − 이용수수료) × 3.3% · 최종 = 원화 − 이용수수료(+VAT) − 원천징수.</p>
-          <p style="color:var(--faint)">부칙: 2026년 8월 29일부터 적용. (실배포 terms/page.tsx 293줄 계승)</p>
+          <p style="color:var(--muted)">부칙: 2026년 8월 29일부터 적용. (실배포 terms/page.tsx 293줄 계승)</p>
         </div>
       </div></div>
     </div>
@@ -2972,7 +2972,7 @@
         <div class="head"><button class="back" onclick="go('login')">‹</button><div class="brand">개인정보처리방침</div><div style="width:44px"></div></div>
         <div class="legal-doc">
           <h1>개인정보처리방침</h1>
-          <p style="color:var(--faint)">표준 템플릿 기반의 잠정 문서로, 정식 법률 검토를 대체하지 않으며 결제·환전·분석 도구 활성화에 따라 개정될 수 있습니다.</p>
+          <p style="color:var(--muted)">표준 템플릿 기반의 잠정 문서로, 정식 법률 검토를 대체하지 않으며 결제·환전·분석 도구 활성화에 따라 개정될 수 있습니다.</p>
           <h3>1. 수집 항목</h3>
           <p><b>카카오 로그인</b>: [필수] 닉네임·카카오 식별자·전화번호(응원 도착·환전 완료 알림톡), [선택] 프로필 이미지·이메일·연령대·생일.</p>
           <p><b>목표·응원</b>: 목표 제목·사유·기한, 응원 표시 이름·익명 여부·메시지(140자)·클로버 수량. <b>신고</b>: 사유·대상·신고자 식별자(비로그인 게스트는 별도 식별정보 미수집).</p>
@@ -2980,7 +2980,7 @@
           <h3>3. 보유·이용기간</h3><p>목적 달성·탈퇴 시 지체 없이 파기. 단 전자상거래법상 계약·결제 5년, 분쟁 3년, 로그 3개월 보관. 환전 계좌정보는 지급 완료/반려 후 파기(세법상 증빙은 법정기간 분리보관).</p>
           <h3>4. 제3자 제공·처리위탁</h3><p>Supabase(DB·인증·서울리전, 활성)·Vercel(호스팅, 활성)·(주)카카오(알림톡, 비활성)·솔라피(발송 대행, 비활성)·토스페이먼츠(결제, 비활성)·GA4(분석, 측정ID 미설정 비활성). 카카오 로그인은 위탁이 아니라 이용자 동의 하 제공받는 항목입니다.</p>
           <h3>6. 안전성 확보조치</h3><p>계좌번호 등 민감정보 암호화, 복호화·상태변경은 관리자 허용목록+서버 권한 통과 시에만. DB 접근은 service role·RLS로 제한, 부정이용 요청은 해시값으로 식별.</p>
-          <p style="color:var(--faint)">시행일: 2026년 7월 28일. (실배포 privacy/page.tsx 318줄 계승)</p>
+          <p style="color:var(--muted)">시행일: 2026년 7월 28일. (실배포 privacy/page.tsx 318줄 계승)</p>
         </div>
       </div></div>
     </div>

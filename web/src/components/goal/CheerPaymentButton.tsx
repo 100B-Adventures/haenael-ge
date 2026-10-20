@@ -252,7 +252,7 @@ export function CheerPaymentButton({
                       style={{
                         color: selected
                           ? "var(--accent-foreground)"
-                          : "var(--faint)",
+                          : "var(--muted-color)",
                       }}
                     >
                       {(value * KRW_PER_CLOVER).toLocaleString("ko-KR")}원

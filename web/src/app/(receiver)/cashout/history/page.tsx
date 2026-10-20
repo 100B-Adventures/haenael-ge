@@ -41,19 +41,19 @@ export default async function CashoutHistoryPage() {
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         <div className="rounded-md border border-border bg-card p-4">
-          <p className="text-[11px] text-[var(--faint)]">지금까지 받은 금액</p>
+          <p className="text-[11px] text-[var(--muted-color)]">지금까지 받은 금액</p>
           <p className="mt-1 text-xl font-extrabold text-accent-foreground">
             {formatCashoutKrw(paidTotal)}
           </p>
         </div>
         <div className="rounded-md border border-border bg-card p-4">
-          <p className="text-[11px] text-[var(--faint)]">입금 완료</p>
+          <p className="text-[11px] text-[var(--muted-color)]">입금 완료</p>
           <p className="mt-1 text-xl font-extrabold text-accent-foreground">
             {paid.length}건
           </p>
         </div>
         <div className="rounded-md border border-border bg-card p-4">
-          <p className="text-[11px] text-[var(--faint)]">진행중</p>
+          <p className="text-[11px] text-[var(--muted-color)]">진행중</p>
           <p className="mt-1 text-xl font-extrabold text-amber-ink">
             {pendingCount}건
           </p>
@@ -71,7 +71,7 @@ export default async function CashoutHistoryPage() {
             >
               환전 내역을 불러오지 못했어요
             </p>
-            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--faint)]">
+            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">
               내역이 없다는 뜻이 아니에요. 잠시 뒤 새로고침 해주세요.
             </p>
           </div>
@@ -80,7 +80,7 @@ export default async function CashoutHistoryPage() {
             <p className="text-sm font-bold text-muted-foreground">
               아직 환전 내역이 없어요
             </p>
-            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--faint)]">
+            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">
               신청하면 이곳에 처리 상태가 남아요.
             </p>
           </div>
@@ -92,7 +92,7 @@ export default async function CashoutHistoryPage() {
               className="flex items-start justify-between gap-4 border-b border-border py-4 last:border-0"
             >
               <div>
-                <p className="text-[length:var(--text-meta-micro)]! text-[var(--faint)]">
+                <p className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
                   {new Date(item.requested_at).toLocaleDateString("ko-KR")} · #
                   {item.id}
                 </p>

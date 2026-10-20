@@ -37,7 +37,7 @@ export function SplitBalanceCard({
   return (
     <div data-testid="split-balance-card">
       <div className="flex items-baseline justify-between">
-        <p className="text-[length:var(--text-meta-micro)]! text-[var(--faint)]">
+        <p className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
           모인 클로버
         </p>
       </div>
@@ -54,7 +54,7 @@ export function SplitBalanceCard({
       {/* 잠김이 있을 때만 등가 은닉. 없을 때는 기존 원화 등가 보조표기 유지 */}
       {!hasLock && (
         <p
-          className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--faint)]"
+          className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]"
           data-testid="clover-krw-equivalent"
         >
           ≈{krwFromClover(total).toLocaleString("ko-KR")}원 상당
@@ -83,7 +83,7 @@ export function SplitBalanceCard({
                 🍀 {available}개
               </strong>
               <p
-                className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--faint)]"
+                className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]"
                 data-testid="split-balance-available-krw"
               >
                 ≈{krwFromClover(available).toLocaleString("ko-KR")}원 상당
@@ -104,7 +104,7 @@ export function SplitBalanceCard({
               </strong>
               {typeof pendingNetKrw === "number" && (
                 <p
-                  className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--faint)]"
+                  className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]"
                   data-testid="split-balance-locked-krw"
                 >
                   {formatCashoutKrw(pendingNetKrw)} 입금 예정

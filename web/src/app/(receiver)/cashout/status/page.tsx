@@ -160,7 +160,7 @@ export default async function CashoutStatusPage() {
       <h1 className="receiver-page-title mt-2 sm:text-[length:var(--text-page-title-desktop)]!">
         환전 진행 상태
       </h1>
-      <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--faint)]">
+      <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">
         {dateTime.format(new Date(cashout.requested_at))} 신청 · 신청번호 #
         {cashout.id}
       </p>
@@ -215,7 +215,7 @@ export default async function CashoutStatusPage() {
                     ? "text-danger-ink"
                     : isPaid
                       ? "text-accent-foreground"
-                      : "text-[var(--faint)]"
+                      : "text-[var(--muted-color)]"
                 }
               >
                 <span

@@ -371,7 +371,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
           >
             WHY{" "}
-            <span className="text-[10px] font-normal normal-case [color:var(--faint)]!">
+            <span className="text-[10px] font-normal normal-case [color:var(--muted-color)]!">
               (응원의 이유가 돼요 · 선택)
             </span>
           </label>
@@ -385,7 +385,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             maxLength={200}
             data-testid="goal-reason-input"
           />
-          <p className="text-right text-[11px] [color:var(--faint)]!">
+          <p className="text-right text-[11px] [color:var(--muted-color)]!">
             {values.reason.length}/200
           </p>
         </div>
@@ -413,7 +413,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         </button>
 
         {/* 안내 */}
-        <p className="text-center text-[12px] [color:var(--faint)]!">
+        <p className="text-center text-[12px] [color:var(--muted-color)]!">
           {user
             ? "바로 저장돼요."
             : "저장하면 로그인 화면이 잠깐 뜨고, 작성 중인 목표는 안전하게 보관 중이에요."}

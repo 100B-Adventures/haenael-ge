@@ -116,7 +116,7 @@ export function GoalCard({
             {displayName}
           </p>
           <p
-            className="mt-0.5 [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
+            className="mt-0.5 [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
             // --faint
           >
             해낼게 목표

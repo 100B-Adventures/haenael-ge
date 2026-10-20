@@ -351,7 +351,7 @@ export default async function ReceiverHomePage({
             data-testid="cashout-history-link"
           >
             <span>환전 내역</span>
-            <span className="text-[length:var(--text-label-small)]! font-medium text-[var(--faint)]">
+            <span className="text-[length:var(--text-label-small)]! font-medium text-[var(--muted-color)]">
               최근 #{cashoutStatus.id} ›
             </span>
           </Link>

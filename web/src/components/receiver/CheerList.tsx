@@ -39,7 +39,7 @@ function CheerItem({
       <div
         className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
           cheer.is_anonymous || !cheer.display_name
-            ? "bg-muted text-[var(--faint)]"
+            ? "bg-muted text-[var(--muted-color)]"
             : "bg-accent text-accent-foreground"
         }`}
       >
@@ -162,7 +162,7 @@ export function CheerList({
                 minLength={1}
                 maxLength={80}
                 required
-                className="h-12 min-w-0 flex-1 rounded-sm border border-border bg-card px-4 text-sm text-foreground outline-none placeholder:text-[var(--faint)] focus:border-primary focus:ring-2 focus:ring-accent"
+                className="h-12 min-w-0 flex-1 rounded-sm border border-border bg-card px-4 text-sm text-foreground outline-none placeholder:text-[var(--muted-color)] focus:border-primary focus:ring-2 focus:ring-accent"
                 data-testid="cheer-search-input"
               />
               <button

@@ -338,7 +338,7 @@ export function CashoutRequestForm({
               className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
               required
             />
-            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--faint)]">
+            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--muted-color)]">
               본인 명의 계좌만 입금할 수 있어요. 예금주가 다르면 반려돼요.
             </p>
           </div>
@@ -363,7 +363,7 @@ export function CashoutRequestForm({
               placeholder="010-1234-5678"
               data-testid="cashout-phone"
             />
-            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--faint)]">
+            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--muted-color)]">
               지급 완료 안내를 보내드릴 번호예요. 신청할 때 최신 번호로
               저장해요.
             </p>
@@ -625,7 +625,7 @@ export function CashoutRequestForm({
                     {CASHOUT_STATUS_LABELS[item.status]}
                   </span>
                 </div>
-                <p className="mt-1 text-[length:var(--text-meta-micro)]! text-[var(--faint)]">
+                <p className="mt-1 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
                   {new Date(item.requested_at).toLocaleString("ko-KR")}
                 </p>
               </Link>

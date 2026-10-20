@@ -110,11 +110,11 @@ export function CashoutPageView({
                 </span>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-[13px] text-[var(--faint)]">
+                <span className="text-[13px] text-[var(--muted-color)]">
                   − 해낼게 웰컴 (지급 대상 아님)
                 </span>
                 <span
-                  className="text-[13px] font-bold text-[var(--faint)]"
+                  className="text-[13px] font-bold text-[var(--muted-color)]"
                   data-testid="breakdown-welcome"
                 >
                   − 🍀 {welcomeAmount}개

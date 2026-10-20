@@ -148,7 +148,7 @@ export function GoalEditSheet({
         <p
           className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed"
           style={{
-            color: savedValues.reason ? "var(--foreground)" : "var(--faint)",
+            color: savedValues.reason ? "var(--foreground)" : "var(--muted-color)",
           }}
           data-testid="goal-reason"
         >
@@ -266,7 +266,7 @@ export function GoalEditSheet({
                   className="text-[11px] font-bold tracking-wider [color:var(--muted-foreground)]!"
                 >
                   WHY{" "}
-                  <span className="text-[10px] font-normal [color:var(--faint)]!">
+                  <span className="text-[10px] font-normal [color:var(--muted-color)]!">
                     (응원의 이유가 돼요 · 선택)
                   </span>
                 </label>
@@ -281,7 +281,7 @@ export function GoalEditSheet({
                   className="w-full resize-none rounded-[12px] px-4 py-3 text-[14px] outline-none [background-color:var(--card)]! [color:var(--foreground)]! [border:1px_solid_var(--border)]! [font-family:inherit]!"
                   data-testid="edit-goal-reason-input"
                 />
-                <p className="text-right text-[11px] [color:var(--faint)]!">
+                <p className="text-right text-[11px] [color:var(--muted-color)]!">
                   {values.reason.length}/200
                 </p>
               </div>

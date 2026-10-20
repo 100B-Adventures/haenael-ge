@@ -207,7 +207,7 @@ export function LoginSheet({
               <>
                 {/* 구분선 */}
                 <div
-                  className="flex items-center gap-3 [color:var(--faint)]!"
+                  className="flex items-center gap-3 [color:var(--muted-color)]!"
                   // --faint
                 >
                   <div className="flex-1 h-px [background-color:var(--border)]!" />
@@ -226,7 +226,7 @@ export function LoginSheet({
 
           {/* 약관 고지 */}
           <p
-            className="text-center text-xs leading-relaxed [color:var(--faint)]!"
+            className="text-center text-xs leading-relaxed [color:var(--muted-color)]!"
             // --faint
           >
             로그인 시{" "}

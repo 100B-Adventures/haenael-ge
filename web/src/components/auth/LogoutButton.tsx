@@ -35,7 +35,7 @@ export function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={pending}
-      className="min-h-11 min-w-11 px-2 text-sm font-semibold transition-transform active:translate-y-px disabled:opacity-50 [color:var(--faint)]!"
+      className="min-h-11 min-w-11 px-2 text-sm font-semibold transition-transform active:translate-y-px disabled:opacity-50 [color:var(--muted-color)]!"
       data-testid="logout-button"
       aria-label="로그아웃"
     >

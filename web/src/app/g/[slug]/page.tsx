@@ -170,7 +170,7 @@ export default async function GoalPublicPage({ params }: Props) {
           {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
           {!user && (
             <p
-            className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--faint)]!"
+            className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
               data-testid="relogin-hint"
             >
               내 목표가 있으신가요?{" "}
@@ -232,7 +232,7 @@ export default async function GoalPublicPage({ params }: Props) {
         {/* role-transition: "나도 해낼게 만들래" */}
         <Link
           href="/"
-          className="block w-full text-center font-semibold mt-1 [font-size:var(--text-wordmark)]! [color:var(--faint)]! p-[9px_0_0]! [min-height:var(--tap-min-size)]! [display:flex]! [align-items:center]! [justify-content:center]! transition-opacity active:opacity-70"
+          className="block w-full text-center font-semibold mt-1 [font-size:var(--text-wordmark)]! [color:var(--muted-color)]! p-[9px_0_0]! [min-height:var(--tap-min-size)]! [display:flex]! [align-items:center]! [justify-content:center]! transition-opacity active:opacity-70"
           data-testid="role-transition-link"
         >
           나도 해낼게 만들래 →
