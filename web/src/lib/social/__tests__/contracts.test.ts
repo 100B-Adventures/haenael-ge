@@ -66,13 +66,11 @@ describe("V2 social contracts", () => {
       inviter_nickname: "서연",
       goal_title: "달리기",
       cover_preset_key: "c1",
-      cover_public_path: null,
-      expires_at: "2026-10-20T00:00:00Z",
-      requires_login: true,
     };
     expect(Object.keys(asInvitePreview(value) ?? {}).sort()).toEqual(
       Object.keys(value).sort(),
     );
+    expect(asInvitePreview({ ...value, expires_at: "leak" })).toBeNull();
   });
   it("CT-24 social fixture에 금액 결제 환전 key가 없다", () => {
     const serialized = JSON.stringify(asFriendGoals({ friends: [] }));
@@ -96,6 +94,9 @@ describe("V2 social contracts", () => {
         due_date: "2026-12-01",
         status: "ACTIVE",
         cover_preset_key: "c1",
+        cheer_count: 0,
+        supporter_avatars: [],
+        recent_cheer: null,
       }],
       friend_count: 3,
       achievements: {

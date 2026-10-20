@@ -389,6 +389,10 @@ verify_jwt = false
 # service-to-service 전용. handler가 NOTIFY_INTERNAL_TOKEN을 별도로 검증한다.
 verify_jwt = false
 
+[functions.storage-cleanup-worker]
+# cron service-to-service 전용. handler가 STORAGE_CLEANUP_INTERNAL_TOKEN을 별도로 검증한다.
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

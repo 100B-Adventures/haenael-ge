@@ -23,6 +23,14 @@ const dashboard = {
     due_date: "2026-12-01",
     status: "ACTIVE" as const,
     cover_preset_key: "c1",
+    cheer_count: 1,
+    supporter_avatars: [{ profile_image: null, is_anonymous: true }],
+    recent_cheer: {
+      supporter_name: null,
+      message: "끝까지 응원해요.",
+      created_at: "2026-10-20T00:00:00Z",
+      is_anonymous: true,
+    },
   }],
   friend_count: 3,
   achievements: {

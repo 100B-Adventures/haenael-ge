@@ -14,6 +14,7 @@ import { removeFriendAction } from "@/app/(receiver)/social-actions";
 import { GoalCover } from "./GoalCover";
 import { Wordmap } from "@/components/goal/Wordmap";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
+import { Collapsible } from "@/components/common/Collapsible";
 
 export function FriendGoalDetail(
   { friendId, nickname, profileImage, relationshipDirection, detail, friendGoals }: {
@@ -78,19 +79,24 @@ export function FriendGoalDetail(
         <div><strong>다른 친구도 이 자리에 부를까요?</strong><small>내가 고른 친구에게만 조용히 초대해요.</small></div>
         <b aria-hidden="true">›</b>
       </Link>
-      <details className="social-card friend-wordmap-card">
-        <summary className="social-card-heading">
+      <Collapsible
+        className="social-card friend-wordmap-card"
+        policy={{ auxiliary: true, exceedsLimit: detail.wordmap.length > 8, hasCollapsedContext: true }}
+      >
+        {(expanded) => <>
+        <div className="social-card-heading">
           <h2>응원 워드맵</h2>
           <span>{detail.wordmap.length}개 단어</span>
-        </summary>
-        <Wordmap
+        </div>
+        {expanded && <Wordmap
           words={detail.wordmap.map((item) => ({
             word: item.word,
             word_count: item.weight,
           }))}
           ownerName={displayName}
-        />
-      </details>
+        />}
+        </>}
+      </Collapsible>
       {otherGoals.length > 0 && (
         <section className="friend-other-goals">
           <h2>{displayName}의 다른 목표</h2>

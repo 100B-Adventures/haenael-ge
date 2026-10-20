@@ -18,9 +18,6 @@ const preview = {
   inviter_nickname: "서연",
   goal_title: "달리기",
   cover_preset_key: "c1",
-  cover_public_path: null,
-  expires_at: "2026-10-20T00:00:00Z",
-  requires_login: false,
 };
 
 it("CT-07 self_invite stable code를 정확한 복구 카드로 표시한다", async () => {

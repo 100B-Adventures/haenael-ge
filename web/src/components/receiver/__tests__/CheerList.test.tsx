@@ -21,16 +21,16 @@ describe("TC-OV-01 응원 목록 오버플로", () => {
     expect(screen.getByTestId("receiver-cheer-card")).toContainElement(screen.getByTestId("cheer-overflow-summary"));
     expect(screen.getByTestId("cheer-overflow-summary")).toHaveTextContent("미니 목록은 8개까지 보여줘요");
 
-    fireEvent.click(screen.getByRole("button", { name: "더 보기" }));
+    fireEvent.click(screen.getByRole("button", { name: "내용 펼치기" }));
 
     expect(screen.getAllByTestId("cheer-item")).toHaveLength(20);
-    expect(screen.getByRole("button", { name: "응원 목록 접기" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "내용 접기" })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getAllByTestId("cheer-item-ordinal")[10]).toHaveTextContent("11번째");
   });
 
   it("거절 경로: 100건이어도 DOM 표시 상한을 20행으로 지키고 카드 안에서 서버 검색을 연다", () => {
     render(<CheerList cheers={cheers(100)} totalCount={100} />);
-    fireEvent.click(screen.getByRole("button", { name: "더 보기" }));
+    fireEvent.click(screen.getByRole("button", { name: "내용 펼치기" }));
 
     expect(screen.getAllByTestId("cheer-item")).toHaveLength(20);
     expect(screen.getByTestId("cheer-overflow-summary")).toHaveTextContent("전체 목록도 20개까지 보여줘요");

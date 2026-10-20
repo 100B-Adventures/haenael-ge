@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(8);
+SELECT plan(12);
 
 INSERT INTO auth.users(
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -39,7 +39,8 @@ INSERT INTO public.payment(order_id, amount_krw, status, pg_customer_key)
 VALUES
   ('my-achievement-1', 1000, 'DONE', 'MY-PGTAP'),
   ('my-achievement-2', 1000, 'DONE', 'MY-PGTAP'),
-  ('my-achievement-3', 1000, 'DONE', 'MY-PGTAP');
+  ('my-achievement-3', 1000, 'DONE', 'MY-PGTAP'),
+  ('my-achievement-4', 1000, 'DONE', 'MY-PGTAP');
 
 INSERT INTO public.cheer(
   goal_id, payment_id, display_name, is_anonymous, message, clover_amount, status
@@ -59,6 +60,14 @@ SELECT g.id, p.id, 'Owner', false, '친구 응원', 1, 'CONFIRMED'
 FROM public.goal AS g
 JOIN public.payment AS p ON p.order_id = 'my-achievement-3'
 WHERE g.slug = 'friend-public';
+
+INSERT INTO public.cheer(
+  goal_id, payment_id, display_name, is_anonymous, message, clover_amount, status, created_at
+)
+SELECT g.id, p.id, '가려진 응원자', true, '익명으로 끝까지 응원해요', 1, 'CONFIRMED', now() + interval '1 minute'
+FROM public.goal AS g
+JOIN public.payment AS p ON p.order_id = 'my-achievement-4'
+WHERE g.slug = 'my-active';
 
 INSERT INTO public.social_cheer_member_attribution(cheer_id, supporter_member_id)
 SELECT c.id, '56000000-0000-0000-0000-000000000001'
@@ -90,7 +99,7 @@ SELECT is(
 );
 SELECT is(
   (public.my_social_dashboard()->'achievements'->>'received_cheer_count')::integer,
-  2,
+  3,
   'PG-MY-04 확정된 받은 응원만 업적 집계'
 );
 SELECT is(
@@ -109,6 +118,28 @@ SELECT ok(
   public.my_social_dashboard()::text !~
     'clover_amount|amount|payment|cashout|supporter_ci|supporter_member_id|ranking|streak',
   'PG-MY-07 마이페이지 JSON에 금액 식별자 순위 연속 기록 key 0'
+);
+
+SELECT is(
+  (public.my_social_dashboard()->'goals'->0->>'cheer_count')::integer,
+  2,
+  'CS-01 홈 목표 응원 수는 CONFIRMED 비환영 응원만 집계'
+);
+SELECT ok(
+  jsonb_array_length(public.my_social_dashboard()->'goals'->0->'supporter_avatars') <= 3
+    AND (public.my_social_dashboard()->'goals'->0->'supporter_avatars') @>
+      '[{"profile_image": null, "is_anonymous": true}]'::jsonb,
+  'CS-02 아바타는 최대 3개이고 익명 프로필은 null'
+);
+SELECT ok(
+  (public.my_social_dashboard()->'goals'->0->'recent_cheer'->>'is_anonymous')::boolean
+    AND public.my_social_dashboard()->'goals'->0->'recent_cheer'->'supporter_name' = 'null'::jsonb,
+  'CS-03 최근 익명 응원은 이름을 노출하지 않는다'
+);
+SELECT ok(
+  public.my_social_dashboard()->'goals'->0->'recent_cheer'->>'message' = '익명으로 끝까지 응원해요'
+    AND public.my_social_dashboard()->'goals'->0->'recent_cheer' ? 'created_at',
+  'CS-04 최근 응원 한 건만 메시지와 시각을 반환한다'
 );
 
 RESET ROLE;

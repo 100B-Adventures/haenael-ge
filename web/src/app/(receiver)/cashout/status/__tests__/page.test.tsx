@@ -121,9 +121,12 @@ describe("/cashout/status", () => {
     const { default: CashoutStatusPage } = await import("../page");
     render(await CashoutStatusPage());
 
-    const banner = screen.getByRole("status");
+    const banner = screen
+      .getAllByRole("status")
+      .find((element) => element.textContent?.includes("모인 클로버가 52개에서 12개가 됐어요"));
+    expect(banner).toBeDefined();
     expect(banner).toHaveTextContent("모인 클로버가 52개에서 12개가 됐어요");
-    expect(banner.textContent).not.toMatch(/62개/);
+    expect(banner?.textContent).not.toMatch(/62개/);
   });
 
   it("TC-STATUS-01~04: REQUESTED 상태는 분할 잔액·단계 시각·카드 안내·비활성 재신청·홈 경로를 렌더한다", async () => {

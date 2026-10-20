@@ -72,6 +72,46 @@ function buildSupabase(
       if (fn === "get_wordmap") {
         return Promise.resolve({ data: wordmap, error: null });
       }
+      if (fn === "my_social_dashboard") {
+        const goals = goalRows.map((goal) => {
+          const goalCheers = cheers
+            .filter((cheer) => cheer.goal_id === goal.id)
+            .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+          const recent = goalCheers[0];
+          return {
+            goal_id: goal.id,
+            slug: goal.slug,
+            title: goal.title,
+            due_date: goal.due_date,
+            status: goal.status,
+            cover_preset_key: goal.cover_preset_key ?? "c1",
+            cheer_count: goalCheers.length,
+            supporter_avatars: [],
+            recent_cheer: recent
+              ? {
+                  supporter_name: recent.display_name ?? null,
+                  message: recent.message ?? null,
+                  created_at: recent.created_at,
+                  is_anonymous: recent.is_anonymous ?? false,
+                }
+              : null,
+          };
+        });
+        return Promise.resolve({
+          data: {
+            profile: { nickname: "Owner", profile_image: null },
+            goals,
+            friend_count: 0,
+            achievements: {
+              completed_goal_count: 0,
+              received_cheer_count: cheers.length,
+              connected_friend_count: 0,
+            },
+            belonging_queue: [],
+          },
+          error: null,
+        });
+      }
       return Promise.resolve({ data: [], error: null });
     }),
     from: vi.fn((table: string) => {

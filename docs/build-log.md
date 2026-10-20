@@ -1,5 +1,17 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-20 1차 슬라이스 실구동
+
+- Storage 정리 worker와 점유·settle RPC, 중단 업로드 정리 함수, tombstone 재등록 함수를 구현했다. 버킷과 객체 경로를 쌍으로 비교한다.
+- CV-09~13과 EA-01~04를 로컬 Supabase에서 실구동했다. 객체 부재, stale lease 재점유, 늦은 settle 거부, 부분 성공 1:1, tombstone 재등록, 동일 경로의 버킷 격리를 관찰했다.
+- `drain-storage-cleanup-queue`를 로컬 `pg_cron`으로 1회 발사했다. run 89 succeeded, HTTP 200, 함수 로그 +1이며 cron은 원래 10분 주기로 원복했다.
+- 커버는 sign 200, Presigned PUT 200, finalize 200, REVIEW 행·격리 객체 존재까지 확인했다. 실패 시도와 성공 시도의 로컬 fixture는 0건으로 정리했다.
+- TypeScript·lint, Vitest 358/358, pgTAP 361/361, Next.js build, dev 헤드리스 smoke, 360~1000 아홉 폭 사용성 검사를 통과했다.
+- 문서 contradiction 차단축과 요구 커버리지 결손은 0이며 H축은 14/14다. Mermaid는 이번 판에서 다시 렌더하지 않았다.
+- 운영 Supabase·Vercel에는 쓰거나 배포하지 않았다. 운영 배너 장애와 로컬 Presigned URL origin 결함이 같은 원인인지는 미확인이다.
+
+> STAMP: 생성 2026-10-20 19:27 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 승인 기술설계 v1.2.5와 로컬 런타임·테스트 로그. 상태 local build 일치, 운영 미반영.
+
 ## 2026-10-15 응원 키워드·희소 데이터 2차
 
 - 한국어 응원 문장을 `Intl.Segmenter`와 조사·어미·불용어·승인 표현 규칙으로 정규화했다. `건넬게요`, `저희가`, `차례예요`, `클로버는`은 워드맵에서 0건이고, 빈도 가중·전체 표시는 유지했다.

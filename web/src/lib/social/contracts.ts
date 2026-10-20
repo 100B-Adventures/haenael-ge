@@ -41,9 +41,6 @@ export type InvitePreview = {
   inviter_nickname: string | null;
   goal_title: string | null;
   cover_preset_key: string;
-  cover_public_path: string | null;
-  expires_at: string;
-  requires_login: boolean;
 };
 
 export type InviteCreated = {
@@ -61,6 +58,17 @@ export type MySocialGoal = {
   due_date: string;
   status: "ACTIVE" | "CLOSED";
   cover_preset_key: string;
+  cheer_count: number;
+  supporter_avatars: Array<{
+    profile_image: string | null;
+    is_anonymous: boolean;
+  }>;
+  recent_cheer: {
+    supporter_name: string | null;
+    message: string | null;
+    created_at: string;
+    is_anonymous: boolean;
+  } | null;
 };
 
 export type BelongingQueueGoal = {
@@ -105,9 +113,18 @@ export function asFriendGoalDetail(value: unknown): FriendGoalDetail | null {
 export function asInvitePreview(value: unknown): InvitePreview | null {
   if (
     !value || typeof value !== "object" ||
-    typeof (value as { expires_at?: unknown }).expires_at !== "string"
+    !("inviter_nickname" in value) ||
+    !("goal_title" in value) ||
+    typeof (value as { cover_preset_key?: unknown }).cover_preset_key !== "string"
   ) return null;
-  return value as InvitePreview;
+  const candidate = value as Record<string, unknown>;
+  const exactKeys = ["inviter_nickname", "goal_title", "cover_preset_key"];
+  if (
+    Object.keys(candidate).some((key) => !exactKeys.includes(key)) ||
+    (candidate.inviter_nickname !== null && typeof candidate.inviter_nickname !== "string") ||
+    (candidate.goal_title !== null && typeof candidate.goal_title !== "string")
+  ) return null;
+  return candidate as InvitePreview;
 }
 
 export function asInviteCreated(value: unknown): InviteCreated | null {

@@ -75,7 +75,7 @@ export default async function LandingPage() {
       <div className="landing-approved-wordmark">
         <Link
           href={user ? "/me" : "/"}
-          className="inline-block font-extrabold transition-opacity active:opacity-70 [font-size:13px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!"
+          className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center font-extrabold transition-opacity active:opacity-70 [font-size:13px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!"
           data-testid="brand-logo-link"
           aria-label="해낼게 홈으로"
         >

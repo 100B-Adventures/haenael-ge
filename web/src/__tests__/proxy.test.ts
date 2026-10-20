@@ -5,53 +5,60 @@
 
 import { describe, it, expect } from "vitest";
 import { NextRequest } from "next/server";
-import { proxy } from "../proxy";
+import { isProtectedRoute, proxy } from "../proxy";
 
 function req(host: string, path: string) {
   return new NextRequest(new URL(path, `https://${host}`));
 }
 
 describe("proxy — canonical 도메인 강제", () => {
-  it("알려진 레거시 production 별칭 호스트는 canonical로 308 리다이렉트", () => {
-    const res = proxy(req("web-two-theta-bmil2ljwdg.vercel.app", "/auth/kakao/start?redirect=/onboarding"));
+  it("AU-04 보호 라우트 계약은 공개 초대 상세를 제외한다", () => {
+    expect(isProtectedRoute("/me")).toBe(true);
+    expect(isProtectedRoute("/my/legal")).toBe(true);
+    expect(isProtectedRoute("/invite")).toBe(true);
+    expect(isProtectedRoute("/invite/public-token")).toBe(false);
+    expect(isProtectedRoute("/g/public-goal")).toBe(false);
+  });
+  it("알려진 레거시 production 별칭 호스트는 canonical로 308 리다이렉트", async () => {
+    const res = await proxy(req("web-two-theta-bmil2ljwdg.vercel.app", "/auth/kakao/start?redirect=/onboarding"));
     expect(res.status).toBe(308);
     const location = res.headers.get("location");
     expect(location).toBe("https://haenael-ge.vercel.app/auth/kakao/start?redirect=/onboarding");
   });
 
-  it("haenaelge.vercel.app 레거시 별칭도 canonical로 308 리다이렉트", () => {
-    const res = proxy(req("haenaelge.vercel.app", "/"));
+  it("haenaelge.vercel.app 레거시 별칭도 canonical로 308 리다이렉트", async () => {
+    const res = await proxy(req("haenaelge.vercel.app", "/"));
     expect(res.status).toBe(308);
     expect(res.headers.get("location")).toBe("https://haenael-ge.vercel.app/");
   });
 
-  it("canonical 호스트 자체는 리다이렉트 없이 통과 (2xx, location 없음)", () => {
-    const res = proxy(req("haenael-ge.vercel.app", "/auth/kakao/callback?code=abc&state=xyz"));
+  it("canonical 호스트 자체는 리다이렉트 없이 통과 (2xx, location 없음)", async () => {
+    const res = await proxy(req("haenael-ge.vercel.app", "/auth/kakao/callback?code=abc&state=xyz"));
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("localhost는 리다이렉트 없이 통과 (로컬 개발 보존)", () => {
-    const res = proxy(req("localhost", "/onboarding"));
+  it("localhost는 리다이렉트 없이 통과 (로컬 개발 보존)", async () => {
+    const res = await proxy(req("localhost", "/onboarding"));
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("127.0.0.1도 리다이렉트 없이 통과", () => {
-    const res = proxy(req("127.0.0.1", "/"));
+  it("127.0.0.1도 리다이렉트 없이 통과", async () => {
+    const res = await proxy(req("127.0.0.1", "/"));
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("알려지지 않은 Vercel preview 해시 도메인은 통과 (preview 배포 파괴 방지)", () => {
-    const res = proxy(req("web-abc123xyz-sjteam.vercel.app", "/onboarding"));
+  it("알려지지 않은 Vercel preview 해시 도메인은 통과 (preview 배포 파괴 방지)", async () => {
+    const res = await proxy(req("web-abc123xyz-sjteam.vercel.app", "/onboarding"));
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("git-branch preview 도메인도 통과", () => {
-    const res = proxy(req("web-git-feature-foo-sjteam.vercel.app", "/onboarding"));
+  it("git-branch preview 도메인도 통과", async () => {
+    const res = await proxy(req("web-git-feature-foo-sjteam.vercel.app", "/onboarding"));
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("query string까지 정확히 보존해 리다이렉트", () => {
-    const res = proxy(req("haenaelge.vercel.app", "/g/my-goal?utm_source=kakao&x=1"));
+  it("query string까지 정확히 보존해 리다이렉트", async () => {
+    const res = await proxy(req("haenaelge.vercel.app", "/g/my-goal?utm_source=kakao&x=1"));
     expect(res.headers.get("location")).toBe(
       "https://haenael-ge.vercel.app/g/my-goal?utm_source=kakao&x=1",
     );

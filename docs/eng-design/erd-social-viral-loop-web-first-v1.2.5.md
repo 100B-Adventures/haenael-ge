@@ -19,7 +19,7 @@
 - [A. v1.2.x 개정 (운영 적용 현황과 추가 변경)](#a-v12-개정-운영-적용-현황과-추가-변경)
   - [A.1 운영 적용 실측표](#a1-운영-적용-실측표)
   - [A.2 D-024 로 바뀐 관계 생성 경로](#a2-d-024-로-바뀐-관계-생성-경로)
-  - [A.3 이번 개정의 스키마 변경 (3건, 전부 비파괴)](#a3-이번-개정의-스키마-변경-3건-전부-비파괴)
+- [A.3 이번 개정의 스키마 변경 (전부 비파괴)](#a3-이번-개정의-스키마-변경-전부-비파괴)
   - [A.4 중단분 정리 실행 계약](#a4-중단분-정리-실행-계약)
     - [A.4.1 삭제 순서](#a41-삭제-순서-행을-먼저-deleted-로-객체는-나중에-채택)
     - [A.4.2 큐 소비자 계약](#a42-큐-소비자-계약-storage_cleanup_queue-를-비우는-주체)
@@ -80,18 +80,18 @@ v1.1.0 §4.3 은 `friend_connection.origin_invite_id` 만 두고 **관계가 초
 
 **관계 방향은 저장하지 않고 판정한다.** `relationship_direction` 을 컬럼으로 두면 응원이 추가될 때마다 갱신해야 하고 그 갱신이 빠지면 화면이 거짓을 말한다. 확정 응원 기록에서 매번 계산한다(`social_has_confirmed_cheer` 재사용). 입력은 응원의 **유무**뿐이고 금액은 쓰지 않는다(D-003).
 
-### A.3 이번 개정의 스키마 변경 (3건, 전부 비파괴)
+### A.3 이번 개정의 스키마 변경 (전부 비파괴)
 6차 개정 R1~R10 중 **스키마를 요구하는 것은 없다.** R1 법적 고지는 정적, R2 비회원 미리보기는 **클라이언트 상수**(회장 확정: 서버 호출 0), R3·R9·R10 은 CSS, R4 는 카피, R5 는 클라이언트, R6 은 기존 테이블 조회, R7 은 UI 제거, R8 은 컴포넌트, D-034 는 `proxy.ts` 다.
 
-**신설 RPC·테이블은 0건이다.** v1.2.0 이 후보로 둔 `platform_social_stats()` 는 회장이 집계 수치 안을 택하지 않아 **폐기**됐다.
+v1.2.0 이 후보로 둔 `platform_social_stats()` 는 회장이 집계 수치 안을 택하지 않아 **폐기**됐다. 이번 절의 서버 자산은 아래 이름으로 식별한다.
 
-**그럼에도 3건이 필요하다.** 중단된 업로드를 치우는 작업에 쓸 자리가 운영에 없다. "서버 변경 0" 이라고 적으면 사실과 다르다.
+중단된 업로드를 치우는 작업에 쓸 자리가 운영에 없으므로 아래 변경이 필요하다. 구현 진척 수는 `node scripts/qa/lint-doc-contradiction.mjs docs/eng-design/*v1.2.5*.md`의 H축을 정본으로 삼고 문서에 손으로 적지 않는다.
 
 | # | 변경 | 종류 | 왜 필요한가 | 파괴적 |
 |---|---|---|---|---|
-| 1 | `storage_cleanup_queue.reason` CHECK 에 `ABANDONED_UPLOAD` 추가 | 제약 교체 | 현재 허용값이 3개(`VISIBILITY_DOWNGRADE`·`ASSET_REPLACED`·`ASSET_REJECTED`)뿐이라 **중단 업로드를 큐에 넣을 수 없다**(`migration:79`) | 아니다. 허용값만 늘린다. 기존 행은 전부 그대로 유효 |
-| 2 | 정리 함수 1개 + 부분 인덱스 1개 + 명명된 cron job 1개 | 신규 함수·인덱스·job | 정책만 있고 **실행 주체가 레포에 0건** | 아니다. `DROP` 으로 완전 되돌림 |
-| 3 | **Storage 큐 소비자** 묶음: 엣지 함수 1개 + cron job 1개 + 점유·완료 RPC 2개 + `locked_at`·`lock_token` 컬럼 2개 + 인덱스 1개 + Vault 비밀값 3개 | 신규 함수·job·컬럼·인덱스 | **DB 행 삭제는 Storage 객체를 지우지 않는다.** 객체를 지우는 주체가 레포에 0건이라 큐만 쌓인다. 그리고 Storage 호출이 트랜잭션 밖이라 **점유 상태를 테이블에 기록**해야 한다(§A.4.2~A.4.5) | 아니다. 컬럼·인덱스 추가는 비파괴, 함수·job 은 삭제 가능 |
+| 1 | `storage_cleanup_queue.reason` CHECK 에 `ABANDONED_UPLOAD` 추가 | 제약 교체 | 기존 허용값으로는 **중단 업로드를 큐에 넣을 수 없다**(`migration:79`) | 아니다. 허용값만 늘린다. 기존 행은 전부 그대로 유효 |
+| 2 | `purge_abandoned_goal_covers` · `requeue_orphan_cover_tombstones` · `goal_cover_asset_abandoned_idx` · `goal_cover_asset_tombstone_idx` · `purge-abandoned-goal-covers` | 신규 함수·인덱스·job | 중단 업로드와 고아 tombstone의 조회 조건·소유권 조건이 달라 책임을 분리한다 | 아니다. 이름별 `DROP` 으로 되돌린다 |
+| 3 | **Storage 큐 소비자**: `storage-cleanup-worker` · `drain-storage-cleanup-queue` · `claim_storage_cleanup_batch` · `settle_storage_cleanup` · `locked_at` · `lock_token` · `storage_cleanup_queue_claimable_idx` · Vault 키 이름 | 신규 함수·job·컬럼·인덱스 | **DB 행 삭제는 Storage 객체를 지우지 않는다.** Storage 호출은 트랜잭션 밖이므로 **점유 상태를 테이블에 기록**해야 한다(§A.4.2~A.4.5) | 아니다. 컬럼·인덱스 추가는 비파괴, 함수·job 은 삭제 가능 |
 
 ```sql
 -- ① 정리 큐 사유 추가 (비파괴: 허용값만 늘린다)
@@ -528,17 +528,17 @@ Supabase Storage `remove([paths])` 는 **삭제된 객체 배열을 반환한다
 
 | 추가 | 종류 |
 |---|---|
-| `supabase/functions/storage-cleanup-worker/` | 엣지 함수 1개 |
-| `[functions.storage-cleanup-worker] verify_jwt = false` | `config.toml` 1절 |
-| `supabase/functions/_shared/cleanup-auth.ts` (notify-auth 패턴 재사용) | 공유 모듈 1개 |
-| `drain-storage-cleanup-queue` cron job | job 1개 |
-| `claim_storage_cleanup_batch(integer, interval)` | 함수 1개 |
-| `requeue_orphan_cover_tombstones(interval)` | 함수 1개 |
-| `goal_cover_asset_tombstone_idx` | 인덱스 1개 |
-| `settle_storage_cleanup(bigint, uuid, boolean)` | 함수 1개 |
-| `storage_cleanup_queue` 에 `locked_at timestamptz` · `lock_token uuid` | 컬럼 2개(비파괴) |
-| `storage_cleanup_queue_claimable_idx` | 인덱스 1개 |
-| Vault 비밀값 3개(`storage_cleanup_worker_url`·`edge_invoke_publishable_key`·`storage_cleanup_internal_token`) | 비밀값 3개 |
+| `supabase/functions/storage-cleanup-worker/` | Storage 삭제 소비자 |
+| `[functions.storage-cleanup-worker] verify_jwt = false` | 게이트웨이 JWT 검사 비활성화 설정 |
+| `supabase/functions/_shared/cleanup-auth.ts` (notify-auth 패턴 재사용) | 내부 토큰 인증 모듈 |
+| `drain-storage-cleanup-queue` cron job | 소비자 기동 스케줄 |
+| `claim_storage_cleanup_batch(integer, interval)` | lease 기반 점유 함수 |
+| `requeue_orphan_cover_tombstones(interval)` | 고아 tombstone 재등록 함수 |
+| `goal_cover_asset_tombstone_idx` | 고아 tombstone 조회 인덱스 |
+| `settle_storage_cleanup(bigint, uuid, boolean)` | 소유권 토큰 기반 정산 함수 |
+| `storage_cleanup_queue` 에 `locked_at timestamptz` · `lock_token uuid` | lease·소유권 컬럼(비파괴) |
+| `storage_cleanup_queue_claimable_idx` | 점유 가능 행 조회 인덱스 |
+| `storage_cleanup_worker_url`·`edge_invoke_publishable_key`·`storage_cleanup_internal_token` | Vault 키 이름 |
 
 **종료 증거(이 계약이 실제로 돈다는 증거) 여섯**
 
@@ -551,10 +551,10 @@ Supabase Storage `remove([paths])` 는 **삭제된 객체 배열을 반환한다
 
 테스트 = CV-08·CV-09·CV-10·CV-11·CV-12 · EA-01~04.
 
-**현재 레포 실물(관찰됨, 2026-10-20)**: `purge_abandoned_goal_covers`·`claim_storage_cleanup_batch`·`settle_storage_cleanup` 함수 3개, `goal_cover_asset_abandoned_idx`·`storage_cleanup_queue_claimable_idx` 인덱스 2개, `purge-abandoned-goal-covers`·`drain-storage-cleanup-queue` job 2개, `storage-cleanup-worker` 엣지 함수 1개, `locked_at`·`lock_token` 컬럼 2개 **합계 16건 전부 0건**이다(2026-10-20 재계수. 함수 **4** · 인덱스 **3** · 컬럼 2 · CHECK 값 1 · cron job 2 · 엣지 함수 1 · 공유 인증 모듈 1 · `config.toml` 절 1 · **`friend_invite_preview` 필드 축소 migration 1**). `storage_cleanup_queue` 테이블과 `storage_cleanup_queue_pending_idx`(`migration:124`)는 실재한다. 즉 **큐는 있고 중단 업로드를 그 큐에 넣는 길만 없다.**
+**현재 레포 실물 판정 방법(2026-10-20)**: 이 절의 자산 목록을 사람이 다시 세지 않는다. `node scripts/qa/lint-doc-contradiction.mjs docs/eng-design/*v1.2.5*.md`의 H축이 각 이름의 구현 참조 수를 낸다. `storage_cleanup_queue`와 `storage_cleanup_queue_pending_idx`(`migration:124`)는 기존 자산이며 H축 신설 목록과 구분한다.
 
 ### A.5 되돌리는 법
-품질헌법 §1-4(데이터 안전). 이번 개정이 추가하는 것은 **제약 교체 1건 + 함수·인덱스·job 3건**이라 되돌림이 단순하다.
+품질헌법 §1-4(데이터 안전). 이번 개정의 추가물은 아래 이름별 되돌림 명령으로 관리한다.
 
 | 추가물 | 되돌리는 명령 | 데이터 손실 |
 |---|---|---|

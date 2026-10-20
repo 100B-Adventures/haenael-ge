@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { Clover } from "lucide-react";
 import { DdayChip, StatusChip } from "./DdayChip";
+import { ClampText } from "@/components/common/ClampText";
 
 export interface GoalCardProps {
   title: string; // "나 편입 평점 4.0"
@@ -76,7 +77,6 @@ export function GoalCard({
   const displayName = normalizedNickname ?? "해낼게 사용자";
   const trimmedTitle = title.trim();
   const needsHaenaelSuffix = !/게[.!?]?$/u.test(trimmedTitle);
-  const [reasonExpanded, setReasonExpanded] = useState(false);
 
   if (variant === "public") {
     return (
@@ -154,21 +154,9 @@ export function GoalCard({
           {/* 왜는 3줄까지 보이고 나머지는 펼쳐 본다. 길다고 잘라 버리면 목표를
               세운 이유가 사라지고, 다 펼쳐 두면 응원 버튼이 화면 밖으로 밀린다.
               design-token-lint-allow: 기존 본문 색상 유지(토큰화는 별도 작업). */}
-          <p
-            className={`text-[14px] leading-relaxed [color:#4a4640]! ${reasonExpanded ? "" : "line-clamp-3"}`}
-            data-testid="goal-reason"
-          >
+          <ClampText className="text-[14px] leading-relaxed [color:#4a4640]!">
             {reason}
-          </p>
-          <button
-            type="button"
-            className="mt-2 inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-bold transition-opacity active:opacity-70 [font-size:var(--text-wordmark)]! [color:var(--accent-foreground)]!"
-            aria-expanded={reasonExpanded}
-            data-testid="goal-reason-toggle"
-            onClick={() => setReasonExpanded((prev) => !prev)}
-          >
-            {reasonExpanded ? "접기" : "더 보기"}
-          </button>
+          </ClampText>
         </div>
       )}
     </article>

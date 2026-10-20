@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ClampText } from "@/components/common/ClampText";
+import { Collapsible } from "@/components/common/Collapsible";
 
 export type ReceiverCheer = {
   id: number;
@@ -48,12 +50,9 @@ function CheerItem({
           {name}
         </p>
         {cheer.message && (
-          <p
-            className="mt-1 truncate text-[length:var(--text-label-small)]! leading-[normal] text-muted-foreground"
-            title={cheer.message}
-          >
+          <ClampText className="mt-1 text-[length:var(--text-label-small)]! leading-[normal] text-muted-foreground">
             {cheer.message}
-          </p>
+          </ClampText>
         )}
       </div>
       <div
@@ -92,11 +91,7 @@ export function CheerList({
   searchQuery = "",
 }: CheerListProps) {
   const isSearching = searchQuery.length > 0;
-  const [expanded, setExpanded] = useState(isSearching);
   const [searchOpen, setSearchOpen] = useState(isSearching);
-  const visibleLimit = expanded ? EXPANDED_LIMIT : PREVIEW_LIMIT;
-  const visibleCheers = cheers.slice(0, visibleLimit);
-  const hiddenCount = Math.max(totalCount - visibleCheers.length, 0);
 
   if (totalCount === 0) return null;
 
@@ -117,85 +112,32 @@ export function CheerList({
         className="overflow-hidden rounded-md border border-border bg-card"
         data-testid="receiver-cheer-card"
       >
-        <div
-          id="receiver-cheer-list"
-          className="px-4"
-          data-testid="receiver-cheer-list"
-          aria-live="polite"
-        >
-          {visibleCheers.map((cheer, index) => (
-            <CheerItem key={cheer.id} cheer={cheer} ordinal={index + 1} />
-          ))}
-          {isSearching && visibleCheers.length === 0 && (
-            <p
-              className="py-8 text-center text-[length:var(--text-label-small)]! text-muted-foreground"
-              role="status"
-            >
-              검색 결과가 없어요.
-            </p>
-          )}
-        </div>
-        {totalCount > PREVIEW_LIMIT && (
-          <div
-            className="flex items-center justify-between gap-3 border-t border-border px-4 py-3"
-            data-testid="cheer-overflow-summary"
-          >
-            {isSearching ? (
-              <span className="text-[length:var(--text-label-small)]! text-muted-foreground">
-                {visibleCheers.length}개 찾았어요
-              </span>
-            ) : expanded ? (
-              <button
-                type="button"
-                className="text-left text-[length:var(--text-label-small)]! text-muted-foreground"
-                aria-label="응원 목록 접기"
-                aria-expanded="true"
-                aria-controls="receiver-cheer-list"
-                onClick={() => {
-                  setExpanded(false);
-                  setSearchOpen(false);
-                }}
-              >
-                전체 목록도 {EXPANDED_LIMIT}개까지 보여줘요
-              </button>
-            ) : (
-              <span className="text-[length:var(--text-label-small)]! text-muted-foreground">
-                미니 목록은 {PREVIEW_LIMIT}개까지 보여줘요
-              </span>
-            )}
-
-            {isSearching ? (
-              <Link
-                href="/me"
-                className="shrink-0 text-[length:var(--text-label-small)]! font-bold text-accent-foreground"
-              >
-                전체 목록
-              </Link>
-            ) : expanded && totalCount > EXPANDED_LIMIT ? (
-              <button
-                type="button"
-                className="shrink-0 text-[length:var(--text-label-small)]! font-bold text-accent-foreground"
-                aria-expanded={searchOpen}
-                aria-controls="receiver-cheer-search-form"
-                onClick={() => setSearchOpen((value) => !value)}
-                data-testid="cheer-search-trigger"
-              >
-                {totalCount - EXPANDED_LIMIT}개는 검색으로 찾기
-              </button>
-            ) : !expanded ? (
-              <button
-                type="button"
-                className="shrink-0 text-[length:var(--text-label-small)]! font-bold text-accent-foreground"
-                aria-label="더 보기"
-                aria-expanded="false"
-                aria-controls="receiver-cheer-list"
-                onClick={() => setExpanded(true)}
-              >
-                {hiddenCount}개 더 있음
-              </button>
-            ) : null}
-          </div>
-        )}
+        <Collapsible policy={{ auxiliary: true, exceedsLimit: totalCount > PREVIEW_LIMIT, hasCollapsedContext: true }}>
+          {(expanded) => {
+            const visibleCheers = cheers.slice(0, expanded ? EXPANDED_LIMIT : PREVIEW_LIMIT);
+            return <>
+              <div id="receiver-cheer-list" className="px-4" data-testid="receiver-cheer-list" aria-live="polite">
+                {visibleCheers.map((cheer, index) => <CheerItem key={cheer.id} cheer={cheer} ordinal={index + 1} />)}
+                {isSearching && visibleCheers.length === 0 && <p className="py-8 text-center text-[length:var(--text-label-small)]! text-muted-foreground" role="status">검색 결과가 없어요.</p>}
+              </div>
+              <p className="cheer-overflow-summary" data-testid="cheer-overflow-summary">
+                {isSearching
+                  ? `${visibleCheers.length}개 찾았어요`
+                  : expanded && totalCount > EXPANDED_LIMIT
+                    ? `전체 목록도 ${EXPANDED_LIMIT}개까지 보여줘요`
+                    : expanded
+                      ? `${visibleCheers.length}개를 모두 보여줘요`
+                      : `미니 목록은 ${PREVIEW_LIMIT}개까지 보여줘요`}
+              </p>
+              {isSearching && <Link href="/me" className="cheer-list-reset">전체 목록</Link>}
+              {!isSearching && expanded && totalCount > EXPANDED_LIMIT && (
+                <button type="button" className="cheer-list-search" aria-expanded={searchOpen} aria-controls="receiver-cheer-search-form" onClick={() => setSearchOpen((value) => !value)} data-testid="cheer-search-trigger">
+                  {totalCount - EXPANDED_LIMIT}개는 검색으로 찾기
+                </button>
+              )}
+            </>;
+          }}
+        </Collapsible>
         {(searchOpen || isSearching) && totalCount > EXPANDED_LIMIT && (
           <form
             id="receiver-cheer-search-form"

@@ -7,14 +7,14 @@ export type NotifyAuthResult =
     message: string;
   };
 
-const MIN_TOKEN_LENGTH = 32;
+export const MIN_TOKEN_LENGTH = 32;
 
-async function sha256(value: string): Promise<Uint8Array> {
+export async function sha256(value: string): Promise<Uint8Array> {
   const bytes = new TextEncoder().encode(value);
   return new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
 }
 
-function constantTimeEqual(left: Uint8Array, right: Uint8Array): boolean {
+export function constantTimeEqual(left: Uint8Array, right: Uint8Array): boolean {
   if (left.length !== right.length) return false;
 
   let mismatch = 0;

@@ -18,6 +18,8 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import protectedRoutes from "@/lib/auth/protected-routes.json";
 
 const CANONICAL_HOST = "haenael-ge.vercel.app";
 
@@ -44,7 +46,12 @@ function shouldRedirectToCanonical(hostname: string): boolean {
   return KNOWN_LEGACY_HOSTS.has(hostname);
 }
 
-export function proxy(request: NextRequest) {
+export function isProtectedRoute(pathname: string) {
+  return protectedRoutes.exact.includes(pathname) ||
+    protectedRoutes.prefix.some((prefix) => pathname.startsWith(prefix));
+}
+
+export async function proxy(request: NextRequest) {
   const url = new URL(request.url);
   const hostname = url.hostname;
 
@@ -53,7 +60,30 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(canonicalUrl, 308);
   }
 
-  return NextResponse.next();
+  let response = NextResponse.next();
+  if (!isProtectedRoute(url.pathname)) return response;
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookies) => {
+          cookies.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next();
+          cookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        },
+      },
+    },
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    const landing = new URL("/", request.url);
+    landing.searchParams.set("next", url.pathname + url.search);
+    return NextResponse.redirect(landing, 307);
+  }
+  return response;
 }
 
 export const config = {

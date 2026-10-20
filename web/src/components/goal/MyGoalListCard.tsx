@@ -6,9 +6,10 @@
 
 import Link from "next/link";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
-import { CheerCount } from "@/components/goal/CheerCount";
 import { MyLinkCard } from "@/components/goal/MyLinkCard";
+import { CheerSummaryBar } from "@/components/social/CheerSummaryBar";
 import { GoalCover } from "@/components/social/GoalCover";
+import type { MySocialGoal } from "@/lib/social/contracts";
 
 export interface MyGoalListCardData {
   id: number;
@@ -16,7 +17,7 @@ export interface MyGoalListCardData {
   title: string; // " 해낼게" suffix 제거된 순수 제목
   due_date: string;
   status: "ACTIVE" | "CLOSED" | "DELETED";
-  cheerCount: number;
+  cheerSummary: Pick<MySocialGoal, "cheer_count" | "supporter_avatars" | "recent_cheer">;
   coverPresetKey: string;
 }
 
@@ -39,7 +40,7 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
         </div>
       </div>
 
-      <CheerCount count={goal.cheerCount} />
+      <CheerSummaryBar goal={goal.cheerSummary} />
 
       <div className="flex items-center gap-2">
         <div className="flex-1">

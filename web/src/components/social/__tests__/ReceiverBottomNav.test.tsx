@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { ReceiverBottomNav } from "../ReceiverBottomNav";
 
@@ -26,26 +27,17 @@ it("CT-NAV-03 관리 탭은 /my로 분리되고 실제 경로에서 활성화된
   expect(myLink).toHaveAttribute("aria-current", "page");
 });
 
-it("CT-NAV-02 비회원 잠금 상태는 홈 외 3탭에 잠금 뱃지를 붙인다", () => {
+it("GT-03 비회원은 자물쇠 없이 예시 미리보기 시트를 연다", async () => {
   pathname = "/";
   const { container } = render(<ReceiverBottomNav locked />);
-  expect(container.querySelectorAll(".receiver-tabbar-lock")).toHaveLength(3);
+  expect(container.querySelectorAll(".receiver-tabbar-lock")).toHaveLength(0);
   expect(screen.getByRole("link", { name: /^홈$/ })).toHaveAttribute(
     "aria-current",
     "page",
   );
-  expect(screen.getByRole("link", { name: /친구/ })).toHaveAttribute(
-    "href",
-    "/onboarding",
-  );
-  expect(screen.getByRole("link", { name: /초대/ })).toHaveAttribute(
-    "href",
-    "/onboarding",
-  );
-  expect(screen.getByRole("link", { name: /관리/ })).toHaveAttribute(
-    "href",
-    "/onboarding",
-  );
+  await userEvent.click(screen.getByRole("button", { name: "친구" }));
+  expect(screen.getByRole("dialog")).toHaveTextContent("예시 화면");
+  expect(screen.getByRole("dialog")).not.toHaveTextContent("친구 3명");
 });
 
 it.each(["/cashout", "/cashout/status", "/cashout/history"])(

@@ -18,6 +18,9 @@ import { MyGoalListCard } from "@/components/goal/MyGoalListCard";
 import { SplitBalanceCard } from "@/components/goal/SplitBalanceCard";
 import { type CashoutRecord } from "@/lib/cashout";
 import { CheerList, type ReceiverCheer } from "@/components/receiver/CheerList";
+import { Collapsible } from "@/components/common/Collapsible";
+import { CheerSummaryBar } from "@/components/social/CheerSummaryBar";
+import { asMySocialDashboard, type MySocialGoal } from "@/lib/social/contracts";
 import {
   ReceiverPageShell,
   ReceiverTopBar,
@@ -82,28 +85,25 @@ export default async function ReceiverHomePage({
 
   // 진행 중 목표가 전부 마감이면(예: 상태 갱신 지연) 온보딩으로 보내지 않고
   // "지난 목표"만 보여준다(설계 §4.6 "목표 전부 마감" 경계) — 이 경우 primary는 없음.
-  const goalIds = allGoals.map((g) => g.id);
-
-  // 응원 인원수 + 정렬용 최근 응원 도착시각을 목표별로 한 번에 집계.
-  // PRD §4.3-1: 최근 응원 도착순, 같으면 생성 역순.
-  const { data: cheerAggRaw } = goalIds.length
-    ? await supabase
-        .from("cheer")
-        .select("goal_id, created_at")
-        .in("goal_id", goalIds)
-        .eq("status", "CONFIRMED")
-        .is("deleted_at", null)
-    : { data: [] as { goal_id: number; created_at: string }[] };
-
-  const cheerCountByGoal = new Map<number, number>();
-  const lastCheerAtByGoal = new Map<number, string>();
-  for (const row of cheerAggRaw ?? []) {
-    cheerCountByGoal.set(row.goal_id, (cheerCountByGoal.get(row.goal_id) ?? 0) + 1);
-    const prevLast = lastCheerAtByGoal.get(row.goal_id);
-    if (!prevLast || row.created_at > prevLast) {
-      lastCheerAtByGoal.set(row.goal_id, row.created_at);
-    }
-  }
+  // R6: 목표별 응원 수·아바타·최근 응원은 my_social_dashboard 단일 호출에서 받는다.
+  // 금액과 순위는 이 응답에 포함하지 않는다.
+  const { data: socialDashboardRaw } = await supabase.rpc("my_social_dashboard");
+  const socialDashboard = asMySocialDashboard(socialDashboardRaw);
+  const cheerSummaryByGoal = new Map<number, MySocialGoal>(
+    (socialDashboard?.goals ?? []).map((socialGoal) => [socialGoal.goal_id, socialGoal]),
+  );
+  const lastCheerAtByGoal = new Map<number, string>(
+    (socialDashboard?.goals ?? []).flatMap((socialGoal) =>
+      socialGoal.recent_cheer
+        ? [[socialGoal.goal_id, socialGoal.recent_cheer.created_at] as const]
+        : []
+    ),
+  );
+  const emptyCheerSummary = {
+    cheer_count: 0,
+    supporter_avatars: [],
+    recent_cheer: null,
+  } satisfies Pick<MySocialGoal, "cheer_count" | "supporter_avatars" | "recent_cheer">;
 
   const stripSuffix = (title: string | null) =>
     (title ?? "").replace(/\s*해낼게\s*$/, "").trim();
@@ -271,6 +271,8 @@ export default async function ReceiverHomePage({
           editable={goal.status === "ACTIVE"}
         />
 
+        <CheerSummaryBar goal={cheerSummaryByGoal.get(goal.id) ?? emptyCheerSummary} />
+
         <Link
           href={`/me/goal/${goal.id}`}
           className="mb-3 flex min-h-11 items-center justify-center rounded-sm bg-accent px-4 text-[13px] font-bold text-accent-foreground"
@@ -431,7 +433,7 @@ export default async function ReceiverHomePage({
                   title: stripSuffix(g.title),
                   due_date: g.due_date,
                   status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
-                  cheerCount: cheerCountByGoal.get(g.id) ?? 0,
+                  cheerSummary: cheerSummaryByGoal.get(g.id) ?? emptyCheerSummary,
                   coverPresetKey: g.cover_preset_key,
                 }}
               />
@@ -441,16 +443,13 @@ export default async function ReceiverHomePage({
 
         {/* 지난 목표 — 마감(due_date < 오늘) 목표를 접어서 둔다(설계 §4.5). */}
         {pastGoals.length > 0 && (
-          <details className="mt-6" data-testid="past-goals-section">
-            <summary
-              className="cursor-pointer select-none py-2 text-[13px] font-bold text-muted-foreground"
-              data-testid="past-goals-toggle"
-            >
-              지난 목표 {pastGoals.length}개
-            </summary>
-            <div className="mt-2">
+          <section className="mt-6" data-testid="past-goals-section">
+            <p className="py-2 text-[13px] font-bold text-muted-foreground">지난 목표 {pastGoals.length}개</p>
+            <Collapsible policy={{ auxiliary: true, exceedsLimit: pastGoals.length > 8, hasCollapsedContext: true }}>
+              {(expanded) => <div className="mt-2">
               {pastGoals
                 .filter((g) => g.id !== goal.id)
+                .slice(0, expanded ? undefined : 8)
                 .map((g) => (
                   <MyGoalListCard
                     key={g.id}
@@ -460,13 +459,14 @@ export default async function ReceiverHomePage({
                       title: stripSuffix(g.title),
                       due_date: g.due_date,
                       status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
-                      cheerCount: cheerCountByGoal.get(g.id) ?? 0,
+                      cheerSummary: cheerSummaryByGoal.get(g.id) ?? emptyCheerSummary,
                       coverPresetKey: g.cover_preset_key,
                     }}
                   />
                 ))}
-            </div>
-          </details>
+              </div>}
+            </Collapsible>
+          </section>
         )}
       </ReceiverPageShell>
     </>

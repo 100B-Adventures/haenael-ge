@@ -26,6 +26,18 @@ const normal = {
     due_date: "2026-12-01",
     status: "ACTIVE" as const,
     cover_preset_key: "c1",
+    cheer_count: 4,
+    supporter_avatars: [
+      { profile_image: null, is_anonymous: false },
+      { profile_image: null, is_anonymous: true },
+      { profile_image: null, is_anonymous: false },
+    ],
+    recent_cheer: {
+      supporter_name: "도경",
+      message: "이번 주도 꾸준히 해낼 수 있어요.",
+      created_at: "2026-10-20T00:00:00Z",
+      is_anonymous: false,
+    },
   }],
   friend_count: 3,
   achievements: {

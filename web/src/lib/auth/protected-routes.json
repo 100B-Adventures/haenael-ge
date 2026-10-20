@@ -1,0 +1,4 @@
+{
+  "exact": ["/me", "/my", "/friends", "/invite", "/cashout", "/wordmap"],
+  "prefix": ["/me/", "/my/", "/friends/", "/cashout/", "/wordmap/"]
+}

@@ -25,7 +25,11 @@ UPDATE public.friend_invite SET created_at=created_at-interval '2 hours' WHERE i
 
 SELECT set_config('test.valid_token',(SELECT payload->>'token' FROM generated_invites LIMIT 1),true);
 SET LOCAL ROLE anon;
-SELECT ok((public.friend_invite_preview(current_setting('test.valid_token')) ?& ARRAY['inviter_nickname','goal_title','cover_preset_key','cover_public_path','expires_at','requires_login']),'PG-32 anon valid preview 최소 계약');
+SELECT is(
+  ARRAY(SELECT jsonb_object_keys(public.friend_invite_preview(current_setting('test.valid_token'))) ORDER BY 1),
+  ARRAY['cover_preset_key','goal_title','inviter_nickname']::text[],
+  'PG-32 anon valid preview는 현재 클라이언트가 쓰는 3개 필드만 반환'
+);
 RESET ROLE;
 
 SET LOCAL ROLE authenticated;

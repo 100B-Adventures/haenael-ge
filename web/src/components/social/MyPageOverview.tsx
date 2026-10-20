@@ -14,9 +14,12 @@ import {
   Target,
 } from "lucide-react";
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
+import { ClampText } from "@/components/common/ClampText";
+import { LegalLinkList } from "@/components/common/LegalFooter";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import type { MySocialDashboard } from "@/lib/social/contracts";
+import { CheerSummaryBar } from "./CheerSummaryBar";
 
 type Preferences = {
   notifyCheer: boolean;
@@ -105,7 +108,8 @@ export function MyPageOverview({
                 <div className="my-goal-chips"><DdayChip dueDate={goal.due_date} /><StatusChip status={goal.status} /></div>
                 <h3 title={goal.title}>{goal.title}</h3>
                 <p><strong>WHY</strong> {goalReasons[goal.goal_id]?.trim() || "이 목표를 시작한 이유를 아직 적지 않았어요."}</p>
-                <div className="my-goal-meta"><span>{goalCheerCounts[goal.goal_id] ?? 0}명이 응원했어요</span><Link href={`/g/${goal.slug}`}><Share2 aria-hidden="true" /> 공유하기</Link></div>
+                <CheerSummaryBar goal={goal} />
+                <div className="my-goal-meta"><span>{goalCheerCounts[goal.goal_id] ?? goal.cheer_count}명이 응원했어요</span><Link href={`/g/${goal.slug}`}><Share2 aria-hidden="true" /> 공유하기</Link></div>
               </div>
             </article>
           )) : (
@@ -168,7 +172,7 @@ export function MyPageOverview({
                   return (
                     <article key={cheer.id}>
                       <span className="my-cheer-avatar" aria-hidden="true">{Array.from(name)[0]}</span>
-                      <div><strong>{name}</strong><p>💬 {cheer.message || "조용한 응원이 도착했어요."}</p></div>
+                      <div><strong>{name}</strong><ClampText className="my-cheer-message">{cheer.message || "조용한 응원이 도착했어요."}</ClampText></div>
                       <div className="my-cheer-status">
                         <strong>응원 도착</strong>
                         <small>{formatCheerDate(cheer.createdAt)}</small>
@@ -219,11 +223,8 @@ export function MyPageOverview({
           />
         </div>
         {saveError && <p className="social-error" role="alert">설정을 저장하지 못했어요. 다시 시도해 주세요.</p>}
-        <nav className="my-policy-links" aria-label="서비스 안내">
-          <Link href="/how">이용안내</Link>
-          <Link href="/terms">이용약관</Link>
-          <Link href="/privacy">개인정보처리방침</Link>
-        </nav>
+        <Link href="/how" className="my-guide-link">이용안내</Link>
+        <LegalLinkList />
       </section>
 
       <section aria-labelledby="my-account-heading">
@@ -231,10 +232,6 @@ export function MyPageOverview({
         <div className="my-account-card"><LogoutButton /></div>
       </section>
 
-      <p className="my-company-foot">
-        정성컴퍼니 · 대표 조성진 · 사업자등록번호 798-31-01774<br />
-        haenaelge.official@gmail.com
-      </p>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Home, LockKeyhole, UserPlus, UserRound, Users } from "lucide-react";
+import { Home, UserPlus, UserRound, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { GuestTeaserSheet } from "./GuestTeaserSheet";
 
 const tabs = [
   { href: "/me", label: "홈", Icon: Home },
@@ -46,22 +48,30 @@ export function ReceiverBottomNavView({
   locked?: boolean;
   pathname: string;
 }) {
+  const [teaserOpen, setTeaserOpen] = useState(false);
   if (!shouldShowBottomNav(pathname)) return null;
 
   return (
-    <nav
-      className="receiver-tabbar"
-      aria-label="주요 메뉴"
-      data-testid="receiver-bottom-nav"
-    >
+    <>
+      <nav className="receiver-tabbar" aria-label="주요 메뉴" data-testid="receiver-bottom-nav">
       {tabs.map(({ href, label, Icon }, index) => {
         const active = label === "홈"
           ? pathname === "/" || pathname === "/me" || pathname.startsWith("/me/")
           : pathname === href || pathname.startsWith(`${href}/`);
-        return (
+        return locked && index > 0 ? (
+          <button
+            type="button"
+            key={`${label}-${index}`}
+            className="transition-transform active:translate-y-px"
+            onClick={() => setTeaserOpen(true)}
+          >
+            <span className="receiver-tabbar-icon"><Icon aria-hidden="true" /></span>
+            <span>{label}</span>
+          </button>
+        ) : (
           <Link
             key={`${label}-${index}`}
-            href={locked ? (index === 0 ? "/" : "/onboarding") : href}
+            href={locked ? "/" : href}
             className={`${active ? "is-active " : ""}transition-transform active:translate-y-px`}
             aria-current={active ? "page" : undefined}
           >
@@ -69,14 +79,11 @@ export function ReceiverBottomNavView({
               <Icon aria-hidden="true" />
             </span>
             <span>{label}</span>
-            {locked && index > 0 && (
-              <span className="receiver-tabbar-lock">
-                <LockKeyhole aria-hidden="true" />
-              </span>
-            )}
           </Link>
         );
       })}
-    </nav>
+      </nav>
+      <GuestTeaserSheet open={teaserOpen} onClose={() => setTeaserOpen(false)} />
+    </>
   );
 }

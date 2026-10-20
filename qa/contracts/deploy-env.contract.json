@@ -22,6 +22,7 @@
     "SUPABASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
     "SUPABASE_ANON_KEY": { "targets": ["supabase-production"], "features": ["wordmap"] },
     "COVER_PUBLIC_BASE_URL": { "targets": ["supabase-production"], "features": ["core"], "optional": true },
+    "STORAGE_CLEANUP_INTERNAL_TOKEN": { "targets": ["supabase-production"], "features": ["storage-cleanup"] },
     "PAYMENTS_ENABLED": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_SECRET_KEY": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_WEBHOOK_TOKEN": { "targets": ["supabase-production"], "features": ["payments"] },
@@ -47,7 +48,7 @@
     },
     "supabase-production": {
       "provider": "supabase",
-      "features": ["core", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events"]
+      "features": ["core", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
     }
   }
 }

@@ -1,11 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { shouldShowBottomNav } from "@/components/social/ReceiverBottomNav";
-import { Footer } from "./Footer";
+import { legalExposureForPath } from "@/lib/legal/exposure";
+import { LegalFooter } from "./LegalFooter";
 
 export function ConditionalFooter() {
   const pathname = usePathname() ?? "";
-  if (shouldShowBottomNav(pathname)) return null;
-  return <Footer />;
+  return <LegalFooter mode={legalExposureForPath(pathname)} />;
 }
