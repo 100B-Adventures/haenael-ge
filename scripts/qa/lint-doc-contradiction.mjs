@@ -294,6 +294,71 @@ function scanPlannedAssets(reg, repo) {
   return rows;
 }
 
+// ── I·J축: 제목 중복과 자기 계열 구버전 참조 ─────────────────────────────────────
+// 왜 (2026-10-20, Codex 7차):
+//   I축 = 설계자가 F축(목차 앵커)을 고치려고 제목을 정규화하다가 **제목을 두 번 붙였다**
+//     (`### A.5 신규 기능 요구### A.5 신규 기능 요구 FR-W12 - FR-W21`). 그런데 F축은 통과했다.
+//     앵커가 그 중복 제목에서 생성되므로 목차와는 맞기 때문이다. **F축은 목차와 제목이 맞나를 보고
+//     제목 자체가 정상인가는 보지 않는다.** 내 축이 통과시킨 결함이고, 검사를 고치려는 수정이 새 결함을
+//     만든 형태다. 그래서 제목의 모양 자체를 보는 축을 따로 둔다.
+//   J축 = v1.2.4 문서의 §A.8.3 입력표가 `api-contract…v1.2.3.md` 를 가리켰다. 그 표는 "필드 목록이
+//     적힌 자리 전수" 이고 **자기 문서를 가리켜야 한다.** 구버전을 가리키면 다음 판에 그 표를 보고
+//     구 파일을 연다. 변경 이력과 교정 기록이 구버전을 부르는 것은 정상이므로 회고 면제를 적용한다.
+function scanHeadingsAndRefs(docs) {
+  const out = [];
+  for (const d of docs) {
+    const lines = d.text.split('\n');
+
+    // I축: 한 줄에 헤딩 마커가 두 번 이상, 또는 같은 제목 문구가 바로 반복
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      if (!/^#{2,6}\s/.test(l)) continue;
+      const markers = (l.match(/#{2,6}\s/g) || []).length;
+      const body = l.replace(/^#{2,6}\s+/, '');
+      const half = Math.floor(body.length / 2);
+      const dup = half > 6 && body.slice(0, half).trim() === body.slice(half).trim();
+      if (markers > 1 || dup) {
+        out.push({ axis: 'I', file: d.name, line: i + 1, note: `제목이 한 줄에서 겹쳤다: ${l.trim().slice(0, 90)}`,
+          why: '목차 앵커는 그 중복 제목에서 생성되므로 F축이 통과시킨다. 겹친 제목은 렌더에서 그대로 두 번 보이고, 다음 판에 그 줄을 고치려는 사람이 어느 쪽이 정본인지 알 수 없다.' });
+      }
+    }
+
+    // J축: 자기 계열의 다른 버전 파일을 계약 서술에서 참조
+    const m = d.name.match(/^(.*?)-v(\d+\.\d+\.\d+)\.md$/);
+    if (!m) continue;
+    const series = path.basename(m[1]).replace(/^[a-z-]+?-/, '');
+    const selfV = m[2];
+    // 면제: 구버전을 가리키는 것이 **정상인 자리**들이다.
+    //   · `기반 포맷` = 포맷 상속 근거를 적는 자리다(표준 §1.5). 직전 판을 가리켜야 맞다.
+    //   · `상류 핀`·`SOURCES/MODEL` = 출처 기록이다.
+    //   · 변경 이력과 교정 기록은 구버전을 불러야 뜻이 통한다.
+    //   2026-10-20 첫 실행에서 24건이 나왔고 그중 20건이 이 자리들이었다. 진짜 결함은 §A.8.3 입력표
+    //   4건뿐이었다. 넓은 검출은 소음이 되고 소음은 검사 전체를 무시하게 만든다(핀 검사와 같은 교훈).
+    const marks = ['변경 이력', '조치', '교정', '가 적은 것', '잔존', '로 교체', '이 적었',
+                   '기반 포맷', '상류 핀', 'SOURCES/MODEL', '선례', '대체됨', 'superseded'];
+    const hist = d.text.indexOf('## 변경 이력');
+    for (let i = 0; i < lines.length; i++) {
+      if (hist >= 0 && d.text.indexOf(lines[i]) > hist) continue;
+      if (marks.some((k) => lines[i].includes(k))) continue;
+      for (const r of lines[i].matchAll(/([a-z-]+)[^\s`]*?v(\d+\.\d+\.\d+)(?:\.md)?/g)) {
+        if (r[2] === selfV) continue;
+        // 같은 **종류**(fdd·erd·api-contract …)의 구버전을 가리킬 때만 센다. 다른 계열 문서(청사진·
+        // 이전 세대 architecture.md)를 부르는 것은 상류 참조이고 결함이 아니다.
+        const kind = path.basename(d.name).split('-social-viral-loop')[0];
+        if (!new RegExp(`${kind}[^\\s\`]*?v${r[2].replace(/\./g, '\\.')}`).test(lines[i]) &&
+            !new RegExp(`${kind}…v${r[2].replace(/\./g, '\\.')}`).test(lines[i])) {
+          const anyKind = /(fdd|erd|api-contract|architecture|test-plan|test-cases|folder-structure|design-patterns)[^\s`]*?…?v\d+\.\d+\.\d+/.test(lines[i]);
+          if (!anyKind) continue;
+        }
+        out.push({ axis: 'J', file: d.name, line: i + 1, note: `자기 버전 v${selfV} 문서가 계약 서술에서 v${r[2]} 파일을 가리킨다: ${lines[i].trim().slice(0, 90)}`,
+          why: '그 표나 문장을 보는 사람이 구 파일을 연다. 변경 이력과 교정 기록이 구버전을 부르는 것은 정상이지만 계약과 입력표는 자기 문서를 가리켜야 한다.' });
+        break;
+      }
+    }
+  }
+  return out;
+}
+
 // ── 자기검증 ──────────────────────────────────────────────────────────────────
 const FIXTURE = path.join(repo, 'scripts/qa/fixtures/doc-contradiction-known.md');
 function selfTest() {
@@ -333,6 +398,7 @@ const findings = scan(reg, docs);
 const fsFindings = scanFieldSets(reg, docs);
 const stFindings = scanStructure(docs);
 const paRows = scanPlannedAssets(reg, repo);
+const hrFindings = scanHeadingsAndRefs(docs);
 
 // ── C 레지스트리 미등재 ───────────────────────────────────────────────────────
 // 왜: 이 검사는 등재된 사실만 본다. 설계 문서가 모순표(§A.9 같은 "같은 사실이 두 곳에 적혔던 자리")에
@@ -394,6 +460,18 @@ if (AS_JSON) {
   } else {
     console.log('E 버전 표기 · F 목차 앵커 · G 적어 둔 수치: 0건');
   }
+  if (hrFindings.length) {
+    const names = { I: '제목 겹침', J: '자기 계열 구버전 참조' };
+    for (const ax of ['I', 'J']) {
+      const g = hrFindings.filter((x) => x.axis === ax);
+      if (!g.length) continue;
+      console.log(`\n${ax} ${names[ax]} ${g.length}건${ax === 'J' ? ' (경고. 차단하지 않는다. 면제를 두 번 좁혀도 9건 중 진짜 결함은 4건이고 나머지는 스킬 푸터·다른 채널 참조·회고 서술이었다. 구버전을 부르는 것이 정상인 자리가 너무 많아 의도와 실수를 구별하지 못한다. AGENTS.md 의 여백 축이 같은 이유로 경고다)' : ''}`);
+      for (const x of g.slice(0, 8)) console.log(`     ${path.basename(x.file)}:${x.line} ${x.note}`);
+      console.log(`     왜 중요한가: ${g[0].why}`);
+    }
+  } else {
+    console.log('I 제목 겹침 · J 자기 계열 구버전 참조: 0건');
+  }
   if (paRows.length) {
     const done = paRows.filter((r) => r.hits > 0).length;
     console.log(`\nH 선언한 신설 서버 자산 ${paRows.length}건 중 구현 참조 있는 것 ${done}건 (막지 않는다)`);
@@ -414,7 +492,7 @@ if (AS_JSON) {
     else console.log(`       · ${f.file}:${f.line}  ${f.text}`);
     console.log(`     왜 중요한가: ${f.fact.why}`);
   }
-  const tot = findings.length + fsFindings.length + stFindings.length;
+  const tot = findings.length + fsFindings.length + stFindings.length + hrFindings.filter((x) => x.axis !== 'J').length;
   console.log(`\n판정: ${tot === 0 ? 'PASS (0건)' : 'FAIL (' + tot + '건)'}`);
 }
-process.exit(findings.length === 0 && fsFindings.length === 0 && stFindings.length === 0 ? 0 : 1);
+process.exit(findings.length === 0 && fsFindings.length === 0 && stFindings.length === 0 && hrFindings.filter((x) => x.axis !== 'J').length === 0 ? 0 : 1);
