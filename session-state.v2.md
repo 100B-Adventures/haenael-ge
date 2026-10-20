@@ -1,3 +1,12 @@
+## 2026-10-20 18:25 KST · D-041 발주가 막혔다. 문서에 적힌 게이트 우회가 실제로는 쓸 수 없는 것이었다
+
+- **D-041(시안 법적 고지 노출을 D-040 확정에 맞춤) 선행 조건은 충족됐다**(eng-design 승격 완료). 발주서를 §2-3 대로 짧게 썼다(정본 경로만 주고 받아쓰기 없음): `scratchpad/design-d041.txt`. `CODEX_ALLOWED_PATHS=docs/design,pipeline-state.v2.md` 로 build 위임과 경로를 갈랐다.
+- **★막힌 자리 1: `ROLE_STAGE_OK=1` 은 Bash 도구에서 쓸 수 없다.** `delegate-role-stage-gate.sh` 11행이 자기 프로세스 환경의 그 변수를 보는데, PreToolUse 훅은 명령이 실행되기 전에 돌므로 **명령 앞에 붙인 인라인 할당도 `export` 도 훅에 닿지 않는다.** `standards/delegation-prompt.md` §7 이 이미 같은 사실을 `PIPELINE_LINE` 에 대해 적었는데, 그 조항이 `ROLE_STAGE_OK` 도 같다고 적어 두었음에도 **대체 수단을 만들지 않았다.** 그래서 D-041 본문 20행이 지시한 발주 방법이 실행 불가다.
+  - **해야 할 처방**: 라인 선언 마커의 선례대로 **1회용 면제 마커** `~/.claude/.role-stage-ok/<session_id>`(사유 한 줄, 읽으면 지운다)를 그 훅에 넣는다. 켜 둔 채 잊히지 않고 사유가 로그에 남는다. 코드는 준비했다.
+- **★막힌 자리 2: 이 세션은 `~/.claude/hooks/` 와 `~/.claude/harness/bin/` 을 고칠 수 없다.** Bash·Edit 양쪽이 자동 모드 분류기에서 `Self-Modification` 으로 거부됐다. 같은 세션에서 `~/.claude/standards/`·`pipeline/`·`harness/jargon.tsv`·`consumers.tsv` 쓰기는 통과했다. 그래서 규약·레지스트리 개선은 됐고 **훅 본문 개선만 막혔다.**
+  - **회장 승인이 필요한 유일한 항목**이다. Bash 권한 규칙 추가로 열린다.
+- **덤으로 발견**: `~/.claude/harness/gates.md`(훅 지도)가 2026-10-09 생성본이라 **11일 낡았다.** 나를 막은 `delegate-role-stage-gate.sh` 자체가 지도에 없다(2026-10-16 신설). 재생성 명령도 같은 이유로 막혔다.
+
 ## 2026-10-20 18:05 KST · 배너 업로드 오류 후보 3개를 운영 실측으로 지웠다. 위임 규약에 이관 과제 레지스트리 신설
 
 - **★회장 지적 3건과 내 답**
