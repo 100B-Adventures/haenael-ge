@@ -244,7 +244,8 @@
         "cover_url(승인 커버)"
       ],
       "why": "D-019. `cover_public_path` 는 공개 버킷의 객체 경로이고 `my_friend_goals` 의 `cover_url`(PUBLIC 은 공개 URL, FRIENDS 는 120초 Presigned URL)과 다른 필드다. 두 RPC 를 같은 이름으로 묶으면 FRIENDS 커버를 비회원에게 주는 경로가 열린 것처럼 읽힌다. 운영은 이미 `CASE WHEN visibility='PUBLIC' … ELSE NULL`(migration:369)로 강제하고 있었고 어긋난 것은 설계 문구뿐이었다(Codex 5차 P0-1).",
-      "_왜_금지값인가": "v1.2.2 는 이 필드를 **일관되게** `cover_url`(승인 커버)로 적었다. 값이 한 종류뿐이라 B축(값 분기)은 발동하지 않는다. 일관되게 틀린 것은 분기로 잡히지 않는다. 그래서 A축(금지값)으로 잡는다. 2026-10-20 에 B축만 걸어 뒀더니 v1.2.2 를 통과시키고 v1.2.3 의 회고 서술만 잡는 반대 결과가 나왔다."
+      "_왜_금지값인가": "v1.2.2 는 이 필드를 **일관되게** `cover_url`(승인 커버)로 적었다. 값이 한 종류뿐이라 B축(값 분기)은 발동하지 않는다. 일관되게 틀린 것은 분기로 잡히지 않는다. 그래서 A축(금지값)으로 잡는다. 2026-10-20 에 B축만 걸어 뒀더니 v1.2.2 를 통과시키고 v1.2.3 의 회고 서술만 잡는 반대 결과가 나왔다.",
+      "_v125_주": "v1.2.5 에서 비회원 초대 미리보기 응답이 **3개로 축소**됐다(`inviter_nickname`·`goal_title`·`cover_preset_key`). `cover_public_path` 가 응답에서 빠졌으므로 이 사실의 대상 자체가 없어졌다. Codex 7차: '미래 사용 계획은 현재 API 의 최소 응답 집합 근거가 될 수 없다'. 금지값 검사는 과거 판 회귀용으로 남긴다."
     },
     {
       "id": "F16",
@@ -438,6 +439,15 @@
         "web/src/app/"
       ],
       "why": "사업자 정보 전문을 소유하는 2단 화면(D-040)"
+    },
+    {
+      "id": "PA-14",
+      "종류": "RPC 함수",
+      "token": "requeue_orphan_cover_tombstones",
+      "expect_in": [
+        "supabase/migrations/"
+      ],
+      "why": "고아 tombstone(큐 행이 애초에 안 생긴 DELETED 행)을 찾아 큐에 재등록한다. v1.2.5 에서 `purge_abandoned_goal_covers()` 에서 쪼개 나왔다. 한 함수가 UPLOADING 조회와 DELETED 조회를 함께 하면 WHERE 가 OR 로 갈리고 각 분기의 안전 조건이 달라진다. 쪼개서 각 함수의 조회 상태를 하나로 만든 것이 Codex 7차 P0(CV-12 삼자 불일치)의 처방이다."
     }
   ]
 }
