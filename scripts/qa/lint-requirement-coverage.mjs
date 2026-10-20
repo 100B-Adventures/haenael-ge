@@ -82,6 +82,22 @@ for (const d of searchDirs) {
 }
 const missingTests = [...wanted].filter((id) => !new RegExp(`\\b${id}\\b`).test(corpus)).sort();
 
+// ── C 추적성 매트릭스의 빈 칸: 만들지 않았다. 왜 못 만드는지 적는다 ─────────────
+// 2026-10-20 Codex 8차 P1 이 이 검사의 공백을 짚었다. "자동 커버리지 검사는 요구 ID 와 테스트 ID 의
+//   존재만 확인해 다음 누락을 통과시켰다. R2 행은 초대 미리보기 3필드 축소를 요구하면서 서버 계약을
+//   `0건` 으로 적는다. 실제 설계에는 `friend_invite_preview(` 가 있다."
+//
+// 축을 두 번 시도했고 둘 다 실패했다.
+//   ① 같은 행에 함수·라우트 이름이 있으면 모순으로 센다 → 4건 중 Codex 가 지목한 것은 2건이었다.
+//      라우트만 있는 행(`/how`·`/my`)은 순수 화면 변경이고 서버 계약 0건이 맞다.
+//   ② 함수 이름만 센다 → **0건.** Codex 가 본 것은 "같은 행" 이 아니라 **설계 본문**에 그 함수가
+//      있다는 사실이다. 행과 본문을 잇는 데는 그 요구가 서버를 쓰는지에 대한 의미 이해가 필요하다.
+//
+// 그래서 **만들지 않는다.** 0건만 내는 축은 장식이고, 억지 판정은 오탐이 되어 검사 전체를 무시하게
+//   만든다(`lint-doc-contradiction.mjs` 의 J축에서 같은 결론을 냈다). 이 자리는 **교차 리뷰가 보는
+//   축**으로 남기고, 그 사실을 여기 적어 다음 사람이 "검사가 통과했으니 추적성 갭 0" 으로 읽지 않게 한다.
+//   **존재를 세는 것과 행이 끝까지 닿는지 보는 것은 다른 명제다.**
+
 const total = uncovered.length + missingTests.length;
 
 if (AS_JSON) {
@@ -100,6 +116,7 @@ if (AS_JSON) {
   console.log(`추적성 문서: ${path.relative(repo, tracePath)}`);
   console.log(`테스트 케이스: ${path.relative(repo, casesPath)}`);
   console.log(`\nA 요구 미커버 ${uncovered.length}건 · B 테스트 미실재 ${missingTests.length}건 (참조된 테스트 ID ${wanted.size}개)`);
+  console.log('  ※ 이 검사는 ID 의 존재만 본다. 매트릭스 행의 서버 계약 칸이 낡았는지(설계 본문에 함수가 있는데 행은 0건)는 보지 않는다. 그 축은 만들지 못했고 이유를 파일 머리에 적었다. 교차 리뷰가 보는 자리다.');
   for (const r of uncovered) {
     console.log(`\n  A 미커버  ${r.id}  ${r.요구}`);
     console.log(`     회장원문: ${String(r.회장원문).slice(0, 70)}`);

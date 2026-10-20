@@ -405,6 +405,59 @@ function scanSqlStates(docs) {
   return out;
 }
 
+// ── L축: 문서가 단정한 레포 경로의 실재와 개수 ───────────────────────────────────
+// 보는 것: 문서 본문이 가리키는 레포 상대 경로(`docs/…`·`supabase/…`·`web/src/…`·`scripts/…`)가
+//   실제로 있는지, 그리고 같은 줄에 "N개" 주장이 있으면 그 디렉터리의 파일 수와 맞는지.
+// 보지 않는 것: 파일 내용의 정합, 경로가 "앞으로 만들 것" 인지 "이미 있다" 인지의 어조. 그래서
+//   **없는 경로만 알리고 판정은 차단으로 둔다**(신설 예정 경로는 planned_assets 가 따로 센다).
+//
+// 왜 (2026-10-20, Codex 8차 P0): FDD 가 `docs/qa/evidence/mermaid-render-v1.2.5/` 에 SVG 15개가
+//   있다고 단정했는데 **실제로 0개**였다. 설계자가 v1.2.4 폴더만 만들고 v1.2.5 는 만들지 않은 채
+//   문서에 있다고 적었다. 컨트롤러는 v1.2.4 때 15개를 직접 셌고 **v1.2.5 때는 세지 않았다.**
+//   자기신고 릴레이의 반복이다. 회장이 두 번 지적한 "증거가 있다고 적었는데 없다" 의 전형이고
+//   (2026-10-13·10-14) 그래서 세는 주체를 검사로 옮긴다.
+function scanClaimedPaths(docs, repo) {
+  // **증거 경로만 본다.** 설계 문서는 신설 예정 파일(`web/src/lib/legal/exposure.ts` 등)을 표에
+  //   적는 것이 정상이고, 그것까지 세면 20건 중 대부분이 오탐이 된다(2026-10-20 실측).
+  //   증거는 정의상 **이미 있어야 하는 것**이므로 그 경로만 보면 오탐이 없다. 신설 예정 자산은
+  //   planned_assets(H축)가 따로 센다.
+  const RE = /`((?:docs\/qa\/(?:evidence|captures)[A-Za-z0-9._\/-]*))`?/g;
+  const out = [];
+  const seen = new Set();
+  for (const d of docs) {
+    const lines = d.text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      // 신설 예정을 말하는 줄은 뺀다. planned_assets(H축)가 그쪽을 센다.
+      if (/신설|만든다|추가한다|생성|예정|앞으로|will|TODO/.test(lines[i])) continue;
+      for (const m of lines[i].matchAll(RE)) {
+        const rel = m[1];
+        const key = d.name + '|' + rel;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const full = path.join(repo, rel);
+        if (fs.existsSync(full)) {
+          // 디렉터리이고 같은 줄에 "N개" 주장이 있으면 개수도 본다.
+          const cm = lines[i].match(/(\d+)\s*개/);
+          if (cm && fs.statSync(full).isDirectory()) {
+            const want = Number(cm[1]);
+            // 주장 문구에 확장자 힌트가 있으면 그 종류만 센다. "SVG 15개" 를 README 까지 세면
+            // 16 이 나와 거짓 경보가 된다(2026-10-20 실측).
+            const extHint = (lines[i].match(/\b(svg|png|pdf|json|md|html)\b/i) || [])[1];
+            const all = fs.readdirSync(full).filter((f) => !f.startsWith('.'));
+            const got = extHint ? all.filter((f) => f.toLowerCase().endsWith('.' + extHint.toLowerCase())).length : all.length;
+            if (want !== got && Math.abs(want - got) <= 50) {
+              out.push({ file: d.name, line: i + 1, rel, note: `\`${rel}\` 에 ${want}개가 있다고 적었는데 실제 ${got}개다` });
+            }
+          }
+          continue;
+        }
+        out.push({ file: d.name, line: i + 1, rel, note: `\`${rel}\` 가 실재하지 않는다` });
+      }
+    }
+  }
+  return out;
+}
+
 // ── 자기검증 ──────────────────────────────────────────────────────────────────
 const FIXTURE = path.join(repo, 'scripts/qa/fixtures/doc-contradiction-known.md');
 function selfTest() {
@@ -446,6 +499,7 @@ const stFindings = scanStructure(docs);
 const paRows = scanPlannedAssets(reg, repo);
 const hrFindings = scanHeadingsAndRefs(docs);
 const kRows = scanSqlStates(docs);
+const lFindings = scanClaimedPaths(docs, repo);
 
 // ── C 레지스트리 미등재 ───────────────────────────────────────────────────────
 // 왜: 이 검사는 등재된 사실만 본다. 설계 문서가 모순표(§A.9 같은 "같은 사실이 두 곳에 적혔던 자리")에
@@ -507,6 +561,13 @@ if (AS_JSON) {
   } else {
     console.log('E 버전 표기 · F 목차 앵커 · G 적어 둔 수치: 0건');
   }
+  if (lFindings.length) {
+    console.log(`\nL 문서가 단정한 경로의 실재 ${lFindings.length}건`);
+    for (const x of lFindings.slice(0, 10)) console.log(`     ${path.basename(x.file)}:${x.line} ${x.note}`);
+    console.log('     왜 중요한가: 증거가 있다고 적었는데 없으면 그것이 허위 완료다. 회장이 두 번 지적한 종류이고(2026-10-13·10-14) 세는 주체를 사람에서 검사로 옮긴 자리다.');
+  } else {
+    console.log('L 문서가 단정한 경로: 전부 실재');
+  }
   if (kRows.length) {
     console.log(`\nK SQL 함수의 조회 상태와 전이 상태 (정보. 판정하지 않는다)`);
     for (const r of kRows) {
@@ -546,7 +607,7 @@ if (AS_JSON) {
     else console.log(`       · ${f.file}:${f.line}  ${f.text}`);
     console.log(`     왜 중요한가: ${f.fact.why}`);
   }
-  const tot = findings.length + fsFindings.length + stFindings.length + hrFindings.filter((x) => x.axis !== 'J').length;
+  const tot = findings.length + fsFindings.length + stFindings.length + hrFindings.filter((x) => x.axis !== 'J').length + lFindings.length;
   console.log(`\n판정: ${tot === 0 ? 'PASS (0건)' : 'FAIL (' + tot + '건)'}`);
 }
-process.exit(findings.length === 0 && fsFindings.length === 0 && stFindings.length === 0 && hrFindings.filter((x) => x.axis !== 'J').length === 0 ? 0 : 1);
+process.exit(findings.length === 0 && fsFindings.length === 0 && stFindings.length === 0 && hrFindings.filter((x) => x.axis !== 'J').length === 0 && lFindings.length === 0 ? 0 : 1);
