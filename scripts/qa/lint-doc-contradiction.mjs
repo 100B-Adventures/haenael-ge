@@ -359,6 +359,52 @@ function scanHeadingsAndRefs(docs) {
   return out;
 }
 
+// ── K축: SQL 함수의 조회 상태와 전이 상태를 갈라 보여준다 ─────────────────────────
+// 보는 것: 문서 안 SQL 함수 정의에서 **WHERE 가 조회하는 상태**와 **SET 이 전이시키는 상태**를 갈라
+//   표로 낸다. 산문이 "이 함수가 X 상태도 찾아 처리한다" 고 선언했는데 X 가 조회 쪽에 없으면 그
+//   선언은 SQL 에 없는 동작이다.
+// 보지 않는 것: 산문 문구의 의미(찾는다·만든다·거친다를 구별하지 못한다)와 SQL 의 의미 정합. 그래서
+//   **판정하지 않고 정보만 낸다.** 자동 판정이 어려운 자리를 억지로 판정하면 오탐이 난다(J축 교훈).
+//
+// 왜 (2026-10-20, Codex 7차 P0): `purge_abandoned_goal_covers()` 의 SQL 은
+//   `WHERE a.status = 'UPLOADING'` 으로 **조회**하고 `SET status = 'DELETED'` 로 **전이**시킨다.
+//   산문은 같은 함수가 "`DELETED` tombstone 도 찾아 큐에 재등록한다" 고 선언했고 CV-12 가 그것을
+//   기대했다. **`DELETED` 는 쓰기 대상이고 조회 대상이 아니다.** 구현자가 문서의 SQL 을 적용하면
+//   CV-12 후반부를 통과할 수 없다.
+//   첫 설계에서 조회와 전이를 **합쳐** 집합 비교했더니 `DELETED` 가 양쪽에 다 있는 것으로 읽혀
+//   이 결함을 통과시켰다. 같은 자리를 또 놓친 것이고, 그래서 가르는 것이 이 축의 핵심이다.
+function scanSqlStates(docs) {
+  const SKIP = new Set(['SQL','WHERE','SELECT','UPDATE','DELETE','INSERT','FROM','AND','OR','NOT','CREATE','FUNCTION',
+    'RETURNS','TRUE','FALSE','NULL','EXECUTE','CHECK','DROP','EXISTS','SKIP','LOCKED','RETURNING','INTO','VALUES',
+    'DECLARE','BEGIN','END','SET','LANGUAGE','VOLATILE','SECURITY','DEFINER','REVOKE','GRANT','PUBLIC','ALTER','TABLE',
+    'INDEX','UNIQUE','PRIMARY','FOREIGN','REFERENCES','DEFAULT','INTERVAL','COUNT','WITH','AS','ON','IN','IS','FOR','DO']);
+  const out = [];
+  for (const d of docs) {
+    const lines = d.text.split('\n');
+    let inFence = false, fence = [];
+    const blocks = [];
+    for (const l of lines) {
+      if (/^```/.test(l)) {
+        if (inFence) { blocks.push(fence.join('\n')); fence = []; }
+        inFence = !inFence;
+        continue;
+      }
+      if (inFence) fence.push(l);
+    }
+    for (const body of blocks) {
+      for (const fm of body.matchAll(/CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+(?:public\.)?([a-z_]+)[\s\S]*?(?=CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION|$)/gi)) {
+        const name = fm[1], seg = fm[0];
+        const read = new Set(), write = new Set();
+        for (const m of seg.matchAll(/(?:WHERE|AND|OR)[^;\n]{0,120}?status\s*(?:=|IN)\s*\(?\s*((?:'[A-Z_]+'\s*,?\s*)+)/gi))
+          for (const t of m[1].matchAll(/'([A-Z_]+)'/g)) if (!SKIP.has(t[1])) read.add(t[1]);
+        for (const m of seg.matchAll(/SET[^;\n]{0,80}?status\s*=\s*'([A-Z_]+)'/gi)) if (!SKIP.has(m[1])) write.add(m[1]);
+        if (read.size || write.size) out.push({ file: d.name, name, read: [...read], write: [...write] });
+      }
+    }
+  }
+  return out;
+}
+
 // ── 자기검증 ──────────────────────────────────────────────────────────────────
 const FIXTURE = path.join(repo, 'scripts/qa/fixtures/doc-contradiction-known.md');
 function selfTest() {
@@ -399,6 +445,7 @@ const fsFindings = scanFieldSets(reg, docs);
 const stFindings = scanStructure(docs);
 const paRows = scanPlannedAssets(reg, repo);
 const hrFindings = scanHeadingsAndRefs(docs);
+const kRows = scanSqlStates(docs);
 
 // ── C 레지스트리 미등재 ───────────────────────────────────────────────────────
 // 왜: 이 검사는 등재된 사실만 본다. 설계 문서가 모순표(§A.9 같은 "같은 사실이 두 곳에 적혔던 자리")에
@@ -459,6 +506,13 @@ if (AS_JSON) {
     }
   } else {
     console.log('E 버전 표기 · F 목차 앵커 · G 적어 둔 수치: 0건');
+  }
+  if (kRows.length) {
+    console.log(`\nK SQL 함수의 조회 상태와 전이 상태 (정보. 판정하지 않는다)`);
+    for (const r of kRows) {
+      console.log(`     \`${r.name}()\`  조회(WHERE): ${r.read.join('·') || '없음'}  →  전이(SET): ${r.write.join('·') || '없음'}`);
+    }
+    console.log('     산문이 "이 함수가 X 상태도 찾아 처리한다" 고 선언했는데 X 가 조회 쪽에 없으면 그 선언은 SQL 에 없는 동작이다. 전이 쪽에 있는 것은 쓰기 대상이지 조회 대상이 아니다.');
   }
   if (hrFindings.length) {
     const names = { I: '제목 겹침', J: '자기 계열 구버전 참조' };
