@@ -17,9 +17,24 @@ const expected = ["storage_cleanup_worker_url", "edge_invoke_publishable_key", "
 const declared = new Set((contract.vaultSecrets ?? []).map((row) => row.name));
 const missing = expected.filter((name) => !declared.has(name));
 sql("DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_SCHEDULE_FAILED' AND details->>'stage'='verification';");
-const eventId = sql("SELECT public.record_storage_cleanup_schedule_failure('verification','XX000','controlled registration failure');");
-const event = sql(`SELECT event_type||'|'||(details->>'stage') FROM public.ops_event WHERE id=${Number(eventId)};`);
+// service_role은 cron schema를 읽을 수 없다. 실제 insufficient_privilege를
+// migration과 같은 EXCEPTION 분기로 통과시켜 실패 이벤트가 남는지 본다.
+sql(`
+  SET ROLE service_role;
+  DO $verify$
+  BEGIN
+    BEGIN
+      PERFORM 1 FROM cron.job LIMIT 1;
+    EXCEPTION WHEN insufficient_privilege THEN
+      PERFORM public.record_storage_cleanup_schedule_failure('verification', SQLSTATE, SQLERRM);
+    END;
+  END
+  $verify$;
+  RESET ROLE;
+`);
+const eventId = sql("SELECT id FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_SCHEDULE_FAILED' AND details->>'stage'='verification' ORDER BY id DESC LIMIT 1;");
+const event = sql(`SELECT event_type||'|'||(details->>'stage')||'|'||(details->>'sqlstate') FROM public.ops_event WHERE id=${Number(eventId)};`);
 sql(`DELETE FROM public.ops_event WHERE id=${Number(eventId)};`);
 
 console.log(JSON.stringify({ cron_jobs_active: Number(jobs), vault_contract_missing: missing, failure_event: event }));
-if (jobs !== "2" || missing.length || event !== "STORAGE_CLEANUP_SCHEDULE_FAILED|verification") process.exit(1);
+if (jobs !== "2" || missing.length || event !== "STORAGE_CLEANUP_SCHEDULE_FAILED|verification|42501") process.exit(1);

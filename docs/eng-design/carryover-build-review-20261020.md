@@ -29,7 +29,7 @@
 |---|---|---|
 | 1 | 닫힘 | `GoalCoverPicker.test.tsx` GC-01~05. format·sign·PUT·finalize 문구와 상태 로그, 업로드 중 preset 차단 5/5 |
 | 2 | 닫힘 | Storybook `receiver-ui-cheerlist--overflow`, 390×844: `lineClamp=2`, `clientHeight=32`, `scrollHeight=80`, 셰브론 노출, console error 0 |
-| 3 | 닫힘 | `verify-storage-cleanup-schedules.mjs`: active cron 2, Vault 계약 누락 0, 실패 이벤트 `STORAGE_CLEANUP_SCHEDULE_FAILED|verification` |
+| 3 | 닫힘 | `verify-storage-cleanup-schedules.mjs`: active cron 2, Vault 계약 누락 0, service_role 실제 권한 오류가 `STORAGE_CLEANUP_SCHEDULE_FAILED|verification|42501`로 기록됨 |
 | 4 | 닫힘 | 구 6필드 pick·현 3필드·null 로그 계약과 초대 카드 렌더 테스트 포함 전체 Vitest 367/367 |
 | 5 | 닫힘 | `qa/contracts/protected-routes.json` 단일 정본. `lint-protected-routes.mjs`: roots 5, missing 0, invite public true |
 | 6 | 닫힘 | proxy AU-05가 Supabase env·Auth 실패에서 `/` 리다이렉트를 관찰. 관련 테스트 10/10 |
