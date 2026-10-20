@@ -137,6 +137,16 @@ override_expires: ""
 
 ## 승인 로그 (append-only · 최신순)
 
+### 2026-10-20 20:18 KST · build 승격 **거부**. 교차 코드리뷰 BLOCK 과 dev 배포 증거 부재
+
+- **거부 사유 2건.**
+  1. `product-lane.yaml` build 절의 `dev_deploy` 증거 2종(`dev-health-200`·`smoke-happy-1pass`)이 없다. worker 스모크는 `127.0.0.1:3000` 이고 QA 는 배포된 dev 주소에서 돈다(2026-09-29 회장 확정). 로컬 대상 QA 는 `pipeline-artifact-lint.sh` 검사 H 가 반려한다.
+  2. `critic_loop`(코드리뷰) 판정이 **BLOCK** 이다. 교차 모델(Claude code-reviewer, Codex 가 짠 코드이므로) MAJOR 14·MINOR 6, RUBRIC 21/25. 고위험(인증·마이그레이션)에 MAJOR 3건이 남아 있어 승인 불가다.
+- **통과한 것**(기록). 컨트롤러 직접 재실행: `tsc --noEmit` rc=0 · Vitest 63파일 358/358 · `lint-doc-contradiction` 차단축 0건·H축 14/14 · `lint-requirement-coverage` A 0건 B 0건 · `component-deletion-check.sh 3da6c1e` 삭제 0건 · `verify-agent-quality.sh` PASS.
+- **반려분 처리**: 15건을 `docs/eng-design/carryover-build-review-20261020.md` 레지스트리로 적립하고 같은 Codex 워커에 재위임했다(P0 5·P1 6·P2 3·P3 1). 컨트롤러 커밋 결함 3건(색 토큰)은 `07c1255` 로 직접 닫았다. 다른 11건은 hand-patch 금지(헌법 §7)라 손대지 않았다.
+- **선행 조건(회장 대기)**: Supabase 접근 토큰 1건. 이 호스트의 Supabase CLI 계정에 운영 프로젝트 권한이 없다(403, 두 경로 실측). 그것 없이는 마이그레이션 적용·엣지 함수 배포·프리뷰 배포가 전부 불가하고 따라서 dev 증거를 만들 수 없다.
+- **핀 경고 16건**: 승격 시 재계산한다. 지금은 승격하지 않았으므로 갱신하지 않는다.
+
 ### 2026-10-20 15:4x · eng-design 승격 (v1.2.5). 회장 지시로 왕복을 끊었다
 
 - **회장 원문**: "꼼꼼히 하는건 좋은데 뭔 놈의 기술설계를 8차까지 가냐? 복잡한 앱도 아니고 그냥 간단한 CRU 수준인데 어이가 없네. 왜 니 응답에는 기술설계에서 뭐때문에 그렇게 도는지 설명이 단하나도 없냐? 개발해 난 이따위 수준의 기능이 기술설계를 10차까지 돌일이 아니라고 판단하는데?"
