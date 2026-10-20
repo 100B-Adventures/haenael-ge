@@ -1,4 +1,36 @@
+## 2026-10-20 19:53 KST · build 재위임 회수. 내가 직접 재검증했고 build 승격은 거부했다(dev 배포 증거 없음)
+
+- **회수 결과 rc=0.** 커밋 `3da6c1e`. Codex code-builder 가 선언한 판정 9줄 중 8줄이 "일치", 1줄이 "운영 배너 동일 원인 미확인".
+- **자기신고를 그대로 올리지 않고 내가 다시 돌렸다.**
+  - `npx tsc --noEmit` rc=0 · Vitest **63파일 358/358** (워커 보고와 같은 수치)
+  - 설계 검사: `lint-doc-contradiction` 차단축 **0건** · **H축 14/14** (선언 서버 자산 전부 구현 참조 보유) · `lint-requirement-coverage` A 0건·B 0건(참조 테스트 ID 114개)
+  - `component-deletion-check.sh 3da6c1e` = 삭제된 화면 부품 0건
+  - `verify-agent-quality.sh` PASS(Skill 1회·WebSearch 4회·참조조회 179회)
+  - Mermaid SVG 15개는 `docs/qa/evidence/mermaid-render-v1.2.5/` 에 실재하고 내용이 실제 렌더 결과다(17KB~292KB).
+- **★build 승격을 거부했다.** `product-lane.yaml` build 절의 `dev_deploy` 증거 2종(`dev-health-200`·`smoke-happy-1pass`)이 **없다.** 워커 스모크는 `127.0.0.1:3000` 이고 QA 는 배포된 dev 주소에서 돌아야 한다(2026-09-29 회장 확정). 코드리뷰 사이클도 이번 판에 안 돌았다 -> 교차 모델(Claude code-reviewer) 로 발주해 진행 중.
+- **★dev 배포가 막힌 진짜 이유를 찾았다. 추측이 아니라 명령 출력이다.**
+  - 이 호스트의 Supabase CLI 로그인 계정에 **haenael-ge 운영 프로젝트(`ossvejipdivgxzcqszbw`)가 없다.** `supabase projects list` 결과에 haejo-danta·vibe-doctor 둘뿐이다.
+  - 두 경로로 재확인했다: `projects api-keys --project-ref` **403 privileges**, `migration list --linked` **403 privileges**. 대체 토큰도 없다(시크릿 디렉터리·키체인·`~/.supabase` 전부 조회, `SUPABASE_ACCESS_TOKEN` 0건).
+  - 그래서 **마이그레이션 3건 적용과 엣지 함수 배포를 이 세션이 할 수 없다.** 회장 계정 권한 문제다.
+- **★배너 업로드 오류: 후보를 하나 더 지웠다. 격리 버킷은 운영에 있다.**
+  - QA 계정 토큰으로 운영 Storage 를 읽었다. `goal-cover-quarantine` 과 `goal-cover-public` 은 없는 객체에 **`NoSuchKey` "Object not found"**, 대조군인 가짜 버킷 이름은 **`NoSuchBucket` "Bucket not found"**. 두 버킷 다 실재한다.
+  - 로컬 원인은 워커가 찾았다: `COVER_PUBLIC_BASE_URL` 미주입이면 Presigned URL 이 Edge Runtime 내부 `127.0.0.1:8000` 을 가리킨다. **운영에서는 이 경로가 성립하지 않는다** — `externalizeSignedStorageUrl` 이 그 값이 없을 때 `x-forwarded-host`·`host` 로 넘어가고 호스팅 Supabase 에서는 그것이 올바른 프로젝트 도메인이다. 그래서 **운영 원인은 여전히 미확정**이고, 남은 길은 QA 계정에 목표 1건을 만들어 sign -> PUT -> finalize 를 끝까지 누르는 것이다(운영 쓰기).
+- **★D-029 색 대비 토큰을 적용해 닫았다.** 커밋 `e171841`.
+  - `var(--faint)` 읽는 글자 사용처를 **web/src 50곳 전부**와 **승인 프로토타입 50곳**에서 `--muted` 계열로 옮겼다. `--faint` 가 남은 자리는 프로토타입 `.cb-more` **배경 1곳**뿐이다(장식).
+  - 흰 배경 위 글자색으로 쓰인 `--clover` 는 하단탭 활성 라벨·워드맵 2단·랜딩 미리보기 중간단과 프로토타입 13px 2곳에서 `--clover-ink` 로 바꿨다. 워드맵 하트·빈 상태 아이콘·채움 배경·테두리는 안 바꿨다(비텍스트).
+  - 측정값: `--muted` 흰배경 **5.38:1** · 앱배경 5.15:1 · 따뜻한면 4.69:1. `--clover-ink` 7.50 / 7.18 / 6.55:1. **읽는 글자 전부 4.5:1 이상.**
+  - 출고 검사 4종 재실행 전부 통과: 가로넘침 0 · 조작 5축 0(F 여백 경고 11건은 비차단) · 모션 미달 화면 없음·콘솔 오류 0 · 렌더 후 미적용 class 0.
+  - `DESIGN.md` 토큰 표 3행 갱신(`--faint` 용도 축소, `--clover` 글자 금지와 글자용 초록 지정, 하단 회수 링크 토큰).
+
 ## 2026-10-20 18:35 KST · D-029(색 대비 토큰) 을 규칙으로 닫았다. 회장 결정 대기 4일은 내 실패였다
+
+## [2026-10-20 19:29 KST] compact 마크 (auto)
+- 세션 f904f244 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: d31810a docs(거버넌스): D-029 색 대비 토큰을 D-023 규칙으로 닫았다. 회장 결정 0건
+- compact 직전 컨텍스트: 247584 토큰
+- 마지막 회장 요청: Stop hook feedback: [bash ~/.claude/hooks/record-gate.sh]: ⛔ 반려(record-gate): 거버넌스 줄에 실수 를 1 이상으로 적었는데 이번 턴에 그 파일을 쓴 도구 호출이 없다. 실제로 기록하거나 수치를 바로잡아라.
+- 직전에 고친 파일: delegate-role-stage-gate.sh
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 
 - **D-029 판정: 회장이 결정할 것이 없다.** 셋 다 이미 내린 결정이 답을 준다.
   - `--faint` 2.94:1 과 `--clover` 13px 4.38:1 은 **읽는 글자 하한 4.5:1 미달** -> D-023("하한이 이기고 그때 시안 정본을 고친다")이 곧 답이다. `--muted #6F6A60`·`--clover-ink #14613A` 로 옮긴다.
