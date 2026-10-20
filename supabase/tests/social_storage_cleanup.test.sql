@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(19);
+SELECT plan(23);
 
 INSERT INTO auth.users(
   id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,
@@ -40,8 +40,9 @@ SELECT ok(
 
 SELECT ok(
   EXISTS(SELECT 1 FROM cron.job WHERE jobname='purge-abandoned-goal-covers' AND active)
-  AND EXISTS(SELECT 1 FROM cron.job WHERE jobname='drain-storage-cleanup-queue' AND active),
-  'CV-08 정리 cron job 2개가 active다'
+  AND EXISTS(SELECT 1 FROM cron.job WHERE jobname='drain-storage-cleanup-queue' AND active)
+  AND EXISTS(SELECT 1 FROM cron.job WHERE jobname='monitor-storage-cleanup-drain' AND active),
+  'CV-08 정리와 배수 정체 감시 cron job 3개가 active다'
 );
 
 INSERT INTO public.goal_cover_asset(
@@ -162,6 +163,35 @@ SELECT ok(
   NOT EXISTS(SELECT 1 FROM public.goal_cover_asset WHERE id='55100000-0000-0000-0000-000000000010')
   AND (SELECT status='DONE' FROM public.storage_cleanup_queue WHERE id=(SELECT id FROM quarantine_pair)),
   'CV-12 성공 settle은 tombstone을 하드 삭제하고 큐를 DONE으로 닫는다'
+);
+
+DELETE FROM public.storage_cleanup_queue;
+DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED';
+INSERT INTO public.storage_cleanup_queue(goal_id,bucket_id,object_path,reason,created_at)
+SELECT id,'goal-cover-quarantine','cleanup/stalled.webp','ABANDONED_UPLOAD',now()-interval '21 minutes'
+FROM public.goal WHERE slug='cleanup-goal';
+SELECT is(
+  public.monitor_storage_cleanup_drain(interval '20 minutes'),
+  1,
+  'CV-14 20분 넘게 미배수인 PENDING 큐를 독립 축으로 감지한다'
+);
+SELECT ok(
+  EXISTS(
+    SELECT 1 FROM public.ops_event
+    WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED'
+      AND (details->>'stalled_count')::integer=1
+  ),
+  'CV-14 배수 정체는 만료되는 pg_net 응답과 별개로 ops_event에 기록된다'
+);
+SELECT is(
+  public.monitor_storage_cleanup_drain(interval '20 minutes'),
+  1,
+  'CV-14 반복 감시는 정체 수를 유지하면서 10분 안에 중복 경보를 만들지 않는다'
+);
+SELECT is(
+  (SELECT count(*) FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED'),
+  1::bigint,
+  'CV-14 같은 정체는 10분 안에 경보 한 건만 유지한다'
 );
 
 SELECT * FROM finish();

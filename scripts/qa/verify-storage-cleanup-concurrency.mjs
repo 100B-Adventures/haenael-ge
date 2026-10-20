@@ -3,7 +3,7 @@
 import { execFileSync, spawn } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 
-const container = "supabase_db_haenael-ge";
+const container = process.env.SUPABASE_DB_CONTAINER ?? "supabase_db_haenael-ge";
 const args = ["exec", "-i", container, "psql", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-At"];
 const sql = (statement) => execFileSync("docker", args, { input: statement, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] }).trim();
 const runSession = (statement) => new Promise((resolve, reject) => {
@@ -19,6 +19,10 @@ const runSession = (statement) => new Promise((resolve, reject) => {
 const suffix = randomBytes(5).toString("hex");
 const owner = randomUUID();
 const slug = `concurrency-${suffix}`;
+const r18Function = `block_storage_cleanup_event_${suffix}`;
+const r18Trigger = `block_storage_cleanup_event_${suffix}`;
+const r18Job = `r18-storage-cleanup-${suffix}`;
+let r18JobId = null;
 try {
   sql(`
     INSERT INTO auth.users(id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,confirmation_token,recovery_token,email_change_token_new,raw_app_meta_data,raw_user_meta_data,is_super_admin,is_anonymous)
@@ -59,8 +63,46 @@ try {
   await held;
   const afterCommit = sql("SELECT count(*) FROM public.claim_storage_cleanup_batch(1, interval '1 millisecond');");
 
-  console.log(JSON.stringify({ parallel_left: leftIds, parallel_right: rightIds, intersection: overlap, left_window: leftWindow, right_window: rightWindow, windows_overlap: windowsOverlap, distinct_backends: leftWindow.backend_pid !== rightWindow.backend_pid, short_lease_during_lock: Number(duringLock), short_lease_after_commit: Number(afterCommit) }));
-  if (leftIds.length !== 2 || rightIds.length !== 2 || overlap.length || !windowsOverlap || leftWindow.backend_pid === rightWindow.backend_pid || duringLock !== "0" || afterCommit !== "0") process.exitCode = 1;
+  sql(`
+    DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}');
+    DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED';
+    INSERT INTO public.storage_cleanup_queue(goal_id,bucket_id,object_path,reason,created_at)
+    SELECT id,'goal-cover-quarantine','${slug}/stalled.webp','ABANDONED_UPLOAD',now()-interval '21 minutes'
+    FROM public.goal WHERE slug='${slug}';
+  `);
+  const stalledCount = sql("SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');");
+  const stalledEvent = sql("SELECT event_type||'|'||(details->>'stalled_count') FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED' ORDER BY id DESC LIMIT 1;");
+
+  sql(`
+    DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED';
+    CREATE OR REPLACE FUNCTION public.${r18Function}() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN
+      IF NEW.event_type='STORAGE_CLEANUP_DRAIN_STALLED' THEN
+        RAISE EXCEPTION 'ops_event logger blocked for R18';
+      END IF;
+      RETURN NEW;
+    END;
+    $$;
+    CREATE TRIGGER ${r18Trigger}
+      BEFORE INSERT ON public.ops_event
+      FOR EACH ROW EXECUTE FUNCTION public.${r18Function}();
+  `);
+  r18JobId = Number(sql(`SELECT cron.schedule('${r18Job}','2 seconds',$job$SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');$job$);`));
+  let r18Cron = "";
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    r18Cron = sql(`SELECT status||'|'||coalesce(return_message,'') FROM cron.job_run_details WHERE jobid=${r18JobId} ORDER BY runid DESC LIMIT 1;`);
+    if (r18Cron.startsWith("failed|")) break;
+  }
+  const warningFallbackDeclared = sql("SELECT position('RAISE WARNING' in pg_get_functiondef('public.monitor_storage_cleanup_drain(interval)'::regprocedure)) > 0;");
+  sql(`SELECT cron.unschedule(${r18JobId}); DROP TRIGGER ${r18Trigger} ON public.ops_event; DROP FUNCTION public.${r18Function}();`);
+  r18JobId = null;
+
+  console.log(JSON.stringify({ parallel_left: leftIds, parallel_right: rightIds, intersection: overlap, left_window: leftWindow, right_window: rightWindow, windows_overlap: windowsOverlap, distinct_backends: leftWindow.backend_pid !== rightWindow.backend_pid, short_lease_during_lock: Number(duringLock), short_lease_after_commit: Number(afterCommit), drain_monitor: { stalled_count: Number(stalledCount), ops_event: stalledEvent }, logger_failure: { cron: r18Cron, warning_fallback_declared: warningFallbackDeclared === "t" } }));
+  if (leftIds.length !== 2 || rightIds.length !== 2 || overlap.length || !windowsOverlap || leftWindow.backend_pid === rightWindow.backend_pid || duringLock !== "0" || afterCommit !== "0" || stalledCount !== "1" || stalledEvent !== "STORAGE_CLEANUP_DRAIN_STALLED|1" || !r18Cron.startsWith("failed|") || warningFallbackDeclared !== "t") process.exitCode = 1;
 } finally {
-  sql(`DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.goal WHERE slug='${slug}'; DELETE FROM public.member WHERE id='${owner}'; DELETE FROM auth.users WHERE id='${owner}';`);
+  try {
+    if (r18JobId !== null) sql(`SELECT cron.unschedule(${r18JobId});`);
+    sql(`DROP TRIGGER IF EXISTS ${r18Trigger} ON public.ops_event; DROP FUNCTION IF EXISTS public.${r18Function}(); DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED' AND details->>'oldest_created_at' IS NOT NULL; DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.goal WHERE slug='${slug}'; DELETE FROM public.member WHERE id='${owner}'; DELETE FROM auth.users WHERE id='${owner}';`);
+  } catch {}
 }
