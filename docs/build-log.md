@@ -1,5 +1,16 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-20 교차 코드리뷰 BLOCK 해소
+
+- 레지스트리 15행 중 1~14를 코드·테스트·로컬 런타임으로 닫았다. 15번 Mermaid renderer는 P3 건너뜀 허용과 재렌더 금지에 따라 변경하지 않았다.
+- 배너 업로드 실패 4단계, clamp 측정, cron·Vault 실패 관측, 6필드 초대 배포 창, 보호 라우트 정본, Auth fail-closed, 저장 lease, 포이즌 격리, CheerList 회귀, 무효 class, 실제 병렬 claim, migration 멱등, cheer index, 죽은 legal key를 각각 회귀 계약으로 고정했다.
+- 로컬 Storage 정리 실제 호출은 CV-09~13과 EA-01~04를 통과했다. 객체 부재, cron HTTP 200, Authorization 미전송, 버킷+경로 쌍 격리를 관찰했다.
+- TypeScript와 lint, Vitest 65파일 367건, pgTAP 21파일 365건, Next build와 Storybook build가 통과했다.
+- Next dev `/`→`/how`는 HTTP 200과 console error 0이다. CheerList Storybook은 390×844에서 2줄 clamp와 셰브론을 보였고, 360~1000 아홉 폭 ergonomics가 모두 통과했다.
+- 운영 Supabase·Vercel에는 쓰거나 배포하지 않았다. Mermaid SVG 15개도 다시 렌더하지 않았다.
+
+> STAMP: 생성 2026-10-20 20:36 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 교차리뷰 레지스트리와 로컬 런타임·전체 회귀 로그. 상태 local build 일치, 운영 미반영.
+
 ## 2026-10-20 1차 슬라이스 실구동
 
 - Storage 정리 worker와 점유·settle RPC, 중단 업로드 정리 함수, tombstone 재등록 함수를 구현했다. 버킷과 객체 경로를 쌍으로 비교한다.

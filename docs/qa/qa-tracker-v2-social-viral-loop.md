@@ -10,9 +10,12 @@
 
 | 요청 번호 | 범위 | 현재 판정 | 종료 증거 |
 |---|---|---|---|
-| BUILD-REVIEW-01~15 | `carryover-build-review-20261020.md` 15행 | ❌ NG | 각 행의 명령·렌더·DB 실측을 확보한 뒤 로컬 일치로 전환. 운영 쓰기·배포 없음 |
+| BUILD-REVIEW-01~14 | `carryover-build-review-20261020.md` 1~14행 | 🔧 로컬 일치 | Vitest 367/367, pgTAP 365/365, 실제 Edge·Storage·cron, 병렬 DB 2세션, Storybook 렌더와 계약 린트 통과. 운영 쓰기·배포 없음 |
+| BUILD-REVIEW-15 | Mermaid renderer 이식성 | 건너뜀 | P3 시간 부족 시 건너뜀 허용, 이번 판 Mermaid 재렌더 명시 금지. 기존 SVG 15개 변경 0 |
 
 원인 분석: 직전 build는 파일 존재·단일 세션 happy path를 실제 동시성·부분 실패·배포 창 안전성의 증거로 확대했다. 교차 리뷰가 발견한 결함은 레지스트리 우선순위대로 코드와 테스트에서 닫고, 실행 출력이 없는 항목은 미검증으로 남긴다.
+
+로컬 build 종료 판정: 1~14는 로컬 일치, 15는 건너뜀이다. 운영 Supabase 쓰기와 운영 배포를 금지한 판이므로 production tracker의 최종 PASS로 승격하지 않는다.
 
 ## 0. 2026-10-14 승인 시안 재대조 라운드
 

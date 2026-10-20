@@ -23,4 +23,26 @@
 | 14 | P2 | `web/src/lib/legal/exposure.ts` 의 `LEGAL_EXPOSURE.receiverShell` 키가 어느 분기에서도 도달하지 않는다(죽은 항목). `/my` 목록 1단과 `/my/legal` 전문이 구별되지 않는다. `protected-routes.json` 의 `/invite` 가 exact 에만 있고 prefix 에 없는 암묵 규칙도 데이터에 주석으로 남겨라. | 예 | 죽은 키 제거 또는 도달 경로 추가 · 의도 주석 실재 |
 | 15 | P3 | `scripts/qa/render-mermaid-evidence.mjs` 가 Chrome 실행 경로를 하드코딩하고 블록 수 15 를 단정한다. 기계 환경이 바뀌면 반드시 실패한다. **남은 시간이 부족하면 건너뛰고 보고해라.** | 아니오 | 경로를 env 로 뺀 뒤 1회 실행 출력, 또는 건너뛴 사실 보고 |
 
+## 종료 판정, 2026-10-20 20:36 KST
+
+| # | 판정 | 종료 증거 |
+|---|---|---|
+| 1 | 닫힘 | `GoalCoverPicker.test.tsx` GC-01~05. format·sign·PUT·finalize 문구와 상태 로그, 업로드 중 preset 차단 5/5 |
+| 2 | 닫힘 | Storybook `receiver-ui-cheerlist--overflow`, 390×844: `lineClamp=2`, `clientHeight=32`, `scrollHeight=80`, 셰브론 노출, console error 0 |
+| 3 | 닫힘 | `verify-storage-cleanup-schedules.mjs`: active cron 2, Vault 계약 누락 0, 실패 이벤트 `STORAGE_CLEANUP_SCHEDULE_FAILED|verification` |
+| 4 | 닫힘 | 구 6필드 pick·현 3필드·null 로그 계약과 초대 카드 렌더 테스트 포함 전체 Vitest 367/367 |
+| 5 | 닫힘 | `qa/contracts/protected-routes.json` 단일 정본. `lint-protected-routes.mjs`: roots 5, missing 0, invite public true |
+| 6 | 닫힘 | proxy AU-05가 Supabase env·Auth 실패에서 `/` 리다이렉트를 관찰. 관련 테스트 10/10 |
+| 7 | 닫힘 | pgTAP lease 저장·탈취 거절. 병렬 실행: `short_lease_during_lock=0`, `short_lease_after_commit=0` |
+| 8 | 닫힘 | Deno `CV-11 포이즌 1건` 테스트 PASS. 정상 객체 개별 삭제와 5회 실패 `STORAGE_CLEANUP_DEAD_LETTER` 이벤트 구현 |
+| 9 | 닫힘 | CheerList 5/5와 prototype interact `scenarioFails=[]`. 숨은 개수·접기 시 검색 닫기·ARIA·title 복원 |
+| 10 | 닫힘 | `.cheer-overflow-summary` CSS 실재. web class lint `used=59 missing=0`이며 `npm test` 계약에 편입 |
+| 11 | 닫힘 | 독립 PostgreSQL 세션 병렬 claim 결과 `intersection=[]` |
+| 12 | 닫힘 | 동일 migration 직접 2회 적용 모두 rc=0. `wiki/ops/인프라.md`에 cron unschedule과 하드 삭제 보존 전제 기록 |
+| 13 | 닫힘 | `EXPLAIN`: `Index Only Scan using cheer_social_summary_recent_idx` |
+| 14 | 닫힘 | `receiverShell` 제거. 보호 라우트 계약에 `/invite` exact-only public 주석과 linter assertion 추가 |
+| 15 | 건너뜀 | 발주에서 P3 시간 부족 시 허용했고 Mermaid 재렌더를 명시 금지했다. 기존 SVG 15개는 변경하지 않음 |
+
 > STAMP: 생성 2026-10-20 20:0x KST. 모델 claude-opus-5[1m]. 역할 컨트롤러. 근거 = Claude code-reviewer 교차 리뷰 판정과 컨트롤러 직접 재확인(MAJOR-1·2·3 은 grep·파일 목록·코드 읽기로 실재 확인). 상태 발주 대기.
+
+> STAMP: 종료 2026-10-20 20:36 KST. 모델 gpt-6.1-sol. 역할 code-builder. 스킬 haenael-supabase-build. 근거 = 로컬 Supabase 런타임, Vitest, pgTAP, Storybook 헤드리스 렌더, 계약 린트. 운영 미반영.

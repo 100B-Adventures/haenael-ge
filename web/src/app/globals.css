@@ -515,6 +515,7 @@
   .guest-teaser-sample { display: flex; min-height: var(--tap-min-size); align-items: center; gap: var(--sp-2); border-radius: var(--radius-card); background: var(--warm); padding: var(--sp-3); }
 
   .collapse-chevron { display: grid; width: var(--tap-min-size); height: var(--tap-min-size); margin-inline: auto; place-items: center; color: var(--muted-color); }
+  .collapse-chevron:active { background: var(--muted); }
   .collapse-chevron svg { width: var(--tabbar-icon-size); height: var(--tabbar-icon-size); transition: transform 160ms ease-out; }
   .collapse-chevron.is-expanded svg { transform: rotate(180deg); }
   .clamp-text { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: var(--cheer-clamp-lines); }

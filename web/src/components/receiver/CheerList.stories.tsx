@@ -7,7 +7,7 @@ function makeCheers(count: number): ReceiverCheer[] {
     display_name: `응원자 ${index + 1}`,
     is_anonymous: index % 3 === 0,
     message: index === 0
-      ? "긴 응원 메시지는 한 줄에서 말줄임되고 전체 문장은 title로 보존됩니다. 끝까지 응원할게요."
+      ? "긴 응원 메시지는 두 줄에서 말줄임되고 셰브론으로 펼칠 수 있습니다. 작은 걸음을 매일 이어가는 모습이 정말 멋져요. 오늘도 내일도 끝까지 응원할게요."
       : `${index + 1}번째 응원 메시지`,
     clover_amount: (index % 10) + 1,
     created_at: "2026-08-24T00:00:00.000Z",
