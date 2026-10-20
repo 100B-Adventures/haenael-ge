@@ -50,7 +50,7 @@ function CheerItem({
           {name}
         </p>
         {cheer.message && (
-          <ClampText className="mt-1 text-[length:var(--text-label-small)]! leading-[normal] text-muted-foreground">
+          <ClampText title={cheer.message} className="mt-1 text-[length:var(--text-label-small)]! leading-[normal] text-muted-foreground">
             {cheer.message}
           </ClampText>
         )}
@@ -112,7 +112,11 @@ export function CheerList({
         className="overflow-hidden rounded-md border border-border bg-card"
         data-testid="receiver-cheer-card"
       >
-        <Collapsible policy={{ auxiliary: true, exceedsLimit: totalCount > PREVIEW_LIMIT, hasCollapsedContext: true }}>
+        <Collapsible
+          policy={{ auxiliary: true, exceedsLimit: totalCount > PREVIEW_LIMIT, hasCollapsedContext: true }}
+          controlsId="receiver-cheer-list"
+          onExpandedChange={(expanded) => { if (!expanded) setSearchOpen(false); }}
+        >
           {(expanded) => {
             const visibleCheers = cheers.slice(0, expanded ? EXPANDED_LIMIT : PREVIEW_LIMIT);
             return <>
@@ -127,7 +131,7 @@ export function CheerList({
                     ? `전체 목록도 ${EXPANDED_LIMIT}개까지 보여줘요`
                     : expanded
                       ? `${visibleCheers.length}개를 모두 보여줘요`
-                      : `미니 목록은 ${PREVIEW_LIMIT}개까지 보여줘요`}
+                    : `${Math.max(totalCount - visibleCheers.length, 0)}개 더 있음`}
               </p>
               {isSearching && <Link href="/me" className="cheer-list-reset">전체 목록</Link>}
               {!isSearching && expanded && totalCount > EXPANDED_LIMIT && (

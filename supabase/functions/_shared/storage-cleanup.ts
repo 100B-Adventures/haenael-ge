@@ -46,6 +46,31 @@ export async function classifyRemovalResults(
   return outcomes;
 }
 
+export async function removeCleanupClaims(
+  claims: CleanupClaim[],
+  remove: (paths: string[]) => Promise<{ data: RemovedObject[] | null; error: unknown | null }>,
+  objectIsAbsent: (claim: CleanupClaim) => Promise<boolean>,
+): Promise<Map<number, boolean>> {
+  const bulk = await remove(claims.map((claim) => claim.object_path));
+  if (!bulk.error) {
+    return classifyRemovalResults(claims, returnedObjectPaths(bulk.data), objectIsAbsent);
+  }
+
+  // Storage가 배치 전체를 오류로 반환하면 한 건씩 격리해 정상 객체까지
+  // attempts가 오르는 것을 막는다. 포이즌 객체만 실패로 남는다.
+  const outcomes = new Map<number, boolean>();
+  for (const claim of claims) {
+    const single = await remove([claim.object_path]);
+    outcomes.set(
+      claim.id,
+      single.error
+        ? await objectIsAbsent(claim)
+        : returnedObjectPaths(single.data).has(claim.object_path) || await objectIsAbsent(claim),
+    );
+  }
+  return outcomes;
+}
+
 export function splitStoragePath(path: string): { folder: string; name: string } {
   const separator = path.lastIndexOf("/");
   return separator < 0

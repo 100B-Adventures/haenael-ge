@@ -18,11 +18,15 @@ export function Collapsible({
   children,
   className = "",
   warnWhenDisabled = false,
+  controlsId,
+  onExpandedChange,
 }: {
   policy: CollapsePolicy;
   children: (expanded: boolean) => React.ReactNode;
   className?: string;
   warnWhenDisabled?: boolean;
+  controlsId?: string;
+  onExpandedChange?: (expanded: boolean) => void;
 }) {
   const enabled = shouldCollapse(policy);
   const [expanded, setExpanded] = useState(false);
@@ -38,7 +42,13 @@ export function Collapsible({
           className={`collapse-chevron${expanded ? " is-expanded" : ""}`}
           aria-label={expanded ? "내용 접기" : "내용 펼치기"}
           aria-expanded={expanded}
-          onClick={() => setExpanded((value) => !value)}
+          aria-controls={controlsId}
+          onClick={() =>
+            setExpanded((value) => {
+              const next = !value;
+              onExpandedChange?.(next);
+              return next;
+            })}
         >
           <ChevronDown aria-hidden="true" />
         </button>

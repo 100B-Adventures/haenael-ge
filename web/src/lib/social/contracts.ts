@@ -118,13 +118,23 @@ export function asInvitePreview(value: unknown): InvitePreview | null {
     typeof (value as { cover_preset_key?: unknown }).cover_preset_key !== "string"
   ) return null;
   const candidate = value as Record<string, unknown>;
-  const exactKeys = ["inviter_nickname", "goal_title", "cover_preset_key"];
   if (
-    Object.keys(candidate).some((key) => !exactKeys.includes(key)) ||
     (candidate.inviter_nickname !== null && typeof candidate.inviter_nickname !== "string") ||
     (candidate.goal_title !== null && typeof candidate.goal_title !== "string")
   ) return null;
-  return candidate as InvitePreview;
+  return {
+    inviter_nickname: candidate.inviter_nickname as string | null,
+    goal_title: candidate.goal_title as string | null,
+    cover_preset_key: candidate.cover_preset_key as string,
+  };
+}
+
+export function observeInvitePreview(value: unknown): InvitePreview | null {
+  const preview = asInvitePreview(value);
+  if (!preview) {
+    console.error(JSON.stringify({ event: "friend_invite_preview_invalid", code: "invalid_response" }));
+  }
+  return preview;
 }
 
 export function asInviteCreated(value: unknown): InviteCreated | null {

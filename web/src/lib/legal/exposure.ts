@@ -3,7 +3,6 @@ export type LegalExposureMode = "none" | "link" | "biz" | "page";
 export const LEGAL_EXPOSURE = {
   landing: "none",
   how: "none",
-  receiverShell: "none",
   myLegal: "page",
   terms: "page",
   privacy: "page",

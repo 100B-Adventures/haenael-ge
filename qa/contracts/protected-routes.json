@@ -1,0 +1,8 @@
+{
+  "exact": ["/me", "/my", "/friends", "/invite", "/cashout", "/wordmap"],
+  "prefix": ["/me/", "/my/", "/friends/", "/cashout/", "/wordmap/"],
+  "scanRoots": ["/me", "/my", "/friends", "/cashout", "/wordmap"],
+  "notes": {
+    "/invite": "exact-only: 초대 생성은 보호하지만 /invite/[token] 미리보기는 공개한다"
+  }
+}

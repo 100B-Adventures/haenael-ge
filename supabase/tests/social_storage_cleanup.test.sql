@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(15);
+SELECT plan(19);
 
 INSERT INTO auth.users(
   id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,
@@ -75,11 +75,23 @@ CREATE TEMP TABLE claim_two AS SELECT * FROM public.claim_storage_cleanup_batch(
 SELECT ok(
   (SELECT count(*)=1 FROM claim_one) AND (SELECT count(*)=1 FROM claim_two)
   AND NOT EXISTS(SELECT 1 FROM claim_one a JOIN claim_two b USING(id)),
-  'CV-10 겹친 claim은 같은 큐 행을 점유하지 않는다'
+  'CV-10 순차 claim은 같은 큐 행을 점유하지 않는다'
+);
+
+SELECT ok(
+  (SELECT lease_until > now() AND lease_until <= now() + interval '16 minutes'
+   FROM public.storage_cleanup_queue WHERE id=(SELECT id FROM claim_one)),
+  'CV-10 claim 시 lease_until을 행에 저장한다'
+);
+
+SELECT is(
+  (SELECT count(*) FROM public.claim_storage_cleanup_batch(1,interval '1 millisecond')),
+  0::bigint,
+  'CV-10 다음 호출자의 짧은 lease로 기존 점유를 탈취하지 못한다'
 );
 
 UPDATE public.storage_cleanup_queue
-SET locked_at=now()-interval '16 minutes'
+SET locked_at=now()-interval '16 minutes', lease_until=now()-interval '1 second'
 WHERE id=(SELECT id FROM claim_one);
 CREATE TEMP TABLE claim_recovered AS SELECT * FROM public.claim_storage_cleanup_batch(1,interval '15 minutes');
 SELECT is(
@@ -101,6 +113,22 @@ SELECT ok(
   (SELECT status='FAILED' AND attempts=1 AND locked_at IS NULL AND lock_token IS NULL
    FROM public.storage_cleanup_queue WHERE id=(SELECT id FROM claim_recovered)),
   'CV-10 실패 settle은 attempts를 올리고 점유를 해제한다'
+);
+
+UPDATE public.storage_cleanup_queue SET attempts=4 WHERE id=(SELECT id FROM claim_recovered);
+CREATE TEMP TABLE dead_letter_claim AS SELECT * FROM public.claim_storage_cleanup_batch(1,interval '15 minutes');
+SELECT is(
+  public.settle_storage_cleanup((SELECT id FROM dead_letter_claim),(SELECT lock_token FROM dead_letter_claim),false),
+  true,
+  'CV-11 attempts 5 포이즌 행의 마지막 실패를 settle한다'
+);
+SELECT ok(
+  EXISTS(
+    SELECT 1 FROM public.ops_event
+    WHERE event_type='STORAGE_CLEANUP_DEAD_LETTER'
+      AND (details->>'queue_id')::bigint=(SELECT id FROM dead_letter_claim)
+  ),
+  'CV-11 attempts 5 포이즌 행은 dead-letter ops_event를 남긴다'
 );
 
 DELETE FROM public.storage_cleanup_queue;

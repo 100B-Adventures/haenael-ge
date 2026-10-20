@@ -6,6 +6,7 @@
 import { describe, it, expect } from "vitest";
 import { NextRequest } from "next/server";
 import { isProtectedRoute, proxy } from "../proxy";
+import protectedRoutes from "../../../qa/contracts/protected-routes.json";
 
 function req(host: string, path: string) {
   return new NextRequest(new URL(path, `https://${host}`));
@@ -13,11 +14,23 @@ function req(host: string, path: string) {
 
 describe("proxy — canonical 도메인 강제", () => {
   it("AU-04 보호 라우트 계약은 공개 초대 상세를 제외한다", () => {
+    expect(protectedRoutes.notes["/invite"]).toContain("exact-only");
     expect(isProtectedRoute("/me")).toBe(true);
     expect(isProtectedRoute("/my/legal")).toBe(true);
     expect(isProtectedRoute("/invite")).toBe(true);
     expect(isProtectedRoute("/invite/public-token")).toBe(false);
     expect(isProtectedRoute("/g/public-goal")).toBe(false);
+  });
+  it("AU-05 Auth 환경이 끊겨도 보호 화면은 흰 500 대신 랜딩으로 degrade한다", async () => {
+    const previousUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const previousKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const res = await proxy(req("localhost", "/me"));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("https://localhost/?next=%2Fme");
+    if (previousUrl) process.env.NEXT_PUBLIC_SUPABASE_URL = previousUrl;
+    if (previousKey) process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = previousKey;
   });
   it("알려진 레거시 production 별칭 호스트는 canonical로 308 리다이렉트", async () => {
     const res = await proxy(req("web-two-theta-bmil2ljwdg.vercel.app", "/auth/kakao/start?redirect=/onboarding"));

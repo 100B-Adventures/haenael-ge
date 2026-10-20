@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   asFriendGoalDetail,
   asFriendGoals,
   asInviteCreated,
   asInvitePreview,
   asMySocialDashboard,
+  observeInvitePreview,
   FORBIDDEN_SOCIAL_KEYS,
 } from "../contracts";
 
@@ -61,7 +62,7 @@ describe("V2 social contracts", () => {
       intoss_path: "intoss://haenael/invite?token=t",
     });
   });
-  it("CT-06 preview 최소 필드만 허용하는 fixture다", () => {
+  it("CT-06 preview는 배포 창의 구 6필드 응답을 3필드로 pick한다", () => {
     const value = {
       inviter_nickname: "서연",
       goal_title: "달리기",
@@ -70,7 +71,19 @@ describe("V2 social contracts", () => {
     expect(Object.keys(asInvitePreview(value) ?? {}).sort()).toEqual(
       Object.keys(value).sort(),
     );
-    expect(asInvitePreview({ ...value, expires_at: "leak" })).toBeNull();
+    expect(asInvitePreview({
+      ...value,
+      expires_at: "2026-10-21T00:00:00Z",
+      visibility: "PUBLIC",
+      invite_id: "legacy-id",
+    })).toEqual(value);
+  });
+  it("CT-06 null 응답은 관측 로그 한 줄을 남긴다", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(observeInvitePreview(null)).toBeNull();
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining("friend_invite_preview_invalid"));
+    error.mockRestore();
   });
   it("CT-24 social fixture에 금액 결제 환전 key가 없다", () => {
     const serialized = JSON.stringify(asFriendGoals({ friends: [] }));

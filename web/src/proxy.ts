@@ -19,7 +19,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import protectedRoutes from "@/lib/auth/protected-routes.json";
+import protectedRoutes from "../../qa/contracts/protected-routes.json";
 
 const CANONICAL_HOST = "haenael-ge.vercel.app";
 
@@ -63,27 +63,37 @@ export async function proxy(request: NextRequest) {
   let response = NextResponse.next();
   if (!isProtectedRoute(url.pathname)) return response;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next();
-          cookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !anonKey) throw new Error("supabase_auth_configuration_missing");
+    const supabase = createServerClient(
+      supabaseUrl,
+      anonKey,
+      {
+        cookies: {
+          getAll: () => request.cookies.getAll(),
+          setAll: (cookies) => {
+            cookies.forEach(({ name, value }) => request.cookies.set(name, value));
+            response = NextResponse.next();
+            cookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+          },
         },
       },
-    },
-  );
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+    );
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      const landing = new URL("/", request.url);
+      landing.searchParams.set("next", url.pathname + url.search);
+      return NextResponse.redirect(landing, 307);
+    }
+    return response;
+  } catch {
+    console.error(JSON.stringify({ event: "protected_route_auth_failed", code: "auth_unavailable" }));
     const landing = new URL("/", request.url);
     landing.searchParams.set("next", url.pathname + url.search);
     return NextResponse.redirect(landing, 307);
   }
-  return response;
 }
 
 export const config = {

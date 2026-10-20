@@ -33,6 +33,23 @@
           }
         }
       ]
+    },
+    {
+      "id": "cheer-search-open-close-roundtrip",
+      "why": "응원 목록을 펼쳐 검색을 연 뒤 접거나 닫았을 때 검색 폼이 남는 회귀를 막는다. 제품 컴포넌트의 접기 왕복은 CheerList 테스트가 함께 고정한다.",
+      "steps": [
+        { "go": "goaldetail" },
+        { "click": "#goaldetail .cheer-more button" },
+        { "click": "#goaldetail .cheer-search-trigger" },
+        { "click": "#goaldetail .cheer-search-trigger" },
+        {
+          "expect": {
+            "fingerprintOf": "#goaldetail .frame",
+            "notMatches": "cheer-search:",
+            "message": "응원 검색을 닫았는데 검색 폼의 열린 상태가 남아 있다."
+          }
+        }
+      ]
     }
   ]
 }

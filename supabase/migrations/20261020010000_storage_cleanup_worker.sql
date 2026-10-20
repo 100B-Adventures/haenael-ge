@@ -3,14 +3,46 @@
 BEGIN;
 
 ALTER TABLE public.storage_cleanup_queue
-  DROP CONSTRAINT storage_cleanup_queue_reason_check;
+  DROP CONSTRAINT IF EXISTS storage_cleanup_queue_reason_check;
 ALTER TABLE public.storage_cleanup_queue
   ADD CONSTRAINT storage_cleanup_queue_reason_check
   CHECK (reason IN ('VISIBILITY_DOWNGRADE', 'ASSET_REPLACED', 'ASSET_REJECTED', 'ABANDONED_UPLOAD'));
 
 ALTER TABLE public.storage_cleanup_queue
   ADD COLUMN IF NOT EXISTS locked_at timestamptz,
-  ADD COLUMN IF NOT EXISTS lock_token uuid;
+  ADD COLUMN IF NOT EXISTS lock_token uuid,
+  ADD COLUMN IF NOT EXISTS lease_until timestamptz;
+
+CREATE TABLE IF NOT EXISTS public.ops_event (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  event_type text NOT NULL,
+  severity text NOT NULL CHECK (severity IN ('INFO', 'WARNING', 'ERROR')),
+  details jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.ops_event ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.ops_event FROM PUBLIC, anon, authenticated;
+GRANT SELECT, INSERT ON TABLE public.ops_event TO service_role;
+
+CREATE OR REPLACE FUNCTION public.record_storage_cleanup_schedule_failure(
+  p_stage text, p_sqlstate text, p_message text
+)
+RETURNS bigint
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE v_id bigint;
+BEGIN
+  INSERT INTO public.ops_event(event_type, severity, details)
+  VALUES (
+    'STORAGE_CLEANUP_SCHEDULE_FAILED',
+    'ERROR',
+    jsonb_build_object('stage', p_stage, 'sqlstate', p_sqlstate, 'message', left(p_message, 500))
+  )
+  RETURNING id INTO v_id;
+  RETURN v_id;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS goal_cover_asset_abandoned_idx
   ON public.goal_cover_asset(created_at)
@@ -21,7 +53,7 @@ CREATE INDEX IF NOT EXISTS goal_cover_asset_tombstone_idx
   WHERE status = 'DELETED';
 
 CREATE INDEX IF NOT EXISTS storage_cleanup_queue_claimable_idx
-  ON public.storage_cleanup_queue(status, locked_at, created_at)
+  ON public.storage_cleanup_queue(status, lease_until, created_at)
   WHERE status IN ('PENDING', 'FAILED');
 
 CREATE OR REPLACE FUNCTION public.purge_abandoned_goal_covers(
@@ -111,13 +143,13 @@ BEGIN
     FROM public.storage_cleanup_queue AS q
     WHERE q.status IN ('PENDING', 'FAILED')
       AND q.attempts < 5
-      AND (q.locked_at IS NULL OR q.locked_at < now() - p_lease)
+      AND (q.lease_until IS NULL OR q.lease_until < now())
     ORDER BY q.created_at
     LIMIT LEAST(GREATEST(COALESCE(p_limit, 200), 1), 1000)
     FOR UPDATE SKIP LOCKED
   )
   UPDATE public.storage_cleanup_queue AS q
-  SET locked_at = now(), lock_token = v_token
+  SET locked_at = now(), lease_until = now() + p_lease, lock_token = v_token
   WHERE q.id IN (SELECT t.id FROM target AS t)
   RETURNING q.id, q.bucket_id, q.object_path, q.lock_token;
 END;
@@ -130,17 +162,18 @@ RETURNS boolean
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 SET search_path = ''
 AS $$
-DECLARE v_hit integer; v_path text; v_bucket text;
+DECLARE v_hit integer; v_path text; v_bucket text; v_attempts integer;
 BEGIN
   UPDATE public.storage_cleanup_queue AS q
   SET status       = CASE WHEN p_ok THEN 'DONE' ELSE 'FAILED' END,
       attempts     = CASE WHEN p_ok THEN q.attempts ELSE q.attempts + 1 END,
       completed_at = CASE WHEN p_ok THEN now() ELSE NULL END,
       locked_at    = NULL,
+      lease_until  = NULL,
       lock_token   = NULL
   WHERE q.id = p_id
     AND q.lock_token = p_lock_token
-  RETURNING q.object_path, q.bucket_id INTO v_path, v_bucket;
+  RETURNING q.object_path, q.bucket_id, q.attempts INTO v_path, v_bucket, v_attempts;
   GET DIAGNOSTICS v_hit = ROW_COUNT;
   IF v_hit <> 1 THEN RETURN false; END IF;
 
@@ -152,6 +185,13 @@ BEGIN
       AND NOT EXISTS (
         SELECT 1 FROM public.goal AS g WHERE g.active_cover_asset_id = a.id
       );
+  ELSIF v_attempts >= 5 THEN
+    INSERT INTO public.ops_event(event_type, severity, details)
+    VALUES (
+      'STORAGE_CLEANUP_DEAD_LETTER',
+      'ERROR',
+      jsonb_build_object('queue_id', p_id, 'bucket_id', v_bucket, 'object_path', v_path, 'attempts', v_attempts)
+    );
   END IF;
   RETURN true;
 END;
@@ -161,17 +201,19 @@ REVOKE ALL ON FUNCTION public.purge_abandoned_goal_covers(interval) FROM PUBLIC,
 REVOKE ALL ON FUNCTION public.requeue_orphan_cover_tombstones(interval) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.claim_storage_cleanup_batch(integer, interval) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.settle_storage_cleanup(bigint, uuid, boolean) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.record_storage_cleanup_schedule_failure(text, text, text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.purge_abandoned_goal_covers(interval) TO service_role;
 GRANT EXECUTE ON FUNCTION public.requeue_orphan_cover_tombstones(interval) TO service_role;
 GRANT EXECUTE ON FUNCTION public.claim_storage_cleanup_batch(integer, interval) TO service_role;
 GRANT EXECUTE ON FUNCTION public.settle_storage_cleanup(bigint, uuid, boolean) TO service_role;
+GRANT EXECUTE ON FUNCTION public.record_storage_cleanup_schedule_failure(text, text, text) TO service_role;
 
 DO $$
 BEGIN
   BEGIN
     CREATE EXTENSION IF NOT EXISTS pg_cron;
   EXCEPTION WHEN insufficient_privilege OR feature_not_supported OR undefined_file THEN
-    RAISE NOTICE 'pg_cron unavailable; cover cleanup schedules were not registered.';
+    PERFORM public.record_storage_cleanup_schedule_failure('pg_cron', SQLSTATE, SQLERRM);
     RETURN;
   END;
 
@@ -204,10 +246,10 @@ BEGIN
       );
     END IF;
   EXCEPTION WHEN insufficient_privilege OR feature_not_supported OR undefined_file OR undefined_table OR invalid_schema_name THEN
-    RAISE NOTICE 'pg_net or Vault unavailable; Storage cleanup drain schedule was not registered.';
+    PERFORM public.record_storage_cleanup_schedule_failure('pg_net_or_vault', SQLSTATE, SQLERRM);
   END;
 EXCEPTION WHEN undefined_table OR invalid_schema_name OR insufficient_privilege THEN
-  RAISE NOTICE 'cron job registration unavailable; cover cleanup schedules were not registered.';
+  PERFORM public.record_storage_cleanup_schedule_failure('cron_registration', SQLSTATE, SQLERRM);
 END $$;
 
 COMMIT;

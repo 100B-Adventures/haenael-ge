@@ -3,9 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { authorizeCleanupRequest } from "../_shared/cleanup-auth.ts";
 import {
   type CleanupClaim,
-  classifyRemovalResults,
   groupCleanupClaims,
-  returnedObjectPaths,
+  removeCleanupClaims,
   splitStoragePath,
 } from "../_shared/storage-cleanup.ts";
 
@@ -79,16 +78,10 @@ export async function handleStorageCleanup(req: Request): Promise<Response> {
   }
 
   for (const [bucketId, bucketClaims] of groupCleanupClaims(claims)) {
-    const paths = bucketClaims.map((claim) => claim.object_path);
-    const removal = await service.storage.from(bucketId).remove(paths);
-    if (removal.error) {
-      for (const claim of bucketClaims) await settle(claim, false);
-      continue;
-    }
-
-    const outcomes = await classifyRemovalResults(
+    const bucket = service.storage.from(bucketId);
+    const outcomes = await removeCleanupClaims(
       bucketClaims,
-      returnedObjectPaths(removal.data),
+      (paths) => bucket.remove(paths),
       (claim) => objectIsAbsent(service.storage, bucketId, claim.object_path),
     );
     for (const claim of bucketClaims) {

@@ -2,6 +2,11 @@
   "version": 1,
   "sourceRoots": ["web/src", "supabase/functions"],
   "systemVariables": ["NODE_ENV", "VERCEL_ENV"],
+  "vaultSecrets": [
+    { "name": "storage_cleanup_worker_url", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" },
+    { "name": "edge_invoke_publishable_key", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" },
+    { "name": "storage_cleanup_internal_token", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" }
+  ],
   "variables": {
     "NEXT_PUBLIC_SUPABASE_URL": { "targets": ["vercel-production"], "features": ["core"] },
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": { "targets": ["vercel-production"], "features": ["core"] },

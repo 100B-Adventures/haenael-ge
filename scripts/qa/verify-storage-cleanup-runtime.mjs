@@ -217,7 +217,7 @@ try {
   if (!claimOneId || !claimTwoId || claimOneId === claimTwoId || beforeLease !== "0") {
     throw new Error("cv10_claim_overlap");
   }
-  sql(`UPDATE public.storage_cleanup_queue SET locked_at=now()-interval '16 minutes' WHERE id=${claimOneId};`);
+  sql(`UPDATE public.storage_cleanup_queue SET locked_at=now()-interval '16 minutes', lease_until=now()-interval '1 second' WHERE id=${claimOneId};`);
   const [reclaimedId, reclaimedToken] = sql("SELECT id||'|'||lock_token FROM public.claim_storage_cleanup_batch(1,interval '15 minutes');").split("|");
   const lateSettle = sql(`SELECT public.settle_storage_cleanup(${claimOneId},'${claimOneToken}',true);`);
   const currentSettle = sql(`SELECT public.settle_storage_cleanup(${reclaimedId},'${reclaimedToken}',false);`);

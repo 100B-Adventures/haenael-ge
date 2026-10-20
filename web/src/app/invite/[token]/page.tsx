@@ -7,7 +7,7 @@ import {
   ReceiverBrandMark,
 } from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { asInvitePreview } from "@/lib/social/contracts";
+import { observeInvitePreview } from "@/lib/social/contracts";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -34,6 +34,7 @@ export default async function InviteTokenPage(
     supabase.rpc("friend_invite_preview", { token }),
     supabase.auth.getUser(),
   ]);
+  const preview = error ? null : observeInvitePreview(previewData);
   return (
     <ReceiverAppShell locked={!user} currentPath={`/invite/${token}`}>
     <main className="min-h-[calc(100svh-var(--tabbar-height))] bg-background">
@@ -46,7 +47,7 @@ export default async function InviteTokenPage(
         <div className="mx-auto max-w-[430px]">
           <InviteAcceptCard
             token={token}
-            preview={asInvitePreview(previewData)}
+            preview={preview}
             isAuthenticated={Boolean(user)}
             initialError={error ? inviteCode(error.message) : null}
           />

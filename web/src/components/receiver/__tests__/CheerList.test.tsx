@@ -19,7 +19,8 @@ describe("TC-OV-01 응원 목록 오버플로", () => {
 
     expect(screen.getAllByTestId("cheer-item")).toHaveLength(8);
     expect(screen.getByTestId("receiver-cheer-card")).toContainElement(screen.getByTestId("cheer-overflow-summary"));
-    expect(screen.getByTestId("cheer-overflow-summary")).toHaveTextContent("미니 목록은 8개까지 보여줘요");
+    expect(screen.getByTestId("cheer-overflow-summary")).toHaveTextContent("12개 더 있음");
+    expect(screen.getByRole("button", { name: "내용 펼치기" })).toHaveAttribute("aria-controls", "receiver-cheer-list");
 
     fireEvent.click(screen.getByRole("button", { name: "내용 펼치기" }));
 
@@ -43,6 +44,10 @@ describe("TC-OV-01 응원 목록 오버플로", () => {
     expect(form).toHaveAttribute("method", "get");
     expect(screen.getByTestId("cheer-search-input")).toBeRequired();
     expect(screen.getByTestId("cheer-search-input")).toHaveAttribute("maxlength", "80");
+
+    fireEvent.click(screen.getByRole("button", { name: "내용 접기" }));
+    expect(screen.queryByRole("search")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "내용 펼치기" })).toHaveAttribute("aria-expanded", "false");
   });
 
   it("TC-OV-04 정상 경로: 시안의 12px 행 패딩과 12px 간격을 쓰고 우측 하단에 순번을 보여준다", () => {
@@ -53,6 +58,7 @@ describe("TC-OV-01 응원 목록 오버플로", () => {
     expect(screen.getAllByTestId("cheer-item-ordinal")[0]).toHaveTextContent("1번째");
     expect(screen.getAllByTestId("cheer-item-ordinal")[1]).toHaveTextContent("2번째");
     expect(screen.queryByText("날짜 미상")).not.toBeInTheDocument();
+    expect(screen.getByText("1번째 응원 메시지")).toHaveAttribute("title", "1번째 응원 메시지");
   });
 
   it("TC-OV-05 거절 경로: 잘못된 생성 시간이어도 상대 시간을 만들지 않고 목록 순번을 유지한다", () => {

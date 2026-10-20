@@ -2,6 +2,7 @@ import { assertEquals } from "jsr:@std/assert@1";
 import {
   classifyRemovalResults,
   groupCleanupClaims,
+  removeCleanupClaims,
   returnedObjectPaths,
   splitStoragePath,
 } from "./storage-cleanup.ts";
@@ -47,4 +48,24 @@ Deno.test("CV-11 부분 성공은 반환 2건만 성공이고 남은 존재 객�
     async (claim) => claim.object_path !== "c.webp",
   );
   assertEquals([...outcomes.entries()], [[1, true], [2, true], [3, false]]);
+});
+
+Deno.test("CV-11 포이즌 1건이 배치 오류를 내도 정상 객체는 개별 삭제된다", async () => {
+  const claims = [
+    { id: 1, bucket_id: "quarantine", object_path: "good-a.webp", lock_token: "x" },
+    { id: 2, bucket_id: "quarantine", object_path: "poison.webp", lock_token: "x" },
+    { id: 3, bucket_id: "quarantine", object_path: "good-b.webp", lock_token: "x" },
+  ];
+  const calls: string[][] = [];
+  const outcomes = await removeCleanupClaims(
+    claims,
+    async (paths) => {
+      calls.push(paths);
+      if (paths.length > 1 || paths[0] === "poison.webp") return { data: null, error: new Error("poison") };
+      return { data: [{ name: paths[0] }], error: null };
+    },
+    async (claim) => claim.object_path !== "poison.webp",
+  );
+  assertEquals(calls, [["good-a.webp", "poison.webp", "good-b.webp"], ["good-a.webp"], ["poison.webp"], ["good-b.webp"]]);
+  assertEquals([...outcomes.entries()], [[1, true], [2, false], [3, true]]);
 });

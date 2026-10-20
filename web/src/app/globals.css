@@ -518,6 +518,7 @@
   .collapse-chevron svg { width: var(--tabbar-icon-size); height: var(--tabbar-icon-size); transition: transform 160ms ease-out; }
   .collapse-chevron.is-expanded svg { transform: rotate(180deg); }
   .clamp-text { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: var(--cheer-clamp-lines); }
+  .cheer-overflow-summary { padding: var(--sp-2) var(--sp-4); color: var(--muted-color); font-size: var(--text-label-small); line-height: 1.5; }
 
   .cheer-summary-bar { display: grid; gap: var(--sp-1); margin-top: var(--sp-3); }
   .cheer-summary-avatars { display: flex; align-items: center; min-height: var(--tap-min-size); }
@@ -526,6 +527,7 @@
   .cheer-summary-avatars img { object-fit: cover; }
   .cheer-summary-count { color: var(--muted-color); font-size: var(--text-label-small); }
   .cheer-summary-recent { color: var(--muted-color); font-size: var(--text-label-small); line-height: 1.5; }
+  .my-cheer-message { color: var(--muted-color); font-size: var(--text-label-small); line-height: 1.5; }
 
   .business-info { display: grid; gap: var(--sp-3); margin-top: var(--sp-4); border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--card); padding: var(--sp-4); }
   .business-info div { display: grid; gap: var(--sp-1); }

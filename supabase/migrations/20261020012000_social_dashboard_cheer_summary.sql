@@ -1,6 +1,11 @@
 -- R6: add non-monetary social proof to each dashboard goal in one RPC call.
 BEGIN;
 
+CREATE INDEX IF NOT EXISTS cheer_social_summary_recent_idx
+  ON public.cheer(goal_id, created_at DESC, id DESC)
+  INCLUDE (message, is_anonymous, display_name)
+  WHERE status = 'CONFIRMED' AND deleted_at IS NULL AND NOT is_welcome;
+
 CREATE OR REPLACE FUNCTION public.my_social_dashboard()
 RETURNS jsonb
 LANGUAGE plpgsql
