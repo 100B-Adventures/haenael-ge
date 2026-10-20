@@ -75,6 +75,7 @@ const originalVault = JSON.parse(sql(`
 `));
 const originalVaultNames = new Set(originalVault.map((row) => row.name));
 const originalCronSchedule = sql("SELECT schedule FROM cron.job WHERE jobname='drain-storage-cleanup-queue';");
+const originalCronActive = sql("SELECT active FROM cron.job WHERE jobname='drain-storage-cleanup-queue';") === "t";
 const encodedSqlText = (value) => `convert_from(decode('${Buffer.from(value).toString("base64")}','base64'),'UTF8')`;
 function upsertVaultSecret(name, value, description) {
   sql(`
@@ -136,6 +137,7 @@ const pairPath = `runtime-cleanup/${runId}/same-path.png`;
 const bytes = Buffer.from("89504e470d0a1a0a0000000d49484452", "hex");
 const hash = createHash("sha256").update(bytes).digest("hex");
 let cronConfigured = false;
+const drainProbeEventIds = [];
 
 const functionInvocationCount = () => {
   try {
@@ -179,9 +181,77 @@ async function observeCronInvocation() {
   throw new Error("cron_worker_observation_timeout");
 }
 
+async function waitForPgNetResponse(requestId) {
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    const response = sql(`
+      SELECT jsonb_build_object(
+        'status', status_code,
+        'error', error_msg
+      )::text
+      FROM net._http_response
+      WHERE id=${requestId};
+    `);
+    if (response) return JSON.parse(response);
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error(`pg_net_response_timeout_${requestId}`);
+}
+
+async function injectDrainFailureProbe({ name, url, token, expectedStatus }) {
+  const objectPath = `runtime-cleanup/${runId}/r11-${name}.png`;
+  const queueId = Number(sql(`
+    INSERT INTO public.storage_cleanup_queue(
+      goal_id, bucket_id, object_path, reason, created_at
+    )
+    SELECT id, 'goal-cover-quarantine', '${objectPath}', 'ABANDONED_UPLOAD', now()-interval '21 minutes'
+    FROM public.goal WHERE slug='${goalSlug}'
+    RETURNING id;
+  `));
+  const eventBaseline = Number(sql("SELECT coalesce(max(id),0) FROM public.ops_event;"));
+  const requestId = Number(sql(`
+    SELECT net.http_post(
+      url := ${encodedSqlText(url)},
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'apikey', ${encodedSqlText(anonKey)},
+        'x-cleanup-internal-token', ${encodedSqlText(token)}
+      ),
+      body := '{}'::jsonb,
+      timeout_milliseconds := 5000
+    );
+  `));
+  const response = await waitForPgNetResponse(requestId);
+  const stalledCount = Number(sql("SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');"));
+  const event = sql(`
+    SELECT id||'|'||event_type||'|'||(details->>'stalled_count')
+    FROM public.ops_event
+    WHERE id>${eventBaseline}
+      AND event_type='STORAGE_CLEANUP_DRAIN_STALLED'
+    ORDER BY id DESC LIMIT 1;
+  `);
+  if (!event) throw new Error(`r11_alert_missing_${name}`);
+  const [eventId, eventType, eventCount] = event.split("|");
+  drainProbeEventIds.push(Number(eventId));
+  if (response.status !== expectedStatus || stalledCount !== 1 || eventType !== "STORAGE_CLEANUP_DRAIN_STALLED" || eventCount !== "1") {
+    throw new Error(`r11_probe_failed_${name}_${response.status}_${stalledCount}_${eventType}_${eventCount}`);
+  }
+  sql(`
+    DELETE FROM public.storage_cleanup_queue WHERE id=${queueId};
+    UPDATE public.ops_event SET created_at=now()-interval '11 minutes' WHERE id=${eventId};
+  `);
+  return {
+    injected: name,
+    request_id: requestId,
+    http_status: response.status,
+    alert: eventType,
+    stalled_count: stalledCount,
+  };
+}
+
 try {
   await waitForFunction();
   const cronObservation = await observeCronInvocation();
+  sql("SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), active := false);");
   const ea01 = await invoke(cleanupToken);
   const ea02 = await invoke(cleanupToken, "invalid-publishable-key");
   const ea03 = await invoke(null);
@@ -279,6 +349,19 @@ try {
     throw new Error(`cv13_bucket_pair_${afterPublicPair}_${afterQuarantinePair}`);
   }
 
+  const wrongUrlProbe = await injectDrainFailureProbe({
+    name: "wrong-url",
+    url: "http://kong:8000/functions/v1/not-storage-cleanup-worker",
+    token: cleanupToken,
+    expectedStatus: 404,
+  });
+  const permissionDeniedProbe = await injectDrainFailureProbe({
+    name: "permission-denied",
+    url: "http://kong:8000/functions/v1/storage-cleanup-worker",
+    token: "wrong-token-with-more-than-thirty-two-characters",
+    expectedStatus: 403,
+  });
+
   const denoContracts = execFileSync(
     "deno",
     ["test", "--allow-env", "supabase/functions/_shared/cleanup-auth.test.ts", "supabase/functions/_shared/storage-cleanup.test.ts"],
@@ -297,12 +380,14 @@ try {
     CV11: { injected_partial_success_contract: "PASS", source: "production classifyRemovalResults" },
     CV12: { orphan_requeued: Number(requeued), before: tombstoneBeforeSettle, after: tombstoneAfterSettle },
     CV13: { public_pair: afterPublicPair, quarantine_pair: afterQuarantinePair },
+    R11: { wrong_url: wrongUrlProbe, permission_denied: permissionDeniedProbe },
     CRON01: cronObservation,
   }));
 } finally {
   try {
     sql(`
-      ${cronConfigured ? `SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), schedule := '${originalCronSchedule.replaceAll("'", "''")}');` : ""}
+      ${cronConfigured ? `SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), schedule := '${originalCronSchedule.replaceAll("'", "''")}', active := ${originalCronActive});` : ""}
+      ${drainProbeEventIds.length ? `DELETE FROM public.ops_event WHERE id IN (${drainProbeEventIds.join(",")});` : ""}
       DELETE FROM public.storage_cleanup_queue WHERE object_path LIKE 'runtime-cleanup/${runId}/%';
       DELETE FROM public.goal_cover_asset WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}');
       DELETE FROM public.social_cheer_member_attribution WHERE cheer_id IN (SELECT id FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}'));

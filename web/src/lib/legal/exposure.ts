@@ -18,6 +18,12 @@ export const BUSINESS_INFORMATION = {
   privacyOfficer: "윤동주",
 } as const;
 
+export const COMMERCE_REGISTRATION = {
+  label: "통신판매업 신고번호",
+  status: "확인 중",
+  note: "확인된 신고번호를 받은 뒤 이 자리에 반영해요. 확인 전 값은 표시하지 않아요.",
+} as const;
+
 export function legalExposureForPath(pathname: string): LegalExposureMode {
   if (pathname === "/my") return LEGAL_EXPOSURE.my;
   if (pathname === "/my/legal") return LEGAL_EXPOSURE.myLegal;

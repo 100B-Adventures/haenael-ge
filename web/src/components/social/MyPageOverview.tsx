@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
 import { ClampText } from "@/components/common/ClampText";
+import { LegalLinkList } from "@/components/common/LegalFooter";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import type { MySocialDashboard } from "@/lib/social/contracts";
@@ -227,7 +228,10 @@ export function MyPageOverview({
 
       <section aria-labelledby="my-account-heading">
         <h2 className="my-section-title" id="my-account-heading">계정</h2>
-        <div className="my-account-card"><LogoutButton /></div>
+        <div className="my-account-card">
+          <LegalLinkList />
+          <LogoutButton />
+        </div>
       </section>
 
     </div>

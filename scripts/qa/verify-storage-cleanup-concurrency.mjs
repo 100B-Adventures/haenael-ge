@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execFileSync, spawn } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 
 const container = process.env.SUPABASE_DB_CONTAINER ?? "supabase_db_haenael-ge";
@@ -87,6 +87,14 @@ try {
       BEFORE INSERT ON public.ops_event
       FOR EACH ROW EXECUTE FUNCTION public.${r18Function}();
   `);
+  const directFailure = spawnSync("docker", args, {
+    input: "SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');",
+    encoding: "utf8",
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  const directFailureStderr = directFailure.stderr ?? "";
+  const directWarningObserved = directFailureStderr.includes("WARNING:  storage_cleanup_drain_monitor_failed");
+  const directErrorObserved = directFailureStderr.includes("ERROR:  ops_event logger blocked for R18");
   r18JobId = Number(sql(`SELECT cron.schedule('${r18Job}','2 seconds',$job$SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');$job$);`));
   let r18Cron = "";
   for (let attempt = 0; attempt < 30; attempt += 1) {
@@ -98,8 +106,8 @@ try {
   sql(`SELECT cron.unschedule(${r18JobId}); DROP TRIGGER ${r18Trigger} ON public.ops_event; DROP FUNCTION public.${r18Function}();`);
   r18JobId = null;
 
-  console.log(JSON.stringify({ parallel_left: leftIds, parallel_right: rightIds, intersection: overlap, left_window: leftWindow, right_window: rightWindow, windows_overlap: windowsOverlap, distinct_backends: leftWindow.backend_pid !== rightWindow.backend_pid, short_lease_during_lock: Number(duringLock), short_lease_after_commit: Number(afterCommit), drain_monitor: { stalled_count: Number(stalledCount), ops_event: stalledEvent }, logger_failure: { cron: r18Cron, warning_fallback_declared: warningFallbackDeclared === "t" } }));
-  if (leftIds.length !== 2 || rightIds.length !== 2 || overlap.length || !windowsOverlap || leftWindow.backend_pid === rightWindow.backend_pid || duringLock !== "0" || afterCommit !== "0" || stalledCount !== "1" || stalledEvent !== "STORAGE_CLEANUP_DRAIN_STALLED|1" || !r18Cron.startsWith("failed|") || warningFallbackDeclared !== "t") process.exitCode = 1;
+  console.log(JSON.stringify({ parallel_left: leftIds, parallel_right: rightIds, intersection: overlap, left_window: leftWindow, right_window: rightWindow, windows_overlap: windowsOverlap, distinct_backends: leftWindow.backend_pid !== rightWindow.backend_pid, short_lease_during_lock: Number(duringLock), short_lease_after_commit: Number(afterCommit), drain_monitor: { stalled_count: Number(stalledCount), ops_event: stalledEvent }, logger_failure: { direct_exit: directFailure.status, warning_observed: directWarningObserved, error_observed: directErrorObserved, cron: r18Cron, warning_fallback_declared: warningFallbackDeclared === "t" } }));
+  if (leftIds.length !== 2 || rightIds.length !== 2 || overlap.length || !windowsOverlap || leftWindow.backend_pid === rightWindow.backend_pid || duringLock !== "0" || afterCommit !== "0" || stalledCount !== "1" || stalledEvent !== "STORAGE_CLEANUP_DRAIN_STALLED|1" || directFailure.status === 0 || !directWarningObserved || !directErrorObserved || !r18Cron.startsWith("failed|") || warningFallbackDeclared !== "t") process.exitCode = 1;
 } finally {
   try {
     if (r18JobId !== null) sql(`SELECT cron.unschedule(${r18JobId});`);

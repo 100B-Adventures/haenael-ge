@@ -534,6 +534,9 @@
   .business-info div { display: grid; gap: var(--sp-1); }
   .business-info dt { color: var(--muted-color); font-size: var(--text-label-small); font-weight: 700; }
   .business-info dd { color: var(--foreground); font-size: 1rem; line-height: 1.5; overflow-wrap: anywhere; }
+  .business-registration-status { display: grid; gap: var(--sp-2); margin-top: var(--sp-4); border-radius: var(--radius-card); background: var(--warm); padding: var(--sp-4); }
+  .business-registration-status strong { color: var(--foreground); font-size: 1rem; font-weight: 850; line-height: 1.5; }
+  .business-registration-status p { color: var(--muted-color); font-size: 1rem; line-height: 1.6; }
   .legal-footer { width: 100%; max-width: var(--receiver-native-width); margin-inline: auto; padding: 0 var(--space-mobile-gutter) var(--sp-5); }
 
   .landing-approved {
@@ -1061,8 +1064,8 @@
   .my-switch span { width: 1.5rem; height: 1.5rem; border-radius: 9999px; background: var(--card); transition: transform 160ms ease-out; }
   .my-switch.is-on { background: var(--clover); }
   .my-switch.is-on span { transform: translateX(1.25rem); }
-  .my-policy-links { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; }
-  .my-policy-links a { display: inline-flex; min-height: var(--tap-min-size); align-items: center; color: var(--muted-color); font-size: 0.8125rem; font-weight: 700; }
+  .my-policy-links { display: grid; }
+  .my-policy-links a { display: flex; min-height: var(--tap-min-size); align-items: center; border-bottom: 1px solid var(--line); padding-inline: 0.875rem; color: var(--foreground); font-size: 1rem; font-weight: 700; }
   .my-guide-link { display: inline-flex; min-height: var(--tap-min-size); align-items: center; margin-top: var(--sp-2); color: var(--muted-color); font-size: var(--text-label-small); font-weight: 700; }
   .cheer-list-search,
   .cheer-list-reset { display: flex; min-height: var(--tap-min-size); align-items: center; justify-content: center; border-top: 1px solid var(--line); color: var(--clover-ink); font-size: var(--text-label-small); font-weight: 800; }

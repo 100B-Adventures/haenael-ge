@@ -75,6 +75,9 @@ describe("MyPageOverview", () => {
     expect(text.indexOf("나의 활동")).toBeLessThan(text.indexOf("응원 내역"));
     expect(text.indexOf("응원 내역")).toBeLessThan(text.indexOf("환경설정"));
     expect(text.indexOf("환경설정")).toBeLessThan(text.indexOf("계정"));
+    expect(screen.getByRole("link", { name: "이용약관" })).toHaveAttribute("href", "/terms");
+    expect(screen.getByRole("link", { name: "개인정보처리방침" })).toHaveAttribute("href", "/privacy");
+    expect(screen.getByRole("link", { name: "사업자 정보" })).toHaveAttribute("href", "/my/legal");
     expect(text).not.toMatch(/\d[\d,]*원|₩/);
   });
 
