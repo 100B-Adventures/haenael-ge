@@ -350,7 +350,7 @@
   .tabbar a .ic{font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;height:22px;}
   .tabbar a .ic svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
   .tabbar a.on{color:var(--clover-ink);}
-  .tabbar a.on .ic svg{stroke:var(--clover);}
+  .tabbar a.on .ic svg{stroke:var(--clover-ink);}
   .tabbar a:not(.on){color:var(--muted);}
 
   /* 상단 헤더 */
@@ -833,7 +833,7 @@
   .step-row .dot{width:22px;height:22px;border-radius:var(--r-full);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
   .step-row .dot.done{background:var(--clover);color:#fff;}
   .step-row .dot.now{background:var(--clover-soft);color:var(--clover-ink);border:2px solid var(--clover);}
-  .step-row .dot.wait{background:var(--warm);color:var(--muted);}
+  .step-row .dot.wait{background:var(--warm);color:var(--faint);}
   .step-row .sx{padding-bottom:16px;}
   .step-row .st{font-size:13px;font-weight:800;color:var(--ink);}
   .step-row .sd{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5;}
@@ -1119,7 +1119,7 @@
   .ach .ad{font-size:13px;color:var(--muted);margin-top:3px;word-break:keep-all;line-height:1.35;}
   .ach.lock .medal{filter:grayscale(1) brightness(1.08) contrast(.82);box-shadow:none;background:#EDE9E1;}
   .ach.lock .medal:after{content:'';position:absolute;inset:0;background:rgba(244,239,230,.52);}
-  .ach.lock .an,.ach.lock .ad{color:var(--muted);font-weight:700;}
+  .ach.lock .an,.ach.lock .ad{color:var(--faint);font-weight:700;}
   .ach .lockic{position:absolute;right:calc(50% - 40px);top:48px;width:22px;height:22px;border-radius:var(--r-full);background:#fff;
     border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);}
   /* 획득 배지 빛 쓸림: 수집한 것만 살아 있다는 신호(잠김은 정지) */

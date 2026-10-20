@@ -605,7 +605,7 @@
 
   .landing-preview-message { position: relative; z-index: 1; animation: wordmap-float 4.8s ease-in-out infinite; font-weight: 800; white-space: nowrap; }
   .landing-preview-message.is-soft { color: var(--muted-color); font-size: var(--wordmap-text-small); }
-  .landing-preview-message.is-medium { color: var(--clover-ink); font-size: var(--wordmap-text-medium); }
+  .landing-preview-message.is-medium { color: var(--clover); font-size: var(--wordmap-text-medium); }
   .landing-preview-message.is-strong { color: var(--clover-ink); font-size: var(--wordmap-text-large); font-weight: 950; }
   .landing-preview-message:nth-of-type(3n) { animation-delay: -1.6s; }
   .landing-preview-message:nth-of-type(3n + 1) { animation-delay: -3.2s; }
@@ -779,7 +779,7 @@
   .wordmap-cloud-item:nth-of-type(3n) { animation-delay: -1.8s; }
   .wordmap-cloud-item:nth-of-type(3n + 1) { animation-delay: -3.5s; }
   .wordmap-tier-s1 { color: var(--muted-color); font-size: var(--wordmap-text-small); }
-  .wordmap-tier-s2 { color: var(--clover-ink); font-size: var(--wordmap-text-medium); font-weight: 850; }
+  .wordmap-tier-s2 { color: var(--clover); font-size: var(--wordmap-text-medium); font-weight: 850; }
   .wordmap-tier-s3 { color: var(--clover-ink); font-size: var(--wordmap-text-large); font-weight: 950; }
   .wordmap-empty { display: flex; min-height: 12rem; flex-direction: column; align-items: center; justify-content: center; border-radius: var(--radius-card); background: var(--warm); text-align: center; }
   .wordmap-empty-icon { color: var(--clover); font-size: 1.75rem; }

@@ -223,7 +223,7 @@ motion:
 
 /* text */
 --ink           #16140F   본문 primary     (foreground)        대비 16:1 ✅
---muted         #6F6A60   보조 텍스트       (muted-foreground)  대비 4.7:1 ✅
+--muted-color   #6F6A60   보조 텍스트(글자) 흰배경 5.38:1 ✅  ※ CSS 의 --muted 는 웜 배경 #F4EFE6 다. 글자색으로 쓰지 마라
 --faint         #9C968B   장식·비활성 전용  (bg 위 대비 2.81:1, WCAG 미달. D-029 로 읽는 글자 사용처 전부 --muted 로 이관, 2026-10-20)
 
 /* brand: clover green = 성장 + 안전 + "클로버" 네이밍 정합 */
@@ -246,7 +246,7 @@ motion:
 
 ⛔ `--amber`, `--amber-soft`, `--amber-line`, `--amber-ink`, `--danger-ink`는 정본 프로토타입에는 있으나 globals에는 없다. 제품 코드는 같은 값을 hex 리터럴로 사용한다. 이름만 문서에 있는 상태이므로 변수 자체는 `[신설·미구현]`이다. [실측 `docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html`:14-18, `web/src/components/goal/SplitBalanceCard.tsx`:70,95-99, `web/src/app/(receiver)/cashout/status/page.tsx`:76-77]
 
-`--faint`(2.81:1)는 **읽혀야 하는 글자에 쓰지 않는다.** placeholder·구분선 대용·비의미 장식만. 읽혀야 하는 보조 텍스트는 전부 `--muted`(4.71:1) 이상. 돈 설명은 예외 없이 `--muted` 이상(§8.4).
+`--faint`(흰배경 2.94:1 · 앱배경 2.81:1 · 웜면 2.56:1)는 **비활성 상태와 글자가 아닌 장식에만 쓴다** (D-029 적용, 2026-10-20). **placeholder 는 여기서 빠졌다**: placeholder 는 사람이 읽는 글자라 4.5:1 이 걸린다. **셰브론·화살표 글리프도 빠졌다**: 그것은 글자가 아니라 3:1 이 걸리는데 `--faint` 는 **그 3:1 조차 넘지 못한다**(2.94:1). 그래서 `--faint` 가 남는 자리는 ①비활성·잠김 상태(접근성 하한 자체가 면제된다) ②색이 정보를 지지 않는 순수 장식 배경, 둘뿐이다. 읽혀야 하는 보조 텍스트는 전부 `--muted-color`(흰배경 5.38:1) 이상. 돈 설명은 예외 없이 `--muted-color` 이상(§8.4).
 
 **상태색은 원색과 글자색을 짝으로 쓴다** 🔒(2026-08-21). `--clover` / `--clover-ink`가 그랬듯 `--amber` / `--amber-ink`, `--danger` / `--danger-ink`도 짝이다. 원색(`--amber`·`--danger`)은 테두리·점·채움에만 쓰고, **soft 배경 위의 글자는 반드시 ink 짝**을 쓴다. 원색을 12.5px 본문에 쓰면 soft 배경 위에서 3.29:1로 AA 미달이다.
 
@@ -272,7 +272,8 @@ motion:
 | 브랜드 글자 | `text-accent-foreground` 또는 `text-[#14613A]` | `#14613A` [실측 `web/src/app/globals.css`:71, `web/src/components/goal/SplitBalanceCard.tsx`:36-44] | 클로버 수, 성공 강조, 링크 |
 | 웜 보조면 | `bg-muted`, `bg-secondary`, inline `#F4EFE6` | `#F4EFE6` [실측 `web/src/app/globals.css`:66-69, `web/src/components/goal/SplitBalanceCard.tsx`:54-59] | 보조 카드, 비활성·안내 배경 |
 | 보조 글자 | `text-muted-foreground` 또는 `text-[#6F6A60]` | `#6F6A60` [실측 `web/src/app/globals.css`:69, `web/src/components/goal/SplitBalanceCard.tsx`:42-44,112-114] | 설명, 메타, 긴 안내 |
-| 비의미 장식 | `var(--faint)` 또는 `text-[#9C968B]` | `#9C968B` [실측 `web/src/app/globals.css`:92, `web/src/components/goal/SplitBalanceCard.tsx`:34,49] | 보조 등가, 타임스탬프. 읽혀야 하는 핵심 글자 금지 |
+| 비활성·잠김 상태, 색이 정보를 지지 않는 장식 배경 | `var(--faint)` | `#9C968B` [실측 `web/src/app/globals.css`:98] | 대기 단계 점, 잠긴 업적, 장식 배경. **읽는 글자·placeholder·셰브론 금지**(§3.1) |
+| 보조 텍스트·타임스탬프·셰브론 | `var(--muted-color)` | `#6F6A60` [실측 `web/src/app/globals.css`:97] | 읽는 글자 4.5:1 과 비텍스트 3:1 을 모두 넘는다 |
 | 실패 채움 | `bg-destructive` 또는 `bg-[#D9483B]` | `#D9483B` [실측 `web/src/app/globals.css`:74, `web/src/components/admin/CashoutQueue.tsx`:250] | 반려, 실패, 파괴적 확정 |
 | 실패 글자 | `text-[#B23225]` | `#B23225`, semantic 변수 없음 [실측 `web/src/app/(receiver)/me/page.tsx`:304-306, `web/src/app/(receiver)/cashout/status/page.tsx`:118-120] | 실패 안내. `[신설·미구현] --danger-ink` |
 | 대기 배경 | `bg-[#FBF1DD]` + `border-[#E8D3A6]` | 배경 `#FBF1DD`, 선 `#E8D3A6`, semantic 변수 없음 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:65-71, `web/src/app/(receiver)/cashout/status/page.tsx`:76-77] | 환전 잠김, 확인 중 |
