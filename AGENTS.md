@@ -14,6 +14,8 @@ node ../scripts/qa/measure-motion-v4.mjs              # 모션 2축(screencast �
 node ~/.claude/harness/bin/verify-prototype-css.mjs <파일>   # 렌더 후 CSS 미적용 class
 ```
 
+**`verify-prototype-css.mjs` 는 프로토타입만 본다. `web/src` 는 그 검사 대상이 아니다** (2026-10-20 교차 리뷰 지적). 그래서 "렌더 후 미적용 class 0" 을 제품 코드 판정으로 인용하면 거짓이다. 실제로 `CheerList.tsx` 의 `cheer-overflow-summary` 가 CSS 규칙 0건인 채 통과했고, 그 줄은 브라우저 기본 16px 로 렌더된다. 제품 코드의 무효 class 검사는 **이 스크립트를 `web/src` 대상으로 확장**해 만든다(새 스크립트를 만들지 마라. 헌법 §9).
+
 `lint-prototype-interact.mjs` 는 매 실행 전 `scripts/qa/fixtures/interact-known-defects.html` 로 자기검증을 거친다. 5축 중 하나라도 픽스처 결함을 못 잡으면 본 검사를 돌리지 않고 종료코드 2 로 멈춘다. 린트 고장과 결함 0건을 구별할 수 없으면 그 검사는 장식이기 때문이다.
 
 `F 여백 비대칭` 은 **경고이고 차단하지 않는다.** 카드로 범위를 좁혀도 검출 8건 중 실제 결함은 1건이고 나머지는 라벨과 그 값 묶음(정상)이었다. 의도와 실수를 이 축이 구별하지 못한다. 거짓 경보를 차단 조건으로 세우면 린트 전체가 무시되므로 눈으로 판단한다. 근본 처방은 수직 간격을 spacing scale 토큰으로 정의하고 관계별 토큰 표를 `DESIGN.md` 에 등재하는 것이다(진행 중). 토큰이 서면 이 축을 "토큰 밖 값" 검사로 바꿔 차단 조건으로 올린다.
