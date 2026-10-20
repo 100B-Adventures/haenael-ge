@@ -117,6 +117,7 @@
   --text-page-title-mobile: 1.375rem;
   --text-page-title-desktop: 1.875rem;
   --text-body-description: 13px;
+  --text-body: 1rem;
   --text-input-label: 13px;
   --text-label-small: 13px;
   --text-meta-micro: 13px;
@@ -1067,11 +1068,11 @@
   .my-switch.is-on { background: var(--clover); }
   .my-switch.is-on span { transform: translateX(1.25rem); }
   .my-policy-links { display: grid; }
-  .my-policy-links a { display: flex; min-height: var(--tap-min-size); align-items: center; border-bottom: 1px solid var(--line); padding-inline: 0.875rem; color: var(--foreground); font-size: 1rem; font-weight: 700; }
+  .my-policy-links a { display: flex; min-height: var(--tap-min-size); align-items: center; border-bottom: 1px solid var(--line); padding-inline: var(--sp-3); color: var(--foreground); font-size: var(--text-body); font-weight: 700; }
   .my-guide-link { display: inline-flex; min-height: var(--tap-min-size); align-items: center; margin-top: var(--sp-2); color: var(--muted-color); font-size: var(--text-label-small); font-weight: 700; }
   .cheer-list-search,
   .cheer-list-reset { display: flex; min-height: var(--tap-min-size); align-items: center; justify-content: center; border-top: 1px solid var(--line); color: var(--clover-ink); font-size: var(--text-label-small); font-weight: 800; }
-  .my-account-card > button { width: 100%; justify-content: flex-start; padding-inline: 0.875rem; color: var(--foreground) !important; text-align: left; }
+  .my-account-card > button { width: 100%; justify-content: flex-start; padding-inline: var(--sp-3); color: var(--foreground) !important; text-align: left; }
   .my-company-foot { color: var(--muted-color); font-size: 0.8125rem; line-height: 1.6; text-align: center; }
 
   .achievement-hero { margin: 1.5rem 0; text-align: center; }

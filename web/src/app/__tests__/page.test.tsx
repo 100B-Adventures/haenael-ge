@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import LandingPage from "../page";
 
 function chainable<T>(result: T) {
   const obj: Record<string, unknown> & PromiseLike<T> = {
@@ -52,7 +53,6 @@ describe("루트 / 세션 리다이렉트", () => {
       buildSupabase({ id: "owner-uid" }, [{ id: 1 }]) as never,
     );
 
-    const { default: LandingPage } = await import("../page");
     await expect(LandingPage()).rejects.toThrow("NEXT_REDIRECT:/me");
     expect(redirectMock).toHaveBeenCalledWith("/me");
   });
@@ -62,7 +62,6 @@ describe("루트 / 세션 리다이렉트", () => {
       buildSupabase(null, []) as never,
     );
 
-    const { default: LandingPage } = await import("../page");
     const element = await LandingPage();
     render(element);
 
@@ -78,7 +77,6 @@ describe("루트 / 세션 리다이렉트", () => {
       buildSupabase({ id: "owner-uid" }, []) as never,
     );
 
-    const { default: LandingPage } = await import("../page");
     const element = await LandingPage();
     render(element);
 

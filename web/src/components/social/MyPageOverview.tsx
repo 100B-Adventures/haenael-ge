@@ -15,9 +15,10 @@ import {
 } from "lucide-react";
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
 import { ClampText } from "@/components/common/ClampText";
-import { LegalLinkList } from "@/components/common/LegalFooter";
+import { LegalFooter } from "@/components/common/LegalFooter";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
+import { LEGAL_EXPOSURE } from "@/lib/legal/exposure";
 import type { MySocialDashboard } from "@/lib/social/contracts";
 import { CheerSummaryBar } from "./CheerSummaryBar";
 
@@ -229,7 +230,7 @@ export function MyPageOverview({
       <section aria-labelledby="my-account-heading">
         <h2 className="my-section-title" id="my-account-heading">계정</h2>
         <div className="my-account-card">
-          <LegalLinkList />
+          <LegalFooter mode={LEGAL_EXPOSURE.my} />
           <LogoutButton />
         </div>
       </section>

@@ -19,6 +19,16 @@ const apiUrl = local.API_URL;
 const anonKey = local.ANON_KEY;
 const serviceKey = local.SERVICE_ROLE_KEY;
 if (!apiUrl || !anonKey || !serviceKey) throw new Error("local_supabase_status_missing");
+const apiHost = new URL(apiUrl).hostname;
+if (apiHost !== "127.0.0.1" && apiHost !== "localhost") {
+  throw new Error(`local_supabase_required_${apiHost}`);
+}
+const containerProject = execFileSync(
+  "docker",
+  ["inspect", "--format", "{{ index .Config.Labels \"com.supabase.cli.project\" }}", dbContainer],
+  { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+).trim();
+if (!containerProject) throw new Error("supabase_cli_container_required");
 
 const cleanupToken = randomBytes(32).toString("hex");
 const secretDir = mkdtempSync(join(tmpdir(), "haenael-cleanup-"));
@@ -63,33 +73,7 @@ function sql(statement) {
   ).trim();
 }
 
-const vaultNames = ["storage_cleanup_worker_url", "edge_invoke_publishable_key", "storage_cleanup_internal_token"];
-const originalVault = JSON.parse(sql(`
-  SELECT COALESCE(jsonb_agg(jsonb_build_object(
-    'name', name,
-    'secret', decrypted_secret,
-    'description', description
-  ) ORDER BY name), '[]'::jsonb)::text
-  FROM vault.decrypted_secrets
-  WHERE name = ANY(ARRAY['${vaultNames.join("','")}']);
-`));
-const originalVaultNames = new Set(originalVault.map((row) => row.name));
-const originalCronSchedule = sql("SELECT schedule FROM cron.job WHERE jobname='drain-storage-cleanup-queue';");
-const originalCronActive = sql("SELECT active FROM cron.job WHERE jobname='drain-storage-cleanup-queue';") === "t";
 const encodedSqlText = (value) => `convert_from(decode('${Buffer.from(value).toString("base64")}','base64'),'UTF8')`;
-function upsertVaultSecret(name, value, description) {
-  sql(`
-    SELECT vault.update_secret(id, ${encodedSqlText(value)}, name, ${encodedSqlText(description)})
-    FROM vault.secrets WHERE name='${name}';
-    SELECT vault.create_secret(${encodedSqlText(value)}, '${name}', ${encodedSqlText(description)})
-    WHERE NOT EXISTS (SELECT 1 FROM vault.secrets WHERE name='${name}');
-  `);
-}
-function restoreVault() {
-  for (const row of originalVault) upsertVaultSecret(row.name, row.secret, row.description ?? "");
-  const createdNames = vaultNames.filter((name) => !originalVaultNames.has(name));
-  if (createdNames.length) sql(`DELETE FROM vault.secrets WHERE name IN ('${createdNames.join("','")}');`);
-}
 
 async function waitForFunction() {
   for (let attempt = 0; attempt < 120; attempt += 1) {
@@ -136,8 +120,7 @@ const tombstonePath = `runtime-cleanup/${runId}/cv12-tombstone.png`;
 const pairPath = `runtime-cleanup/${runId}/same-path.png`;
 const bytes = Buffer.from("89504e470d0a1a0a0000000d49484452", "hex");
 const hash = createHash("sha256").update(bytes).digest("hex");
-let cronConfigured = false;
-const drainProbeEventIds = [];
+const temporaryCronJobIds = new Set();
 
 const functionInvocationCount = () => {
   try {
@@ -148,17 +131,24 @@ const functionInvocationCount = () => {
 };
 
 async function observeCronInvocation() {
-  const baselineRunId = Number(sql("SELECT coalesce(max(runid),0) FROM cron.job_run_details WHERE jobid=(SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue');"));
+  const jobName = `qa-drain-storage-cleanup-${runId}`;
   const baselineResponseId = Number(sql("SELECT coalesce(max(id),0) FROM net._http_response;"));
   const baselineInvocations = functionInvocationCount();
-  upsertVaultSecret("storage_cleanup_worker_url", "http://kong:8000/functions/v1/storage-cleanup-worker", "local runtime verification");
-  upsertVaultSecret("edge_invoke_publishable_key", anonKey, "local runtime verification");
-  upsertVaultSecret("storage_cleanup_internal_token", cleanupToken, "local runtime verification");
-  sql("SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), schedule := '* * * * *');");
-  cronConfigured = true;
+  const command = `SELECT net.http_post(
+    url := 'http://kong:8000/functions/v1/storage-cleanup-worker',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'apikey', ${encodedSqlText(anonKey)},
+      'x-cleanup-internal-token', ${encodedSqlText(cleanupToken)}
+    ),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 5000
+  );`;
+  const jobId = Number(sql(`SELECT cron.schedule('${jobName}', '2 seconds', ${encodedSqlText(command)});`));
+  temporaryCronJobIds.add(jobId);
 
-  for (let attempt = 0; attempt < 45; attempt += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const row = sql(`
       SELECT d.runid||'|'||d.status||'|'||coalesce(r.status_code,0)
       FROM cron.job_run_details d
@@ -167,15 +157,16 @@ async function observeCronInvocation() {
         WHERE id > ${baselineResponseId}
         ORDER BY id DESC LIMIT 1
       ) r ON true
-      WHERE d.jobid=(SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue')
-        AND d.runid > ${baselineRunId}
+      WHERE d.jobid=${jobId}
       ORDER BY d.runid DESC LIMIT 1;
     `);
     if (!row) continue;
     const [runId, runStatus, httpStatus] = row.split("|");
     const invocationDelta = functionInvocationCount() - baselineInvocations;
     if (runStatus === "succeeded" && httpStatus === "200" && invocationDelta >= 1) {
-      return { run_id: Number(runId), run_status: runStatus, http_status: Number(httpStatus), function_log_delta: invocationDelta, authorization_header_sent: false };
+      sql(`SELECT cron.unschedule(${jobId});`);
+      temporaryCronJobIds.delete(jobId);
+      return { job_name: jobName, run_id: Number(runId), run_status: runStatus, http_status: Number(httpStatus), function_log_delta: invocationDelta, authorization_header_sent: false };
     }
   }
   throw new Error("cron_worker_observation_timeout");
@@ -202,15 +193,14 @@ async function injectDrainFailureProbe({ name, url, token, expectedStatus }) {
   const queueId = Number(sql(`
     WITH inserted AS (
       INSERT INTO public.storage_cleanup_queue(
-        goal_id, bucket_id, object_path, reason, created_at
+        goal_id, bucket_id, object_path, reason
       )
-      SELECT id, 'goal-cover-quarantine', '${objectPath}', 'ABANDONED_UPLOAD', now()-interval '21 minutes'
+      SELECT id, 'goal-cover-quarantine', '${objectPath}', 'ABANDONED_UPLOAD'
       FROM public.goal WHERE slug='${goalSlug}'
       RETURNING id
     )
     SELECT id FROM inserted;
   `));
-  const eventBaseline = Number(sql("SELECT coalesce(max(id),0) FROM public.ops_event;"));
   const requestId = Number(sql(`
     SELECT net.http_post(
       url := ${encodedSqlText(url)},
@@ -224,37 +214,63 @@ async function injectDrainFailureProbe({ name, url, token, expectedStatus }) {
     );
   `));
   const response = await waitForPgNetResponse(requestId);
-  const stalledCount = Number(sql("SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');"));
-  const event = sql(`
-    SELECT id||'|'||event_type||'|'||(details->>'stalled_count')
-    FROM public.ops_event
-    WHERE id>${eventBaseline}
-      AND event_type='STORAGE_CLEANUP_DRAIN_STALLED'
-    ORDER BY id DESC LIMIT 1;
-  `);
-  if (!event) throw new Error(`r11_alert_missing_${name}`);
-  const [eventId, eventType, eventCount] = event.split("|");
-  drainProbeEventIds.push(Number(eventId));
-  if (response.status !== expectedStatus || stalledCount !== 1 || eventType !== "STORAGE_CLEANUP_DRAIN_STALLED" || eventCount !== "1") {
-    throw new Error(`r11_probe_failed_${name}_${response.status}_${stalledCount}_${eventType}_${eventCount}`);
+  if (response.status !== expectedStatus) {
+    throw new Error(`r11_probe_failed_${name}_${response.status}`);
   }
-  sql(`
-    DELETE FROM public.storage_cleanup_queue WHERE id=${queueId};
-    UPDATE public.ops_event SET created_at=now()-interval '11 minutes' WHERE id=${eventId};
-  `);
   return {
     injected: name,
+    queue_id: queueId,
     request_id: requestId,
     http_status: response.status,
-    alert: eventType,
-    stalled_count: stalledCount,
   };
+}
+
+async function observeMonitorCron({ eventBaseline, expectedStalledCount }) {
+  const jobName = `qa-monitor-storage-cleanup-${runId}`;
+  const command = "SELECT public.monitor_storage_cleanup_drain(interval '1 second');";
+  const jobId = Number(sql(`SELECT cron.schedule('${jobName}', '2 seconds', ${encodedSqlText(command)});`));
+  temporaryCronJobIds.add(jobId);
+
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const run = sql(`
+      SELECT runid||'|'||status||'|'||coalesce(return_message,'')
+      FROM cron.job_run_details
+      WHERE jobid=${jobId}
+      ORDER BY runid DESC LIMIT 1;
+    `);
+    if (!run) continue;
+    const event = sql(`
+      SELECT id||'|'||event_type||'|'||(details->>'stalled_count')||'|'||(details->>'stale_after_seconds')
+      FROM public.ops_event
+      WHERE id>${eventBaseline}
+        AND event_type='STORAGE_CLEANUP_DRAIN_STALLED'
+      ORDER BY id DESC LIMIT 1;
+    `);
+    if (run.includes("|succeeded|") && event) {
+      const [eventId, eventType, stalledCount, staleAfterSeconds] = event.split("|");
+      sql(`SELECT cron.unschedule(${jobId});`);
+      temporaryCronJobIds.delete(jobId);
+      if (Number(stalledCount) !== expectedStalledCount || staleAfterSeconds !== "1") {
+        throw new Error(`monitor_cron_alert_mismatch_${stalledCount}_${staleAfterSeconds}`);
+      }
+      return {
+        job_name: jobName,
+        job_run: run,
+        event_id: Number(eventId),
+        event_type: eventType,
+        stalled_count: Number(stalledCount),
+        stale_after_seconds: Number(staleAfterSeconds),
+        received_by: "public.ops_event",
+      };
+    }
+  }
+  throw new Error("monitor_cron_observation_timeout");
 }
 
 try {
   await waitForFunction();
   const cronObservation = await observeCronInvocation();
-  sql("SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), active := false);");
   const ea01 = await invoke(cleanupToken);
   const ea02 = await invoke(cleanupToken, "invalid-publishable-key");
   const ea03 = await invoke(null);
@@ -352,6 +368,7 @@ try {
     throw new Error(`cv13_bucket_pair_${afterPublicPair}_${afterQuarantinePair}`);
   }
 
+  const eventBaseline = Number(sql("SELECT coalesce(max(id),0) FROM public.ops_event;"));
   const wrongUrlProbe = await injectDrainFailureProbe({
     name: "wrong-url",
     url: "http://kong:8000/functions/v1/not-storage-cleanup-worker",
@@ -363,6 +380,12 @@ try {
     url: "http://kong:8000/functions/v1/storage-cleanup-worker",
     token: "wrong-token-with-more-than-thirty-two-characters",
     expectedStatus: 403,
+  });
+  const preCronAlertCount = Number(sql(`SELECT count(*) FROM public.ops_event WHERE id>${eventBaseline} AND event_type='STORAGE_CLEANUP_DRAIN_STALLED';`));
+  if (preCronAlertCount !== 0) throw new Error("monitor_alert_created_before_cron");
+  const monitorCronObservation = await observeMonitorCron({
+    eventBaseline,
+    expectedStalledCount: 2,
   });
 
   const denoContracts = execFileSync(
@@ -383,14 +406,15 @@ try {
     CV11: { injected_partial_success_contract: "PASS", source: "production classifyRemovalResults" },
     CV12: { orphan_requeued: Number(requeued), before: tombstoneBeforeSettle, after: tombstoneAfterSettle },
     CV13: { public_pair: afterPublicPair, quarantine_pair: afterQuarantinePair },
-    R11: { wrong_url: wrongUrlProbe, permission_denied: permissionDeniedProbe },
+    R11: { wrong_url: wrongUrlProbe, permission_denied: permissionDeniedProbe, alert_before_cron: preCronAlertCount, monitor_cron: monitorCronObservation },
     CRON01: cronObservation,
   }));
 } finally {
   try {
+    for (const jobId of temporaryCronJobIds) {
+      try { sql(`SELECT cron.unschedule(${jobId});`); } catch {}
+    }
     sql(`
-      ${cronConfigured ? `SELECT cron.alter_job((SELECT jobid FROM cron.job WHERE jobname='drain-storage-cleanup-queue'), schedule := '${originalCronSchedule.replaceAll("'", "''")}', active := ${originalCronActive});` : ""}
-      ${drainProbeEventIds.length ? `DELETE FROM public.ops_event WHERE id IN (${drainProbeEventIds.join(",")});` : ""}
       DELETE FROM public.storage_cleanup_queue WHERE object_path LIKE 'runtime-cleanup/${runId}/%';
       DELETE FROM public.goal_cover_asset WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}');
       DELETE FROM public.social_cheer_member_attribution WHERE cheer_id IN (SELECT id FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}'));
@@ -400,7 +424,6 @@ try {
       DELETE FROM auth.users WHERE id='${owner}';
     `);
   } catch {}
-  try { restoreVault(); } catch {}
   server.kill("SIGTERM");
   closeSync(logFd);
   rmSync(secretDir, { recursive: true, force: true });

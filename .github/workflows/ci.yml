@@ -37,11 +37,15 @@ jobs:
         with:
           node-version: 22
 
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.109.0
+
       - name: 로컬 Supabase 기동
-        run: npx supabase start
+        run: supabase start
 
       - name: pgTAP 전수
-        run: npx supabase test db
+        run: supabase test db
 
       - name: Storage cleanup 스케줄·동시성 계약
         run: |
@@ -54,7 +58,7 @@ jobs:
 
       - name: 로컬 Supabase 종료
         if: always()
-        run: npx supabase stop --no-backup
+        run: supabase stop --no-backup
 
   qa-contracts:
     name: 배포 환경·환전 층간 계약

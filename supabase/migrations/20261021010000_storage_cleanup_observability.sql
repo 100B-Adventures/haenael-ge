@@ -12,6 +12,9 @@ AS $$
 DECLARE
   v_stalled integer;
   v_oldest timestamptz;
+  v_pending integer;
+  v_cleanup_candidates integer;
+  v_oldest_candidate timestamptz;
 BEGIN
   SELECT count(*)::integer, min(q.created_at)
   INTO v_stalled, v_oldest
@@ -26,6 +29,7 @@ BEGIN
     FROM public.ops_event AS e
     WHERE e.event_type = 'STORAGE_CLEANUP_DRAIN_STALLED'
       AND e.created_at >= now() - interval '10 minutes'
+      AND e.details->>'oldest_created_at' = to_jsonb(v_oldest)#>>'{}'
   ) THEN
     INSERT INTO public.ops_event(event_type, severity, details)
     VALUES (
@@ -35,6 +39,36 @@ BEGIN
         'stalled_count', v_stalled,
         'oldest_created_at', v_oldest,
         'stale_after_seconds', extract(epoch FROM p_stale_after)::bigint
+      )
+    );
+  END IF;
+
+  SELECT count(*)::integer
+  INTO v_pending
+  FROM public.storage_cleanup_queue AS q
+  WHERE q.status IN ('PENDING', 'PROCESSING', 'FAILED')
+    AND q.attempts < 5;
+
+  SELECT count(*)::integer, min(a.created_at)
+  INTO v_cleanup_candidates, v_oldest_candidate
+  FROM public.goal_cover_asset AS a
+  WHERE (a.status = 'UPLOADING' AND a.created_at < now() - interval '24 hours')
+     OR (a.status = 'DELETED' AND (a.quarantine_path IS NOT NULL OR a.public_path IS NOT NULL));
+
+  IF v_pending = 0 AND v_cleanup_candidates > 0 AND NOT EXISTS (
+    SELECT 1
+    FROM public.ops_event AS e
+    WHERE e.event_type = 'STORAGE_CLEANUP_QUEUE_EMPTY_WITH_CANDIDATES'
+      AND e.created_at >= now() - interval '10 minutes'
+      AND e.details->>'oldest_candidate_created_at' = to_jsonb(v_oldest_candidate)#>>'{}'
+  ) THEN
+    INSERT INTO public.ops_event(event_type, severity, details)
+    VALUES (
+      'STORAGE_CLEANUP_QUEUE_EMPTY_WITH_CANDIDATES',
+      'ERROR',
+      jsonb_build_object(
+        'candidate_count', v_cleanup_candidates,
+        'oldest_candidate_created_at', v_oldest_candidate
       )
     );
   END IF;
@@ -120,11 +154,22 @@ BEGIN
     );
   END IF;
 
-  IF NOT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'monitor-storage-cleanup-drain') THEN
+  SELECT jobid INTO v_job_id
+  FROM cron.job
+  WHERE jobname = 'monitor-storage-cleanup-drain';
+
+  IF v_job_id IS NULL THEN
     PERFORM cron.schedule(
       'monitor-storage-cleanup-drain',
       '*/10 * * * *',
       $CRON$SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');$CRON$
+    );
+  ELSE
+    PERFORM cron.alter_job(
+      v_job_id,
+      schedule := '*/10 * * * *',
+      command := $CRON$SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');$CRON$,
+      active := true
     );
   END IF;
 EXCEPTION WHEN OTHERS THEN

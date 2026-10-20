@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service";
 import {
   CashoutQueue,
   type AdminCashout,
@@ -33,6 +34,14 @@ type AdminLedgerEntry = {
   ref_type: string | null;
   ref_id: number | null;
   balance_after: number;
+  created_at: string;
+};
+
+type AdminOpsAlert = {
+  id: number;
+  event_type: string;
+  severity: string;
+  details: Record<string, unknown>;
   created_at: string;
 };
 
@@ -141,14 +150,21 @@ export default async function AdminPage() {
     notFound();
   }
 
-  const [membersResult, ledgerResult, cashoutsResult, coversResult] = await Promise.all([
+  const serviceClient = createServiceRoleClient();
+  const [membersResult, ledgerResult, cashoutsResult, coversResult, alertsResult] = await Promise.all([
     callAdminRpc<AdminMember[]>("admin_list_members", { p_limit: 100 }),
     callAdminRpc<AdminLedgerEntry[]>("admin_list_ledger", { p_limit: 200 }),
     callAdminRpc<AdminCashout[]>("admin_list_cashouts_v2", { p_limit: 100 }),
     callAdminRpc<CoverReviewItem[]>("admin_list_goal_covers", { p_limit: 100 }),
+    serviceClient
+      .from("ops_event" as never)
+      .select("id,event_type,severity,details,created_at")
+      .in("severity", ["ERROR", "WARN"])
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
 
-  if (membersResult.error || ledgerResult.error || cashoutsResult.error || coversResult.error) {
+  if (membersResult.error || ledgerResult.error || cashoutsResult.error || coversResult.error || alertsResult.error) {
     throw new Error("관리자 데이터를 불러오지 못했습니다.");
   }
 
@@ -157,6 +173,7 @@ export default async function AdminPage() {
   // W-8: 목록은 authenticated RPC로 마스킹 필드만 읽는다. 복호화는 행별 액션에서만 한다.
   const cashouts = cashoutsResult.data ?? [];
   const covers = coversResult.data ?? [];
+  const alerts = (alertsResult.data ?? []) as unknown as AdminOpsAlert[];
 
   return (
     <main className="min-h-svh bg-background px-4 py-10 text-foreground sm:px-6 lg:px-10">
@@ -173,6 +190,34 @@ export default async function AdminPage() {
         </header>
 
         <div className="space-y-10">
+          <section
+            className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
+            data-testid="admin-ops-alerts"
+          >
+            <SectionHeader
+              title="운영 경보"
+              description="Storage cleanup 정체와 스케줄 실패를 최근순으로 표시합니다."
+              count={alerts.length}
+            />
+            {alerts.length === 0 ? (
+              <p className="py-6 text-sm text-muted-foreground">현재 수신된 운영 경보가 없습니다.</p>
+            ) : (
+              <ul className="divide-y" aria-label="운영 경보 목록">
+                {alerts.map((alert) => (
+                  <li className="grid gap-1 py-3 text-sm sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-4" key={alert.id}>
+                    <strong className="text-destructive">{alert.severity}</strong>
+                    <span className="font-semibold">{alert.event_type}</span>
+                    <time className="text-muted-foreground" dateTime={alert.created_at}>
+                      {formatDateTime(alert.created_at)}
+                    </time>
+                    <code className="break-all text-xs text-muted-foreground sm:col-span-3">
+                      {JSON.stringify(alert.details)}
+                    </code>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
           <GoalCoverReviewQueue initialItems={covers} />
           <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
             <SectionHeader

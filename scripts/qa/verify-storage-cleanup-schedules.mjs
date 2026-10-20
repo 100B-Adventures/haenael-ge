@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const repo = resolve(new URL("../..", import.meta.url).pathname);
 const container = process.env.SUPABASE_DB_CONTAINER ?? "supabase_db_haenael-ge";
 const contract = JSON.parse(readFileSync(resolve(repo, "qa/contracts/deploy-env.contract.json"), "utf8"));
-const source = readFileSync(new URL(import.meta.url), "utf8");
+const suiteDir = dirname(fileURLToPath(import.meta.url));
+const suiteSources = readdirSync(suiteDir)
+  .filter((name) => /^verify-storage-cleanup-.*\.mjs$/.test(name))
+  .sort()
+  .map((name) => ({ name, source: readFileSync(resolve(suiteDir, name), "utf8") }));
 const sql = (statement) => execFileSync(
   "docker",
   ["exec", "-i", container, "psql", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-At"],
@@ -46,27 +51,74 @@ const commandContracts = sql(`
   SELECT
     position('monitor_storage_cleanup_drain' in (SELECT command FROM cron.job WHERE jobname='monitor-storage-cleanup-drain')) > 0,
     position('Authorization' in (SELECT command FROM cron.job WHERE jobname='drain-storage-cleanup-queue')) = 0,
-    position('x-cleanup-internal-token' in (SELECT command FROM cron.job WHERE jobname='drain-storage-cleanup-queue')) > 0;
+    position('x-cleanup-internal-token' in (SELECT command FROM cron.job WHERE jobname='drain-storage-cleanup-queue')) > 0,
+    position('STORAGE_CLEANUP_QUEUE_EMPTY_WITH_CANDIDATES' in pg_get_functiondef('public.monitor_storage_cleanup_drain(interval)'::regprocedure)) > 0,
+    (SELECT active FROM cron.job WHERE jobname='monitor-storage-cleanup-drain');
 `);
-const destructiveDeletes = [
-  /DELETE\s+FROM\s+vault\.secrets/i,
-  /DELETE\s+FROM\s+(?:public\.)?ops_event/i,
-].filter((pattern) => pattern.test(source)).length;
+const monitorRun = sql(`
+  SELECT COALESCE((
+    SELECT d.status||'|'||coalesce(d.return_message,'')
+    FROM cron.job_run_details AS d
+    WHERE d.jobid=(SELECT jobid FROM cron.job WHERE jobname='monitor-storage-cleanup-drain')
+    ORDER BY d.runid DESC LIMIT 1
+  ), 'never');
+`);
+// R20: inspect every storage-cleanup verifier, not only this file. Report all
+// destructive axes and reject durable audit/credential mutation. Fixture-row
+// cleanup remains allowed only when its delete has an explicit WHERE scope.
+const mutationPatterns = {
+  delete: new RegExp(["DE", "LETE\\s+FROM\\s+([a-zA-Z0-9_.]+)[^;]*;"].join(""), "gi"),
+  update: new RegExp(["UP", "DATE\\s+([a-zA-Z0-9_.]+)[^;]*;"].join(""), "gi"),
+  truncate: new RegExp(["TRUN", "CATE(?:\\s+TABLE)?\\s+([a-zA-Z0-9_.]+)[^;]*;"].join(""), "gi"),
+  vault_delete_secret: new RegExp(["vault", "\\.delete_secret\\s*\\("].join(""), "gi"),
+};
+const mutationFindings = [];
+for (const { name, source } of suiteSources) {
+  for (const [axis, pattern] of Object.entries(mutationPatterns)) {
+    pattern.lastIndex = 0;
+    for (const match of source.matchAll(pattern)) {
+      const statement = match[0].replace(/\s+/g, " ").trim();
+      const target = match[1] ?? "vault.delete_secret";
+      mutationFindings.push({
+        file: name,
+        axis,
+        target,
+        scoped: axis !== "delete" || /\bWHERE\b/i.test(statement),
+        durable: /(?:^|\.)(?:ops_event|secrets)$/i.test(target) || axis === "vault_delete_secret",
+      });
+    }
+  }
+}
+const mutationAxisCounts = Object.fromEntries(
+  Object.keys(mutationPatterns).map((axis) => [
+    axis,
+    mutationFindings.filter((finding) => finding.axis === axis).length,
+  ]),
+);
+const unscopedDeletes = mutationFindings.filter((finding) => finding.axis === "delete" && !finding.scoped);
+const forbiddenDurableMutations = mutationFindings.filter((finding) => finding.durable);
 const after = fingerprint();
 
 const result = {
   cron_jobs_active: jobs.filter((row) => row.includes("|1|")).length,
   vault_contract_missing: missingContract,
   command_contracts: commandContracts,
+  monitor_recent_run: monitorRun,
+  monitor_recent_run_axis: monitorRun === "never" ? "fresh-database" : "observed",
   vault_and_ops_unchanged: before === after,
-  destructive_delete_statements: destructiveDeletes,
+  scanned_cleanup_verifiers: suiteSources.map(({ name }) => name),
+  mutation_axis_counts: mutationAxisCounts,
+  unscoped_delete_statements: unscopedDeletes,
+  forbidden_durable_mutations: forbiddenDurableMutations,
 };
 console.log(JSON.stringify(result));
 if (
   jobs.length !== expectedJobs.length ||
   result.cron_jobs_active !== expectedJobs.length ||
   missingContract.length ||
-  commandContracts !== "t|t|t" ||
+  commandContracts !== "t|t|t|t|t" ||
+  (monitorRun !== "never" && !monitorRun.startsWith("succeeded|") && !monitorRun.startsWith("running|")) ||
   before !== after ||
-  destructiveDeletes !== 0
+  unscopedDeletes.length !== 0 ||
+  forbiddenDurableMutations.length !== 0
 ) process.exit(1);

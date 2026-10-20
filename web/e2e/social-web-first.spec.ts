@@ -411,6 +411,35 @@ test.describe("V2 web-first social slice", () => {
     }
   });
 
+  test("OPS-ALERT-01 관리자 화면이 ops_event 경보를 실제 수신한다", async ({ browser }) => {
+    const { data: inserted, error: insertError } = await admin.from("ops_event" as never)
+      .insert({
+        event_type: "STORAGE_CLEANUP_DRAIN_STALLED",
+        severity: "ERROR",
+        details: { stalled_count: 2, source: `playwright-${runId}` },
+      } as never)
+      .select("id")
+      .single();
+    if (insertError || !inserted) throw insertError ?? new Error("ops_alert_fixture_failed");
+
+    try {
+      const context = await authContext(browser, emails.admin);
+      const page = await context.newPage();
+      const consoleErrors: string[] = [];
+      page.on("console", (message) => {
+        if (message.type() === "error") consoleErrors.push(message.text());
+      });
+      await page.goto("/admin");
+      const alerts = page.getByTestId("admin-ops-alerts");
+      await expect(alerts).toContainText("STORAGE_CLEANUP_DRAIN_STALLED");
+      await expect(alerts).toContainText(`playwright-${runId}`);
+      expect(consoleErrors).toEqual([]);
+      await context.close();
+    } finally {
+      await admin.from("ops_event" as never).delete().eq("id", (inserted as { id: number }).id);
+    }
+  });
+
   test("PW-02 목표 관리 화면이 기존 응원, 잔액, 링크, 편집을 보존한다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();

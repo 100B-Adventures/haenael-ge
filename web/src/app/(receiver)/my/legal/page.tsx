@@ -1,8 +1,8 @@
 import Link from "next/link";
 // D-040 route implementation token: my/legal
-import { BusinessInfoBlock } from "@/components/common/LegalFooter";
+import { LegalFooter } from "@/components/common/LegalFooter";
 import { ReceiverPageShell } from "@/components/receiver/ReceiverShell";
-import { COMMERCE_REGISTRATION } from "@/lib/legal/exposure";
+import { COMMERCE_REGISTRATION, LEGAL_EXPOSURE } from "@/lib/legal/exposure";
 
 export default function BusinessInformationPage() {
   return (
@@ -15,7 +15,7 @@ export default function BusinessInformationPage() {
       <p className="social-description">
         해낼게를 운영하는 사업자의 정보를 확인할 수 있어요.
       </p>
-      <BusinessInfoBlock />
+      <LegalFooter mode={LEGAL_EXPOSURE.myLegal} />
       <section
         className="business-registration-status"
         aria-labelledby="commerce-registration-heading"

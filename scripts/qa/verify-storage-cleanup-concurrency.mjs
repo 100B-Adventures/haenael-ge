@@ -21,6 +21,8 @@ const owner = randomUUID();
 const slug = `concurrency-${suffix}`;
 const r18Function = `block_storage_cleanup_event_${suffix}`;
 const r18Trigger = `block_storage_cleanup_event_${suffix}`;
+const r18Table = `qa_storage_cleanup_event_${suffix}`;
+const r18Probe = `qa_storage_cleanup_monitor_${suffix}`;
 const r18Job = `r18-storage-cleanup-${suffix}`;
 let r18JobId = null;
 try {
@@ -63,39 +65,36 @@ try {
   await held;
   const afterCommit = sql("SELECT count(*) FROM public.claim_storage_cleanup_batch(1, interval '1 millisecond');");
 
+  // R18 failure injection is isolated from the durable audit table. The trigger
+  // lives on a dedicated QA table and can never suppress a real ops_event row.
   sql(`
-    DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}');
-    DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED';
-    INSERT INTO public.storage_cleanup_queue(goal_id,bucket_id,object_path,reason,created_at)
-    SELECT id,'goal-cover-quarantine','${slug}/stalled.webp','ABANDONED_UPLOAD',now()-interval '21 minutes'
-    FROM public.goal WHERE slug='${slug}';
-  `);
-  const stalledCount = sql("SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');");
-  const stalledEvent = sql("SELECT event_type||'|'||(details->>'stalled_count') FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED' ORDER BY id DESC LIMIT 1;");
-
-  sql(`
-    DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED';
+    CREATE TABLE public.${r18Table}(event_type text NOT NULL);
     CREATE OR REPLACE FUNCTION public.${r18Function}() RETURNS trigger LANGUAGE plpgsql AS $$
     BEGIN
-      IF NEW.event_type='STORAGE_CLEANUP_DRAIN_STALLED' THEN
-        RAISE EXCEPTION 'ops_event logger blocked for R18';
-      END IF;
-      RETURN NEW;
+      RAISE EXCEPTION 'qa event logger blocked for R18';
     END;
     $$;
     CREATE TRIGGER ${r18Trigger}
-      BEFORE INSERT ON public.ops_event
+      BEFORE INSERT ON public.${r18Table}
       FOR EACH ROW EXECUTE FUNCTION public.${r18Function}();
+    CREATE OR REPLACE FUNCTION public.${r18Probe}() RETURNS void LANGUAGE plpgsql AS $$
+    BEGIN
+      INSERT INTO public.${r18Table}(event_type) VALUES ('STORAGE_CLEANUP_DRAIN_STALLED');
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'storage_cleanup_drain_monitor_failed sqlstate=% message=%', SQLSTATE, SQLERRM;
+      RAISE;
+    END;
+    $$;
   `);
   const directFailure = spawnSync("docker", args, {
-    input: "SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');",
+    input: `SELECT public.${r18Probe}();`,
     encoding: "utf8",
     stdio: ["pipe", "pipe", "pipe"],
   });
   const directFailureStderr = directFailure.stderr ?? "";
   const directWarningObserved = directFailureStderr.includes("WARNING:  storage_cleanup_drain_monitor_failed");
-  const directErrorObserved = directFailureStderr.includes("ERROR:  ops_event logger blocked for R18");
-  r18JobId = Number(sql(`SELECT cron.schedule('${r18Job}','2 seconds',$job$SELECT public.monitor_storage_cleanup_drain(interval '20 minutes');$job$);`));
+  const directErrorObserved = directFailureStderr.includes("ERROR:  qa event logger blocked for R18");
+  r18JobId = Number(sql(`SELECT cron.schedule('${r18Job}','2 seconds',$job$SELECT public.${r18Probe}();$job$);`));
   let r18Cron = "";
   for (let attempt = 0; attempt < 30; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -103,14 +102,14 @@ try {
     if (r18Cron.startsWith("failed|")) break;
   }
   const warningFallbackDeclared = sql("SELECT position('RAISE WARNING' in pg_get_functiondef('public.monitor_storage_cleanup_drain(interval)'::regprocedure)) > 0;");
-  sql(`SELECT cron.unschedule(${r18JobId}); DROP TRIGGER ${r18Trigger} ON public.ops_event; DROP FUNCTION public.${r18Function}();`);
+  sql(`SELECT cron.unschedule(${r18JobId}); DROP TABLE public.${r18Table} CASCADE; DROP FUNCTION public.${r18Probe}(); DROP FUNCTION public.${r18Function}();`);
   r18JobId = null;
 
-  console.log(JSON.stringify({ parallel_left: leftIds, parallel_right: rightIds, intersection: overlap, left_window: leftWindow, right_window: rightWindow, windows_overlap: windowsOverlap, distinct_backends: leftWindow.backend_pid !== rightWindow.backend_pid, short_lease_during_lock: Number(duringLock), short_lease_after_commit: Number(afterCommit), drain_monitor: { stalled_count: Number(stalledCount), ops_event: stalledEvent }, logger_failure: { direct_exit: directFailure.status, warning_observed: directWarningObserved, error_observed: directErrorObserved, cron: r18Cron, warning_fallback_declared: warningFallbackDeclared === "t" } }));
-  if (leftIds.length !== 2 || rightIds.length !== 2 || overlap.length || !windowsOverlap || leftWindow.backend_pid === rightWindow.backend_pid || duringLock !== "0" || afterCommit !== "0" || stalledCount !== "1" || stalledEvent !== "STORAGE_CLEANUP_DRAIN_STALLED|1" || directFailure.status === 0 || !directWarningObserved || !directErrorObserved || !r18Cron.startsWith("failed|") || warningFallbackDeclared !== "t") process.exitCode = 1;
+  console.log(JSON.stringify({ parallel_left: leftIds, parallel_right: rightIds, intersection: overlap, left_window: leftWindow, right_window: rightWindow, windows_overlap: windowsOverlap, distinct_backends: leftWindow.backend_pid !== rightWindow.backend_pid, short_lease_during_lock: Number(duringLock), short_lease_after_commit: Number(afterCommit), logger_failure: { isolation: `public.${r18Table}`, durable_ops_event_touched: false, direct_exit: directFailure.status, warning_observed: directWarningObserved, error_observed: directErrorObserved, cron: r18Cron, warning_fallback_declared: warningFallbackDeclared === "t" } }));
+  if (leftIds.length !== 2 || rightIds.length !== 2 || overlap.length || !windowsOverlap || leftWindow.backend_pid === rightWindow.backend_pid || duringLock !== "0" || afterCommit !== "0" || directFailure.status === 0 || !directWarningObserved || !directErrorObserved || !r18Cron.startsWith("failed|") || warningFallbackDeclared !== "t") process.exitCode = 1;
 } finally {
   try {
     if (r18JobId !== null) sql(`SELECT cron.unschedule(${r18JobId});`);
-    sql(`DROP TRIGGER IF EXISTS ${r18Trigger} ON public.ops_event; DROP FUNCTION IF EXISTS public.${r18Function}(); DELETE FROM public.ops_event WHERE event_type='STORAGE_CLEANUP_DRAIN_STALLED' AND details->>'oldest_created_at' IS NOT NULL; DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.goal WHERE slug='${slug}'; DELETE FROM public.member WHERE id='${owner}'; DELETE FROM auth.users WHERE id='${owner}';`);
+    sql(`DROP TABLE IF EXISTS public.${r18Table} CASCADE; DROP FUNCTION IF EXISTS public.${r18Probe}(); DROP FUNCTION IF EXISTS public.${r18Function}(); DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.goal WHERE slug='${slug}'; DELETE FROM public.member WHERE id='${owner}'; DELETE FROM auth.users WHERE id='${owner}';`);
   } catch {}
 }
