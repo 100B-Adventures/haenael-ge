@@ -7,7 +7,7 @@
     "prebuild": "node ../scripts/qa/check-deploy-env.mjs --target vercel-production --source runtime --only-if-vercel",
     "build": "next build",
     "lint": "oxlint .",
-    "qa:predeploy-production": "node ../scripts/qa/check-deploy-env.mjs --target vercel-production --source provider && node ../scripts/qa/check-deploy-env.mjs --target supabase-production --source provider",
+    "qa:predeploy-production": "node ../scripts/qa/check-deploy-env.mjs --target vercel-production --source provider && node ../scripts/qa/check-deploy-env.mjs --target supabase-production --source provider --vault-source provider",
     "test:qa-contracts": "node ../scripts/qa/check-deploy-env.mjs --static-only && node ../scripts/qa/check-cashout-layer-contract.mjs && node ../scripts/qa/check-cashout-raise-coverage.mjs && node ../scripts/qa/check-cashout-notification-contract.mjs && node ../scripts/qa/lint-protected-routes.mjs && node ../scripts/qa/lint-web-custom-classes.mjs && node ../scripts/qa/run-contract-mutations.mjs",
     "start": "next start",
     "test": "npm run test:typecheck:security && vitest run --maxWorkers=2 --minWorkers=1",

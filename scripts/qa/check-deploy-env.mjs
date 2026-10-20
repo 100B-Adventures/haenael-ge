@@ -67,6 +67,16 @@ function requiredForTarget(targetName) {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function requiredVaultForTarget(targetName) {
+  const target = contract.targets[targetName];
+  if (!target) throw new Error(`unknown target: ${targetName}`);
+  const enabled = new Set(target.features);
+  return (contract.vaultSecrets ?? [])
+    .filter((rule) => enabled.has(rule.feature))
+    .map((rule) => rule.name)
+    .sort();
+}
+
 function parseProviderNames(targetName) {
   const provider = contract.targets[targetName].provider;
   try {
@@ -99,6 +109,38 @@ function parseProviderNames(targetName) {
 
 function namesFromFile(path) {
   return new Set(readFileSync(resolve(process.cwd(), path), "utf8").split(/\r?\n/).map((line) => line.trim()).filter(Boolean));
+}
+
+async function parseVaultNames(source) {
+  if (source === "file") return namesFromFile(argValue("--vault-names-file"));
+  if (source === "local-db") {
+    const raw = execFileSync(
+      "docker",
+      ["exec", "-i", "supabase_db_haenael-ge", "psql", "-U", "postgres", "-d", "postgres", "-At", "-c", "SELECT name FROM vault.secrets ORDER BY name;"],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+    );
+    return new Set(raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean));
+  }
+  if (source === "provider") {
+    const projectRef = process.env.SUPABASE_PROJECT_REF;
+    const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
+    if (!projectRef || !accessToken) {
+      console.error("VAULT_PROVIDER_QUERY_FAILED missing=SUPABASE_PROJECT_REF,SUPABASE_ACCESS_TOKEN");
+      process.exit(3);
+    }
+    const response = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/database/query`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ query: "SELECT name FROM vault.secrets ORDER BY name" }),
+    });
+    if (!response.ok) {
+      console.error(`VAULT_PROVIDER_QUERY_FAILED status=${response.status}`);
+      process.exit(3);
+    }
+    const rows = await response.json();
+    return new Set((Array.isArray(rows) ? rows : rows.result ?? []).map((row) => row.name).filter(Boolean));
+  }
+  throw new Error(`unsupported vault source: ${source}`);
 }
 
 let ok = assertInventoryClassified();
@@ -136,6 +178,25 @@ if (missing.length) {
   ok = false;
 } else {
   console.log("ENV_TARGET_PASS missing=0");
+}
+
+const requiredVault = requiredVaultForTarget(targetName);
+if (requiredVault.length) {
+  const vaultSource = argValue("--vault-source");
+  if (!vaultSource) {
+    console.error(`VAULT_TARGET_FAIL target=${targetName} reason=vault-source-required missing_names=${requiredVault.join(",")}`);
+    ok = false;
+  } else {
+    const vaultPresent = await parseVaultNames(vaultSource);
+    const vaultMissing = requiredVault.filter((name) => !vaultPresent.has(name));
+    console.log(`VAULT_TARGET target=${targetName} source=${vaultSource} required=${requiredVault.length} present=${requiredVault.length - vaultMissing.length} missing=${vaultMissing.length}`);
+    if (vaultMissing.length) {
+      console.error(`VAULT_TARGET_FAIL missing_names=${vaultMissing.join(",")}`);
+      ok = false;
+    } else {
+      console.log("VAULT_TARGET_PASS missing=0");
+    }
+  }
 }
 
 process.exit(ok ? 0 : 1);

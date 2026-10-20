@@ -232,16 +232,56 @@ BEGIN
         'drain-storage-cleanup-queue',
         '*/10 * * * *',
         $CRON$
-        SELECT net.http_post(
-          url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'storage_cleanup_worker_url'),
-          headers := jsonb_build_object(
-            'Content-Type', 'application/json',
-            'apikey', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'edge_invoke_publishable_key'),
-            'x-cleanup-internal-token', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'storage_cleanup_internal_token')
-          ),
-          body := '{}'::jsonb,
-          timeout_milliseconds := 55000
-        );
+        DO $cleanup$
+        DECLARE
+          v_url text;
+          v_apikey text;
+          v_internal_token text;
+          v_missing text;
+        BEGIN
+          SELECT
+            max(decrypted_secret) FILTER (WHERE name = 'storage_cleanup_worker_url'),
+            max(decrypted_secret) FILTER (WHERE name = 'edge_invoke_publishable_key'),
+            max(decrypted_secret) FILTER (WHERE name = 'storage_cleanup_internal_token')
+          INTO v_url, v_apikey, v_internal_token
+          FROM vault.decrypted_secrets
+          WHERE name IN (
+            'storage_cleanup_worker_url',
+            'edge_invoke_publishable_key',
+            'storage_cleanup_internal_token'
+          );
+
+          SELECT string_agg(name, ', ' ORDER BY name)
+          INTO v_missing
+          FROM (VALUES
+            ('storage_cleanup_worker_url', v_url),
+            ('edge_invoke_publishable_key', v_apikey),
+            ('storage_cleanup_internal_token', v_internal_token)
+          ) AS required_secret(name, secret_value)
+          WHERE secret_value IS NULL OR secret_value = '';
+
+          IF v_missing IS NOT NULL THEN
+            PERFORM public.record_storage_cleanup_schedule_failure(
+              'runtime_secret_missing',
+              'P0001',
+              'missing Vault secret names: ' || v_missing
+            );
+          ELSE
+            PERFORM net.http_post(
+              url := v_url,
+              headers := jsonb_build_object(
+                'Content-Type', 'application/json',
+                'apikey', v_apikey,
+                'x-cleanup-internal-token', v_internal_token
+              ),
+              body := '{}'::jsonb,
+              timeout_milliseconds := 55000
+            );
+          END IF;
+        EXCEPTION WHEN OTHERS THEN
+          PERFORM public.record_storage_cleanup_schedule_failure('runtime_dispatch', SQLSTATE, SQLERRM);
+        END
+        $cleanup$;
         $CRON$
       );
     END IF;
