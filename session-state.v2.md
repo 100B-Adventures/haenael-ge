@@ -1,3 +1,21 @@
+## 2026-10-20 18:05 KST · 배너 업로드 오류 후보 3개를 운영 실측으로 지웠다. 위임 규약에 이관 과제 레지스트리 신설
+
+- **★회장 지적 3건과 내 답**
+  - **A1 "니가 위임을 어떻게 했는지 말해봐. Codex 가 스스로 한 병신짓이 맞냐? 그럼 하네스 문제니까."** 아니다. **내 지시다.** `scratchpad/build-task.txt` 의 이관 과제 2번이 "Mermaid 다이어그램 SVG 를 재생성한다. `@mermaid-js/mermaid-cli` 와 로컬 Chrome 으로" 였다. Codex 는 품질헌법이나 에이전트 정의를 보고 스스로 설계 산출물을 만든 것이 아니다. 하네스 결함도 아니다. **프롬프트를 쓴 내 결함이다.**
+  - **A2 "다이어그램 만드는 건 합당하지 않냐?"** 합당하다. 문서가 SVG 15개가 있다고 단정하는데 실제로 없었으니 실재하는 결함이다. 틀린 것은 **그것을 build 1차 슬라이스에 우선순위·시간 상한 없이 끼운 것**이다. 구현을 한 줄도 바꾸지 않는 문서 그림이고, 브라우저 직렬 렌더라 호스트 부하에서 한 개에 1분 넘게 걸린다.
+  - **A3 "재위임 목표를 왜 니가 일일이 말해? 정의된 문서 없어?"** 있다. `pipeline/product-lane.yaml` build 절(required_inputs·artifacts·exit_report·dev_tests·deletion_check)과 `standards/delegation-prompt.md` 가 정본이고, 그 §3 금지 첫 줄이 **"표준 산출물·입력 목록 받아쓰기"** 다. 내가 어겼다. **다만 이관 과제가 사는 집은 없었다** — 그것이 매 판 받아쓰기를 유발한 구조 결함이다.
+- **★하네스 개선(커밋 `100373e`·`a 다음 커밋`)**
+  - `standards/delegation-prompt.md` **§2-3 신설**: ①이관 과제는 프롬프트에 적지 말고 `docs/<단계>/carryover-<버전>.md` 레지스트리에 두고 경로 한 줄만 준다(우선순위·구현을 바꾸는가·종료 증거를 각 줄에) ②장시간 단일 직렬 작업은 맨 뒤 + "남은 시간 부족하면 건너뛰고 보고" ③**timeout 은 두 개다.** 쉘 도구 인자와 `CODEX_TIMEOUT`(기본 2700초)은 다른 값이고 전자만 늘리면 효과가 없다.
+  - `pipeline/product-lane.yaml` build 절에 `carryover` 키 신설. `consumers.tsv` 2행 선언(정합 321 -> 323, 드리프트 101 유지).
+  - `docs/eng-design/carryover-v1.2.5.md` 신설. 4건을 P0/P2/P2/**P3** 로 정렬했고 Mermaid 렌더가 P3 다.
+  - `jargon.tsv` **6행 추가**: 그림 증거 / 다이어그램 N장 / 저장소 파일 / 작업자 / 예약 호출 / 제한시간. 전부 내가 이번 턴에 쓴 의역이고 목록에 없어서 report-lint 가 통과시켰다. 회장 2026-10-20 "IT표준용어쓰라고 41번째".
+- **★배너 업로드 오류: 후보 3개를 운영 실측으로 지웠다.** 종전 가설(엣지 함수 미배포)은 **틀렸다.**
+  - 운영 엣지 함수 응답 코드: `goal-cover-sign-upload`·`goal-cover-finalize`·`admin-review-goal-cover`·`wordmap-render` **전부 401**(= 배포돼 있고 인가 요구). `storage-cleanup-worker` 만 404(아직 로컬만, 정상).
+  - QA 운영 계정으로 로그인해 `goal-cover-sign-upload` 호출 -> **`{"error":{"code":"goal_not_found"}}` HTTP 404.** 도메인 오류 코드를 냈다는 것은 **함수가 DB 에 닿았다**는 뜻이다. 따라서 `goal_cover_asset` 테이블 실재와 `SUPABASE_SERVICE_ROLE_KEY` 주입은 정상이다.
+  - **남은 후보는 둘**: `goal-cover-quarantine` 버킷 부재 또는 `createSignedUploadUrl` 실패, 그리고 서명 URL 에 PUT 하는 구간. QA 계정에 목표가 0건이라 그 다음을 누르려면 운영에 목표를 만들어야 한다(운영 쓰기). worker 에게 넘긴다.
+  - **참고 실측**: `~/.sj-agent-harness/secrets/haenael-ge.env` 의 `SUPABASE_SERVICE_ROLE_KEY` 는 **프로젝트 ref 가 `QA_PRODUCTION_SUPABASE_URL` 과 다르다**(role 은 service_role 로 맞다). 그래서 그 키로는 운영 REST·Storage 조회가 401 이다. 값은 어디에도 적지 않았다. 운영 조회가 필요하면 키 출처를 먼저 바로잡아야 한다.
+- **클라이언트 쪽 구조 결함 1건(미수정)**: `web/src/components/social/GoalCoverPicker.tsx` 가 서명 발급 실패·PUT 실패·최종 확정 실패·형식 검사 실패를 **전부 `setState("error")` 하나로 수렴**시킨다. 회장이 화면에서 본 "오류" 가 어느 구간인지 화면도 로그도 구별하지 못한다. 그래서 원인 확정이 이렇게 오래 걸렸다. 구간별 코드 노출을 build 과제로 넘긴다.
+
 ## 2026-10-20 17:50 KST · build 1차가 제한시간으로 죽었다. 원인 규명 후 재위임. 회장이 설계 사안의 성격을 되물었다
 
 - **★회장 질문: "저게 기술설계라고? 구현하면서 만나는 상황 아닌가? 너 의견은?"** 그리고 "지금 진행중인거냐? codex log pane rc=124 난 이유? 넌 가만히 있는 이유?"
