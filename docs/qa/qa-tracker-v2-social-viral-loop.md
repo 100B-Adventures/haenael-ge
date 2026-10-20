@@ -1,5 +1,35 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+## 2026-10-21 3차 교차 코드리뷰 BLOCK 재작업 착수
+
+| 요청 번호 | 범위 | 현재 판정 | 종료 증거 |
+|---|---|---|---|
+| BUILD-REVIEW-R10 | Vault·감사 로그 비파괴 스케줄 검증 | ✅ 닫힘 | cron 3개·Vault 누락 0, 전후 fingerprint 동일, 파괴적 DELETE 0 |
+| BUILD-REVIEW-R11 | 잘못된 URL·401에서도 정리 큐 배수 정체 감지 | ✅ 닫힘 | 21분 정체 PENDING 1건 감지, `STORAGE_CLEANUP_DRAIN_STALLED|1` 관찰 |
+| BUILD-REVIEW-R12 | `ClampText`의 `Collapsible` 단일정본 경유 | ✅ 닫힘 | 공용 컴포넌트 경유, CP-01~05 5/5와 전체 Vitest 369/369 |
+| BUILD-REVIEW-R13 | 제품 custom class 접두사 fail-closed 검사 | ✅ 닫힘 | 미등재 `reviewnew` fixture 반려, 실제 prefix 20·미등재 0 |
+| BUILD-REVIEW-R14 | 서버 계약 원격 자동 검사와 컨테이너명 설정화 | ❌ NG | PR #11 자동 실행에서 계약·단위·빌드 잡은 통과. 서버 잡은 깨끗한 DB의 기존 권한 드리프트 5건으로 실패. 로컬 교정 migration과 pgTAP 369/369는 통과했으나 후속 push가 승인 게이트에 차단돼 원격 재실행 미검증 |
+| BUILD-REVIEW-R15 | 중첩 라우트 그룹·`/admin` 보호 계약 | ✅ 닫힘 | 중첩 `/zz-hidden` fixture 반려, 실제 라우트 14·`admin_scanned=true` |
+| BUILD-REVIEW-R16 | 실제 응원 요약 함수 인덱스 검증 | ✅ 닫힘 | migration 함수 본문 4,282자를 직접 추출해 EXPLAIN, 최근 분기 60→3행 |
+| BUILD-REVIEW-R17 | 초대 카드 테스트 부하 플래키 제거 | ✅ 닫힘 | 단일 워커 5회 연속 3/3, 전체 Vitest 369/369 |
+| BUILD-REVIEW-R18 | 감사 기록 실패 시 PostgreSQL 경고·cron 실패 | ✅ 닫힘 | `ops_event` INSERT 실패 주입 뒤 cron `failed`, warning fallback 선언 확인 |
+
+원인 분석: 앞선 판은 검증 스크립트의 PASS와 `pg_cron` 디스패치 성공을 실제 정리 큐 배수 진행으로 확대했다. 이번 판은 큐 정체 자체를 독립 감시하고, 검증 명령의 Vault·감사 로그 전후 동일성을 확인하며, 실패 fixture를 자동 계약에 연결했다. 원격 CI는 수동 증거를 자동화하는 과정에서 깨끗한 DB의 기존 권한 드리프트를 추가로 발견했고, 로컬 교정까지 끝냈지만 push 승인 게이트 때문에 R14만 NG다.
+
+STAMP: 2026-10-21 01:53 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 R10~R13·R15~R18 닫힘, R14 원격 재실행 미검증
+
+## 2026-10-21 D-041 승인 프로토타입 법적 고지 정합 PATCH
+
+**판정: ❌ 디자인 QA 불일치. 승인 프로토타입 PATCH 자체는 D-040 확정과 일치하지만, 같은 390×844 조건에서 dev `/my/legal`은 헤더와 하단 탭만 보이고 본문이 비어 있다. D-041의 시안↔dev 정합은 닫히지 않았다.**
+
+| 결함 ID | 기대 | 현재 관찰 | 종료 증거 |
+|---|---|---|---|
+| QA-V2-D041-LEGAL-01 | `how: 'none'`, 마이페이지 1단 목록 → 사업자 정보 2단 전문 | 프로토타입: 2단 본문에 법정 기재 6항목·통신판매업 신고번호 `확인 중`. dev `/my/legal`: 본문 가시 항목 0, 헤더·하단 탭만 노출. 전역 푸터의 사업자 정보는 844px 첫 화면 밖에 있어 2단 전문을 대신하지 못함 | 프로토타입 `/tmp/d041-prototype-business-clean.png`와 dev `/tmp/d041-dev-business-clean.png`를 같은 390×844에서 직접 육안 대조. 프로토타입 검사 4종은 0건이지만 시안↔dev는 불일치 |
+
+원인 분석: D-040에서 노출 위치를 다시 확정했지만 승인 프로토타입의 데이터 정본(`LEGAL_EXPOSURE`)과 그 값이 그리는 블록을 함께 갱신하지 않아 이전 D-030 결론이 실행 코드에 남았다. D-041 PATCH는 프로토타입의 노출 표, 1단 목록, 2단 전문, 다중 단계 회귀 시나리오를 고정했다. 그러나 최초 판정은 프로토타입 한 장만 읽고 dev 화면을 대조하지 않아 프로토타입 내부 통과를 제품 정합 통과로 잘못 확대했다. 같은 폭의 두 화면을 다시 읽은 결과 dev 2단 본문 미구현을 확인했다.
+
+STAMP: 2026-10-21 KST | model gpt-6.1-sol | agent product-designer | 상태 프로토타입 PATCH 통과·시안↔dev 불일치 OPEN | 근거 `wiki/거버넌스/결정.md` D-041·D-040 §4 · `/tmp/d041-*-final.log` · `/tmp/d041-prototype-business-clean.png` · `/tmp/d041-dev-business-clean.png`
+
 > 이 파일은 **v2 라인 전용 기능 해피·엣지 추적표**다. 환전(core) 라인의 누적 추적은 `qa-tracker.md` 가 계속 소유한다. 두 파일은 서로 덮지 않는다.
 >
 > **모든 판정은 배포본(`https://haenael-ge.vercel.app`) 대상이다.** 로컬 주소 기준 판정은 이 표에 올리지 않는다.

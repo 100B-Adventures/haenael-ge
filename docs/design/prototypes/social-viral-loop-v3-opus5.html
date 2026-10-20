@@ -3,10 +3,16 @@
   변경 이력은 최신순(위가 최신)이다. 파일명 v3 는 승인 세대 표기이고 작업 횟수가 아니다
   (정본 = ~/.claude/standards/artifact-stamp.md §1 · D-028-B · D-029-B). 같은 세대 안의 개정은 이 파일을 고친다.
 
+  2026-10-21 D-041 확정 반영 PATCH(D-040 §4).
+  - 랜딩·공개목표·이용안내의 법적 푸터를 모두 제거하고 LEGAL_EXPOSURE.how 를 none 으로 고정했다.
+  - 마이페이지 1단에 이용약관·개인정보처리방침·사업자 정보 세 항목을 두고, 사업자 정보는 바로 다음 화면이 소유한다.
+  - 사업자 정보 전문은 상호·대표자·사업자등록번호·주소·이메일·개인정보보호책임자 6항목을 전부 표시한다.
+    통신판매업 신고번호는 확인 전 값을 만들지 않고 별도 확인 중 상태로 표시한다.
+
   2026-10-19 6차 개정(회장 지적 8건 R1~R8 · 전부 "집행자를 코드로" D-032 방식).
   - R1 랜딩 법적 푸터 전면 제거. 전 판은 "필요할 때만" 을 사업자 정보만 접는 것으로 좁게 읽어 링크 3종을 남겼다.
     노출 표 LEGAL_EXPOSURE.landing 을 none 으로 내려 블록 전체를 없앴고, 전문은 마이페이지 > 약관 및 정책이,
-    사업자 정보는 랜딩에서 한 번 눌러 닿는 이용안내 화면(how:'biz')이 소유한다. 형태는 셋 → 넷으로 늘었다.
+    사업자 정보는 당시 랜딩에서 한 번 눌러 닿는 이용안내 화면(how 모드가 biz였음)이 소유했다. 형태는 셋 → 넷으로 늘었다.
     ※ 미검증: 연결화면 방식의 전자상거래법 제10조 충족 여부는 법률 검토 전이다.
   - R2 비회원 하단탭 잠금 배지 폐지. 자물쇠는 차단 신호이고 다음 행동이 없다. 지금은 그 탭의 가치를 보여주는
     미리보기 + 카카오 시작 바텀시트가 뜬다. 근거: 추적 앱 809개에서 자물쇠만 12%(94)보다 잠금 해제 CTA 20%(159)가
@@ -1433,10 +1439,17 @@
      랜딩은 아예 'none' 이 됐으며 이용안내·약관 화면은 전문을 펼쳐 둔다. */
   .legalfoot .lf-biz-link{display:inline-flex;align-items:center;min-height:44px;margin-top:2px;font-size:13px;font-weight:700;
     color:var(--muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
-  /* 약관 및 정책 화면: 관리 화면의 행 컴포넌트를 그대로 쓴다(같은 데이터는 같은 모양) */
-  .legal-biz{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:15px;}
-  .legal-biz .lb-t{font-size:13px;font-weight:800;color:var(--muted);}
-  .legal-biz .lb-d{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.8;}
+  /* D-041 사업자 정보 전문: 마이페이지 1단 목록에서 한 번 눌러 닿는 2단 화면. */
+  .legal-lead{margin:16px 0 0;font-size:13px;line-height:1.6;color:var(--muted);word-break:keep-all;}
+  .business-info{margin:16px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+  .business-info-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px;padding:16px;border-bottom:1px solid var(--line);}
+  .business-info-row:last-child{border-bottom:0;}
+  .business-info-row dt,.business-info-row dd{margin:0;font-size:13px;line-height:1.6;word-break:keep-all;}
+  .business-info-row dt{font-weight:800;color:var(--muted);}
+  .business-info-row dd{min-width:0;font-weight:700;color:var(--ink);overflow-wrap:anywhere;}
+  .business-pending{display:flex;flex-direction:column;gap:8px;margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--warm);}
+  .business-pending strong{display:block;font-size:13px;color:var(--ink);}
+  .business-pending p{margin:0;font-size:13px;line-height:1.6;color:var(--muted);word-break:keep-all;}
 
   /* ── D-030-C 응원 메시지 줄넘침: 목록은 2줄까지, 넘치면 "더 보기" ──
      규칙 = docs/design/DESIGN.md §4 오버플로. 한 줄 말줄임은 메시지가 거의 안 보여 응원을 읽는 화면의
@@ -1607,6 +1620,13 @@
         <span class="fmeta"><span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/me 셸 통합</code> · 부여 예정</span></span><span class="ml"><span class="mk">진입</span><span class="mv">전 화면 하단탭 "마이"</span></span><span class="ml"><span class="mk">상태</span><span class="mv newv">신규 통합 · 업적·환전내역·환경설정·계정 흡수 · 상단 🔔(배포 NotificationBadge 계승)</span></span></span>
       </span>
     </div>
+    <div class="farrow"><span>↓</span><span class="lbl">마이페이지 "사업자 정보"</span></div>
+    <div class="fnode newnode" data-loop="business" onclick="go('business')">
+      <span class="newtag">PATCH</span>
+      <span class="fi">🏢</span><span class="fl">사업자 정보 (/my/legal)
+        <span class="fmeta"><span class="ml"><span class="mk">경로</span><span class="mv"><code>(receiver)/my/legal</code> · 2단 전문</span></span><span class="ml"><span class="mk">진입</span><span class="mv">마이페이지 1단 목록 "사업자 정보"</span></span><span class="ml"><span class="mk">상태</span><span class="mv newv">D-041 · 법정 기재 6항목 · 통신판매업 신고번호 확인 중</span></span></span>
+      </span>
+    </div>
     <div class="farrow"><span>↓</span><span class="lbl">마이페이지 "환전 내역"</span></div>
     <div class="fnode newnode" data-loop="cashhistory" onclick="go('cashhistory')">
       <span class="newtag">NEW</span>
@@ -1696,7 +1716,7 @@
       <span class="lbl">관리</span>
       <button class="nav" data-s="mypage">마이페이지</button>
       <button class="nav" data-s="cashhistory">환전내역</button>
-      <button class="nav" data-s="legal">약관 및 정책</button>
+      <button class="nav" data-s="business">사업자 정보</button>
       <button class="nav" data-s="bannerupload">배너 직접 올리기</button>
       <span class="sep"></span>
       <span class="lbl">계승</span>
@@ -2465,13 +2485,9 @@
 
         <!-- 계정 -->
         <div class="mp-sect">계정</div>
-        <!-- D-030-B 하단탭 화면에는 사업자 정보·약관·개인정보 블록을 깔지 않는다.
-             상시 접근 의무(개인정보 보호법 제30조 제2항)는 이 한 행이 책임지고, 내용은 약관 및 정책 화면이 소유한다. -->
-        <div class="mp-row" onclick="go('legal')">
-          <div class="mp-ic">📄</div>
-          <div class="mp-rx"><div class="mp-rt">약관 및 정책</div><div class="mp-rd">약관 · 개인정보 · 사업자 정보</div></div>
-          <span class="mp-go">›</span>
-        </div>
+        <!-- D-041: 1단 목록은 이 자리가 소유하고, 사업자 정보 전문만 바로 다음 화면이 소유한다.
+             목록과 전문은 아래 LEGAL_EXPOSURE 한 표에서 렌더해 문서와 화면의 재불일치를 막는다. -->
+        <div data-legal-settings></div>
         <button class="mp-logout-btn" onclick="go('landing')">로그아웃</button>
         <button class="danger-act" onclick="alert('실배포: 탈퇴는 고객센터 문의(개인정보처리방침 §3 보유기간 준수). 프로토 안내용.')">회원 탈퇴</button>
         <div style="height:12px"></div>
@@ -2933,7 +2949,7 @@
           <h3>3. 응원이 워드맵에 쌓여요</h3><p>받은 응원이 워드맵에 단어로 쌓여요. 모인 클로버는 환전할 수 있어요.</p>
         </div>
         <button class="cbtn pri" style="margin-top:22px" onclick="go('onboarding')">나도 시작하기</button>
-        <!-- R1 사업자 정보는 LEGAL_EXPOSURE 표가 그린다(how:'biz'). 화면에 손으로 쓰지 않는다. -->
+        <!-- D-041: 이용안내는 사용법만 소유한다. LEGAL_EXPOSURE.how='none' 이 법적 고지 블록을 제거한다. -->
         <div class="legalfoot" data-legal="how"></div>
       </div></div>
     </div>
@@ -2989,30 +3005,17 @@
 
   <!-- ══════════ 커버리지 대조표 (검수 문서 · 51항) ══════════ -->
 
-  <!-- ══════════ 화면 · 약관 및 정책 (D-030-B · 법적 정보의 단일 상시 접근 지점) ══════════ -->
-  <section class="screen" id="legal">
+  <!-- ══════════ 화면 · 사업자 정보 (D-041 · 마이페이지 1단 목록 아래 2단 전문) ══════════ -->
+  <section class="screen" id="business">
     <div class="frame">
       <div class="statusbar"><span>9:41</span><span class="dots">🍀 &nbsp;●●● &nbsp;100</span></div>
       <div class="app"><div class="pad">
-        <div class="head"><button class="back" onclick="go('mypage')">‹</button><div class="brand">약관 및 정책</div><div style="width:44px"></div></div>
-        <div class="mp-row" onclick="go('how')">
-          <div class="mp-ic">📖</div>
-          <div class="mp-rx"><div class="mp-rt">이용안내</div><div class="mp-rd">해낼게를 쓰는 방법</div></div>
-          <span class="mp-go">›</span>
-        </div>
-        <div class="mp-row" onclick="go('terms')">
-          <div class="mp-ic">📄</div>
-          <div class="mp-rx"><div class="mp-rt">이용약관</div><div class="mp-rd">서비스 이용 조건과 응원·환전 규칙</div></div>
-          <span class="mp-go">›</span>
-        </div>
-        <div class="mp-row" onclick="go('privacy')">
-          <div class="mp-ic">🔐</div>
-          <div class="mp-rx"><div class="mp-rt">개인정보처리방침</div><div class="mp-rd">수집 항목과 보관 기간</div></div>
-          <span class="mp-go">›</span>
-        </div>
-        <div class="legal-biz">
-          <div class="lb-t">사업자 정보</div>
-          <div class="lb-d">정성컴퍼니 · 대표 조성진<br>사업자등록번호 798-31-01774<br>haenaelge.official@gmail.com</div>
+        <div class="head"><button class="back" onclick="go('mypage')" aria-label="마이페이지로 돌아가기">‹</button><div class="brand">사업자 정보</div><div style="width:44px"></div></div>
+        <p class="legal-lead">해낼게를 운영하는 사업자의 정보를 확인할 수 있어요.</p>
+        <dl class="business-info" data-business-info aria-label="사업자 법정 기재사항"></dl>
+        <div class="business-pending" data-registration-status>
+          <strong>통신판매업 신고번호 · 확인 중</strong>
+          <p>확인된 신고번호를 받은 뒤 이 자리에 반영해요. 확인 전 값은 표시하지 않아요.</p>
         </div>
         <div style="height:16px"></div>
       </div></div>
@@ -3023,7 +3026,7 @@
         <a class="on" onclick="go('mypage')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>마이</a>
       </div>
     </div>
-    <div class="review" data-review="legal"></div>
+    <div class="review" data-review="business"></div>
   </section>
 
   <!-- ══════════ 화면 · 배너 직접 올리기 (D-030-D · 프리셋이 아니라 내 사진으로 가는 경로) ══════════ -->
@@ -3100,8 +3103,8 @@
 </div>
 
 <div class="stamp">
-  🏷 STAMP | line: v2 | 생성: 2026-09-23 07:40 · v4·v5 2026-10-02 · v6 2026-10-03 · v6.1 랭킹제거+모션C안 2026-10-04 · v6.2 IA 2026-10-05 · 회장 지시 2차 2026-10-15 22:43 · v3 보드메모 개정 2026-10-16 · 5차 2026-10-19 · <b>6차 개정 2026-10-19 KST</b> | model: claude-opus-5[1m] | agent: product-designer | skill: design-review | 근거: 결정.md D-003·D-030~D-034 · 요청.md 9158행 · DESIGN.md 접기·펼치기/하단 고정 액션 바/응원 요약 바/비회원 탭 전환 유도 · standard-ux-writing.md 말투 규칙 · 실구현 컴포넌트 | 고민: 자물쇠를 떼는 것과 타인 정보를 가리는 것을 어떻게 한 화면에서 동시에 하느냐였다. 전면 블러는 업계에서 거의 쓰이지 않아(809개 중 1개) 구조는 보여주고 이름·얼굴만 가리는 쪽으로 갈랐다.<br>
-  <b>STAMP</b> line=v2 · social-viral-loop-v3-opus5.html · 생성 2026-09-23 07:40 · 6차 개정 2026-10-19 KST · model claude-opus-5[1m] · agent product-designer · skill design-review · 배포 1.2.1(운영 미배포, 로컬 소스 기준) · 출고 검사 5종(넘침·CSS 미적용·말투·접힘 0건 · 상호작용 A~E 0건, F 여백 경고는 차단 아님) · 모션 미달 0화면 · 콘솔 오류 0<br>
+  🏷 STAMP | line: v2 | 생성: 2026-09-23 07:40 · v4·v5 2026-10-02 · v6 2026-10-03 · v6.1 랭킹제거+모션C안 2026-10-04 · v6.2 IA 2026-10-05 · 회장 지시 2차 2026-10-15 22:43 · v3 보드메모 개정 2026-10-16 · 5차 2026-10-19 · 6차 개정 2026-10-19 · <b>D-041 PATCH 2026-10-21 KST</b> | model: claude-opus-5[1m] + gpt-6.1-sol(PATCH) | agent: product-designer | skill: design-review(기존 승인) · dz-ui-ux-pro-max · dz-hallmark(D-041 PATCH) | 근거: 결정.md D-040 §4·D-041 · 승인 FDD v1.2.5 FR-W12 · standard-design.md §11.1 · 전자상거래법 제10조 · FTC 통신판매사업자정보 조회 | 고민: 기존 시각 체계를 다시 그리지 않고 법적 정보의 소유 화면만 바꾸면서, 확인되지 않은 통신판매업 신고번호를 사실처럼 만들지 않는 것이었다.<br>
+  <b>STAMP</b> line=v2 · social-viral-loop-v3-opus5.html · 생성 2026-09-23 07:40 · D-041 PATCH 2026-10-21 KST · model claude-opus-5[1m] + gpt-6.1-sol(PATCH) · agent product-designer · skill dz-ui-ux-pro-max·dz-hallmark · 배포 1.2.1(운영 미배포, 로컬 승인 시안 PATCH) · 출고 검사 4종(넘침·고아 줄바꿈·상호작용 A~E·CSS 미적용 차단 0건, F 여백 경고는 차단 아님) · 모션 미달 0화면 · 콘솔 오류 0<br>
   <b>v3 변경(2026-10-16 · 보드 메모 D-027-A~G)</b> ①<b>떠다니는 워드맵 엔진</b>(5화면 전부): flex-wrap 폐기 → 단어 실측 크기로 타원 나선 배치, 겹침 0·시드 고정(캡처 재현), 단어마다 다른 위상·속도·진폭·회전, 하트·클로버 입자 상승. 한 줄이 구조적으로 불가능하다 ②<b>업적 전면 재설계</b>: 메달 실사 히어로 + 집계 3타일 + 진열대 수집 그리드(획득=입체·빛 쓸림, 잠김=음각·정지) + 다음 메달 진행바, Higgsfield 자산 8종 ③<b>해낼게 관리</b>: 푸터 제거 · 로그아웃을 계정 블록 한 곳으로 · 알림 토글 한 카드 행 묶음(46x27 트랙/44px 터치) · 목표 상세 관리 진입 신설 · 실사 커버 ④<b>공개 목표</b>: 제목 끝 "해낼게" 브랜드 색 강조(실배포 GoalCard 규칙 계승) · 신고를 상단 더보기 시트로 ⑤<b>친구 상세</b>: 응원 워드맵·전체 보기 노출 ⑥모션은 GIF 녹화로 보드에 제시(정지 캡처로는 판정 불가)<br>
   <b>v2 변경</b> ①왼쪽 전역 플로우맵 고정 레일 · 각 노드에 라우터 경로·진입 화면·신규/수정 diff를 레일 위 글자로 표기(신규↔기존 배포 화면 화살표 연결) ②인물 자리 Higgsfield 실사(seedream_v5_pro) 5종 삽입 · 이모지·이니셜 전량 제거 ③화면별 우측 검수 패널에 v2 개정 변경점(chg) 표출 ④아트보드 안 설계·원칙 주석(도파민 원칙·열린결정 배지) 전량 제거 → 검수 패널로 이관(아트보드 주석 0) ⑤기존 배포 홈((receiver)/me 다중목표) 실제 디바이스 프레임으로 계승 추가 + 하단 탭바에 홈 진입 신설<br>
   <b>v2 확장(실배포 전수 계승)</b> ⑥실배포 라우트 15개 전수 Read(screen-inventory.md 정본·globals.css @theme 토큰·DESIGN.md 브랜드) → 커버리지 대조표(계승10·연결4·누락사유명시1·누락무사유0, 권한축 비회원·회원·관리자 + 돈축 결제·환전 전부 커버) ⑦누락 기존 화면 실프레임 계승: 랜딩·공개목표(g/[slug])·카카오로그인(auth)·온보딩·이용안내·결제성공·결제실패·환전·환전상태·관리자 ⑧하단탭 이모지→인라인 SVG(단색 stroke·clover accent)<br>
@@ -3160,15 +3163,15 @@
       ],
       flow: [['진입','홈 목표 카드 "관리" 칩 · 홈 "워드맵 보기"'],['이탈','환전 → cashout · 응원 링크 복사 · 친구뷰 → 공개목표 · 뒤로 → 홈'],['핵심','관리 = 응원 워드맵(인라인·주 콘텐츠) + 응원자 명단 + 환전. 워드맵은 더 이상 한 뎁스 아래가 아님. 편집은 그 자리 인라인 수정']]
     },
-    legal: {
-      psych:'통제감+신뢰. 법적 정보를 찾을 자리를 한 곳으로 고정해, 사용자가 "어디서 봤더라" 를 겪지 않게 한다. 찾는 비용이 낮을수록 신뢰가 올라간다.',
-      bench:'토스 전체 > 약관 및 정책 · 카카오페이 설정 > 약관·정책 · 당근 내 정보 > 약관. 셋 다 앱 내부 화면에 사업자 정보를 깔지 않고 설정 하위 한 화면에 모아 둔다. 그 구조를 차용했고, 화면마다 푸터를 반복하는 방식은 버렸다.',
-      inherit:'계승(실배포): Footer.tsx 의 법적 링크·사업자 정보 + terms/page.tsx · privacy/page.tsx · how. 종전에는 Footer 가 전 화면에 깔려 하단탭과 겹쳤다. 블록을 이 화면으로 옮기고 관리 화면에는 진입 행 하나만 남겼다.',
-      prd:'D-030-B 푸터 일관성. 노출 표의 "상시 접근" 칸을 이 화면이 책임진다. 법적 근거는 전자상거래법 제10조(초기화면 사업자 정보)와 개인정보 보호법 제30조 제2항(쉽게 확인할 수 있도록 공개).',
+    business: {
+      psych:'통제감+신뢰. 마이페이지 1단 목록에서 사업자 정보를 예측 가능한 이름으로 찾고, 바로 다음 화면에서 전문을 읽는다. 법적 정보의 위치를 기억하게 만들지 않는다.',
+      bench:'토스 전체 > 약관 및 정책 · 카카오페이 설정 > 약관·정책 · 당근 내 정보 > 약관. 설정 목록과 상세 문서를 분리하는 구조를 차용했고, 화면마다 푸터를 반복하거나 이용안내에 사업자 정보를 섞는 방식은 버렸다.',
+      inherit:'계승(실배포): terms/page.tsx · privacy/page.tsx · 운영 사업자 정보 6항목. D-041 PATCH는 승인 화면의 레이아웃과 기존 mp-row 컴포넌트를 보존하고 법적 정보의 소유 화면만 D-040 계약에 맞춘다.',
+      prd:'D-041 · D-040 §4. 마이페이지 1단은 약관·개인정보처리방침·사업자 정보 목록, 2단은 사업자 정보 전문이다. /how는 법적 고지를 소유하지 않는다.',
       chg:[
-        {w:'<b>D-030-B 신규 화면</b>. 해낼게 관리에 나열돼 있던 이용안내·이용약관·개인정보처리방침 링크와 사업자 정보 접힘을 이 화면으로 옮겼다. 관리 화면에는 <b>약관 및 정책</b> 한 행만 남는다. 전 화면 노출 표는 보드와 판정표에 있다.', fb:'회장 2026-10-17: "전역 푸터를 깔지 않는다는데 아래 사업자 정보 칸은 왜 보이고 이용안내 이용약관 개인정보처리방침은 왜 여기 있지"'}
+        {w:'<b>D-041 확정 반영 PATCH</b>. 마이페이지 계정 영역에 이용약관·개인정보처리방침·사업자 정보 세 행을 직접 두고, 사업자 정보는 한 번 더 눌러 이 화면에서 본다. 상호·대표자·사업자등록번호·주소·이메일·개인정보보호책임자 6항목을 전부 복원했다. 통신판매업 신고번호는 실값 확인 전이라 <b>확인 중</b>으로 분리했다.', fb:'회장 2026-10-19: "설정이나 마이페이지에서 약관 개인정보 사업자 이런거 넣으면되잖아 사업자도 따로 한뎁스아내래에 넣으면 푸터 넣을필요 없고"'}
       ],
-      flow:[['진입','해낼게 관리 → 약관 및 정책'],['이탈','각 문서 화면 · 뒤로 → 해낼게 관리'],['핵심','법적 정보의 단일 상시 접근 지점. 다른 회원 화면에는 이 블록을 두지 않는다']]
+      flow:[['진입','마이페이지 → 사업자 정보'],['이탈','뒤로 → 마이페이지'],['핵심','1단 목록에서 2단 전문으로 한 번에 도달. 법정 기재 6항목이 모두 보이고 /how에는 법적 고지가 없다']]
     },
     bannerupload: {
       psych:'자기표현+통제감. 프리셋은 빠르지만 내 사진은 "내 해낼게" 가 된다. 올리기 전에 배너에서 어떻게 보이는지 먼저 보여줘 올렸다 지우는 왕복을 없앤다(불확실성 제거).',
@@ -3257,6 +3260,7 @@
       inherit:'계승(실배포): ①상단 🔔 = ReceiverShell.tsx ReceiverTopBar(home 변형) + NotificationBadge.tsx(드롭다운·CHEER_RECEIVED·읽음처리·채널배지·빈상태) ②환전 내역 진입 = me/page.tsx:337-348 cashout-history-link + cashout/history/page.tsx ③업적 = 소셜 status 화면 ④로그아웃 = ReceiverShell LogoutButton ⑤법적 링크·사업자 정보 = Footer.tsx. ⑥응원 내역 = cheer 테이블(받은: owner 기준, 보낸: supporter 기준) → "N번 응원"·메시지·시점만(clover_amount 미노출, D-003). ⑦프로필 수정 = 이름·소개·아바타 update(프로필 필드), 별도 화면 없이 인라인. v3 신규 통합 셸 + v6.2 응원내역·프로필수정.',
       prd:'하단탭 4개(홈·친구·초대·마이페이지) 중 4번째. 업적·환전내역·환경설정·계정을 흡수(업적·설정 단독 탭 폐지). PRD 정본은 receiver-home 유지 + 마이페이지 라우트 plan 승격 대기.',
       chg:[
+        {w:'<b>D-041 1단 목록 교정</b>. 단일 "약관 및 정책" 행을 이용약관·개인정보처리방침·사업자 정보 세 행으로 풀었다. 사업자 정보 행은 바로 다음 <b>/my/legal</b> 전문으로 이동하고, 나머지 두 행은 기존 전문으로 이동한다.', fb:'회장 2026-10-19: "설정이나 마이페이지에서 약관 개인정보 사업자 이런거 넣으면되잖아"'},
         {w:'<b>R1 법적 고지의 집이 여기임을 확정</b>. 랜딩에서 내린 전문(이용안내·이용약관·개인정보처리방침·사업자 정보)은 <b>계정 &gt; 약관 및 정책</b> 한 행이 받는다. 이 화면에는 법적 블록을 깔지 않는다(하단탭 화면 금지 규칙 유지).', fb:'회장 2026-10-19: "마이페이지에 안넣냐?"'},
         {w:'<b>D-031-A 목표 블록 제거 · 이름을 마이페이지로</b>. 홈(내 목표)이 목표 목록과 관리 액션을 이미 소유하는데 이 탭을 "해낼게 관리" 로 이름 짓고 안에 목표 카드를 또 심었다. 홈은 3개, 여기는 1개라 목록으로도 어긋났다. 목표는 홈·목표 관리가 소유하고 이 화면은 프로필·활동·설정·계정만 갖는다. 하단탭 라벨도 관리 → 마이.', fb:'회장 2026-10-18: "마이페이지에서 해낼게 관리가 또 있는 이유가뭐냐?"'},
         {w:'<b>D-028-E 목표 관리 버튼이 CSS 없이 렌더되던 것을 고쳤다</b>. 마크업 부모는 .goal-actions 인데 스타일은 .gfoot .gmanage 로만 선언돼 있어 브라우저 기본 버튼이 그대로 보였다. 선택자를 실제 부모에 맞추고 위계를 정했다: 응원 인원은 윗줄, 아래에 보조(목표 관리, 테두리)와 주(응원 링크 공유, 채움)를 같은 폭 44px 로 나란히. 알림 스위치의 켜짐 상태(.set-sw.on)와 프로필 텍스트 블록(.mp-pf)도 규칙이 없던 자리였다.', fb:'회장 2026-10-16: "해낼게 관리에서 목표관리 버튼은 왜 저따위로했고 ... 저런 쓰레기 css 없이 프로토타입이랍시고 올린 이유"'},
@@ -3497,7 +3501,7 @@
     cashhistory:[['요약 타일 pop-in + 건별 행 stagger 등장(rise)','base · decel(70ms 간격)','돈 축 · 환전 이력을 차분히 스캔·대조']],
     inviteaccept:[['초대 카드·아바타 진입 rise(stagger)','base · decel(70ms 간격)','누가 불렀는지를 먼저 읽게 하는 순서 안내']],
     login:[['로그인 시트 진입 rise','base · decel','시트가 올라오는 방향 안내']],
-    legal:[['정책 행 stagger 등장(rise)','base · decel(70ms 간격)','읽을 항목이 위에서 아래로 정렬된다는 신호']],
+    business:[['사업자 정보 행 stagger 등장(rise)','base · decel(70ms 간격)','법정 기재사항을 위에서 아래로 대조하는 읽기 순서']],
     bannerupload:[['사진 보관함 타일 stagger 등장','base · decel(70ms 간격)','고를 것이 여럿임을 형태로 말함'],
                   ['사진 고르면 배너 미리보기 pop + 적용 버튼 등장','spring 640ms · decel','고른 결과를 즉시 보여주는 상태 피드백']],
     how:[['안내 블록 stagger 등장(rise)','base · decel(70ms 간격)','읽는 순서 안내']],
@@ -4191,7 +4195,7 @@
      ②스크롤로 들어오는 블록은 그 시점에 다시 재생한다(IntersectionObserver)
      ③프레임 바로 아래 모션 바에서 언제든 다시 재생한다(오른쪽 패널에 글로 적지 않는다).
      ══════════════════════════════════════════════════════════════════ */
-  const MO_SEL = '.fr,.bdg,.ach,.mp-row,.ch-item,.ch-tile,.field,.goalcard,.ach-stage,.achievement-visual,.nextbar,.invite-hero,.kprev,.share-row,.belong-hero,.cash-sum .r,.set-group,.shelf-row,.legal-biz,.bu-ph';
+  const MO_SEL = '.fr,.bdg,.ach,.mp-row,.ch-item,.ch-tile,.field,.goalcard,.ach-stage,.achievement-visual,.nextbar,.invite-hero,.kprev,.share-row,.belong-hero,.cash-sum .r,.set-group,.shelf-row,.business-info-row,.bu-ph';
   function replayEl(el){
     el.style.animation='none'; void el.offsetWidth; el.style.animation='';
   }
@@ -4439,35 +4443,53 @@
        사람이 기억으로 다시 판단했고, 한 판에 한 화면씩 어긋났다(v1 전역 푸터 → v2 해낼게 관리 잔존 → v3 환전
        잔존 → 이번 판 공개 목표 상시 노출). 같은 결정이 네 번 새로 내려진 것이지 한 번도 지켜진 적이 없다.
      조치: 노출 여부와 형태를 데이터로 못박고 화면은 그 표가 그린다. 표에 없는 화면은 그릴 수단이 없다.
-     형태 세 가지 — full: 링크 + 사업자 정보 펼침(필요할 때만) / link: 한 줄 링크만 / none: 없음. */
+     D-041 현재 형태 — none: 푸터 없음 / link: 마이페이지 1단 목록 / biz: 2단 사업자 정보 전문 / page: 문서 본문. */
   const LEGAL_EXPOSURE = {
-    // R1 2026-10-19 랜딩을 none 으로 내린다.
-    //   회장 "랜딩에 푸터 없애라니까 '사업자 정보' 만 띡 너놓고 이용안내 이용약관 개인정보처리방침 띄워놓고
-    //   있네 ... 마이페이지에 안넣냐?"
-    //   전 판은 사업자 정보만 접고 링크 3종을 남겼다. 회장이 제거를 지시한 대상은 블록 전체였다(D-030-B).
-    //   법적 요구는 'how'(이용안내)가 받는다. 전자상거래법 제10조는 초기화면에서 쉽게 찾을 수 있게 할 것을
-    //   요구하고 시행 관행상 연결화면 표시를 허용한다. 랜딩의 '어떻게 쓰는 건가요?' 버튼이 그 연결이다.
-    //   ※ 미검증: 연결화면 방식의 법적 충분성은 법률 검토를 받지 않았다. build 단계 전에 확인이 필요하다.
-    landing:    'none',   // 랜딩에는 법적 블록을 두지 않는다
-    how:        'biz',    // 이용안내. 랜딩에서 한 번 눌러 닿는 연결화면이 사업자 정보를 소유한다
-    goalpublic: 'link',   // 공유 링크 도착점. 한 줄 링크만(블록 금지). 자리는 --cta-h 예약 안에 든다
-    legal:      'page'    // 마이페이지 > 약관 및 정책. 상시 전문(개인정보 보호법 제30조 제2항)
-    // 나머지 전 화면 = 없음. 하단탭을 가진 회원 화면에 법적 푸터를 깔지 않는다(standard-bottom-tab 7항)
+    landing:    'none',   // 전 화면 푸터 제거 확정(D-040)
+    how:        'none',   // 이용안내는 사용법만 소유하고 법적 고지를 소유하지 않는다
+    my:         'link',   // 1단: 이용약관 · 개인정보처리방침 · 사업자 정보 목록
+    myLegal:    'biz',    // 2단: 사업자 정보 전문 6항목
+    terms:      'page',   // 이용약관 전문
+    privacy:    'page'    // 개인정보처리방침 전문
   };
-  const LEGAL_LINKS='<div class="lf-links">'+
-    '<a onclick="go(\'how\')">이용안내</a><a onclick="go(\'terms\')">이용약관</a>'+
-    '<a onclick="go(\'privacy\')">개인정보처리방침</a></div>';
+  const BUSINESS_INFORMATION = [
+    ['상호','정성컴퍼니'],
+    ['대표자','조성진'],
+    ['사업자등록번호','798-31-01774'],
+    ['주소','서울시 강남구 역삼동 620-17 203호'],
+    ['이메일','haenaelge.official@gmail.com'],
+    ['개인정보보호책임자','윤동주']
+  ];
   function renderLegalFoot(){
+    // D-040: 법적 푸터는 전 화면에서 제거한다. 남은 마크업도 렌더 시점에 삭제한다.
     document.querySelectorAll('.screen .frame .legalfoot').forEach(el=>{
       const id=el.dataset.legal||(el.closest('.screen')||{}).id;
       const mode=LEGAL_EXPOSURE[id];
-      if(mode!=='link'&&mode!=='biz'){ el.remove(); return; }   // 표에 없으면 존재 자체를 지운다
-      el.innerHTML = mode==='biz'
-        // 'biz' = 링크 나열 없이 사업자 정보 전문만. 이용안내 화면이 이미 그 자체로 안내 문서다.
-        ? '<div class="legal-biz"><div class="lb-t">사업자 정보</div>'+
-          '<div class="lb-d">정성컴퍼니 · 대표 조성진<br>사업자등록번호 798-31-01774<br>haenaelge.official@gmail.com</div></div>'
-        : LEGAL_LINKS+'<a class="lf-biz-link" onclick="go(\'legal\')">사업자 정보</a>';
+      if(mode==='none'||!mode) el.remove();
     });
+    const settings=document.querySelector('[data-legal-settings]');
+    if(settings&&LEGAL_EXPOSURE.my==='link') settings.innerHTML=[
+      ['terms','📄','이용약관','서비스 이용 조건과 응원·환전 규칙'],
+      ['privacy','🔐','개인정보처리방침','수집 항목과 보관 기간'],
+      ['business','🏢','사업자 정보','상호·대표자·사업자등록번호 등 6항목']
+    ].map(([route,icon,title,desc])=>
+      '<div class="mp-row" data-route="'+route+'" onclick="go(\''+route+'\')">'+
+      '<div class="mp-ic">'+icon+'</div><div class="mp-rx"><div class="mp-rt">'+title+'</div>'+
+      '<div class="mp-rd">'+desc+'</div></div><span class="mp-go">›</span></div>'
+    ).join('');
+    const info=document.querySelector('[data-business-info]');
+    if(info&&LEGAL_EXPOSURE.myLegal==='biz') info.innerHTML=BUSINESS_INFORMATION.map(([label,value])=>
+      '<div class="business-info-row" data-biz-item><dt>'+label+'</dt><dd>'+value+'</dd></div>'
+    ).join('');
+  }
+  function assertD041Business(){
+    const active=(document.querySelector('section.screen.active')||{}).id;
+    const items=[...document.querySelectorAll('#business [data-biz-item]')];
+    if(active!=='business') throw new Error('사업자 정보 2단 화면에 도달하지 못했다');
+    if(items.length!==6) throw new Error('법정 기재사항이 6항목이 아니다: '+items.length);
+    if(items.some(el=>!(el.querySelector('dt')||{}).textContent?.trim()||!(el.querySelector('dd')||{}).textContent?.trim()))
+      throw new Error('법정 기재사항에 빈 값이 있다');
+    return true;
   }
 
   /* ══════════════════════════════════════════════════════════════════

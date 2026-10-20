@@ -50,6 +50,16 @@
           }
         }
       ]
+    },
+    {
+      "id": "d041-my-business-info-depth-and-six-items",
+      "why": "D-041: 마이페이지 1단 목록에서 사업자 정보 2단으로 들어가며, 그 화면이 법정 기재 6항목 전문을 소유해야 한다. /how가 사업자 정보를 소유하던 이전 결정을 되살리지 않는다.",
+      "steps": [
+        { "go": "mypage" },
+        { "click": "#mypage [data-legal-settings] [data-route=\"business\"]" },
+        { "call": "assertD041Business" },
+        { "click": "#business .back" }
+      ]
     }
   ]
 }

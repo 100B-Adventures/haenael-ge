@@ -32,7 +32,7 @@ approved_artifacts:
     - { path: docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md, version: 1.0.0, status: approved, label: "V2 청사진" }
   design:
     # v2 소셜 바이럴 루프 라운드 (2026-09-16 ~ 2026-10-12). core 라인에서 이관.
-    - { path: docs/design/prototypes/social-viral-loop-v3-opus5.html, version: 3.0.0, status: approved, label: "소셜 바이럴 루프 v3 프로토타입(6차 개정, 회장 지적 R1~R10 반영)", sha256: f9398150755d42b2afbf5bdd7b6d982fd52b10ba8b6dd7da9b1ff72b3b9dca0c }
+    - { path: docs/design/prototypes/social-viral-loop-v3-opus5.html, version: 3.0.0, status: approved, label: "소셜 바이럴 루프 v3 프로토타입(6차 개정 + D-041 확정 반영 PATCH)", sha256: afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a }
     - { path: DESIGN.md, version: unversioned, status: approved, label: "디자인 시스템(수직 간격 토큰·접기 규칙·상호작용 출고 검사 신설)", sha256: 0ddeed8caff763de7b91ed5a0c178bf406c59a6ccefa65dcf5f057929e04c24a }
     - { path: docs/design/standard-ux-writing.md, version: unversioned, status: approved, label: "UX 라이팅 말투 규칙", sha256: 06e4ba1007bbb37c552d6c56a4fdfe4abbe86bcc06c9776dc4579b009fe26ece }
     - { path: docs/design/prototypes/social-viral-loop-v2-opus48.html, version: 2.0.0, status: superseded, label: "소셜 바이럴 루프 v2 프로토타입(v3 로 대체됨 2026-10-19)", sha256: cf4a78fe7041c00f8f4336fcbbb3107f2230f404b1f1116840dcaf469bdb9626 }
