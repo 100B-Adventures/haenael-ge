@@ -46,3 +46,25 @@
 > STAMP: 생성 2026-10-20 20:0x KST. 모델 claude-opus-5[1m]. 역할 컨트롤러. 근거 = Claude code-reviewer 교차 리뷰 판정과 컨트롤러 직접 재확인(MAJOR-1·2·3 은 grep·파일 목록·코드 읽기로 실재 확인). 상태 발주 대기.
 
 > STAMP: 종료 2026-10-20 20:36 KST. 모델 gpt-6.1-sol. 역할 code-builder. 스킬 haenael-supabase-build. 근거 = 로컬 Supabase 런타임, Vitest, pgTAP, Storybook 헤드리스 렌더, 계약 린트. 운영 미반영.
+
+---
+
+# 2차 교차 리뷰 반려분 (2026-10-21 추가)
+
+> 2차 판정 = BLOCK · MAJOR 2 · MINOR 8 · 15행 중 12 닫힘·2 미달(5·13)·1 건너뜀(15).
+> 리뷰어가 로컬에서 직접 재현했고 **동시성 셋(7·8·11)은 두 프로세스 실제 병렬로 닫힌 것을 확인**했다(1차의 "같은 트랜잭션 순차 호출" 오류는 없다).
+> 컨트롤러가 아래 R1·R2 를 직접 재확인했다. 둘 다 사실이다.
+
+| # | 우선 | 과제 | 구현 변경 | 종료 증거 |
+|---|---|---|---|---|
+| R1 | P0 | `scripts/qa/lint-protected-routes.mjs` 가 **설계가 명문화한 방향의 반대**다. `architecture-...-v1.2.5.md` 94·105행이 "목록에 없는 신규 보호 라우트는 **폴더 스캔 대조**로 린트가 반려한다. 규칙의 집행 주체가 사람 기억이 되지 않게 한다" 로 적었는데, 구현은 `for (const root of contract.scanRoots)` 로 **계약에 적힌 것만** 돈다. `web/src/app/(receiver)/` 에 새 보호 라우트 폴더가 생기고 계약에 없으면 린트가 그 폴더를 쳐다보지 않아 영원히 `missing=0` 이다. 집행 주체가 여전히 사람 기억이고, 이 린트가 막겠다고 선언한 실패 모드가 통과한다(`(receiver)/onboarding` 이 실증). **고치는 방향**: `readdirSync(web/src/app/(receiver))` 를 정본으로 돌려 각 디렉터리가 `exact`+`prefix` 또는 명시적 `public` 목록 중 하나에 반드시 등재돼야 통과하게 하고 미등재는 반려한다. `scanRoots` 는 `public`(의도적 제외) 목록으로 역할이 바뀐다. | 예 | 새 폴더를 임시로 만들어 린트가 **반려하는 것**을 관찰한 출력 · 지운 뒤 PASS 출력 · `public` 목록에 넣으면 PASS 하는 출력 |
+| R2 | P0 | **Vault 시크릿이 없어도 pg_cron 은 "성공" 으로 등록되고, 이후 매 실행 실패가 아무 신호를 남기지 않는다.** `20261020010000_...sql` 228~249행 등록 블록은 `cron.schedule` 만 하고 Vault 조회는 **job 본문 안에서 실행 시점에** 일어난다(235~241행). 그래서 시크릿 3종이 없으면 ①마이그레이션 성공 ②cron job 2개 존재(그래서 `verify-storage-cleanup-schedules.mjs` 도 PASS) ③10분마다 `net.http_post(url := NULL)` 실패 ④`ops_event` 0줄. **1차 반려 문장이 한 계단 뒤로 옮겨진 채 그대로 살아 있다.** 증폭 요인: `deploy-env.contract.json` 의 `vaultSecrets` 를 읽는 곳이 레포 전체에서 로컬 전용 스크립트 **한 곳뿐**이고 CI·`prebuild`·`qa:predeploy-production` 어디에도 안 걸린다(`check-deploy-env.mjs` 는 `vaultSecrets` 를 안 본다). `scripts/ops/provision-storage-cleanup-vault.sql` 도 어느 배포 절차에서도 참조되지 않고 `vault.create_secret` 이라 재실행 시 중복 이름으로 실패한다. **고치는 방향**: ①cron job 본문이 시크릿 NULL 을 먼저 판정해 `record_storage_cleanup_schedule_failure('runtime_secret_missing', ...)` 를 남기고 http_post 를 건너뛴다 ②`check-deploy-env.mjs` 가 `--target supabase-production` 에서 `vaultSecrets` 존재를 함께 검사한다 ③provisioner 를 존재 시 `update_secret` 으로 멱등화하고 `wiki/ops/인프라.md` 배포 절차에 한 줄 등재. | 예 | 시크릿을 비운 로컬에서 cron 1회 발사 후 `ops_event` 에 `runtime_secret_missing` 이 남는 것을 관찰 · `check-deploy-env.mjs` 가 Vault 3종 누락을 반려하는 출력 · provisioner 2회 연속 실행 rc=0 |
+| R3 | P1 | **이번 판에 만든 검증 스크립트와 pgTAP 에 실행 주체가 없다.** `verify-storage-cleanup-schedules.mjs`·`verify-storage-cleanup-concurrency.mjs`·`verify-cheer-summary-index.mjs` 와 `supabase/tests/*.test.sql` 이 npm script·CI·`AGENTS.md` 출고 조건 어디에도 등재되지 않았다(참조처가 판정표 본문뿐). 7·8·11·12·13 의 닫힘이 전부 **1회성 수동 실행 증거** 위에 서 있다. CI 와 `AGENTS.md` 출고 조건에 `supabase test db` 와 세 스크립트를 올려라. | 아니오 | CI 설정에 등재된 diff · `AGENTS.md` 출고 조건 블록에 등재 · CI 1회 통과 로그 |
+| R4 | P1 | `scripts/qa/verify-cheer-summary-index.mjs` 의 인덱스 증거가 **조작된 조건에서 다른 질의를 쟀다.** `SET enable_seqscan=off` 를 먼저 깔고, 실제 `my_social_dashboard` 의 `cheer_ranked`(전건 적재 + 두 LEFT JOIN + 윈도우 정렬)가 아니라 단일 goal `LIMIT 3` 질의를 EXPLAIN 한다. 기본값으로 돌리면 플래너가 `Seq Scan on cheer` 를 고른다. 실제 RPC 경로를 그대로 EXPLAIN 하고, Index Only Scan 이 불가능하면 **불가능하다고 적고** 무엇이 개선됐는지(버퍼·행수)로 증거를 바꿔라. | 예(인덱스 또는 질의) | `enable_seqscan` 기본값에서 실제 RPC 질의의 `EXPLAIN (ANALYZE, BUFFERS)` 출력과 개선 전후 수치 |
+| R5 | P1 | **노출 규칙 단일정본(D-032)을 렌더가 우회한다.** `web/src/lib/legal/exposure.ts` 의 `"link"`·`"biz"` 모드가 단일정본으로는 도달 불가인데, `(receiver)/my/legal/page.tsx` 가 `<LegalFooter mode="biz" />` 로 값을 하드코딩하고 `MyPageOverview.tsx` 가 `<LegalLinkList />` 를 직접 부른다. 그래서 `legalExposureForPath` 를 쓰는 `ConditionalFooter.tsx` 는 어떤 경로에서도 `none`/`page` 만 받아 **항상 null 을 반환**한다. `/my` 1단과 `/my/legal` 전문의 구별도 데이터상 구별이 아니다. | 예 | 두 화면의 노출이 단일정본 값에서 나오는 것을 코드와 테스트로 고정 · `ConditionalFooter` 가 실제로 무언가 렌더하는 경로 1개 관찰 |
+| R6 | P2 | `scripts/qa/lint-web-custom-classes.mjs` 의 `css.includes('.'+token)` 는 부분문자열 매칭이라 **위양성 통과**를 낸다(`.cheer-list-reset` 규칙만 있어도 `cheer-list` 가 통과). 수집도 `className="..."`/백틱 리터럴만 보므로 `cn()`·변수 합성·`tabbar-`·`invite-` 류가 검사 밖이다. 경계 일치로 바꾸고 수집 범위를 넓혀라. | 아니오 | 위양성 사례를 픽스처로 넣고 린트가 잡는 출력 |
+| R7 | P2 | `web/src/components/social/__tests__/InviteAcceptCard.test.tsx` 가 동어반복이다. 6필드 `legacy` 를 만들어 두고 컴포넌트에는 손으로 3필드만 뽑은 값을 넘기므로 `asInvitePreview` 를 지나지 않는다. "구 6필드 응답에서도 화면이 렌더된다" 를 증명하지 않는다. 변환 함수를 통과시키는 테스트로 바꿔라. | 아니오 | `asInvitePreview(6필드)` 결과를 컴포넌트에 넣어 렌더되는 테스트 통과 출력 |
+| R8 | P2 | `ClampText` 의 ARIA 복원이 목록 셰브론까지만이다. 메시지별 셰브론에 `aria-controls` 가 없고 `aria-label` 이 목록 셰브론과 같아 실제 브라우저에서 동일 라벨 버튼이 여러 개 생긴다(jsdom 은 높이 0 이라 안 떠서 테스트가 통과한다). `overflows` 초기값이 `null` 이라 짧은 메시지도 첫 페인트에 셰브론이 한 프레임 보인다. | 예 | 실제 브라우저 폭 390 에서 라벨 중복 0 과 첫 페인트 깜빡임 없음을 관찰 |
+| R9 | P2 | `verify-storage-cleanup-concurrency.mjs` 가 두 세션의 claim 시각 겹침을 어서션하지 않는다. `pg_sleep(2)` 로 사실상 보장되지만 느린 머신에서 순차 실행이 되어도 `intersection=[]` 로 PASS 한다. `pg_backend_pid` 와 claim 시각을 함께 출력해 겹침을 어서션해라. | 아니오 | 겹침 어서션이 든 출력 |
+
+> STAMP: 생성 2026-10-21 00:05 KST. 모델 claude-opus-5[1m]. 역할 컨트롤러. 근거 = 2차 교차 리뷰 판정과 컨트롤러 직접 재확인(R1 은 린트 본문 9행의 `contract.scanRoots` 순회, R2 는 `vaultSecrets` 참조처 전수 grep 2건). 상태 발주 대기.
