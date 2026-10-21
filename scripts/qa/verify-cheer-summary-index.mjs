@@ -73,8 +73,19 @@ try {
   const withoutIndex = summarize(explain(`BEGIN; DROP INDEX public.cheer_social_summary_recent_idx; EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${dashboardSummaryQuery}; ROLLBACK;`));
   const indexUsed = withIndex.indexes.includes("cheer_social_summary_recent_idx");
   const buffersImproved = withIndex.shared_hit_blocks < withoutIndex.shared_hit_blocks;
-  const recentRowsWithIndex = Math.min(...withIndex.cheer_access.map((node) => node.actual_rows));
-  const recentRowsWithoutIndex = Math.min(...withoutIndex.cheer_access.map((node) => node.actual_rows));
+  // The dashboard query has an unrelated cheer_pkey branch that may be planned but
+  // never executed (loops=0, rows=0).  Including that no-op node makes both plans
+  // look like they read zero rows and hides the recent-cheer branch we are proving.
+  const activeCheerRows = (summary) => summary.cheer_access
+    .filter((node) => node.loops > 0 && node.actual_rows > 0)
+    .map((node) => node.actual_rows);
+  const withIndexRows = activeCheerRows(withIndex);
+  const withoutIndexRows = activeCheerRows(withoutIndex);
+  if (withIndexRows.length === 0 || withoutIndexRows.length === 0) {
+    throw new Error("recent_cheer_branch_not_observed");
+  }
+  const recentRowsWithIndex = Math.min(...withIndexRows);
+  const recentRowsWithoutIndex = Math.min(...withoutIndexRows);
   const recentRowsImproved = recentRowsWithIndex < recentRowsWithoutIndex;
   console.log(JSON.stringify({ query_source: "my_social_dashboard migration body", query_chars: normalizedMigrationQuery.length, enable_seqscan: seqscan, fixture_goals: 100, fixture_cheers: 6000, with_index: withIndex, without_index: withoutIndex, index_used: indexUsed, shared_hit_blocks_improved: buffersImproved, recent_branch_rows: { with_index: recentRowsWithIndex, without_index: recentRowsWithoutIndex, improved: recentRowsImproved } }));
   if (seqscan !== "on" || !indexUsed || !recentRowsImproved || withIndex.result_rows !== withoutIndex.result_rows) process.exitCode = 1;
