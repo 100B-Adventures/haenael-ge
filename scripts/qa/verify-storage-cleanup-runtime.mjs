@@ -40,6 +40,10 @@ const server = spawn("supabase", ["functions", "serve", "storage-cleanup-worker"
   env: { ...process.env, STORAGE_CLEANUP_INTERNAL_TOKEN: cleanupToken },
   stdio: ["ignore", logFd, logFd],
 });
+let serverExit = null;
+server.once("exit", (code, signal) => {
+  serverExit = { code, signal };
+});
 
 const functionUrl = `${apiUrl}/functions/v1/storage-cleanup-worker`;
 async function fetchWithRetry(input, init, attempts = 4) {
@@ -55,7 +59,7 @@ async function fetchWithRetry(input, init, attempts = 4) {
   throw lastError;
 }
 
-const invoke = (token, apikey = anonKey) => fetchWithRetry(functionUrl, {
+const invoke = (token, apikey = anonKey, attempts = 4, timeoutMs = 12000) => fetchWithRetry(functionUrl, {
   method: "POST",
   headers: {
     apikey,
@@ -63,7 +67,8 @@ const invoke = (token, apikey = anonKey) => fetchWithRetry(functionUrl, {
     ...(token === null ? {} : { "x-cleanup-internal-token": token }),
   },
   body: "{}",
-});
+  signal: AbortSignal.timeout(timeoutMs),
+}, attempts);
 
 function sql(statement) {
   return execFileSync(
@@ -76,14 +81,37 @@ function sql(statement) {
 const encodedSqlText = (value) => `convert_from(decode('${Buffer.from(value).toString("base64")}','base64'),'UTF8')`;
 
 async function waitForFunction() {
+  let lastObservation = "no_response";
   for (let attempt = 0; attempt < 120; attempt += 1) {
+    if (serverExit) {
+      throw new Error(`function_serve_exited_${serverExit.code ?? "signal"}_${serverExit.signal ?? "none"}_${functionLogTail()}`);
+    }
     try {
-      const response = await invoke(cleanupToken);
+      const response = await invoke(cleanupToken, anonKey, 1, 5000);
       if (response.status === 200) return;
-    } catch {}
+      const body = await response.text();
+      lastObservation = `http_${response.status}_${body.slice(0, 240)}`;
+    } catch (error) {
+      lastObservation = error instanceof Error ? error.message : String(error);
+    }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  throw new Error("function_serve_timeout");
+  throw new Error(`function_serve_timeout_${lastObservation}_${functionLogTail()}`);
+}
+
+function functionLogTail() {
+  try {
+    return readFileSync("/tmp/haenael-storage-cleanup-function.log", "utf8")
+      .replaceAll(cleanupToken, "[cleanup-token-redacted]")
+      .replaceAll(serviceKey, "[service-key-redacted]")
+      .replaceAll(anonKey, "[anon-key-redacted]")
+      .split("\n")
+      .slice(-30)
+      .join(" | ")
+      .slice(-4000);
+  } catch (error) {
+    return `log_unavailable_${error instanceof Error ? error.message : String(error)}`;
+  }
 }
 
 async function putObject(path, bytes) {
