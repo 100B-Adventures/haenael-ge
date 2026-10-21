@@ -171,3 +171,23 @@
 - **R20 은 닫혔다**(컨트롤러 실측): 가드가 `readdirSync(suiteDir)` 로 **묶음 전체**를 읽고, `concurrency.mjs` 의 무조건 삭제가 **0건**이다.
 
 > STAMP: 생성 2026-10-21 15:4x KST. 모델 claude-opus-5[1m]. 역할 컨트롤러. 근거 = `gh run view 39504302785 --log-failed` 와 잡별 결론, 그리고 스크립트 직접 확인.
+
+---
+
+# 6차 종료 판정과 R23 원인 정정 (2026-10-21 17:22 KST)
+
+**R21·R22·R24·R25는 로컬 실행 증거로 닫혔고 R23은 열려 있다. 최신 원격 자동 검사는 빨간불이다.**
+
+| # | 판정 | 종료 증거 |
+|---|---|---|
+| R21 | 닫힘 | 정상 시각으로 넣은 404·403 실패 행, `alert_before_cron=0`, 감시 cron run 185 `succeeded`, 그 실행이 만든 `STORAGE_CLEANUP_DRAIN_STALLED` 2건 |
+| R22 | 닫힘 | `/admin`이 실제 `ops_event` 경보를 읽는 헤드리스 E2E 1/1 PASS, 감시 cron 최근 실행 `succeeded`, 큐 비어 있음·감시 실패·inactive 복구 계약 |
+| R23 | 열림 | run 39567933287은 3잡 성공, 서버 잡 인덱스 단계 실패. 로컬 fix `733fb3e`가 실행되지 않은 plan node를 제외해 3행 대 60행 PASS했으나 push 정책 차단으로 원격 미반영 |
+| R24 | 닫힘 | `/my=link`, `/my/legal=biz`를 노출 표가 직접 집행하고 테스트가 실제 링크·법정 기재 6항목을 단언. `DESIGN.md`의 D-041 충돌도 정정 |
+| R25 | 닫힘 | migration 함수 본문 직접 추출, 최근 분기 60→3행, 전체 Vitest 372/372, rollback·cron 복원·spacing token 계약 통과 |
+
+**직전 R23 원인 갱신은 사실과 달라 정정한다.** run `39504302785`는 ECR 한도 오류 뒤 GHCR fallback으로 이미지를 내려받고 Supabase 기동과 pgTAP 369/369까지 진행했다. 당시 최종 실패는 `function_serve_timeout`이었다. 후속 run `39567197451`은 함수 런타임을 통과하고 Deno 성공 문자열 판정에서 실패했고, 이를 exit status 판정으로 고쳤다. run `39567933287`은 그 단계까지 통과하고 인덱스 검증기의 실행되지 않은 plan node 포함 때문에 실패했다. 따라서 "외부 한도라 코드로 못 고친다"는 판정과 선택지 1~3은 폐기한다.
+
+필수 회귀: tsc rc=0, lint rc=0, `npm test` 66파일 372/372, `test:qa-contracts` mutation 8/8, pgTAP 21파일 369/369, 스케줄·동시성·런타임·인덱스 검증 rc=0.
+
+> STAMP: 생성 2026-10-21 17:22 KST. 모델 gpt-6.1-sol. 역할 code-builder. 스킬 haenael-supabase-build. 근거 = 로컬 Supabase·pg_cron·헤드리스 Chromium·Actions runs 39504302785, 39567197451, 39567933287. 운영 Supabase 쓰기·운영 배포 0건.
