@@ -1,16 +1,16 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
-## 2026-10-21 6차 회수 R21·R22·R24·R25
+## 2026-10-21 6차 회수 R21~R25
 
 - R21은 정상 시각으로 404·403 실패를 주입한 뒤 임시 감시 cron의 실제 실행 `succeeded`와 그 실행 이후 정체 경보를 관찰했다. 손 호출만으로 인과를 대신하지 않는다.
 - R22는 `/admin`이 실제 `ops_event` WARN/ERROR를 읽도록 연결하고 헤드리스 Chromium E2E 1/1로 수신을 관찰했다. 감시 cron 최근 실행과 큐 비어 있음 경보도 계약에 포함했다.
 - R24는 `/my` 1단 목록과 `/my/legal` 2단 사업자 전문이 `LEGAL_EXPOSURE`를 직접 소비한다. 제품 코드와 충돌하던 `DESIGN.md`의 과거 `/how=biz` 설명도 D-041대로 정정했다.
 - R25는 migration 본문에서 실제 대시보드 질의를 추출한다. 실행되지 않은 plan node를 제외해 기본 플래너에서 최근 분기 60행→3행을 다시 관찰했다.
 - 로컬 회귀는 tsc·lint rc=0, QA mutation 8/8, Vitest 66파일 372/372, pgTAP 21파일 369/369다. 스케줄·동시성·런타임·인덱스 검증도 모두 rc=0이다.
-- 빨간불: 원격 run `39567933287`은 4잡 중 3잡 성공, 서버 잡의 인덱스 단계 실패다. 로컬 fix `733fb3e`는 push 정책 차단으로 원격 미반영이므로 R23과 원격 초록 요구는 열려 있다.
+- R23은 공식 GHCR mirror를 함수 런타임 검증에 고정해 ECR 익명 pull 한도를 제거했다. 원격 run `39570467103`의 4잡이 모두 성공했고 서버 잡은 pgTAP·스케줄·동시성·함수 런타임·인덱스 효과를 연속 통과했다.
 - 운영 Supabase 쓰기와 운영 배포는 실행하지 않았다.
 
-> STAMP: 생성 2026-10-21 17:22 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 5차 반려 레지스트리, 로컬 Supabase·pg_cron·Vitest·pgTAP·헤드리스 Chromium, Actions run 39567933287. 운영 미반영.
+> STAMP: 생성 2026-10-21 17:39 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 5차 반려 레지스트리, 로컬 Supabase·pg_cron·Vitest·pgTAP·헤드리스 Chromium, Actions run 39570467103. 운영 미반영.
 
 ## 2026-10-21 4차 회수 R10·R11·R18·R19 종료
 

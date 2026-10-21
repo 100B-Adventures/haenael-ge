@@ -1,20 +1,20 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
-## 2026-10-21 6차 회수 R21·R22·R24·R25 로컬 종료, R23 원격 NG
+## 2026-10-21 6차 회수 R21~R25 종료
 
 | 요청 번호 | 범위 | 현재 판정 | 종료 증거 |
 |---|---|---|---|
 | BUILD-REVIEW-R21 | 주입 실패→예약 감시→경보 인과 | ✅ 로컬 닫힘 | 정상 시각 404·403 행, 경보 선행 0, cron run 185 `succeeded`, 정체 2건 경보 |
 | BUILD-REVIEW-R22 | 경보 수신 주체와 감시 cron 최근 실행 | ✅ 로컬 닫힘 | `/admin` 실제 `ops_event` 수신 헤드리스 E2E 1/1, console error 0, 최근 감시 run `succeeded` |
-| BUILD-REVIEW-R23 | 원격 자동 검사 초록 1회 | ❌ NG | run 39567933287은 3잡 성공·서버 잡 인덱스 단계 실패. 로컬 fix `733fb3e`는 push 정책 차단으로 원격 미반영 |
+| BUILD-REVIEW-R23 | 원격 자동 검사 초록 1회 | ✅ 닫힘 | run 39570467103의 4잡 전부 성공. 서버 잡이 pgTAP·스케줄·동시성·GHCR 함수 런타임·인덱스를 연속 통과 |
 | BUILD-REVIEW-R24 | 법적 고지 노출 표 단일 집행 | ✅ 로컬 닫힘 | `/my=link`, `/my/legal=biz` 테스트와 실제 2단 본문 6항목. `DESIGN.md`도 D-041과 정합 |
 | BUILD-REVIEW-R25 | 인덱스·플래키·rollback·cron·token 잔존 | ✅ 로컬 닫힘 | 실제 migration 질의 60→3행, Vitest 372/372, 관련 계약 전수 통과 |
 
-빨간불: 최신 원격 자동 검사 run `39567933287`은 **failure**다. 함수 런타임과 pgTAP은 통과했고 마지막 인덱스 효과 단계만 실패했다. 실행되지 않은 plan node의 0행을 포함한 검증기 오판은 로컬에서 수정했으나 원격 초록은 아직 0회다.
+원격 자동 검사: 최신 실행 `39570467103`은 **success**다. 직전 빨간 실행 `39569075947`의 ECR 한도는 동일 태그 GHCR mirror로 해소했고, 네 잡이 모두 초록으로 끝났다.
 
 종료 증거: `docs/qa/evidence/v2-r21-r25-verification-v1-gpt-codex-20261021-1722.md`. 운영 Supabase 쓰기와 운영 배포는 0건이다.
 
-STAMP: 2026-10-21 17:22 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 R21·R22·R24·R25 로컬 닫힘, R23 원격 NG
+STAMP: 2026-10-21 17:39 KST | model gpt-6.1-sol | agent code-builder | skill haenael-supabase-build | 상태 R21~R25 닫힘, 원격 CI 초록
 
 ## 2026-10-21 4차 회수 R10·R11·R18·R19 재검증 종료
 
