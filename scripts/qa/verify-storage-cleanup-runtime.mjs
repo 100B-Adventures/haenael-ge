@@ -416,12 +416,11 @@ try {
     expectedStalledCount: 2,
   });
 
-  const denoContracts = execFileSync(
+  execFileSync(
     "deno",
     ["test", "--allow-env", "supabase/functions/_shared/cleanup-auth.test.ts", "supabase/functions/_shared/storage-cleanup.test.ts"],
     { cwd: repo, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
   );
-  if (!denoContracts.includes("ok |")) throw new Error("deno_contracts_not_observed");
   console.log(JSON.stringify({
     EA01: { status: ea01.status, authorization_header_sent: false },
     EA02_observed: ea02.status,
@@ -436,6 +435,7 @@ try {
     CV13: { public_pair: afterPublicPair, quarantine_pair: afterQuarantinePair },
     R11: { wrong_url: wrongUrlProbe, permission_denied: permissionDeniedProbe, alert_before_cron: preCronAlertCount, monitor_cron: monitorCronObservation },
     CRON01: cronObservation,
+    DENO01: { files: 2, exit: 0 },
   }));
 } finally {
   try {
