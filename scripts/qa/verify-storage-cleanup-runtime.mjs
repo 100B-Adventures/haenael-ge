@@ -31,13 +31,21 @@ const containerProject = execFileSync(
 if (!containerProject) throw new Error("supabase_cli_container_required");
 
 const cleanupToken = randomBytes(32).toString("hex");
+// GitHub-hosted runners repeatedly exhaust the anonymous public ECR quota.
+// Supabase publishes the same tagged edge-runtime image on GHCR, and the CLI's
+// documented registry override rewrites it to ghcr.io/supabase/<image>:<tag>.
+const functionImageRegistry = process.env.SUPABASE_INTERNAL_IMAGE_REGISTRY ?? "ghcr.io";
 const secretDir = mkdtempSync(join(tmpdir(), "haenael-cleanup-"));
 const secretFile = join(secretDir, "runtime.env");
 writeFileSync(secretFile, `STORAGE_CLEANUP_INTERNAL_TOKEN=${cleanupToken}\n`, { mode: 0o600 });
 const logFd = openSync("/tmp/haenael-storage-cleanup-function.log", "w");
 const server = spawn("supabase", ["functions", "serve", "storage-cleanup-worker", "--no-verify-jwt", "--env-file", secretFile], {
   cwd: repo,
-  env: { ...process.env, STORAGE_CLEANUP_INTERNAL_TOKEN: cleanupToken },
+  env: {
+    ...process.env,
+    STORAGE_CLEANUP_INTERNAL_TOKEN: cleanupToken,
+    SUPABASE_INTERNAL_IMAGE_REGISTRY: functionImageRegistry,
+  },
   stdio: ["ignore", logFd, logFd],
 });
 let serverExit = null;
@@ -422,6 +430,7 @@ try {
     { cwd: repo, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
   );
   console.log(JSON.stringify({
+    function_image_registry: functionImageRegistry,
     EA01: { status: ea01.status, authorization_header_sent: false },
     EA02_observed: ea02.status,
     EA03: { status: ea03.status, code: ea03Body.error.code },
