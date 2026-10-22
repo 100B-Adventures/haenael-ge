@@ -14,7 +14,7 @@
     "NEXT_PUBLIC_APP_VERSION": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "SUPABASE_SERVICE_ROLE_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout", "core"] },
     "CASHOUT_ENABLED": { "targets": ["vercel-production"], "features": ["cashout"] },
-    "CASHOUT_ALLOWED_MEMBER_IDS": { "targets": ["vercel-production"], "features": ["cashout"], "optional": true },
+    "CASHOUT_ALLOWED_MEMBER_IDS": { "targets": ["vercel-production"], "features": ["cashout"], "optional": true, "requiredWhen": "CASHOUT_ENABLED=true" },
     "CASHOUT_ACCOUNT_ENCRYPTION_KEYS": { "targets": ["vercel-production"], "features": ["cashout"] },
     "CASHOUT_ACCOUNT_ENCRYPTION_KEY": { "targets": ["vercel-production"], "features": ["cashout-legacy"], "optional": true },
     "CASHOUT_ACCOUNT_ACTIVE_KEY_VERSION": { "targets": ["vercel-production"], "features": ["cashout"] },

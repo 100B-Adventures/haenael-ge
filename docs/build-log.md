@@ -5,12 +5,16 @@
 - D-017 환전 경계를 서버 전용 `CASHOUT_ALLOWED_MEMBER_IDS` allowlist로 옮겼다. 값이 없거나 잘못됐거나 preview이면 기본 거부하고, Server Action 직접 호출도 DB 쓰기 전에 같은 판정을 다시 한다.
 - 일반 계정은 기존 잔액·진행 중 신청·이력을 회수할 수 있지만 신규 신청 폼은 열리지 않는다. 승인된 읽기 상태를 삭제했던 1차 구현은 Claude 교차 리뷰 BLOCK 뒤 되살렸다.
 - 아동·청소년 보호 정책 실본문과 개인정보처리방침의 카카오·솔라피 운영 정합을 반영했다. 환전 조회 4종, 상태, 이력의 오류 위장 회귀 테스트를 추가했다.
-- 실제 Next production 서버 기반 환전 Playwright는 허용 계정 쓰기와 일반 계정 거부를 포함해 13/13 통과했다. 웹 전체 회귀는 70파일 387/387, 로컬 pgTAP은 21파일 369/369, 환경·돈 계약 mutation은 8/8 통과했다. Next production build와 Storybook 정적 build도 통과했다.
+- 실제 Next production 서버 기반 환전 Playwright는 허용 계정 쓰기와 **일반 계정 화면 비노출**을 포함해 13/13 통과했다. 브라우저 검사가 단언한 것은 화면에 신청 폼이 없다는 것이고, 화면을 거치지 않은 Server Action 직접 호출의 거부는 `__tests__/actions.real-gate.test.ts` 가 게이트를 목으로 치환하지 않고 환경변수부터 판정까지 실제로 실행해 5/5 로 단언한다(교차 리뷰 MAJOR-2 정정). 웹 전체 회귀는 70파일 387/387, 로컬 pgTAP은 21파일 369/369, 환경·돈 계약 mutation은 8/8 통과했다. Next production build와 Storybook 정적 build도 통과했다.
 - 환경 계약 검사는 `qa/contracts/deploy-env.contract.json`의 `sourceRoots`인 `web/src`와 `supabase/functions`를 재귀 순회한다. 이번 실행은 코드 환경변수 39개를 발견해 39개 전부 분류했고, 한 파일만 읽는 축소 검사가 아니다.
 - 감사 레지스트리 P0/P1 17행 가운데 15행을 닫았다. `supporter_name_visibility`·`message_visibility`와 1회 `thanks_message` 채널은 스키마·정책 결정이 승인되지 않아 회수 필요로 남겼다.
-- 운영 Supabase 쓰기와 운영 배포는 실행하지 않았다.
+- 워커는 운영 Supabase 쓰기와 운영 배포를 실행하지 않았다. 그 뒤 컨트롤러가 회장 승인으로 웹을 운영에 배포했다.
 
-> STAMP: 생성 2026-10-22 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build·review. 근거는 감사 v1.0.0, D-017, 로컬 Supabase·Vitest·Next·Playwright, Claude 교차 리뷰. 운영 미반영.
+- 비활성 안내 본문을 "환전 기능이 열리면 여기에서 바로 알려드릴게요" 에서 "쌓인 클로버는 그대로 보관됩니다" 로 바꿨다. 허용 목록 밖 계정에게 알림을 약속할 근거가 없기 때문이다. 승인 프로토타입에 준비 중 상태가 없어 대조 정본이 없으므로 이 줄로 사유를 남긴다(교차 리뷰 지적).
+- 자격 조회가 오류 없이 빈 응답을 주는 경우도 실패로 센다. `loadFailed` 에 자격 부재를 더하고 빈 응답 주입 테스트를 넣었다. 전화번호 조회 실패는 폼 프리필 전용이라 전체 실패로 승격하지 않는다(교차 리뷰 MAJOR-1).
+- 전역 스위치가 켜졌는데 허용 목록이 비면 전원 거부이므로 그 조합을 경고로 드러낸다. 배포 환경 계약에도 조건부 필수로 표기했다(값은 Secret 이라 검사가 차단하지 못하고 목록으로만 드러낸다).
+
+> STAMP: 생성 2026-10-22 KST. 모델 gpt-6.1-sol 과 claude-opus-5[1m](교차 리뷰 지적 반영분). 에이전트 code-builder. 스킬 haenael-supabase-build·review. 근거는 감사 v1.0.0, D-017, 로컬 Supabase·Vitest·Next·Playwright, Claude 교차 리뷰. 운영 반영됨(커밋 44b38e8 이 main 에 머지돼 웹이 배포됐다).
 
 ## 2026-10-21 6차 회수 R21~R25
 

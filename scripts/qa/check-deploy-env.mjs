@@ -52,6 +52,7 @@ function assertInventoryClassified() {
     console.error(`ENV_CONTRACT_FAIL unclassified=${unclassified.join(",")}`);
     return false;
   }
+  console.log(`ENV_CONTRACT_CONDITIONAL ${conditionallyRequired().join(" ") || "none"}`);
   console.log("ENV_CONTRACT_PASS unclassified=0");
   return true;
 }
@@ -66,6 +67,16 @@ function requiredForTarget(targetName) {
     .filter(([, rule]) => rule.features.some((feature) => enabled.has(feature)))
     .map(([name, rule]) => ({ name, features: rule.features.filter((feature) => enabled.has(feature)) }))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// 조건부 필수: 다른 변수의 값에 따라 필수가 되는 항목이다. 이 검사는 변수 존재만
+// 보고 값은 못 읽으므로(운영 값은 Secret) 차단하지 않고 목록으로 드러낸다.
+// 값으로 판정하는 자리는 런타임 경고다(web/src/lib/supabase/service.ts 의 빈 목록 경고).
+function conditionallyRequired() {
+  return Object.entries(contract.variables)
+    .filter(([, rule]) => rule.requiredWhen)
+    .map(([name, rule]) => `${name}(${rule.requiredWhen})`)
+    .sort();
 }
 
 function requiredVaultForTarget(targetName) {

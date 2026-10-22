@@ -118,6 +118,8 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 
 ## 승인 로그
 
+2026-10-22 13:35 KST · 감사 잔여 15건 종료. 2026-09-05 재오픈 사유 가운데 P0 1건과 P1 14건을 번호 단위로 닫았다(레지스트리 `docs/qa/audit-20260905/audit-haenael-ge-v1.0.0.md`). 환전 허용 판정을 클라이언트에서 서버 전용 환경변수로 옮겼고 우회 경로는 교차 리뷰 실측으로 0건이다. 커밋 `44b38e8` 이 main 에 머지돼 운영 웹에 배포됐고 자동 검사 네 잡 전부 성공(run 39718727090). 교차 리뷰 MAJOR 3건은 후속 커밋으로 닫았다. **build 는 아직 승격하지 않는다**: 미구현 2건(`supporter_name_visibility`·`message_visibility` 노출 범위와 세금 처리)이 미승인 제품 정책이고, `dev_deploy` 증거 2종도 없다.
+
 2026-10-13 02:30 KST ⟲ REOPEN eng-design. 회장 "V2 파이프타면서 웹배포하고 그다음 모바일 배포하면 되잖아 코덱스시켜서 적극 해" 지시로 V2 소셜 바이럴 루프를 파이프라인에 올린다. 스코프는 거버넌스 D-018 대로 **웹 우선**이고 모바일(앱인토스)은 2차다. 재오픈 사유: 기존 eng-design 핀은 환전 잠금 중심이고, V2 설계 문서는 앱인토스 중심(`fdd-core-social-viral-loop-appintoss-v0.1.0`)이라 웹 우선 지시와 어긋난다. 웹 우선 슬라이스 설계 4종(FDD·ERD·API 계약·테스트 계획)을 Codex tech-architect 에 위임했다. 1차 슬라이스 범위는 목표 상세·목표 커버·초대 링크·친구 목록이고 활동 타임라인·업적·부스트는 비범위다. build·qa·ship 은 2026-09-05 감사로 이미 잠겨 있어 추가 재잠금은 없다. V2 가 필요한 서버 실물이 운영에 0건임을 직접 조회로 확인했다(RPC 5종 0개, 친구·초대 테이블 0개, 웹 라우트에 친구·초대 부재).
 
 2026-09-21 22:34 KST — build 슬라이스 완료(갈래 1 다중 목표), qa 대기 — 설계안 §4 대로 `20260921000000_multi_goal_create_fn.sql`(유니크 인덱스 제거 + `create_goal` RPC 권고 잠금·상한 3 + REVOKE INSERT), 온보딩 리다이렉트 제거, `/me` 목록. 컨트롤러 직접 실측: vitest 282/282, pgTAP 270/270(신규 create_goal 10), 동시성 스크립트 PASS, Playwright multi-goal 2/2(로컬 Supabase 실세션), cashout-manual 12/12(E2E 전용 빌드), tsc 0, 토큰 신규 0. PR #3 CI success 3/3. **운영 DB 미적용·main 미머지(회장 몫).** 갈래 2·3 미착수. 단계는 build 유지, qa 승인은 /approve 로만. (artifacts: build=d8dab3f)

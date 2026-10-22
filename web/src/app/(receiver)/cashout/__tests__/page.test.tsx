@@ -25,6 +25,9 @@ function cashoutClient(failingDependency?: string) {
       return Promise.resolve({ data: null, error: { message: `${name} failed` } });
     }
     if (name === "clover_eligibility") {
+      if (failingDependency === "clover_eligibility_empty") {
+        return Promise.resolve({ data: [], error: null });
+      }
       return Promise.resolve({
         data: [{ total_balance: 8, welcome_amount: 3, payable_amount: 5, min_cashout_clover: 30, reached_threshold: false }],
         error: null,
@@ -102,10 +105,10 @@ describe("/cashout 미달 상태", () => {
 
   it.each([
     "clover_eligibility",
+    "clover_eligibility_empty",
     "my_cashout_status",
     "my_cashout_history",
-    "member",
-  ])("P1-14 %s 조회 오류는 0원이나 빈 상태로 위장하지 않는다", async (dependency) => {
+  ])("P1-14 %s 조회 실패는 0원이나 빈 상태로 위장하지 않는다", async (dependency) => {
     vi.mocked(createServerSupabaseClient).mockResolvedValueOnce(
       cashoutClient(dependency).client as never,
     );
@@ -117,5 +120,17 @@ describe("/cashout 미달 상태", () => {
       "잔액이 0이라는 뜻이 아니에요",
     );
     expect(screen.queryByTestId("cashout-breakdown-table")).not.toBeInTheDocument();
+  });
+
+  it("전화번호 조회 실패는 돈 상태 화면을 막지 않는다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValueOnce(
+      cashoutClient("member").client as never,
+    );
+
+    const { default: CashoutPage } = await import("../page");
+    render(await CashoutPage());
+
+    expect(screen.queryByTestId("cashout-load-error")).not.toBeInTheDocument();
+    expect(screen.getByTestId("cashout-breakdown-table")).toBeInTheDocument();
   });
 });

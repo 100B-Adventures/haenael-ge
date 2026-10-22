@@ -115,6 +115,11 @@ export function isCashoutAllowedMember(memberId: string) {
       invalidCount,
     });
   }
+  // 전역 스위치가 켜졌는데 허용 목록이 비면 전원 거부다. 운영자가 스위치만 켜고
+  // 목록을 잊으면 아무도 모르므로 그 조합을 로그로 드러낸다(교차 리뷰 지적).
+  if (allowedMemberIds.length === 0) {
+    console.warn("[cashout-gate] cashout is enabled but the allowlist is empty: denying everyone");
+  }
 
   return new Set(allowedMemberIds).has(memberId.toLowerCase());
 }

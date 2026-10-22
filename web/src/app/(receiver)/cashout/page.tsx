@@ -29,13 +29,15 @@ export default async function CashoutPage() {
     supabase.from("member").select("phone").eq("id", user.id).maybeSingle(),
   ]);
 
+  const eligibilityRaw = eligibilityResult.data;
+  const eligibility = Array.isArray(eligibilityRaw) ? eligibilityRaw[0] : eligibilityRaw;
+
   // 조회 실패를 잔액 0·신청 없음으로 그리면, 실제로 잔액이 있는 사람이
   // "환전 불가"로 읽는다. 돈 화면에서 실패는 실패로 보여야 한다(감사 P1, 오류 처리).
+  // 오류 객체가 없어도 자격 응답이 비면 같은 위장이 된다. 빈 응답도 실패로 센다.
+  // 전화번호는 폼 프리필 전용이라 조회 실패를 전체 실패로 승격하지 않는다.
   const loadFailed = Boolean(
-    eligibilityResult.error ||
-      statusResult.error ||
-      historyResult.error ||
-      memberResult.error,
+    eligibilityResult.error || statusResult.error || historyResult.error || !eligibility,
   );
   if (loadFailed) {
     return (
@@ -56,8 +58,6 @@ export default async function CashoutPage() {
     );
   }
 
-  const eligibilityRaw = eligibilityResult.data;
-  const eligibility = Array.isArray(eligibilityRaw) ? eligibilityRaw[0] : eligibilityRaw;
   const currentCashout = (((statusResult.data ?? []) as unknown) as CashoutRecord[])[0] ?? null;
   const history = ((historyResult.data ?? []) as unknown) as CashoutRecord[];
 
