@@ -12,6 +12,7 @@ const {
   notificationInsert,
   notifyInvoke,
   revalidatePath,
+  isCashoutAllowedMember,
 } = vi.hoisted(() => ({
   callerGetUser: vi.fn(),
   callerFrom: vi.fn(),
@@ -24,6 +25,7 @@ const {
   notificationInsert: vi.fn(),
   notifyInvoke: vi.fn(),
   revalidatePath: vi.fn(),
+  isCashoutAllowedMember: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({ revalidatePath }));
@@ -45,7 +47,7 @@ vi.mock("@/lib/supabase/service", () => ({
     keys: { "1": "o".repeat(40), "2": "k".repeat(40) },
   })),
   getCashoutAccountFingerprintKey: vi.fn(() => "f".repeat(40)),
-  isCashoutEnabled: vi.fn(() => true),
+  isCashoutAllowedMember,
 }));
 
 import { createCashoutRequest } from "../actions";
@@ -56,6 +58,7 @@ describe("createCashoutRequest Server Action", () => {
     vi.stubEnv("NOTIFY_INTERNAL_TOKEN", "n".repeat(48));
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://haenael.app");
     callerGetUser.mockResolvedValue({ data: { user: { id: "member-uid" } } });
+    isCashoutAllowedMember.mockReturnValue(true);
     callerFrom.mockReturnValue({ update: callerUpdate });
     callerUpdate.mockReturnValue({ eq: callerEq });
     callerEq.mockReturnValue({ select: callerSelect });
@@ -138,6 +141,24 @@ describe("createCashoutRequest Server Action", () => {
       requestKey: "cashout_action_02",
     });
     expect(result.ok).toBe(false);
+    expect(serviceRpc).not.toHaveBeenCalled();
+  });
+
+  it("P0-01 일반 계정은 서버 allowlist에서 거부하고 DB 쓰기를 시작하지 않는다", async () => {
+    isCashoutAllowedMember.mockReturnValueOnce(false);
+
+    const result = await createCashoutRequest({
+      cloverAmount: 30,
+      bankCode: "KB",
+      accountNo: "123456789012",
+      accountHolder: "홍길동",
+      phone: "01012345678",
+      requestKey: "cashout_action_denied",
+    });
+
+    expect(isCashoutAllowedMember).toHaveBeenCalledWith("member-uid");
+    expect(result).toEqual({ ok: false, code: "cashout_disabled" });
+    expect(callerFrom).not.toHaveBeenCalled();
     expect(serviceRpc).not.toHaveBeenCalled();
   });
 

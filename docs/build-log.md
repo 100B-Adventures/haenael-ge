@@ -1,5 +1,17 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-22 core 감사 재오픈 P0/P1 보정
+
+- D-017 환전 경계를 서버 전용 `CASHOUT_ALLOWED_MEMBER_IDS` allowlist로 옮겼다. 값이 없거나 잘못됐거나 preview이면 기본 거부하고, Server Action 직접 호출도 DB 쓰기 전에 같은 판정을 다시 한다.
+- 일반 계정은 기존 잔액·진행 중 신청·이력을 회수할 수 있지만 신규 신청 폼은 열리지 않는다. 승인된 읽기 상태를 삭제했던 1차 구현은 Claude 교차 리뷰 BLOCK 뒤 되살렸다.
+- 아동·청소년 보호 정책 실본문과 개인정보처리방침의 카카오·솔라피 운영 정합을 반영했다. 환전 조회 4종, 상태, 이력의 오류 위장 회귀 테스트를 추가했다.
+- 실제 Next production 서버 기반 환전 Playwright는 허용 계정 쓰기와 일반 계정 거부를 포함해 13/13 통과했다. 웹 전체 회귀는 70파일 387/387, 로컬 pgTAP은 21파일 369/369, 환경·돈 계약 mutation은 8/8 통과했다. Next production build와 Storybook 정적 build도 통과했다.
+- 환경 계약 검사는 `qa/contracts/deploy-env.contract.json`의 `sourceRoots`인 `web/src`와 `supabase/functions`를 재귀 순회한다. 이번 실행은 코드 환경변수 39개를 발견해 39개 전부 분류했고, 한 파일만 읽는 축소 검사가 아니다.
+- 감사 레지스트리 P0/P1 17행 가운데 15행을 닫았다. `supporter_name_visibility`·`message_visibility`와 1회 `thanks_message` 채널은 스키마·정책 결정이 승인되지 않아 회수 필요로 남겼다.
+- 운영 Supabase 쓰기와 운영 배포는 실행하지 않았다.
+
+> STAMP: 생성 2026-10-22 KST. 모델 gpt-6.1-sol. 에이전트 code-builder. 스킬 haenael-supabase-build·review. 근거는 감사 v1.0.0, D-017, 로컬 Supabase·Vitest·Next·Playwright, Claude 교차 리뷰. 운영 미반영.
+
 ## 2026-10-21 6차 회수 R21~R25
 
 - R21은 정상 시각으로 404·403 실패를 주입한 뒤 임시 감시 cron의 실제 실행 `succeeded`와 그 실행 이후 정체 경보를 관찰했다. 손 호출만으로 인과를 대신하지 않는다.

@@ -24,6 +24,32 @@ skills:
 
 등급은 P0/P1을 MAJOR, P2/P3을 MINOR로 매핑한다. 표 기준 집계는 P0 1건, P1 16건이며, 축간 중복을 합친 고유 P1 원인은 14건이다. 가장 큰 결함은 세무 자문 전 환전을 회장 계정에만 제한하라는 D-017과 달리 전역 스위치 하나로 모든 인증 사용자의 신청이 열리는 점이다. 승인 PRD v0.4.0의 공개범위·다중 목표·응원자 경험은 구현되지 않았는데 파이프라인은 `done`이고, 돈 화면 조회 실패는 정상 0원 또는 신청 없음으로 위장된다. 보안의 기존 핵심 경계인 RLS, service role 서버 격리, 환전 계좌 암호화, 보호 API 무인증 401은 확인됐다.
 
+## 2026-10-22 core build 재검증 레지스트리
+
+번호는 이 보고서의 P0/P1 행을 위에서 아래로 센 고정 ID다. `구현 변경`은 이번 작업에서 코드를 바꿨는지이며, `아니오`는 이미 후속 구현이 존재해 현재 코드를 실측한 경우다. 운영 Supabase 쓰기와 운영 배포는 실행하지 않았다.
+
+| ID | 우선순위 | 상태 | 구현 변경 | 종료 증거 |
+|---|---|---|---|---|
+| P0-01 | P0 | 닫힘 | 예 | 서버 기본 거부 allowlist `web/src/lib/supabase/service.ts`, Server Action 재검사 `web/src/app/(receiver)/cashout/actions.ts`, 읽기 상태 보존·신청만 차단 `web/src/app/(receiver)/cashout/page.tsx`. 허용·일반·빈 목록·preview 단위 테스트와 실제 환전 E2E 13/13 통과. |
+| P1-01 | P1 | 닫힘 | 아니오 | `20260921000000_multi_goal_create_fn.sql:35,41,86`이 단일 목표 인덱스 제거, 계정 잠금, 진행 중 3개 상한을 구현. `create_goal.test.sql`과 로컬 pgTAP 전체 369/369 통과. |
+| P1-02 | P1 | **회수 필요** | 아니오 | 목표 `visibility`와 공개 view는 `20261013050000_social_viral_loop_web_first.sql:72-77,456-484`에 있으나 승인 PRD의 `supporter_name_visibility`·`message_visibility`는 없고 `cheer_public`은 공개 목표의 이름·메시지를 계속 반환한다(`:464-467`). 정책·스키마 선택 없이는 닫을 수 없다. |
+| P1-03 | P1 | 닫힘 | 아니오 | `onboarding/page.tsx:22-24`가 기존 목표 리다이렉트를 제거했고 `OnboardingGoalForm.tsx:83-105`가 `create_goal`을 사용한다. |
+| P1-04 | P1 | **회수 필요** | 아니오 | 최신 V2는 응원 귀속·친구·마이 화면을 구현했지만 `thanks_message` 1회 채널은 없다. `eng-design-goal-visibility-supporter-v1.0.0-claude-opus.md` §6은 응원자 연결 정책과 D-017 결론 전 착수 금지이며 pipeline 핀도 `pending-review`다. |
+| P1-05 | P1 | 닫힘 | 예 | `web/src/app/child-safety/page.tsx`에 적용 범위, 금지 행위, 신고 이메일, 대응, 112·1388·1377, 시행일과 법률 검토 경계를 구현. 정적 계약 테스트 및 실제 Next 렌더 HTTP 200. |
+| P1-06 | P1 | 닫힘 | 아니오 | `Wordmap.tsx:75-94`가 정규화된 단어 전체를 렌더한다. `Wordmap.test.tsx` 13건 통과. |
+| P1-07 | P1 | 닫힘 | 아니오 | `GoalCard.tsx:127-137` 제목 2줄 clamp, `ClampText.tsx:36-52` 이유 펼침과 `Collapsible`의 `aria-expanded` 계약. 관련 19건 통과. |
+| P1-08 | P1 | 닫힘 | 아니오 | `get_wordmap`이 `goal.visibility='PUBLIC' OR owner`를 함수 내부에서 검사(`20261013050000...sql:473-484`). 공개범위 pgTAP 포함 DB 전체 통과. |
+| P1-09 | P1 | 닫힘 | 아니오 | P1-01과 같은 데이터 안전 중복 지적. 원자 상한 함수와 동시성 테스트가 현재 계약이다. |
+| P1-10 | P1 | 닫힘 | 예 | `/cashout` 네 조회 중 하나라도 실패하면 전용 오류 상태를 렌더하고 금액을 추정하지 않는다. 네 의존성 오류 주입 테스트 4건 추가. |
+| P1-11 | P1 | 닫힘 | 아니오 | `/cashout/status`가 `statusError`를 빈 상태보다 먼저 분기한다(`status/page.tsx:74-93`). 오류 주입 테스트 추가. |
+| P1-12 | P1 | 닫힘 | 예 | `/cashout/history`가 RPC 오류와 성공 0건을 분리한다(`history/page.tsx:63-78`). 오류 주입 테스트 추가. |
+| P1-13 | P1 | 닫힘 | 아니오 | 다중 목표 `create_goal.test.sql`, visibility `social_web_first_schema/rls.test.sql`, 현재 응원 귀속·마이 화면 테스트가 로컬 DB 369/369와 웹 전체 회귀에 포함된다. P1-04의 미승인 감사 채널은 별도 회수로 분리한다. |
+| P1-14 | P1 | 닫힘 | 예 | eligibility·status·history·member 각 실패, status RPC 실패, history RPC 실패를 별도 테스트로 고정하고 숫자·빈 상태 비노출을 단언했다. |
+| P1-15 | P1 | 닫힘 | 아니오 | `pipeline-state.core.md:8-9,75-77`은 build 재오픈, QA·ship 잠금 상태다. `done` 주장은 제거된 상태다. |
+| P1-16 | P1 | 닫힘 | 예 | `privacy/page.tsx:199-206`에서 운영 실발송 이력과 충돌한 카카오·솔라피 `비활성` 문구를 제거하고 처리 목적과 실패 시 인앱 폴백을 명시. 정적 계약 및 HTTP 200 렌더 확인. |
+
+재검증 결과는 **17건 중 15건 닫힘, 2건 회수 필요**다. P1-02와 P1-04를 닫았다고 쓰면 승인되지 않은 공개범위·응원자 DB 스키마를 워커가 독단 확정하는 것이므로 완료로 승격하지 않는다.
+
 ## 1. 승인 산출물 대비 이탈
 
 | 심각도 | 위치 | 지적 | 승인 계약·근거 | 교정안 | 예상 공수 |

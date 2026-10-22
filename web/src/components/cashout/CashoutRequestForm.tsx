@@ -581,7 +581,7 @@ export function CashoutRequestForm({
           </p>
           <p className="mt-1 max-w-64 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">
             {!cashoutEnabled
-              ? "환전 기능이 열리면 여기에서 바로 알려드릴게요."
+              ? "쌓인 클로버는 그대로 보관됩니다."
               : reachedThreshold
                 ? "웰컴 클로버는 환전되지 않아요. 친구 응원이 들어오면 지급 가능한 만큼 신청할 수 있어요."
                 : `환전 기준은 모인 클로버 ${minCashoutClover}개 이상이에요. 지금 모인 클로버는 그대로 보관됩니다.`}

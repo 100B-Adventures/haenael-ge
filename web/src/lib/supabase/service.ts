@@ -89,3 +89,32 @@ export function isCashoutEnabled() {
   }
   return process.env.CASHOUT_ENABLED === "true";
 }
+
+const MEMBER_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * D-017 temporary cashout gate.
+ *
+ * The allowlist is intentionally server-only and deny-by-default. A global
+ * feature switch can stop cashout for everyone, but turning it on must never
+ * grant access to every authenticated account while the tax contract remains
+ * unresolved.
+ */
+export function isCashoutAllowedMember(memberId: string) {
+  if (!isCashoutEnabled() || !MEMBER_ID_PATTERN.test(memberId)) return false;
+
+  const rawEntries = (process.env.CASHOUT_ALLOWED_MEMBER_IDS ?? "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+  const allowedMemberIds = rawEntries.filter((value) => MEMBER_ID_PATTERN.test(value));
+  const invalidCount = rawEntries.length - allowedMemberIds.length;
+  if (invalidCount > 0) {
+    console.warn("[cashout-gate] invalid allowlist member ids ignored", {
+      invalidCount,
+    });
+  }
+
+  return new Set(allowedMemberIds).has(memberId.toLowerCase());
+}

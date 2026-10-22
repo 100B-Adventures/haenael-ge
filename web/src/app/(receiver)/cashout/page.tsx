@@ -5,7 +5,7 @@ import {
 } from "@/components/receiver/ReceiverShell";
 import { CashoutPageView } from "@/components/cashout/CashoutPageView";
 import { type CashoutRecord } from "@/lib/cashout";
-import { isCashoutEnabled } from "@/lib/supabase/service";
+import { isCashoutAllowedMember } from "@/lib/supabase/service";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +17,11 @@ export default async function CashoutPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
+  // D-017: 일반 계정도 자기 잔액과 진행 중 신청은 회수할 수 있어야 한다.
+  // 신청 가능 여부만 서버 allowlist로 판정하고, Server Action에서도 같은 경계를
+  // 다시 확인한다. 클라이언트 환경변수나 입력값은 인가 근거로 쓰지 않는다.
+  const cashoutAllowed = isCashoutAllowedMember(user.id);
+
   const [eligibilityResult, statusResult, historyResult, memberResult] = await Promise.all([
     supabase.rpc("clover_eligibility", { p_member_id: user.id }),
     supabase.rpc("my_cashout_status" as never),
@@ -27,7 +32,10 @@ export default async function CashoutPage() {
   // 조회 실패를 잔액 0·신청 없음으로 그리면, 실제로 잔액이 있는 사람이
   // "환전 불가"로 읽는다. 돈 화면에서 실패는 실패로 보여야 한다(감사 P1, 오류 처리).
   const loadFailed = Boolean(
-    eligibilityResult.error || statusResult.error || historyResult.error,
+    eligibilityResult.error ||
+      statusResult.error ||
+      historyResult.error ||
+      memberResult.error,
   );
   if (loadFailed) {
     return (
@@ -60,7 +68,7 @@ export default async function CashoutPage() {
   const reachedThreshold = eligibility?.reached_threshold ?? false;
   return (
     <CashoutPageView
-      cashoutEnabled={isCashoutEnabled()}
+      cashoutEnabled={cashoutAllowed}
       reachedThreshold={reachedThreshold}
       payableAmount={payableAmount}
       totalBalance={totalBalance}

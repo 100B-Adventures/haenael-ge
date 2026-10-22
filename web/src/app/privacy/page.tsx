@@ -199,13 +199,11 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>(주)카카오</strong>(카카오톡 알림톡 발송): 응원 도착·환전
-          지급 완료 등 정보성 알림 발송을 위한 수신자 전화번호 처리 — 현재{" "}
-          <strong>비활성</strong>, 알림 기능 활성화 시 이용 예정
+          신청·지급 완료 등 정보성 알림 발송을 위한 수신자 전화번호 처리
         </li>
         <li>
           <strong>(주)넥스모어시스템즈(솔라피)</strong>(메시지 발송 대행):
-          알림톡 발송 요청 중계 — 현재 <strong>비활성</strong>, 알림 기능
-          활성화 시 이용 예정
+          알림톡 발송 요청 중계에 이용. 발송할 수 없으면 인앱 알림으로 대체
         </li>
         <li>
           <strong>토스페이먼츠(Toss Payments)</strong>(결제 처리): 응원

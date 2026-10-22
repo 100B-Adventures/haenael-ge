@@ -28,6 +28,7 @@ const USERS = {
   invalid: randomUUID(),
   happy: randomUUID(),
   duplicate: randomUUID(),
+  general: randomUUID(),
 } as const;
 
 function requiredEnv(name: string) {
@@ -114,6 +115,14 @@ const INITIAL_FIXTURE_BY_USER = new Map<string, UserFixtureState>([
     lockedAmount: 30, // existingDuplicate()의 clover_amount와 정합(진행 중 신청 = 잠김)
     pendingCashout: existingDuplicate(),
     phone: "01087654321",
+  }],
+  [USERS.general, {
+    totalBalance: 35,
+    welcomeAmount: 5,
+    payableAmount: 30,
+    lockedAmount: 0,
+    pendingCashout: null,
+    phone: "01011112222",
   }],
 ]);
 let mockServer: Server;
@@ -487,6 +496,12 @@ test.beforeAll(async () => {
           `--require=${path.resolve("e2e/support/cashout-fetch-redirect.cjs")}`,
         ].filter(Boolean).join(" "),
         CASHOUT_ENABLED: "true",
+        CASHOUT_ALLOWED_MEMBER_IDS: [
+          USERS.below,
+          USERS.invalid,
+          USERS.happy,
+          USERS.duplicate,
+        ].join(","),
         CASHOUT_ACCOUNT_ENCRYPTION_KEY: "e".repeat(40),
         CASHOUT_ACCOUNT_FINGERPRINT_KEY: "f".repeat(40),
       },
@@ -511,6 +526,16 @@ test.afterAll(async () => {
 });
 
 test.describe("수동 환전: happy + edge", () => {
+  test("P0-01 일반 계정은 잔액을 회수하지만 신청 폼은 열리지 않는다", async ({ page }) => {
+    await openCashout(page, USERS.general);
+
+    await expect(page.getByTestId("cashout-breakdown-table")).toBeVisible();
+    await expect(page.getByTestId("cashout-confirm-disabled")).toContainText(
+      "환전 기능을 준비하고 있어요",
+    );
+    await expect(page.getByTestId("cashout-request-form")).toHaveCount(0);
+  });
+
   test("전화번호가 없는 회원에게 카카오 재동의 안내를 노출한다", async ({ page }) => {
     await openCashout(page, USERS.invalid);
 

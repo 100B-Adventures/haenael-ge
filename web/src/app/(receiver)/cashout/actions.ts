@@ -6,7 +6,7 @@ import {
   createServiceRoleClient,
   getCashoutAccountEncryptionConfig,
   getCashoutAccountFingerprintKey,
-  isCashoutEnabled,
+  isCashoutAllowedMember,
 } from "@/lib/supabase/service";
 import { normalizeKoreanMobilePhone } from "@/lib/phone";
 import {
@@ -94,7 +94,6 @@ function cashoutAdminUrl(): string {
 export async function createCashoutRequest(
   input: CreateCashoutInput,
 ): Promise<CreateCashoutResult> {
-  if (!isCashoutEnabled()) return fail("cashout_disabled");
   if (!input || typeof input !== "object") return fail("invalid_request_key");
 
   const callerClient = await createServerSupabaseClient();
@@ -102,6 +101,9 @@ export async function createCashoutRequest(
     data: { user },
   } = await callerClient.auth.getUser();
   if (!user) return fail("unauthorized");
+  // 화면을 거치지 않은 Server Action 직접 호출도 같은 서버 allowlist로 막는다.
+  // 허용 여부는 클라이언트 입력이나 공개 환경변수에서 받지 않는다.
+  if (!isCashoutAllowedMember(user.id)) return fail("cashout_disabled");
 
   const { bankCode, accountNo, accountHolder, phone, requestKey } = normalizeInput(input);
   if (!Number.isSafeInteger(input.cloverAmount) || input.cloverAmount < 1) {

@@ -72,6 +72,34 @@ describe("/cashout/status", () => {
     );
   });
 
+  it("P1-14 상태 RPC 오류는 신청 없음으로 위장하지 않는다", async () => {
+    mockSupabase((name) => {
+      if (name === "my_cashout_status") {
+        return { data: null, error: { message: "status failed" } };
+      }
+      return {
+        data: [{
+          total_balance: 30,
+          welcome_amount: 3,
+          locked_amount: 0,
+          available_amount: 30,
+          payable_amount: 27,
+          min_cashout_clover: 30,
+          reached_threshold: true,
+        }],
+        error: null,
+      };
+    });
+
+    const { default: CashoutStatusPage } = await import("../page");
+    render(await CashoutStatusPage());
+
+    expect(screen.getByTestId("cashout-status-load-error")).toHaveTextContent(
+      "신청이 없다는 뜻이 아니에요",
+    );
+    expect(screen.queryByTestId("cashout-status-empty-page")).not.toBeInTheDocument();
+  });
+
   it("MAJOR1: PAID 배너는 라이브 총량 역산이 아니라 원장 스냅샷(settled_balance_before/after)을 쓴다", async () => {
     // 지급 후 응원이 더 도착해 라이브 총량(clover_eligibility)이 12가 아니라 22로
     // 늘어난 상황을 재현한다. beforeBalance를 "라이브 총량 + clover_amount"로
