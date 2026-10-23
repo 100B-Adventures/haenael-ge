@@ -163,6 +163,19 @@ if (args.includes("--only-if-vercel") && process.env.VERCEL !== "1" && !process.
   process.exit(ok ? 0 : 1);
 }
 
+// 운영 기준을 preview·development 빌드에 들이대면 그 빌드는 영구히 실패한다.
+// 운영에 등록한 변수는 그 환경에 없는 것이 정상이기 때문이다(계약이 운영만 대상으로 적는다).
+// 운영 배포는 VERCEL_ENV=production 이므로 보호는 그대로 유지된다.
+if (
+  args.includes("--only-if-vercel") &&
+  argValue("--target") === "vercel-production" &&
+  process.env.VERCEL_ENV &&
+  process.env.VERCEL_ENV !== "production"
+) {
+  console.log(`ENV_TARGET_CHECK_SKIPPED reason=non-production-vercel-env env=${process.env.VERCEL_ENV}`);
+  process.exit(ok ? 0 : 1);
+}
+
 const targetName = argValue("--target");
 if (!targetName) {
   console.error("usage: check-deploy-env.mjs --target <target> --source provider|runtime|file");
