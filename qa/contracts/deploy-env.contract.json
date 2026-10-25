@@ -13,6 +13,7 @@
     "NEXT_PUBLIC_APP_URL": { "targets": ["vercel-production"], "features": ["core"] },
     "NEXT_PUBLIC_APP_VERSION": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "SUPABASE_SERVICE_ROLE_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout", "core"] },
+    "SERVICE_ROLE_KEY": { "targets": [], "features": ["local-supabase-cli"], "optional": true },
     "CASHOUT_ENABLED": { "targets": ["vercel-production"], "features": ["cashout"] },
     "CASHOUT_ALLOWED_MEMBER_IDS": { "targets": ["vercel-production"], "features": ["cashout"], "optional": true, "requiredWhen": "CASHOUT_ENABLED=true" },
     "CASHOUT_ACCOUNT_ENCRYPTION_KEYS": { "targets": ["vercel-production"], "features": ["cashout"] },
@@ -28,6 +29,7 @@
     "SUPABASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
     "SUPABASE_ANON_KEY": { "targets": ["supabase-production"], "features": ["wordmap"] },
     "COVER_PUBLIC_BASE_URL": { "targets": ["supabase-production"], "features": ["core"], "optional": true },
+    "PROFILE_PUBLIC_BASE_URL": { "targets": ["supabase-production"], "features": ["core", "profile"], "optional": true },
     "STORAGE_CLEANUP_INTERNAL_TOKEN": { "targets": ["supabase-production"], "features": ["storage-cleanup"] },
     "PAYMENTS_ENABLED": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_SECRET_KEY": { "targets": ["supabase-production"], "features": ["payments"] },
@@ -54,7 +56,7 @@
     },
     "supabase-production": {
       "provider": "supabase",
-      "features": ["core", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
+      "features": ["core", "profile", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
     }
   }
 }

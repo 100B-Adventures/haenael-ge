@@ -62,3 +62,19 @@ it("CT-INVITE-03 초대 가능한 목표가 없으면 관리 화면으로 이어
     .toHaveAttribute("href", "/me");
   expect(screen.queryByRole("button", { name: "초대 링크 복사" })).not.toBeInTheDocument();
 });
+
+it("CT-INVITE-04 현재 활성 친구 관계인 수락자만 완료 패널로 표시한다", () => {
+  render(
+    <FriendInviteCard
+      goals={[{ id: 42, title: "매일 달리기", visibility: "FRIENDS" }]}
+      acceptedFriend={{
+        nickname: "윤도경",
+        profileImage: "/images/social-viral/dogyeong.png",
+      }}
+    />,
+  );
+  expect(screen.getByTestId("invite-accepted-panel")).toHaveTextContent(
+    "윤도경님이 초대를 받고 들어왔어요",
+  );
+  expect(screen.getByRole("img", { name: "윤도경 프로필" })).toBeInTheDocument();
+});

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Wordmap } from "./Wordmap";
 
 const meta = {
-  title: "Goal/Wordmap",
+  title: "Goal/UI/Wordmap",
   component: Wordmap,
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof Wordmap>;

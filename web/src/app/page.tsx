@@ -12,6 +12,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
+import { WordmapCloudLayout } from "@/components/goal/WordmapCloudLayout";
 
 export const metadata: Metadata = {
   title: "해낼게 — 응원은 돈으로 하는 겁니다",
@@ -25,23 +26,27 @@ export const metadata: Metadata = {
 
 function WordmapPreview() {
   const messages = [
-    ["너라면 할 수 있어", "strong"],
-    ["오늘도 한 걸음 ♥", "medium"],
-    ["끝까지 가보자", "soft"],
-    ["진짜 멋지다", "medium"],
     ["꼭 해낼 거야", "strong"],
+    ["너라면 할 수 있어", "medium"],
+    ["오늘도 한 걸음 ♥", "soft"],
+    ["진짜 멋지다", "medium"],
+    ["끝까지 가보자", "strong"],
     ["내가 옆에 있을게", "soft"],
   ] as const;
   return (
-    <div className="landing-wordmap-preview" aria-label="응원 메시지 예시">
+    <WordmapCloudLayout
+      className="landing-wordmap-preview"
+      label="응원 메시지 예시"
+      seed="landing-preview"
+    >
       <span className="landing-preview-heart landing-preview-heart--left" aria-hidden="true">♥</span>
       <span className="landing-preview-heart landing-preview-heart--right" aria-hidden="true">♥</span>
       {messages.map(([message, tone]) => (
-        <span key={message} className={`landing-preview-message is-${tone}`}>
+        <span key={message} className={`landing-preview-message is-${tone}`} data-wordmap-item>
           {message}
         </span>
       ))}
-    </div>
+    </WordmapCloudLayout>
   );
 }
 

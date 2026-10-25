@@ -91,35 +91,51 @@ function shortId(value: string) {
   return `${value.slice(0, 8)}…${value.slice(-4)}`;
 }
 
-function EmptyRow({ colSpan }: { colSpan: number }) {
-  return (
-    <tr>
-      <td colSpan={colSpan} className="px-4 py-10 text-center text-muted-foreground">
-        조회된 항목이 없습니다.
-      </td>
-    </tr>
-  );
-}
-
 function SectionHeader({
   title,
   description,
-  count,
+  countLabel,
 }: {
   title: string;
   description: string;
-  count: number;
+  countLabel: string;
 }) {
   return (
-    <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+    <div className="admin-section-head" aria-label={`${title}. ${description}`}>
       <div>
-        <h2 className="text-lg font-extrabold tracking-[-0.02em]">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <h2>{title}</h2>
       </div>
-      <span className="rounded-full bg-accent px-3 py-1 text-sm font-bold text-accent-foreground">
-        {formatNumber(count)}건
-      </span>
+      <span>{countLabel}</span>
     </div>
+  );
+}
+
+function MemberCard({ member }: { member: AdminMember }) {
+  return (
+    <li className="admin-member-card">
+      <div className="admin-record-row">
+        <div><strong>{member.nickname || "미설정"}</strong><small>가입 {formatDateTime(member.created_at)}</small></div>
+        <div><strong>🍀 {formatNumber(member.clover_count)}</strong><small>보유 클로버</small></div>
+      </div>
+      <details className="admin-member-details">
+        <summary aria-label={`${member.nickname || "미설정"} 회원 상세`}>⋯</summary>
+        <div>
+          <p>로그인 {member.provider || "미확인"}</p>
+          <p>본인인증 {member.kyc_status === "VERIFIED" ? "완료" : "미완료"}</p>
+          <p>회원 ID {shortId(member.id)}</p>
+          {member.goal_slug && <a href={`/g/${member.goal_slug}`} target="_blank" rel="noopener noreferrer">목표 보기</a>}
+        </div>
+      </details>
+    </li>
+  );
+}
+
+function LedgerRow({ entry }: { entry: AdminLedgerEntry }) {
+  return (
+    <li className="admin-record-row">
+      <div><strong>{ledgerTypeLabels[entry.entry_type] ?? entry.entry_type} ({entry.nickname || "미설정"})</strong><small>{formatDateTime(entry.created_at)} · {entry.ref_type ? `${entry.ref_type}${entry.ref_id !== null ? ` #${entry.ref_id}` : ""}` : `원장 #${entry.id}`}</small></div>
+      <div><strong className={entry.clover_delta < 0 ? "is-negative" : ""}>{entry.clover_delta > 0 ? "+" : ""}{formatNumber(entry.clover_delta)}</strong><small>{formatNumber(entry.balance_after)} 잔액</small></div>
+    </li>
   );
 }
 
@@ -174,29 +190,67 @@ export default async function AdminPage() {
   const alerts = (alertsResult.data ?? []) as unknown as AdminOpsAlert[];
 
   return (
-    <main className="min-h-svh bg-background px-4 py-10 text-foreground sm:px-6 lg:px-10">
-      <div className="mx-auto w-full max-w-[1440px]">
-        <header className="mb-10">
-          <p className="text-sm font-extrabold text-primary">해낼게 운영</p>
-          <h1 className="mt-2 text-3xl font-black tracking-[-0.04em]">
+    <main className="admin-dashboard">
+      <div className="admin-dashboard-inner">
+        <header className="admin-dashboard-head">
+          <p>해낼게 운영</p>
+          <h1>
             관리자 운영 대시보드
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+          <p>
             회원과 클로버 원장은 조회만 합니다. 환전 요청은 실제 은행 송금을 마친 뒤
             지급 완료로 표시하거나, 사유를 남기고 반려할 수 있습니다.
           </p>
         </header>
 
-        <div className="space-y-10">
-          <section
+        <div className="admin-dashboard-stack">
+          <section className="admin-dashboard-section" data-testid="admin-cashout-section">
+            <SectionHeader
+              title="환전 요청 큐"
+              description="계좌는 기본 마스킹 · 실제 송금 후 지급 완료 · 반려 시 클로버 잠금 해제(총량은 그대로)"
+              countLabel={`${formatNumber(cashouts.filter((item) => item.status === "REQUESTED").length)}건 대기`}
+            />
+            <CashoutQueue cashouts={cashouts} />
+          </section>
+          <section className="admin-dashboard-section" data-testid="admin-members-section">
+            <SectionHeader
+              title="회원"
+              description="최근 가입순 · 현재 클로버 잔액 포함"
+              countLabel={`최근 ${formatNumber(members.length)}명`}
+            />
+            <ul className="admin-record-list" aria-label="회원 목록">
+              {members.length === 0
+                ? <li className="admin-record-empty">조회된 회원이 없습니다.</li>
+                : members.map((member) => <MemberCard key={member.id} member={member} />)}
+            </ul>
+          </section>
+
+          <section className="admin-dashboard-section" data-testid="admin-ledger-section">
+            <SectionHeader
+              title="클로버 원장"
+              description="적립·환전·환불·웰컴 기록 · 최근순"
+              countLabel={`최근 ${formatNumber(ledger.length)}건`}
+            />
+            <ul className="admin-record-list" aria-label="클로버 원장 목록">
+              {ledger.length === 0
+                ? <li className="admin-record-empty">조회된 원장 기록이 없습니다.</li>
+                : ledger.map((entry) => <LedgerRow key={entry.id} entry={entry} />)}
+            </ul>
+          </section>
+
+          <GoalCoverReviewQueue initialItems={covers} />
+
+          <details
             className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
             data-testid="admin-ops-alerts"
           >
-            <SectionHeader
-              title="운영 경보"
-              description="Storage cleanup 정체와 스케줄 실패를 최근순으로 표시합니다."
-              count={alerts.length}
-            />
+            <summary className="min-h-11 cursor-pointer list-none">
+              <SectionHeader
+                title="운영 경보"
+                description="Storage cleanup 정체와 스케줄 실패를 접어서 표시합니다."
+                countLabel={`${formatNumber(alerts.length)}건`}
+              />
+            </summary>
             {alerts.length === 0 ? (
               <p className="py-6 text-sm text-muted-foreground">현재 수신된 운영 경보가 없습니다.</p>
             ) : (
@@ -215,163 +269,7 @@ export default async function AdminPage() {
                 ))}
               </ul>
             )}
-          </section>
-          <GoalCoverReviewQueue initialItems={covers} />
-          <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
-            <SectionHeader
-              title="회원"
-              description="최근 가입순 · 현재 클로버 잔액 포함"
-              count={members.length}
-            />
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[860px] border-separate border-spacing-0 text-left text-sm">
-                <caption className="sr-only">회원 목록</caption>
-                <thead>
-                  <tr className="text-xs text-muted-foreground">
-                    <th className="border-b px-4 py-3 font-semibold">가입일</th>
-                    <th className="border-b px-4 py-3 font-semibold">닉네임</th>
-                    <th className="border-b px-4 py-3 font-semibold">로그인</th>
-                    <th className="border-b px-4 py-3 font-semibold">본인인증</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">클로버</th>
-                    <th className="border-b px-4 py-3 font-semibold">해낼게</th>
-                    <th className="border-b px-4 py-3 font-semibold">회원 ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.length === 0 ? (
-                    <EmptyRow colSpan={7} />
-                  ) : (
-                    members.map((member) => (
-                      <tr key={member.id} className="hover:bg-muted/40">
-                        <td className="border-b px-4 py-3 whitespace-nowrap">
-                          {formatDateTime(member.created_at)}
-                        </td>
-                        <td className="border-b px-4 py-3 font-semibold">
-                          {member.nickname || "미설정"}
-                        </td>
-                        <td className="border-b px-4 py-3">{member.provider || "—"}</td>
-                        <td className="border-b px-4 py-3">
-                          <span
-                            className={
-                              member.kyc_status === "VERIFIED"
-                                ? "rounded-full bg-accent px-2 py-1 text-xs font-bold text-accent-foreground"
-                                : "rounded-full bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground"
-                            }
-                          >
-                            {member.kyc_status === "VERIFIED" ? "완료" : "미완료"}
-                          </span>
-                        </td>
-                        <td className="border-b px-4 py-3 text-right font-bold text-primary">
-                          {formatNumber(member.clover_count)}
-                        </td>
-                        <td className="border-b px-4 py-3">
-                          {member.goal_slug ? (
-                            <a
-                              href={`/g/${member.goal_slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-semibold text-primary underline"
-                            >
-                              보기
-                            </a>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                        <td
-                          className="border-b px-4 py-3 font-mono text-xs text-muted-foreground"
-                          title={member.id}
-                        >
-                          {shortId(member.id)}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
-            <SectionHeader
-              title="클로버 원장"
-              description="적립·환전·환불·웰컴 기록 · 최근순"
-              count={ledger.length}
-            />
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1080px] border-separate border-spacing-0 text-left text-sm">
-                <caption className="sr-only">클로버 원장 목록</caption>
-                <thead>
-                  <tr className="text-xs text-muted-foreground">
-                    <th className="border-b px-4 py-3 font-semibold">일시</th>
-                    <th className="border-b px-4 py-3 font-semibold">회원</th>
-                    <th className="border-b px-4 py-3 font-semibold">구분</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">변동</th>
-                    <th className="border-b px-4 py-3 text-right font-semibold">잔액</th>
-                    <th className="border-b px-4 py-3 font-semibold">참조</th>
-                    <th className="border-b px-4 py-3 font-semibold">원장 ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ledger.length === 0 ? (
-                    <EmptyRow colSpan={7} />
-                  ) : (
-                    ledger.map((entry) => (
-                      <tr key={entry.id} className="hover:bg-muted/40">
-                        <td className="border-b px-4 py-3 whitespace-nowrap">
-                          {formatDateTime(entry.created_at)}
-                        </td>
-                        <td className="border-b px-4 py-3">
-                          <p className="font-semibold">{entry.nickname || "미설정"}</p>
-                          <p
-                            className="mt-0.5 font-mono text-xs text-muted-foreground"
-                            title={entry.member_id}
-                          >
-                            {shortId(entry.member_id)}
-                          </p>
-                        </td>
-                        <td className="border-b px-4 py-3 whitespace-nowrap">
-                          {ledgerTypeLabels[entry.entry_type] ?? entry.entry_type}
-                        </td>
-                        <td
-                          className={`border-b px-4 py-3 text-right font-bold ${
-                            entry.clover_delta > 0
-                              ? "text-primary"
-                              : entry.clover_delta < 0
-                                ? "text-destructive"
-                                : ""
-                          }`}
-                        >
-                          {entry.clover_delta > 0 ? "+" : ""}
-                          {formatNumber(entry.clover_delta)}
-                        </td>
-                        <td className="border-b px-4 py-3 text-right font-semibold">
-                          {formatNumber(entry.balance_after)}
-                        </td>
-                        <td className="border-b px-4 py-3 font-mono text-xs text-muted-foreground">
-                          {entry.ref_type
-                            ? `${entry.ref_type}${entry.ref_id !== null ? ` #${entry.ref_id}` : ""}`
-                            : "—"}
-                        </td>
-                        <td className="border-b px-4 py-3 font-mono text-xs text-muted-foreground">
-                          #{entry.id}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
-            <SectionHeader
-              title="환전 요청 큐"
-              description="계좌는 기본 마스킹 · 실제 송금 후 지급 완료 · 반려 시 클로버 잠금 해제(총량은 그대로)"
-              count={cashouts.length}
-            />
-            <CashoutQueue cashouts={cashouts} />
-          </section>
+          </details>
         </div>
       </div>
     </main>

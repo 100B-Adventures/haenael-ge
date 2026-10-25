@@ -8,8 +8,12 @@ import { createFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InviteCreated } from "@/lib/social/contracts";
 
 export function FriendInviteCard(
-  { goals }: {
+  { goals, acceptedFriend }: {
     goals: Array<{ id: number; title: string; visibility: string }>;
+    acceptedFriend?: {
+      nickname: string;
+      profileImage: string | null;
+    } | null;
   },
 ) {
   const [invite, setInvite] = useState<InviteCreated | null>(null);
@@ -78,8 +82,8 @@ export function FriendInviteCard(
     <div className="invite-flow" data-testid="friend-invite-card">
       <section className="invite-hero-card">
         <p className="social-eyebrow">함께 응원할 친구 부르기</p>
-        <h1>혼자 응원하지 말고,<br />친구랑 같이 밀어줘요</h1>
-        <p>초대한 친구가 들어오면 서로의 목표가 친구목록에 뜨고, 조용히 서로를 응원하는 사이가 됩니다.</p>
+        <h1>친구를 부르면<br />서로의 목표를 같이 응원해요</h1>
+        <p>초대한 친구가 들어오면 서로의 목표가 친구 목록에 보여요.</p>
         <Image
           className="invite-people-photo"
           src="/images/social-viral/belong.png"
@@ -134,9 +138,20 @@ export function FriendInviteCard(
           </section>
         )}
 
+      {acceptedFriend && (
+        <section className="invite-accepted-panel" data-testid="invite-accepted-panel">
+          <span className="invite-accepted-avatar">
+            {acceptedFriend.profileImage
+              ? <Image src={acceptedFriend.profileImage} alt={`${acceptedFriend.nickname} 프로필`} fill sizes="44px" unoptimized />
+              : <span aria-hidden="true">{Array.from(acceptedFriend.nickname)[0]}</span>}
+          </span>
+          <p><strong>{acceptedFriend.nickname}</strong>님이 초대를 받고 들어왔어요. 이제 친구 목록에서 서로의 목표를 볼 수 있어요.</p>
+        </section>
+      )}
+
       <p className="invite-safe-note">
         <ShieldCheck aria-hidden="true" />
-        연락처를 통째로 읽지 않아요. 내가 직접 고른 친구에게만 초대를 보내요.
+        내가 고른 사람에게만 카카오톡이나 링크로 초대해요.
       </p>
     </div>
   );

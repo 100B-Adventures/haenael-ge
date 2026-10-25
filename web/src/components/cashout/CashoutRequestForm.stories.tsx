@@ -14,7 +14,7 @@ import { CashoutRequestForm } from "./CashoutRequestForm";
  *   대조하는 데 이게 가장 빠른 길이다.
  */
 const meta = {
-  title: "Cashout/CashoutRequestForm",
+  title: "Cashout/Form/CashoutRequestForm",
   component: CashoutRequestForm,
   parameters: { layout: "fullscreen" },
   decorators: [

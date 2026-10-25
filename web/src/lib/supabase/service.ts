@@ -5,7 +5,11 @@ import type { Database } from "./database.types";
 
 export function createServiceRoleClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const isLocalSupabase = Boolean(
+    supabaseUrl && ["127.0.0.1", "localhost"].includes(new URL(supabaseUrl).hostname),
+  );
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    (isLocalSupabase ? process.env.SERVICE_ROLE_KEY : undefined);
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error("admin_service_unavailable");
   }

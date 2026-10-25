@@ -289,6 +289,7 @@ export default async function ReceiverHomePage({
           initialTitle={cleanTitle}
           initialReason={goal.reason}
           initialDueDate={goal.due_date}
+          status={goal.status as "ACTIVE" | "CLOSED" | "DELETED"}
           editable={goal.status === "ACTIVE"}
         />
 

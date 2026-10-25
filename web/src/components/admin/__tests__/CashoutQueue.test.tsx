@@ -57,22 +57,30 @@ describe("CashoutQueue", () => {
     expect(document.body.textContent).not.toContain("ca500000");
   });
 
-  it("계좌는 기본 마스킹하고 명시적 클릭 뒤에만 전체 번호를 표시한다", async () => {
+  it("ADMIN-VISUAL-01 지급 대기 상태는 강조 배경 없이 muted text로 표시한다", () => {
+    render(<CashoutQueue cashouts={[cashout]} />);
+
+    const status = screen.getByText("지급 예정");
+    expect(status).toHaveClass("text-muted-foreground");
+    expect(status).not.toHaveClass("bg-amber-soft", "text-amber-ink");
+  });
+
+  it("전체 계좌는 지급 확인 모달에서만 감사 로그와 함께 표시한다", async () => {
     render(<CashoutQueue cashouts={[cashout]} />);
 
     expect(screen.getAllByText(/••••••9012/).length).toBeGreaterThan(0);
     expect(screen.queryByText("123456789012")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "전체 계좌 보기" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "지급 완료" })[0]);
 
     await waitFor(() =>
       expect(revealCashoutAccount).toHaveBeenCalledWith(cashout.id),
     );
-    expect((await screen.findAllByText(/123456789012/)).length).toBeGreaterThan(0);
-
-    fireEvent.click(screen.getAllByRole("button", { name: "다시 가리기" })[0]);
-    expect(screen.queryByText("123456789012")).not.toBeInTheDocument();
-    expect(screen.getAllByText(/••••••9012/).length).toBeGreaterThan(0);
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toHaveTextContent("123456789012");
+    expect(dialog).toHaveTextContent("친구 응원분");
+    expect(dialog).toHaveTextContent("원천징수");
+    expect(document.body).not.toHaveTextContent("전체 계좌 보기");
   });
 
   it("지급 완료는 실제 이체 확인 체크 전에는 확정할 수 없다", async () => {

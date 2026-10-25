@@ -1,9 +1,16 @@
+export const COVER_PRESET_KEYS = [
+  "c1", "c2", "c3", "c4", "c5", "c6",
+  "study", "run", "health", "career", "money", "writing", "habit", "travel",
+] as const;
+
+export type CoverPresetKey = (typeof COVER_PRESET_KEYS)[number];
+
 export type SocialGoal = {
   goal_id: number;
   slug: string;
   title: string;
   due_date: string;
-  cover_preset_key: string;
+  cover_preset_key: CoverPresetKey;
   cover_public_path: string | null;
   cover_url?: string | null;
   cheer_count: number;
@@ -27,6 +34,7 @@ export type SocialFriend = {
   nickname: string | null;
   profile_image: string | null;
   relationship_direction: RelationshipDirection;
+  recent_message: string | null;
   goals: SocialGoal[];
 };
 
@@ -34,13 +42,17 @@ export type FriendGoalsResponse = { friends: SocialFriend[] };
 
 export type FriendGoalDetail = SocialGoal & {
   reason: string | null;
+  supporter_avatars: Array<{
+    profile_image: string | null;
+    is_anonymous: boolean;
+  }>;
   wordmap: Array<{ word: string; weight: number }>;
 };
 
 export type InvitePreview = {
   inviter_nickname: string | null;
   goal_title: string | null;
-  cover_preset_key: string;
+  cover_preset_key: CoverPresetKey;
 };
 
 export type InviteCreated = {
@@ -57,7 +69,7 @@ export type MySocialGoal = {
   title: string;
   due_date: string;
   status: "ACTIVE" | "CLOSED";
-  cover_preset_key: string;
+  cover_preset_key: CoverPresetKey;
   cheer_count: number;
   supporter_avatars: Array<{
     profile_image: string | null;
@@ -65,6 +77,7 @@ export type MySocialGoal = {
   }>;
   recent_cheer: {
     supporter_name: string | null;
+    profile_image: string | null;
     message: string | null;
     created_at: string;
     is_anonymous: boolean;
@@ -78,15 +91,48 @@ export type BelongingQueueGoal = {
   slug: string;
   title: string;
   due_date: string;
-  cover_preset_key: string;
+  cover_preset_key: CoverPresetKey;
+};
+
+export type ReceivedCheer = {
+  id: number;
+  display_name: string | null;
+  profile_image: string | null;
+  message: string | null;
+  created_at: string;
+  is_anonymous: boolean;
+};
+
+export type SentCheer = {
+  id: number;
+  target_name: string | null;
+  profile_image: string | null;
+  message: string | null;
+  created_at: string;
+};
+
+export type GoalCheerSummary = {
+  total_count: number;
+  items: Array<{
+    supporter_key: string;
+    display_name: string | null;
+    is_anonymous: boolean;
+    profile_image: string | null;
+    message: string | null;
+    cheer_count: number;
+    latest_at: string;
+  }>;
 };
 
 export type MySocialDashboard = {
   profile: {
     nickname: string | null;
+    bio: string | null;
     profile_image: string | null;
   };
   goals: MySocialGoal[];
+  received_cheers: ReceivedCheer[];
+  sent_cheers: SentCheer[];
   friend_count: number;
   achievements: {
     completed_goal_count: number;
@@ -125,7 +171,7 @@ export function asInvitePreview(value: unknown): InvitePreview | null {
   return {
     inviter_nickname: candidate.inviter_nickname as string | null,
     goal_title: candidate.goal_title as string | null,
-    cover_preset_key: candidate.cover_preset_key as string,
+    cover_preset_key: candidate.cover_preset_key as CoverPresetKey,
   };
 }
 
@@ -151,6 +197,8 @@ export function asMySocialDashboard(value: unknown): MySocialDashboard | null {
   if (
     !candidate.profile || !candidate.achievements ||
     !Array.isArray(candidate.goals) ||
+    !Array.isArray(candidate.received_cheers) ||
+    !Array.isArray(candidate.sent_cheers) ||
     !Array.isArray(candidate.belonging_queue) ||
     typeof candidate.friend_count !== "number" ||
     typeof candidate.achievements.completed_goal_count !== "number" ||

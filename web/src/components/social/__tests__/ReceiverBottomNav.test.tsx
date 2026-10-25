@@ -10,7 +10,7 @@ beforeEach(() => {
   pathname = "/friends";
 });
 
-it("CT-NAV-01 홈 친구 초대 관리 4탭과 친구 활성 상태를 렌더한다", () => {
+it("CT-NAV-01 홈 친구 초대 마이 4탭과 친구 활성 상태를 렌더한다", () => {
   render(<ReceiverBottomNav />);
   expect(screen.getAllByRole("link")).toHaveLength(4);
   expect(screen.getByRole("link", { name: /친구/ })).toHaveAttribute(
@@ -19,10 +19,10 @@ it("CT-NAV-01 홈 친구 초대 관리 4탭과 친구 활성 상태를 렌더한
   );
 });
 
-it("CT-NAV-03 관리 탭은 /my로 분리되고 실제 경로에서 활성화된다", () => {
+it("CT-NAV-03 마이 탭은 /my로 분리되고 실제 경로에서 활성화된다", () => {
   pathname = "/my";
   render(<ReceiverBottomNav />);
-  const myLink = screen.getByRole("link", { name: /관리/ });
+  const myLink = screen.getByRole("link", { name: /마이/ });
   expect(myLink).toHaveAttribute("href", "/my");
   expect(myLink).toHaveAttribute("aria-current", "page");
 });
@@ -53,4 +53,11 @@ it("CT-NAV-05 응원 워드맵 전체보기에서도 하단탭을 유지한다",
   pathname = "/wordmap/42";
   render(<ReceiverBottomNav />);
   expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
+});
+
+it("CT-NAV-06 프로토타입 정본에 따라 목표 관리에서도 하단탭을 유지한다", () => {
+  pathname = "/me/goal/42";
+  render(<ReceiverBottomNav />);
+  expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /^홈$/ })).toHaveAttribute("aria-current", "page");
 });

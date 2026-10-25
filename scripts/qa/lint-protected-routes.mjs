@@ -24,16 +24,21 @@ function walk(root, directory = root, prefix = "") {
 walk(receiverRoot);
 walk(adminRoot, adminRoot, `admin${sep}`);
 const actualRoutes = [...new Set(pages)].sort();
-const isProtected = (route) => contract.exact.includes(route) || contract.prefix.some((prefix) => route.startsWith(prefix));
+const isException = (route) => Object.values(contract.exceptions ?? {})
+  .some((pattern) => new RegExp(pattern).test(route));
+const isProtected = (route) => !isException(route) &&
+  (contract.exact.includes(route) || contract.prefix.some((prefix) => route.startsWith(prefix)));
 const isPublic = (route) => contract.scanRoots.some((entry) => entry.endsWith("/") ? route.startsWith(entry) : route === entry);
 const missing = actualRoutes.filter((route) => !isProtected(route) && !isPublic(route));
 const nestedFixtureRoute = routeFromRelativePage(`(zzgroup)${sep}zz-hidden${sep}page.tsx`);
 const nestedFixtureCaught = !isProtected(nestedFixtureRoute) && !isPublic(nestedFixtureRoute);
 const invitePublic = contract.exact.includes("/invite") && !contract.prefix.includes("/invite/");
 const adminScanned = actualRoutes.includes("/admin") && isProtected("/admin") && isProtected("/admin/example");
+const goalAccessException = !isProtected("/me/goal/1") &&
+  isProtected("/me/goal/not-a-number") && isProtected("/me/goal/1/edit");
 console.log(`PROTECTED_ROUTE_FIXTURE nested_route=${nestedFixtureRoute} caught=${nestedFixtureCaught}`);
-console.log(`PROTECTED_ROUTE_LINT actual_routes=${actualRoutes.length} public_entries=${publicRoutes.size} missing=${missing.length} invite_public=${invitePublic} admin_scanned=${adminScanned}`);
-if (missing.length || !invitePublic || !nestedFixtureCaught || !adminScanned) {
+console.log(`PROTECTED_ROUTE_LINT actual_routes=${actualRoutes.length} public_entries=${publicRoutes.size} missing=${missing.length} invite_public=${invitePublic} admin_scanned=${adminScanned} goal_access_exception=${goalAccessException}`);
+if (missing.length || !invitePublic || !nestedFixtureCaught || !adminScanned || !goalAccessException) {
   console.error(`PROTECTED_ROUTE_LINT_FAIL missing=${missing.join(",") || "none"}`);
   process.exit(1);
 }

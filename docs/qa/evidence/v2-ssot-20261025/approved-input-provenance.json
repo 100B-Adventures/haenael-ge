@@ -1,0 +1,36 @@
+{
+  "observed_at": "2026-10-24T23:07:27.744102+00:00",
+  "authority": "D-049: approved prototype v3 remains SSOT; historical pins are preserved, this records actual implementation input provenance, not a new design approval",
+  "entries": [
+    {
+      "path": "DESIGN.md",
+      "original_approved_sha256": "0ddeed8caff763de7b91ed5a0c178bf406c59a6ccefa65dcf5f057929e04c24a",
+      "retrievable_git_revision": "6c66ae6c5e1009ccdfcaf45e398699f465c4c8f9",
+      "current_sha256": "8cfca60ee615782a6ad22ca5b49a8703b708988476c57e9afcfd5a6d8071a6c5",
+      "subsequent_recorded_commits": [
+        "e171841",
+        "07c1255",
+        "bfc151a",
+        "733fb3e"
+      ]
+    },
+    {
+      "path": "docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md",
+      "original_approved_sha256": "e0265938801e2f7ff3eefca12312c6e75c1c269641aa9b0b20394443556eb01c",
+      "retrievable_git_revision": "fdd1a3d925c3fa0e01fba8d8bef6f034dc33f5fd",
+      "current_sha256": "3a628e7993763b81b7c4727dc1c6982d34984724dd15537f694b44f1a3c6d4db",
+      "subsequent_recorded_commits": [
+        "3da6c1e"
+      ]
+    },
+    {
+      "path": "docs/eng-design/erd-social-viral-loop-web-first-v1.2.5.md",
+      "original_approved_sha256": "825688efa769fb7f73bc2ccbebeb9c7d663f4db7d1f4a35ac031567617beecd9",
+      "retrievable_git_revision": "fbd432c94a6a3a0583cc28db2919cc68d3e8c26f",
+      "current_sha256": "12f277238aed5ad2033f23e54132d9ca682894f6dfd14d0d50abda8e82c777f7",
+      "subsequent_recorded_commits": [
+        "3da6c1e"
+      ]
+    }
+  ]
+}

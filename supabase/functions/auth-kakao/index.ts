@@ -152,7 +152,7 @@ Deno.serve(async (req: Request) => {
     const { data: existingMember, error: providerLookupError } =
       await supabaseAdmin
         .from("member")
-        .select("id,phone")
+        .select("id")
         .eq("provider", "kakao")
         .eq("provider_id", providerId)
         .maybeSingle();
@@ -162,32 +162,32 @@ Deno.serve(async (req: Request) => {
     let createdAuthUser = false;
 
     if (existingMember) {
-      // 기존 유저: auth metadata + nickname/profile_image 갱신
+      // 기존 유저가 앱에서 직접 고른 프로필은 카카오 재로그인으로 덮지 않는다.
+      // 저장값이 비어 있을 때만 provider 기본값을 초기값으로 채운다.
       userId = existingMember.id as string;
-
-      await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: {
-          provider: "kakao",
-          provider_id: providerId,
-          nickname,
-          profile_image: profileImage,
-        },
-      });
-
       // 최신 번호는 교체, 명시적 동의 필요/철회 상태는 NULL로 삭제한다.
       // 전화번호 관련 필드 자체가 없는 응답에서만 기존 값을 보존한다.
-      const { error: memberUpdateError } = await supabaseAdmin
-        .from("member")
-        .update({
-          nickname,
-          profile_image: profileImage,
-          ...(shouldUpdatePhone ? { phone } : {}),
-        })
-        .eq("id", userId);
+      const { data: storedProfile, error: memberUpdateError } =
+        await supabaseAdmin.rpc("hydrate_kakao_profile_defaults_service", {
+          p_member_id: userId,
+          p_nickname: nickname,
+          p_profile_image: profileImage,
+          p_phone: phone,
+          p_update_phone: shouldUpdatePhone,
+        });
 
       if (memberUpdateError) {
         throw new Error(`member 갱신 실패: ${memberUpdateError.message}`);
       }
+      const hydrated = (storedProfile ?? {}) as Record<string, unknown>;
+      await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          provider: "kakao",
+          provider_id: providerId,
+          nickname: hydrated.nickname,
+          profile_image: hydrated.profile_image,
+        },
+      });
     } else {
       // 신규 유저: auth user 생성
       const { data: newUserData, error: createError } = await supabaseAdmin.auth

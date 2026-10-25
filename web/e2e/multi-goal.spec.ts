@@ -11,6 +11,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { createBrowserClient } from "@supabase/ssr";
+import { execFileSync } from "node:child_process";
 import { test, expect, type BrowserContext } from "@playwright/test";
 
 // 시크릿 리터럴을 커밋하지 않는다 — 값은 로컬 .env.local/셸 env로만 주입한다.
@@ -27,25 +28,110 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:5
 const SUPABASE_ANON_KEY = requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 const SUPABASE_SERVICE_ROLE_KEY = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
 const APP_ORIGIN = new URL(process.env.E2E_BASE_URL ?? "http://localhost:3000").origin;
+const LOCAL_DB_CONTAINER = process.env.LOCAL_DB_CONTAINER ?? "supabase_db_haenael-ge";
+const E2E_ENVIRONMENT = process.env.E2E_ENVIRONMENT ?? "local";
+const IS_STAGING = E2E_ENVIRONMENT === "staging";
+const STAGING_PROJECT_REF = "ezzklgotgydwxqebfoys";
+const PRODUCTION_WEB_HOSTS = new Set([
+  "haenael-ge.vercel.app",
+  "haenael-ge-100-b.vercel.app",
+  "web-two-theta-bmil2ljwdg.vercel.app",
+  "haenael-ge-git-main-100-b.vercel.app",
+  "haenael-2y3gnz5cy-100-b.vercel.app",
+]);
 
-// 로컬 전용 QA 계정 — 매 실행 고유 이메일(병렬/재실행 충돌 방지).
-const QA_EMAIL = `multi-goal-e2e-${Date.now()}@test.local`;
 const QA_PASSWORD = "multi-goal-e2e-pw-1234!";
 
 type CapturedCookie = { name: string; value: string; options?: { maxAge?: number } };
 
+function assertStagingGuards() {
+  if (!IS_STAGING) return;
+  const projectRef = requiredEnv("SUPABASE_STAGING_PROJECT_REF");
+  const stagingBaseUrl = requiredEnv("STAGING_WEB_BASE_URL");
+  if (projectRef !== STAGING_PROJECT_REF) throw new Error("staging_project_ref_mismatch");
+  if (new URL(SUPABASE_URL).hostname.split(".")[0] !== projectRef) throw new Error("staging_supabase_url_mismatch");
+  if (APP_ORIGIN !== new URL(stagingBaseUrl).origin) throw new Error("staging_web_base_url_mismatch");
+  if (PRODUCTION_WEB_HOSTS.has(new URL(APP_ORIGIN).hostname.toLowerCase())) throw new Error("production_web_base_url_forbidden");
+}
+
+async function assertStagingRuntime() {
+  if (!IS_STAGING) return;
+  assertStagingGuards();
+  const response = await fetch(`${APP_ORIGIN}/api/health`, { redirect: "error" });
+  if (!response.ok) throw new Error(`staging_health_failed:${response.status}`);
+  const health = await response.json() as { supabaseProjectRef?: string };
+  if (health.supabaseProjectRef !== STAGING_PROJECT_REF) throw new Error("staging_runtime_project_ref_mismatch");
+}
+
+async function routeStagingOriginWithoutToolbar(context: BrowserContext) {
+  if (!IS_STAGING) return;
+  await context.route(`${APP_ORIGIN}/**`, async (route) => {
+    await route.continue({
+      headers: {
+        ...route.request().headers(),
+        "x-vercel-skip-toolbar": "1",
+      },
+    });
+  });
+}
+
+async function runFixtureSql(sql: string) {
+  if (!IS_STAGING) {
+    return execFileSync("docker", [
+      "exec", LOCAL_DB_CONTAINER, "psql", "-U", "postgres", "-d", "postgres",
+      "-v", "ON_ERROR_STOP=1", "-q", "-t", "-A", "-c", sql,
+    ], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  }
+  assertStagingGuards();
+  const response = await fetch(`https://api.supabase.com/v1/projects/${STAGING_PROJECT_REF}/database/query`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${requiredEnv("SUPABASE_ACCESS_TOKEN")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query: sql }),
+  });
+  if (!response.ok) throw new Error(`staging_fixture_sql_failed:${response.status}`);
+  const payload: unknown = await response.json();
+  if (!Array.isArray(payload)) throw new Error("staging_fixture_sql_invalid_response");
+  const rows = payload as Array<Record<string, unknown>>;
+  const first = rows[0];
+  return first ? String(Object.values(first)[0] ?? "") : "";
+}
+
+async function deleteFixtureRows(memberId: string) {
+  if (!/^[0-9a-f-]{36}$/i.test(memberId)) throw new Error("invalid_fixture_member_id");
+  return runFixtureSql(`
+    DELETE FROM public.cheer WHERE goal_id IN (SELECT id FROM public.goal WHERE member_id='${memberId}'::uuid);
+    DELETE FROM public.goal WHERE member_id='${memberId}'::uuid;
+    DELETE FROM public.member WHERE id='${memberId}'::uuid;
+    SELECT
+      (SELECT count(*) FROM public.member WHERE id='${memberId}'::uuid) +
+      (SELECT count(*) FROM public.goal WHERE member_id='${memberId}'::uuid) AS remaining;
+  `);
+}
+
 test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () => {
   test.skip(
-    !process.env.RUN_LOCAL_SUPABASE_E2E,
-    "RUN_LOCAL_SUPABASE_E2E 미설정 — 로컬 Supabase + dev 서버 가동 상태에서 수동 실행",
+    IS_STAGING ? process.env.RUN_STAGING_SUPABASE_E2E !== "1" : !process.env.RUN_LOCAL_SUPABASE_E2E,
+    "RUN_LOCAL_SUPABASE_E2E 또는 staging 실행 플래그가 필요",
   );
 
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  let qaEmail: string;
   let userId: string;
 
-  test.beforeAll(async () => {
+  test.beforeAll(async ({ request }) => {
+    test.setTimeout(90_000);
+    await assertStagingRuntime();
+    const response = await request.get("/onboarding");
+    expect(response.ok()).toBeTruthy();
+  });
+
+  test.beforeEach(async ({ browserName: _browserName }, testInfo) => {
+    qaEmail = `multi-goal-e2e-${Date.now()}-${testInfo.retry}-${testInfo.workerIndex}@test.local`;
     const { data, error } = await admin.auth.admin.createUser({
-      email: QA_EMAIL,
+      email: qaEmail,
       password: QA_PASSWORD,
       email_confirm: true,
     });
@@ -62,11 +148,26 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
     }
   });
 
-  test.afterAll(async () => {
+  test.afterEach(async () => {
     if (!userId) return;
-    await admin.from("goal").delete().eq("member_id", userId);
-    await admin.from("member").delete().eq("id", userId);
-    await admin.auth.admin.deleteUser(userId);
+    const cleanupErrors: string[] = [];
+    try {
+      // service_role 제품 권한을 넓히지 않고, 실행 환경별 DB 관리 채널에서 이 userId fixture만 지운다.
+      const remainingRows = await deleteFixtureRows(userId);
+      if (remainingRows !== "0") cleanupErrors.push(`rows-remain:${remainingRows}`);
+    } catch (error) {
+      cleanupErrors.push(`rows:${error instanceof Error ? error.message : String(error)}`);
+    }
+    const { error: authError } = await admin.auth.admin.deleteUser(userId);
+    if (authError) cleanupErrors.push(`auth:${authError.message}`);
+    if (!authError) {
+      const remainingAuth = await runFixtureSql(`SELECT count(*) AS remaining FROM auth.users WHERE id='${userId}'::uuid;`);
+      if (remainingAuth !== "0") cleanupErrors.push(`auth-remain:${remainingAuth}`);
+    }
+    userId = "";
+    if (cleanupErrors.length) {
+      throw new Error(`QA fixture 정리 실패: ${cleanupErrors.join(" | ")}`);
+    }
   });
 
   test("목표 2개를 만들면 /me에 둘 다 표시된다(기존 단일 목표 화면 무회귀 포함)", async ({ browser }) => {
@@ -86,12 +187,15 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
     });
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: QA_EMAIL,
+      email: qaEmail,
       password: QA_PASSWORD,
     });
     if (signInError) throw new Error(`QA 로그인 실패: ${signInError.message}`);
 
-    const context: BrowserContext = await browser.newContext({ baseURL: APP_ORIGIN });
+    const context: BrowserContext = await browser.newContext({
+      baseURL: APP_ORIGIN,
+    });
+    await routeStagingOriginWithoutToolbar(context);
     const nowSeconds = Math.floor(Date.now() / 1000);
     await context.addCookies(
       [...cookieJar.values()]
@@ -151,16 +255,22 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
       },
       auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: true },
     });
-    await supabase.auth.signInWithPassword({ email: QA_EMAIL, password: QA_PASSWORD });
+    await supabase.auth.signInWithPassword({ email: qaEmail, password: QA_PASSWORD });
 
-    // 이전 테스트에서 이미 2개를 만들었으므로 3번째 생성 RPC를 직접 호출해 상한을 채운다.
-    await supabase.rpc("create_goal", {
-      p_title: "세번째",
-      p_reason: "",
-      p_due_date: "2030-03-01",
+    // 이 테스트가 자기 fixture를 전부 만든다. 다른 테스트의 성공 여부나 실행 순서에 의존하지 않는다.
+    for (const [index, title] of ["첫번째", "두번째", "세번째"].entries()) {
+      const { error } = await supabase.rpc("create_goal", {
+        p_title: title,
+        p_reason: "",
+        p_due_date: `2030-0${index + 1}-01`,
+      });
+      if (error) throw new Error(`상한 fixture 생성 실패(${title}): ${error.message}`);
+    }
+
+    const context: BrowserContext = await browser.newContext({
+      baseURL: APP_ORIGIN,
     });
-
-    const context: BrowserContext = await browser.newContext({ baseURL: APP_ORIGIN });
+    await routeStagingOriginWithoutToolbar(context);
     const nowSeconds = Math.floor(Date.now() / 1000);
     await context.addCookies(
       [...cookieJar.values()]

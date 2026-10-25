@@ -24,9 +24,11 @@ const r18Trigger = `block_storage_cleanup_event_${suffix}`;
 const r18Table = `qa_storage_cleanup_event_${suffix}`;
 const r18Probe = `qa_storage_cleanup_monitor_${suffix}`;
 const r18Job = `r18-storage-cleanup-${suffix}`;
+const readinessTable = `qa_storage_cleanup_ready_${suffix}`;
 let r18JobId = null;
 try {
   sql(`
+    CREATE UNLOGGED TABLE public.${readinessTable}(backend_pid integer PRIMARY KEY);
     INSERT INTO auth.users(id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,confirmation_token,recovery_token,email_change_token_new,raw_app_meta_data,raw_user_meta_data,is_super_admin,is_anonymous)
     VALUES('${owner}','00000000-0000-0000-0000-000000000000','authenticated','authenticated','${slug}@test.local','',now(),now(),'','','','{}','{}',false,false);
     INSERT INTO public.member(id,nickname) VALUES('${owner}','Concurrency Owner');
@@ -34,7 +36,27 @@ try {
     INSERT INTO public.storage_cleanup_queue(goal_id,bucket_id,object_path,reason)
     SELECT id,'goal-cover-quarantine','${slug}/'||n||'.webp','ABANDONED_UPLOAD' FROM public.goal, generate_series(1,4) n WHERE slug='${slug}';
   `);
-  const statement = "BEGIN; SELECT 'START|'||pg_backend_pid()||'|'||extract(epoch FROM clock_timestamp()); SELECT 'CLAIM|'||id FROM public.claim_storage_cleanup_batch(2, interval '15 minutes'); SELECT pg_sleep(2); SELECT 'END|'||pg_backend_pid()||'|'||extract(epoch FROM clock_timestamp()); COMMIT;";
+  const statement = `
+    INSERT INTO public.${readinessTable}(backend_pid) VALUES(pg_backend_pid());
+    DO $$
+    DECLARE deadline timestamptz := clock_timestamp() + interval '10 seconds';
+    BEGIN
+      LOOP
+        EXIT WHEN (SELECT count(*) FROM public.${readinessTable}) = 2;
+        IF clock_timestamp() >= deadline THEN
+          RAISE EXCEPTION 'parallel_readiness_timeout';
+        END IF;
+        PERFORM pg_sleep(0.05);
+      END LOOP;
+    END;
+    $$;
+    BEGIN;
+    SELECT 'START|'||pg_backend_pid()||'|'||extract(epoch FROM clock_timestamp());
+    SELECT 'CLAIM|'||id FROM public.claim_storage_cleanup_batch(2, interval '15 minutes');
+    SELECT pg_sleep(2);
+    SELECT 'END|'||pg_backend_pid()||'|'||extract(epoch FROM clock_timestamp());
+    COMMIT;
+  `;
   const [left, right] = await Promise.all([runSession(statement), runSession(statement)]);
   const ids = (output) => [...output.matchAll(/CLAIM\|(\d+)/g)].map((match) => match[1]);
   const leftIds = ids(left);
@@ -110,6 +132,6 @@ try {
 } finally {
   try {
     if (r18JobId !== null) sql(`SELECT cron.unschedule(${r18JobId});`);
-    sql(`DROP TABLE IF EXISTS public.${r18Table} CASCADE; DROP FUNCTION IF EXISTS public.${r18Probe}(); DROP FUNCTION IF EXISTS public.${r18Function}(); DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.goal WHERE slug='${slug}'; DELETE FROM public.member WHERE id='${owner}'; DELETE FROM auth.users WHERE id='${owner}';`);
+    sql(`DROP TABLE IF EXISTS public.${readinessTable}; DROP TABLE IF EXISTS public.${r18Table} CASCADE; DROP FUNCTION IF EXISTS public.${r18Probe}(); DROP FUNCTION IF EXISTS public.${r18Function}(); DELETE FROM public.storage_cleanup_queue WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${slug}'); DELETE FROM public.goal WHERE slug='${slug}'; DELETE FROM public.member WHERE id='${owner}'; DELETE FROM auth.users WHERE id='${owner}';`);
   } catch {}
 }

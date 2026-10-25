@@ -23,6 +23,7 @@ const detail: FriendGoalDetail = {
   cover_preset_key: "c1",
   cover_public_path: null,
   cheer_count: 2,
+  supporter_avatars: [],
   wordmap: [],
 };
 

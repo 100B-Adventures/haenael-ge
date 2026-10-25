@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CheerSummaryBar } from "./CheerSummaryBar";
 
 const meta = {
-  title: "Social/V2Revision/CheerSummaryBar",
+  title: "Social/UI/CheerSummaryBar",
   component: CheerSummaryBar,
   parameters: { layout: "centered" },
 } satisfies Meta<typeof CheerSummaryBar>;
@@ -20,6 +20,7 @@ export const Normal: Story = {
       ],
       recent_cheer: {
         supporter_name: "도경",
+        profile_image: null,
         message: "이번 주도 꾸준히 해낼 수 있어요.",
         created_at: "2026-10-20T00:00:00Z",
         is_anonymous: false,

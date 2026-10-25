@@ -1,11 +1,20 @@
 // Wordmap.test.tsx — Wordmap 단위 테스트
 
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { Wordmap } from "../Wordmap";
+import { cloudMotionEnvelope } from "../WordmapCloudLayout";
 import { extractWordmapKeywords } from "@/lib/wordmap/keywords";
 
 describe("Wordmap", () => {
+  it("WM-LAYOUT-03 긴 단어는 부유 이동과 회전 전체 범위를 충돌 여백에 포함한다", () => {
+    const envelope = cloudMotionEnvelope(164, 24);
+
+    expect(envelope.x).toBeGreaterThan(3.5);
+    expect(envelope.y).toBeGreaterThan(5);
+    expect(envelope.y * 2).toBeGreaterThan(8.5);
+  });
+
   it("words=[]이면 empty 상태 렌더", () => {
     render(<Wordmap words={[]} />);
     expect(screen.getByTestId("wordmap-empty")).toBeInTheDocument();
@@ -26,6 +35,17 @@ describe("Wordmap", () => {
     expect(screen.getByTestId("wordmap")).toBeInTheDocument();
     expect(screen.getByText("화이팅")).toBeInTheDocument();
     expect(screen.getByText("멋지다")).toBeInTheDocument();
+  });
+
+  it("WM-GOAL-01 실제 목표 제목을 워드맵 안에 표시하고 D-030-F suffix를 적용한다", () => {
+    render(<Wordmap words={[{ word: "화이팅", word_count: 2 }]} goalTitle="토익 900" />);
+    expect(screen.getByTestId("wordmap-goal-title")).toHaveTextContent("🍀 토익 900 해낼게");
+  });
+
+  it("WM-GOAL-02 게로 끝난 실제 제목은 해낼게 suffix를 중복하지 않는다", () => {
+    render(<Wordmap words={[{ word: "화이팅", word_count: 2 }]} goalTitle="2급 자격증 따낼게" />);
+    expect(screen.getByTestId("wordmap-goal-title")).toHaveTextContent("🍀 2급 자격증 따낼게");
+    expect(screen.getByTestId("wordmap-goal-title")).not.toHaveTextContent("따낼게 해낼게");
   });
 
   it("WM-01 고정 좌표·회전 없이 추출한 전체 키워드를 흐름 배치한다", () => {
@@ -126,6 +146,72 @@ describe("Wordmap", () => {
     );
     expect(screen.getByText("동률하나")).toHaveClass("wordmap-tier-s2");
     expect(screen.getByText("동률둘")).toHaveClass("wordmap-tier-s2");
+  });
+
+  it("WM-LAYOUT-02 같은 목표의 단어·빈도가 바뀌면 좌표를 다시 계산한다", async () => {
+    const originalClientWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "clientWidth",
+    );
+    const originalOffsetWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "offsetWidth",
+    );
+    const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "offsetHeight",
+    );
+    Object.defineProperties(HTMLElement.prototype, {
+      clientWidth: {
+        configurable: true,
+        get() {
+          return this.hasAttribute("data-wordmap-layout") ? 320 : 0;
+        },
+      },
+      offsetWidth: {
+        configurable: true,
+        get() {
+          return Math.max((this.textContent?.length ?? 1) * 10, 20);
+        },
+      },
+      offsetHeight: { configurable: true, get: () => 24 },
+    });
+
+    try {
+      const { rerender } = render(
+        <Wordmap
+          goalTitle="토익 900"
+          words={[{ word: "화이팅", word_count: 2 }]}
+        />,
+      );
+      await waitFor(() => expect(screen.getByTestId("wordmap"))
+        .toHaveAttribute("data-layout-ready", "true"));
+
+      rerender(
+        <Wordmap
+          goalTitle="토익 900"
+          words={[
+            { word: "화이팅", word_count: 8 },
+            { word: "끝까지", word_count: 3 },
+          ]}
+        />,
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("wordmap"))
+          .toHaveAttribute("data-layout-ready", "true");
+        expect(screen.getByText("끝까지").style.left).not.toBe("");
+        expect(screen.getByText("끝까지").style.top).not.toBe("");
+      });
+    } finally {
+      for (const [key, descriptor] of [
+        ["clientWidth", originalClientWidth],
+        ["offsetWidth", originalOffsetWidth],
+        ["offsetHeight", originalOffsetHeight],
+      ] as const) {
+        if (descriptor) Object.defineProperty(HTMLElement.prototype, key, descriptor);
+        else delete (HTMLElement.prototype as unknown as Record<string, unknown>)[key];
+      }
+    }
   });
 
   it("WM-03 빈도 내림차순·동률 입력순으로 전체 메시지를 표시한다", () => {

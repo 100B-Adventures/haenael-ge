@@ -7,9 +7,9 @@ project: haenael-ge
 line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
-controller: claude
-current_stage: build   # 2026-10-20 15:4x eng-design 승격(회장 지시). 종전 주석: 2026-10-19 04:1x design 승격(조건 충족, 검사 6종 통과). 2026-10-14 05:1x ⟲ REOPEN design. 회장이 운영에서 시안 불일치·기획 오류·기능 장애를 확인. 사유 = D-024 와 아래 승인 로그.
-approved_stages: [plan, design]
+controller: codex
+current_stage: qa
+approved_stages: [plan, design, eng-design, build]
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.
@@ -17,9 +17,9 @@ stage_timestamps:
   #   핀을 v2-opus48 에서 v3-opus5 로 옮기고 sha256 을 재계산했다(낡은 핀은 아래 superseded 로 남긴다).
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
-  build:      { entered: 2026-10-13 10:20, completed: 2026-10-13 17:12 }
-  qa:         { entered: 2026-10-13 17:12, completed: 2026-10-14 00:05 }
-  ship:       { entered: 2026-10-14 00:05, completed: 2026-10-14 00:56 }
+  build:      { entered: 2026-10-20 15:40, completed: 2026-10-25 13:23 }
+  qa:         { entered: 2026-10-25 13:23 }
+  ship:       { status: not-entered }
 release_train: 2.0
 distribution:
   selected:
@@ -33,7 +33,7 @@ approved_artifacts:
   design:
     # v2 소셜 바이럴 루프 라운드 (2026-09-16 ~ 2026-10-12). core 라인에서 이관.
     - { path: docs/design/prototypes/social-viral-loop-v3-opus5.html, version: 3.0.0, status: approved, label: "소셜 바이럴 루프 v3 프로토타입(6차 개정 + D-041 확정 반영 PATCH)", sha256: afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a }
-    - { path: DESIGN.md, version: unversioned, status: approved, label: "디자인 시스템(수직 간격 토큰·접기 규칙·상호작용 출고 검사 신설)", sha256: 0ddeed8caff763de7b91ed5a0c178bf406c59a6ccefa65dcf5f057929e04c24a }
+    - { path: DESIGN.md, version: unversioned, status: approved, label: "디자인 시스템(수직 간격 토큰·접기 규칙·상호작용 출고 검사 신설)", sha256: 7a4eea086b63c4d61a75ee850843a19e8170fafe91eefd21b21ffe92772db4d5 }
     - { path: docs/design/standard-ux-writing.md, version: unversioned, status: approved, label: "UX 라이팅 말투 규칙", sha256: 06e4ba1007bbb37c552d6c56a4fdfe4abbe86bcc06c9776dc4579b009fe26ece }
     - { path: docs/design/prototypes/social-viral-loop-v2-opus48.html, version: 2.0.0, status: superseded, label: "소셜 바이럴 루프 v2 프로토타입(v3 로 대체됨 2026-10-19)", sha256: cf4a78fe7041c00f8f4336fcbbb3107f2230f404b1f1116840dcaf469bdb9626 }
     - { path: docs/design/prototypes/core-viral-motion-shotgun-v1-opus48.html, version: 1.0.0, status: approved, label: "바이럴 모션 샷건", sha256: a5d87276065b4bd4968ac201f11b259f437aa1dc9b43f4886b5ddf78051122b2 }
@@ -44,8 +44,8 @@ approved_artifacts:
   eng-design:
     # V2 웹 우선 슬라이스 설계 v1.2.5 (2026-10-20 승격). 6차 개정 요구 R1~R10 + 거버넌스 3건 반영.
     # 회장 지시로 승격했다. Codex 재검수 8차까지 돌았고 설계 실체는 v1.2.4 에서 섰다. 미해소 지적은 build 선행 과제로 이관(아래 승인 로그).
-    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "V2 웹 우선 소셜 루프 FDD(요구 추적성·비회원 계약·정리 경로)", sha256: e0265938801e2f7ff3eefca12312c6e75c1c269641aa9b0b20394443556eb01c }
-    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "데이터 구조와 정리 계약(큐 점유·lease·소유권 토큰·함수 4종)", sha256: 825688efa769fb7f73bc2ccbebeb9c7d663f4db7d1f4a35ac031567617beecd9 }
+    - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "V2 웹 우선 소셜 루프 FDD(요구 추적성·비회원 계약·정리 경로)", sha256: 3a628e7993763b81b7c4727dc1c6982d34984724dd15537f694b44f1a3c6d4db }
+    - { path: docs/eng-design/erd-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "데이터 구조와 정리 계약(큐 점유·lease·소유권 토큰·함수 4종)", sha256: 12f277238aed5ad2033f23e54132d9ca682894f6dfd14d0d50abda8e82c777f7 }
     - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "API 계약(비회원 3필드·오류 형태·엔드포인트별 허용 목록)", sha256: c3799cc792b5881cf8d8c9e14570c17e5687144acb17a75aadb41f6ced700662 }
     - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "아키텍처(공개범위 경계·인증 흐름·정리 파이프라인)", sha256: 24eac9d60ebb3e4cc482d42bba9c963b8ee2a949c0f9e2ece57a32898b60d890 }
     - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "테스트 전략", sha256: 1a5badbf8be03aae6c9ee498f1fa15a6a9e3a3788b1e9863f31408d37b80e5e2 }
@@ -58,24 +58,32 @@ approved_artifacts:
     - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 시스템 구성도(다이어그램 7종)", sha256: b2a7f81a68583886cd39e81b4462f976b020cd0fbb8297e772ca8675cc6bff71 }
     - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 테스트 계획", sha256: 78a945e1061448af7a56356485d2c39f301f06bcb370cd8c60ea39c8f24bc7cd }
   build:
-    - { path: docs/build-log.md, version: unversioned, status: approved, label: "V2 build 구현·검증 로그(1차+2차 슬라이스)", sha256: e3612a5a434123d1d39cf1a14fb1b8951f0843241148e046de3eb7fbb19af100 }
-    - { path: supabase/migrations/20261013050000_social_viral_loop_web_first.sql, version: unversioned, status: approved, label: "V2 소셜 스키마(운영 미적용)" }
-    - { path: supabase/migrations/20261013060000_social_my_page_achievements.sql, version: unversioned, status: approved, label: "마이페이지·업적 집계(운영 미적용)" }
+    - { path: docs/build-log.md, version: unversioned, status: approved, label: "D-049 구현·검증 로그", sha256: 54ed4af2e27aeae26c7d039b18e75654dd984647b4bf2a91ffa68baab84f2620 }
+    - { path: docs/구현현황.md, version: unversioned, status: approved, label: "V2 구현 현황과 미검증 범위", sha256: 1ce212e96bb63a0e90e3b5c4c4e5657cc7129f683e998b6f9feee8ad40795c8b }
+    - { path: docs/design/component-inventory-v1.0.0.md, version: unversioned, status: approved, label: "Storybook 컴포넌트 인벤토리", sha256: a1cd788c8a63056acfab1db6c202533772fad0f77772677e6de067df6d139384 }
+    - { path: docs/eng-design/v2-prototype-server-contract-v1.0.0-gpt-codex-20261025-0653.md, version: unversioned, status: approved, label: "프로토타입 구현 서버 계약 보완", sha256: b2505912b09c4b6b4e396fdbc5d87d34f010815c202082e42322c09d0949fe6e }
+    - { path: supabase/migrations/20261025010000_v2_prototype_contract_completion.sql, version: unversioned, status: approved, label: "신규 migration, staging 적용·운영 미적용", sha256: 131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999 }
   qa:
-    - { path: docs/qa/v2-production-final-readonly-qa-v1.0.0-gpt-codex-20261013-2351.md, version: 1.0.0, status: approved, label: "운영 배포 후 read-only 최종 QA(증거 23건)" }
-    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: approved, label: "v2 기능 해피·엣지 추적(배포본 기준 전수)" }
-    - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: approved, label: "디자인 정합 매트릭스(픽셀 대조는 부분, 차기 라운드)" }
-    - { path: docs/qa/v2-regression-harness-fix-v1.0.0-gpt-codex-20261013-1943.md, version: 1.0.0, status: approved, label: "누적 전체 회귀 63/63" }
+    - { path: docs/qa/v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.md, version: unversioned, status: changes-requested, label: "현재 staging QA, OAuth·PG 미검증으로 승인 보류", sha256: 8cd1ad61c38198cf84012126c0c3b492c2eb438491d2f12e4e70256e187184a0 }
+    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: changes-requested, label: "현재 기능 QA 추적", sha256: c5530ad7b1bc075cc78a1c2f163acb57575a244b945de7a1348438dacfb9dea4 }
+    - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: changes-requested, label: "프로토타입·staging 대조", sha256: 168de1703fce20266254dcd3fbc98294a2c577eee412051c9a496e791e12cc70 }
+    - { path: docs/qa/cross-browser-matrix.md, version: unversioned, status: changes-requested, label: "Chromium·모바일 검증, 선택 브라우저 미검증", sha256: 6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55 }
+    - { path: docs/qa/security-report.md, version: unversioned, status: changes-requested, label: "보안 검증과 미검증 범위", sha256: 7edd2b218baf1f1cc87f1bbc6c3bb6e60f11a9a5ac05a3a08679c99037d0d9f3 }
+    - { path: docs/qa/perf-report.md, version: unversioned, status: changes-requested, label: "성능 측정 범위, Web Vitals·부하 미검증", sha256: bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092 }
   ship:
     - { path: RELEASE.md, version: 2.0.0, status: approved, label: "해낼게 2.0.0 릴리스 매니페스트" }
     - { path: CHANGELOG.md, version: 2.0.0, status: approved, label: "2.0.0 변경 기록" }
 stages:
   plan:       { status: approved, artifacts_ok: true }
-  design:     { status: changes-requested, artifacts_ok: false }
-  eng-design: { status: todo, artifacts_ok: false }
-  build:      { status: todo, artifacts_ok: false }
-  qa:         { status: changes-requested, artifacts_ok: false }
+  design:     { status: approved, artifacts_ok: true }
+  eng-design: { status: approved, artifacts_ok: true }
+  build:      { status: approved, artifacts_ok: true }
+  qa:         { status: in-progress, artifacts_ok: false }
   ship:       { status: todo, artifacts_ok: false }
+critic_cycles:
+  build:
+    - { cycle: 1, critic: code-reviewer, major_findings: 0, resolved: true, chairman_qs: "asked=4 answered=4, D-049로 세 구현 선택과 무료 staging 조건 확정", evidence: docs/build-log.md }
+external_integration_pending: [kakao-oauth, toss-sandbox]
 override: false
 override_reason: ""
 override_expires: ""
@@ -95,7 +103,7 @@ override_expires: ""
 | 공개범위 3단계(공개·친구공개·비공개) | 부스트 클로버 |
 | 초대 링크 생성·미리보기·수락 | 자동 이미지 모더레이션 |
 | 친구 목록·친구 목표 상세·관계 해제 | 친구 추천·연락처 |
-| 하단탭 4개(홈·친구·초대·마이) | 마이페이지 전체 기능 |
+| 하단탭 4개와 프로토타입 마이페이지(소개·사진·탈퇴 문의) | 실제 계정 삭제·신규 정책 |
 | 미니앱 RPC 이름 5종 호환 유지 | 앱인토스 출시·심사 |
 
 ## 불변식 (이 라인이 건드리지 않는 것)
@@ -124,18 +132,38 @@ override_expires: ""
 - [x] 시스템 구성도 (531행, 다이어그램 7종)
 - [x] 테스트 계획 (291행)
 
-### build ⏳ (in-progress)
-- [ ] additive migration (친구·초대·커버·공개범위 테이블)
-- [ ] RPC·엣지 함수 (`create_friend_invite`·`friend_goal_detail`·`my_friend_goals`·`set_goal_cover_preset`·`update_member_preferences` 이름 유지)
-- [ ] pgTAP 통과
-- [ ] 웹 화면 (`/me/goal/[id]`·`/friends`·`/friends/[friendId]`·`/invite`·`/invite/[token]`·`/admin` 커버 검수)
-- [ ] 하단탭 4개
-- [ ] 환전 회귀 테스트 그대로 통과
+### build ✅
+- [x] 무료 Supabase staging에 migration54개와 Edge Functions16개 배포, 신규 서버 계약36/36 확인
+- [x] 프로토타입9화면 구현과 대조, 시안 원본 SHA 불변
+- [x] Vitest78파일439건, pgTAP22파일412건, 필수 서버 계약5명령 통과
+- [x] 배포 URL 기능 고유17개 통과(분할 실행 합집합), root 별도 실제 쓰기·DB 관찰
+- [x] Storybook build/typecheck 통과,21 stories·9 titles, 직접 coverage7/42→8/46
+- [x] 독립 코드리뷰와 교차모델 서버 보안리뷰 최종 지적0, 삭제 검사0
+- [ ] 실제 Kakao OAuth·Toss sandbox 왕복은 미검증. 코드 구현과 분리해 QA에 이관
 
-### qa ⬜
+### qa ⏳
+- OAuth·PG 실제 왕복 미검증으로 전체 QA 승인 불가. 현재 산출물은 changes-requested 핀이다.
+- 선택 Firefox/WebKit·Web Vitals·부하 및 기존 관리자 실제 지급 브라우저 경로는 미검증 범위로 문서에 명시.
 ### ship ⬜
+- 운영 배포·운영 DB 변경·실결제 미실행. 2026-10-14 릴리스 기록은 과거 이력이며 이번 승인 근거가 아니다.
 
 ## 승인 로그 (append-only · 최신순)
+
+### 2026-10-25 13:23 KST · build 재검증 승인, qa 진입. QA·ship 미승인
+
+- 승인자: Codex controller. 회장의 개발·QA GOAL 진행 지시와 D-049 구현 정본 지시에 따른 가역 단계 검수다. 앞서 설명 없이 올린 구현 선택3건과 무료 staging 조건1건은 D-049로 확정됐으며 새 사용자 결정을 만들지 않는다.
+- 직접 확인: 단위439, DB412, staging E2E 고유17(분할 합집합), 최신 영향9, 서버 계약5명령, 자산36/36·Edge16, Storybook21stories/9titles, component deletion0. 코드리뷰 gpt-5.6-sol과 고위험 서버 gpt-6.1-sol 최종 지적0. verify-agent-quality 각 역할 PASS. 실제 배포 runtime128파일 SHA와 작업트리 일치.
+- build 입력 DESIGN/FDD/ERD의 기존 drift를 provenance와 커밋 이력에 대조한 후 현재 SHA로 정합시켰다. 최초 승인값은 approved-input-provenance.json에 보존하고 이번 대조는 build-input-pin-reconciliation-20261025.json에 기록했다. 정본 prototype SHA는 불변이다. 과거 QA 핀은 이번 판의 승인으로 사용하지 않고 현재 QA6문서를 미승인 상태로 핀했다.
+- 외부 통합: Kakao OAuth와 Toss PG sandbox 실제 왕복 미검증. 로그인 화면 준비 외에 현재 사용자 행동은 없다. 전체 QA 승인과 운영 배포는 금지 유지. 선택 브라우저·부하 및 기존 관리자 지급 브라우저 미검증도 숨기지 않는다.
+- 배포: dpl_6ngntmdYQpZHbo83PvuQyhbtiYvu, preview source manifest-v8. stage alias haenael-ge-v2-staging-100-b.vercel.app. operating release_targets와 ship 핀은 역사 기록이며 이번 배포가 아니다.
+
+
+### 2026-10-25 07:42 KST · 기존 단계 승인 이력과 frontmatter 불일치 정정, 신규 승인 아님
+
+- 2026-10-19 design 승격·2026-10-20 eng-design 승격은 이 파일 본문과 커밋 fbd432c에 기록돼 있으나 approved_stages/stages 상태가 과거 REOPEN 값에 머물렀다. 회장 최신 D-049 프로토타입 SSOT 지시와 기존 승격 기록에 맞춰 design/eng-design approved, build in-progress로 일치시켰다. build/qa 신규 승인을 만들지 않았다.
+- FDD/ERD v1.2.5 SHA drift는 3da6c1e의 build carryover 문서 업데이트에서 발생했다. 최초 승인 SHA를 새 SHA로 몰래 교체하지 않는다. 원본 승인핀 보존, 실제 구현 보완은 docs/eng-design/v2-prototype-server-contract-v1.0.0-gpt-codex-20261025-0653.md와 신규 migration으로 추적한다. 다음 build 승격 검수 때 전체 artifact provenance를 확인한다.
+- QA 사전검수 워커가 current_stage를 qa로 바꾼 것은 승인 전 상태변경이라 즉시 build로 원복했다. STATE writer는 controller이며 QA 작업 착수 자체는 단계 승인 근거가 아니다.
+
 
 ### 2026-10-20 20:18 KST · build 승격 **거부**. 교차 코드리뷰 BLOCK 과 dev 배포 증거 부재
 

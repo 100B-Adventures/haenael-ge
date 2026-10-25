@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { acceptFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InvitePreview } from "@/lib/social/contracts";
-import { GoalCover } from "./GoalCover";
 
 const ERROR_COPY: Record<string, string> = {
   invite_expired: "이 초대는 더 이상 사용할 수 없어요.",
@@ -53,11 +52,9 @@ export function InviteAcceptCard(
       className="invite-accept-card"
       data-testid="invite-accept-card"
     >
-      <GoalCover
-        presetKey={preview.cover_preset_key}
-        title={preview.goal_title ?? "친구 초대"}
-        size="banner"
-      />
+      <div className="invite-accept-cover" data-testid="invite-accept-cover" aria-hidden="true">
+        <span>🍀</span>
+      </div>
       <div className="invite-accept-person" aria-hidden="true">
         {Array.from(preview.inviter_nickname ?? "친구")[0]}
       </div>
@@ -65,7 +62,7 @@ export function InviteAcceptCard(
       <h1>{preview.inviter_nickname ?? "친구"}님이 함께 해내자고 초대했어요</h1>
       {preview.goal_title && (
         <p className="social-description">
-          “{preview.goal_title}” 목표를 보고 서로 조용히 응원할 수 있어요.
+          {preview.inviter_nickname ?? "친구"}님의 “{preview.goal_title}” 목표를 보고 서로 응원할 수 있어요.
         </p>
       )}
       {isAuthenticated

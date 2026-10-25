@@ -7,6 +7,7 @@ import {
   ReceiverPageShell,
 } from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { loadLatestActiveAcceptedFriend } from "./accepted-friend";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ export default async function InvitePage() {
     "DELETED",
   ).is("deleted_at", null).order("created_at", { ascending: false });
   if (error) throw new Error("초대할 목표를 불러오지 못했습니다.");
+
+  const acceptedFriend = await loadLatestActiveAcceptedFriend(user.id);
   return (
     <ReceiverPageShell testId="invite-page" bottomSafe>
       <header className="social-detail-head">
@@ -28,7 +31,7 @@ export default async function InvitePage() {
         <ReceiverBrandMark />
         <span aria-hidden="true" />
       </header>
-      <FriendInviteCard goals={data ?? []} />
+      <FriendInviteCard goals={data ?? []} acceptedFriend={acceptedFriend} />
     </ReceiverPageShell>
   );
 }

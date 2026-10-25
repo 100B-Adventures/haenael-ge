@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FriendGoalList } from "./FriendGoalList";
 
 const meta = {
-  title: "Social/FriendGoalList",
+  title: "Social/UI/FriendGoalList",
   component: FriendGoalList,
   parameters: { layout: "centered" },
 } satisfies Meta<typeof FriendGoalList>;
@@ -15,6 +15,7 @@ export const Normal: Story = {
       nickname: "서연",
       profile_image: null,
       relationship_direction: "I_CHEERED",
+      recent_message: "이번 주도 꾸준히 해낼 수 있어요.",
       goals: [{
         goal_id: 1,
         slug: "run",
@@ -48,6 +49,7 @@ export const Normal: Story = {
       nickname: "윤도경",
       profile_image: null,
       relationship_direction: "CHEERED_ME",
+      recent_message: "모의고사 820점, 조금만 더 가보자.",
       goals: [{
         goal_id: 4,
         slug: "grade",
@@ -63,6 +65,7 @@ export const Normal: Story = {
       nickname: "정민서",
       profile_image: null,
       relationship_direction: "MUTUAL",
+      recent_message: null,
       goals: [{
         goal_id: 5,
         slug: "fitness",

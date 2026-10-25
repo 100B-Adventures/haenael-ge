@@ -24,10 +24,11 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
   }
   return (
     <section data-testid="friend-goal-list">
-      <p className="friends-count">친구 <strong>{friends.length}명</strong></p>
+      <p className="friends-count"><span>친구</span><strong>{friends.length}명</strong></p>
       <div className="friends-list-card">
         {friends.map((friend) => {
           const [primaryGoal] = friend.goals;
+          const recentMessage = friend.recent_message;
           const nickname = friend.nickname ?? "친구";
           const progress = primaryGoal
             ? primaryGoal.cheer_count >= 10 ? "high" : primaryGoal.cheer_count >= 5 ? "mid" : "low"
@@ -47,26 +48,29 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                         : <span aria-hidden="true">{Array.from(nickname)[0]}</span>}
                     </span>
                     <span className="friend-list-copy">
-                      <span className="friend-list-name" title={nickname}>
-                        {nickname}
-                        <FriendRelationshipBadge direction={friend.relationship_direction} />
-                      </span>
+                      <span className="friend-list-name" title={nickname}>{nickname}</span>
                       <strong>{primaryGoal.title}</strong>
                       <span className={`friend-list-progress is-${progress}`} aria-hidden="true"><i /></span>
-                      <span className="friend-list-news"><MessageCircle aria-hidden="true" /> 응원 {primaryGoal.cheer_count}개가 쌓였어요</span>
+                      <span className="friend-list-news">
+                        <MessageCircle aria-hidden="true" />
+                        <span>{recentMessage || "아직 최근 응원 메시지가 없어요."}</span>
+                      </span>
                     </span>
-                    <span className="friend-list-open" aria-hidden="true">›</span>
+                    <span className="friend-list-relation">
+                      <FriendRelationshipBadge direction={friend.relationship_direction} />
+                      <span className="friend-list-open" aria-hidden="true">›</span>
+                    </span>
                   </Link>
                 )
                 : (
                   <div className="friend-list-main">
                     <span className="friend-list-avatar" aria-hidden="true">{Array.from(nickname)[0]}</span>
                     <span className="friend-list-copy">
-                      <span className="friend-list-name" title={nickname}>
-                        {nickname}
-                        <FriendRelationshipBadge direction={friend.relationship_direction} />
-                      </span>
+                      <span className="friend-list-name" title={nickname}>{nickname}</span>
                       <strong>지금 공개한 목표가 없어요.</strong>
+                    </span>
+                    <span className="friend-list-relation">
+                      <FriendRelationshipBadge direction={friend.relationship_direction} />
                     </span>
                   </div>
                 )}

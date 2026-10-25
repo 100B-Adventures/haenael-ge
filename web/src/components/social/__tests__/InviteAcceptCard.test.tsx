@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { InviteAcceptCard } from "../InviteAcceptCard";
-import { asInvitePreview } from "@/lib/social/contracts";
+import { asInvitePreview, type InvitePreview } from "@/lib/social/contracts";
 
 const accept = vi.fn(async (_token: string) => ({
   ok: false as const,
@@ -15,7 +15,7 @@ vi.mock(
   () => ({ acceptFriendInviteAction: (token: string) => accept(token) }),
 );
 
-const preview = {
+const preview: InvitePreview = {
   inviter_nickname: "서연",
   goal_title: "달리기",
   cover_preset_key: "c1",
@@ -43,5 +43,7 @@ it("CT-06 구 RPC 6필드 응답도 3필드로 축소한 뒤 초대 화면을 �
   if (!picked) throw new Error("legacy preview conversion failed");
   render(<InviteAcceptCard token="token" preview={picked} isAuthenticated={false} />);
   expect(screen.getByTestId("invite-accept-card")).toBeInTheDocument();
+  expect(screen.getByTestId("invite-accept-cover")).toBeInTheDocument();
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
   expect(screen.getByText(/서연님이 함께 해내자고/)).toBeInTheDocument();
 });

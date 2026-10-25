@@ -57,4 +57,5 @@ describe("auth-kakao 보안 경계", () => {
     expect(() => assertProviderLookupSucceeded({ message: "db timeout" }))
       .toThrow("provider lookup failed");
   });
+
 });

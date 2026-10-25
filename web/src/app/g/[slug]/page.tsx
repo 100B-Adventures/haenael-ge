@@ -163,6 +163,12 @@ export default async function GoalPublicPage({ params }: Props) {
           <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
             해낼게<span className="[color:var(--clover-bright)]!">.</span>
           </p>
+          <details className="goal-public-menu">
+            <summary aria-label="이 목표 더보기">⋯</summary>
+            <div className="goal-public-menu-panel">
+              <ReportButton targetType="GOAL" targetId={goal.id!} variant="text" />
+            </div>
+          </details>
 
           {/* owner bar — 본인 세션 열람 시에만 렌더(위에서 이미 판정 완료) */}
           {isOwner && <OwnerBar cheerCreatedAts={ownerCheerCreatedAts} />}
@@ -177,7 +183,7 @@ export default async function GoalPublicPage({ params }: Props) {
               <Link
                 href="/auth/kakao/start?redirect=/me"
                 prefetch={false}
-                className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--muted-foreground)]!"
+                className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
                 data-testid="relogin-link"
               >
                 카카오로 로그인
@@ -189,7 +195,7 @@ export default async function GoalPublicPage({ params }: Props) {
         {/* GoalCard */}
         <GoalCard
           title={rawTitle}
-          reason={goal.reason ?? null}
+          reason={null}
           dueDate={goal.due_date}
           status={(goal.status as "ACTIVE" | "CLOSED" | "DELETED") ?? "ACTIVE"}
           variant="public"
@@ -200,8 +206,15 @@ export default async function GoalPublicPage({ params }: Props) {
           imageUrl={coverUrl}
           title={goal.title ?? slug}
           size="banner"
-          caption="친구의 해낼게"
+          caption={goal.title ?? slug}
         />
+
+        {goal.reason && (
+          <div className="public-goal-why" data-testid="goal-reason">
+            <strong>WHY</strong>
+            <p>{goal.reason}</p>
+          </div>
+        )}
 
         {/* CheerCount */}
         <div className="public-cheer-wrap">
@@ -215,10 +228,6 @@ export default async function GoalPublicPage({ params }: Props) {
 
         {/* 최근 응원자 리스트는 공개 RLS/정렬 정책 확정 후 연결 */}
 
-        {/* 신고 버튼 (F7 — 게스트/비로그인 모두 가능) */}
-        <div className="mt-1 flex justify-end">
-          <ReportButton targetType="GOAL" targetId={goal.id!} variant="text" />
-        </div>
       </div>
 
       {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}

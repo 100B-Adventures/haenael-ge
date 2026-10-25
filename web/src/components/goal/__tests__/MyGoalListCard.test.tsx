@@ -20,6 +20,7 @@ it("CS-UI-01 내 목표 카드에 금액·순위 없이 응원 요약을 표시�
           ],
           recent_cheer: {
             supporter_name: null,
+            profile_image: null,
             message: "꾸준히 가요.",
             created_at: "2026-10-20T00:00:00Z",
             is_anonymous: true,

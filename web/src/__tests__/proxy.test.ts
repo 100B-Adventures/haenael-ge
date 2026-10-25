@@ -16,6 +16,9 @@ describe("proxy — canonical 도메인 강제", () => {
   it("AU-04 보호 라우트 계약은 공개 초대 상세를 제외한다", () => {
     expect(protectedRoutes.notes["/invite"]).toContain("exact-only");
     expect(isProtectedRoute("/me")).toBe(true);
+    expect(isProtectedRoute("/me/goal/1")).toBe(false);
+    expect(isProtectedRoute("/me/goal/not-a-number")).toBe(true);
+    expect(isProtectedRoute("/me/goal/1/edit")).toBe(true);
     expect(isProtectedRoute("/my/legal")).toBe(true);
     expect(isProtectedRoute("/invite")).toBe(true);
     expect(isProtectedRoute("/invite/public-token")).toBe(false);

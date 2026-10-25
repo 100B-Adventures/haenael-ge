@@ -1,7 +1,7 @@
 # 디자인 진입점
 
-status: v2-design-revision-5 awaiting-chairman-review
-updated: 2026-10-19
+status: v2-build-rework local-verified, production-not-deployed
+updated: 2026-10-25
 
 이 폴더가 해낼게 디자인 자료의 canonical 경로다. 전체 규칙의 정본은 이 폴더의 `DESIGN.md`가 가리키는 레포 루트 `DESIGN.md`다. 기존 `docs/design/WIREFRAMES/`, `artifacts/`는 보존하며 아래 문서에서 연결한다. 기존에 `docs/user-flow.md`에 있던 전수 플로우는 이 폴더의 `user-flow.md`로 승격했다.
 
@@ -9,13 +9,15 @@ updated: 2026-10-19
 
 | 구분 | 무엇 | 경로 |
 |---|---|---|
-| **target (심사 대기)** | V2 소셜 바이럴 루프 프로토타입 — 회장 지적 11건(D-031) 반영 5차 개정본 | `prototypes/social-viral-loop-v3-opus5.html` |
+| **target (승인됨)** | V2 소셜 바이럴 루프 프로토타입 3.0.0. 회장 지적 11건(D-031)과 D-041 반영본 | `prototypes/social-viral-loop-v3-opus5.html` |
 | 심사 보드 | 전/후 대조 + 모션 GIF + 화면별 메모·선택 + 전체 일괄 복사 | `boards/v2-design-revision-v2-opus5.html` |
 | 판정표 | 지시 대 반영 전수표, 기계 실측, design-review 등급 | `../qa/v2-design-revision-v5-opus5.md` |
 | 지난 판 | v2(2026-10-16 01:5x 2차 지시 반영분). 대조용으로만 쓴다 | `prototypes/social-viral-loop-v2-opus48.html` |
-| current (운영 배포) | v1 환전 라인. V2 는 아직 제품 코드에 반영하지 않았다(D-026-A) | `web/src` |
+| current (로컬 build 재작업) | 승인 프로토타입 3.0.0과 기술설계 1.2.5를 반영한 제품 코드 | `web/src` |
+| 로컬 최신 검증 증거 | Next.js production build, Playwright E2E 소셜 15건+다중 목표 2건, 최종 390·1280 캡처 20장. Vitest 전체 실행은 407건 중 406건 통과 후 실패 테스트 파일 3/3 표적 재검증 | `../qa/evidence/v2-goal-20261024/web-build-ui-rework-final4-20261025-0254.log`, `../qa/evidence/v2-goal-20261024/e2e-ui-rework-final2-20261025-0226.log`, `../qa/evidence/v2-goal-20261024/e2e-ui-rework-final2-multigoal-20261025-0229.log`, `../qa/evidence/v2-goal-20261024/captures-ui-rework-final-all-20261025-0245/` |
+| current (운영 배포) | 릴리스 2.0.0. 이번 로컬 재작업은 아직 운영에 배포하지 않았다 | `../../RELEASE.md` |
 
-**V2 는 design 단계다.** 회장 승인 전에는 제품 코드를 바꾸지 않는다. 승인 이후 eng-design → build 로 내려간다.
+**V2 는 build 재작업 단계다.** `pipeline-state.v2.md`의 2026-10-19 design 승인과 2026-10-20 기술설계 1.2.5 승격을 기준으로 구현했다. 로컬 최신 증거는 Next.js production build, Playwright E2E 17건과 최종 화면 캡처 검증이다. Vitest는 전체 실행 407건 중 406건 통과 뒤 오래된 커버 테스트를 교정해 해당 파일 3/3을 통과시켰다. 이번 수정의 staging 및 운영 배포는 아직 하지 않았다.
 
 ## 읽는 순서 (디자인 착수 0스텝)
 

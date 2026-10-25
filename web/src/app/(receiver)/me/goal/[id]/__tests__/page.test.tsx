@@ -28,7 +28,10 @@ describe("/me/goal/[id] 권한 경계", () => {
     } as never);
 
     const { default: GoalManagementPage } = await import("../page");
-    render(await GoalManagementPage({ params: Promise.resolve({ id: "1" }) }));
+    render(await GoalManagementPage({
+      params: Promise.resolve({ id: "1" }),
+      searchParams: Promise.resolve({}),
+    }));
 
     expect(screen.getByTestId("goal-access-required")).toHaveTextContent(
       "권한이 필요한 화면이에요",

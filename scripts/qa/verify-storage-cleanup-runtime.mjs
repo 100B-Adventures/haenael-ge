@@ -122,8 +122,8 @@ function functionLogTail() {
   }
 }
 
-async function putObject(path, bytes) {
-  const response = await fetchWithRetry(`${apiUrl}/storage/v1/object/goal-cover-quarantine/${path}`, {
+async function putObject(path, bytes, bucket = "goal-cover-quarantine") {
+  const response = await fetchWithRetry(`${apiUrl}/storage/v1/object/${bucket}/${path}`, {
     method: "POST",
     headers: {
       apikey: serviceKey,
@@ -136,8 +136,8 @@ async function putObject(path, bytes) {
   if (!response.ok) throw new Error(`storage_upload_${response.status}`);
 }
 
-async function objectExists(path) {
-  const response = await fetchWithRetry(`${apiUrl}/storage/v1/object/goal-cover-quarantine/${path}`, {
+async function objectExists(path, bucket = "goal-cover-quarantine") {
+  const response = await fetchWithRetry(`${apiUrl}/storage/v1/object/${bucket}/${path}`, {
     headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
   });
   return response.ok;
@@ -149,11 +149,13 @@ const asset = randomUUID();
 const concurrentAsset = randomUUID();
 const tombstoneAsset = randomUUID();
 const pairAsset = randomUUID();
+const profileAsset = randomUUID();
 const goalSlug = `runtime-cleanup-${runId}`;
 const objectPath = `runtime-cleanup/${runId}/cv09.png`;
 const concurrentPath = `runtime-cleanup/${runId}/cv09-concurrent.png`;
 const tombstonePath = `runtime-cleanup/${runId}/cv12-tombstone.png`;
 const pairPath = `runtime-cleanup/${runId}/same-path.png`;
+const profilePath = `${owner}/${profileAsset}.png`;
 const bytes = Buffer.from("89504e470d0a1a0a0000000d49484452", "hex");
 const hash = createHash("sha256").update(bytes).digest("hex");
 const temporaryCronJobIds = new Set();
@@ -341,6 +343,36 @@ try {
   if (idempotentBody.claimed !== 0) throw new Error("cv09_not_idempotent");
 
   sql(`
+    INSERT INTO public.profile_avatar_asset(
+      id,owner_member_id,object_path,status,content_sha256,mime_type,byte_size,created_at
+    ) VALUES(
+      '${profileAsset}','${owner}','${profilePath}','DELETED','${hash}','image/png',${bytes.length},now()-interval '3 hours'
+    );
+    INSERT INTO public.storage_cleanup_queue(
+      profile_avatar_asset_id,bucket_id,object_path,reason,available_at
+    ) VALUES(
+      '${profileAsset}','profile-avatars','${profilePath}','PROFILE_AVATAR_REPLACED',now()-interval '1 second'
+    );
+  `);
+  await putObject(profilePath, bytes, "profile-avatars");
+  const profileCleanup = await invoke(cleanupToken);
+  const profileCleanupBody = await profileCleanup.json();
+  const profileDbState = sql(`
+    SELECT q.status||':'||CASE WHEN a.id IS NULL THEN 'asset-absent' ELSE 'asset-present' END
+    FROM public.storage_cleanup_queue q
+    LEFT JOIN public.profile_avatar_asset a ON a.id='${profileAsset}'
+    WHERE q.object_path='${profilePath}'
+    ORDER BY q.id DESC LIMIT 1;
+  `);
+  if (
+    profileCleanup.status !== 200 ||
+    await objectExists(profilePath, "profile-avatars") ||
+    profileDbState !== "DONE:asset-absent"
+  ) {
+    throw new Error(`profile_cleanup_failed_${profileCleanup.status}_${profileDbState}`);
+  }
+
+  sql(`
     INSERT INTO public.goal_cover_asset(id,goal_id,owner_member_id,quarantine_path,status,content_sha256,mime_type,byte_size,created_at)
     SELECT '${concurrentAsset}',id,'${owner}','${concurrentPath}','DELETED','${hash}','image/png',${bytes.length},now()-interval '25 hours' FROM public.goal WHERE slug='${goalSlug}';
     INSERT INTO public.storage_cleanup_queue(goal_id,bucket_id,object_path,reason)
@@ -437,6 +469,7 @@ try {
     EA04: { status: ea04.status, code: ea04Body.error.code, constant_time_and_fail_closed_unit: "PASS" },
     CV09: { http: cv09.status, claimed: cv09Body.claimed, storage_absent: true, db: dbState },
     CV09_idempotent: idempotentBody,
+    PROFILE_CLEANUP: { http: profileCleanup.status, claimed: profileCleanupBody.claimed, storage_absent: true, db: profileDbState },
     CV09_concurrent: { responses: concurrent.map((response) => response.status), storage_absent: true },
     CV10: { distinct_claims: true, pre_lease_reclaim: 0, stale_reclaimed: true, late_settle: false, current_state: failedState },
     CV11: { injected_partial_success_contract: "PASS", source: "production classifyRemovalResults" },
@@ -448,12 +481,17 @@ try {
   }));
 } finally {
   try {
+    await fetchWithRetry(`${apiUrl}/storage/v1/object/profile-avatars/${profilePath}`, {
+      method: "DELETE",
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+    }).catch(() => undefined);
     for (const jobId of temporaryCronJobIds) {
       try { sql(`SELECT cron.unschedule(${jobId});`); } catch {}
     }
     sql(`
       DELETE FROM public.storage_cleanup_queue WHERE object_path LIKE 'runtime-cleanup/${runId}/%';
       DELETE FROM public.goal_cover_asset WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}');
+      DELETE FROM public.profile_avatar_asset WHERE owner_member_id='${owner}';
       DELETE FROM public.social_cheer_member_attribution WHERE cheer_id IN (SELECT id FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}'));
       DELETE FROM public.cheer WHERE goal_id=(SELECT id FROM public.goal WHERE slug='${goalSlug}');
       DELETE FROM public.goal WHERE slug='${goalSlug}';

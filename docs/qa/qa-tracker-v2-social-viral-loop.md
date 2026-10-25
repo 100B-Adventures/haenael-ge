@@ -1,5 +1,45 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+## 2026-10-25 free staging 실제 쓰기·시각 재검증
+
+> build 단계가 만든 staging 증거다. production 배포·production QA 승인으로 승격하지 않는다.
+
+| 요청 번호 | 범위 | 현재 판정 | 종료 증거 |
+|---|---|---|---|
+| BUILD-V2-STAGE-01 | 승인 프로토타입 v3 9화면 | ✅ staging 일치 | 승인 390px 9장 대 제품 390px 9장 직접 대조 finding 0, 제품 1024·1280 각 9장 overflow·console error 0 |
+| BUILD-V2-STAGE-02 | 모바일 사용성 | ✅ staging 닫힘 | 실제 데이터 공개 목표 360·390·412·600·700·780·820·900·1000px 9/9 PASS |
+| BUILD-V2-STAGE-03 | 프로필·커버 Storage 쓰기 | ✅ staging 닫힘 | 실제 sign→PUT→finalize, preset 복귀, REVIEW 관리자 승인, public 반영. 정상 지연 cleanup은 queue 계약으로 분리 |
+| BUILD-V2-STAGE-04 | 공개범위·동시성·주문 귀속 | ✅ staging 닫힘 | PW-06·PW-07·CC-01·ORDER-ATTR-01 4/4 PASS |
+| BUILD-V2-STAGE-05 | 원격 고유 E2E | ✅ staging 닫힘 | 분할 실행 합집합으로 고유 17건 미실행 0. 같은 조건 전체 suite 반복 없이 실패 이후 미실행 범위만 표적 회수 |
+| BUILD-V2-STAGE-06 | fixture·결제 플래그 복구 | ✅ staging 닫힘 | run namespace Auth·member·goal·cashout·payment 잔여 0, 각 control JSON에서 PAYMENTS 비활성 복구와 503 `payments_disabled` 확인 |
+| BUILD-V2-STAGE-07 | 로컬 전체 회귀 | ✅ 닫힘 | Vitest 78파일 439건, Next production build, TypeScript, Storybook 21 stories 정적 build PASS |
+| BUILD-V2-STAGE-08 | Storybook 커버리지 | ✅ 비감소 | 컴포넌트 인벤토리 HEAD 직접 7/42(16.7%)→현재 직접 8/46(17.4%), 신규 공용 WordmapCloudLayout 직접 3상태 story |
+| BUILD-V2-STAGE-09 | production·외부 연동 | ⬜ 미검증 | production DB·웹 배포·production 쓰기 QA, 실제 Kakao OAuth, Toss Payments 승인 API, 실은행 송금은 실행하지 않음 |
+
+증거: `docs/qa/evidence/v2-ssot-20261025/`, `docs/design/component-inventory-v1.0.0.md`.
+
+STAMP: 2026-10-25 13:15 KST | model gpt-5.6-sol | agent code-builder | skill haenael-supabase-build | 상태 staging build 검증 종료, production 미반영
+
+## 2026-10-25 build 단계 로컬 production-mode 재검증
+
+> 이 블록은 build 단계의 로컬 증거다. 이 파일의 production 최종 판정을 승격하지 않으며, 운영 배포 뒤 QA가 같은 경로를 다시 판정해야 한다.
+
+| 요청 번호 | 범위 | 현재 판정 | 종료 증거 |
+|---|---|---|---|
+| BUILD-V2-20261025-01 | Next.js 보안 패치 | ✅ 로컬 닫힘 | `16.4.1` production build, 정적 페이지 18/18 |
+| BUILD-V2-20261025-02 | `/me/goal/[id]` 비로그인 권한 안내 | ✅ 로컬 닫힘 | 양의 정수 ID만 예외, 데이터 DOM 0, 다른 `/me` 보호 계약 유지 |
+| BUILD-V2-20261025-03 | 승인 프로토타입 v3 화면 구조·마이페이지 | ✅ 로컬 닫힘 | 공개·목표·친구·관리자 순서 정렬, D-031-A 중복 블록 제거, 이름·4개 프리셋 사진 저장과 실패 재시도 관찰 |
+| BUILD-V2-20261025-04 | 브라우저 실제 경로 | ✅ 로컬 닫힘 | 같은 production build에서 소셜 15/15와 다중 목표 2/2, 합계 17건 미실행 0. 최종 CSS 뒤 MY·캡처 2/2 |
+| BUILD-V2-20261025-05 | 모바일 사용성·캡처 | ✅ 로컬 닫힘 | 공개 목표 360~1000px 9폭 통과, `/my` 390px 기준 통과, 최종 캡처 20장 DPR 3와 SHA-256 manifest |
+| BUILD-V2-20261025-06 | 전체 회귀 | ✅ 로컬 닫힘 | 전체 Vitest 72파일 407건 중 406건 통과. 접힌 커버를 열지 않은 테스트 교정 뒤 해당 파일 3/3 통과. pgTAP 369건과 서버 계약 4종은 컨트롤러 별도 통과 |
+| BUILD-V2-20261025-07 | 공유 staging 환경 | ⬜ 미검증 | Vercel preview 환경변수 0건, Supabase 프로젝트 운영 1개. 환경 생성·외부 설정 변경은 미실행 |
+| BUILD-V2-20261025-08 | 신규 서버 계약이 필요한 승인 시안 항목 | ⬜ 미검증 | 프로필 소개·사용자 사진 업로드, 친구 최근 메시지, 사진 커버 8개와 DB 키 매핑은 임의 API·스키마 없이 보류 |
+| BUILD-V2-20261025-09 | 승인 프로토타입 v3 디자인 정합 | ❌ 불일치·출고 보류 | 목표 관리의 커버 크기·편집 위치·제목 중복·WHY 표현이 승인 시안과 다르고, 마이페이지 간격·아이콘 표현도 다르다. `/tmp/haenael-approved-v3-clean/approved-{goal-detail,mypage}.png`와 `evidence/v2-goal-20261024/captures-ui-rework-final-all-20261025-0245/dev-{goal-detail,mypage}-390.png` 직접 대조 |
+
+최종 로컬 기능 증거: `docs/qa/evidence/v2-goal-20261024/`. 기능 테스트는 통과했지만 디자인 전체 판정은 불일치이며 출고를 보류한다. 운영 Supabase 쓰기와 운영 배포는 0건이다.
+
+STAMP: 2026-10-25 KST | model gpt-5.6-sol | agent code-builder | skill haenael-supabase-build | 상태 로컬 build 닫힘, production QA 미승격
+
 ## 2026-10-21 6차 회수 R21~R25 종료
 
 | 요청 번호 | 범위 | 현재 판정 | 종료 증거 |

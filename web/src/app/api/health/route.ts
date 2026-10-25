@@ -6,6 +6,13 @@ export async function GET() {
   const startedAt = Date.now();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseProjectRef = (() => {
+    try {
+      return supabaseUrl ? new URL(supabaseUrl).hostname.split(".")[0] : null;
+    } catch {
+      return null;
+    }
+  })();
   let database: "ok" | "degraded" = "degraded";
 
   if (supabaseUrl && anonKey) {
@@ -27,6 +34,7 @@ export async function GET() {
       status,
       version: process.env.NEXT_PUBLIC_APP_VERSION ?? "dev",
       database,
+      supabaseProjectRef,
       responseTimeMs: Date.now() - startedAt,
       timestamp: new Date().toISOString(),
     },

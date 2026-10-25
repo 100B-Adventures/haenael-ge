@@ -99,7 +99,7 @@ describe("V2 social contracts", () => {
 
   it("CT-MY-01 마이페이지 집계와 소속감 큐 계약을 읽는다", () => {
     const parsed = asMySocialDashboard({
-      profile: { nickname: "서연", profile_image: null },
+      profile: { nickname: "서연", bio: null, profile_image: null },
       goals: [{
         goal_id: 1,
         slug: "run",
@@ -111,6 +111,8 @@ describe("V2 social contracts", () => {
         supporter_avatars: [],
         recent_cheer: null,
       }],
+      received_cheers: [],
+      sent_cheers: [],
       friend_count: 3,
       achievements: {
         completed_goal_count: 2,

@@ -1,0 +1,9 @@
+{
+  "observed_at": "2026-10-25T04:19:42.273039+00:00",
+  "deployment": "dpl_6ngntmdYQpZHbo83PvuQyhbtiYvu",
+  "snapshot_manifest": "preview-source-manifest-v8.json",
+  "scope": "web/src runtime files, tests and stories excluded",
+  "runtime_files_checked": 128,
+  "mismatches": [],
+  "pass": true
+}

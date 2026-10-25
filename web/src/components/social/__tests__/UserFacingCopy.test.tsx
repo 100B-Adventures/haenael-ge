@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { FriendInviteCard } from "../FriendInviteCard";
 import { GoalCoverPicker } from "../GoalCoverPicker";
@@ -52,6 +52,7 @@ it("CT-COPY-03 기본 커버는 내부 프리셋 키 대신 사용자 라벨을 
     />,
   );
 
-  expect(screen.getByText("기본 1")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "배너 바꾸기" }));
+  expect(screen.getByText("공부·시험")).toBeInTheDocument();
   expect(document.body.textContent).not.toMatch(/\bC[1-6]\b/);
 });

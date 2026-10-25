@@ -47,6 +47,9 @@ function shouldRedirectToCanonical(hostname: string): boolean {
 }
 
 export function isProtectedRoute(pathname: string) {
+  const isDeclaredException = Object.values(protectedRoutes.exceptions)
+    .some((pattern) => new RegExp(pattern).test(pathname));
+  if (isDeclaredException) return false;
   return protectedRoutes.exact.includes(pathname) ||
     protectedRoutes.prefix.some((prefix) => pathname.startsWith(prefix));
 }

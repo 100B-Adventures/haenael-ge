@@ -99,8 +99,10 @@ function buildSupabase(
         });
         return Promise.resolve({
           data: {
-            profile: { nickname: "Owner", profile_image: null },
+            profile: { nickname: "Owner", bio: null, profile_image: null },
             goals,
+            received_cheers: [],
+            sent_cheers: [],
             friend_count: 0,
             achievements: {
               completed_goal_count: 0,

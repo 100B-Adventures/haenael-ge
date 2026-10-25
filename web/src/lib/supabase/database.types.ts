@@ -461,6 +461,7 @@ export type Database = {
           active_cover_asset_id: string | null
           closed_at: string | null
           cover_preset_key: string
+          cover_selection_mode: string
           created_at: string
           deleted_at: string | null
           due_date: string
@@ -476,6 +477,7 @@ export type Database = {
           active_cover_asset_id?: string | null
           closed_at?: string | null
           cover_preset_key?: string
+          cover_selection_mode?: string
           created_at?: string
           deleted_at?: string | null
           due_date: string
@@ -491,6 +493,7 @@ export type Database = {
           active_cover_asset_id?: string | null
           closed_at?: string | null
           cover_preset_key?: string
+          cover_selection_mode?: string
           created_at?: string
           deleted_at?: string | null
           due_date?: string
@@ -690,6 +693,7 @@ export type Database = {
       }
       member: {
         Row: {
+          bio: string | null
           birth_date: string | null
           ci: string | null
           created_at: string
@@ -702,6 +706,7 @@ export type Database = {
           provider_id: string | null
         }
         Insert: {
+          bio?: string | null
           birth_date?: string | null
           ci?: string | null
           created_at?: string
@@ -714,6 +719,7 @@ export type Database = {
           provider_id?: string | null
         }
         Update: {
+          bio?: string | null
           birth_date?: string | null
           ci?: string | null
           created_at?: string
@@ -917,6 +923,53 @@ export type Database = {
           },
         ]
       }
+      profile_avatar_asset: {
+        Row: {
+          activated_at: string | null
+          byte_size: number
+          content_sha256: string
+          created_at: string
+          id: string
+          mime_type: string
+          object_path: string
+          owner_member_id: string | null
+          public_url: string | null
+          status: string
+        }
+        Insert: {
+          activated_at?: string | null
+          byte_size: number
+          content_sha256: string
+          created_at?: string
+          id?: string
+          mime_type: string
+          object_path: string
+          owner_member_id?: string | null
+          public_url?: string | null
+          status?: string
+        }
+        Update: {
+          activated_at?: string | null
+          byte_size?: number
+          content_sha256?: string
+          created_at?: string
+          id?: string
+          mime_type?: string
+          object_path?: string
+          owner_member_id?: string | null
+          public_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_avatar_asset_owner_member_id_fkey"
+            columns: ["owner_member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report: {
         Row: {
           created_at: string
@@ -1061,43 +1114,49 @@ export type Database = {
       storage_cleanup_queue: {
         Row: {
           attempts: number
+          available_at: string
           bucket_id: string
           completed_at: string | null
           created_at: string
-          goal_id: number
+          goal_id: number | null
           id: number
           lease_until: string | null
           lock_token: string | null
           locked_at: string | null
           object_path: string
+          profile_avatar_asset_id: string | null
           reason: string
           status: string
         }
         Insert: {
           attempts?: number
+          available_at?: string
           bucket_id: string
           completed_at?: string | null
           created_at?: string
-          goal_id: number
+          goal_id?: number | null
           id?: never
           lease_until?: string | null
           lock_token?: string | null
           locked_at?: string | null
           object_path: string
+          profile_avatar_asset_id?: string | null
           reason: string
           status?: string
         }
         Update: {
           attempts?: number
+          available_at?: string
           bucket_id?: string
           completed_at?: string | null
           created_at?: string
-          goal_id?: number
+          goal_id?: number | null
           id?: never
           lease_until?: string | null
           lock_token?: string | null
           locked_at?: string | null
           object_path?: string
+          profile_avatar_asset_id?: string | null
           reason?: string
           status?: string
         }
@@ -1114,6 +1173,13 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goal_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storage_cleanup_queue_profile_avatar_asset_id_fkey"
+            columns: ["profile_avatar_asset_id"]
+            isOneToOne: false
+            referencedRelation: "profile_avatar_asset"
             referencedColumns: ["id"]
           },
         ]
@@ -1228,6 +1294,15 @@ export type Database = {
     }
     Functions: {
       accept_friend_invite: { Args: { token: string }; Returns: Json }
+      account_withdrawal_eligibility: { Args: never; Returns: Json }
+      activate_my_profile_avatar_service: {
+        Args: {
+          p_asset_id: string
+          p_owner_member_id: string
+          p_public_url: string
+        }
+        Returns: Json
+      }
       admin_apply_goal_cover_review: {
         Args: {
           p_admin_id: string
@@ -1371,6 +1446,7 @@ export type Database = {
         }
         Returns: string
       }
+      close_my_goal: { Args: { p_goal_id: number }; Returns: Json }
       clover_eligibility: {
         Args: { p_member_id: string }
         Returns: {
@@ -1452,12 +1528,24 @@ export type Database = {
         Args: { channel?: string; goal_id?: number }
         Returns: Json
       }
-      create_goal: {
-        Args: { p_due_date: string; p_reason: string; p_title: string }
-        Returns: {
-          slug: string
-        }[]
-      }
+      create_goal:
+        | {
+            Args: { p_due_date: string; p_reason: string; p_title: string }
+            Returns: {
+              slug: string
+            }[]
+          }
+        | {
+            Args: {
+              p_cover_preset_key: string
+              p_due_date: string
+              p_reason: string
+              p_title: string
+            }
+            Returns: {
+              slug: string
+            }[]
+          }
       expire_stale_cheer_payments: { Args: never; Returns: number }
       friend_goal_detail: { Args: { goal_id: number }; Returns: Json }
       friend_invite_preview: { Args: { token: string }; Returns: Json }
@@ -1467,6 +1555,16 @@ export type Database = {
           word: string
           word_count: number
         }[]
+      }
+      hydrate_kakao_profile_defaults_service: {
+        Args: {
+          p_member_id: string
+          p_nickname: string
+          p_phone: string
+          p_profile_image: string
+          p_update_phone: boolean
+        }
+        Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
       min_cashout_clover: { Args: never; Returns: number }
@@ -1509,6 +1607,10 @@ export type Database = {
         }[]
       }
       my_friend_goals: { Args: never; Returns: Json }
+      my_goal_cheer_summary: {
+        Args: { p_goal_id: number; p_limit?: number; p_search?: string }
+        Returns: Json
+      }
       my_social_dashboard: { Args: never; Returns: Json }
       purge_abandoned_goal_covers: {
         Args: { p_older_than?: string }
@@ -1587,6 +1689,10 @@ export type Database = {
         Args: { p_cheer_id: number }
         Returns: undefined
       }
+      social_cover_preset_for_title: {
+        Args: { p_title: string }
+        Returns: string
+      }
       social_has_confirmed_cheer: {
         Args: { p_owner_member_id: string; p_supporter_member_id: string }
         Returns: boolean
@@ -1611,6 +1717,10 @@ export type Database = {
       }
       update_member_preferences: {
         Args: { notify_cheer: boolean; notify_marketing: boolean }
+        Returns: Json
+      }
+      update_my_profile: {
+        Args: { p_bio: string; p_nickname: string; p_profile_image: string }
         Returns: Json
       }
       welcome_clover_amount: { Args: never; Returns: number }

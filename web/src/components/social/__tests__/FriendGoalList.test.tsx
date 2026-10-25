@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { FriendGoalList } from "../FriendGoalList";
+import type { SocialGoal } from "@/lib/social/contracts";
 
-const goals = [
+const goals: SocialGoal[] = [
   {
     goal_id: 1,
     slug: "run",
@@ -31,18 +32,20 @@ it("CT-FRIEND-01 친구 목록은 대표 목표 한 행만 보여 주고 상세�
         nickname: "서연",
         profile_image: null,
         relationship_direction: "I_CHEERED",
+        recent_message: "3주째 도서관 개근, 진짜 대단하다",
         goals,
       }]}
     />,
   );
 
-  expect(screen.getByText((_, element) => Boolean(element?.classList.contains("friends-count") && element.textContent === "친구 1명"))).toBeInTheDocument();
+  expect(screen.getByText((_, element) => Boolean(element?.classList.contains("friends-count") && element.textContent === "친구1명"))).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /이번 달에는 세 번씩 달릴게/ }))
     .toHaveAttribute("href", "/friends/friend-a?goal=1");
   expect(screen.queryByRole("link", { name: "매일 스무 쪽 읽을게" }))
     .not.toBeInTheDocument();
   expect(screen.queryByText("연결된 친구")).not.toBeInTheDocument();
   expect(screen.getByText("내가 응원함")).toBeInTheDocument();
+  expect(screen.getByText("3주째 도서관 개근, 진짜 대단하다")).toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("번 함께");
   expect(screen.getByTestId("friends-sparse-next-step")).toHaveTextContent(
     "한 명 더 함께 응원해볼까요?",
@@ -59,10 +62,11 @@ it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전
     nickname: index === 0 ? "아주아주아주아주아주긴친구닉네임" : null,
     profile_image: null,
     relationship_direction: index % 2 === 0 ? "MUTUAL" as const : "CHEERED_ME" as const,
+    recent_message: null,
     goals,
   }));
   render(<FriendGoalList friends={friends} />);
-  expect(screen.getByText((_, element) => Boolean(element?.classList.contains("friends-count") && element.textContent === "친구 12명"))).toBeInTheDocument();
+  expect(screen.getByText((_, element) => Boolean(element?.classList.contains("friends-count") && element.textContent === "친구12명"))).toBeInTheDocument();
   expect(screen.getByText("아주아주아주아주아주긴친구닉네임")).toHaveAttribute(
     "title",
     "아주아주아주아주아주긴친구닉네임",

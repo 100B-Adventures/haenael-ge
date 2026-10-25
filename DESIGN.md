@@ -1,5 +1,5 @@
 ---
-version: "2.1.1"
+version: "2.1.2"
 name: 해낼게
 description: 친구의 목표에 조용히 돈으로 응원하는 링크 인 바이오형 모바일 웹 디자인 시스템
 colors:
@@ -22,6 +22,9 @@ colors:
   amber-soft: "#FBF1DD"
   amber-line: "#E8D3A6"
   amber-ink: "#8A5A12"
+  violet-soft: "#EFECF7"
+  violet-line: "#D6CEEC"
+  violet-ink: "#5B4B8A"
 typography:
   wordmark:
     fontFamily: Pretendard
@@ -245,11 +248,12 @@ motion:
 --amber-line    #E8D3A6   대기 상태 테두리
 --amber-ink     #8A5A12   amber-soft 위 글자 (5.27:1 ✅)
 --danger-ink    #B23225   danger-soft 위 글자 (5.34:1 ✅)
+--violet-soft   #EFECF7   서로 응원 관계 배지 배경
+--violet-line   #D6CEEC   서로 응원 관계 배지 경계선
+--violet-ink    #5B4B8A   violet-soft 위 관계 라벨
 --success       = --clover (별도 색 없음. 성공도 클로버)
 ```
-✅ `--bg`부터 `--danger-soft`까지의 실제 값은 globals의 shadcn 변수 또는 custom var에 존재한다. [실측 `web/src/app/globals.css`:54-95]
-
-⛔ `--amber`, `--amber-soft`, `--amber-line`, `--amber-ink`, `--danger-ink`는 정본 프로토타입에는 있으나 globals에는 없다. 제품 코드는 같은 값을 hex 리터럴로 사용한다. 이름만 문서에 있는 상태이므로 변수 자체는 `[신설·미구현]`이다. [실측 `docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html`:14-18, `web/src/components/goal/SplitBalanceCard.tsx`:70,95-99, `web/src/app/(receiver)/cashout/status/page.tsx`:76-77]
+✅ 위 토큰은 `globals.css`의 shadcn 변수 또는 custom var에 존재한다. violet 3종은 D-049의 `서로 응원` 관계 배지에만 쓴다. [실측 `web/src/app/globals.css`:54-113, `docs/design/prototypes/social-viral-loop-v3-opus5.html`:138,415-417]
 
 `--faint`(흰배경 2.94:1 · 앱배경 2.81:1 · 웜면 2.56:1)는 **비활성 상태와 글자가 아닌 장식에만 쓴다** (D-029 적용, 2026-10-20). **placeholder 는 여기서 빠졌다**: placeholder 는 사람이 읽는 글자라 4.5:1 이 걸린다. **셰브론·화살표 글리프도 빠졌다**: 그것은 글자가 아니라 3:1 이 걸리는데 `--faint` 는 **그 3:1 조차 넘지 못한다**(2.94:1). 그래서 `--faint` 가 남는 자리는 ①비활성·잠김 상태(접근성 하한 자체가 면제된다) ②색이 정보를 지지 않는 순수 장식 배경, 둘뿐이다. 읽혀야 하는 보조 텍스트는 전부 `--muted-color`(흰배경 5.38:1) 이상. 돈 설명은 예외 없이 `--muted-color` 이상(§8.4).
 
@@ -280,11 +284,12 @@ motion:
 | 비활성·잠김 상태, 색이 정보를 지지 않는 장식 배경 | `var(--faint)` | `#9C968B` [실측 `web/src/app/globals.css`:98] | 대기 단계 점, 잠긴 업적, 장식 배경. **읽는 글자·placeholder·셰브론 금지**(§3.1) |
 | 보조 텍스트·타임스탬프·셰브론 | `var(--muted-color)` | `#6F6A60` [실측 `web/src/app/globals.css`:97] | 읽는 글자 4.5:1 과 비텍스트 3:1 을 모두 넘는다 |
 | 실패 채움 | `bg-destructive` 또는 `bg-[#D9483B]` | `#D9483B` [실측 `web/src/app/globals.css`:74, `web/src/components/admin/CashoutQueue.tsx`:250] | 반려, 실패, 파괴적 확정 |
-| 실패 글자 | `text-[#B23225]` | `#B23225`, semantic 변수 없음 [실측 `web/src/app/(receiver)/me/page.tsx`:304-306, `web/src/app/(receiver)/cashout/status/page.tsx`:118-120] | 실패 안내. `[신설·미구현] --danger-ink` |
-| 대기 배경 | `bg-[#FBF1DD]` + `border-[#E8D3A6]` | 배경 `#FBF1DD`, 선 `#E8D3A6`, semantic 변수 없음 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:65-71, `web/src/app/(receiver)/cashout/status/page.tsx`:76-77] | 환전 잠김, 확인 중 |
-| 대기 글자 | `text-[#8A5A12]` 또는 inline `#8A5A12` | `#8A5A12`, semantic 변수 없음 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:91-100, `web/src/app/(receiver)/me/page.tsx`:323-327] | 잠김 라벨, 진행 중 버튼. `[신설·미구현] --amber-ink` |
+| 실패 글자 | `var(--danger-ink)` | `#B23225` [실측 `web/src/app/globals.css`:103] | 실패 안내 |
+| 대기 배경 | `var(--amber-soft)` + `var(--amber-line)` | 배경 `#FBF1DD`, 선 `#E8D3A6` [실측 `web/src/app/globals.css`:105-106] | 환전 잠김, 확인 중 |
+| 대기 글자 | `var(--amber-ink)` | `#8A5A12` [실측 `web/src/app/globals.css`:107] | 잠김 라벨, 진행 중 버튼 |
+| 상호 관계 배경·선·글자 | `var(--violet-soft)` · `var(--violet-line)` · `var(--violet-ink)` | `#EFECF7` · `#D6CEEC` · `#5B4B8A` [실측 `web/src/app/globals.css`:108-110] | `서로 응원` 관계 배지 전용 |
 
-⛔ **색 이탈:** `--danger-ink`, `--amber-soft`, `--amber-line`, `--amber-ink`는 프로토타입에는 이름이 있으나 `globals.css`에는 없다. 개발은 같은 hex를 직접 쓰고 있다. 다음 토큰 정리 전까지 새 별칭을 더 만들지 않는다. [실측 `docs/design/prototypes/legacy/core-cashout-full-journey-v3.8-opus5.html`:9-18, `web/src/app/globals.css`:51-110]
+✅ **상태 토큰 동기화:** `--danger-ink`, amber 4종, violet 3종은 `globals.css`와 이 문서에 같은 값으로 등록돼 있다. 신규 관계색은 다른 기능으로 확장하지 않는다. [실측 `web/src/app/globals.css`:101-110]
 
 
 ## Typography

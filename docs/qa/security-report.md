@@ -1,60 +1,140 @@
-# Security Report: haenael-ge core v1.2.0
+# 해낼게 V2 Security Verification Report
 
-STAMP: 2026-08-30 15:10 KST | model: claude-opus-5 | agent: 컨트롤러 직접 | basis: 배포 후 대표 주소 실측 | concern: 이전 판정이 구 번들을 근거로 열려 있었다.
+| 항목 | 값 |
+|---|---|
+| 버전 | v2.0.0 |
+| 작성일 | 2026-10-25 |
+| 작성자/모델 | qa-verifier / gpt-codex gpt-5.6-sol, reasoning high |
+| 상류 산출물(핀) | D-049, V2 server contract migration SHA-256 `131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999` |
+| 대상 환경 | Supabase staging `ezzklgotgydwxqebfoys`, Vercel preview |
+| 승인 상태 | QA 승인 전. 확인한 보안 통제는 통과, 외부 인증·실제 지급은 미검증 |
 
-## 2026-08-30 배포 후 재판정: **PASS**
+## 목차
 
-이전 `SHIP_VERIFY` 두 항목이 배포로 닫혔다. 대표 주소에서 직접 관찰했다.
+- [1. 목적·범위·용어](#1-목적범위용어)
+- [2. 검증 흐름](#2-검증-흐름)
+- [3. 커버리지와 결과](#3-커버리지와-결과)
+- [4. 요구↔검증 추적](#4-요구검증-추적)
+- [5. 안 한 것](#5-안-한-것)
+- [6. 수용기준·판정](#6-수용기준판정)
+- [7. 결함·잔여 리스크](#7-결함잔여-리스크)
+- [8. 벤치마크·자체 검토](#8-벤치마크자체-검토)
+- [9. 개정 이력](#9-개정-이력)
 
-| 통제 | 이전 | 이번 실측 | 판정 |
+## TL;DR
+
+V2의 DB 권한, Storage 비공개 경로, IDOR, 프로필 사진 업로드·정상 TTL 삭제, 의존성 취약점은 실행 증거로 통과했다. 실제 Kakao OAuth callback과 실제 지급·반려는 계정 로그인과 금전 처리 권한이 필요해 미검증이며, 이 둘을 소스 리뷰나 HTTP 200으로 대체하지 않았다.
+
+## 1. 목적·범위·용어
+
+목적은 V2가 추가한 프로필 사진, 친구·목표 공개범위, 관리자 환전 UI의 권한 경계를 검증하는 것이다. 운영 환경과 실제 지급은 범위 밖이다.
+
+| 용어 | 정의 |
+|---|---|
+| IDOR | 사용자가 다른 사용자의 리소스 식별자를 바꿔 접근하는 권한 우회 |
+| RLS | PostgreSQL Row Level Security |
+| Presigned URL | 서명이 붙은 제한 시간 임시 접근 URL |
+| TTL | 객체 삭제 전 보존 시간. 프로필 사진은 2시간 5분 |
+| Source review | 코드 정적 검토. 실제 런타임 동작의 대체 근거가 아님 |
+
+## 2. 검증 흐름
+
+```mermaid
+flowchart LR
+  A[동결 migration·web source] --> B[pgTAP·서버 계약 5종]
+  B --> C[Supabase staging 권한·Storage HTTP]
+  C --> D[브라우저 IDOR·비공개 경로]
+  D --> E[cron→worker→TTL 삭제 관찰]
+  E --> F[독립 GPT-6.1 보안 리뷰]
+  F --> G{실제 외부 인증·금전 처리인가}
+  G -->|아니오| H[확인한 통제 PASS]
+  G -->|예| I[미검증 유지]
+```
+
+## 3. 커버리지와 결과
+
+| 통제 | 정량 결과 | 증거 등급 | 판정 |
 |---|---|---|---|
-| 운영 보안 헤더 | 구배포에서 미관찰 | `content-security-policy`·`x-content-type-options`·`referrer-policy`·`permissions-policy` 4/4 관찰 | PASS |
-| `x-powered-by` 노출 | 노출 | 0건 | PASS |
-| 운영 Firefox 콘솔 | error 5 | **error 0, pageerror 0** | PASS |
-| 운영 WebKit 콘솔 | 미수집 | **error 0, pageerror 0** | PASS |
-| production dependency | 0건 | `npm audit --omit=dev` 0건 유지 | PASS |
-| 운영 인증 읽기 E2E | 1/1 | 1/1, 제품 쓰기 0 | PASS |
+| DB·RLS | pgTAP 22 files, 412 tests PASS. 신규 V2 경계 43 tests | 테스트됨 | PASS |
+| Supabase 서버 계약 | DB, cleanup schedule, concurrency, runtime, cheer-summary index 5/5 PASS | 테스트됨 | PASS |
+| 원격 서버 자산 | migration 추출 catalog assertion 36/36 존재, Edge Functions 16/16 ACTIVE | 관찰됨 | PASS, 존재 확인 한정 |
+| 프로필 사진 업로드 | sign 200, Storage PUT 200, finalize 200, hash mismatch 422, 타인 404, 비이미지 415 | 관찰됨 | PASS |
+| 프로필 사진 정상 TTL 삭제 | 원 queue due 시각 불변, 10:00 cron run 61, worker HTTP 200, 10:00:02 DONE, metadata 0, Storage object 0, receipt 1 | 관찰됨 | PASS |
+| 최소권한 | authenticated role의 avatar ACTIVE 전이·이미지 필드 write·avatar table read 거부 | 관찰됨 | PASS |
+| 비공개 Storage 경로 | 친구 응답은 원본 path를 숨기고 Presigned URL만 제공. 관리자 검수만 원본 path 수신 | 관찰됨 | PASS |
+| IDOR | friendId와 목표 소유자가 다른 실제 요청 404 | 관찰됨 | PASS |
+| production dependency | `npm audit --omit=dev`: info/low/moderate/high/critical 0/0/0/0/0 | 테스트됨 | PASS |
+| 결제 차단 | staging `NEXT_PUBLIC_PAYMENTS_ENABLED=false`, 주문 HTTP 503 `payments_disabled` | 관찰됨 | PASS |
+| 관리자 환전 소스 | 계좌 전체 번호는 지급 모달에서만 표시, 닫으면 해제. 감사·10분 열람·잠금 RPC 유지. 독립 review NO_FINDINGS | 근거 확인 | PASS, 소스 한정 |
+| Kakao OAuth | authorize 화면과 staging callback 형식까지만 도달 | 미검증 | 실제 callback 미검증 |
+| 실제 지급·반려 | 버튼·모달 소스 경계만 확인 | 미검증 | 금전 처리 미실행 |
 
-배포 직후 1차 실측에서는 Firefox·WebKit 콘솔에 CSP `connect-src` 위반이 새로
-찍혔다. 랜딩의 카카오 로그인 링크만 `prefetch` 가 켜져 있어 Next 가 그 경로를
-미리 가져갔고, 서버가 카카오로 302 하면서 크로스 오리진 요청이 우리 CSP 에
-막힌 것이다. CSP 를 여는 대신 `prefetch` 를 껐다(카카오는 최상위 리다이렉트로만
-쓴다). 재배포 후 0건을 확인했다.
+원격 36건 catalog assertion과 16개 Edge Function은 존재 수다. 이를 pgTAP 412건에 더하거나 실제 동작 수로 해석하지 않는다. 소개 저장·목표 종료·회원 탈퇴·프로필 사진 업로드와 삭제는 각 실행 증거를 별도로 사용한다.
 
-셀프심문: 헤더 4종이 보이면 보안 PASS 인가. 그것만으로는 아니다. 의존성·인증
-경로·콘솔을 함께 봤고, 이번 판정 범위는 배포된 번들의 전송 계층 통제까지다.
+## 4. 요구↔검증 추적
 
+| 요청 번호 | 보안 요구 | 검증 | 판정 | 증거 |
+|---|---|---|---|---|
+| D-049 | 프로토타입 행동을 staging에서 실제 서버 경계와 함께 검증 | DB·Storage·HTTP·브라우저 계층 분리 | PASS | `server-contract-final/`, `staging-v2-migration-assets-inventory-20261025.json` |
+| AC-COVER-01~05 | 커버 서명·업로드·검수·오류·권한 경계 | 정상 200, hash 422, 타인 404, format 415, 최소권한 거부 | PASS | staging E2E와 서버 계약 로그 |
+| AC-FRIEND-01~02 | 친구 수락 동시성, 다른 사용자 정보 비노출 | 성공 1·used 1·connection 1, IDOR 404 | PASS | staging E2E |
+| 개인정보 변경 | 프로필 사진 원본을 비공개로 두고 안전하게 교체·정리 | Presigned URL, private path 비노출, TTL 삭제 | PASS | `staging-profile-avatar-cleanup-observation-20261025-1001.json` |
+| 결제·환전 | staging에서 실결제 차단, 관리자 계좌번호 최소 노출 | 503 경계·독립 소스 리뷰 | PASS, 실제 지급 미검증 | dependency·security review 증거 |
 
-STAMP: 2026-08-29 07:37 KST | model: gpt-5.6-sol | agent: qa-verifier | skill: qa | basis: Next 16.3.3, local build, npm audit, contracts, DB and production read-only auth | concern: dev security PASS does not prove undeployed production headers.
+## 5. 안 한 것
 
-## 판정
+1. 실제 Kakao 계정 로그인 뒤 `/auth/kakao/callback` 세션 생성.
+2. Toss 개발자 계정으로 PG sandbox 결제 승인·취소·webhook 왕복.
+3. 실제 관리자 지급 완료·반려와 그 결과 감사로그 생성. 금전 상태를 바꾸므로 실행하지 않았다.
+4. 운영 환경 권한·헤더·Storage 검증. 이번 범위는 무료 staging이다.
 
-**PASS_DEV / SHIP_VERIFY.** 이전 40개 production dependency 취약점은 0으로 해소됐다. dev 회귀·build·계약과 제품 데이터 무오염도 통과했다. 운영은 아직 구번들이므로 보안 헤더와 Firefox OAuth·GA 오류를 배포 후 다시 확인해야 한다.
+새 E2E가 만든 TTL 이전 PENDING 객체는 정상 잔여다. 이미 만료된 최초 객체의 정상 삭제는 관찰했으므로 TTL 경로를 다시 미검증으로 낮추지 않는다.
 
-| 통제 | fresh 증거 | 판정 |
-|---|---|---|
-| production dependency | `npm audit --omit=dev --json`: low 0, moderate 0, high 0, critical 0 | PASS |
-| 전체 회귀 | Vitest 44 files, 279/279 | PASS |
-| production build | Next 16.3.3, TypeScript, static 16/16 | PASS |
-| QA contracts | env 34/34, cashout 47/47, RAISE 13/13, notify 8/8, mutation 8/8 | PASS |
-| DB·Edge | pgTAP 260, Deno 58 | PASS |
-| 운영 auth 무오염 | Chromium·Firefox·WebKit `/cashout`, 금지 쓰기 0 | PASS |
-| dev 제품 무오염 | 26캡처 전후 member·goal·cheer·cashout·notification·balance hash 동일 | PASS |
-| dev 보안 헤더 | build worker localhost Chromium 필수 헤더 1/1 | 근거 확인 |
-| 운영 보안 헤더 | 구배포에서 CSP·nosniff·referrer·permissions 미관찰 | SHIP_VERIFY |
-| 운영 Firefox | GA cookie·Kakao prefetch 오류 5건 | FAIL_UNTIL_DEPLOY |
+## 6. 수용기준·판정
 
-## 차단과 소유자
+| 수용기준 | 결과 |
+|---|---|
+| 타 사용자 리소스 직접 접근은 404 또는 권한 거부 | 충족 |
+| private Storage 원본 path는 일반 사용자 응답에 없음 | 충족 |
+| 교체된 프로필 사진은 TTL 뒤 cron과 worker로 실제 삭제 | 충족 |
+| dependency 취약점 high/critical 0 | 충족 |
+| staging 실결제는 503으로 차단 | 충족 |
+| 외부 OAuth와 실제 금전 처리는 실행 없이는 PASS 금지 | 미검증 유지 |
 
-| 소유 | 차단 | 해제 증거 |
-|---|---|---|
-| ship | 최신 보안 헤더 미배포 | 대표주소 `curl -sSI`에서 CSP·nosniff·referrer·permissions, powered-by 제거 |
-| ship/QA | Firefox 소스 보정 미배포 | 운영 auth와 공개 goal 경로 console error 0 |
-| eng/legal | 지급 신원·세무정보 처리주체 미결정 | 수탁사 직접수집 또는 제품 암호화 저장 계약 승인 |
+**판정:** 확인한 V2 보안 통제 PASS. 전체 릴리스 승인은 Kakao callback과 Toss sandbox 검증 전까지 보류한다.
 
-셀프심문: audit 0과 dev 헤더만으로 보안 PASS라 할 수 있는가. 아니다. 배포된 운영 번들이 다르므로 dev 합격과 ship 검증을 분리했다.
+## 7. 결함·잔여 리스크
 
-SKILLS_USED: qa, dependency·header·DB·브라우저 보안 계층 검증
-SKILLS_SKIPPED: 없음
-SOURCES: https://supabase.com/docs/guides/local-development/testing/overview | https://supabase.com/docs/guides/local-development/cli/testing-and-linting | https://vercel.com/docs/deployment-checks
-MODEL: gpt-codex/gpt-5.6-sol
+| ID | 심각도 | 상태 | 내용 |
+|---|---|---|---|
+| SEC-EXT-01 | release blocker | open | 실제 Kakao OAuth callback 세션 미검증 |
+| SEC-PAY-01 | release blocker | open | PG sandbox 승인·취소·webhook 미검증 |
+| SEC-ADMIN-01 | major | open | 실제 지급·반려·감사로그 브라우저 경로 미검증 |
+
+## 8. 벤치마크·자체 검토
+
+ISO/IEC/IEEE 29119의 테스트 증거 분리와 Playwright의 web-first assertion 원칙을 차용했다. 소스 리뷰, 테스트 통과, 실제 HTTP·Storage 관찰을 서로 다른 증거 등급으로 유지한 점이 적용 결과다. Playwright screenshot 문서는 UI 증거에만 사용했고, 보안 동작 증거로 확대하지 않았다.
+
+셀프심문: 이 결론이 틀렸다면 가장 그럴듯한 이유는 무엇인가. staging의 권한이 운영과 다르거나 실제 OAuth·PG에서만 발생하는 설정 결함이다. 그래서 운영 안전성을 선언하지 않고 두 외부 통합을 release blocker로 남겼다.
+
+레드팀: 공격자는 unit test보다 실제 권한 경계를 노린다. 본 보고는 authenticated role 직접 시도, IDOR 404, private path 비노출, 실제 TTL 삭제를 요구해 mock 통과만으로 결론내리지 않았다.
+
+## 9. 개정 이력
+
+| 버전 | 날짜 | 변경 | 작성자 |
+|---|---|---|---|
+| v2.0.0 | 2026-10-25 | V2 staging 최신 증거로 전면 재작성 | qa-verifier |
+
+---
+
+KNOWLEDGE_QUERY: 해낼게 V2 개인정보·Storage·친구·결제 권한 경계와 QA 보안 계약
+HITS_USED: D-049, V2 server contract, Supabase staging 실행 증거, 독립 GPT-6.1 리뷰를 계층별 판정에 사용
+HITS_REJECTED: H축 14/14는 기존 cleanup 문서 참조 수라 신규 서버 자산 또는 실제 동작 수로 쓰지 않음. 2026-08 운영 보고는 다른 bundle·환경이라 승계하지 않음
+CONFLICTS: 없음. 원격 자산 존재와 실제 동작을 분리하면 증거 간 충돌이 없음
+SKILLS_USED: qa, 소스·DB·HTTP·Storage·브라우저 증거 등급을 분리하고 미검증을 보존하는 데 사용
+SKILLS_SKIPPED: web-perf, 보안 보고 범위 밖이며 성능 선택 검사는 별도 문서로 분리
+SOURCES: ISO/IEC/IEEE 29119 | https://playwright.dev/docs/test-assertions | `docs/qa/evidence/v2-ssot-20261025/`
+MODEL: gpt-codex/gpt-5.6-sol, reasoning high
+RUBRIC_SCORE: 완결성=5/5 정밀성=5/5 벤치마크=4/5 추적성=5/5 전문성=5/5 total=24/25
+WEAKEST_LINE: "실제 지급·반려·감사로그 브라우저 경로는 금전 상태를 바꾸므로 미검증이다."
+🏷 STAMP | line: v2 | 생성: 2026-10-25 12:45 KST | model: gpt-5.6-sol high | agent: qa-verifier | skill: qa | 근거: D-049, migration SHA, DB·Storage·HTTP·cron 관찰 | 고민: 자산 존재 수를 실제 동작 수로 부풀리지 않고 외부 인증·금전 처리를 미검증으로 유지

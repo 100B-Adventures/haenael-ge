@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MyPageOverview } from "./MyPageOverview";
+import type { MySocialDashboard } from "@/lib/social/contracts";
 
 const meta = {
-  title: "Social/MyPageOverview",
+  title: "Social/Layout/MyPageOverview",
   component: MyPageOverview,
   parameters: { layout: "centered" },
   decorators: [
@@ -17,8 +18,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const normal = {
-  profile: { nickname: "서연", profile_image: null },
+const normal: MySocialDashboard = {
+  profile: { nickname: "서연", bio: "한 걸음씩, 끝까지 함께해요", profile_image: null },
   goals: [{
     goal_id: 1,
     slug: "run",
@@ -34,6 +35,7 @@ const normal = {
     ],
     recent_cheer: {
       supporter_name: "도경",
+      profile_image: null,
       message: "이번 주도 꾸준히 해낼 수 있어요.",
       created_at: "2026-10-20T00:00:00Z",
       is_anonymous: false,
@@ -54,6 +56,21 @@ const normal = {
     due_date: "2026-12-20",
     cover_preset_key: "c3",
   }],
+  received_cheers: [{
+    id: 1,
+    display_name: "도경",
+    profile_image: "/images/social-viral/dogyeong.png",
+    message: "이번 주도 꾸준히 해낼 수 있어요.",
+    created_at: "2026-10-20T00:00:00Z",
+    is_anonymous: false,
+  }],
+  sent_cheers: [{
+    id: 2,
+    target_name: "민서",
+    profile_image: "/images/social-viral/jimin.png",
+    message: "오늘도 한 걸음, 꾸준히 가자",
+    created_at: "2026-10-19T00:00:00Z",
+  }],
 };
 
 const initialPreferences = { notifyCheer: true, notifyMarketing: false };
@@ -63,7 +80,7 @@ export const Normal: Story = { args: { dashboard: normal, initialPreferences } }
 export const Empty: Story = {
   args: {
     dashboard: {
-      profile: { nickname: null, profile_image: null },
+      profile: { nickname: null, bio: null, profile_image: null },
       goals: [],
       friend_count: 0,
       achievements: {
@@ -72,6 +89,8 @@ export const Empty: Story = {
         connected_friend_count: 0,
       },
       belonging_queue: [],
+      received_cheers: [],
+      sent_cheers: [],
     },
     initialPreferences,
   },

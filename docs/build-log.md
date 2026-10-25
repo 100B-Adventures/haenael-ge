@@ -1,5 +1,40 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-25 승인 프로토타입 v3 구현과 free staging 실제 검증
+
+- `docs/design/prototypes/social-viral-loop-v3-opus5.html`을 화면·상태의 SSOT로 삼아 목표 관리, 마이페이지, 친구 목록·상세, 초대, 공개 목표, 랜딩, 관리자 화면을 다시 맞췄다. 최종 독립 source review와 390px 승인본 9장 대 제품 9장 직접 대조는 신규 finding 0으로 종료됐다.
+- free Supabase staging `ezzklgotgydwxqebfoys`와 Vercel preview alias에서 실제 Auth·DB·Storage·Edge Function 쓰기 경로를 실행했다. 운영 Supabase·운영 Vercel·실결제·실은행 송금은 건드리지 않았다.
+- 원격 E2E는 한 번의 전체 PASS로 과장하지 않는다. 이전 고유 10건, 최신 소스 영향 재검증 `PW-02`·`MY-01`, `SMOKE-01`, viewport, `PW-05`, `PW-06`·`PW-07`·`CC-01`·`ORDER-ATTR-01`의 분할 로그를 합쳐 고유 17건을 닫았다. 마지막 4건은 4/4, 커버 승인은 1/1, viewport는 1/1이다. 각 wrapper는 테스트 뒤 `PAYMENTS_ENABLED=false` 복구와 무인증 요청 503 `payments_disabled`를 확인했다.
+- 데이터가 있는 공개 목표에서 360·390·412·600·700·780·820·900·1000px 모바일 사용성은 9/9 통과했다. 캡처 폴더에는 승인 390px 9장, 제품 기본 화면 390·1024·1280 각 9장과 마이페이지 하위 상태 2장, 총 39장이 있다.
+- 최종 앱 회귀는 Vitest 78파일 439건, Next.js production build, TypeScript를 통과했다. Storybook 정적 build는 21 stories·9 titles로 통과했고, title 누락 0건이다. 컴포넌트 인벤토리는 HEAD 직접 7/42(16.7%)에서 현재 직접 8/46(17.4%)로 증가했다. 새 공용 `WordmapCloudLayout`은 병설 스토리의 Default·Empty·LongWords와 기존 `Wordmap` 렌더 트리 양쪽에서 확인한다.
+- 디자인 lint는 기존 전역 부채를 숨기지 않는다. 신규 디자인 토큰 위반은 0건이지만 기존 10px·inline style·off-token hex 경고는 남아 있다. 실제 Kakao OAuth, Toss Payments 승인 API, 실은행 송금, production 배포와 production QA는 아직 하지 않았다.
+
+증거: `docs/qa/evidence/v2-ssot-20261025/web-unit-full-v9-final-20261025.log`, `web-build-v9-final-why-weight-20261025.log`, `staging-e2e-20261025-{122808,123617,124755,125645,125815}.log`, `staging-e2e-control-20261025-{123617,124755,125645,125815}.json`, `captures-v10-staging-20261025-124745/`, `storybook-build-v10-final-naming-20261025.log`, `storybook-typecheck-v10-final-20261025.log`, `docs/design/component-inventory-v1.0.0.md`.
+
+> STAMP: 생성 2026-10-25 13:15 KST. 모델 gpt-5.6-sol. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 승인 프로토타입 v3, DESIGN.md, free Supabase staging, Vercel preview, Playwright, Vitest, Next.js, Storybook 실측이다. 운영 미반영.
+
+## 2026-10-25 V2 승인 시안 재정렬·로컬 production 검증 종료
+
+- Next.js는 보안 패치 버전 `16.4.1`로 고정했고 `sharp`는 `0.35.5`를 유지했다. 최종 production build는 컴파일·TypeScript·정적 페이지 18/18을 통과했다.
+- 승인 FDD v1.2.5의 AU-03에 따라 비로그인 `/me/goal/<양의 정수>`만 권한 안내 화면까지 통과한다. 익명 화면의 목표 관리 본문·응원·잔액·소유자 데이터·법적 고지 DOM은 0건이고, 다른 `/me` 경로는 계속 인증으로 보호된다.
+- 승인 프로토타입 v3의 공개 화면 순서, 목표 커버 기본 접힘, 목표·WHY 인라인 편집, 목표·친구 워드맵 순서, 관리자 핵심 큐 우선순위, D-031-A 마이페이지 구조를 제품에 반영했다. 친구 응원자 사진은 서버 응답에 신원 데이터가 없으므로 중립 아이콘으로 바꾸고 실제 응원 수 0·1·2·4를 단위 테스트로 고정했다.
+- `/my`는 `마이페이지`·하단 탭 `마이`로 맞추고 중복 목표 블록을 제거했다. 기존 `member.nickname`과 `member.profile_image`만 사용해 이름과 4개 승인 프리셋 사진의 저장·새로고침·실패 후 재시도를 구현했다. 사진 선택기의 세로 이미지는 실제 DOM에서 44px 버튼 밖으로 11.328px 늘어나는 결함을 발견해 절대 배치 40×40, 넘침 0으로 고정했다.
+- `/my` 390px 실측은 본문 토큰 16px, 13px 미만 글자 0건, 44px 미만 터치 대상 0건, 눌림 상태 적용률 100%, 가로 넘침 0건, console error 0건이다. 이름 버튼의 첫 production CSS에는 source의 `min-width`가 빠져 실제 41.2×44px로 렌더됐다. 제거 주체는 규명하지 못했으며, logical sizing으로 바꾼 served CSS와 짧은·긴 이름 DOM을 재검증했다.
+- 데이터가 있는 공개 목표에서 공식 모바일 측정기를 360·390·412·600·700·780·820·900·1000px로 실행해 9/9 통과했다. 최종 캡처는 390·1280 기본 화면 18장과 390 이름 편집·사진 선택 2장, 합계 20장이다. 전부 DPR 3이며 물리 크기와 SHA-256은 `captures-ui-rework-final-all-20261025-0245/manifest.tsv`에 기록했다. 목표 상세 캡처는 cover·인라인 목표/WHY·워드맵·잔액을 기다린 뒤 저장해 skeleton을 증거로 쓰지 않았다.
+- 기능·반응형 검증 통과는 승인 시안과의 디자인 전체 일치를 뜻하지 않는다. 승인 목표 관리 화면은 작은 사진 커버 안의 편집 overlay, 제목 1회, inline WHY 구조인데 제품은 별도 대형 커버 카드와 하단 편집 버튼, 제목 중복, 독립 WHY 박스로 남아 있다. 마이페이지도 승인 시안과 간격·아이콘 표현이 다르다. 승인 시안 `approved-goal-detail.png`·`approved-mypage.png`와 최종 제품 `dev-goal-detail-390.png`·`dev-mypage-390.png`를 직접 대조한 결과이므로 디자인 출고는 보류한다.
+- Playwright는 소셜 15/15와 다중 목표 2/2를 별도 실행해 합계 17건의 미실행이 0이다. 최종 CSS 뒤 MY-01과 390·1280 캡처 회귀도 통과했다. 신규 주문 201·재실행 200·최초 회원 귀속, Storage upload/finalize, 관리자 승인, 공개범위, 동시 초대, 경보를 포함한다.
+- 전체 Vitest 실행은 72파일 407건 중 406건 통과, 승인된 커버 선택기 기본 접힘을 반영하지 않은 기존 카피 테스트 1건 실패였다. 테스트가 `배너 바꾸기`를 누른 뒤 사용자 라벨을 검사하도록 교정했고 해당 파일 3/3을 표적 재검증했다. 제품 소스는 그 사이 바뀌지 않았다. 기존 React `act(...)` 경고는 남아 있다.
+- 최종 backend 회귀는 pgTAP 22파일 412건을 통과했다. Storage cleanup 출고 조건 5개 명령과 `create_goal` 동시 세션도 통과했으며, 동시 생성은 1건 성공·1건 상한 거절·ACTIVE 목표 총 3건을 관찰했다. E2E fixture는 실행별 UUID·run ID·Storage prefix만 정리하며 최종 잔여는 0이다.
+- 후속 backend slice에서 프로필 한 줄 소개와 실제 사진 sign→PUT→finalize, 친구 목록의 최근 비익명 직접 메시지, 승인 프로토타입 semantic 8개 커버와 legacy `c1..c6` 호환을 구현했다. 받은·보낸 응원 내역, supporter별 횟수·최신 메시지·고유 인원수, owner-only 목표 종료, 고객센터 탈퇴 사전 확인도 같은 migration 계약으로 연결했다.
+- 프로필 사진은 5 MiB·JPEG/PNG/WebP·magic bytes·SHA-256·owner를 검증한다. 동시 정상/오류 finalize에서 ACTIVE Storage object와 member metadata가 일치했고, 타인 asset은 404, 잘못된 bytes는 415, signed upload URL 재사용은 차단됐다. 실패·교체·member 삭제 자산은 token 만료 뒤 cleanup worker가 회수한다.
+- 실제 로컬 HTTP 경로에서 sign 200, Storage PUT 200, 정상 finalize 200, 동시 오류 hash 422, 타인 finalize 404, 잘못된 magic bytes 415를 관찰했다. cleanup worker는 profile queue 1건을 claim해 Storage object를 삭제하고 DB를 `DONE`으로 전이했으며, 동시 claim·cron·재시도 경계도 통과했다.
+- Kakao 재로그인은 기존 사용자 nickname과 profile image를 원자적으로 보존하고 빈 값만 provider 기본값으로 채운다. client의 `member.profile_image` 직접 UPDATE 권한은 회수하고 service-role activation으로 단일화했다.
+- 운영 배포와 운영 Supabase 쓰기는 실행하지 않았다. free Supabase staging에는 54번째 migration과 서버 Edge Functions 16개를 배포했고 신규 RPC 존재·EXECUTE 권한을 실측했다. staging의 실제 sign→Storage PUT→finalize 쓰기 경로는 frontend E2E 판정 전까지 미검증이며 production에는 적용하지 않았다.
+
+증거: `docs/qa/evidence/v2-goal-20261024/web-build-ui-rework-final4-20261025-0254.log`, `e2e-ui-rework-final2-20261025-0226.log`, `e2e-ui-rework-final2-multigoal-20261025-0229.log`, `e2e-ui-rework-my-capture-final4-20261025-0256.log`, `e2e-ui-rework-capture-final-all-20261025-0245.log`, `unit-final-ui-rework-20261025-0258.log`, `unit-user-facing-copy-target-20261025-0243.log`, `captures-ui-rework-final-all-20261025-0245/`, `docs/qa/evidence/v2-ssot-20261025/server-contract-final/server-contract-handoff-v1.0.0-gpt-codex.md`.
+
+> STAMP: 생성 2026-10-25 KST. 모델 gpt-5.6-sol, gpt-codex. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 승인 프로토타입 v3·DESIGN.md·FDD v1.2.5·로컬 Next production 서버·Playwright·Vitest·Supabase DB·Storage runtime. 운영 미반영.
+
 ## 2026-10-22 core 감사 재오픈 P0/P1 보정
 
 - D-017 환전 경계를 서버 전용 `CASHOUT_ALLOWED_MEMBER_IDS` allowlist로 옮겼다. 값이 없거나 잘못됐거나 preview이면 기본 거부하고, Server Action 직접 호출도 DB 쓰기 전에 같은 판정을 다시 한다.

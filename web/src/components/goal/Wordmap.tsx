@@ -4,6 +4,7 @@
 // 서버 컴포넌트에서도 사용 가능 (no useState).
 
 import { normalizeWordmapKeywords } from "@/lib/wordmap/keywords";
+import { WordmapCloudLayout } from "./WordmapCloudLayout";
 
 export interface WordmapWord {
   word: string;
@@ -14,6 +15,8 @@ export interface WordmapProps {
   words: WordmapWord[];
   /** empty 상태용 이름 (목표 주인공) */
   ownerName?: string;
+  /** 정상 워드맵 안에 표시할 실제 목표 제목 */
+  goalTitle?: string;
   /** 하위 호환용. D-025-F 이후에는 값과 무관하게 전체를 보여준다. */
   showOverflowDisclosure?: boolean;
 }
@@ -53,6 +56,7 @@ function EmptyWordmap({ ownerName }: { ownerName?: string }) {
 export function Wordmap({
   words,
   ownerName,
+  goalTitle,
   showOverflowDisclosure: _showOverflowDisclosure = true,
 }: WordmapProps) {
   const normalizedWords = normalizeWordmapKeywords(words);
@@ -64,15 +68,23 @@ export function Wordmap({
   const counts = normalizedWords.map((item) => item.word_count);
   const minCount = Math.min(...counts);
   const maxCount = Math.max(...counts);
+  const trimmedGoalTitle = goalTitle?.trim() ?? "";
+  const needsHaenaelSuffix = trimmedGoalTitle && !/게[.!?]?$/u.test(trimmedGoalTitle);
+  const layoutSeed = `${trimmedGoalTitle}|${normalizedWords.map((item) => `${item.word}:${item.word_count}`).join("|")}`;
   return (
-    <div
+    <WordmapCloudLayout
       className="wordmap-cloud"
-      data-testid="wordmap"
-      role="group"
-      aria-label={`응원 메시지 워드맵, 전체 ${normalizedWords.length}개 표시`}
+      seed={layoutSeed}
+      testId="wordmap"
+      label={`응원 메시지 워드맵, 전체 ${normalizedWords.length}개 표시`}
     >
       <span className="wordmap-heart wordmap-heart--left" aria-hidden="true">♥</span>
       <span className="wordmap-heart wordmap-heart--right" aria-hidden="true">♥</span>
+      {trimmedGoalTitle && (
+        <strong className="wordmap-goal-title" data-wordmap-heading data-testid="wordmap-goal-title">
+          🍀 {trimmedGoalTitle}{needsHaenaelSuffix && <> <span>해낼게</span></>}
+        </strong>
+      )}
       {normalizedWords.map((item) => {
         const tier = getSizeTier(
           item.word_count,
@@ -92,6 +104,6 @@ export function Wordmap({
           </span>
         );
       })}
-    </div>
+    </WordmapCloudLayout>
   );
 }
