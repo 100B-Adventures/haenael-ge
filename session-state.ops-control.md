@@ -7,6 +7,7 @@
 - build 재검증 승인, current_stage qa, qa 미승인. 최신 QA5문서와 tracker가 외부 OAuth·PG 미검증을 NO-GO로 명시. 운영 배포·운영 DB 변경·실결제 없음.
 - 사용자 행동: 전용 Chrome9342의 Kakao1516450 콘솔과 Toss API키 페이지 로그인만 필요. 로그인 후 controller가 stage callback 추가·test_*키 설정·실제 왕복을 검증한다. 기존 운영 URI 보존, live_*키 사용 금지. 이미 async 요청, 중복 질문 금지.
 - native goal metadata는 실제 blocked이며 수동 작업 진행과 혼동 금지. 완료 선언하지 않는다. 사용자 로그인 후 필요한 테스트만 재개하고 전체439 반복 금지.
+- 소스·검증 문서 로컬 커밋70a9eba 생성, push 미실행. 원격 preview는 CLI snapshot 배포라 해당 커밋을 배포 Git SHA로 주장하지 않는다. raw 로그·캡처는 로컬 증거 경로에 보존했다. 문서15개 렌더와 링크19개 허브 docs/v2-deliverables/index.html을 실제 브라우저로 검사하고 전용 Chrome9342 탭 열림 확인.
 - 기존 session-state.v2.md 변경은 다른 작업 이력으로 보존. 작업이 새로 띄운 서버·브라우저 자원은 회수됨. 기존 Docker와 사용자 로그인용 Chrome은 보존.
 
 

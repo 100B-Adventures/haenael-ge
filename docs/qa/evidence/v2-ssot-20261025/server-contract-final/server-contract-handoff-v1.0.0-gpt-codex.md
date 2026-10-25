@@ -41,7 +41,7 @@
 
 까다로운 보안 검수 관점에서는 service-role RPC 우회, 동시 finalize의 ACTIVE object 삭제, Presigned URL 만료 전 orphan, Kakao 재로그인의 사용자 편집 덮어쓰기가 주요 공격점이다. migration과 Edge Function은 각각 권한 회수, compare-and-set 상태 전이, 만료 뒤 cleanup queue, 원자적 default hydration으로 닫았고 독립 리뷰가 실행 로그까지 확인했다.
 
-SKILLS_USED: haenael-supabase-build, Supabase 서버 계약 구현·로컬 DB·Storage·Edge Function 검증에 사용  
-SKILLS_SKIPPED: 없음  
-SOURCES: `docs/design/prototypes/social-viral-loop-v3-opus5.html`, `docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md`, https://supabase.com/docs/reference/javascript/storage-from-createsigneduploadurl  
+SKILLS_USED: haenael-supabase-build, Supabase 서버 계약 구현·로컬 DB·Storage·Edge Function 검증에 사용
+SKILLS_SKIPPED: 없음
+SOURCES: `docs/design/prototypes/social-viral-loop-v3-opus5.html`, `docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md`, https://supabase.com/docs/reference/javascript/storage-from-createsigneduploadurl
 MODEL: gpt-5.6-sol

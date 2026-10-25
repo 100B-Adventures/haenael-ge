@@ -142,4 +142,3 @@ export function profileErrorStatus(code: string): number {
   ) return 422;
   return 500;
 }
-
