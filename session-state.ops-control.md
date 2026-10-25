@@ -1,5 +1,12 @@
 # ops-control 인계
 
+## 2026-10-25 20:42 KST · GOAL 시작 이후 누적 작업 재대조
+
+- 사용자 요청: “goal 시작이후 지금까지 세션에서 진행한거 말해봐”. 기준은 이 세션 GOAL 시작 2026-10-24 19:27과 이후 실제 커밋·구현문서·원본 로그. 새 코드·DB·배포 작업 아님.
+- 확인: 시작 HEAD c5ecc8a 이후 주요3커밋70a9eba/0915dd8/d97a427, 변경112파일9297추가1386삭제. 기존 session-state.v2.md 미커밋 변경은 보존. 최상위 하위폴더의 중첩 .git0 확인.
+- 원본 재확인: Vitest78파일439건, Storybook build 성공, 마지막 원격E2E4건PASS. 전체 기능17개는 분할 실행 중복 제외 결과이며 단일17PASS가 아님. DB412와 서버runtime 상세는 handoff 로그SHA·QA보고서에 기록. 자연TTL queue DONE/Storage0 실측JSON과 deployed runtime128파일 일치JSON 재조회.
+- 현재 current_stage qa, build approved, QA·ship 미승인. 실제 외부OAuth·Tosssandbox 미검증. native get_goal 상태blocked는 실제값이며 수동작업이 계속됐다고 active/complete로 조작하지 않음. 메인Chrome 계정 확인보다 전용프로필을 우선한 오류와 재로그인 요청 철회 유지.
+
 ## 2026-10-25 20:30 KST · 메인 Chrome 우선 규칙 누락으로 재로그인 요청 철회
 
 - 사용자 원문: “메인크롬 창에 로그인 되어있는데 전용 브라우저 들어가는 이유? 하네스에 정리 안되어있나?”
