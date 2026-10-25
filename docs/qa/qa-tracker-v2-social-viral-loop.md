@@ -1,5 +1,11 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+## 2026-10-25 20:30 KST · 브라우저 선택 오류 등록 (controller 운영 이슈)
+
+| 요청 번호 | 범위 | 현재 판정 | 원인·근거·조치 |
+|---|---|---|---|
+| OPS-BROWSER-20261025-01 | 메인 Chrome 계정 확인 없이 전용 Chrome 재로그인 요청 | ❌ NG | 사용자 원문: “메인크롬 창에 로그인 되어있는데 전용 브라우저 들어가는 이유? 하네스에 정리 안되어있나?” 표준 browser-automation.md §1-5는 Toss와 결제 플랫폼의 메인 Chrome 우선 확인을 명시한다. controller는 CDP9342 미로그인만 보고 재로그인을 요구했다. 재로그인 요청 철회. 현재 Codex 세션의 Claude in Chrome 도구 미노출은 확인했지만 메인 콘솔 직접 조회는 미검증. 기존 제품 QA 판정을 변경하지 않음. |
+
 ## 2026-10-25 free staging 실제 쓰기·시각 재검증
 
 > build 단계가 만든 staging 증거다. production 배포·production QA 승인으로 승격하지 않는다.

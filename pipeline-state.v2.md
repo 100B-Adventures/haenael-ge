@@ -65,7 +65,7 @@ approved_artifacts:
     - { path: supabase/migrations/20261025010000_v2_prototype_contract_completion.sql, version: unversioned, status: approved, label: "신규 migration, staging 적용·운영 미적용", sha256: 131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999 }
   qa:
     - { path: docs/qa/v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.md, version: unversioned, status: changes-requested, label: "현재 staging QA, OAuth·PG 미검증으로 승인 보류", sha256: 8cd1ad61c38198cf84012126c0c3b492c2eb438491d2f12e4e70256e187184a0 }
-    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: changes-requested, label: "현재 기능 QA 추적", sha256: c5530ad7b1bc075cc78a1c2f163acb57575a244b945de7a1348438dacfb9dea4 }
+    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: changes-requested, label: "현재 기능 QA 추적", sha256: 9405ee1270f1a53a6f51a76ef2b0e0292b21b326c4a778cde746fc1458ac00b7 }
     - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: changes-requested, label: "프로토타입·staging 대조", sha256: 168de1703fce20266254dcd3fbc98294a2c577eee412051c9a496e791e12cc70 }
     - { path: docs/qa/cross-browser-matrix.md, version: unversioned, status: changes-requested, label: "Chromium·모바일 검증, 선택 브라우저 미검증", sha256: 6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55 }
     - { path: docs/qa/security-report.md, version: unversioned, status: changes-requested, label: "보안 검증과 미검증 범위", sha256: 7edd2b218baf1f1cc87f1bbc6c3bb6e60f11a9a5ac05a3a08679c99037d0d9f3 }

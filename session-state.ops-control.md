@@ -1,5 +1,12 @@
 # ops-control 인계
 
+## 2026-10-25 20:30 KST · 메인 Chrome 우선 규칙 누락으로 재로그인 요청 철회
+
+- 사용자 원문: “메인크롬 창에 로그인 되어있는데 전용 브라우저 들어가는 이유? 하네스에 정리 안되어있나?”
+- 정본 browser-automation.md §1-5에 Toss 메인 로그인·결제 플랫폼 메인 우선 확인이 이미 있다. CDP 가능한 전용9342만 보고 로그인 필요를 선언한 controller 판단 오류다. 로그인 부재와 도구 미노출을 구별하지 않았다.
+- 사용자에게 전용 브라우저 재로그인 요청 철회. QA tracker OPS-BROWSER-20261025-01 ❌ NG 등록. native 도구 메타데이터에 Claude in Chrome/enable 도구 없음 확인, 메인 콘솔 실제 로그인 상태는 사용자 확인이며 controller 직접 조회는 미검증. 쿠키 복사·메인 Chrome 재시작·하네스 수정 미실행.
+- 다음 작업은 기존 메인 Chrome 세션 접근 통로 확인. 사용자 로그인 반복 요청 금지. 기존 stage 테스트·QA 미승인 상태 유지.
+
 ## 2026-10-25 13:23 KST · 개발 검수 종료, 실제 외부 통합 두 건 미검증
 
 - D-049 프로토타입 SSOT 구현. 무료 Supabase staging ezzklgotgydwxqebfoys, 최신 preview dpl_6ngntmdYQpZHbo83PvuQyhbtiYvu와 canonical stage alias 직접 확인. runtime128파일 현재 소스와 일치.
