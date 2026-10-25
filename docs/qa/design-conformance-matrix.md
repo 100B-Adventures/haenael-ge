@@ -22,29 +22,29 @@
 
 ## TL;DR
 
-D-049 프로토타입을 정본으로 최신 staging의 9개 화면을 같은 390px 상태로 대조한 결과 9/9 **일치**다. QA와 독립 reviewer가 18장을 원본 해상도로 각각 열었고, WHY 글꼴 굵기 400, 목표 상세 간격 24/4/10, 초대 커버 128px, 관리자 REQUESTED 위계를 실제 computed style과 화면으로 확인했다.
+최신 staging의 목표 관리 화면을 승인본과 다시 직접 대조한 결과, 응원자 횟수 badge가 **불일치**다. 승인본은 연녹색 pill 배경이고 제품은 배경 없는 초록 텍스트다. 과거 9쌍 대조 실행은 기록으로 보존하지만 포괄 9/9 일치 판정은 현재 출고 근거로 사용하지 않는다. 현재 화면 단위 판정은 **0 일치·1 불일치·8 미확인**이다.
 
 ## 1. 목적·판정 규칙
 
 목적은 기능 통과와 디자인 일치를 분리하고, 주축·순서·열 수·정렬·여백·표시·글꼴 단계·버튼 위계·상태 전환을 화면별로 검증하는 것이다. 판정어는 `일치`, `불일치`, `미확인`만 사용한다.
 
-동적 이름·목표·사진·숫자·wordmap 단어 위치는 데이터 차이로 제외한다. staging의 `NEXT_PUBLIC_PAYMENTS_ENABLED=false`로 인한 공개 목표 CTA 비활성은 상태 차이로 분리하며, 활성 결제 CTA와 PG sandbox는 미확인이다.
+동적 이름·목표·사진·숫자·wordmap 단어 위치는 데이터 차이로 제외한다. staging의 `NEXT_PUBLIC_PAYMENTS_ENABLED=false`로 인한 공개 목표 CTA 비활성은 상태 차이로 분리하며, 활성 결제 CTA와 PG sandbox는 미확인이다. 이번 정정은 목표 관리 승인·제품 PNG와 해당 CSS만 다시 판정했으며 나머지 8개 화면은 새 판정을 내리지 않았다.
 
 ## 2. 화면·상태 정합 매트릭스
 
 | 요청 번호 | 화면 | 상태 | 행동 명세 | 행동 구현 | 수치 규격 | 수치 구현 | 판정 | 다른 점과 이유 |
 |---|---|---|---|---|---|---|---|---|
-| D-049·PW-02 | 목표 관리 | active 목표·편집 버튼 표시 | cover→상태→제목·WHY→wordmap→응원자→잔액→관리 액션 | 동일 순서·1열·표시 상태. 제목·WHY 44px hit target과 glyph ownership 관찰 | WHY→label 24px, label→count 4px, count→wordmap 10px, WHY 400 | 24/4/10, 400/400, lower gap 24/24, pencil intersection 0 | 일치 | 목표 문구·응원 수·wordmap 단어는 fixture 데이터 차이 |
-| D-049·MY-01 | 마이페이지 | populated profile·activity·cheer | profile→활동→응원→알림→계정, 하단 마이 active | 동일 순서·카드 위계·편집 affordance. 이름·소개 저장·reload 별도 관찰 | 390px, avatar 편집 44px, 글자 13px 미만 0 | tap<44 0, profile rect 겹침 0, overflow 0 | 일치 | 소개 empty와 알림 숫자는 데이터 차이 |
-| D-049·VIEWPORT-01 | 친구 목록 | 친구 3명 populated | avatar·이름·목표·관계 badge·progress·최근 응원 | 3행 모두 동일 정보 구조와 우측 행동 위계 | avatar 44px, 목표 13px 2줄 clamp, news 2줄 clamp | 3행 avatar 44, goal 13, clamp 2/2, 정렬 flex-start | 일치 | 행 순서·관계 문구는 실제 관계 데이터 차이 |
-| D-049·VIEWPORT-01 | 친구 상세 | 관계 ACTIVE·응원·wordmap populated | cover→관계→profile→supporter summary→받은 응원→wordmap | 동일 순서·pill·전체 보기·wordmap surface | 390px, cover와 portrait hierarchy, 1열 | 구조와 위계 일치, overflow 0 | 일치 | cover preset·목표명·wordmap 단어는 데이터 차이 |
-| D-049·VIEWPORT-01 | 초대 생성 | accepted 관계 panel 표시 | hero→Kakao preview→Kakao·link action→accepted panel | accepted fixture로 동일 상태 생성, 버튼 위계·panel 표시 | 390px, 2열 action, fixed bottom nav | 2열·정렬·여백·active tab 일치 | 일치 | 수락자 이름·시각은 fixture 데이터 차이 |
-| D-049·VIEWPORT-01 | 초대 수락 | guest preview | 큰 상단 여백→128px gradient cover→avatar→설명→primary CTA | 동일 순서·generic cover·center alignment | card y 60, cover y 211.921875, height 128 | 60/211.921875/128 exact | 일치 | 목표 문구는 fixture 데이터 차이 |
-| D-049·VIEWPORT-01 | 랜딩 | 비회원 기본 | brand→hero→설명 CTA→wordmap→social proof→primary CTA | 동일 순서·wordmap fill·버튼 위계·하단 탭 | wordmap height 약 384px, 3초 motion·collision 0 | 385.75px, position change 관찰, collision 0 | 일치 | 단어 좌표는 동적 motion 상태 차이 |
-| D-049·VIEWPORT-01 | 공개 목표 | base, payments disabled | login→title/status→cover→WHY→count→wordmap→cheer CTA | 동일 구조·WHY rail·typography. CTA는 환경상 disabled copy | 390px, 1열, WHY·wordmap hierarchy | 구조·간격 일치, overflow 0 | 일치 | 승인 CTA active와 staging disabled는 환경 상태 차이. 활성 PG는 미확인 |
-| D-049·VIEWPORT-01 | 관리자 | REQUESTED cashout 2건·회원 rows | header→queue count→compact requests→members→ledger | 동일 구조·compact row·plain muted status·count label | 390px, 2열 action, REQUESTED background transparent | requested 2건, background transparent, overflow 0 | 일치 | 회원·ledger 행 수는 데이터 cardinality 차이. prototype 2행은 mock이며 계약 상한은 100/200 |
+| QA-V2-VISUAL-20261025-01·D-049·PW-02 | 목표 관리 | active 목표·응원자 목록 표시 | 응원자 횟수는 연녹색 pill badge | 배경 없는 초록 텍스트. 숫자·메시지 fixture 차이는 제외 | pill 배경·padding·border-radius | `globals.css:868`은 color·font-size만 정의 | 불일치 | 승인·제품 PNG를 이번 턴 직접 재대조. 현재 출고 차단 결함 |
+| D-049·MY-01 | 마이페이지 | populated profile·activity·cheer | profile→활동→응원→알림→계정, 하단 마이 active | 과거 실행 기록 보존 | 390px, avatar 편집 44px, 글자 13px 미만 0 | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음 |
+| D-049·VIEWPORT-01 | 친구 목록 | 친구 3명 populated | avatar·이름·목표·관계 badge·progress·최근 응원 | 과거 실행 기록 보존 | avatar 44px, 목표 13px 2줄 clamp, news 2줄 clamp | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음 |
+| D-049·VIEWPORT-01 | 친구 상세 | 관계 ACTIVE·응원·wordmap populated | cover→관계→profile→supporter summary→받은 응원→wordmap | 과거 실행 기록 보존 | 390px, cover와 portrait hierarchy, 1열 | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음 |
+| D-049·VIEWPORT-01 | 초대 생성 | accepted 관계 panel 표시 | hero→Kakao preview→Kakao·link action→accepted panel | 과거 실행 기록 보존 | 390px, 2열 action, fixed bottom nav | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음 |
+| D-049·VIEWPORT-01 | 초대 수락 | guest preview | 큰 상단 여백→128px gradient cover→avatar→설명→primary CTA | 과거 실행 기록 보존 | card y 60, cover y 211.921875, height 128 | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음 |
+| D-049·VIEWPORT-01 | 랜딩 | 비회원 기본 | brand→hero→설명 CTA→wordmap→social proof→primary CTA | 과거 실행 기록 보존 | wordmap height 약 384px, 3초 motion·collision 0 | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음 |
+| D-049·VIEWPORT-01 | 공개 목표 | base, payments disabled | login→title/status→cover→WHY→count→wordmap→cheer CTA | 과거 실행 기록 보존 | 390px, 1열, WHY·wordmap hierarchy | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음. 활성 PG도 미확인 |
+| D-049·VIEWPORT-01 | 관리자 | REQUESTED cashout 2건·회원 rows | header→queue count→compact requests→members→ledger | 과거 실행 기록 보존 | 390px, 2열 action, REQUESTED background transparent | 과거 수치 기록 보존 | 미확인 | 이번 정정에서 새 판정하지 않음 |
 
-화면 단위 커버리지: **일치 9 / 불일치 0 / 미확인 0**. 실제 Kakao OAuth callback과 활성 결제 CTA는 화면 구조가 아닌 외부 통합 범위로 §6에 남긴다.
+화면 단위 현재 판정: **일치 0 / 불일치 1 / 미확인 8**. 실제 Kakao OAuth callback과 활성 결제 CTA는 화면 구조가 아닌 외부 통합 범위로 §6에 남긴다.
 
 ## 3. 반응형·사용성 수치
 
@@ -77,44 +77,46 @@ D-049 프로토타입을 정본으로 최신 staging의 9개 화면을 같은 39
 flowchart LR
   A[D-049 prototype SHA] --> B[390px 승인 캡처 9장]
   C[immutable preview] --> D[390px 구현 캡처 9장]
-  B --> E[QA original 18장 직접 대조]
+  B --> E[과거 18장 대조 기록]
   D --> E
-  E --> F[독립 reviewer original 18장 대조]
-  F --> G[9 일치·0 불일치·0 미확인]
+  E --> F[목표 관리 2장 재대조]
+  F --> G[0 일치·1 불일치·8 미확인]
   C --> H[9폭 사용성·1024/1280 runtime]
 ```
 
 ## 6. 미확인·오픈 이슈
 
-1. 활성 결제 CTA와 Toss PG sandbox 화면. staging은 의도적으로 payments disabled다.
-2. 실제 Kakao 계정 로그인 후 callback UI.
-3. Firefox·WebKit의 동일 화면 정합. 선택 검사이며 별도 문서에 미확인으로 기록했다.
-4. 관리자 목록의 pagination은 기존 계약 부채다. 현재 V2 prototype의 2행 mock을 pagination 요구로 오독하지 않았고, 이번 디자인 판정 범위를 새 DB/API 설계로 확대하지 않았다.
+1. 목표 관리 응원자 횟수 badge. 승인본의 연녹색 pill 배경이 제품에 없다. `QA-V2-VISUAL-20261025-01` NG.
+2. 나머지 8개 화면. 이번 재검증에서 새 판정을 내리지 않았다.
+3. 활성 결제 CTA와 Toss PG sandbox 화면. staging은 의도적으로 payments disabled다.
+4. 실제 Kakao 계정 로그인 후 callback UI.
+5. Firefox·WebKit의 동일 화면 정합. 선택 검사이며 별도 문서에 미확인으로 기록했다.
+6. 관리자 목록의 pagination은 기존 계약 부채다. 현재 V2 prototype의 2행 mock을 pagination 요구로 오독하지 않았고, 이번 디자인 판정 범위를 새 DB/API 설계로 확대하지 않았다.
 
 ## 7. 벤치마크·자체 검토
 
-Playwright의 같은 viewport screenshot comparison과 web-first assertion을 차용했다. 단순 픽셀 diff 대신 상태 fixture, computed geometry, DB·network 결과를 결합한 점이 변경 사항이다.
+Playwright의 같은 viewport screenshot comparison과 web-first assertion을 차용했다. 이번 재검증은 동일한 목표 관리 승인·제품 PNG를 다시 열고 CSS 선언까지 대조했다.
 
-셀프심문: 이 결론이 틀렸다면 가장 그럴듯한 이유는 무엇인가. 동적 데이터 차이를 너무 넓게 제외했을 가능성이다. 그래서 데이터 값만 제외하고 구조·위계·표시 여부·정렬·computed 수치는 그대로 판정했다.
+셀프심문: 이 결론이 틀렸다면 가장 그럴듯한 이유는 badge 차이가 숫자 fixture 차이로 오인됐을 가능성이다. 숫자 8회와 1회는 제외했지만 pill 배경 유무는 데이터와 무관한 CSS 구조 차이라 불일치로 유지했다.
 
-레드팀: 비슷해 보인다는 인상만으로 일치를 선언할 수 있다. 이를 막기 위해 QA와 독립 reviewer가 18장을 각각 원본으로 열고, 24/4/10·400·128·44 같은 load-bearing 수치를 테스트에서 확인했다.
+레드팀: 과거 독립 reviewer의 finding 0을 그대로 인용하면 새로 관찰한 badge 누락을 덮게 된다. 그래서 과거 실행은 기록으로만 남기고 현재 포괄 일치 판정을 철회했다.
 
 ## 8. 개정 이력
 
 | 버전 | 날짜 | 변경 | 작성자 |
 |---|---|---|---|
-| v2.0.0 | 2026-10-25 | 최신 immutable preview 9쌍과 수치 증거로 전면 재작성 | qa-verifier |
+| v2.0.0 | 2026-10-25 | 목표 관리 badge 재대조 결과를 반영해 포괄 9/9 판정 철회 | qa-verifier |
 
 ---
 
 KNOWLEDGE_QUERY: 해낼게 V2 D-049 프로토타입 정본, 화면 상태, 8속성 정합, 모바일 수치 기준
-HITS_USED: D-049를 화면·동작 SSOT로 사용. `standard-design.md` §16과 QA 역할 계약을 이미지·수치 대조에 사용
-HITS_REJECTED: 2026-10-13 이전 matrix와 v6/v7 캡처는 다른 bundle·해소 전 상태라 최종 판정에 승계하지 않음
+HITS_USED: D-049를 화면·동작 SSOT로 사용. 목표 관리 승인·제품 PNG, `globals.css:868`, `QA-V2-VISUAL-20261025-01`을 현재 판정에 사용
+HITS_REJECTED: 과거 9쌍 finding 0 판정은 이번 badge 재대조와 충돌하므로 현재 출고 근거에서 제외. 2026-10-13 이전 matrix와 v6/v7 캡처도 다른 bundle이라 승계하지 않음
 CONFLICTS: 일반 모바일 글자 중앙값 16px 권고와 D-049의 실제 13px 중앙값 충돌. 정합에는 D-049 우선, 일반 권고 미달은 별도 기록
-SKILLS_USED: qa, 기능·사용성·시각 정합 증거를 분리하고 9쌍을 같은 상태로 검증하는 데 사용
+SKILLS_USED: qa, 목표 관리 badge 재대조와 과거 포괄 판정 철회에 사용
 SKILLS_SKIPPED: 없음
-SOURCES: https://playwright.dev/docs/test-snapshots | https://playwright.dev/docs/test-assertions | `wiki/거버넌스/결정.md` D-049 | `docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/`
+SOURCES: https://playwright.dev/docs/test-snapshots | https://playwright.dev/docs/test-assertions | `wiki/거버넌스/결정.md` D-049 | `docs/qa/qa-tracker-v2-social-viral-loop.md` | `web/src/app/globals.css:868` | `docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/`
 MODEL: gpt-codex/gpt-5.6-sol, reasoning high
 RUBRIC_SCORE: 완결성=5/5 정밀성=5/5 벤치마크=5/5 추적성=5/5 전문성=5/5 total=25/25
-WEAKEST_LINE: "활성 결제 CTA는 payments disabled 환경 때문에 시각 상태를 직접 대조하지 못했다."
-🏷 STAMP | line: v2 | 생성: 2026-10-25 12:52 KST | model: gpt-5.6-sol high | agent: qa-verifier | skill: qa | 근거: D-049, immutable preview, 9쌍 18장 original Read, computed geometry | 고민: 데이터·환경 상태 차이를 구조 불일치와 분리하되 미검증 외부 통합은 숨기지 않음
+WEAKEST_LINE: "나머지 8개 화면은 이번 재검증에서 새 판정을 내리지 않았다."
+🏷 STAMP | line: v2 | 생성: 2026-10-25 20:45 KST | model: gpt-5.6-sol high | agent: qa-verifier | skill: qa | 근거: D-049, goal-detail 승인·제품 PNG direct Read, globals.css, QA tracker | 고민: 과거 포괄 판정을 현재 출고 근거로 남기지 않음

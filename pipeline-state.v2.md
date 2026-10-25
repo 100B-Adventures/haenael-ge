@@ -64,9 +64,9 @@ approved_artifacts:
     - { path: docs/eng-design/v2-prototype-server-contract-v1.0.0-gpt-codex-20261025-0653.md, version: unversioned, status: approved, label: "프로토타입 구현 서버 계약 보완", sha256: b2505912b09c4b6b4e396fdbc5d87d34f010815c202082e42322c09d0949fe6e }
     - { path: supabase/migrations/20261025010000_v2_prototype_contract_completion.sql, version: unversioned, status: approved, label: "신규 migration, staging 적용·운영 미적용", sha256: 131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999 }
   qa:
-    - { path: docs/qa/v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.md, version: unversioned, status: changes-requested, label: "현재 staging QA, OAuth·PG 미검증으로 승인 보류", sha256: 8cd1ad61c38198cf84012126c0c3b492c2eb438491d2f12e4e70256e187184a0 }
-    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: changes-requested, label: "현재 기능 QA 추적", sha256: 9405ee1270f1a53a6f51a76ef2b0e0292b21b326c4a778cde746fc1458ac00b7 }
-    - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: changes-requested, label: "프로토타입·staging 대조", sha256: 168de1703fce20266254dcd3fbc98294a2c577eee412051c9a496e791e12cc70 }
+    - { path: docs/qa/v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.md, version: unversioned, status: changes-requested, label: "현재 staging QA, OAuth·PG 미검증으로 승인 보류", sha256: 5c32e855d0e95890effe460ae31904701b876146b51b229ae30dca14a7696658 }
+    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: changes-requested, label: "현재 기능 QA 추적", sha256: 845eb0acf7e93f5912c622ddd4187d9307046d826450ec7123f0e2df9f695662 }
+    - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: changes-requested, label: "프로토타입·staging 대조", sha256: d1a5d7d591a752c8e18ce2576639916d930a8950d12a2a58d5ee41d2272f28ad }
     - { path: docs/qa/cross-browser-matrix.md, version: unversioned, status: changes-requested, label: "Chromium·모바일 검증, 선택 브라우저 미검증", sha256: 6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55 }
     - { path: docs/qa/security-report.md, version: unversioned, status: changes-requested, label: "보안 검증과 미검증 범위", sha256: 7edd2b218baf1f1cc87f1bbc6c3bb6e60f11a9a5ac05a3a08679c99037d0d9f3 }
     - { path: docs/qa/perf-report.md, version: unversioned, status: changes-requested, label: "성능 측정 범위, Web Vitals·부하 미검증", sha256: bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092 }

@@ -8,7 +8,7 @@
 | 상류 산출물(핀) | D-049, prototype v3.0.0 SHA-256 `afca1c03…24d5de9a`, V2 server contract migration SHA-256 `13104607…630999` |
 | 대상 빌드 | Vercel preview `dpl_6ngntmdYQpZHbo83PvuQyhbtiYvu`, immutable `haenael-9ujgvzzu5-100-b.vercel.app` |
 | 대상 DB | Supabase staging `ezzklgotgydwxqebfoys` |
-| 승인 게이트 | QA 승인 전. staging runtime·Storybook build gate PASS. 외부 OAuth·PG가 남아 전체 QA·release NO-GO |
+| 승인 게이트 | QA 미승인. 기능·서버·Storybook PASS, 목표 관리 badge 디자인 불일치 1건과 외부 OAuth·PG 미검증으로 release NO-GO |
 
 ## 목차
 
@@ -28,13 +28,13 @@
 
 ## TL;DR
 
-V2는 무료 Supabase staging과 최신 immutable preview에서 기능 E2E 고유 17/17, web unit 78 files·439 tests, DB 22 files·412 tests, 디자인 9/9 화면, 모바일 9/9 폭을 통과했다. Storybook도 최신 title 규격으로 재빌드됐고, 21 stories·9 titles·title 누락 0, 작업트리 coverage 8/46을 확인했다. 실제 Kakao OAuth callback과 Toss PG sandbox는 미검증이므로 전체 QA 승인과 운영 release는 **NO-GO**다.
+V2는 무료 Supabase staging과 최신 immutable preview에서 기능 E2E 고유 17/17, web unit 78 files·439 tests, DB 22 files·412 tests, 모바일 9/9 폭과 Storybook build gate를 통과했다. 그러나 목표 관리 화면의 응원자 횟수 badge는 승인본의 연녹색 pill 배경이 제품에 없어 **불일치**다. 나머지 8개 화면은 이번 재검증에서 새 판정을 내리지 않았다. 실제 Kakao OAuth callback과 Toss PG sandbox도 미검증이므로 전체 QA 승인과 운영 release는 **NO-GO**다.
 
 ## 1. 요청·결론
 
 회장 요청: 이전 목표 실행이 개발·QA까지 가지 못하고 앞 단계에서 토큰을 소진한 문제를 반복하지 말고, 프로토타입을 화면·행동의 정본으로 삼아 무료 Supabase staging에서 개발과 QA를 끝까지 진행하라는 요구다. 설명 없는 기술 선택이나 이미 확정된 앱 코드·무료 staging 선택을 다시 회장 결정으로 넘기지 말라는 지시도 포함한다.
 
-한 줄 결론: **staging runtime과 Storybook build gate는 통과했지만, 실제 Kakao OAuth callback과 Toss PG sandbox가 남아 전체 QA 승인과 운영 release는 보류한다.**
+한 줄 결론: **기능·서버·Storybook은 통과했지만, 목표 관리 badge 디자인 불일치 1건과 실제 Kakao OAuth·Toss PG sandbox 미검증으로 전체 QA 승인과 운영 release를 보류한다.**
 
 ## 2. 목적·범위·용어
 
@@ -65,14 +65,15 @@ flowchart LR
   A[D-049 prototype·server contract] --> B[build·unit·DB]
   B --> C[immutable preview·staging]
   C --> D[기능 E2E 17개]
-  C --> E[디자인 9쌍·9폭]
+  C --> E[디자인 PNG 재대조]
   C --> F[권한·Storage·TTL]
-  D --> G{필수 내부 QA}
-  E --> G
+  D --> G[기능·서버 PASS]
   F --> G
-  G -->|runtime PASS| H[Storybook build gate PASS]
-  H --> J[외부 OAuth·PG]
-  J -->|미검증| K[전체 QA·release NO-GO]
+  E --> H[목표 관리 badge 불일치]
+  G --> I[Storybook build gate PASS]
+  H --> K[전체 QA·release NO-GO]
+  I --> J[외부 OAuth·PG]
+  J -->|미검증| K
 ```
 
 환경 신원:
@@ -88,7 +89,7 @@ flowchart LR
 | 항목 | 값 | 판정 |
 |---|---:|---|
 | 기능 E2E 고유 테스트 | 17 / 17 | PASS, 여러 실행의 합집합 |
-| 최신 visual-impact 표적 | 9 / 9 | PASS, 2+1+1+1+4 분할 실행 |
+| 최신 변경 영향 기능 표적 | 9 / 9 | PASS, 2+1+1+1+4 분할 실행 |
 | web unit | 78 files / 439 tests | PASS |
 | Next.js build | static page generation 18 / 18 | PASS |
 | Storybook build gate | build rc0, typecheck rc0, 21 stories·9 titles·title 누락 0 | PASS |
@@ -97,7 +98,7 @@ flowchart LR
 | Supabase 서버 계약 | 5 / 5 | PASS |
 | 원격 migration catalog | 36 / 36 assertion | 존재 확인 PASS |
 | Edge Functions | 16 / 16 ACTIVE | 존재 확인 PASS |
-| 디자인 화면 | 9 일치 / 0 불일치 / 0 미확인 | PASS |
+| 디자인 화면 현재 판정 | 0 일치 / 1 불일치 / 8 미확인 | FAIL |
 | 모바일 폭 | 9 / 9 | PASS |
 | production dependency 취약점 | 0 / 0 / 0 / 0 / 0 | PASS |
 | 필수 외부 통합 | 0 / 2 | 미검증 |
@@ -133,7 +134,7 @@ Storybook formal gate는 `storybook-build-v10-final-naming-20261025.log`의 buil
 | `staging-e2e-20261025-125645.log` | 최종 preview PW-05 | 1 PASS |
 | `staging-e2e-20261025-125815.log` | 최종 preview PW-06, PW-07, CC-01, ORDER-ATTR-01 | 4 PASS |
 
-최신 visual-impact 표적 9개는 `PW-02, MY-01, SMOKE-01, VIEWPORT-01, PW-05, PW-06, PW-07, CC-01, ORDER-ATTR-01`이며 9/9 통과했다. 각 wrapper는 temporary payments enable 뒤 `false`로 복구했고, 최종 smoke는 503 `payments_disabled`를 확인했다. fixture cleanup도 잔여 0으로 끝났다.
+최신 변경 영향 기능 표적 9개는 `PW-02, MY-01, SMOKE-01, VIEWPORT-01, PW-05, PW-06, PW-07, CC-01, ORDER-ATTR-01`이며 9/9 통과했다. 이 결과는 기능 E2E 판정이며 디자인 일치 근거로 사용하지 않는다. 각 wrapper는 temporary payments enable 뒤 `false`로 복구했고, 최종 smoke는 503 `payments_disabled`를 확인했다. fixture cleanup도 잔여 0으로 끝났다.
 
 ### 6.2 대표 Gherkin
 
@@ -149,10 +150,16 @@ Feature: V2 staging social loop
 
 ## 7. 디자인·반응형 결과
 
-상세 정본은 `docs/qa/design-conformance-matrix.md`다.
+상세 정본은 `docs/qa/design-conformance-matrix.md`다. 과거 390px DPR 3 승인·제품 9쌍 대조 실행과 독립 reviewer 판정은 기록으로 보존하지만 현재 출고 근거로 사용하지 않는다.
 
-- 390px DPR 3 승인 9장과 staging 9장을 QA가 original로 직접 열었다.
-- 독립 reviewer도 같은 18장을 original로 열어 구조·컴포넌트·플로우 finding 0을 판정했다.
+- 이번 재검증에서 `approved-goal-detail-390.png`와 `dev-goal-detail-390.png`를 다시 직접 열었다.
+- 승인본의 응원자 횟수 badge는 연녹색 pill 배경이 있으나 제품은 배경 없는 초록 텍스트다.
+- `globals.css:868`도 해당 요소에 color와 font-size만 정의하며 pill 배경·padding·border-radius가 없다.
+- 숫자와 메시지 fixture 차이는 결함으로 세지 않았다.
+- 나머지 8개 화면은 이번 재검증에서 새 판정을 내리지 않았다.
+
+아래 수치는 과거 실행 기록이며 현재 디자인 PASS 근거로 사용하지 않는다.
+
 - 목표 상세: WHY 400/400, 간격 24/4/10, lower gap 24/24, 편집 hit target 44, glyph intersection 0.
 - 초대 수락: card y 60, cover y 211.921875, cover height 128.
 - 랜딩 wordmap: height 385.75, 3초 position change, collision 0.
@@ -202,7 +209,7 @@ catalog 36건과 Edge Function 16개는 존재 확인이다. 이를 DB test 412�
 
 | 수용기준 | 결과 |
 |---|---|
-| prototype SSOT 9화면 불일치 0 | 충족 |
+| prototype SSOT 화면 불일치 0 | 미충족. 목표 관리 badge 불일치 1, 나머지 8 미확인 |
 | 기능 E2E 고유 17개 미실행·실패 0 | 충족 |
 | web·DB 회귀 실패 0 | 충족 |
 | 쓰기 경로를 staging에서 실제 실행 | 충족 |
@@ -211,9 +218,9 @@ catalog 36건과 Edge Function 16개는 존재 확인이다. 이를 DB test 412�
 | 실제 Kakao OAuth callback | 미충족 |
 | Toss PG sandbox 왕복 | 미충족 |
 
-**staging runtime 판정:** GO. 최신 배포본의 기능·디자인·서버 경로는 통과했다.
+**staging 기능·서버 판정:** GO. 최신 배포본의 기능·서버 경로는 통과했다.
 
-**전체 QA 승인·운영 release 판정:** NO-GO. 회장이 Kakao 앱 콘솔 로그인과 Toss 개발자 로그인을 완료한 뒤 세션이 callback과 PG sandbox를 실행·관찰해야 한다. 앱 코드·무료 staging 선택은 이미 확정되어 재질문하지 않는다.
+**전체 QA 승인·운영 release 판정:** NO-GO. 목표 관리 응원자 횟수 badge 불일치를 해소하고 시안과 제품을 다시 대조해야 한다. Kakao·Toss 콘솔은 기존 메인 Chrome 로그인 상태를 사용하며, 현 세션의 브라우저 확장 도구 미노출과 계정 로그아웃을 혼동하지 않는다. controller가 메인 Chrome 조작 도구 연결을 확인한 뒤 callback과 PG sandbox를 실행·관찰한다. 사용자 재로그인은 요구하지 않는다. 앱 코드·무료 staging 선택도 이미 확정되어 재질문하지 않는다.
 
 ## 12. 벤치마크·자체 검토
 
@@ -221,7 +228,7 @@ Playwright 공식 screenshot comparison과 web-first assertion 원칙을 적용�
 
 셀프심문: 이 결론이 틀렸다면 가장 그럴듯한 이유는 무엇인가. 여러 실행의 합집합이 단일 최종 run처럼 읽힐 위험이다. 그래서 실행별 결과, 중복 2건, 최신 영향 범위 9건을 따로 적었고 `17/17 단일 실행` 표현을 금지했다.
 
-레드팀: runtime과 Storybook 통과를 운영 준비 완료로 포장할 수 있다. 실제 OAuth·PG가 비어 있으므로 전체 QA·release NO-GO를 유지하고, 선택 검사와 필수 외부 통합도 분리했다.
+레드팀: 과거 9쌍 대조와 기능 E2E 통과를 현재 디자인 일치로 포장할 수 있다. 직접 다시 연 PNG에서 badge 배경 누락이 확인됐으므로 9/9 일치 주장을 철회하고 전체 QA·release NO-GO를 유지했다.
 
 ## 13. 개정 이력
 
@@ -237,8 +244,8 @@ HITS_REJECTED: 2026-10-13 이전 QA와 2026-08 production 수치는 다른 bundl
 CONFLICTS: 모바일 중앙값 16px 일반 권고와 D-049 13px 실물이 충돌. 디자인 정합은 D-049를 우선하고 일반 권고 미달은 matrix에 별도 기록
 SKILLS_USED: qa, staging 기능·보안·반응형·디자인 증거를 분리하고 실패 원인을 회수하는 데 사용
 SKILLS_SKIPPED: web-perf, performance는 선택 검사이고 측정하지 않아 별도 미검증 문서로 유지
-SOURCES: https://playwright.dev/docs/test-snapshots | https://playwright.dev/docs/test-assertions | ISO/IEC/IEEE 29119 | `wiki/거버넌스/결정.md` D-049 | `docs/design/component-inventory-v1.0.0.md` | `docs/qa/evidence/v2-ssot-20261025/`
+SOURCES: https://playwright.dev/docs/test-snapshots | https://playwright.dev/docs/test-assertions | ISO/IEC/IEEE 29119 | `wiki/거버넌스/결정.md` D-049 | `docs/design/component-inventory-v1.0.0.md` | `docs/qa/qa-tracker-v2-social-viral-loop.md` | `docs/qa/evidence/v2-ssot-20261025/`
 MODEL: gpt-codex/gpt-5.6-sol, reasoning high
 RUBRIC_SCORE: 완결성=5/5 정밀성=5/5 벤치마크=5/5 추적성=5/5 전문성=5/5 total=25/25
 WEAKEST_LINE: "기능 E2E 고유 17개는 여러 유효 실행의 합집합이며 단일 실행 17/17은 아니다."
-🏷 STAMP | line: v2 | 생성: 2026-10-25 13:16 KST | model: gpt-5.6-sol high | agent: qa-verifier | skill: qa | 근거: D-049, immutable preview, Supabase staging, E2E·unit·DB·Storybook·18장 direct Read | 고민: 내부 staging 완결과 외부 계정 통합 미검증을 한 판정으로 섞지 않음
+🏷 STAMP | line: v2 | 생성: 2026-10-25 20:45 KST | model: gpt-5.6-sol high | agent: qa-verifier | skill: qa | 근거: D-049, goal-detail 승인·제품 PNG 재대조, globals.css, QA tracker | 고민: 과거 포괄 PASS를 현재 출고 근거로 유지하지 않음
