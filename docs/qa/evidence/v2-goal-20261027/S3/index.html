@@ -19,22 +19,23 @@
 <main>
   <h1>S3 친구 초대부터 친구 목표 조회까지</h1>
   <p class="lead">무료 staging의 실제 UI, Supabase Auth/API/DB/Storage를 사용한 한 회차입니다. 초대 생성부터 다른 계정 수락, 친구 목록, 친구 공개 목표 조회까지 이어졌고 보안 거부·동시성·정리도 같은 최신 E2E 소스에서 검증했습니다.</p>
-  <div class="status">기능 검증 PASS · 독립 QA 대기</div>
+  <div class="status">독립 QA PASS · S3 internal closed</div>
 
   <section class="grid" aria-label="검증 요약">
     <div class="metric"><strong>7 / 7</strong>F5 명시 검증, 실패 0 · skip 0</div>
     <div class="metric"><strong>17 / 17</strong>전체 Chromium 한 회차, 실패 0 · skip 0</div>
+    <div class="metric"><strong>3 / 3</strong>독립 01A·01B·01C, 실패 0 · skip 0</div>
     <div class="metric"><strong>ACTIVE</strong>초대 수락 뒤 DB 친구 연결 상태</div>
     <div class="metric"><strong>0</strong>최종 namespace DB/Auth/Storage 잔여</div>
   </section>
 
   <h2>실제 5단계 흐름</h2>
   <section class="flow">
-    <figure class="shot"><img src="captures/haenael-s3-01-invite-create-v1-gpt-codex-20261028-0103.png" alt="친구 초대 생성 화면"><b>1. 초대 생성</b><span>owner가 실제 초대 UI를 엽니다.</span></figure>
-    <figure class="shot"><img src="captures/haenael-s3-02-invite-link-created-v1-gpt-codex-20261028-0103.png" alt="초대 링크 생성 완료 화면"><b>2. 초대 링크 생성</b><span>서버가 만든 실제 token 링크를 확인합니다.</span></figure>
-    <figure class="shot"><img src="captures/haenael-s3-03-invite-accept-v1-gpt-codex-20261028-0103.png" alt="다른 계정의 초대 수락 화면"><b>3. 다른 계정 수락</b><span>별도 계정이 링크를 방문해 수락합니다.</span></figure>
-    <figure class="shot"><img src="captures/haenael-s3-04-friend-list-v1-gpt-codex-20261028-0103.png" alt="수락 후 친구 목록 화면"><b>4. 친구 목록</b><span>DB 연결 상태 ACTIVE와 UI 목록을 함께 확인합니다.</span></figure>
-    <figure class="shot"><img src="captures/haenael-s3-05-friend-public-goal-v1-gpt-codex-20261028-0103.png" alt="친구 공개 목표 화면"><b>5. 친구 공개 목표</b><span>인증 HTTP 사전 요청 없이 실제 Link 클릭으로 공개 목표를 조회합니다.</span></figure>
+    <figure class="shot"><img src="captures/haenael-s3-01-invite-create-v1-gpt-codex-20261028-0133.png" alt="친구 초대 생성 화면"><b>1. 초대 생성</b><span>owner가 실제 초대 UI를 엽니다.</span></figure>
+    <figure class="shot"><img src="captures/haenael-s3-02-invite-link-created-v1-gpt-codex-20261028-0133.png" alt="초대 링크 생성 완료 화면"><b>2. 초대 링크 생성</b><span>서버가 만든 실제 token 링크를 확인합니다.</span></figure>
+    <figure class="shot"><img src="captures/haenael-s3-03-invite-accept-v1-gpt-codex-20261028-0133.png" alt="다른 계정의 초대 수락 화면"><b>3. 다른 계정 수락</b><span>별도 계정이 링크를 방문해 수락합니다.</span></figure>
+    <figure class="shot"><img src="captures/haenael-s3-04-friend-list-v1-gpt-codex-20261028-0133.png" alt="수락 후 친구 목록 화면"><b>4. 친구 목록</b><span>DB 연결 상태 ACTIVE와 UI 목록을 함께 확인합니다.</span></figure>
+    <figure class="shot"><img src="captures/haenael-s3-05-friend-public-goal-v1-gpt-codex-20261028-0133.png" alt="친구 공개 목표 화면"><b>5. 친구 공개 목표</b><span>인증 HTTP 사전 요청 없이 실제 Link 클릭으로 공개 목표를 조회합니다.</span></figure>
   </section>
 
   <h2>보안·동시성·정리</h2>
@@ -51,15 +52,20 @@
   <h2>소스와 원문 증거</h2>
   <div class="card">
     <ul>
-      <li><a href="rendered/haenael-s3-source-manifest-v2-gpt-codex-20261028-0111.html">source manifest 원문 읽기</a></li>
+      <li><a href="rendered/haenael-s3-source-manifest-v3-gpt-codex-20261028-0147.html">최종 source manifest 원문 읽기</a></li>
       <li><a href="rendered/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.html">최종 전체 E2E 로그 원문 읽기</a></li>
+      <li><a href="rendered/haenael-s3-independent-01abc-v1-gpt-codex-20261028-0133.html">독립 01A·01B·01C 로그 원문 읽기</a></li>
       <li><a href="rendered/haenael-s3-cleanup-result-v2-gpt-codex-20261027-1746.html">실패 namespace 정리 원문 읽기</a></li>
       <li><a href="rendered/haenael-s3-payment-control-v2-gpt-codex-20261027-1746.html">staging 결제 플래그 원복 원문 읽기</a></li>
+      <li><a href="rendered/haenael-s3-payment-disabled-independent-v1-gpt-codex-20261028-0146.html">독립 결제 비활성 503 원문 읽기</a></li>
+      <li><a href="rendered/haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.html">독립 데모 렌더 검수 원문 읽기</a></li>
+      <li><a href="rendered/md-web-haenael-ge-haenael-s3-independent-code-review-v1-gpt-codex-20261027-1656.html">독립 코드리뷰 P1 원문 렌더</a></li>
+      <li><a href="rendered/md-web-haenael-ge-haenael-s3-independent-qa-v1-gpt-codex-20261028-0147.html">독립 QA PASS 보고서 원문 렌더</a></li>
     </ul>
   </div>
-  <p class="note">제품 <code>web/src</code>는 S2 최종 staging과 동일합니다. 따라서 S2 최종 소스의 78파일·439/439 회귀를 재사용했고 unit 전량을 중복 실행하지 않았습니다. S3는 독립 qa-verifier 판정 전이라 closed로 표시하지 않습니다.</p>
+  <p class="note">제품 <code>web/src</code>는 S2 최종 staging과 동일합니다. 따라서 S2 최종 소스의 78파일·439/439 회귀를 재사용했고 unit 전량을 중복 실행하지 않았습니다. S3는 독립 QA PASS로 내부 closed입니다. 실제 Kakao OAuth·Toss sandbox callback·실결제·production 배포와 전체 제품 QA 승인은 미검증입니다.</p>
 
-  <footer>STAMP: 2026-10-27 17:46 KST · model gpt-codex · agent code-builder · skill haenael-supabase-build · basis prototype v3.0.0, staging Playwright, Supabase Auth/API/DB/Storage · 고민: 기능 실패와 fixture·teardown 결함을 분리하면서도 실패를 성공으로 세지 않음</footer>
+  <footer>STAMP: builder 2026-10-27 17:46 KST · independent QA 2026-10-28 01:47 KST · model gpt-codex · agents code-builder, qa-verifier · skills haenael-supabase-build, qa, review · basis prototype v3.0.0, staging Playwright, Supabase Auth/API/DB/Storage · 고민: 기능 실패와 fixture·teardown 결함을 분리하면서 외부 연동 미검증을 내부 PASS와 혼동하지 않음</footer>
 </main>
 </body>
 </html>

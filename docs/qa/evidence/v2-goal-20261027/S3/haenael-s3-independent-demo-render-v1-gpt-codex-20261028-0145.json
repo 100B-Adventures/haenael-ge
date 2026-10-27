@@ -1,0 +1,69 @@
+{
+  "title": "해낼게 V2 S3 친구 초대 실제 데모",
+  "imageCount": 5,
+  "imagesLoaded": 5,
+  "brokenImages": [],
+  "horizontalOverflow": 0,
+  "links": [
+    {
+      "text": "source manifest 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-source-manifest-v2-gpt-codex-20261028-0111.html"
+    },
+    {
+      "text": "최종 전체 E2E 로그 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.html"
+    },
+    {
+      "text": "실패 namespace 정리 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-cleanup-result-v2-gpt-codex-20261027-1746.html"
+    },
+    {
+      "text": "staging 결제 플래그 원복 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-payment-control-v2-gpt-codex-20261027-1746.html"
+    }
+  ],
+  "statusText": "기능 검증 PASS · 독립 QA 대기",
+  "linkCount": 4,
+  "linksOk": 4,
+  "linkResults": [
+    {
+      "text": "source manifest 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-source-manifest-v2-gpt-codex-20261028-0111.html",
+      "ok": true,
+      "status": 200,
+      "title": "S3 source manifest v2",
+      "bodyLength": 4234,
+      "errors": []
+    },
+    {
+      "text": "최종 전체 E2E 로그 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.html",
+      "ok": true,
+      "status": 200,
+      "title": "S3 F6 전체 E2E v10",
+      "bodyLength": 29454,
+      "errors": []
+    },
+    {
+      "text": "실패 namespace 정리 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-cleanup-result-v2-gpt-codex-20261027-1746.html",
+      "ok": true,
+      "status": 200,
+      "title": "S3 cleanup result",
+      "bodyLength": 1484,
+      "errors": []
+    },
+    {
+      "text": "staging 결제 플래그 원복 원문 읽기",
+      "href": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S3/rendered/haenael-s3-payment-control-v2-gpt-codex-20261027-1746.html",
+      "ok": true,
+      "status": 200,
+      "title": "S3 payment control",
+      "bodyLength": 601,
+      "errors": []
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "checkedAt": "2026-10-27T16:45:53.846Z"
+}

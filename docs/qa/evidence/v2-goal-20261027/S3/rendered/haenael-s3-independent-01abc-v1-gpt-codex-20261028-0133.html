@@ -1,0 +1,21 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>S3 independent 01A 01B 01C</title><style>body{margin:0;background:#f5f7f4;color:#17372b;font:15px/1.6 system-ui}main{max-width:1100px;margin:32px auto;padding:0 20px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;border:1px solid #dbe7df;border-radius:16px;padding:20px;box-shadow:0 8px 28px #17372b0a;font:13px/1.55 ui-monospace,SFMono-Regular,monospace}a{color:#14613a}</style></head><body><main><p><a href="../index.html">← S3 데모 허브</a></p><h1>S3 independent 01A 01B 01C</h1><pre>[heavy-slot] ⏸ 자원 대기: 앞에 0개 · 실행 중 2/2 (빈 메모리 24851MB, 스왑 96%)
+[heavy-slot] ▶ 입장 (527초 대기): env SJ_LOCAL_SECRET_FILE=/Users/sj/.sj-agent-harness/secrets/haenael-ge-qa-staging.env bash /Users/sj/.claude/harness/bin/with-local-secret-env.sh bash -lc cd /Users/sj/sj_code_master/haenael-ge/web || exit 2; set +e; E2E_ENVIRONMENT=staging RUN_STAGING_SUPABASE_E2E=1 E2E_BASE_URL=https://haenael-ge-v2-staging-100-b.vercel.app STAGING_WEB_BASE_URL=https://haenael-ge-v2-staging-100-b.vercel.app SUPABASE_STAGING_PROJECT_REF=ezzklgotgydwxqebfoys S3_DEMO_CAPTURE_DIR=../docs/qa/evidence/v2-goal-20261027/S3/captures S3_EVIDENCE_STAMP=20261028-0133 npx playwright test e2e/social-web-first.spec.ts --project=chromium --grep "QA-REVERIFY-FLOW-01A|QA-REVERIFY-FLOW-01B|QA-REVERIFY-FLOW-01C"; test_rc=$?; response_file=$(mktemp); smoke_status=$(curl -sS -o "$response_file" -w "%{http_code}" -X POST "${NEXT_PUBLIC_SUPABASE_URL}/functions/v1/cheer-order" -H "Authorization: Bearer ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" -H "Content-Type: application/json" --data "{}"); smoke_rc=$?; printf "S3_INDEPENDENT_TEST_EXIT_CODE=%s\nS3_PAYMENT_DISABLED_SMOKE_CURL_RC=%s\nS3_PAYMENT_DISABLED_SMOKE_STATUS=%s\n" "$test_rc" "$smoke_rc" "$smoke_status"; jq -c "{code}" "$response_file"; rm -f "$response_file"; if [ "$test_rc" -ne 0 ] || [ "$smoke_rc" -ne 0 ] || [ "$smoke_status" != 503 ]; then exit 1; fi; exit 0
+
+Running 3 tests using 1 worker
+
+(node:70252) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+SOCIAL_RUN_NAMESPACE {"runId":1793119379683}
+S3_INVITE_FRIEND_DEMO {"createRoute":"/invite","acceptRoute":"/invite/{token}","friendListRoute":"/friends","friendGoalRoute":"/friends/0cc848b4-7bce-422c-8b86-ab2d6d8d3c89?goal=687","inviteAccepted":true,"connectionStatus":"ACTIVE","goalTitle":"토익 900 넘길게","captureCount":5}
+  ✓  1 [chromium] › e2e/social-web-first.spec.ts:2505:7 › V2 web-first social slice › QA-REVERIFY-FLOW-01A 초대 생성부터 친구 공개 목표 조회까지 실제 UI와 DB가 이어진다 (27.6s)
+  ✓  2 [chromium] › e2e/social-web-first.spec.ts:2630:7 › V2 web-first social slice › QA-REVERIFY-FLOW-01B friendId와 목표 소유자·공개 범위가 다르면 실제 HTTP 404다 (18.9s)
+S3_ANON_REDIRECT_EVIDENCE {"route":"/friends/4f99e8b1-c320-4ea2-a34e-8521a1f7db47/wordmap?goal=691","boundaryStatus":307,"location":"/?next=%2Ffriends%2F4f99e8b1-c320-4ea2-a34e-8521a1f7db47%2Fwordmap%3Fgoal%3D691","landingStatus":200,"finalUrl":"https://haenael-ge-v2-staging-100-b.vercel.app/?next=%2Ffriends%2F4f99e8b1-c320-4ea2-a34e-8521a1f7db47%2Fwordmap%3Fgoal%3D691","forbiddenDomCount":0}
+SOCIAL_FIXTURE_CLEANUP_ZERO {"runId":1793119379683,"databaseMemberGoalPaymentRows":0,"authUsers":0,"goalCoverPrivateObjects":0,"goalCoverPublicObjects":0,"profileAvatarQueues":0,"profileAvatarAssets":0,"profileAvatarObjects":0}
+  ✓  3 [chromium] › e2e/social-web-first.spec.ts:2709:7 › V2 web-first social slice › QA-REVERIFY-FLOW-01C 비인증 친구 워드맵 요청은 HTTP 307 뒤 landing DOM으로 거부된다 (3.0s)
+
+  3 passed (1.3m)
+S3_INDEPENDENT_TEST_EXIT_CODE=0
+S3_PAYMENT_DISABLED_SMOKE_CURL_RC=0
+S3_PAYMENT_DISABLED_SMOKE_STATUS=503
+{"code":null}
+</pre></main></body></html>

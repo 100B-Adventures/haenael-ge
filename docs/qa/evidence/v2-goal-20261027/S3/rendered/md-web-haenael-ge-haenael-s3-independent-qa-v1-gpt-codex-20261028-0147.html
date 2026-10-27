@@ -1,0 +1,203 @@
+<!doctype html><html lang=ko><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>haenael-s3-independent-qa-v1-gpt-codex-20261028-0147.md</title><style>
+:root{color-scheme:only light;--bg:#fff;--fg:#1a1a1a;--soft:#e2e4e9;--line:#767680;--muted:#555;--accent:#f63d68;--link:#a51d42;--thead:#fae8ee;--quote:#fff1f5}
+@media screen and (prefers-color-scheme:dark){:root{color-scheme:only dark;--bg:#16161a;--fg:#ececf1;--soft:#30303a;--line:#9494a0;--muted:#b6b6c0;--link:#ff8fab;--thead:#35252e;--quote:#2b2027}}
+/* 배경을 칠하는 규칙에는 반드시 글자색을 짝으로 쓴다. 상속에 맡기면 흰 위 흰이 난다(2026-09-08 사고). */
+html,body{background:var(--bg);color:var(--fg)}
+body{max-width:860px;margin:40px auto;padding:0 24px;font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Apple SD Gothic Neo',sans-serif;font-size:16px;line-height:1.7;overflow-wrap:anywhere}
+h1,h2,h3,h4,h5,h6{line-height:1.3;margin-top:1.6em} h1{border-bottom:2px solid var(--accent);padding-bottom:.3em}
+h2{border-bottom:1px solid var(--line);padding-bottom:.2em}
+code,kbd,samp{background:var(--soft);color:var(--fg);padding:2px 5px;border-radius:4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+pre{background:var(--soft);color:var(--fg);border:1px solid var(--line);padding:16px;border-radius:8px;overflow-x:auto;white-space:pre;overflow-wrap:normal;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.65}
+pre code{background:var(--soft);color:var(--fg);display:block;padding:0;border-radius:0;font-size:inherit}
+pre.mermaid{color-scheme:only light;--bg:#fff;--fg:#1a1a1a;--soft:#e2e4e9;--muted:#555;--link:#a51d42;--line:#767680;background:var(--bg);color:var(--fg);border:1px solid var(--line);text-align:left}
+pre.mermaid svg{display:block;margin-inline:auto}
+table{background:var(--bg);color:var(--fg);border-collapse:collapse;width:100%;margin:1em 0}
+caption{background:var(--bg);color:var(--fg);text-align:left;font-weight:700}
+td,th{background:var(--bg);color:var(--fg);border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--thead);color:var(--fg)}
+blockquote{background:var(--quote);color:var(--muted);border-left:3px solid var(--accent);margin:1em 0;padding:.4em 1em}
+a,a:visited{color:var(--link);text-decoration:underline;text-underline-offset:.18em}
+:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+@media print{:root,pre.mermaid{color-scheme:only light;--bg:#fff;--fg:#000;--soft:#fff;--line:#000;--muted:#000;--accent:#000;--link:#000;--thead:#fff;--quote:#fff}
+body{max-width:none;margin:0;padding:0} pre,pre code{white-space:pre-wrap;overflow-wrap:anywhere}}
+@media (forced-colors:active){:root,pre.mermaid{color-scheme:light dark;--bg:Canvas;--fg:CanvasText;--soft:Canvas;--line:CanvasText;--muted:CanvasText;--accent:CanvasText;--link:LinkText;--thead:Canvas;--quote:Canvas}
+*,*::before,*::after{forced-color-adjust:auto} a:visited{color:VisitedText}}</style></head><body><h1 id="해낼게-s3-독립-qa-최종-보고-v1">해낼게 S3 독립 QA 최종 보고 v1</h1>
+<blockquote>
+<p>STAMP: 2026-10-28 01:47 KST | model gpt-codex(API model ID 미노출) | agent qa-verifier | skills qa, review | scope S3 independent staging QA | verdict PASS_INTERNAL_S3_CLOSED</p>
+<p>기반 포맷: S2 독립 QA 보고 구조. 승인 정본은 <code>docs/design/prototypes/social-viral-loop-v3-opus5.html</code> v3.0.0이며, S1·S2 판정과 제품 코드는 변경하지 않았다.</p>
+</blockquote>
+<h2 id="결론">결론</h2>
+<p>S3는 무료 staging 내부 범위에서 <strong>PASS, S3 closed</strong>다. 독립 실행에서 초대 생성 → 다른 계정 수락 → 친구 목록 → 실제 목표 Link 클릭 → 친구 공개 목표를 HTTP 사전 예열 없이 완주했고, DB 연결 <code>ACTIVE</code>, 잘못된 소유자·비공개·삭제 연결 HTTP 404, 비인증 HTTP 307과 금지 DOM 0을 확인했다. 기존 P1 두 건은 모두 해소됐다.</p>
+<p>외부 Kakao OAuth callback·세션 생성, Toss sandbox 승인·callback, 실결제, production 배포와 전체 제품 QA 승인은 이 판이 보장하지 않는다.</p>
+<h2 id="출고-기준-판정">출고 기준 판정</h2>
+<table>
+<thead>
+<tr>
+<th>필수 항목</th>
+<th>판정</th>
+<th>직접 근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>기능 happy + edge</td>
+<td>충족</td>
+<td>독립 01A·01B·01C 3/3 PASS, skip 0. 실제 UI Link 클릭, DB <code>ACTIVE</code>, 404·307·금지 DOM 0</td>
+</tr>
+<tr>
+<td>누적 회귀</td>
+<td>충족</td>
+<td>동일 E2E SHA에서 builder F6 v10 17/17, 실패 0, skip 0. 제품 <code>web/src</code>는 S2 최종 staging과 동일해 78파일·439/439 결과 재사용</td>
+</tr>
+<tr>
+<td>디자인 QA</td>
+<td>충족</td>
+<td>승인본 v3.0.0과 staging의 초대·수락·친구 390px 화면을 양쪽 이미지로 직접 대조. 주축·순서·열·정렬·표시·타입·버튼 위계가 일치하며 실제 데이터량 차이는 별도 분리</td>
+</tr>
+</tbody>
+</table>
+<h2 id="독립-실행">독립 실행</h2>
+<table>
+<thead>
+<tr>
+<th>케이스</th>
+<th>실제 관찰</th>
+<th>판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QA-REVERIFY-FLOW-01A</td>
+<td>초대 UI → token 링크 → 다른 인증 계정 수락 → 친구 목록 DOM → 목표 Link 클릭 → 상세 DOM. <code>connectionStatus=ACTIVE</code>, 목표 제목 일치</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>QA-REVERIFY-FLOW-01B</td>
+<td>정상 친구 상세·wordmap은 표시. 잘못된 friendId, PRIVATE 목표, REMOVED 연결은 HTTP 404와 보호 DOM 0</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>QA-REVERIFY-FLOW-01C</td>
+<td>익명 요청 HTTP 307, 정확한 <code>/?next=...</code>, landing HTTP 200, <code>friend-wordmap-page</code> 0</td>
+<td>PASS</td>
+</tr>
+</tbody>
+</table>
+<p>실행 로그: <code>logs/haenael-s3-independent-01abc-v1-gpt-codex-20261028-0133.log</code>. 결과는 3 passed, 실패 0, skip 0, Playwright 종료코드 0이다. 실행 전후 E2E SHA-256은 <code>a5b18a71ed2e3601ed2f29a5e427e5e7ec85c354c0f50a80c76b462598922234</code>로 manifest와 같다.</p>
+<h2 id="기존-p1-두-건-해소">기존 P1 두 건 해소</h2>
+<table>
+<thead>
+<tr>
+<th>P1</th>
+<th>해소 판정</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>실제 Link 클릭 전 인증 HTTP 200 예열</td>
+<td>해소</td>
+<td>현재 01A에 <code>friendGoalProbe</code>와 상세 route <code>request.get()</code>이 없다. 친구 목록에서 exact href를 가진 Link를 클릭한 뒤 URL·상세 DOM을 확인한다. 독립 회차도 같은 경로로 PASS했다.</td>
+</tr>
+<tr>
+<td>F6 결제 플래그 수명주기</td>
+<td>해소</td>
+<td>canonical F6 verify가 시작 전 staging <code>PAYMENTS_ENABLED=true</code>, 전체 Playwright 종료 처리의 <code>false</code> 복구, HTTP 503 <code>payments_disabled</code> 확인을 한 명령에 포함한다. v10은 17/17, 복구 rc 0, 503, 외부 결제 호출 0이다. 독립 종료 뒤에도 별도 smoke에서 HTTP 503·<code>payments_disabled</code>를 재확인했다.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="회귀정리환경">회귀·정리·환경</h2>
+<ul>
+<li>builder 전체 회차: <code>logs/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.log</code>, 17 passed, 실패 0, skip 0, 7.2분.</li>
+<li>F5: 7/7, 실패 0, skip 0. <code>CC-01</code>은 동시 수락 성공 1·used 1·connection 1을 유지한다.</li>
+<li>독립 namespace <code>1793119379683</code>: DB member/goal/payment 0, Auth 0, goal-cover Storage 0, avatar queue·asset·object 0.</li>
+<li>지연 avatar는 v10에서 PENDING·object 존재를 먼저 관찰한 뒤 정확한 test-owned queueId·assetId·objectPath를 강제 정리했다. 이는 <strong>자연 TTL cleanup PASS가 아니라 fixture teardown 이후 잔여 0</strong>이다.</li>
+<li>독립 결제 비활성 증거: <code>haenael-s3-payment-disabled-independent-v1-gpt-codex-20261028-0146.json</code>, curl rc 0, HTTP 503, code <code>payments_disabled</code>.</li>
+<li>실제 Toss API·실결제·과금 호출은 하지 않았다.</li>
+</ul>
+<h2 id="디자인데모-판정">디자인·데모 판정</h2>
+<table>
+<thead>
+<tr>
+<th>화면</th>
+<th>승인본</th>
+<th>staging</th>
+<th>판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>초대 생성</td>
+<td><code>approved-connect-390.png</code></td>
+<td>독립 캡처 01·02</td>
+<td>일치. 세로 흐름, hero, Kakao preview, CTA 2열, 하단탭 위계 유지</td>
+</tr>
+<tr>
+<td>초대 수락</td>
+<td><code>approved-inviteaccept-390.png</code></td>
+<td>독립 캡처 03</td>
+<td>일치. cover·avatar, 초대 문구, 목표 설명, primary CTA 순서 유지</td>
+</tr>
+<tr>
+<td>친구 목록</td>
+<td><code>approved-friends-390.png</code></td>
+<td>독립 캡처 04</td>
+<td>일치. 제목·추가 CTA·카드 구조·관계 badge·progress·message·chevron 유지. 승인본 3명과 독립 fixture 1명은 데이터량 차이이며, 1명 상태의 초대 유도 카드가 정상 노출됨</td>
+</tr>
+<tr>
+<td>친구 공개 목표</td>
+<td>승인 prototype의 친구 상세 흐름</td>
+<td>독립 캡처 05</td>
+<td>일치. cover·목표·관계 badge·응원자·wordmap·다른 목표·관계 해제 흐름 유지</td>
+</tr>
+</tbody>
+</table>
+<p>S3 데모 허브를 별도 headless Chromium으로 열어 이미지 5/5 로드, 깨진 이미지 0, 링크 4/4 실제 열림, 가로 overflow 0, console·page error 0을 확인했다. 증거는 <code>haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.json</code>과 같은 이름의 PNG다.</p>
+<h2 id="이-qa가-보장하는-것과-보장하지-않는-것">이 QA가 보장하는 것과 보장하지 않는 것</h2>
+<p>보장한다: 배포 ID <code>dpl_8vUvNNqSBhBa2cJ98bnMrRxKNt58</code>의 무료 staging에서 S3 초대·수락·친구 목록·친구 공개 목표·접근 거부 흐름, 현재 E2E source의 F5/F6 assertion coverage, test-owned fixture 잔여 0, staging 결제 플래그 false 경계, 승인 v3.0.0의 S3 화면 구조 정합.</p>
+<p>보장하지 않는다: 실제 Kakao OAuth, 실제 Toss sandbox 승인·callback, 실결제·환불·송금, production 배포·production DB 쓰기, 성능·부하·크로스브라우징, S1·S2 재검증, 전체 제품 QA 승인과 출시 준비.</p>
+<p>정리된 fixture URL과 token은 현재 재사용할 수 없다.</p>
+<h2 id="실행-명령과-종료-코드">실행 명령과 종료 코드</h2>
+<table>
+<thead>
+<tr>
+<th>실행</th>
+<th style="text-align: right;">종료코드</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>staging wrapper + heavy-slot + Playwright grep <code>QA-REVERIFY-FLOW-01A|01B|01C</code></td>
+<td style="text-align: right;">0</td>
+<td>3 passed, 실패 0, skip 0, fixture 8계수 0</td>
+</tr>
+<tr>
+<td>wrapper 주입 <code>cheer-order</code> disabled smoke</td>
+<td style="text-align: right;">0</td>
+<td>curl rc 0, HTTP 503, <code>payments_disabled</code></td>
+</tr>
+<tr>
+<td>S3 demo headless Chromium smoke</td>
+<td style="text-align: right;">0</td>
+<td>이미지 5/5, 링크 4/4, overflow 0, console/page error 0</td>
+</tr>
+<tr>
+<td>전체 F6 v10 로그·source hash 대조</td>
+<td style="text-align: right;">0</td>
+<td>17/17, skip 0, hash 일치</td>
+</tr>
+</tbody>
+</table>
+<p>SKILLS_USED: qa, staging 실제 flow·보안 경계·정리·데모 종료 증거 판정. review, 기존 P1 두 건과 assertion 보존 여부의 독립 대조.
+SKILLS_SKIPPED: 없음.</p>
+<p>KNOWLEDGE_QUERY: S3 recovery prompt, D-049와 관련 실수 맥락, 현재 source manifest·E2E source·F6 v10·S3 데모와 캡처를 repo-local로 조회했다.
+HITS_USED: 승인 prototype v3.0.0, E2E SHA 일치 source, F6 v10 원문, 독립 01A·01B·01C 로그, 승인/dev 390px 이미지, demo headless 결과를 판정에 사용했다.
+HITS_REJECTED: S1·S2 상류 전체와 과거 실패 회차는 재검증 범위 밖이거나 최종 소스 판정 근거가 아니어서 제외했다. 외부 웹조사는 이미 확정된 QA 실행이라 수행하지 않았다.
+CONFLICTS: 없음. 외부 Kakao·Toss는 정본과 충돌하지 않게 미검증으로 유지했다.</p>
+<p>SOURCES/MODEL: gpt-codex(API model ID 미노출) | <code>docs/design/prototypes/social-viral-loop-v3-opus5.html</code> v3.0.0 | <code>docs/qa/evidence/v2-goal-20261027/S3/source-manifest.json</code> | <code>web/e2e/social-web-first.spec.ts</code> | F6 v10·독립 01A/B/C·demo headless 증거</p>
+<p>PRESENTATION_CHECK: 내부 태그 잔재 없음, 원문 Markdown 렌더 대상, 브라우저 자동 열기 없음.</p>
+<p>RUBRIC_SCORE: evidence=5 traceability=5 clarity=5 completeness=5 presentation=5 total=25/25
+WEAKEST_LINE: production과 외부 사업자 callback은 금지 범위라 이 보고서의 PASS에 포함하지 않는다.</p></body></html>

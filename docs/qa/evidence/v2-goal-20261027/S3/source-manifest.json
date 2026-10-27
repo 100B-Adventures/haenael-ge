@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-28T01:13:26+09:00",
+  "generated_at": "2026-10-28T01:47:00+09:00",
   "scope": "S3",
-  "status": "verification_pass_independent_qa_pending",
+  "status": "closed_independent_qa_pass",
   "approved_prototype": {
     "path": "docs/design/prototypes/social-viral-loop-v3-opus5.html",
     "version": "3.0.0",
@@ -50,6 +50,23 @@
       "reuse_basis": "S3 changed no web/src product file. Product hashes remain identical to the S2 final staging source that passed 439/439."
     }
   },
+  "independent_qa": {
+    "result": "PASS, S3 internal closed",
+    "report": "haenael-s3-independent-qa-v1-gpt-codex-20261028-0147.md",
+    "rendered_report": "rendered/md-web-haenael-ge-haenael-s3-independent-qa-v1-gpt-codex-20261028-0147.html",
+    "prior_code_review": "haenael-s3-independent-code-review-v1-gpt-codex-20261027-1656.md",
+    "rendered_prior_code_review": "rendered/md-web-haenael-ge-haenael-s3-independent-code-review-v1-gpt-codex-20261027-1656.html",
+    "targeted_result": "3 passed, 0 failed, 0 skipped",
+    "targeted_exit_code": 0,
+    "targeted_log": "logs/haenael-s3-independent-01abc-v1-gpt-codex-20261028-0133.log",
+    "targeted_run_namespace": "1793119379683",
+    "e2e_sha256": "a5b18a71ed2e3601ed2f29a5e427e5e7ec85c354c0f50a80c76b462598922234",
+    "cold_ui_navigation": "friend list DOM -> actual goal Link click -> URL -> detail DOM; no authenticated HTTP preflight",
+    "cleanup_zero": true,
+    "payment_disabled_http_status": 503,
+    "payment_disabled_code": "payments_disabled",
+    "external_kakao_toss": "not verified"
+  },
   "s3_flow": {
     "steps": [
       "invite create",
@@ -60,7 +77,7 @@
     ],
     "database_connection_status": "ACTIVE",
     "capture_count": 5,
-    "capture_stamp": "20261028-0103"
+    "capture_stamp": "20261028-0133"
   },
   "security_and_concurrency": {
     "wrong_owner_http_status": 404,
@@ -100,6 +117,19 @@
     "console_errors": 0,
     "evidence": "haenael-s3-demo-render-v2-gpt-codex-20261028-0113.json",
     "screenshot": "haenael-s3-demo-render-v2-gpt-codex-20261028-0113.png"
+  },
+  "independent_render_validation": {
+    "result": "pass",
+    "image_count": 5,
+    "images_loaded": 5,
+    "broken_images": 0,
+    "link_count": 4,
+    "links_opened": 4,
+    "horizontal_overflow": 0,
+    "console_errors": 0,
+    "page_errors": 0,
+    "evidence": "haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.json",
+    "screenshot": "haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.png"
   },
   "external_boundaries": {
     "kakao_oauth": "not claimed complete",
