@@ -1,0 +1,111 @@
+{
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "observed_at": "2026-10-25T01:58:50Z",
+  "source": {
+    "migration": "supabase/migrations/20261025010000_v2_prototype_contract_completion.sql",
+    "sha256": "131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999",
+    "extraction_scope": "CREATE FUNCTION, CREATE OR REPLACE FUNCTION, CREATE TABLE, ADD COLUMN, storage.buckets INSERT",
+    "doc_facts_h14_used_as_new_asset_evidence": false
+  },
+  "counts": {
+    "function_signatures_declared": 20,
+    "function_signatures_present": 20,
+    "unique_function_names_declared": 19,
+    "new_tables_declared": 1,
+    "new_tables_present": 1,
+    "columns_added_to_existing_tables_declared": 4,
+    "columns_added_to_existing_tables_present": 4,
+    "new_table_columns_declared": 10,
+    "new_table_columns_present": 10,
+    "storage_buckets_declared": 1,
+    "storage_buckets_present": 1,
+    "catalog_assertions_total": 36,
+    "catalog_assertions_present": 36,
+    "management_api_edge_functions": 16,
+    "management_api_edge_functions_active": 16
+  },
+  "function_signatures": [
+    {"name":"public.prepare_profile_avatar_cleanup_on_member_delete()","present":true},
+    {"name":"public.update_my_profile(text,text,text)","present":true},
+    {"name":"public.activate_my_profile_avatar_service(uuid,uuid,text)","present":true},
+    {"name":"public.hydrate_kakao_profile_defaults_service(uuid,text,text,text,boolean)","present":true},
+    {"name":"public.claim_storage_cleanup_batch(integer,interval)","present":true},
+    {"name":"public.purge_abandoned_goal_covers(interval)","present":true},
+    {"name":"public.requeue_orphan_cover_tombstones(interval)","present":true},
+    {"name":"public.settle_storage_cleanup(bigint,uuid,boolean)","present":true},
+    {"name":"public.social_cover_preset_for_title(text)","present":true},
+    {"name":"public.create_goal(text,text,date,text)","present":true},
+    {"name":"public.create_goal(text,text,date)","present":true},
+    {"name":"public.update_goal(bigint,text,text,date)","present":true},
+    {"name":"public.set_goal_cover_preset(bigint,text)","present":true},
+    {"name":"public.admin_apply_goal_cover_review(uuid,uuid,text,text,text)","present":true},
+    {"name":"public.my_friend_goals()","present":true},
+    {"name":"public.my_goal_cheer_summary(bigint,text,integer)","present":true},
+    {"name":"public.friend_goal_detail(bigint)","present":true},
+    {"name":"public.my_social_dashboard()","present":true},
+    {"name":"public.close_my_goal(bigint)","present":true},
+    {"name":"public.account_withdrawal_eligibility()","present":true}
+  ],
+  "new_tables": [
+    {"name":"public.profile_avatar_asset","present":true}
+  ],
+  "columns_added_to_existing_tables": [
+    {"name":"public.member.bio","present":true},
+    {"name":"public.storage_cleanup_queue.profile_avatar_asset_id","present":true},
+    {"name":"public.storage_cleanup_queue.available_at","present":true},
+    {"name":"public.goal.cover_selection_mode","present":true}
+  ],
+  "new_table_columns": [
+    {"name":"public.profile_avatar_asset.id","present":true},
+    {"name":"public.profile_avatar_asset.owner_member_id","present":true},
+    {"name":"public.profile_avatar_asset.object_path","present":true},
+    {"name":"public.profile_avatar_asset.public_url","present":true},
+    {"name":"public.profile_avatar_asset.status","present":true},
+    {"name":"public.profile_avatar_asset.content_sha256","present":true},
+    {"name":"public.profile_avatar_asset.mime_type","present":true},
+    {"name":"public.profile_avatar_asset.byte_size","present":true},
+    {"name":"public.profile_avatar_asset.created_at","present":true},
+    {"name":"public.profile_avatar_asset.activated_at","present":true}
+  ],
+  "storage_buckets": [
+    {"name":"profile-avatars","present":true}
+  ],
+  "management_api": {
+    "read_attempts": 2,
+    "successful_list_reads": 1,
+    "stored_fields": ["name", "status"],
+    "functions": [
+      {"name":"admin-review-goal-cover","status":"ACTIVE"},
+      {"name":"auth-kakao","status":"ACTIVE"},
+      {"name":"cashout","status":"ACTIVE"},
+      {"name":"cashout-payout","status":"ACTIVE"},
+      {"name":"cheer-order","status":"ACTIVE"},
+      {"name":"goal-cover-finalize","status":"ACTIVE"},
+      {"name":"goal-cover-sign-upload","status":"ACTIVE"},
+      {"name":"kyc-verify","status":"ACTIVE"},
+      {"name":"lead-capture","status":"ACTIVE"},
+      {"name":"notify","status":"ACTIVE"},
+      {"name":"profile-update","status":"ACTIVE"},
+      {"name":"report","status":"ACTIVE"},
+      {"name":"storage-cleanup-worker","status":"ACTIVE"},
+      {"name":"toss-confirm","status":"ACTIVE"},
+      {"name":"toss-webhook","status":"ACTIVE"},
+      {"name":"wordmap-render","status":"ACTIVE"}
+    ]
+  },
+  "scope_separation": {
+    "prior_bio_ui_save_reload_and_database_observation": "docs/qa/evidence/v2-ssot-20261025/controller-smoke-2026-10-24T23-55-38-388Z.json",
+    "prior_close_goal_ui_and_database_observation": "docs/qa/evidence/v2-ssot-20261025/controller-smoke-2026-10-24T23-55-38-388Z.json",
+    "prior_withdrawal_rpc_existence_observation": "docs/qa/evidence/v2-ssot-20261025/staging-server-assets-observed.json",
+    "this_evidence": "catalog existence and Management API function inventory only",
+    "does_not_reclassify_prior_behavior_observations_as_asset_counts": true
+  },
+  "mutations": {
+    "database": false,
+    "edge_functions": false,
+    "secrets": false,
+    "canonical_documents": false,
+    "product_code": false
+  },
+  "pass": true
+}

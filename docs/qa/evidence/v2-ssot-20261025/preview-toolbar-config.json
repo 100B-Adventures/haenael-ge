@@ -1,0 +1,11 @@
+{
+  "project_id": "prj_oIOFTRxCvWyM57ncJH4YI5a7IiFT",
+  "preview_toolbar_before": null,
+  "preview_toolbar_after": false,
+  "production_toolbar_unchanged": false,
+  "production_toolbar_restore": {
+    "preview_toolbar": false,
+    "production_toolbar_restored": true
+  },
+  "note": "Preview PATCH normalized unset production field to false; restored inherited null immediately."
+}

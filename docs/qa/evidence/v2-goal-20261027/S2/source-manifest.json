@@ -1,0 +1,239 @@
+{
+  "generated_at": "2026-10-27T10:58:00+09:00",
+  "scope": "S2",
+  "status": "pass_closed",
+  "independent_qa_updated_at": "2026-10-27T11:16:00+09:00",
+  "base_commit": "f4d38f3fae0d5c7908ef5499281f2f9bf9d956de",
+  "approved_prototype": {
+    "path": "docs/design/prototypes/social-viral-loop-v3-opus5.html",
+    "version": "3.0.0",
+    "sha256": "afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a"
+  },
+  "staging": {
+    "alias": "https://haenael-ge-v2-staging-100-b.vercel.app",
+    "deployment_id": "dpl_8vUvNNqSBhBa2cJ98bnMrRxKNt58",
+    "preview_url": "https://haenael-fd69k95ra-100-b.vercel.app",
+    "supabase_project_ref": "ezzklgotgydwxqebfoys",
+    "health": "ok, version 2.0.0, database ok",
+    "health_evidence": "logs/staging-remediation-v2-final-health.json",
+    "production_deployed": false
+  },
+  "served_source_identity": {
+    "comparison": "current S2 product files versus the final staging deployment source snapshot",
+    "snapshot": "/private/tmp/haenael-s2-remediation-20261027-YwhFus/web/src",
+    "diff_exit_code": 0,
+    "diff_evidence": "logs/product-source-diff-v2.log",
+    "product_source_changed_for_s2": true,
+    "change_boundary": "Only the S2 owner cover marker and redundant/static reduced-motion wordmap decoration boundary changed. The five approved ambient motion nodes remain in WordmapCloudLayout.",
+    "e2e_sha256": "8b07f022cf0b50bf9d89c2cc50caecfe64bdc0128c1cf2e6968f95237226e09c",
+    "sources": [
+      {"path": "web/src/app/globals.css", "sha256": "8e0164e0407c67fa8e8bf195308150b52a290bc286853b8c684df78d3966db78"},
+      {"path": "web/src/components/goal/Wordmap.tsx", "sha256": "a4dfd05076ff5c11b3722c5bfec9dc93003cb283748bbd113e304eabcfe55b4a"},
+      {"path": "web/src/components/social/MyPageOverview.tsx", "sha256": "f3bcfe8c7e3f5af3e19db14b090b7be0aab985893cefb1ff37fad838972b87e7"},
+      {"path": "web/src/components/social/GoalCoverPicker.tsx", "sha256": "6ccac3525ffe432b285d61ed655c6de2f7e2f19008f02456c161dd21ebfca7c5"},
+      {"path": "web/src/components/social/GoalCover.tsx", "sha256": "abb93f2c615b176597d2c42b157142c3344cf49f5adb07091a063600eeafc18e"},
+      {"path": "web/src/app/(receiver)/me/goal/[id]/page.tsx", "sha256": "0a289e0598200969a0d54c8e3dcd07a7511c58d80fa9cb734fccf2db16ee1038"},
+      {"path": "web/src/app/g/[slug]/page.tsx", "sha256": "6bd4a0fe6af8da56eef4d32de9a1305a7e85f7ebd0f5922f1faa1105273ffd46"}
+    ]
+  },
+  "verification": {
+    "f3": {
+      "tests": ["MY-01", "PW-03"],
+      "result": "2 passed, 0 skipped",
+      "exit_code": 0,
+      "evidence": "logs/F3-MY-01-PW-03-attempt-3.log",
+      "post_change_impact_result": "PW-03 1 passed, 0 skipped",
+      "post_change_impact_evidence": "logs/PW-03-remediation-v2-dom-boundary.log"
+    },
+    "f4": {
+      "tests": ["PW-04", "PW-05"],
+      "result": "2 passed, 0 skipped",
+      "exit_code": 0,
+      "evidence": "logs/F4-PW-04-PW-05-remediation-v2.log"
+    },
+    "full_regression": {
+      "result": "78 files passed, 439 tests passed",
+      "command": "cd web && npm run test:qa-contracts && npm test",
+      "exit_code": 0,
+      "evidence": "logs/full-regression-final-source.log",
+      "reused": false,
+      "reuse_basis": "Not reused. The reduced-motion CSS was added after the earlier 439/439 run, so the final source required one fresh full regression."
+    },
+    "typecheck": {
+      "command": "cd web && npx tsc --noEmit --pretty false",
+      "exit_code": 0,
+      "note": "The first diagnostic run found only E2E TypeScript casts; after correction, the single final run passed. The empty-success stdout was observed in-session but was not persisted as a separate log file."
+    }
+  },
+  "authenticated_mobile_ergonomics": {
+    "routes": ["/my", "/me/goal/{id}"],
+    "widths": [360, 390, 412, 600, 700, 780, 820, 900, 1000],
+    "route_width_pairs": 18,
+    "results": {
+      "font_below_13": 0,
+      "token_body_px": 16,
+      "tap_below_44": 0,
+      "active_ratio": 1,
+      "active_rules": 27,
+      "horizontal_overflow": 0,
+      "fixed_overlap_with_controls": 0,
+      "fixed_bottom_height": 64,
+      "bottom_clearance": 80
+    },
+    "reference_only": {
+      "median_font": 13,
+      "note": "Median font is recorded for diagnosis only and is not a canonical pass criterion."
+    },
+    "evidence": "logs/PW-03-remediation-v2-dom-boundary.log"
+  },
+  "real_write_flow": {
+    "profile": {
+      "route": "/my",
+      "observed": "name, bio and photo save persisted after reload; the photo used real Storage sign, PUT and finalize before preset restoration"
+    },
+    "preset_cover": {
+      "owner_route": "/me/goal/471",
+      "public_route": "/g/owner-1793046164749",
+      "fixture_removed_after_run": true,
+      "observed": "health preset persisted after reload and appeared on the public route"
+    },
+    "custom_cover": {
+      "owner_route": "/me/goal/480",
+      "public_route": "/g/owner-1793046232911",
+      "fixture_removed_after_run": true,
+      "sign_status": 200,
+      "finalize_status": 200,
+      "review_asset_id": "244f156f-2095-42f9-9c27-a1584bbfae1c",
+      "database_status_after_finalize": "REVIEW",
+      "active_cover_changed_during_review": false,
+      "quarantine_storage_bytes": 69612,
+      "database_status_after_admin": "APPROVED",
+      "public_storage_bytes": 69612,
+      "owner_image_loaded": true,
+      "public_image_loaded": true
+    }
+  },
+  "visual_comparison": {
+    "profile": {
+      "approved": "captures/flow/07-approved-mypage-display-390.png",
+      "actual": "captures/flow/06-profile-preset-restored-reloaded-390.png",
+      "viewport": "390x844",
+      "scroll_top": 0,
+      "images_complete": true,
+      "changed_ratio": 0.21532081662413416,
+      "mean_absolute_channel_delta": 8.22154271478916,
+      "difference_boundary": "fixture name, bio, photo and aggregate data differ from prototype data",
+      "detail": "captures/flow/profile-visual-equivalence.json"
+    },
+    "preset_cover": {
+      "approved": "captures/flow/11-approved-goal-health-display-390.png",
+      "actual": "captures/flow/10-cover-owner-health-display-390.png",
+      "viewport": "390x844",
+      "scroll_top": 0,
+      "images_complete": true,
+      "reduced_motion": true,
+      "changed_ratio": 0.4514005346943736,
+      "mean_absolute_channel_delta": 12.046001944343177,
+      "difference_boundary": "fixture title, dates and aggregate data differ from prototype data. The visible clover is a real data-wordmap-item keyword, not decoration; all five ambient motion nodes are preserved in the DOM and hidden only under reduced motion.",
+      "detail": "captures/flow/cover-visual-equivalence.json"
+    }
+  },
+  "independent_qa_v1_remediation": {
+    "status": "pass_closed",
+    "QAS2-01": {
+      "root_cause": "The prior screenshot was taken at the admin page top before the target review card was scrolled into the 390x844 viewport.",
+      "correction": "PW-05 locates the card for 토익 900 넘길게, scrolls it into view, asserts the target identity and approval CTA are visible and inside the viewport, then captures step 15.",
+      "capture": "captures/flow/15-admin-review-queue-390.png",
+      "capture_sha256": "9e045dedf9fe152ad6ed703f9e29cf72812113098a511980c5137812cc402e29",
+      "evidence": "logs/F4-PW-04-PW-05-remediation-v2.log"
+    },
+    "QAS2-02": {
+      "root_cause": "The product rendered two redundant static hearts and a visible owner-only cover mark in addition to the prototype's ambient motion layer. The remaining clover was initially visually ambiguous.",
+      "correction": "Removed only redundant static hearts, hid the owner picker marker, and hid ambient particles only when reduced motion is active. The approved five-node ambient motion layer remains intact.",
+      "same_display_conditions": "Both approved and actual captures use 390x844, scroll top 0, goal-health display state, complete images and reduced motion.",
+      "dom_boundary": {
+        "reduced_motion_matches": true,
+        "owner_cover_mark_display": "none",
+        "static_heart_count": 0,
+        "ambient_node_count": 5,
+        "ambient_nodes_display": "none under reduced motion",
+        "remaining_clover_evidence": "wordItems contains the real keyword 🍀"
+      },
+      "evidence": "logs/PW-03-remediation-v2-dom-boundary.log"
+    }
+  },
+  "independent_qa_v2": {
+    "verdict": "PASS",
+    "closed": true,
+    "report": "haenael-s2-independent-qa-v2-gpt-codex.md",
+    "rendered_report": "rendered/md-web-haenael-ge-haenael-s2-independent-qa-v2-gpt-codex.html",
+    "resolved_defects": ["QAS2-01", "QAS2-02"],
+    "source_diff_exit_code": 0,
+    "functional_evidence_reused": true,
+    "reuse_basis": "Current web/src matches the final deployment snapshot. The post-change PW-03 exact log, F4 exact log and fresh 439-test regression all ran against that source.",
+    "demo_validation": "logs/independent-demo-render-v2.json"
+  },
+  "captures": [
+    "captures/flow/01-profile-initial-390.png",
+    "captures/flow/02-profile-name-input-390.png",
+    "captures/flow/03-profile-bio-input-390.png",
+    "captures/flow/04-profile-saved-reloaded-390.png",
+    "captures/flow/05-profile-storage-finalized-390.png",
+    "captures/flow/06-profile-preset-restored-reloaded-390.png",
+    "captures/flow/07-approved-mypage-display-390.png",
+    "captures/flow/08-cover-picker-open-390.png",
+    "captures/flow/09-cover-preset-saved-reloaded-390.png",
+    "captures/flow/10-cover-owner-health-display-390.png",
+    "captures/flow/11-approved-goal-health-display-390.png",
+    "captures/flow/12-cover-public-health-reflected-390.png",
+    "captures/flow/13-cover-upload-preview-390.png",
+    "captures/flow/14-cover-review-status-390.png",
+    "captures/flow/15-admin-review-queue-390.png",
+    "captures/flow/16-owner-approved-cover-390.png",
+    "captures/flow/17-public-approved-cover-390.png"
+  ],
+  "demo_render": {
+    "result": "passed",
+    "exit_code": 0,
+    "rendered_image_count": 19,
+    "unique_flow_capture_count": 17,
+    "all_images_loaded": true,
+    "console_errors": 0,
+    "horizontal_overflow": 0,
+    "status_badge": "PASS · S2 closed",
+    "evidence": "logs/independent-demo-render-v2.json",
+    "capture": "captures/independent-demo-hub-v2.png"
+  },
+  "failure_history": [
+    {
+      "item": "MY-01",
+      "count": 1,
+      "cause": "The pre-existing 30 second test timeout was too short after adding the required nine-width measurements.",
+      "product_defect": false,
+      "correction": "Scoped the existing staging test timeout to the measured flow."
+    },
+    {
+      "item": "PW-03",
+      "count": 1,
+      "cause": "The E2E reloaded before the asynchronous preset Server Action and client state completed.",
+      "product_defect": false,
+      "correction": "Waited for data-preset=health before reload."
+    },
+    {
+      "item": "PW-05",
+      "count": 1,
+      "cause": "The evidence logger read an owner image locator after its browser context was closed; approval and captures had already succeeded.",
+      "product_defect": false,
+      "correction": "Stored the loaded-state boolean before closing the context."
+    }
+  ],
+  "scope_boundary": {
+    "s1_preserved": true,
+    "s3_modified": false,
+    "state_files_modified": false,
+    "commit_created": false,
+    "production_deployed": false,
+    "production_database_written": false,
+    "billing_triggered": false
+  }
+}

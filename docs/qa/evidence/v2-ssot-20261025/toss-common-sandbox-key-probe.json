@@ -1,0 +1,8 @@
+{
+  "source": "canonical common toss.env inventory row131",
+  "test_prefix_valid": true,
+  "live_key_used": false,
+  "http_status": 404,
+  "code": "NOT_FOUND_MERCHANT",
+  "method": "GET own nonexistent QA order, no payment created"
+}

@@ -1,0 +1,40 @@
+{
+  "stamp": {
+    "created_at": "2026-10-27T17:46:37+09:00",
+    "model": "gpt-codex",
+    "agent": "code-builder",
+    "skill": "haenael-supabase-build"
+  },
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "failed_run_namespace": "1793089655551",
+  "failure_boundary": "All 17 functional assertions passed, but afterAll failed because deleting all fixture members let reviewed_by ON DELETE SET NULL violate goal_cover_asset_state_check before the approved asset was removed.",
+  "cleanup_change": "Delete namespace goal_cover_asset rows before deleting namespace members. No product source or database schema changed.",
+  "scope": {
+    "auth_email_pattern": "^social-(owner|friend|friend2|friend3|admin|a|b)-1793089655551@test[.]local$",
+    "goal_ids": [660, 661, 662, 663, 664, 665, 666, 667, 668],
+    "payment_order_pattern": "social-1793089655551-%",
+    "profile_avatar_asset_id": "76feb6e7-99f2-4c58-ba0a-ed5a4b31f047",
+    "profile_cleanup_queue_id": 18
+  },
+  "observed_before_cleanup": {
+    "auth_users": 5,
+    "members": 5,
+    "goals": 9,
+    "payments": 31,
+    "goal_cover_assets": 1,
+    "profile_avatar_assets": 0,
+    "storage_objects": 0
+  },
+  "verified_after_cleanup": {
+    "auth_users": 0,
+    "members": 0,
+    "goals": 0,
+    "payments": 0,
+    "goal_cover_assets": 0,
+    "profile_avatar_assets": 0,
+    "profile_cleanup_queue": 0,
+    "storage_objects": 0
+  },
+  "other_namespace_touched": false,
+  "production_touched": false
+}

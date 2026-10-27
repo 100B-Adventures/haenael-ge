@@ -1,0 +1,249 @@
+{
+  "observed_at": "2026-10-27T13:51:41.789662+09:00",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "namespace": "1793075388485",
+  "scope_evidence": "haenael-s3-cleanup-scope-v1-gpt-codex-20261027-1348.json",
+  "member_ids": [
+    "a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe",
+    "224a41e3-ceff-468d-87d7-e908dc128c38",
+    "891d86fc-fcad-4358-a356-359849b2324f",
+    "f9b15895-c307-40e7-8701-cccf9066b36f",
+    "9a9e1dfd-2a25-4309-8287-fa457eb9e6c2"
+  ],
+  "goal_ids": [
+    505,
+    506,
+    503,
+    498,
+    499,
+    500,
+    501,
+    502,
+    504
+  ],
+  "payment_ids": [
+    1585,
+    1586,
+    1587,
+    1588,
+    1589,
+    1590,
+    1591,
+    1592,
+    1593,
+    1594,
+    1595,
+    1596,
+    1597,
+    1598,
+    1599,
+    1600,
+    1601,
+    1602,
+    1603,
+    1604,
+    1605,
+    1606,
+    1607,
+    1608,
+    1609,
+    1610,
+    1611,
+    1612,
+    1613,
+    1614,
+    1615
+  ],
+  "before_counts": {
+    "members": 5,
+    "goals": 9,
+    "payments": 31,
+    "auth": 5,
+    "storage": 0
+  },
+  "children_before": [
+    {
+      "counts": {
+        "member.id": 5,
+        "cheer.goal_id": 40,
+        "goal.member_id": 9,
+        "cheer.payment_id": 31,
+        "share_event.goal_id": 0,
+        "risk_event.member_id": 0,
+        "friend_invite.goal_id": 2,
+        "admin_member.member_id": 1,
+        "notification.member_id": 0,
+        "payment_log.payment_id": 0,
+        "clover_ledger.member_id": 9,
+        "clover_balance.member_id": 4,
+        "goal_cover_asset.goal_id": 0,
+        "cashout_request.member_id": 0,
+        "friend_invite.accepted_by": 1,
+        "kyc_verification.member_id": 0,
+        "member_preference.member_id": 0,
+        "cashout_request.processed_by": 0,
+        "goal_cover_asset.reviewed_by": 0,
+        "wordmap_render_cache.goal_id": 0,
+        "storage_cleanup_queue.goal_id": 0,
+        "friend_connection.member_low_id": 3,
+        "friend_invite.inviter_member_id": 2,
+        "friend_connection.member_high_id": 3,
+        "goal_cover_asset.owner_member_id": 0,
+        "cashout_account_access_log.actor_id": 0,
+        "profile_avatar_asset.owner_member_id": 0,
+        "friend_connection.blocked_by_member_id": 0,
+        "social_cheer_member_attribution.supporter_member_id": 3
+      }
+    }
+  ],
+  "sql": "BEGIN;\nDO $cleanup$ BEGIN\nIF (select count(*) from auth.users where id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid) and email ~ '^social-(owner|friend|friend2|friend3|admin|a|b)-1793075388485@test[.]local$') <> 5 THEN RAISE EXCEPTION 'fixture_auth_scope_changed'; END IF;\nIF EXISTS(select 1 from public.goal where member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid) and id not in (505,506,503,498,499,500,501,502,504)) OR EXISTS(select 1 from public.goal where id in (505,506,503,498,499,500,501,502,504) and member_id not in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)) THEN RAISE EXCEPTION 'fixture_goal_scope_changed'; END IF;\nIF EXISTS(select 1 from public.payment where id in (1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615) and order_id not like 'social-1793075388485-%') THEN RAISE EXCEPTION 'fixture_payment_scope_changed'; END IF;\nIF EXISTS(select 1 from public.cheer c join public.goal g on g.id=c.goal_id where c.goal_id in (505,506,503,498,499,500,501,502,504) and (c.payment_id not in (1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615) or (c.payment_id is null and c.created_at is distinct from g.created_at))) THEN RAISE EXCEPTION 'fixture_cheer_scope_changed'; END IF;\nEND; $cleanup$;\nDELETE FROM public.cheer WHERE goal_id in (505,506,503,498,499,500,501,502,504);\nDELETE FROM public.admin_member WHERE member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid);\nDELETE FROM public.member WHERE id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid);\nDELETE FROM public.payment WHERE id in (1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615) AND order_id like 'social-1793075388485-%';\nCOMMIT;\nselect jsonb_build_object('members',(select count(*) from public.member where id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'goals',(select count(*) from public.goal where id in (505,506,503,498,499,500,501,502,504)),'payments',(select count(*) from public.payment where id in (1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615)),'auth',(select count(*) from auth.users where id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid))) as counts;",
+  "authorization": "발주 Codex의 본인 S3 namespace 한정 종료 정리 지시, 개발/QA 목표 paused 후 종료 정리만 수행",
+  "new_functional_test_run": false,
+  "pre_retry_counts": [
+    {
+      "counts": {
+        "auth": 5,
+        "goals": 9,
+        "members": 5,
+        "payments": 31
+      }
+    }
+  ],
+  "initial_sql_submission": {
+    "exit_code": 22,
+    "pre_retry_counts_unchanged": true
+  },
+  "null_payment_cheer_scope": [
+    {
+      "goal_id": 498,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 499,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 500,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 501,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 502,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 503,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 504,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 505,
+      "count": 1,
+      "same_creation_timestamp": true
+    },
+    {
+      "goal_id": 506,
+      "count": 1,
+      "same_creation_timestamp": true
+    }
+  ],
+  "cleanup_guard_adjustment": "범위로 고정한 각 목표마다 생성 시각이 같은 초기 응원 1건이 확인됐다. 기존 teardown과 동일하게 그 목표 ID의 응원을 먼저 삭제했다.",
+  "database_cleanup_result": [
+    {
+      "counts": {
+        "auth": 5,
+        "goals": 0,
+        "members": 0,
+        "payments": 0
+      }
+    }
+  ],
+  "database_cleanup_observed_at": "2026-10-27T14:04:38.110954+09:00",
+  "auth_delete_results": [
+    {
+      "id": "a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe",
+      "http_status": 200
+    },
+    {
+      "id": "224a41e3-ceff-468d-87d7-e908dc128c38",
+      "http_status": 200
+    },
+    {
+      "id": "891d86fc-fcad-4358-a356-359849b2324f",
+      "http_status": 200
+    },
+    {
+      "id": "f9b15895-c307-40e7-8701-cccf9066b36f",
+      "http_status": 200
+    },
+    {
+      "id": "9a9e1dfd-2a25-4309-8287-fa457eb9e6c2",
+      "http_status": 200
+    }
+  ],
+  "final_verification": {
+    "observed_at": "2026-10-27T14:06:11.752438+09:00",
+    "query": "select jsonb_build_object(\n'namespace','1793075388485',\n'member_remaining',(select count(*) from public.member where id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'goal_remaining',(select count(*) from public.goal where id in (505,506,503,498,499,500,501,502,504) or member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'payment_remaining',(select count(*) from public.payment where id in (1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615) or order_id like 'social-1793075388485-%'),\n'auth_remaining',(select count(*) from auth.users where id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid) or email ~ '^social-(owner|friend|friend2|friend3|admin|a|b)-1793075388485@test[.]local$'),\n'auth_identity_remaining',(select count(*) from auth.identities where user_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'auth_session_remaining',(select count(*) from auth.sessions where user_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'goal_cover_asset_remaining',(select count(*) from public.goal_cover_asset where owner_member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid) or goal_id in (505,506,503,498,499,500,501,502,504)),\n'profile_avatar_asset_remaining',(select count(*) from public.profile_avatar_asset where owner_member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'storage_remaining',(select count(*) from storage.objects where bucket_id in ('goal-cover-quarantine','goal-cover-public','profile-avatars') and (split_part(name,'/',1) in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe','224a41e3-ceff-468d-87d7-e908dc128c38','891d86fc-fcad-4358-a356-359849b2324f','f9b15895-c307-40e7-8701-cccf9066b36f','9a9e1dfd-2a25-4309-8287-fa457eb9e6c2') or (bucket_id='goal-cover-public' and split_part(name,'/',1) in('505','506','503','498','499','500','501','502','504')))),\n'public_fk_remaining',jsonb_build_object('clover_ledger.member_id',(select count(*) from public.\"clover_ledger\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'friend_invite.inviter_member_id',(select count(*) from public.\"friend_invite\" where \"inviter_member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'friend_invite.goal_id',(select count(*) from public.\"friend_invite\" where \"goal_id\" in (505,506,503,498,499,500,501,502,504)),'member.id',(select count(*) from public.\"member\" where \"id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'goal.member_id',(select count(*) from public.\"goal\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'cheer.goal_id',(select count(*) from public.\"cheer\" where \"goal_id\" in (505,506,503,498,499,500,501,502,504)),'cheer.payment_id',(select count(*) from public.\"cheer\" where \"payment_id\" in (1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615)),'payment_log.payment_id',(select count(*) from public.\"payment_log\" where \"payment_id\" in (1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615)),'clover_balance.member_id',(select count(*) from public.\"clover_balance\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'cashout_request.member_id',(select count(*) from public.\"cashout_request\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'kyc_verification.member_id',(select count(*) from public.\"kyc_verification\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'risk_event.member_id',(select count(*) from public.\"risk_event\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'share_event.goal_id',(select count(*) from public.\"share_event\" where \"goal_id\" in (505,506,503,498,499,500,501,502,504)),'wordmap_render_cache.goal_id',(select count(*) from public.\"wordmap_render_cache\" where \"goal_id\" in (505,506,503,498,499,500,501,502,504)),'notification.member_id',(select count(*) from public.\"notification\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'friend_invite.accepted_by',(select count(*) from public.\"friend_invite\" where \"accepted_by\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'admin_member.member_id',(select count(*) from public.\"admin_member\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'cashout_request.processed_by',(select count(*) from public.\"cashout_request\" where \"processed_by\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'cashout_account_access_log.actor_id',(select count(*) from public.\"cashout_account_access_log\" where \"actor_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'member_preference.member_id',(select count(*) from public.\"member_preference\" where \"member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'friend_connection.member_low_id',(select count(*) from public.\"friend_connection\" where \"member_low_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'friend_connection.member_high_id',(select count(*) from public.\"friend_connection\" where \"member_high_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'friend_connection.blocked_by_member_id',(select count(*) from public.\"friend_connection\" where \"blocked_by_member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'goal_cover_asset.goal_id',(select count(*) from public.\"goal_cover_asset\" where \"goal_id\" in (505,506,503,498,499,500,501,502,504)),'goal_cover_asset.owner_member_id',(select count(*) from public.\"goal_cover_asset\" where \"owner_member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'goal_cover_asset.reviewed_by',(select count(*) from public.\"goal_cover_asset\" where \"reviewed_by\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'storage_cleanup_queue.goal_id',(select count(*) from public.\"storage_cleanup_queue\" where \"goal_id\" in (505,506,503,498,499,500,501,502,504)),'social_cheer_member_attribution.supporter_member_id',(select count(*) from public.\"social_cheer_member_attribution\" where \"supporter_member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),'profile_avatar_asset.owner_member_id',(select count(*) from public.\"profile_avatar_asset\" where \"owner_member_id\" in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid))),\n'v3_known_member_remaining',(select count(*) from public.member where id in ('bcea24e0-013b-4c9f-a2f3-5d2afad45c6c','664ba32a-e680-4dc6-a361-55789d5b9f0e')),\n'v3_known_auth_remaining',(select count(*) from auth.users where id in ('bcea24e0-013b-4c9f-a2f3-5d2afad45c6c','664ba32a-e680-4dc6-a361-55789d5b9f0e')),\n'v3_known_goal_remaining',(select count(*) from public.goal where id in (507,511))\n) as evidence",
+    "result": {
+      "namespace": "1793075388485",
+      "auth_remaining": 0,
+      "goal_remaining": 0,
+      "member_remaining": 0,
+      "payment_remaining": 0,
+      "storage_remaining": 0,
+      "public_fk_remaining": {
+        "member.id": 0,
+        "cheer.goal_id": 0,
+        "goal.member_id": 0,
+        "cheer.payment_id": 0,
+        "share_event.goal_id": 0,
+        "risk_event.member_id": 0,
+        "friend_invite.goal_id": 0,
+        "admin_member.member_id": 0,
+        "notification.member_id": 0,
+        "payment_log.payment_id": 0,
+        "clover_ledger.member_id": 0,
+        "clover_balance.member_id": 0,
+        "goal_cover_asset.goal_id": 0,
+        "cashout_request.member_id": 0,
+        "friend_invite.accepted_by": 0,
+        "kyc_verification.member_id": 0,
+        "member_preference.member_id": 0,
+        "cashout_request.processed_by": 0,
+        "goal_cover_asset.reviewed_by": 0,
+        "wordmap_render_cache.goal_id": 0,
+        "storage_cleanup_queue.goal_id": 0,
+        "friend_connection.member_low_id": 0,
+        "friend_invite.inviter_member_id": 0,
+        "friend_connection.member_high_id": 0,
+        "goal_cover_asset.owner_member_id": 0,
+        "cashout_account_access_log.actor_id": 0,
+        "profile_avatar_asset.owner_member_id": 0,
+        "friend_connection.blocked_by_member_id": 0,
+        "social_cheer_member_attribution.supporter_member_id": 0
+      },
+      "auth_session_remaining": 0,
+      "auth_identity_remaining": 0,
+      "v3_known_auth_remaining": 0,
+      "v3_known_goal_remaining": 0,
+      "v3_known_member_remaining": 0,
+      "goal_cover_asset_remaining": 0,
+      "profile_avatar_asset_remaining": 0
+    },
+    "all_observed_counts_zero": true
+  },
+  "functional_qa_status": "S3 F5 3회 실패, F6 전체회차 미실행. 정리 성공은 기능 QA PASS가 아님."
+}

@@ -1,0 +1,102 @@
+{
+  "observed_at": "2026-10-27T13:48:59.977505+09:00",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "read_only": true,
+  "result": [
+    {
+      "evidence": {
+        "auth": [
+          {
+            "id": "a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe",
+            "email": "social-friend-1793075388485@test.local",
+            "created_at": "2026-10-27T04:29:54.11191+00:00"
+          },
+          {
+            "id": "224a41e3-ceff-468d-87d7-e908dc128c38",
+            "email": "social-friend2-1793075388485@test.local",
+            "created_at": "2026-10-27T04:29:55.024918+00:00"
+          },
+          {
+            "id": "891d86fc-fcad-4358-a356-359849b2324f",
+            "email": "social-admin-1793075388485@test.local",
+            "created_at": "2026-10-27T04:29:55.33464+00:00"
+          },
+          {
+            "id": "f9b15895-c307-40e7-8701-cccf9066b36f",
+            "email": "social-friend3-1793075388485@test.local",
+            "created_at": "2026-10-27T04:29:55.183212+00:00"
+          },
+          {
+            "id": "9a9e1dfd-2a25-4309-8287-fa457eb9e6c2",
+            "email": "social-owner-1793075388485@test.local",
+            "created_at": "2026-10-27T04:29:53.60305+00:00"
+          }
+        ],
+        "payments": [
+          1585,
+          1586,
+          1587,
+          1588,
+          1589,
+          1590,
+          1591,
+          1592,
+          1593,
+          1594,
+          1595,
+          1596,
+          1597,
+          1598,
+          1599,
+          1600,
+          1601,
+          1602,
+          1603,
+          1604,
+          1605,
+          1606,
+          1607,
+          1608,
+          1609,
+          1610,
+          1611,
+          1612,
+          1613,
+          1614,
+          1615
+        ],
+        "namespace": "1793075388485",
+        "member_batch": [
+          {
+            "id": "9a9e1dfd-2a25-4309-8287-fa457eb9e6c2",
+            "nickname": "서연",
+            "created_at": "2026-10-27T04:29:55.724146+00:00"
+          },
+          {
+            "id": "a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe",
+            "nickname": "윤도경",
+            "created_at": "2026-10-27T04:29:55.724146+00:00"
+          },
+          {
+            "id": "224a41e3-ceff-468d-87d7-e908dc128c38",
+            "nickname": "서연",
+            "created_at": "2026-10-27T04:29:55.724146+00:00"
+          },
+          {
+            "id": "f9b15895-c307-40e7-8701-cccf9066b36f",
+            "nickname": "정민서",
+            "created_at": "2026-10-27T04:29:55.724146+00:00"
+          },
+          {
+            "id": "891d86fc-fcad-4358-a356-359849b2324f",
+            "nickname": "운영자",
+            "created_at": "2026-10-27T04:29:55.724146+00:00"
+          }
+        ],
+        "member_auth_fk": [
+          "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        ]
+      }
+    }
+  ]
+}

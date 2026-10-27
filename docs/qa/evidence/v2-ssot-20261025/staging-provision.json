@@ -1,0 +1,13 @@
+{
+  "observed_at": "2026-10-24T21:27:21.247829+00:00",
+  "organization_slug": "nicxosecryewmuehvomu",
+  "organization_plan": "free",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "project_name": "haenael-ge-staging",
+  "region": "ap-northeast-2",
+  "requested_instance_size": "nano",
+  "create_http": 201,
+  "observed_status": "ACTIVE_HEALTHY",
+  "operating_project_changed": false,
+  "source": "Supabase Management API; plan verified before project POST"
+}

@@ -1,5 +1,122 @@
 # ops-control 인계
 
+## 2026-10-28 01:33 KST · 최신17/17 회수, 독립QA 실행 시작
+
+- 앱send_message로로드됐던builder가idlewriter보유하여CLI재개충돌. idle확인→앱archive로unload→codex unarchive CLI로복구. 동일UUID재개성공(unified67096). 구체오류별조치후재시도,새worker없음.
+- 같은builder가최신F6v10(20261028-0055) 17/17 PASS·7.2분,hasha5b18a71ed2e3601ed2f29a5e427e5e7ec85c354c0f50a80c76b462598922234를확인. friendGoalProbe제거·canonical F6 payment명령보완완료. 재실행안하고재사용. 현재namespace1793117012267모든정리계수0·flagfalse503직접로그확인.
+- 원발주자가새독립QA위임,unified16147 UUID01a17976-dd7e-7a40-bcb7-a61857d5a739. 01A/B/C실제UI·DB·권한1회,전체17/439재실행금지. QA소유날짜시간누락md rename/render/링크교정도포함. 로그 /private/tmp/haenael-s3-resume-20261028-qa.log. S3closed와전체QA승인은별도,외부OAuth/Toss미검증유지.
+
+## 2026-10-28 01:25 KST · 사용자 지시로 S3 최종보완 재개
+
+- 사용자 진행해라를 직전 사용한도 차단 뒤 재개 승인으로 적용. 실제 Codex rate_limits70%,window10080. .goal/budget backup후baseline70·기존cap5(내부75) 적용, token800만 유지. 사용자숫자지정아님.
+- 같은code-builder UUID01a1794a-b9f6-7771-ae8f-6b57090f7904, unified1516, timeout3600/외부3700. 로그 /private/tmp/haenael-s3-resume-20261028-builder.log. 수정scope E2E·S3증거·기존허브·feature-list. 제품src/STATE/하네스·운영·돈·commit/push금지.
+- 01A friendGoalProbe만제거하고UI/DBassertion보존, F6최종17한회차·flag준비/복구canonical명령보완. F5/439/닫힌S1S2반복금지. 이후같은QA UUID01a17976-dd7e-7a40-bcb7-a61857d5a739로독립실제flow와보안1회, QA소유파일이름규약교정함께회수.
+
+## 2026-10-28 00:46 KST · 기능17/17 회수, 독립QA 미종결, goal-guard 차단
+
+- 사용자 추가진행에 따라 기존code-builder와qa-verifier만 재사용했다. 현재 실제 source SHA0798c5770875d0eb43801eddd4084f6c5eb15160fcdbbcfdeb6a2f4f34011d7a, F6v8 로그17passed/skip0/exit0(6.9분) 직접확인. F5 7/7, 제품소스S2동일439회귀 재사용. 로그중간실패이력은 보존.
+- F6v8 namespace1793090343902 DB/Auth/Storage/queue/asset0, 결제flagfalse복구rc0·HTTP503 payments_disabled. 실Toss없음. 중단/실패namespace1793089655551는별도8계수0 문서확인. 지연avatar는자연TTL실행증거가아니라관찰후test-owned강제정리0이다.
+- 독립리뷰 P1 두건:01A friendGoalProbe가UI클릭직전같은상세route를HTTP호출하여cold UI증거가아님. canonical F6 verify에payment enable/finallyrestore명령전제누락. 현재실제코드2600에probe잔존. 독립QA실행미완·S3closed금지·전체QA/ship미승인. QA보고파일날짜/시간규약도미해결(컨트롤러가그이름으로발주한오류), handpatch안함.
+- 00:43경 같은builder에최소수정/최종검증재위임시goal-guard가시작60→현재68%,내부+5%p초과로차단. 이+5는이번사용자가지정한숫자가아니라컨트롤러설정이다. 계정전체측정이라사업체귀속토큰으로해석금지. 차단우회/추가실행없음. 두기존실행23390/65758는rc4로종료,새실행없음. nativegoal완료선언안함.
+- 직접메시지전달도구는1회thread수신성공했으나결과에P1미반영. CLI위임결과와구분. rootcaffeinate24933는이미종료확인. heavy-slot현재두build:private는다른작업으로보존.
+- S3원본데모 docs/qa/evidence/v2-goal-20261027/S3/index.html은show-artifact가Chrome9342탭확인. 전체허브 실제위치는 docs/qa/evidence/v2-deliverables/index.html이며show-artifact가비교결정보드로분류해열기반려,우회안함. 본작업새로띄운S3최종결과탭은열람용보존.
+- 다음실행조건:주간사용한도재설정승인후같은builder로probe4줄제거/명령재현성보완,같은qa-verifier로coldUI·보안독립검증. 전체재설계/닫힌S1S2/439재실행금지. 외부Kakao/Toss와운영배포는별도미검증유지.
+
+## 2026-10-27 16:48 KST · 전체16/17, selector 보완 후 같은 작업 세션 재개
+
+- S3 표적 F5 v6 및 최종 표적7/7 PASS·skip0. 전체F6 v3는16/17 PASS·skip0, 남은 관리자 viewport selector를 기존 code-builder가 수정. 최종1647 회차는 실행 여부부터 확인 중이며 통과 판정 아님.
+- 위임24843가 heavy-slot 대기 포함2400초로 rc124. 컨트롤러가 대기 시간을 충분히 반영하지 못한 반복 설정 오류. 같은 builder UUID 재사용하여 unified23390, CODEX_TIMEOUT3600/외부3700으로 재개. 새 실행 전 기존 회차 실행 여부·로그·설정 원복 확인, 중복 실행 금지. 로그 /private/tmp/haenael-s3-recovery-dispatch-3.log.
+- 제품src 수정 없음. S1/S2 유지와439회귀 재사용. 완료 조건은 전체17건 실패/skip0, stage결제flag false·503, 이번fixture 정리, 지연Storage 객체 별도대조, 독립QA와 실제데모. 전체 QA·ship 승인 안 함.
+- 다음:23390 실제 결과 회수 후 기존 qa-verifier UUID01a17976-dd7e-7a40-bcb7-a61857d5a739에 .goal/s3-qa-recovery-prompt.txt로 독립검수. caffeinate PID24933(종료17:02 예정)은 이번root 소유, 종료시 정확한프로세스 확인 후 회수. 다른프로젝트 작업 보존.
+
+## 2026-10-27 16:13 KST · S3 재개 후 case분리·정리 완료, 동일 builder 두 번째 실행 중
+
+- 사용자원문 더 진해해에 따라 원발주controller가직접기존worker회수. 별도goalcontroller생성없음. 이번65%는원발주controller가정한내부중단기준이며사용자가65라는숫자를직접승인했다고기록하지않음. 첫실측60%,뒤측정58%관찰,정확한계정귀속소모로해석금지.
+- 기존combined QA-REVERIFY-FLOW-01을01A(happy초대),01B(소유자/공개경계),01C(비인증redirect)로분리. load/networkidle대신HTTP/URL/DOM대기. serial중단을제거하되worker1순차유지. v4표적7건중6통과1실패·미실행0(2.1분),비인증307→landing200/금지DOM0은3.5초. 남은01A는friend목표Link클릭후root복귀/상세DOM부재라원인확인후인증재확인·href/HTTP200·UI최종URL/DOM대기로보완중. 제품src변경없음.
+- unified74277/CODEX_TIMEOUT1800이v5실행초기에rc124로종료. 실제test실패로세지않음. 같은UUID01a1794a-b9f6-7771-ae8f-6b57090f7904로재개(unified24843,timeout2400/외부2500). 직전namespace1793084514123정리우선.
+- haenael-s3-interrupted-namespace-cleanup-v1-gpt-codex-20261027-1610.json 직접확인: auth/member/goal0,결제4잔여를정확한runId로삭제,after8계수전부0. 예전1406namespace재정리없음.
+- caffeinate -i -s -t3600, PID24933를이번실행이시작했다. 종료시이PID가caffeinate인지확인후회수. 부모초기브라우저·서버·타세션자원은유지. 재사용로그%359와goal진행로그%373을소유로그파일명확인후현재root%329아래로이동,로그16줄/진행12줄/primary38줄직접확인.
+- 다음은24843회수와실제표적/전체E2E·fixture0확인,verify-agent-quality후동일qa-verifier01a17976-dd7e-7a40-bcb7-a61857d5a739로독립검수. QA프롬프트는functions store s3_qa_recovery_task에준비. S1/S2유지·전체unit반복금지·운영/과금/commit/push금지.
+
+## 2026-10-27 15:33 KST · 추가 진행 지시로 S3 실패 조건 수정·전수 QA 직접 위임
+
+- 사용자 원문: 더 진해해. 기존 중단을 이어서 진행하라는 지시로 적용. 현재 계정60.0% 실측, 기존 실행 단위와 같이 이번 중단기준65%(추가5%p), 85%이상새위임금지유지. 운영·실결제·유료구매·상류재작성 미승인.
+- 이 대화의 원발주 Codex가 직접 controller. 별도 실행controller 새창생성없음. 기존 code-builder CODEX_RESUME=01a1794a-b9f6-7771-ae8f-6b57090f7904 재개, unified exec74277, timeout1800(외부1900). TMUX_PANE=%329 명시로현재해낼게창아래로그표시. CODEX_ALLOWED_PATHS는E2E·S3증거·문서·feature-list/demos, 제품src·서버·STATE·하네스는제외.
+- 과제: timeout숫자증가가아닌원인확인, 초대happy흐름과소유권/비인증음성case분리, load/networkidle대신HTTP/URL/DOM명시대기, 기존보안assertion보존. 단일heavy-slot 안에표적→전체social-web-first실행, 첫실패전체skip방지와공유fixture정합확인. 새스크립트/게이트/전체unit반복금지. 제품소스동일성으로S2회귀439재사용.
+- 기존cleanup41계수0은보존하며재정리안함. 이번namespace만정리·잔여0증거확인. 완료판정은동일qa-verifier 독립검수후. nativegoal메타데이터를임의active/complete로바꾸지않고실작업로그와구분.
+
+## 2026-10-27 15:00 KST · 최종 보고 준비와 실행 자원 종료
+
+- 새 목표 실행 Codex thread01a17948-dc1e-75e1-bd4a-19adad26e59e는paused·미완료 상태를보존. DB/Auth/Storage41잔여0확인후이번작업이만든controller pane%357의Codex PID16789에SIGTERM을보내종료했다. 원발주root%329·기존Claude%328·다른세션은건드리지않았다. controller-final-screen.txt와controller-process-cleanup.json에종료대상기록. 완료된위임로그pane은회장열람규칙대로보존.
+- 목표완수로바꾸지않음. feature-list/예산/데모/코드/테스트/정리증거는재개용으로보존. 운영배포·실결제·추가구매·새기능테스트없음.
+- 최종초안 /private/tmp/haenael-goal-resume-final-report.md. Codex용report-lint입력으로검사. Claude전용stop-preflight는CLAUDE_CODE_SESSION_ID없으면실행불가라대체검사사용.
+
+## 2026-10-27 14:48 KST · 종료 결과 회수 완료, 테스트 잔여0 직접 대조
+
+- 승인된 계정50→55% 상한 도달로 신규 기능개발·QA 중단. 신규GOAL/재승인/운영변경없음. 목표관리S1독립QA유지, 프로필·커버S2독립QAv2 PASS·439/439회귀·19/19데모실제로드회수. S3 F5실제3회실패, 최신전체F6실행0,전체QA·ship미승인.
+- 정리결과 S3/haenael-s3-cleanup-result-v1-gpt-codex-20261027-1406.json의 after를원발주root가재귀집계해41개계수모두0확인. 회원·목표·결제·Auth·세션·identity·Storage·외래키29조건·v3알려진계정/목표0. Auth삭제5/5 HTTP200과정리후0조회구별. QA-S3-CLEANUP-20261027-01 최신표에정리관찰완료반영,과거NG로그보존.
+- runtime.state가active로낡아있어실제목표DB paused와일치하도록정정. feature-list·budget·demos를삭제하지않고미완요건보존. 검증기PASS가S3기능PASS를뜻하지않음.
+- 최종결과허브 docs/v2-deliverables/index.html은Chrome9342에실제로열린것확인. 원발주root의신규서버·포트·컨테이너생성없음. GOAL 시작caffeinate PID19129는종료돼살아있지않음직접확인. 다른세션자원은건드리지않음.
+- 후속은초대happyflow와접근거부검사를분리하고명시적URL/DOM대기로검증조건을고친뒤,승인된추가실행범위에서S3/F6를종료해야함. 이수정·재실행은아직미실행. 목표완수아님.
+
+## 2026-10-27 13:59 KST · 승인55% 도달, S3 3회 실패 후 데이터 정리만 회수 중
+
+- 사용자 마지막 실행 승인: “어” = 계정 실측50%에서 추가+5%p(55%) 한도. 현재 최신 rate_limits primary used_percent55.0, window_minutes10080 직접 확인. 신규 개발·검증 발주 중단 지시. 원 발주 Codex는 이 턴에서 결과를 회수 중이며 새 제품 워커 발주하지 않음.
+- S1 목표관리 closed 보존. S2 프로필·커버 독립 QA v2 PASS와 최종소스439/439 회귀, 데모 이미지19/19 및 링크·콘솔·overflow0 직접 회수. verify-agent-quality QA 로그 PASS(24/25, weakest-line 비관리자승인음성경로 범위밖 경고 확인). source prototype/dev2장과 admin15번 PNG 직접 열었다. 허브 docs/v2-deliverables/index.html show-artifact 종료0, 전용Chrome9342 탭 실제 확인.
+- S3는 actual F5 3회 실패: 1121 URL5초대기,1328 전체test30초와cleanup transport실패,1331 전체test120초에서익명wordmap load대기. 각 마지막요약1pass/1fail/3미실행. 1129 heavy-slot실행없음·대기초과는실패횟수제외. F6 전체social-web-first는실행0. 새4회차·F6·추가개발은금지지시.
+- root가 v3 익명wordmap URL 직접curl: HTTP307→/?next=...,0.261833초. 접근허용결함이라고단정하지않고 Playwright load timeout과구분. 초대→수락→친구조회 UI동작증거는있어도전체QA통과아님.
+- v2 teardown 로그는 db-remains47/auth-remains5, Storage미확인. QA-S3-CLEANUP-20261027-01 NG등록및기존실행Codex에필수정리전달. read-only scope JSON에서 namespace1793075388485와5테스트이메일·계정ID·생성시각일치직접확인. S3 cleanup-scope1348/cleanup-before1350/cleanup-operation1351 JSON생성, 아직after잔여0미확인. 운영·타작업데이터삭제금지.
+- 실행Codex는예산상한에서목표를paused로기록하고신규위임없이기존helper의정리종료절차만진행중이다. 원발주root의기존nativegoal은blocked그대로이며완료로바꾸지않음. 별도rootnativegoal생성없음.
+- 공유heavy-slot경쟁장기대기실측. zto1 QA npm test 소유 추정 세션01a16c7e-f0db-7b43-b2ae-d4465aa61259에MCP로완료/watch/고아인자기자원만확인·회수요청전달성공. 다른저장소프로세스강제종료안함. 이후슬롯반환관찰, 인과관계단정안함.
+- 평가ev-20261027-55: 시작만보고종료결과미회수한책임·원인·이번회수조치기록. 하네스새훅/정책/설계변경없음. 사용자AGENTS최신교체적용,산출물명명훅추가등곁가지착수안함.
+
+## 2026-10-27 11:22 KST · S2 독립 QA 완료 회수, S3 기존 워커 착수
+
+- 최종 소스 회귀 로그 S2/logs/full-regression-final-source.log: 78파일439/439, duration172.82초. 원 발주 Codex가 직접 로그 확인.
+- qa-verifier S2 v2 보고서 PASS, QAS2-01 관리자 목표 커버 검수 대상·68KB·승인/반려 CTA와 QAS2-02 reduced-motion·owner mark·static heart 경계 해소. root가 승인/제품2장과 관리자15번PNG 직접 열어 확인.
+- S2/logs/independent-demo-render-v2.json 실제 pass=true, images19/19, missingLocalLinks/rawDocLinks/consoleErrors/pageErrors 모두[], horizontalOverflow0. verify-agent-quality.sh QA 로그 검사 PASS, RUBRIC24/25, weakest-line 스팟체크 경고1.
+- QA PW03 독립 추가 실행은 공용heavy-slot2/2 경쟁으로 시작대기 중 중단(exit130)되어 새PASS로 세지 않음. 기존 기능·최종소스회귀·직접DOM/이미지 증거 재사용을 QA v2가 구분해 기록.
+- 현재 기존 code-builder CODEX_RESUME=01a1794a-b9f6-7771-ae8f-6b57090f7904를 S3 초대 수락 실제 데모·전체QA로 발주, timeout2200. 새워커 중복생성없음. S3최종결과는 아직없음.
+- 공용 슬롯 점유 실측: PID37634 postAGI/wt-nativeqa 에뮬레이터, PID86149 zto1-qa worktree npm test. 다른 작업이므로 종료하지 않음. 계정주간사용53% 관찰, 승인상한55% 유지.
+
+## 2026-10-27 10:52 KST · 사용자 추가 +5%p 승인, 기존 Codex 재개 확인
+
+- 사용자 원문 “어”는 직전 추가 +5%p 재개 질문에 대한 승인. 원문과 적용 범위를 wiki/거버넌스/요청.md, .goal/resume-authorization.md에 기록.
+- 현재 계정 실측50.0%에서55.0%까지 .goal/budget weekly_start=50.0, weekly_cap=5. 기존 tokens8000000 유지, 원본 budget-before-resume-20261027 보존. 유료 크레딧 구매·운영 변경 승인 아님.
+- 기존 tmux %357에서 /goal resume 실행 후 실제 DB active 확인, thread 01a17948-dc1e-75e1-bd4a-19adad26e59e. 대화 compact 완료 Context11%로 감소. 기존 code-builder/qa-verifier ID 재사용과 S2 최종검수 우선 지시. 새 제품 워커 중복 발주 없음.
+- 원 발주 대화는 이번에는 실제 종료·중단 결과 회수까지 유지한다. 로그를 goal-run-mark status 네 칸으로 갱신했다. 다음 증거는 S2 독립 QA·데모 열기 검사, 이어 S3 full E2E.
+
+## 2026-10-27 10:46 KST · 사용자 진행 문의로 실제 중단 상태 회수
+
+- 사용자 원문: “왜 진행안하는거야?” 실제 새 Codex %357 Ready, Goal stalled 확인. thread 01a17948-dc1e-75e1-bd4a-19adad26e59e DB blocked, tokens_used472886, time_used_seconds10063. 토큰은 native 카운터이며 전체 워커 비용으로 해석하지 않음.
+- S1 독립 QA v2 PASS와 데모 파일 확인. S2 기능 F3/F4 PASS지만 독립 QA 시각·캡처2건 반려 후 CSS/Wordmap 보완 최종 검수 미완. S3 미착수. 구체 근거 session-state.v2-goal-slices.md, .goal/demos.md, S1/S2 QA 보고서.
+- 원인: 새 실행은 기본 주간 계정 증가 +10%p(30→40)에 도달해 05:26 종료했으나 원 발주 대화가 종료 결과를 회수하지 않아 사용자에게 중단을 알리지 못함. 계정 전체 사용률은 이 작업 고유 소비가 아님. OPS-GOAL-20261027-01 NG 등록.
+- 상한을 임의 확대하거나 새 구현·QA 위임을 발주하지 않음. 현재 실행 결과를 사용자에게 설명하고 재개 예산 결정을 받아 기존 code-builder/qa-verifier를 이어갈 수 있음. 기존 코드·다른 세션 변경 보존.
+
+## 2026-10-27 02:37 KST · 사용자 명시 지시로 개선 하네스 GOAL 실제 시작
+
+- 사용자 지적: 1·2차 GOAL 실패의 핵심은 시간·토큰 대비 개발·QA·데모 산출 부재와 전체 파이프라인 왕복이다. 개선 하네스 확인 후 현재 사업체의 남은 일을 목표로 실행하라는 명시 지시. 원문은 wiki/거버넌스/요청.md 최신 절에 저장.
+- 최신 codex-goal.md 규약13~15 확인: 사용자 흐름별 6개 이하 인수기준, 첫 슬라이스 4시간, 개발→검증→QA+회귀→실제 데모를 닫기 전 다음 흐름 금지, env_check 실패 시 시작 금지, 결함 난 슬라이스만 재오픈.
+- .goal/feature-list.json v2와 execution-brief.md 생성. S1 목표 관리 편집·응원자 배지 수정, S2 프로필·커버 저장·reload·공개 반영, S3 친구 초대·공개 경계·최신 소스 전체 QA. 내부6항목, 외부 Kakao/Toss2항목. verify는 기존 social-web-first.spec.ts 실제 명령. .goal/demos.md는 각 흐름을 끝낸 실행 컨트롤러가 실제 결과로 작성하며 아직 데모 없음.
+- env_check 실제 종료코드0: Playwright 의존성·staging secret 파일 존재 및 staging health의 Supabase ref ezzklgotgydwxqebfoys 확인. 전체 QA 통과를 뜻하지 않음.
+- 기존 root GOAL은 blocked이고 재개 API 없음. goal-start.sh --launch 정문으로 새 Codex medium 실행. 새 thread=01a17948-dc1e-75e1-bd4a-19adad26e59e, DB active 및 TUI Goal active 직접 확인. tmux goal-haenael-ge controller %357, 아래 진행로그 %358 높이12 직접 확인. caffeinate pid19129,12h. 기본 캐시제외800만 토큰·계정 주간증가 +10%p.
+- 단일 실행 주체: 새 GOAL Codex가 v2 담당. 기존 %329는 제품 발주·구현 중단, 상태 기록만 수행. Claude %328 capture는 10/24 완료 보고와 입력대기. 단순 창 존재를 중복 실행으로 오인하지 않도록 GOAL_SOLE_OK=1 사용 사실과 근거 명시. 다른 세션 종료하지 않음.
+- 새 컨트롤러가 S1 code-builder를 codex-delegate.sh로 실제 발주했고 실행 로그 pane %359(16줄)를 직접 확인했다. 로그 /Users/sj/.claude/harness/codex-logs/20261027-023739-32542-code-builder.log. 새 컨트롤러 일본어 진행문은 MCP 전달이 active writer 오류로 거절돼 tmux에 [컨트롤러 전달, 사용자 발화 아님]이라고 명시한 한국어 사용 교정 메시지를 입력했다. 처리 완료 여부는 아직 확인하지 않았다.
+- 현재 새 컨트롤러가 규약·brief·feature-list를 읽고 실제 작업을 시작한 상태까지 관찰. 아직 새 수정/테스트 PASS/데모 완료를 주장하지 않는다. 이 세션은 동일 작업을 병렬 위임하지 않는다.
+- 계속 조건: 기존 prototype SSOT, 무료 staging 유지, 소스 기준 동결. X1/X2도 기존 메인 Chrome·CLI부터 확인, 실제 외부 의존만 분리. 해당 외부 테스트 미완이면 전체 제품 QA 승인/출시 준비 완료로 보고 금지. 운영 배포·운영 DB 변경·실결제·추가 과금 미승인.
+- 보존: staged session-state.core.md 아카이브 이동과 session-state.v2.md 기존변경을 건드리지 않음. 제품 코드 직접 수정·커밋·push 없음. 다음 검증과 결과물 소유자는 새 GOAL controller이며 S1 실제 E2E·시각2장대조·회귀·데모부터 회수한다.
+
+## 2026-10-27 02:25 KST · 개선된 Codex GOAL 하네스 확인, 재실행안 제시만
+
+- 사용자 원문: “goal 개선된 하네스 확인해봐라 그리고 이 프로젝트 다시 목표 세워서 골 진행한다면 어떻게 메세지 남길건지 진행할건지 말해봐라”. 조건부 실행 방식 질문으로 해석했다. 새 GOAL 생성·재개, 제품 코드·배포·DB·하네스 변경은 실행하지 않았다.
+- 확인한 정본과 실물: ~/.claude/standards/codex-goal.md, harness/bin/goal-start.sh, ~/.codex/hooks/goal-guard.sh, goal-run-mark.sh의 pane 선택 코드, 현재 tmux pane과 pipeline-state.v2.md·QA tracker. goal-run 스킬은 내장 Codex GOAL과 다른 범위임을 확인했다.
+- 개선 구현: feature-list에서 목표 생성, 기본 캐시 제외 800만 토큰·계정 주간 사용률 +10%p 예산, 맥 GOAL 1개·저장소 컨트롤러 중복 차단, fork_turns none 강제, codex-delegate 경유 위임과 로그 창, QA 기준 동결·한 회차 완주. 장기 실행 효과는 정본 자체도 시운전 미검증으로 기록한다. 이번 턴 새 시운전은 하지 않았다.
+- 남은 하네스 이슈: 도구 셸 TMUX_PANE=%5, 실제 해낼게 Codex=%329. goal-run-mark.sh는 환경변수를 그대로 우선하므로 올바른 창 아래 표시가 보장되지 않는다. 현재 해낼게 창에는 Claude %328과 Codex %329가 함께 있어 재실행 전 컨트롤러 담당을 확정해야 한다. 다른 세션 종료·pane 이동은 하지 않았다.
+- 측정 한계: 주간 사용률은 계정 전체 지표이며 단계별 사업체 귀속률이 아니다. 최신 rate_limits primary window_minutes=10080, used_percent=29 관찰. 시점 값이며 이 목표의 소비율로 사용하지 않는다. 검사 형식은 종료코드 기반 verify를 요구하므로 육안 시각 대조는 별도 필수 출고 조건으로 남겨야 한다.
+- 프로젝트 상태: current_stage=qa, plan/design/eng-design/build 승인, QA·ship 미승인. 알려진 QA-V2-VISUAL-20261025-01(응원 횟수 pill 배경 차이) 미해결. 실제 Kakao 로그인·Toss 샌드박스 검증도 남아 있다. prototype social-viral-loop-v3-opus5.html SSOT와 기존 무료 스테이징을 재사용한다.
+- 다음 액션(재개 지시 시): .goal/feature-list.json 작성(현재 없음), 검증 명령 확정, 단일 컨트롤러 확인, goal-start로 목표문 생성, 로그 pane 실제 위치 확인, 개발 에이전트 결함 수정 후 QA 에이전트가 최신 기준으로 한 회차 완주. 외부 항목 분리는 실제 접근·실행 시도 후 사유가 확인된 경우에만 한다. 외부 테스트가 남으면 내부 완료와 제품 전체 QA 미완료를 구분한다.
+- 제약: 운영 배포·운영 DB 변경·실결제·추가 과금은 개별 승인 전 실행하지 않는다. 이번 작업은 실행안 제시와 상태 기록뿐이다. 기존 staged session-state.core.md 아카이브 이동과 session-state.v2.md 변경은 보존한다.
+
 ## 2026-10-26 00:21 KST · GOAL 재설정 개선안 제안만, 미실행
 
 - 사용자 원문: “다시 목표를 세운다면 어떻게 무엇을 개선할거야”. 가정형 실행 방식 질문이므로 새 goal 생성·제품/하네스 수정은 하지 않음.

@@ -1,0 +1,21 @@
+{
+  "stamp": {
+    "created_at": "2026-10-27T16:43:30+09:00",
+    "model": "gpt-codex",
+    "agent": "code-builder",
+    "skill": "haenael-supabase-build"
+  },
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "temporary_payments_enabled_rc": 0,
+  "f5_exit_code": 0,
+  "f6_exit_code": 1,
+  "restored_payments_disabled_rc": 0,
+  "payments_disabled_smoke": {
+    "status": 401,
+    "body": {
+      "code": "UNAUTHORIZED_NO_AUTH_HEADER",
+      "message": "Missing authorization header"
+    }
+  },
+  "external_payment_called": false
+}

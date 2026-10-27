@@ -1,0 +1,61 @@
+{
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "source_evidence": "docs/qa/evidence/v2-ssot-20261025/controller-smoke-2026-10-24T22-55-11-380Z.json",
+  "target": {
+    "user_id": "a997427f-9e04-42bf-9390-163e41d983ca",
+    "email": "controller-1792882512988@test.local",
+    "nickname": "컨트롤러 검증",
+    "goal_id": 98,
+    "cheer_id": 346,
+    "ledger_id": 98
+  },
+  "ownership_guard": {
+    "exact_auth_identity": true,
+    "exact_member_profile": true,
+    "one_closed_smoke_goal": true,
+    "one_welcome_cheer": true,
+    "one_welcome_grant": true,
+    "no_cashout_kyc_or_risk_rows": true
+  },
+  "root_cause": {
+    "constraint": "cheer_goal_id_fkey",
+    "action": "ON DELETE RESTRICT",
+    "blocked_path": "auth.users -> member -> goal -> cheer",
+    "note": "clover_ledger_member_id_fkey is ON DELETE CASCADE; the welcome cheer FK was the direct blocker."
+  },
+  "database_cleanup": {
+    "deleted": {
+      "goal": 1,
+      "cheer": 1,
+      "member": 1,
+      "clover_ledger": 1
+    },
+    "remaining_goal": 0,
+    "remaining_cheer": 0,
+    "remaining_ledger": 0,
+    "remaining_member": 0,
+    "remaining_balance": 0
+  },
+  "auth_admin_delete": true,
+  "remaining": {
+    "auth_user": 0,
+    "member": 0,
+    "goal": 0,
+    "cheer": 0,
+    "clover_ledger": 0,
+    "clover_balance": 0
+  },
+  "independent_remaining_query": {
+    "auth_by_id": 0,
+    "auth_by_email": 0,
+    "member_by_id": 0,
+    "goal_by_id": 0,
+    "cheer_by_id": 0,
+    "ledger_by_id": 0,
+    "balance_by_member": 0
+  },
+  "normal_ttl_profile_queue_touched": false,
+  "production_touched": false,
+  "completed_at": "2026-10-24T22:58:52.125Z",
+  "pass": true
+}

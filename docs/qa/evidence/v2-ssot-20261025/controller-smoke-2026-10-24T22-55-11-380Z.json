@@ -1,0 +1,15 @@
+{
+  "origin": "https://haenael-ge-v2-staging-100-b.vercel.app",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "started_at": "2026-10-24T22:55:12.988Z",
+  "bio_saved_reload_and_db": true,
+  "goal_closed_ui_and_db": true,
+  "console_errors": [],
+  "pass": false,
+  "fixture_cleanup": {
+    "member_delete_ok": false,
+    "auth_delete_ok": false,
+    "remaining_members": 1
+  },
+  "finished_at": "2026-10-24T22:55:28.520Z"
+}

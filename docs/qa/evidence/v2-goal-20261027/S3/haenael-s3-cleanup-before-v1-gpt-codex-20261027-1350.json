@@ -1,0 +1,184 @@
+{
+  "observed_at": "2026-10-27T13:50:05.180366+09:00",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "namespace": "1793075388485",
+  "member_ids": [
+    "a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe",
+    "224a41e3-ceff-468d-87d7-e908dc128c38",
+    "891d86fc-fcad-4358-a356-359849b2324f",
+    "f9b15895-c307-40e7-8701-cccf9066b36f",
+    "9a9e1dfd-2a25-4309-8287-fa457eb9e6c2"
+  ],
+  "query": "with scoped_goals as (select id from public.goal where member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)) select jsonb_build_object(\n'member_count',(select count(*) from public.member where id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'goal_count',(select count(*) from scoped_goals),\n'goal_ids',(select coalesce(jsonb_agg(id),'[]') from scoped_goals),\n'payment_count',(select count(*) from public.payment where order_id like 'social-1793075388485-%'),\n'auth_count',(select count(*) from auth.users where id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'cover_assets',(select count(*) from public.goal_cover_asset where owner_member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid) or goal_id in(select id from scoped_goals)),\n'avatar_assets',(select count(*) from public.profile_avatar_asset where owner_member_id in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe'::uuid,'224a41e3-ceff-468d-87d7-e908dc128c38'::uuid,'891d86fc-fcad-4358-a356-359849b2324f'::uuid,'f9b15895-c307-40e7-8701-cccf9066b36f'::uuid,'9a9e1dfd-2a25-4309-8287-fa457eb9e6c2'::uuid)),\n'storage_objects',(select coalesce(jsonb_agg(jsonb_build_object('bucket_id',bucket_id,'name',name)),'[]') from storage.objects where bucket_id in ('goal-cover-quarantine','goal-cover-public','profile-avatars') and (split_part(name,'/',1) in ('a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe','224a41e3-ceff-468d-87d7-e908dc128c38','891d86fc-fcad-4358-a356-359849b2324f','f9b15895-c307-40e7-8701-cccf9066b36f','9a9e1dfd-2a25-4309-8287-fa457eb9e6c2') or (bucket_id='goal-cover-public' and split_part(name,'/',1) in(select id::text from scoped_goals)))),\n'public_fk_scope',(select coalesce(jsonb_agg(jsonb_build_object('table',c.relname,'column',a.attname,'parent',p.relname)),'[]') from pg_constraint k join pg_class c on c.oid=k.conrelid join pg_class p on p.oid=k.confrelid join pg_namespace n on n.oid=c.relnamespace join pg_attribute a on a.attrelid=c.oid and a.attnum=k.conkey[1] where k.contype='f' and n.nspname='public' and array_length(k.conkey,1)=1 and k.confrelid in ('public.member'::regclass,'public.goal'::regclass,'public.payment'::regclass,'auth.users'::regclass))\n) as evidence",
+  "result": [
+    {
+      "evidence": {
+        "goal_ids": [
+          505,
+          506,
+          503,
+          498,
+          499,
+          500,
+          501,
+          502,
+          504
+        ],
+        "auth_count": 5,
+        "goal_count": 9,
+        "cover_assets": 0,
+        "member_count": 5,
+        "avatar_assets": 0,
+        "payment_count": 31,
+        "public_fk_scope": [
+          {
+            "table": "clover_ledger",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "friend_invite",
+            "column": "inviter_member_id",
+            "parent": "member"
+          },
+          {
+            "table": "friend_invite",
+            "column": "goal_id",
+            "parent": "goal"
+          },
+          {
+            "table": "member",
+            "column": "id",
+            "parent": "users"
+          },
+          {
+            "table": "goal",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "cheer",
+            "column": "goal_id",
+            "parent": "goal"
+          },
+          {
+            "table": "cheer",
+            "column": "payment_id",
+            "parent": "payment"
+          },
+          {
+            "table": "payment_log",
+            "column": "payment_id",
+            "parent": "payment"
+          },
+          {
+            "table": "clover_balance",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "cashout_request",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "kyc_verification",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "risk_event",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "share_event",
+            "column": "goal_id",
+            "parent": "goal"
+          },
+          {
+            "table": "wordmap_render_cache",
+            "column": "goal_id",
+            "parent": "goal"
+          },
+          {
+            "table": "notification",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "friend_invite",
+            "column": "accepted_by",
+            "parent": "member"
+          },
+          {
+            "table": "admin_member",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "cashout_request",
+            "column": "processed_by",
+            "parent": "member"
+          },
+          {
+            "table": "cashout_account_access_log",
+            "column": "actor_id",
+            "parent": "member"
+          },
+          {
+            "table": "member_preference",
+            "column": "member_id",
+            "parent": "member"
+          },
+          {
+            "table": "friend_connection",
+            "column": "member_low_id",
+            "parent": "member"
+          },
+          {
+            "table": "friend_connection",
+            "column": "member_high_id",
+            "parent": "member"
+          },
+          {
+            "table": "friend_connection",
+            "column": "blocked_by_member_id",
+            "parent": "member"
+          },
+          {
+            "table": "goal_cover_asset",
+            "column": "goal_id",
+            "parent": "goal"
+          },
+          {
+            "table": "goal_cover_asset",
+            "column": "owner_member_id",
+            "parent": "member"
+          },
+          {
+            "table": "goal_cover_asset",
+            "column": "reviewed_by",
+            "parent": "member"
+          },
+          {
+            "table": "storage_cleanup_queue",
+            "column": "goal_id",
+            "parent": "goal"
+          },
+          {
+            "table": "social_cheer_member_attribution",
+            "column": "supporter_member_id",
+            "parent": "member"
+          },
+          {
+            "table": "profile_avatar_asset",
+            "column": "owner_member_id",
+            "parent": "member"
+          }
+        ],
+        "storage_objects": []
+      }
+    }
+  ]
+}

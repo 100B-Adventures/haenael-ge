@@ -1,0 +1,157 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>source-manifest.json</title><style>body{max-width:980px;margin:40px auto;padding:0 24px;background:#f7f8fa;color:#17202a;font:16px/1.55 system-ui}h1{font-size:24px}p{color:#58636f}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;border:1px solid #d8dee6;border-radius:12px;padding:20px;line-height:1.55}</style></head><body><h1>source-manifest.json</h1><p>원본 JSON 전체를 읽기 좋게 렌더한 화면입니다. 내용은 요약하거나 재작성하지 않았습니다.</p><pre>{
+  &quot;generated_at&quot;: &quot;2026-10-27T04:15:03+09:00&quot;,
+  &quot;independent_qa_updated_at&quot;: &quot;2026-10-27T04:23:00+09:00&quot;,
+  &quot;scope&quot;: &quot;S1&quot;,
+  &quot;remediation_status&quot;: &quot;closed_independent_qa_pass&quot;,
+  &quot;base_commit&quot;: &quot;f4d38f3fae0d5c7908ef5499281f2f9bf9d956de&quot;,
+  &quot;approved_prototype&quot;: {
+    &quot;path&quot;: &quot;docs/design/prototypes/social-viral-loop-v3-opus5.html&quot;,
+    &quot;version&quot;: &quot;3.0.0&quot;,
+    &quot;sha256&quot;: &quot;afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a&quot;
+  },
+  &quot;independent_qa&quot;: {
+    &quot;report&quot;: &quot;docs/qa/evidence/v2-goal-20261027/S1/haenael-s1-independent-qa-v2-gpt-codex.md&quot;,
+    &quot;prior_report&quot;: &quot;docs/qa/evidence/v2-goal-20261027/S1/haenael-s1-independent-qa-v1-gpt-codex.md&quot;,
+    &quot;prior_decision&quot;: &quot;FAIL&quot;,
+    &quot;final_decision&quot;: &quot;PASS&quot;,
+    &quot;closed_findings&quot;: [
+      &quot;QAS1-01&quot;,
+      &quot;QAS1-02&quot;,
+      &quot;QAS1-03&quot;,
+      &quot;QAS1-04&quot;
+    ],
+    &quot;evidence&quot;: &quot;logs/F1-PW-02-independent-recheck-v2.log&quot;,
+    &quot;fixture_route&quot;: &quot;/me/goal/372&quot;,
+    &quot;fixture_removed_after_run&quot;: true
+  },
+  &quot;staging&quot;: {
+    &quot;alias&quot;: &quot;https://haenael-ge-v2-staging-100-b.vercel.app&quot;,
+    &quot;deployment_url&quot;: &quot;https://haenael-gmop3fi0x-100-b.vercel.app&quot;,
+    &quot;deployment_id&quot;: &quot;dpl_2QeUAd65Qn4Tcfs9SvCuZaFWmbC3&quot;,
+    &quot;supabase_project_ref&quot;: &quot;ezzklgotgydwxqebfoys&quot;,
+    &quot;health_evidence&quot;: &quot;docs/qa/evidence/v2-goal-20261027/S1/logs/staging-remediation-health.json&quot;,
+    &quot;production_deployed&quot;: false
+  },
+  &quot;rejected_snapshot&quot;: {
+    &quot;path&quot;: &quot;/private/tmp/haenael-s1-remediation-20261027-mCP7b6&quot;,
+    &quot;reason&quot;: &quot;contained the invalid median-font-driven 16px overrides&quot;,
+    &quot;alias_connected&quot;: false,
+    &quot;allowed_as_evidence&quot;: false
+  },
+  &quot;sources&quot;: [
+    {
+      &quot;path&quot;: &quot;web/src/app/globals.css&quot;,
+      &quot;sha256&quot;: &quot;e83cb2dc47aa609877fdd60de19bcce81f0a218d678458cf0e443bc72db8598a&quot;,
+      &quot;deployed_snapshot_sha256&quot;: &quot;e83cb2dc47aa609877fdd60de19bcce81f0a218d678458cf0e443bc72db8598a&quot;
+    },
+    {
+      &quot;path&quot;: &quot;web/src/components/goal/GoalSupporterList.tsx&quot;,
+      &quot;sha256&quot;: &quot;0bd01649c16ad15b74da9af83d348fe9d9f72e245720b5cabe69adc16caa219d&quot;,
+      &quot;deployed_snapshot_sha256&quot;: &quot;0bd01649c16ad15b74da9af83d348fe9d9f72e245720b5cabe69adc16caa219d&quot;
+    },
+    {
+      &quot;path&quot;: &quot;web/src/components/goal/__tests__/GoalSupporterList.test.tsx&quot;,
+      &quot;sha256&quot;: &quot;0bdba2b18c4dacf373d271edc22b01ebd244c8c766ab4e6447647ec479ef911f&quot;
+    },
+    {
+      &quot;path&quot;: &quot;web/e2e/social-web-first.spec.ts&quot;,
+      &quot;sha256&quot;: &quot;cde309c92a2321b4b5c34a393f678af1d4cdf1af3b10f679d143af5f6910a102&quot;
+    }
+  ],
+  &quot;pw02_flow&quot;: {
+    &quot;fixture_route&quot;: &quot;/me/goal/363&quot;,
+    &quot;fixture_removed_after_run&quot;: true,
+    &quot;steps&quot;: [
+      &quot;owner login&quot;,
+      &quot;goal-management top&quot;,
+      &quot;open editor&quot;,
+      &quot;enter title&quot;,
+      &quot;save&quot;,
+      &quot;reload and assert title persistence&quot;,
+      &quot;assert supporter preview 8&quot;,
+      &quot;expand and assert supporters and pills 18&quot;
+    ],
+    &quot;captures&quot;: [
+      &quot;captures/flow/01-owner-goal-top-390.png&quot;,
+      &quot;captures/flow/02-edit-sheet-open-390.png&quot;,
+      &quot;captures/flow/03-edit-title-filled-390.png&quot;,
+      &quot;captures/flow/04-saved-reloaded-title-390.png&quot;,
+      &quot;captures/flow/05-supporters-preview-8-390.png&quot;,
+      &quot;captures/flow/06-supporters-expanded-18-390.png&quot;
+    ]
+  },
+  &quot;authenticated_goal_ergonomics&quot;: {
+    &quot;route_template&quot;: &quot;/me/goal/{id}&quot;,
+    &quot;widths&quot;: [
+      360,
+      390,
+      412,
+      600,
+      700,
+      780,
+      820,
+      900,
+      1000
+    ],
+    &quot;results&quot;: {
+      &quot;font_below_13&quot;: 0,
+      &quot;token_body_px&quot;: 16,
+      &quot;tap_below_44&quot;: 0,
+      &quot;active_ratio&quot;: 1,
+      &quot;active_rules&quot;: 27,
+      &quot;active_missing&quot;: [],
+      &quot;horizontal_overflow&quot;: 0,
+      &quot;fixed_bottom_height&quot;: 64,
+      &quot;bottom_clearance&quot;: 80
+    },
+    &quot;reference_only&quot;: {
+      &quot;median_font&quot;: 13,
+      &quot;note&quot;: &quot;The canonical mobile ergonomics script does not use median font size as a pass criterion.&quot;
+    },
+    &quot;evidence&quot;: &quot;logs/F1-PW-02-remediation-corrected.log&quot;
+  },
+  &quot;visual_comparison&quot;: {
+    &quot;approved_path&quot;: &quot;captures/flow/07-approved-supporters-expanded-390.png&quot;,
+    &quot;approved_sha256&quot;: &quot;bf6839367bd492171d431b737e54ff6e9bc42ae183c320af9b4b9bf16b113df4&quot;,
+    &quot;actual_path&quot;: &quot;captures/flow/08-staging-supporters-expanded-390.png&quot;,
+    &quot;actual_sha256&quot;: &quot;19eab5ea6b0a3de06f6e76713f8cc9a92d878ebb9e0903b44195bb32ae808913&quot;,
+    &quot;viewport&quot;: &quot;390x844&quot;,
+    &quot;aligned_element&quot;: &quot;supporter list first card&quot;,
+    &quot;aligned_top&quot;: 72,
+    &quot;approved_visible_rows&quot;: 11,
+    &quot;actual_visible_rows&quot;: 18,
+    &quot;row_count_semantics&quot;: &quot;rendered DOM rows, not rows fully visible inside the viewport&quot;,
+    &quot;changed_pixels&quot;: 72865,
+    &quot;total_pixels&quot;: 329160,
+    &quot;changed_ratio&quot;: 0.22136650868878358,
+    &quot;mean_absolute_channel_delta&quot;: 10.421724996961963,
+    &quot;max_channel_delta&quot;: 255,
+    &quot;difference_boundary&quot;: &quot;same viewport, scroll alignment, and semantic supporter-list state; fixture names, counts, and row count differ from prototype data&quot;
+  },
+  &quot;verification&quot;: {
+    &quot;f1&quot;: {
+      &quot;result&quot;: &quot;1 passed, 0 skipped&quot;,
+      &quot;evidence&quot;: &quot;logs/F1-PW-02-remediation-corrected.log&quot;
+    },
+    &quot;f2&quot;: {
+      &quot;result&quot;: &quot;2 passed, 0 skipped&quot;,
+      &quot;evidence&quot;: &quot;logs/F2-AUTH-SMOKE-final.log&quot;,
+      &quot;reuse_basis&quot;: &quot;independent QA already passed F2; active-feedback-only CSS does not alter authentication or smoke behavior&quot;
+    },
+    &quot;full_regression&quot;: {
+      &quot;result&quot;: &quot;78 files passed, 439 tests passed&quot;,
+      &quot;evidence&quot;: &quot;logs/full-regression-remediation.log&quot;,
+      &quot;rerun_reason&quot;: &quot;active-state CSS changed&quot;
+    },
+    &quot;vercel_build&quot;: {
+      &quot;result&quot;: &quot;Build Completed in /vercel/output&quot;,
+      &quot;evidence&quot;: &quot;logs/staging-remediation-correct-deploy.log&quot;
+    }
+  },
+  &quot;failure_history&quot;: {
+    &quot;f1_consecutive_failures&quot;: 1,
+    &quot;cause&quot;: &quot;a newly invented median_font &gt;= 16 assertion contradicted the canonical measurement script&quot;,
+    &quot;correction&quot;: &quot;restored canonical criteria without narrowing scope: fontBelow13=0 and font-designer-14r&gt;=16, plus tap, active, overflow, and fixed-bottom checks&quot;,
+    &quot;invalid_font_overrides_reverted&quot;: true
+  }
+}</pre></body></html>

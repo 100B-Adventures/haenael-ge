@@ -78,8 +78,6 @@ export function Wordmap({
       testId="wordmap"
       label={`응원 메시지 워드맵, 전체 ${normalizedWords.length}개 표시`}
     >
-      <span className="wordmap-heart wordmap-heart--left" aria-hidden="true">♥</span>
-      <span className="wordmap-heart wordmap-heart--right" aria-hidden="true">♥</span>
       {trimmedGoalTitle && (
         <strong className="wordmap-goal-title" data-wordmap-heading data-testid="wordmap-goal-title">
           🍀 {trimmedGoalTitle}{needsHaenaelSuffix && <> <span>해낼게</span></>}

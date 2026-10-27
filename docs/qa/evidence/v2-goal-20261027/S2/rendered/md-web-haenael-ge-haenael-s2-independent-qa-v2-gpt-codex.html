@@ -1,0 +1,198 @@
+<!doctype html><html lang=ko><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>haenael-s2-independent-qa-v2-gpt-codex.md</title><style>
+:root{color-scheme:only light;--bg:#fff;--fg:#1a1a1a;--soft:#e2e4e9;--line:#767680;--muted:#555;--accent:#f63d68;--link:#a51d42;--thead:#fae8ee;--quote:#fff1f5}
+@media screen and (prefers-color-scheme:dark){:root{color-scheme:only dark;--bg:#16161a;--fg:#ececf1;--soft:#30303a;--line:#9494a0;--muted:#b6b6c0;--link:#ff8fab;--thead:#35252e;--quote:#2b2027}}
+/* 배경을 칠하는 규칙에는 반드시 글자색을 짝으로 쓴다. 상속에 맡기면 흰 위 흰이 난다(2026-09-08 사고). */
+html,body{background:var(--bg);color:var(--fg)}
+body{max-width:860px;margin:40px auto;padding:0 24px;font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Apple SD Gothic Neo',sans-serif;font-size:16px;line-height:1.7;overflow-wrap:anywhere}
+h1,h2,h3,h4,h5,h6{line-height:1.3;margin-top:1.6em} h1{border-bottom:2px solid var(--accent);padding-bottom:.3em}
+h2{border-bottom:1px solid var(--line);padding-bottom:.2em}
+code,kbd,samp{background:var(--soft);color:var(--fg);padding:2px 5px;border-radius:4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+pre{background:var(--soft);color:var(--fg);border:1px solid var(--line);padding:16px;border-radius:8px;overflow-x:auto;white-space:pre;overflow-wrap:normal;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.65}
+pre code{background:var(--soft);color:var(--fg);display:block;padding:0;border-radius:0;font-size:inherit}
+pre.mermaid{color-scheme:only light;--bg:#fff;--fg:#1a1a1a;--soft:#e2e4e9;--muted:#555;--link:#a51d42;--line:#767680;background:var(--bg);color:var(--fg);border:1px solid var(--line);text-align:left}
+pre.mermaid svg{display:block;margin-inline:auto}
+table{background:var(--bg);color:var(--fg);border-collapse:collapse;width:100%;margin:1em 0}
+caption{background:var(--bg);color:var(--fg);text-align:left;font-weight:700}
+td,th{background:var(--bg);color:var(--fg);border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--thead);color:var(--fg)}
+blockquote{background:var(--quote);color:var(--muted);border-left:3px solid var(--accent);margin:1em 0;padding:.4em 1em}
+a,a:visited{color:var(--link);text-decoration:underline;text-underline-offset:.18em}
+:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+@media print{:root,pre.mermaid{color-scheme:only light;--bg:#fff;--fg:#000;--soft:#fff;--line:#000;--muted:#000;--accent:#000;--link:#000;--thead:#fff;--quote:#fff}
+body{max-width:none;margin:0;padding:0} pre,pre code{white-space:pre-wrap;overflow-wrap:anywhere}}
+@media (forced-colors:active){:root,pre.mermaid{color-scheme:light dark;--bg:Canvas;--fg:CanvasText;--soft:Canvas;--line:CanvasText;--muted:CanvasText;--accent:CanvasText;--link:LinkText;--thead:Canvas;--quote:Canvas}
+*,*::before,*::after{forced-color-adjust:auto} a:visited{color:VisitedText}}</style></head><body><h1 id="해낼게-s2-독립-qa-보고서-v2">해낼게 S2 독립 QA 보고서 v2</h1>
+<blockquote>
+<p>STAMP: 2026-10-27 11:16 KST | model gpt-codex(API model ID 미노출) | agent qa-verifier | skills qa, review | scope S2 QAS2-01/02 remediation only | verdict PASS</p>
+<p>기반 포맷: <code>docs/qa/evidence/v2-goal-20261027/S2/haenael-s2-independent-qa-v1-gpt-codex.md</code>. v1 반려 원문은 유지하고 보완 재검수 결과만 이 문서에 추가했다.</p>
+</blockquote>
+<h2 id="목차">목차</h2>
+<ul>
+<li><a href="#결론">결론</a></li>
+<li><a href="#반려-항목-재검수">반려 항목 재검수</a></li>
+<li><a href="#출고-기준-판정">출고 기준 판정</a></li>
+<li><a href="#기능회귀-증거-재사용">기능·회귀 증거 재사용</a></li>
+<li><a href="#디자인과-데모-검수">디자인과 데모 검수</a></li>
+<li><a href="#보장-범위">보장 범위</a></li>
+<li><a href="#실행-명령과-종료-코드">실행 명령과 종료 코드</a></li>
+</ul>
+<h2 id="결론">결론</h2>
+<p><strong>PASS. QAS2-01과 QAS2-02가 모두 해소되어 S2를 closed로 판정한다.</strong> 15번 캡처는 대상 커버 검수 카드와 승인 CTA를 실제 viewport 안에 보여준다. 승인 건강 커버와 staging 실화면은 같은 390×844, scroll top 0, reduced-motion 조건에서 대조했고, 비데이터 장식 경계도 DOM으로 분리했다.</p>
+<p>제품 코드는 수정하지 않았다. S1 독립 PASS는 보존했고 S3, 상태 파일, 운영 배포, 운영 DB, 과금, 커밋은 건드리지 않았다.</p>
+<h2 id="반려-항목-재검수">반려 항목 재검수</h2>
+<table>
+<thead>
+<tr>
+<th>결함</th>
+<th>독립 재검수</th>
+<th>판정</th>
+<th>증거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QAS2-01 대상 관리자 검수 카드·승인 CTA 미노출</td>
+<td><code>15-admin-review-queue-390.png</code>를 직접 열어 <code>토익 900 넘길게</code>, <code>서연 · 68KB</code>, 승인·반려 CTA가 390×844 viewport 안에 함께 보이는지 확인했다. PW-05 코드는 대상 카드 식별, <code>scrollIntoViewIfNeeded</code>, 목표명·승인 버튼 visibility와 bounding box를 assertion한 뒤 캡처한다.</td>
+<td>해소</td>
+<td><code>captures/flow/15-admin-review-queue-390.png</code>, <code>logs/F4-PW-04-PW-05-remediation-v2.log</code>, <code>web/e2e/social-web-first.spec.ts</code></td>
+</tr>
+<tr>
+<td>QAS2-02 승인본과 staging의 비데이터 장식 불일치</td>
+<td>승인본 <code>11</code>과 staging <code>10</code>을 각각 직접 열어 같은 display 조건으로 대조했다. owner mark는 <code>display:none</code>, 정적 heart는 0, 승인 ambient node 5개는 DOM에 보존되고 reduced-motion에서만 숨는다. 화면의 남은 🍀는 <code>data-wordmap-item</code> 목록에 포함된 실제 keyword다.</td>
+<td>해소</td>
+<td><code>captures/flow/11-approved-goal-health-display-390.png</code>, <code>captures/flow/10-cover-owner-health-display-390.png</code>, <code>captures/flow/cover-visual-equivalence.json</code>, <code>logs/PW-03-remediation-v2-dom-boundary.log</code></td>
+</tr>
+</tbody>
+</table>
+<p>실제 데이터 차이는 디자인 결함과 분리했다. 제목, 날짜, 집계값, keyword 내용 차이는 fixture 데이터 경계이고, 주축·요소 순서·표시/숨김·컴포넌트 위계는 승인본과 일치한다.</p>
+<h2 id="출고-기준-판정">출고 기준 판정</h2>
+<table>
+<thead>
+<tr>
+<th>필수 항목</th>
+<th>판정</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>기능 happy·edge</td>
+<td>충족</td>
+<td>F3 2/2, F4 2/2, skip 0. 프로필 저장·reload, preset 저장·reload/public, 실제 upload <code>REVIEW</code>→관리자 승인→같은 asset ID <code>APPROVED</code>→owner/public 완전 로드</td>
+</tr>
+<tr>
+<td>누적 회귀</td>
+<td>충족</td>
+<td>최종 제품 소스 전체 회귀 78파일 439 passed, skip 0. 현재 <code>web/src</code>와 deployment snapshot 독립 <code>diff -qr</code> exit 0</td>
+</tr>
+<tr>
+<td>디자인 QA</td>
+<td>충족</td>
+<td>승인본과 staging 실화면 2장을 직접 열어 같은 390×844·reduced-motion 조건에서 대조. QAS2-02 DOM 경계 해소</td>
+</tr>
+<tr>
+<td>데모 증거</td>
+<td>충족</td>
+<td>QAS2-01 대상 카드·CTA 캡처 확인. S2 허브 19개 이미지와 로컬 링크를 headless로 재검수</td>
+</tr>
+</tbody>
+</table>
+<p>필수 기능·회귀·디자인 QA 3종이 모두 충족됐다.</p>
+<h2 id="기능회귀-증거-재사용">기능·회귀 증거 재사용</h2>
+<ul>
+<li>F3·F4를 다시 전량 실행하지 않았다. 최종 deployment <code>dpl_8vUvNNqSBhBa2cJ98bnMrRxKNt58</code> snapshot과 현재 <code>web/src</code>가 독립 <code>diff -qr</code> exit 0이고, 영향 범위 PW-03의 최종 exact log가 1/1 PASS이므로 현재 소스 증거를 재사용했다.</li>
+<li>PW-03 보완 로그는 건강 preset 저장·reload·public 반영과 18개 인증 route×폭을 통과한다. <code>font_below_13=0</code>, 본문 토큰 16px, 44px 미만 누름 0, active 100%, overflow 0이다. <code>median_font=13</code>은 참고값이며 합격 기준으로 쓰지 않았다.</li>
+<li>F4 보완 로그는 실제 asset <code>244f156f-2095-42f9-9c27-a1584bbfae1c</code>의 <code>REVIEW</code>→같은 ID <code>APPROVED</code>, quarantine/public 69,612 bytes, owner/public 이미지 완전 로드를 확인한다.</li>
+<li>최종 회귀 로그는 78파일 439 passed, skip 0, exit 0이다. 마지막 reduced-motion CSS가 포함된 fresh run이므로 이전 회귀보다 우선한다.</li>
+<li>독립 PW-03 재실행을 heavy slot에서 시도했으나 slot 2/2 점유로 test process가 시작되기 전에 대기를 취소했다. 이는 테스트 실패가 아니며, 사용자 지시의 불필요한 반복 금지에 따라 같은 최종 소스의 exact log와 독립 source diff를 재사용했다.</li>
+</ul>
+<h2 id="디자인과-데모-검수">디자인과 데모 검수</h2>
+<table>
+<thead>
+<tr>
+<th>화면</th>
+<th>조건</th>
+<th>판정</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>마이페이지</td>
+<td>390×844, scroll top 0, 이미지 완전 로드</td>
+<td>일치</td>
+<td>정보 위계·카드 순서·탭·하단 탐색 구조 일치. 이름·소개·사진·집계값은 fixture 차이</td>
+</tr>
+<tr>
+<td>건강 커버</td>
+<td>390×844, scroll top 0, <code>goal-health</code>, reduced-motion, 이미지 완전 로드</td>
+<td>일치</td>
+<td>owner mark 숨김, static heart 0, ambient DOM 5 보존·reduced-motion에서만 숨김, 🍀는 실제 keyword</td>
+</tr>
+<tr>
+<td>관리자 승인</td>
+<td>390×844, 대상 카드 viewport 내부</td>
+<td>일치</td>
+<td>대상 목표·asset 정보·승인 CTA가 한 화면에 노출</td>
+</tr>
+</tbody>
+</table>
+<p>데모 허브는 raw Markdown·JSON을 직접 링크하지 않고 렌더 HTML을 사용한다. 실행 fixture는 teardown에서 정리되어 기록된 <code>/me/goal/{id}</code>와 <code>/g/{slug}</code> URL을 현재 재사용할 수 없다는 고지도 유지한다.</p>
+<h2 id="보장-범위">보장 범위</h2>
+<p>이 QA는 현재 free staging deployment에서 S2 F3·F4의 Auth·API·DB·Storage happy flow, 타인 프로필 보존, owner asset 귀속, 관리자 승인, 같은 asset ID 전이, owner/public 이미지 완전 로드, 18개 route×폭 사용성, 승인 prototype v3.0.0 디자인 경계, 439개 회귀를 보장한다.</p>
+<p>보장하지 않는 것은 production 배포·production DB, 실제 외부 OAuth·결제·과금, 명시 로그 밖의 비관리자 승인 음성 경로, 정리된 fixture URL 재사용, S3 기능이다.</p>
+<h2 id="실행-명령과-종료-코드">실행 명령과 종료 코드</h2>
+<table>
+<thead>
+<tr>
+<th>실행</th>
+<th style="text-align: right;">종료 코드</th>
+<th>통과·실패·skip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>diff -qr web/src /private/tmp/haenael-s2-remediation-20261027-YwhFus/web/src</code></td>
+<td style="text-align: right;">0</td>
+<td>차이 0</td>
+</tr>
+<tr>
+<td>PW-03 최종 영향 verify 증거 재사용</td>
+<td style="text-align: right;">0</td>
+<td>1 passed, 0 failed, 0 skipped</td>
+</tr>
+<tr>
+<td>F4 PW-04·PW-05 최종 증거 재사용</td>
+<td style="text-align: right;">0</td>
+<td>2 passed, 0 failed, 0 skipped</td>
+</tr>
+<tr>
+<td>최종 제품 소스 전체 회귀 증거 재사용</td>
+<td style="text-align: right;">0</td>
+<td>78 files, 439 passed, 0 skipped</td>
+</tr>
+<tr>
+<td>S2 최종 데모 headless 검수 1회</td>
+<td style="text-align: right;">0</td>
+<td>이미지 19/19, 누락 링크 0, raw 문서 링크 0, console error 0, overflow 0</td>
+</tr>
+<tr>
+<td>독립 PW-03 heavy-slot 시도</td>
+<td style="text-align: right;">130</td>
+<td>slot 대기 중 취소, test 미개시, 실패·skip 집계 대상 아님</td>
+</tr>
+</tbody>
+</table>
+<p>새 제품 결함 0건, 미해소 출고 차단 결함 0건, skip 0건이다. S2 closed로 S3 착수 선행조건은 충족됐다.</p>
+<p>SKILLS_USED: qa, staging 기능·데모·시각 증거 판정에 사용. review, assertion coverage와 source·회귀 재사용 근거 검토에 사용.
+SKILLS_SKIPPED: 없음.</p>
+<p>KNOWLEDGE_QUERY: S2 QAS2-01/02 보완 로그, 최종 캡처, 승인본·staging DOM 경계, deployment source identity, 전체 회귀, 데모 렌더 상태를 repo-local로 조회했다.
+HITS_USED: S2 <code>source-manifest.json</code>, v1 보고서, PW-03·F4 보완 로그, 최종 회귀 로그, 10·11·15번 캡처, visual-equivalence JSON, E2E assertion 코드, deliverables render smoke. 두 결함 해소와 source·demo 판정에 직접 사용했다.
+HITS_REJECTED: S1 정본 전체와 S3 자료는 범위 밖이며 재독 금지 지시에 따라 사용하지 않았다. Builder 상태 문구 자체는 증거로 사용하지 않고 로그·코드·이미지·source diff로 교차확인했다.
+CONFLICTS: 없음. v1의 두 반려 사유는 최종 이미지와 DOM 경계 증거로 해소됐다.</p>
+<p>SOURCES/MODEL: gpt-codex(API model ID 미노출) | <code>docs/qa/evidence/v2-goal-20261027/S2/source-manifest.json</code> | S2 v1 report·captures·logs·index | <code>web/e2e/social-web-first.spec.ts</code> | <code>docs/v2-deliverables/haenael-v2-deliverables-render-smoke-v1-gpt-codex-20261027-1101.json</code></p>
+<p>PRESENTATION_CHECK: 내부 태그 잔재 없음 확인. Markdown과 읽기 HTML 렌더. 회장 화면 자동 열기 없음.</p>
+<p>RUBRIC_SCORE: evidence=5 traceability=5 clarity=5 completeness=5 presentation=4 total=24/25
+WEAKEST_LINE: 비관리자 관리자 승인 음성 경로는 이번 QAS2-01/02 보완 재검수 범위 밖이라 새 보증으로 올리지 않았다.</p></body></html>

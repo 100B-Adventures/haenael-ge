@@ -1,0 +1,8 @@
+{
+  "authorize_host": "kauth.kakao.com",
+  "client_id_format_valid": true,
+  "redirect_uri": [
+    "https://haenael-ge-v2-staging-100-b.vercel.app/auth/kakao/callback"
+  ],
+  "staging_callback": true
+}

@@ -1,0 +1,119 @@
+{
+  "checkedAt": "2026-10-27T11:18:00+09:00",
+  "source": "docs/qa/evidence/v2-goal-20261027/S2/index.html",
+  "title": "해낼게 S2 실제 흐름 데모",
+  "badge": "PASS · S2 closed",
+  "textHasClosed": true,
+  "imageCount": 19,
+  "imagesLoaded": 19,
+  "brokenImages": [],
+  "links": [
+    {
+      "text": "staging alias",
+      "href": "https://haenael-ge-v2-staging-100-b.vercel.app",
+      "absolute": "https://haenael-ge-v2-staging-100-b.vercel.app/"
+    },
+    {
+      "text": "F3 최종 로그, 2 passed",
+      "href": "logs/F3-MY-01-PW-03-attempt-3.log",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/logs/F3-MY-01-PW-03-attempt-3.log"
+    },
+    {
+      "text": "PW-03 최종 영향 검증, 1 passed",
+      "href": "logs/PW-03-remediation-v2-dom-boundary.log",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/logs/PW-03-remediation-v2-dom-boundary.log"
+    },
+    {
+      "text": "F4 최종 명시 verify, 2 passed",
+      "href": "logs/F4-PW-04-PW-05-remediation-v2.log",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/logs/F4-PW-04-PW-05-remediation-v2.log"
+    },
+    {
+      "text": "최종 소스 전체 회귀, 78파일 439/439",
+      "href": "logs/full-regression-final-source.log",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/logs/full-regression-final-source.log"
+    },
+    {
+      "text": "독립 QA v1 반려 원문 렌더",
+      "href": "rendered/md-web-haenael-ge-haenael-s2-independent-qa-v1-gpt-codex.html",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/md-web-haenael-ge-haenael-s2-independent-qa-v1-gpt-codex.html"
+    },
+    {
+      "text": "독립 QA v2 PASS 보고서 렌더",
+      "href": "rendered/md-web-haenael-ge-haenael-s2-independent-qa-v2-gpt-codex.html",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/md-web-haenael-ge-haenael-s2-independent-qa-v2-gpt-codex.html"
+    },
+    {
+      "text": "source manifest 읽기 화면",
+      "href": "rendered/source-manifest.html",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/source-manifest.html"
+    },
+    {
+      "text": "프로필 픽셀 대조 읽기 화면",
+      "href": "rendered/profile-visual-equivalence.html",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/profile-visual-equivalence.html"
+    },
+    {
+      "text": "커버 픽셀 대조 읽기 화면",
+      "href": "rendered/cover-visual-equivalence.html",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/cover-visual-equivalence.html"
+    },
+    {
+      "text": "최종 staging health 읽기 화면",
+      "href": "rendered/staging-remediation-v2-final-health.html",
+      "absolute": "file:///Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/staging-remediation-v2-final-health.html"
+    }
+  ],
+  "horizontalOverflow": 0,
+  "localLinkCount": 10,
+  "missingLocalLinks": [],
+  "htmlLinkLoads": [
+    {
+      "text": "독립 QA v1 반려 원문 렌더",
+      "path": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/md-web-haenael-ge-haenael-s2-independent-qa-v1-gpt-codex.html",
+      "title": "haenael-s2-independent-qa-v1-gpt-codex.md",
+      "bodyChars": 5941,
+      "pageErrors": []
+    },
+    {
+      "text": "독립 QA v2 PASS 보고서 렌더",
+      "path": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/md-web-haenael-ge-haenael-s2-independent-qa-v2-gpt-codex.html",
+      "title": "haenael-s2-independent-qa-v2-gpt-codex.md",
+      "bodyChars": 5241,
+      "pageErrors": []
+    },
+    {
+      "text": "source manifest 읽기 화면",
+      "path": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/source-manifest.html",
+      "title": "source-manifest.json",
+      "bodyChars": 11435,
+      "pageErrors": []
+    },
+    {
+      "text": "프로필 픽셀 대조 읽기 화면",
+      "path": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/profile-visual-equivalence.html",
+      "title": "profile-visual-equivalence.json",
+      "bodyChars": 960,
+      "pageErrors": []
+    },
+    {
+      "text": "커버 픽셀 대조 읽기 화면",
+      "path": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/cover-visual-equivalence.html",
+      "title": "cover-visual-equivalence.json",
+      "bodyChars": 1085,
+      "pageErrors": []
+    },
+    {
+      "text": "최종 staging health 읽기 화면",
+      "path": "/Users/sj/sj_code_master/haenael-ge/docs/qa/evidence/v2-goal-20261027/S2/rendered/staging-remediation-v2-final-health.html",
+      "title": "staging-remediation-v2-final-health.json",
+      "bodyChars": 273,
+      "pageErrors": []
+    }
+  ],
+  "rawDocLinks": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "screenshot": "captures/independent-demo-hub-v2.png",
+  "pass": true
+}

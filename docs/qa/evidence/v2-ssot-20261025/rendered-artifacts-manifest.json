@@ -1,0 +1,77 @@
+[
+  {
+    "label": "개발 로그",
+    "source": "docs/build-log.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/md-web-haenael-ge-build-log.html"
+  },
+  {
+    "label": "구현 현황",
+    "source": "docs/구현현황.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/md-web-haenael-ge-구현현황.html"
+  },
+  {
+    "label": "기능 QA 추적",
+    "source": "docs/qa/qa-tracker-v2-social-viral-loop.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/qa/md-web-haenael-ge-qa-tracker-v2-social-viral-loop.html"
+  },
+  {
+    "label": "스테이징 QA 보고서",
+    "source": "docs/qa/v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/qa/md-web-haenael-ge-v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.html"
+  },
+  {
+    "label": "디자인 대조 결과",
+    "source": "docs/qa/design-conformance-matrix.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/qa/md-web-haenael-ge-design-conformance-matrix.html"
+  },
+  {
+    "label": "브라우저·반응형 결과",
+    "source": "docs/qa/cross-browser-matrix.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/qa/md-web-haenael-ge-cross-browser-matrix.html"
+  },
+  {
+    "label": "보안 검증",
+    "source": "docs/qa/security-report.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/qa/md-web-haenael-ge-security-report.html"
+  },
+  {
+    "label": "성능 검증 범위",
+    "source": "docs/qa/perf-report.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/qa/md-web-haenael-ge-perf-report.html"
+  },
+  {
+    "label": "Storybook 인벤토리",
+    "source": "docs/design/component-inventory-v1.0.0.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/design/md-web-haenael-ge-component-inventory-v1.0.0.html"
+  },
+  {
+    "label": "디자인 문서 목록",
+    "source": "docs/design/README.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/design/md-web-haenael-ge-README.html"
+  },
+  {
+    "label": "기술설계 문서 목록",
+    "source": "docs/eng-design/README.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/eng-design/md-web-haenael-ge-README.html"
+  },
+  {
+    "label": "서버 계약 보완",
+    "source": "docs/eng-design/v2-prototype-server-contract-v1.0.0-gpt-codex-20261025-0653.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/eng-design/md-web-haenael-ge-v2-prototype-server-contract-v1.0.0-gpt-codex-20261025-0653.html"
+  },
+  {
+    "label": "서버 계약 검증",
+    "source": "docs/qa/evidence/v2-ssot-20261025/server-contract-final/server-contract-handoff-v1.0.0-gpt-codex.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/docs/qa/evidence/v2-ssot-20261025/server-contract-final/md-web-haenael-ge-server-contract-handoff-v1.0.0-gpt-codex.html"
+  },
+  {
+    "label": "인프라 정본",
+    "source": "wiki/ops/인프라.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/wiki/ops/md-web-haenael-ge-인프라.html"
+  },
+  {
+    "label": "결정 원장",
+    "source": "wiki/거버넌스/결정.md",
+    "rendered": "/Users/sj/.sj-agent-harness/md-web/haenael-v2-20261025/wiki/거버넌스/md-web-haenael-ge-결정.html"
+  }
+]

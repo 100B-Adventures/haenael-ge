@@ -1,0 +1,8 @@
+{
+  "source": "https://raw.githubusercontent.com/tosspayments/tosspayments-sample/main/",
+  "http_status": 401,
+  "code": "UNAUTHORIZED_KEY",
+  "test_prefix_valid": true,
+  "live_key_used": false,
+  "method": "GET own nonexistent order id; no payment created"
+}

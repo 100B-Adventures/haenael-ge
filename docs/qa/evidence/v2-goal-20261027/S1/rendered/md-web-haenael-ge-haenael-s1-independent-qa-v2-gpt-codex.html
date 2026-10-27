@@ -1,0 +1,226 @@
+<!doctype html><html lang=ko><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>haenael-s1-independent-qa-v2-gpt-codex.md</title><style>
+:root{color-scheme:only light;--bg:#fff;--fg:#1a1a1a;--soft:#e2e4e9;--line:#767680;--muted:#555;--accent:#f63d68;--link:#a51d42;--thead:#fae8ee;--quote:#fff1f5}
+@media screen and (prefers-color-scheme:dark){:root{color-scheme:only dark;--bg:#16161a;--fg:#ececf1;--soft:#30303a;--line:#9494a0;--muted:#b6b6c0;--link:#ff8fab;--thead:#35252e;--quote:#2b2027}}
+/* 배경을 칠하는 규칙에는 반드시 글자색을 짝으로 쓴다. 상속에 맡기면 흰 위 흰이 난다(2026-09-08 사고). */
+html,body{background:var(--bg);color:var(--fg)}
+body{max-width:860px;margin:40px auto;padding:0 24px;font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Apple SD Gothic Neo',sans-serif;font-size:16px;line-height:1.7;overflow-wrap:anywhere}
+h1,h2,h3,h4,h5,h6{line-height:1.3;margin-top:1.6em} h1{border-bottom:2px solid var(--accent);padding-bottom:.3em}
+h2{border-bottom:1px solid var(--line);padding-bottom:.2em}
+code,kbd,samp{background:var(--soft);color:var(--fg);padding:2px 5px;border-radius:4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+pre{background:var(--soft);color:var(--fg);border:1px solid var(--line);padding:16px;border-radius:8px;overflow-x:auto;white-space:pre;overflow-wrap:normal;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.65}
+pre code{background:var(--soft);color:var(--fg);display:block;padding:0;border-radius:0;font-size:inherit}
+pre.mermaid{color-scheme:only light;--bg:#fff;--fg:#1a1a1a;--soft:#e2e4e9;--muted:#555;--link:#a51d42;--line:#767680;background:var(--bg);color:var(--fg);border:1px solid var(--line);text-align:left}
+pre.mermaid svg{display:block;margin-inline:auto}
+table{background:var(--bg);color:var(--fg);border-collapse:collapse;width:100%;margin:1em 0}
+caption{background:var(--bg);color:var(--fg);text-align:left;font-weight:700}
+td,th{background:var(--bg);color:var(--fg);border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--thead);color:var(--fg)}
+blockquote{background:var(--quote);color:var(--muted);border-left:3px solid var(--accent);margin:1em 0;padding:.4em 1em}
+a,a:visited{color:var(--link);text-decoration:underline;text-underline-offset:.18em}
+:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+@media print{:root,pre.mermaid{color-scheme:only light;--bg:#fff;--fg:#000;--soft:#fff;--line:#000;--muted:#000;--accent:#000;--link:#000;--thead:#fff;--quote:#fff}
+body{max-width:none;margin:0;padding:0} pre,pre code{white-space:pre-wrap;overflow-wrap:anywhere}}
+@media (forced-colors:active){:root,pre.mermaid{color-scheme:light dark;--bg:Canvas;--fg:CanvasText;--soft:Canvas;--line:CanvasText;--muted:CanvasText;--accent:CanvasText;--link:LinkText;--thead:Canvas;--quote:Canvas}
+*,*::before,*::after{forced-color-adjust:auto} a:visited{color:VisitedText}}</style></head><body><h1 id="해낼게-v2-s1-보완-독립-qa-재검수">해낼게 V2 S1 보완 독립 QA 재검수</h1>
+<blockquote>
+<p><strong>판정: PASS. S1 closed.</strong> 이전 반려 QAS1-01~04가 모두 해소됐다. 독립 F1은 현재 staging에서 1/1 PASS, skip 0이며, 인증된 목표 관리 화면의 9개 viewport와 reload 영속성을 다시 관찰했다.</p>
+</blockquote>
+<ul>
+<li>검수 시각: 2026-10-27 04:23 KST</li>
+<li>범위: S1 목표 관리, 편집, 응원자 목록의 QAS1-01~04 보완분만</li>
+<li>승인 기준: <code>docs/design/prototypes/social-viral-loop-v3-opus5.html</code> v3.0.0</li>
+<li>staging deployment: <code>dpl_2QeUAd65Qn4Tcfs9SvCuZaFWmbC3</code></li>
+<li>운영 경계: free staging만 검증. 운영 배포, 운영 DB 변경, 과금, 커밋 0건</li>
+</ul>
+<h2 id="1-보완-결함-재판정">1. 보완 결함 재판정</h2>
+<table>
+<thead>
+<tr>
+<th>결함</th>
+<th>보완 증거</th>
+<th>재판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QAS1-01, S1 화면 9폭 증거 부재</td>
+<td>독립 F1의 인증 route <code>/me/goal/372</code>에서 360·390·412·600·700·780·820·900·1000px를 실측. 모든 폭에서 <code>fontBelow13=0</code>, body token 16px, tap 44px 미만 0, active 100%, overflow 0, bottom clearance 80px</td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td>QAS1-02, 편집→응원자 연속 데모 부재</td>
+<td>owner 상단→편집기→제목 입력→저장→reload 제목 보존→8명 preview→18명 전개를 한 PW-02에서 assertion하고 01~06 PNG로 보존</td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td>QAS1-02, 서로 다른 상태의 시안 대조</td>
+<td>승인 prototype과 staging을 390×844, 응원자 전개 상태, 첫 card top 72px로 정렬한 07·08 PNG를 직접 대조. 데이터 행·이름·횟수 차이는 별도 경계로 기록</td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td>QAS1-03, 공식 구현 문서 누락</td>
+<td><code>docs/build-log.md</code>와 <code>docs/구현현황.md</code> 최상단에 배포 ID, 기능·회귀, 실패 이력, 운영 경계를 기록</td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td>QAS1-04, 근거보다 앞선 PASS 표시</td>
+<td>보완 중에는 재검수 대기로 낮춰 두었고, 이 독립 PASS 이후에만 index·manifest·demos·공식 문서를 closed로 갱신</td>
+<td><strong>해소</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-독립-실행-결과">2. 독립 실행 결과</h2>
+<p>비밀값은 staging wrapper로만 주입했고 화면·로그·보고서에 출력하지 않았다.</p>
+<table>
+<thead>
+<tr>
+<th>실행</th>
+<th style="text-align: right;">결과</th>
+<th style="text-align: right;">종료코드</th>
+<th style="text-align: right;">skip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>현재 staging health와 Supabase project ref 확인</td>
+<td style="text-align: right;">HTTP 정상, <code>database=ok</code>, project ref 일치</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">해당 없음</td>
+</tr>
+<tr>
+<td>heavy-slot + F1 <code>PW-02</code> 독립 실행</td>
+<td style="text-align: right;">1 PASS, 0 FAIL</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>현재 SHA-256과 source manifest·배포 snapshot 대조</td>
+<td style="text-align: right;">in-scope 4파일과 prototype hash 일치</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">해당 없음</td>
+</tr>
+<tr>
+<td>캡처 01~08 직접 검토</td>
+<td style="text-align: right;">8장 열림, 최종 06·07·08 재현 hash 일치</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">해당 없음</td>
+</tr>
+</tbody>
+</table>
+<p>독립 실행 fixture는 <code>/me/goal/372</code>였다. 저장 뒤 reload에서 <code>토익 950 넘길게</code>가 유지됐고, 목록은 8명에서 18명으로 전개됐으며 pill 18개의 색·radius·padding assertion이 통과했다. 테스트 종료 시 cleanup error가 없었고 fixture URL은 재사용하지 않는다.</p>
+<h2 id="3-모바일-측정기-정합">3. 모바일 측정기 정합</h2>
+<p>S1 helper와 정본 <code>mobile-ergonomics-measure.mjs</code>를 코드로 대조했다.</p>
+<table>
+<thead>
+<tr>
+<th>판정축</th>
+<th>정본</th>
+<th>S1 helper</th>
+<th>판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>글자</td>
+<td>13px 미만 0</td>
+<td>13px 미만 0</td>
+<td>동일</td>
+</tr>
+<tr>
+<td>본문 token</td>
+<td><code>.font-designer-14r ≥ 16px</code></td>
+<td>동일</td>
+<td>동일</td>
+</tr>
+<tr>
+<td>tap target</td>
+<td>43.5px 미만 0</td>
+<td>동일</td>
+<td>동일</td>
+</tr>
+<tr>
+<td>active</td>
+<td>규칙 1개 이상, tap coverage 90% 이상</td>
+<td>동일. 실측 27규칙, 100%</td>
+<td>동일</td>
+</tr>
+<tr>
+<td>overflow</td>
+<td>document 폭 초과 없음</td>
+<td>차이값 0 단언</td>
+<td>동일</td>
+</tr>
+<tr>
+<td>fixed bottom</td>
+<td>높이 0 또는 clearance 이상</td>
+<td>동일</td>
+<td>동일</td>
+</tr>
+</tbody>
+</table>
+<p><code>median_font=13</code>은 참고값일 뿐 합격 기준이 아니다. 잘못 만들었던 <code>median_font &gt;= 16</code> assertion과 그에 따른 16px 확대 3곳은 폐기·복구됐으며, 현재 diff에는 남아 있지 않다. S1 helper는 한 글자 text node까지 포함해 정본보다 좁히지 않은 조건으로 통과했다.</p>
+<h2 id="4-기능디자인-증거-판정">4. 기능·디자인 증거 판정</h2>
+<h3 id="편집저장reload목록-전개">편집·저장·reload·목록 전개</h3>
+<p>01~06 이미지를 전부 직접 열었다. 편집기 열기, 제목 입력, 저장 후 reload된 제목, 8명 preview, 18명 전개가 순서대로 존재한다. 독립 실행의 임시 캡처에서도 같은 흐름이 재현됐다.</p>
+<p>04 reload 캡처는 제목은 정상 반영됐지만 cover와 첫 avatar가 loading placeholder인 시점에 찍혔다. 이는 screenshot이 <code>domcontentloaded</code>와 제목 assertion 직후 생성된 데모 품질 제한이다. reload 영속성은 실제 DOM assertion으로 통과했고, 이후 05·06·08에서는 응원자 이미지와 목록이 완전히 렌더됐다. 따라서 기능 결함이나 출고 차단으로 세지 않는다.</p>
+<h3 id="승인본과-staging-대조">승인본과 staging 대조</h3>
+<p>07과 08은 모두 390×844이고 첫 응원자 card top이 72px다. 목록 행 구조, avatar·이름·메시지·횟수 pill·시간의 열 배치, 경계선, 하단 nav가 같은 계열로 렌더된다. 22.14% pixel delta는 prototype 11개와 staging fixture 18개의 DOM 데이터 행, 이름, 메시지, 횟수 차이를 포함한다. 픽셀 동일성은 주장하지 않으며 배치·component·pill 정합을 판정했다.</p>
+<p>기존 evidence의 <code>visible_rows</code> 명칭은 viewport 안에 실제로 보이는 행이 아니라 렌더된 DOM 행 수를 뜻했다. 표시 문서는 <code>DOM 데이터 행</code>으로 교정했다. 비교 자체의 viewport·scroll 정렬에는 영향이 없다.</p>
+<h2 id="5-f2와-전체-회귀-재사용">5. F2와 전체 회귀 재사용</h2>
+<ul>
+<li>F2: 기존 독립 결과 2/2 PASS, skip 0을 재사용했다. AUTH-GOAL-01·SMOKE-01 본문과 인증·라우트 소스는 바뀌지 않았다. 이후 제품 변경은 S1 pill과 S1 action·search active CSS에 한정되고, 변경 화면의 console·overflow·tap·active는 이번 F1 9폭에서 다시 검증했다.</li>
+<li>전체 회귀: <code>full-regression-remediation.log</code>는 현재 CSS와 단위 테스트가 수정된 뒤 실행됐고 78파일 439/439 PASS다. 그 뒤 제품 소스 hash는 manifest와 동일하다. 따라서 다시 실행하지 않았다.</li>
+</ul>
+<h2 id="6-소스배포-신원">6. 소스·배포 신원</h2>
+<ul>
+<li>HEAD와 manifest base commit: <code>f4d38f3fae0d5c7908ef5499281f2f9bf9d956de</code></li>
+<li>CSS SHA-256: <code>e83cb2dc47aa609877fdd60de19bcce81f0a218d678458cf0e443bc72db8598a</code>, 배포 snapshot과 동일</li>
+<li>component SHA-256: <code>0bd01649c16ad15b74da9af83d348fe9d9f72e245720b5cabe69adc16caa219d</code>, 배포 snapshot과 동일</li>
+<li>E2E SHA-256: <code>cde309c92a2321b4b5c34a393f678af1d4cdf1af3b10f679d143af5f6910a102</code></li>
+<li>승인 prototype SHA-256: <code>afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a</code></li>
+<li>staging alias는 올바른 deployment <code>dpl_2QeUAd65Qn4Tcfs9SvCuZaFWmbC3</code>를 가리키며 health의 Supabase project ref가 일치한다.</li>
+</ul>
+<p>중앙값 기준으로 잘못 만든 snapshot은 alias에 연결되지 않았고 evidence 사용 금지로 manifest에 분리돼 있다.</p>
+<h2 id="7-출고-기준">7. 출고 기준</h2>
+<table>
+<thead>
+<tr>
+<th>필수 항목</th>
+<th>판정</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>변경 기능 happy + edge</td>
+<td>충족</td>
+<td>F1 독립 1/1, F2 재사용 2/2, 총 3 PASS, skip 0</td>
+</tr>
+<tr>
+<td>누적 회귀</td>
+<td>충족</td>
+<td>78파일, 439 PASS, 0 FAIL, 0 skip</td>
+</tr>
+<tr>
+<td>디자인 QA</td>
+<td>충족</td>
+<td>인증 S1 9폭, 연속 6단계, 동일 상태 390×844 시안 대조</td>
+</tr>
+</tbody>
+</table>
+<p>필수 3종 모두 충족했다. QAS1-01~04는 closed다.</p>
+<h2 id="8-이-qa가-보장하는-것과-보장하지-않는-것">8. 이 QA가 보장하는 것과 보장하지 않는 것</h2>
+<p>이 QA는 free staging의 인증된 목표 관리 화면에서 제목 편집이 저장되고 reload 뒤 유지되며, 응원자 목록이 8명에서 18명으로 전개되고 pill이 승인 스타일로 렌더된다는 것을 보장한다. 9개 viewport에서 글자·본문 token·tap·active·overflow·fixed-bottom 정본 기준을 통과했고, QAS1-01~04 문서·데모 증거가 해소됐다는 것도 보장한다.</p>
+<p>이 QA는 S2, S3, 실제 Kakao OAuth, Toss Payments, 운영 DB, 운영 배포를 보장하지 않는다. 04 한 장의 cover loading placeholder는 reload 순간의 데모 품질 제한으로 남지만 이후 완전 렌더 증거와 기능 assertion이 있어 S1 기능 결함으로 판정하지 않았다.</p>
+<p>KNOWLEDGE_QUERY: 이전 S1 검수에서 조회한 BRAIN의 해낼게 소셜 증거 맥락과 Playwright 공식 assertion·visual comparison 기준을 재사용했다. 이번에는 새 구조를 정하지 않아 추가 외부 검색을 하지 않았다.</p>
+<p>HITS_USED: D-049, 승인 prototype v3.0.0, 정본 <code>mobile-ergonomics-measure.mjs</code>, 이전 독립 보고서 QAS1-01~04, 현재 staging F1·회귀·배포 증거를 판정에 사용했다.</p>
+<p>HITS_REJECTED: 타 사업체 디자인·일반 마케팅 사례는 확정 prototype의 보완 재검수 범위를 벗어나 사용하지 않았다.</p>
+<p>CONFLICTS: 정본 측정기와 폐기된 median 16px assertion이 충돌했다. median assertion과 CSS 확대를 폐기하고 정본 기준을 유지했다. 현재 남은 충돌은 없다.</p>
+<p>SKILLS_USED: qa, 현재 staging F1을 headless heavy-slot으로 독립 실행하고 증거를 판정. review, 변경 diff와 측정 helper를 정본·보안·회귀 관점으로 검토.</p>
+<p>SKILLS_SKIPPED: 없음.</p>
+<p>RUBRIC_SCORE: evidence=5/5 traceability=5/5 reproducibility=5/5 decision=5/5 presentation=4/5 total=24/25</p>
+<p>WEAKEST_LINE: reload 직후 cover image가 loading placeholder인 04 캡처는 전체 화면의 완전 렌더 증거로는 쓰지 못한다.</p>
+<p>PRESENTATION_CHECK: 내부 tool tag 잔재 없음, Markdown HTML 렌더 완료, 회장 화면 자동 open 없음.</p>
+<p>SOURCES/MODEL: gpt-codex(API model ID 미노출) | D-049 | 승인 prototype v3.0.0 | <code>mobile-ergonomics-measure.mjs</code> | current source manifest | staging Playwright·Vercel·Vitest 증거</p></body></html>

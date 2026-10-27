@@ -1,0 +1,185 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>haenael-s3-cleanup-before-v1-gpt-codex-20261027-1350.json</title><style>body{max-width:1040px;margin:32px auto;padding:0 20px;font:16px/1.7 system-ui;background:#faf9f5;color:#222}nav{overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:20px;border:1px solid #ddd;border-radius:12px}a{color:#176b4c}</style><h1>S3 테스트 데이터 정리 증거</h1><p>원본 JSON 전체를 렌더했습니다. 기능 QA는 미완료이며 아래 정리 결과와 구분합니다.</p><nav><a href="haenael-s3-cleanup-before-v1-gpt-codex-20261027-1350.html">haenael-s3-cleanup-before-v1-gpt-codex-20261027-1350.json</a> · <a href="haenael-s3-cleanup-operation-v1-gpt-codex-20261027-1351.html">haenael-s3-cleanup-operation-v1-gpt-codex-20261027-1351.json</a> · <a href="haenael-s3-cleanup-result-v1-gpt-codex-20261027-1406.html">haenael-s3-cleanup-result-v1-gpt-codex-20261027-1406.json</a> · <a href="haenael-s3-cleanup-scope-v1-gpt-codex-20261027-1348.html">haenael-s3-cleanup-scope-v1-gpt-codex-20261027-1348.json</a></nav><pre>{
+  &quot;observed_at&quot;: &quot;2026-10-27T13:50:05.180366+09:00&quot;,
+  &quot;project_ref&quot;: &quot;ezzklgotgydwxqebfoys&quot;,
+  &quot;namespace&quot;: &quot;1793075388485&quot;,
+  &quot;member_ids&quot;: [
+    &quot;a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe&quot;,
+    &quot;224a41e3-ceff-468d-87d7-e908dc128c38&quot;,
+    &quot;891d86fc-fcad-4358-a356-359849b2324f&quot;,
+    &quot;f9b15895-c307-40e7-8701-cccf9066b36f&quot;,
+    &quot;9a9e1dfd-2a25-4309-8287-fa457eb9e6c2&quot;
+  ],
+  &quot;query&quot;: &quot;with scoped_goals as (select id from public.goal where member_id in (&#x27;a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe&#x27;::uuid,&#x27;224a41e3-ceff-468d-87d7-e908dc128c38&#x27;::uuid,&#x27;891d86fc-fcad-4358-a356-359849b2324f&#x27;::uuid,&#x27;f9b15895-c307-40e7-8701-cccf9066b36f&#x27;::uuid,&#x27;9a9e1dfd-2a25-4309-8287-fa457eb9e6c2&#x27;::uuid)) select jsonb_build_object(\n&#x27;member_count&#x27;,(select count(*) from public.member where id in (&#x27;a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe&#x27;::uuid,&#x27;224a41e3-ceff-468d-87d7-e908dc128c38&#x27;::uuid,&#x27;891d86fc-fcad-4358-a356-359849b2324f&#x27;::uuid,&#x27;f9b15895-c307-40e7-8701-cccf9066b36f&#x27;::uuid,&#x27;9a9e1dfd-2a25-4309-8287-fa457eb9e6c2&#x27;::uuid)),\n&#x27;goal_count&#x27;,(select count(*) from scoped_goals),\n&#x27;goal_ids&#x27;,(select coalesce(jsonb_agg(id),&#x27;[]&#x27;) from scoped_goals),\n&#x27;payment_count&#x27;,(select count(*) from public.payment where order_id like &#x27;social-1793075388485-%&#x27;),\n&#x27;auth_count&#x27;,(select count(*) from auth.users where id in (&#x27;a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe&#x27;::uuid,&#x27;224a41e3-ceff-468d-87d7-e908dc128c38&#x27;::uuid,&#x27;891d86fc-fcad-4358-a356-359849b2324f&#x27;::uuid,&#x27;f9b15895-c307-40e7-8701-cccf9066b36f&#x27;::uuid,&#x27;9a9e1dfd-2a25-4309-8287-fa457eb9e6c2&#x27;::uuid)),\n&#x27;cover_assets&#x27;,(select count(*) from public.goal_cover_asset where owner_member_id in (&#x27;a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe&#x27;::uuid,&#x27;224a41e3-ceff-468d-87d7-e908dc128c38&#x27;::uuid,&#x27;891d86fc-fcad-4358-a356-359849b2324f&#x27;::uuid,&#x27;f9b15895-c307-40e7-8701-cccf9066b36f&#x27;::uuid,&#x27;9a9e1dfd-2a25-4309-8287-fa457eb9e6c2&#x27;::uuid) or goal_id in(select id from scoped_goals)),\n&#x27;avatar_assets&#x27;,(select count(*) from public.profile_avatar_asset where owner_member_id in (&#x27;a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe&#x27;::uuid,&#x27;224a41e3-ceff-468d-87d7-e908dc128c38&#x27;::uuid,&#x27;891d86fc-fcad-4358-a356-359849b2324f&#x27;::uuid,&#x27;f9b15895-c307-40e7-8701-cccf9066b36f&#x27;::uuid,&#x27;9a9e1dfd-2a25-4309-8287-fa457eb9e6c2&#x27;::uuid)),\n&#x27;storage_objects&#x27;,(select coalesce(jsonb_agg(jsonb_build_object(&#x27;bucket_id&#x27;,bucket_id,&#x27;name&#x27;,name)),&#x27;[]&#x27;) from storage.objects where bucket_id in (&#x27;goal-cover-quarantine&#x27;,&#x27;goal-cover-public&#x27;,&#x27;profile-avatars&#x27;) and (split_part(name,&#x27;/&#x27;,1) in (&#x27;a144b6eb-97e8-43a9-a7c5-bc8b8cba8ffe&#x27;,&#x27;224a41e3-ceff-468d-87d7-e908dc128c38&#x27;,&#x27;891d86fc-fcad-4358-a356-359849b2324f&#x27;,&#x27;f9b15895-c307-40e7-8701-cccf9066b36f&#x27;,&#x27;9a9e1dfd-2a25-4309-8287-fa457eb9e6c2&#x27;) or (bucket_id=&#x27;goal-cover-public&#x27; and split_part(name,&#x27;/&#x27;,1) in(select id::text from scoped_goals)))),\n&#x27;public_fk_scope&#x27;,(select coalesce(jsonb_agg(jsonb_build_object(&#x27;table&#x27;,c.relname,&#x27;column&#x27;,a.attname,&#x27;parent&#x27;,p.relname)),&#x27;[]&#x27;) from pg_constraint k join pg_class c on c.oid=k.conrelid join pg_class p on p.oid=k.confrelid join pg_namespace n on n.oid=c.relnamespace join pg_attribute a on a.attrelid=c.oid and a.attnum=k.conkey[1] where k.contype=&#x27;f&#x27; and n.nspname=&#x27;public&#x27; and array_length(k.conkey,1)=1 and k.confrelid in (&#x27;public.member&#x27;::regclass,&#x27;public.goal&#x27;::regclass,&#x27;public.payment&#x27;::regclass,&#x27;auth.users&#x27;::regclass))\n) as evidence&quot;,
+  &quot;result&quot;: [
+    {
+      &quot;evidence&quot;: {
+        &quot;goal_ids&quot;: [
+          505,
+          506,
+          503,
+          498,
+          499,
+          500,
+          501,
+          502,
+          504
+        ],
+        &quot;auth_count&quot;: 5,
+        &quot;goal_count&quot;: 9,
+        &quot;cover_assets&quot;: 0,
+        &quot;member_count&quot;: 5,
+        &quot;avatar_assets&quot;: 0,
+        &quot;payment_count&quot;: 31,
+        &quot;public_fk_scope&quot;: [
+          {
+            &quot;table&quot;: &quot;clover_ledger&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;friend_invite&quot;,
+            &quot;column&quot;: &quot;inviter_member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;friend_invite&quot;,
+            &quot;column&quot;: &quot;goal_id&quot;,
+            &quot;parent&quot;: &quot;goal&quot;
+          },
+          {
+            &quot;table&quot;: &quot;member&quot;,
+            &quot;column&quot;: &quot;id&quot;,
+            &quot;parent&quot;: &quot;users&quot;
+          },
+          {
+            &quot;table&quot;: &quot;goal&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;cheer&quot;,
+            &quot;column&quot;: &quot;goal_id&quot;,
+            &quot;parent&quot;: &quot;goal&quot;
+          },
+          {
+            &quot;table&quot;: &quot;cheer&quot;,
+            &quot;column&quot;: &quot;payment_id&quot;,
+            &quot;parent&quot;: &quot;payment&quot;
+          },
+          {
+            &quot;table&quot;: &quot;payment_log&quot;,
+            &quot;column&quot;: &quot;payment_id&quot;,
+            &quot;parent&quot;: &quot;payment&quot;
+          },
+          {
+            &quot;table&quot;: &quot;clover_balance&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;cashout_request&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;kyc_verification&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;risk_event&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;share_event&quot;,
+            &quot;column&quot;: &quot;goal_id&quot;,
+            &quot;parent&quot;: &quot;goal&quot;
+          },
+          {
+            &quot;table&quot;: &quot;wordmap_render_cache&quot;,
+            &quot;column&quot;: &quot;goal_id&quot;,
+            &quot;parent&quot;: &quot;goal&quot;
+          },
+          {
+            &quot;table&quot;: &quot;notification&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;friend_invite&quot;,
+            &quot;column&quot;: &quot;accepted_by&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;admin_member&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;cashout_request&quot;,
+            &quot;column&quot;: &quot;processed_by&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;cashout_account_access_log&quot;,
+            &quot;column&quot;: &quot;actor_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;member_preference&quot;,
+            &quot;column&quot;: &quot;member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;friend_connection&quot;,
+            &quot;column&quot;: &quot;member_low_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;friend_connection&quot;,
+            &quot;column&quot;: &quot;member_high_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;friend_connection&quot;,
+            &quot;column&quot;: &quot;blocked_by_member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;goal_cover_asset&quot;,
+            &quot;column&quot;: &quot;goal_id&quot;,
+            &quot;parent&quot;: &quot;goal&quot;
+          },
+          {
+            &quot;table&quot;: &quot;goal_cover_asset&quot;,
+            &quot;column&quot;: &quot;owner_member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;goal_cover_asset&quot;,
+            &quot;column&quot;: &quot;reviewed_by&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;storage_cleanup_queue&quot;,
+            &quot;column&quot;: &quot;goal_id&quot;,
+            &quot;parent&quot;: &quot;goal&quot;
+          },
+          {
+            &quot;table&quot;: &quot;social_cheer_member_attribution&quot;,
+            &quot;column&quot;: &quot;supporter_member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          },
+          {
+            &quot;table&quot;: &quot;profile_avatar_asset&quot;,
+            &quot;column&quot;: &quot;owner_member_id&quot;,
+            &quot;parent&quot;: &quot;member&quot;
+          }
+        ],
+        &quot;storage_objects&quot;: []
+      }
+    }
+  ]
+}
+</pre></html>

@@ -1,0 +1,12 @@
+{
+  "http": "201",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "observed": [
+    {
+      "migration_count": 53,
+      "last_version": "20261021011000",
+      "public_table_count": 27,
+      "member_count": 0
+    }
+  ]
+}

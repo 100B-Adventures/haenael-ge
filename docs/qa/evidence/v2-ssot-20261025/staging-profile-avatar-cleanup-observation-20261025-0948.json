@@ -1,0 +1,48 @@
+{
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "observation": "DUE_NOT_REACHED",
+  "observed_at": "2026-10-25T00:48:31.074129+00:00",
+  "observed_at_kst": "2026-10-25T09:48:31.074129+09:00",
+  "target": {
+    "queue_id": 1,
+    "profile_avatar_asset_id": "27026715-a9a9-431d-b043-f7602ce19434",
+    "bucket_id": "profile-avatars",
+    "object_path": "1437fa7f-e0f8-4176-90ac-9032de8f30f4/27026715-a9a9-431d-b043-f7602ce19434.png",
+    "reason": "PROFILE_AVATAR_REPLACED",
+    "available_at": "2026-10-25T00:50:07.467885+00:00",
+    "available_at_kst": "2026-10-25T09:50:07.467885+09:00",
+    "due_reached": false,
+    "queue_status": "PENDING",
+    "attempts": 0,
+    "locked_at": null,
+    "lease_until": null,
+    "completed_at": null,
+    "storage_object_exists": true,
+    "asset_metadata_exists": true
+  },
+  "scheduler": {
+    "job_id": 4,
+    "job_name": "drain-storage-cleanup-queue",
+    "schedule": "*/10 * * * *",
+    "active": true,
+    "latest_observed_run_id": 55,
+    "latest_observed_run_started_at": "2026-10-25T00:40:00.216946+00:00",
+    "latest_observed_run_status": "succeeded",
+    "latest_pg_net_response_id": 15,
+    "latest_pg_net_status_code": 200,
+    "latest_pg_net_transport_error": false,
+    "next_cron_at": "2026-10-25T00:50:00+00:00",
+    "next_cron_is_before_due_by_seconds": 7.467885,
+    "first_expected_eligible_cron_at": "2026-10-25T01:00:00+00:00"
+  },
+  "mutations": {
+    "available_at_changed": false,
+    "worker_invoked_manually": false,
+    "database_rows_changed": false,
+    "storage_objects_changed": false,
+    "secrets_changed": false,
+    "product_code_changed": false
+  },
+  "resume_after": "2026-10-25T01:00:30+00:00",
+  "final_cleanup_verdict": "NOT_YET_OBSERVABLE"
+}

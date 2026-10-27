@@ -1,0 +1,25 @@
+{
+  "started_at": "2026-10-25T12:47:55+0900",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "runner_contract": {
+    "E2E_ENVIRONMENT": "staging",
+    "RUN_STAGING_SUPABASE_E2E": "1",
+    "SUPABASE_STAGING_PROJECT_REF": "ezzklgotgydwxqebfoys",
+    "E2E_BASE_URL": "https://haenael-ge-v2-staging-100-b.vercel.app",
+    "STAGING_WEB_BASE_URL": "https://haenael-ge-v2-staging-100-b.vercel.app"
+  },
+  "temporary_payments_enabled_status": 201,
+  "runner_skipped_tests": false,
+  "test_exit_code": 1,
+  "restored_payments_disabled_status": 201,
+  "payments_disabled_smoke": {
+    "status": 503,
+    "body": {
+      "error": {
+        "code": "payments_disabled",
+        "message": "응원 결제를 준비하고 있습니다."
+      }
+    }
+  },
+  "finished_at": "2026-10-25T12:52:34+0900"
+}

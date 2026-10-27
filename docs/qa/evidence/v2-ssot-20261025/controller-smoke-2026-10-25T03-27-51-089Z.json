@@ -1,0 +1,97 @@
+{
+  "origin": "https://haenael-ge-v2-staging-100-b.vercel.app",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "started_at": "2026-10-25T03:27:53.982Z",
+  "bio_saved_reload_and_db": true,
+  "profile_geometry": {
+    "glyphs": [
+      {
+        "selector": ".my-profile-name-button > span",
+        "rects": [
+          {
+            "x": 101,
+            "y": 87,
+            "width": 86.453125,
+            "height": 19
+          }
+        ]
+      },
+      {
+        "selector": ".my-profile-bio-row > span",
+        "rects": [
+          {
+            "x": 101,
+            "y": 110,
+            "width": 204.09375,
+            "height": 15
+          }
+        ]
+      },
+      {
+        "selector": ".my-profile-card small",
+        "rects": [
+          {
+            "x": 101,
+            "y": 134,
+            "width": 25.734375,
+            "height": 15
+          },
+          {
+            "x": 126.734375,
+            "y": 134,
+            "width": 7.75,
+            "height": 15
+          },
+          {
+            "x": 134.484375,
+            "y": 134,
+            "width": 87.03125,
+            "height": 15
+          },
+          {
+            "x": 221.515625,
+            "y": 134,
+            "width": 5.703125,
+            "height": 15
+          },
+          {
+            "x": 227.21875,
+            "y": 134,
+            "width": 11.25,
+            "height": 15
+          }
+        ]
+      }
+    ],
+    "overlaps": [],
+    "controls": [
+      {
+        "selector": ".my-profile-name-button",
+        "x": 101,
+        "y": 85,
+        "width": 103.453125,
+        "height": 44
+      },
+      {
+        "selector": ".my-profile-bio-button",
+        "x": 309,
+        "y": 85,
+        "width": 44,
+        "height": 44
+      }
+    ],
+    "controls_overlap": false,
+    "surface": "rgb(255, 255, 255)"
+  },
+  "goal_closed_ui_and_db": true,
+  "console_errors": [],
+  "pass": true,
+  "fixture_cleanup": {
+    "ownership_guard": true,
+    "sql_cleanup_ok": true,
+    "auth_delete_ok": true,
+    "remaining_members": 0,
+    "remaining_goals": 0
+  },
+  "finished_at": "2026-10-25T03:28:20.542Z"
+}

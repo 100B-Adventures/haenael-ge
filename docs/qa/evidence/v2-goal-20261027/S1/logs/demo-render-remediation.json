@@ -1,0 +1,58 @@
+{
+  "title": "해낼게 V2 S1 반려 보완 증거",
+  "badge": "독립 재검수 대기",
+  "images": [
+    {
+      "src": "captures/flow/01-owner-goal-top-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    },
+    {
+      "src": "captures/flow/02-edit-sheet-open-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    },
+    {
+      "src": "captures/flow/03-edit-title-filled-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    },
+    {
+      "src": "captures/flow/04-saved-reloaded-title-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    },
+    {
+      "src": "captures/flow/05-supporters-preview-8-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    },
+    {
+      "src": "captures/flow/06-supporters-expanded-18-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    },
+    {
+      "src": "captures/flow/07-approved-supporters-expanded-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    },
+    {
+      "src": "captures/flow/08-staging-supporters-expanded-390.png",
+      "complete": true,
+      "naturalWidth": 390,
+      "naturalHeight": 844
+    }
+  ],
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "bodyText": true,
+  "consoleErrors": []
+}

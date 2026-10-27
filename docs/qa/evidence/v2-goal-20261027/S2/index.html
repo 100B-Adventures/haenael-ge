@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 S2 실제 흐름 데모</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#151c31; --line:#2a3658; --text:#f7f8fc; --muted:#aab5d1; --accent:#8be3c4; --wait:#ffd37a; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:linear-gradient(145deg,#090e1b,#111a31 55%,#0c1427); color:var(--text); font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif; }
+    main { width:min(1180px,calc(100% - 32px)); margin:0 auto; padding:44px 0 80px; }
+    header,.panel { background:rgba(21,28,49,.92); border:1px solid var(--line); border-radius:20px; box-shadow:0 18px 60px rgba(0,0,0,.22); }
+    header { padding:28px; }
+    h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:8px; font-size:clamp(28px,5vw,46px); } h2 { margin-bottom:18px; }
+    .badge { display:inline-flex; padding:7px 12px; margin-bottom:16px; border:1px solid #80632b; border-radius:999px; color:var(--wait); background:#302819; font-weight:800; }
+    .muted { color:var(--muted); } .accent { color:var(--accent); font-weight:800; }
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:22px; }
+    .metric { padding:16px; border:1px solid var(--line); border-radius:14px; background:#0d1427; } .metric strong { display:block; font-size:25px; }
+    .panel { margin-top:20px; padding:24px; }
+    .flow { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px; }
+    figure { margin:0; padding:12px; border:1px solid var(--line); border-radius:16px; background:#0c1325; }
+    figure img { display:block; width:100%; height:auto; border-radius:10px; background:#080c16; }
+    figcaption { padding-top:10px; color:var(--muted); } figcaption b { color:var(--text); }
+    table { width:100%; border-collapse:collapse; } th,td { padding:11px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:var(--muted); }
+    code,a { color:#a9d8ff; } a { text-decoration:none; } ul { padding-left:20px; }
+    .pair { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:760px) { .metrics,.pair { grid-template-columns:1fr 1fr; } main { width:min(100% - 20px,1180px); } }
+    @media (max-width:480px) { .metrics,.pair { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="badge" style="border-color:#327b66;color:var(--accent);background:#15362e">PASS · S2 closed</div>
+    <h1>S2 프로필 · 목표 커버 실제 쓰기 데모</h1>
+    <p class="muted">승인 prototype v3.0.0을 기준으로 free staging의 실제 Auth, API, DB, Storage 경로를 실행했다. 운영 배포와 운영 DB 쓰기는 없었다.</p>
+    <p><a href="https://haenael-ge-v2-staging-100-b.vercel.app">staging alias</a> · deployment <code>dpl_8vUvNNqSBhBa2cJ98bnMrRxKNt58</code></p>
+    <div class="metrics">
+      <div class="metric"><strong>2/2</strong>F3, skip 0</div>
+      <div class="metric"><strong>2/2</strong>F4, skip 0</div>
+      <div class="metric"><strong>18/18</strong>인증 route×폭</div>
+      <div class="metric"><strong>439/439</strong>최종 제품 소스 회귀</div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>1. 마이페이지 프로필 저장과 reload</h2>
+    <div class="flow">
+      <figure><img src="captures/flow/01-profile-initial-390.png" alt="초기 프로필"><figcaption><b>01 초기 상태</b><br>인증된 <code>/my</code></figcaption></figure>
+      <figure><img src="captures/flow/02-profile-name-input-390.png" alt="이름 입력"><figcaption><b>02 이름 입력</b><br>편집 UI 실제 입력</figcaption></figure>
+      <figure><img src="captures/flow/03-profile-bio-input-390.png" alt="소개 입력"><figcaption><b>03 소개 입력</b><br>한 줄 소개 실제 입력</figcaption></figure>
+      <figure><img src="captures/flow/04-profile-saved-reloaded-390.png" alt="저장 후 reload"><figcaption><b>04 저장 후 reload</b><br>이름·소개 영속성 assertion</figcaption></figure>
+      <figure><img src="captures/flow/05-profile-storage-finalized-390.png" alt="실제 Storage 사진"><figcaption><b>05 실제 사진</b><br>sign→Storage PUT→finalize</figcaption></figure>
+      <figure><img src="captures/flow/06-profile-preset-restored-reloaded-390.png" alt="프리셋 복귀 후 reload"><figcaption><b>06 프리셋 복귀</b><br>저장 후 reload 완료</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>2. 같은 390×844 · 같은 상태 시안 대조</h2>
+    <div class="pair">
+      <figure><img src="captures/flow/07-approved-mypage-display-390.png" alt="승인 마이페이지"><figcaption><b>승인 prototype</b><br>mypage display, scroll top 0</figcaption></figure>
+      <figure><img src="captures/flow/06-profile-preset-restored-reloaded-390.png" alt="실제 마이페이지"><figcaption><b>staging 제품</b><br>mypage display, scroll top 0</figcaption></figure>
+    </div>
+    <p class="muted">이미지 완전 로드 뒤 캡처했다. 픽셀 변화율 21.53%, 평균 채널 차이 8.22. fixture의 이름·소개·사진·집계 데이터 차이를 포함한다.</p>
+  </section>
+
+  <section class="panel">
+    <h2>3. 프리셋 커버 저장 · reload · 공개 반영</h2>
+    <div class="flow">
+      <figure><img src="captures/flow/08-cover-picker-open-390.png" alt="커버 선택기"><figcaption><b>08 선택기</b><br>목표 관리 상단</figcaption></figure>
+      <figure><img src="captures/flow/09-cover-preset-saved-reloaded-390.png" alt="건강 프리셋 저장"><figcaption><b>09 저장 후 reload</b><br><code>data-preset=health</code> 확인</figcaption></figure>
+      <figure><img src="captures/flow/10-cover-owner-health-display-390.png" alt="owner 건강 커버"><figcaption><b>10 owner 반영</b><br>인증된 목표 관리</figcaption></figure>
+      <figure><img src="captures/flow/12-cover-public-health-reflected-390.png" alt="공개 건강 커버"><figcaption><b>12 public 반영</b><br>공개 목표에서 동일 preset</figcaption></figure>
+    </div>
+    <div class="pair" style="margin-top:16px">
+      <figure><img src="captures/flow/11-approved-goal-health-display-390.png" alt="승인 건강 커버"><figcaption><b>승인 prototype</b><br>goal-health, scroll top 0</figcaption></figure>
+      <figure><img src="captures/flow/10-cover-owner-health-display-390.png" alt="실제 건강 커버"><figcaption><b>staging 제품</b><br>goal-health, scroll top 0</figcaption></figure>
+    </div>
+    <p class="muted">양쪽 모두 390×844, scroll top 0, 건강 display, 이미지 완전 로드, reduced-motion 상태다. 픽셀 변화율 45.14%, 평균 채널 차이 12.05. 승인된 ambient motion DOM 5개는 보존했고 reduced-motion에서만 숨겼다. 실제 화면에 남은 🍀는 장식이 아니라 fixture의 <code>data-wordmap-item</code> keyword다.</p>
+  </section>
+
+  <section class="panel">
+    <h2>4. 실제 Storage REVIEW · 관리자 승인 · 공개 반영</h2>
+    <div class="flow">
+      <figure><img src="captures/flow/13-cover-upload-preview-390.png" alt="업로드 preview"><figcaption><b>13 업로드 preview</b><br>실제 JPEG 선택</figcaption></figure>
+      <figure><img src="captures/flow/14-cover-review-status-390.png" alt="REVIEW 상태"><figcaption><b>14 REVIEW</b><br>finalize 200, DB REVIEW</figcaption></figure>
+      <figure><img src="captures/flow/15-admin-review-queue-390.png" alt="관리자 심사 큐의 대상 검수 카드"><figcaption><b>15 관리자 큐</b><br><code>토익 900 넘길게</code> · 68KB · 승인 CTA 확인</figcaption></figure>
+      <figure><img src="captures/flow/16-owner-approved-cover-390.png" alt="승인 후 owner"><figcaption><b>16 owner 승인 반영</b><br>이미지 완전 로드</figcaption></figure>
+      <figure><img src="captures/flow/17-public-approved-cover-390.png" alt="승인 후 public"><figcaption><b>17 public 승인 반영</b><br>공개 Storage 69,612 bytes</figcaption></figure>
+    </div>
+    <table>
+      <thead><tr><th>경계</th><th>실제 관찰</th></tr></thead>
+      <tbody>
+        <tr><td>업로드</td><td>sign 200, Storage PUT, finalize 200</td></tr>
+        <tr><td>심사 전</td><td>DB <code>REVIEW</code>, quarantine object 69,612 bytes, active cover 불변</td></tr>
+        <tr><td>관리자 승인</td><td>DB <code>APPROVED</code>, goal active asset 연결</td></tr>
+        <tr><td>공개 반영</td><td>public Storage 69,612 bytes, owner·public 이미지 모두 완전 로드</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>5. 정본 mobile ergonomics와 회귀 경계</h2>
+    <ul>
+      <li><code>/my</code>와 인증된 <code>/me/goal/{id}</code>를 각각 360·390·412·600·700·780·820·900·1000px에서 측정했다.</li>
+      <li>18/18 모두 13px 미만 글자 0, 본문 토큰 16px, 44px 미만 누름 0, active 100%, 가로 overflow 0, fixed overlap 0, 하단 clearance 80px다.</li>
+      <li><code>median_font=13</code>은 참고값이다. 합격 기준으로 사용하지 않았다.</li>
+      <li>S2 제품 소스는 <code>globals.css</code>와 <code>Wordmap.tsx</code>만 변경했다. 현재 파일과 최종 staging snapshot의 두 파일 diff exit code는 각각 0이다.</li>
+      <li>마지막 reduced-motion CSS까지 포함한 최종 소스로 QA 계약과 unit 전체를 1회 재실행해 78파일 439/439, exit 0을 확인했다.</li>
+      <li>S1 공용 화면은 최종 전체 회귀로 보존했고 S3는 수정하지 않았다.</li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <h2>6. 독립 QA v1 반려 해소 근거</h2>
+    <table>
+      <thead><tr><th>결함</th><th>보완 근거</th><th>현재 상태</th></tr></thead>
+      <tbody>
+        <tr><td>QAS2-01</td><td>PW-05가 대상 review card를 <code>scrollIntoViewIfNeeded</code>한 뒤 목표명·asset 정보·승인 CTA와 viewport 경계를 assertion하고 15번 PNG를 캡처했다.</td><td>PASS · 해소</td></tr>
+        <tr><td>QAS2-02</td><td>승인본과 실제 화면을 동일 reduced-motion 조건으로 재촬영했다. static heart 0, owner mark hidden, ambient 5개는 DOM 보존·reduced-motion에서 display none. 남은 🍀는 실제 keyword임을 DOM 로그로 확인했다.</td><td>PASS · 해소</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>7. 재현 로그와 판정 경계</h2>
+    <ul>
+      <li><a href="logs/F3-MY-01-PW-03-attempt-3.log">F3 최종 로그, 2 passed</a></li>
+      <li><a href="logs/PW-03-remediation-v2-dom-boundary.log">PW-03 최종 영향 검증, 1 passed</a></li>
+      <li><a href="logs/F4-PW-04-PW-05-remediation-v2.log">F4 최종 명시 verify, 2 passed</a></li>
+      <li><a href="logs/full-regression-final-source.log">최종 소스 전체 회귀, 78파일 439/439</a></li>
+      <li><a href="rendered/md-web-haenael-ge-haenael-s2-independent-qa-v1-gpt-codex.html">독립 QA v1 반려 원문 렌더</a></li>
+      <li><a href="rendered/md-web-haenael-ge-haenael-s2-independent-qa-v2-gpt-codex.html">독립 QA v2 PASS 보고서 렌더</a></li>
+      <li><a href="rendered/source-manifest.html">source manifest 읽기 화면</a></li>
+      <li><a href="rendered/profile-visual-equivalence.html">프로필 픽셀 대조 읽기 화면</a></li>
+      <li><a href="rendered/cover-visual-equivalence.html">커버 픽셀 대조 읽기 화면</a></li>
+      <li><a href="rendered/staging-remediation-v2-final-health.html">최종 staging health 읽기 화면</a></li>
+    </ul>
+    <p class="accent">독립 qa-verifier가 QAS2-01·02 해소와 필수 기능·회귀·디자인 QA를 확인했다. S2는 closed다.</p>
+    <p class="muted">기반 포맷: S1 실제 데모 허브와 source manifest. 최종 판정 2026-10-27 11:16 KST. 모델 gpt-codex(API model ID 미노출), 에이전트 qa-verifier, 스킬 qa·review.</p>
+  </section>
+</main>
+</body>
+</html>

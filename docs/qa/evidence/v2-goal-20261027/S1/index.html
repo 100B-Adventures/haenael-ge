@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>해낼게 V2 S1 독립 QA PASS 증거</title>
+  <style>
+    :root { color-scheme:light; --ink:#122018; --muted:#5f6c64; --green:#14613a; --soft:#e7f4ec; --amber:#8a5b05; --amber-soft:#fff4d6; --line:#dce5df; --paper:#f7faf7; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.6 -apple-system,BlinkMacSystemFont,"Pretendard",sans-serif; }
+    main { width:min(1160px,calc(100% - 32px)); margin:40px auto 72px; }
+    header,.panel { border:1px solid var(--line); border-radius:20px; background:#fff; padding:24px; }
+    header { background:linear-gradient(135deg,var(--soft),#fff 68%); }
+    h1,h2,h3 { margin:0; letter-spacing:-.03em; } h1 { margin-top:8px; font-size:32px; } h2 { margin-bottom:16px; font-size:21px; } h3 { font-size:16px; }
+    p { margin:8px 0 0; } code { overflow-wrap:anywhere; }
+    .badge { display:inline-flex; align-items:center; border-radius:999px; background:var(--green); color:#fff; border:1px solid var(--green); padding:5px 11px; font-weight:800; }
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:20px 0; }
+    .metric { border:1px solid var(--line); border-radius:16px; background:#fff; padding:16px; }
+    .metric strong { display:block; color:var(--green); font-size:22px; }
+    .panel { margin-top:16px; }
+    .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .compare { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    figure { margin:0; } figcaption { margin-bottom:8px; font-weight:800; }
+    figure img { display:block; width:100%; max-height:844px; object-fit:contain; object-position:top; border:1px solid var(--line); border-radius:14px; background:#f7f6f2; }
+    table { width:100%; border-collapse:collapse; } th,td { border-bottom:1px solid var(--line); padding:10px 8px; text-align:left; vertical-align:top; } th { color:var(--muted); }
+    a { color:var(--green); } ul,ol { margin:0; padding-left:20px; }
+    .note { border-left:4px solid #e7c46f; padding:10px 14px; background:var(--amber-soft); }
+    footer { margin-top:24px; color:var(--muted); font-size:13px; }
+    @media (max-width:760px) { .grid,.gallery,.compare { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="badge">S1 PASS · closed</span>
+    <h1>S1 목표 관리 · 편집 · 응원자 목록</h1>
+    <p>독립 qa-verifier가 현재 staging에서 F1을 재실행하고 QAS1-01~04 해소를 확인했다.</p>
+    <p><a href="https://haenael-ge-v2-staging-100-b.vercel.app">staging alias</a> · deployment <code>dpl_2QeUAd65Qn4Tcfs9SvCuZaFWmbC3</code></p>
+  </header>
+
+  <section class="grid" aria-label="검증 요약">
+    <div class="metric"><strong>1 / 1</strong>F1 독립 재실행, skip 0</div>
+    <div class="metric"><strong>2 / 2</strong>F2 독립 통과 증거 재사용</div>
+    <div class="metric"><strong>439 / 439</strong>전체 회귀 재실행</div>
+    <div class="metric"><strong>9 / 9</strong>인증된 S1 route 실측</div>
+  </section>
+
+  <section class="panel">
+    <h2>QAS1-01~04 해소 근거</h2>
+    <table>
+      <thead><tr><th>결함</th><th>보완 근거</th><th>현재 판정</th></tr></thead>
+      <tbody>
+        <tr><td>QAS1-01</td><td>인증된 <code>/me/goal/{id}</code>를 360·390·412·600·700·780·820·900·1000px에서 직접 측정.</td><td>해소</td></tr>
+        <tr><td>QAS1-02</td><td>owner 편집부터 reload 영속, 8→18 전개까지 단계별 6장. 승인본과 실제 화면은 같은 390×844·scroll·요소 상태로 별도 대조.</td><td>해소</td></tr>
+        <tr><td>QAS1-03</td><td><code>docs/build-log.md</code>, <code>docs/구현현황.md</code>, manifest, demos에 실제 수정·배포 ID·증거 경계를 기록.</td><td>해소</td></tr>
+        <tr><td>QAS1-04</td><td>독립 재검수 전에는 PASS를 보류했고, qa-verifier 실측 PASS 뒤에만 closed로 갱신.</td><td>해소</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>PW-02 한 실행의 연속 화면</h2>
+    <div class="gallery">
+      <figure><figcaption>1. owner 목표 관리 상단</figcaption><img src="captures/flow/01-owner-goal-top-390.png" alt="owner로 로그인한 목표 관리 상단"></figure>
+      <figure><figcaption>2. 편집기 열기</figcaption><img src="captures/flow/02-edit-sheet-open-390.png" alt="목표 편집기 열린 상태"></figure>
+      <figure><figcaption>3. 제목 입력</figcaption><img src="captures/flow/03-edit-title-filled-390.png" alt="토익 950 넘길게 제목 입력"></figure>
+      <figure><figcaption>4. 저장 후 reload 영속, cover loading 중</figcaption><img src="captures/flow/04-saved-reloaded-title-390.png" alt="reload 뒤 저장된 제목과 로딩 중인 cover"></figure>
+      <figure><figcaption>5. 응원자 preview 8명</figcaption><img src="captures/flow/05-supporters-preview-8-390.png" alt="응원자 목록 8명 preview"></figure>
+      <figure><figcaption>6. 응원자 18명과 pill</figcaption><img src="captures/flow/06-supporters-expanded-18-390.png" alt="응원자 18명 전개와 응원 횟수 pill"></figure>
+    </div>
+    <p>builder 실행 route는 <code>/me/goal/363</code>, 독립 재검수 route는 <code>/me/goal/372</code>였다. 두 fixture 모두 실행 뒤 정리돼 URL은 재사용하지 않는다. 04는 제목 영속성 확인 직후라 cover·avatar가 loading 중이며, 05·06·08은 완전 렌더 상태다.</p>
+  </section>
+
+  <section class="panel">
+    <h2>승인본과 실제 화면, 동일 상태 대조</h2>
+    <div class="compare">
+      <figure><figcaption>승인 prototype, 390×844</figcaption><img src="captures/flow/07-approved-supporters-expanded-390.png" alt="승인 prototype의 전개된 응원자 목록"></figure>
+      <figure><figcaption>실제 staging, 390×844</figcaption><img src="captures/flow/08-staging-supporters-expanded-390.png" alt="실제 staging의 전개된 응원자 목록"></figure>
+    </div>
+    <table>
+      <tbody>
+        <tr><th>정렬 기준</th><td>양쪽 모두 첫 supporter card top 72px</td></tr>
+        <tr><th>DOM 데이터 행</th><td>prototype 11행, 실제 fixture 18행. viewport 안에 완전히 보이는 행 수를 뜻하지 않는다.</td></tr>
+        <tr><th>픽셀 차이</th><td>72,865 / 329,160px, 22.14%. 평균 채널 차이 10.42, 최대 255</td></tr>
+        <tr><th>차이 경계</th><td>viewport·scroll·semantic state는 동일하다. 이름·응원 횟수·행 수는 prototype과 fixture 데이터가 다르며 픽셀 동일성은 주장하지 않는다.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>인증된 S1 화면 9폭 실측</h2>
+    <table>
+      <thead><tr><th>폭</th><th>13px 미만</th><th>본문 토큰</th><th>44px 미만 누름</th><th>active</th><th>overflow</th><th>하단 clearance</th></tr></thead>
+      <tbody>
+        <tr><td>360·390·412·600·700·780·820·900·1000</td><td>전부 0</td><td>전부 16px</td><td>전부 0</td><td>전부 100%, 27/27</td><td>전부 0</td><td>전부 80px</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><strong>정본 판정 복원:</strong> <code>median_font=13</code>은 참고값이다. 합격 기준은 <code>fontBelow13=0</code>과 <code>.font-designer-14r ≥ 16px</code>이며 tap·active·overflow·fixed-bottom 축도 함께 검사했다.</p>
+  </section>
+
+  <section class="panel">
+    <h2>실행 결과와 증거</h2>
+    <table>
+      <thead><tr><th>게이트</th><th>결과</th><th>증거</th></tr></thead>
+      <tbody>
+        <tr><td>F1 PW-02</td><td>독립 재실행 1 passed, 0 skipped. 9폭과 reload 영속 포함.</td><td><a href="logs/F1-PW-02-independent-recheck-v2.log">독립 로그</a> · <a href="logs/F1-PW-02-remediation-corrected.log">builder 로그</a></td></tr>
+        <tr><td>F2 AUTH-GOAL-01 · SMOKE-01</td><td>독립 QA 통과 2/2, 0 skipped 재사용. 인증 소스 영향 없음.</td><td><a href="logs/F2-AUTH-SMOKE-final.log">로그</a></td></tr>
+        <tr><td>QA 계약 + unit 전체</td><td>78 files, 439 tests passed. active CSS 변경으로 1회 재실행.</td><td><a href="logs/full-regression-remediation.log">로그</a></td></tr>
+        <tr><td>Vercel preview build</td><td><code>Build Completed in /vercel/output</code>, deployment READY.</td><td><a href="logs/staging-remediation-correct-deploy.log">deploy</a> · <a href="logs/staging-remediation-correct-alias.log">alias</a> · <a href="rendered/staging-remediation-health.html">health 읽기 화면</a></td></tr>
+        <tr><td>source identity</td><td>base commit, source/deployed SHA-256, rejected snapshot 경계 기록.</td><td><a href="rendered/source-manifest.html">manifest 읽기 화면</a></td></tr>
+        <tr><td>독립 QA</td><td>v1 반려 원문과 v2 해소 재검수를 함께 보존한다.</td><td><a href="rendered/md-web-haenael-ge-haenael-s1-independent-qa-v1-gpt-codex.html">v1 FAIL 원문 렌더</a> · <a href="rendered/md-web-haenael-ge-haenael-s1-independent-qa-v2-gpt-codex.html">v2 PASS 원문 렌더</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>오류 이력과 배포 경계</h2>
+    <ul>
+      <li>F1 연속 실패 1회. 정본에 없는 <code>median_font ≥ 16</code> assertion을 새로 만든 테스트 계약 오류였다.</li>
+      <li>그 기준으로 이름·메시지·날짜를 16px로 키운 CSS 3곳은 기존 <code>text-label-small</code>·<code>text-meta-micro</code> 토큰으로 복구했다.</li>
+      <li>잘못된 snapshot <code>/private/tmp/haenael-s1-remediation-20261027-mCP7b6</code>은 alias에 연결하지 않았고 증거로 사용하지 않는다.</li>
+      <li>검사를 축소하지 않았다. 정본 판정 축으로 복원했고 실제 85.7%였던 active coverage는 CSS를 보완해 100%로 올렸다.</li>
+      <li>production 배포·과금·commit·상태 파일 수정은 없고 S2/S3는 건드리지 않았다.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>KNOWLEDGE_QUERY: 이전 S1 작업에서 조회한 해낼게 사업 허브, 소셜 증거·성장 루프 BRAIN, Playwright 공식 visual/assertion 문서. 이번 반려 보완에서는 새 구조를 정하지 않아 추가 외부 조사를 하지 않음.</p>
+    <p>HITS_USED: D-049, 승인 prototype v3.0.0, 독립 QA QAS1-01~04, 정본 mobile-ergonomics-measure.mjs, DESIGN 토큰, 기존 pill 패턴을 구현·검증 기준으로 사용.</p>
+    <p>HITS_REJECTED: 타 사업체 디자인·일반 마케팅 사례는 확정 prototype 구현과 반려 증거 보완 범위를 벗어나 미사용.</p>
+    <p>CONFLICTS: 정본 측정기와 새 median assertion이 충돌했다. median assertion을 폐기하고 정본 기준으로 복원했다.</p>
+    <p>SKILLS_USED: haenael-supabase-build, Next.js+Supabase staging 수직 슬라이스와 증거 계약에 사용.</p>
+    <p>SKILLS_SKIPPED: 없음.</p>
+    <p>SOURCES/MODEL: Codex (GPT-5 family) · 독립 QA 보고서 · D-049 · social-viral-loop-v3-opus5.html · mobile-ergonomics-measure.mjs · DESIGN.md · staging Playwright/Vercel/Vitest 증거.</p>
+  </footer>
+</main>
+</body>
+</html>

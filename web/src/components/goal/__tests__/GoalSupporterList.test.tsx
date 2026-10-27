@@ -26,8 +26,10 @@ describe("GoalSupporterList", () => {
     render(<GoalSupporterList goalId={7} slug="goal" supporters={supporters(20)} totalCount={20} renderedAt={RENDERED_AT} />);
     expect(screen.getAllByTestId("goal-supporter-item")).toHaveLength(8);
     expect(screen.getByText("🍀 1번")).toBeInTheDocument();
+    expect(screen.getAllByTestId("goal-supporter-cheer-count")).toHaveLength(8);
     fireEvent.click(screen.getByRole("button", { name: "응원 목록 펼치기" }));
     expect(screen.getAllByTestId("goal-supporter-item")).toHaveLength(20);
+    expect(screen.getAllByTestId("goal-supporter-cheer-count")).toHaveLength(20);
   });
 
   it("GOAL-CHEER-02 20명 초과는 목표 범위 검색 폼을 열고 익명 사진을 노출하지 않는다", () => {

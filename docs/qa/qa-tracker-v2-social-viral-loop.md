@@ -1,5 +1,47 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+## 2026-10-28 01:20 KST · S3 독립 코드검토 P1 builder 보완
+
+| 요청 번호 | 범위 | 현재 판정 | 원인·직접 관찰 근거 |
+|---|---|---|---|
+| QA-S3-P1-20261028-01 | 친구 목표 상세의 최초 UI 탐색 | 🔧 builder 재검증 PASS, 독립 QA 대기 | 원인은 01A가 실제 Link 클릭 직전에 같은 인증 세션으로 목표 상세 HTTP 200 사전 요청을 보내 최초 UI 탐색을 예열한 것이다. `friendGoalProbe` 요청과 200 assertion 4줄을 제거하고 친구 목록 DOM → 실제 Link 클릭 → URL → 상세 DOM·DB assertion을 유지했다. 현재 E2E SHA-256 `a5b18a71ed2e3601ed2f29a5e427e5e7ec85c354c0f50a80c76b462598922234`에서 전체 Chromium 17/17, 실패 0, skip 0. 독립 qa-verifier 확인 전 해소로 닫지 않는다. |
+| QA-S3-P1-20261028-02 | F6 staging 결제 설정 수명주기 | 🔧 builder 재검증 PASS, 독립 QA 대기 | 원인은 F6 정식 verify가 `ORDER-ATTR-01`의 `PAYMENTS_ENABLED=true` 전제와 종료 후 복구를 명령에 포함하지 않은 것이다. 정식 verify를 staging 설정 활성화 → 전체 Playwright → 셸 종료 처리의 `false` 복구 → HTTP 503 `payments_disabled` 확인으로 고정했다. v10 종료코드 0, 복구 종료코드 0, 외부 결제 호출 0. 독립 qa-verifier 확인 전 해소로 닫지 않는다. |
+| QA-S3-FLOW-20261027-01 | 초대·친구 흐름 전체 검증 | 🔧 builder 재검증 PASS, 독립 QA 대기 | 최종 v10은 테스트 실행 식별자 `1793117012267`에서 17/17 PASS, DB/Auth/Storage/queue/asset/object 0이다. 지연 Storage 항목은 자연 TTL 정리로 주장하지 않고 PENDING·object 존재 관찰 뒤 테스트 소유 exact ID를 강제 정리한 결과다. 증거 `S3/logs/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.log`. |
+
+제품 `web/src`, 운영 환경, 실결제는 변경하지 않았다. S3 closed와 전체 QA 승인은 독립 QA 판정 뒤에만 기록한다.
+
+## 2026-10-27 14:08 KST · S3 기능 재검증 중단
+
+| 요청 번호 | 범위 | 현재 판정 | 원인·관찰 근거 |
+|---|---|---|---|
+| QA-S3-FLOW-20261027-01 | 초대·친구 흐름 전체 검증 | ❌ NG | F5 실제3회 실패. v1 수락후 URL5초 대기, v2 전체30초 timeout·정리네트워크 오류, v3 비로그인 wordmap load 대기120초 timeout. v3 익명URL은 별도 curl에서0.279초 HTTP307→/?next= 관찰. 접근허용 결함으로 판정하지 않는다. 긍정경로5단계·ACTIVE연결은 관찰됐으나 PW-06·PW-07·CC-01은 미실행, F6 전체회차도 미실행. 추가 기능 재시도·새 QA 발주 중단. |
+
+
+
+## 2026-10-27 13:37 KST · S3 테스트 데이터 정리 실패
+
+| 요청 번호 | 범위 | 현재 판정 | 원인·관찰 근거 |
+|---|---|---|---|
+| QA-S3-CLEANUP-20261027-01 | S3 F5 v2 실행 데이터 정리 | 🔧 정리 관찰 완료 | 최초 로그 DB47·Auth5 NG 보존. namespace1793075388485를 계정 UUID·테스트 이메일·생성시각으로 한정했다. 정리 전 DB45(회원5·목표9·결제31), Auth5, Storage0. 정리 후 DB·Auth·Storage0, 외래키29개 조회조건0. Auth삭제5/5 HTTP200. 증거 `S3/haenael-s3-cleanup-result-v1-gpt-codex-20261027-1406.json`. S3 기능 PASS로 승격하지 않는다. |
+
+발주 Codex 전달: “세 번째 회차 후 성공/실패와 별개로 이번 S3 실행 namespace의 잔여 DB/Auth/Storage를 먼저 조회·정리하고 잔여0을 증거로 남기세요. 타 작업 데이터 삭제 금지.”
+
+## 2026-10-27 11:16 KST · S2 독립 QA v2 보완 재검수
+
+| 요청 번호 | 범위 | 현재 판정 | 직접 관찰 근거 |
+|---|---|---|---|
+| QAS2-01 | 관리자 검수 대상 카드와 승인 CTA 데모 | ✅ PASS · 해소 | 390×844 `15-admin-review-queue-390.png`에서 `토익 900 넘길게`, `서연 · 68KB`, 승인·반려 CTA를 직접 확인. PW-05가 대상 카드 식별·scroll·viewport 경계를 assertion한 뒤 캡처 |
+| QAS2-02 | 승인 건강 커버와 staging 표시 경계 | ✅ PASS · 해소 | 같은 390×844·scroll top 0·reduced-motion 승인본/실화면을 직접 대조. static heart 0, owner mark hidden, ambient DOM 5 보존·reduced-motion에서만 숨김. 남은 🍀는 실제 `data-wordmap-item` keyword |
+| QA-S2-FINAL | S2 필수 기능·회귀·디자인 QA | ✅ PASS · S2 closed | final deployment `dpl_8vUvNNqSBhBa2cJ98bnMrRxKNt58` source diff 0. F3 2/2, F4 2/2, 전체 회귀 78파일 439/439, skip 0. 독립 보고서 `S2/haenael-s2-independent-qa-v2-gpt-codex.md` |
+
+보장 범위는 free staging S2다. production·과금·외부 OAuth·결제·S3는 미검증이며, 정리된 fixture URL은 현재 재사용할 수 없다.
+
+## 2026-10-27 10:46 KST · 실행 중단 통보 누락
+
+| 요청 번호 | 범위 | 현재 판정 | 원인·관찰 근거 |
+|---|---|---|---|
+| OPS-GOAL-20261027-01 | Codex 목표 실행 중단 후 발주 대화에 결과·사유 미회수 | ❌ NG | 사용자: “왜 진행안하는거야?” 새 Codex thread 01a17948-dc1e-75e1-bd4a-19adad26e59e는 05:26 blocked. 기본 계정 주간 증가 +10%p(30→40) 도달로 종료. 이 계정 지표는 다른 세션 소비도 포함한다. 발주 세션은 시작만 보고하고 최종 상태 회수·통보를 연결하지 않았다. S1 독립 QA v2 PASS와 데모 존재, S2 기능 PASS·시각 보완 재검수 미완, S3 미착수 확인. 예산 상한 자동 확대나 제품 수정 재개는 하지 않음. |
+
 ## 2026-10-25 20:45 KST · 누적 보고 재검증 중 시각 차이 관찰 (controller)
 
 | 요청 번호 | 범위 | 현재 판정 | 직접 관찰 근거 |
@@ -383,3 +425,10 @@ STAMP: 2026-10-15 KST | model gpt-codex/gpt-6.1-sol | agent code-builder | skill
 ## 6. 정정 기록
 
 `/admin/covers` 404 를 NG 사유로 적은 1차 운영 QA 판정은 **컨트롤러 지시 오류**였다. 그 경로는 승인 설계에도 코드에도 없다. 커버 검수는 `/admin` 안의 섹션이고 `web/src/app/admin/page.tsx` 가 `GoalCoverReviewQueue` 를 렌더한다. 운영 익명 `/admin` 은 307 로 정상 분기한다. 제품 결함 0건이다.
+
+
+## 2026-10-27 13:33 KST · S3 테스트 데이터 정리 오류 (controller 관찰)
+
+| 요청 번호 | 범위 | 현재 판정 | 직접 관찰 근거와 종료 조건 |
+|---|---|---|---|
+| QA-S3-CLEANUP-20261027-01 | staging S3 테스트 namespace 정리 | ❌ NG | S3/logs/haenael-s3-f5-verify-v2-gpt-codex-20261027-1328.log: cleanup transport ETIMEDOUT/EHOSTUNREACH, db-remains47, auth-remains5. 제품 결함으로 단정하지 않으며, 본인 테스트 namespace만 조회·정리하고 DB/Auth/Storage 잔여0을 직접 확인할 때 종료. 이후 테스트 PASS만으로 이 항목을 닫지 않는다. 기존 실행 Codex에 전달함. |

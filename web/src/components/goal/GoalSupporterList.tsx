@@ -50,7 +50,7 @@ function SupporterRow({ supporter, renderedAt }: { supporter: GoalSupporter; ren
         {supporter.message && <ClampText className="goal-supporter-message">{supporter.message}</ClampText>}
       </div>
       <div className="goal-supporter-meta">
-        <strong>🍀 {supporter.cheer_count}번</strong>
+        <strong data-testid="goal-supporter-cheer-count">🍀 {supporter.cheer_count}번</strong>
         <small>{relativeDate(supporter.latest_at, renderedAt)}</small>
       </div>
     </article>

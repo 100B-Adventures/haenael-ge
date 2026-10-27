@@ -1,0 +1,32 @@
+{
+  "approved_state": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "mypage",
+    "scroll_top": 0,
+    "images_complete": true
+  },
+  "actual_state": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "state": "mypage-display",
+    "scroll_top": 0,
+    "images_complete": true
+  },
+  "pixel_data": {
+    "width": 390,
+    "height": 844,
+    "total_pixels": 329160,
+    "changed_pixels": 70875,
+    "changed_ratio": 0.21532081662413416,
+    "mean_absolute_channel_delta": 8.22154271478916,
+    "max_channel_delta": 255,
+    "approved_sha256": "bec629c4c84628a777904f8d47f376e3934b1bc52dfcf560036060358d36cfd5",
+    "actual_sha256": "f23887776b0d2d7eb0b9663af61746e0d0d51bcc841552da597a8e9a9a6c4aad",
+    "interpretation": "동일 390x844·scroll top·프로필 display 상태다. prototype과 fixture의 이름·소개·사진·집계 데이터 차이를 픽셀 차이에 포함한다."
+  }
+}

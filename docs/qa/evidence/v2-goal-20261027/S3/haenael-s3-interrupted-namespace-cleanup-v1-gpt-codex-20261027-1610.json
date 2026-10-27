@@ -1,0 +1,45 @@
+{
+  "stamp": {
+    "created_at": "2026-10-27T16:10:02+09:00",
+    "model": "gpt-codex",
+    "agent": "code-builder",
+    "skill": "haenael-supabase-build",
+    "basis": "social-web-first.spec.ts 기존 afterAll 정리 순서와 namespace 한정 SQL",
+    "decision": "1800초 위임 제한시간 종료는 기능 실패와 분리하고, 해당 run namespace 잔여 fixture만 제거"
+  },
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "namespace": "1793084514123",
+  "interruption": {
+    "kind": "delegate_timeout",
+    "exit_code": 124,
+    "counts_as_product_failure": false
+  },
+  "scope": {
+    "auth_email_pattern": "^social-(owner|friend|friend2|friend3|admin|a|b)-1793084514123@test[.]local$",
+    "payment_ids": [1709, 1710, 1711, 1712],
+    "payment_order_pattern": "social-1793084514123-%",
+    "cashout_request_pattern": "qa-admin-cashout-1793084514123-%"
+  },
+  "observed_before_cleanup": {
+    "auth": 0,
+    "members": 0,
+    "goals": 0,
+    "payments": 4,
+    "storage_objects_by_scoped_auth_or_goal": 0
+  },
+  "cleanup": {
+    "guarded_payment_delete": 4,
+    "other_namespace_touched": false,
+    "previous_1406_cleanup_repeated": false
+  },
+  "verified_after_cleanup": {
+    "auth_remaining": 0,
+    "member_remaining": 0,
+    "goal_remaining": 0,
+    "payment_remaining": 0,
+    "payment_child_remaining": 0,
+    "cashout_remaining": 0,
+    "storage_namespace_objects": 0,
+    "profile_queue_namespace": 0
+  }
+}

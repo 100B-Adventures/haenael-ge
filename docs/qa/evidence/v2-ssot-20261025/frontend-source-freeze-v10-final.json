@@ -1,0 +1,20 @@
+{
+  "captured_at": "2026-10-25T13:17:00+09:00",
+  "source_tree_sha256": "8d8a1a898bc543d56164d45c0a92ad8f571d55560d0662d16e46af2653a7f363",
+  "hash_scope": "sorted sha256 stream of every file under web/src and web/e2e",
+  "preview_deployment": {
+    "immutable_url": "https://haenael-9ujgvzzu5-100-b.vercel.app",
+    "deployment_id": "dpl_6ngntmdYQpZHbo83PvuQyhbtiYvu",
+    "product_source_note": "preview contains the final application source; changes after deployment are E2E isolation, Storybook stories, and documentation only"
+  },
+  "verification": {
+    "unit": "78 files, 439 tests PASS",
+    "next_build": "PASS, Next.js 16.4.1",
+    "storybook": "PASS, 21 stories, 9 titles",
+    "storybook_coverage": "HEAD c5ecc8a direct 7/42 to current direct 8/46",
+    "staging_unique_e2e": "17 unique cases covered by partitioned runs",
+    "mobile_widths": "360,390,412,600,700,780,820,900,1000 all PASS",
+    "visual": "approved 390px 9 screens versus staging 390px 9 screens, reviewer finding 0"
+  },
+  "production": "not deployed"
+}

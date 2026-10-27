@@ -1,0 +1,16 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.goto: Timeout 30000ms exceeded.
+Call log:
+[2m  - navigating to "http://localhost:3000/", waiting until "networkidle"[22m
+
+    at /Users/sj/sj_code_master/haenael-ge/web/[eval1]:1:282 {
+  log: [
+    '  - navigating to "http://localhost:3000/", waiting until "networkidle"'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.16.0

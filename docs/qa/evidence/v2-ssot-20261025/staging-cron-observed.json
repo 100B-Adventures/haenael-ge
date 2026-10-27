@@ -1,0 +1,70 @@
+[
+  {
+    "observed": {
+      "cron_active": 5,
+      "recent_runs": [
+        {
+          "status": "succeeded",
+          "jobname": "expire-stale-cheer-payments",
+          "start_time": "2026-10-24T22:40:00.082314+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "monitor-storage-cleanup-drain",
+          "start_time": "2026-10-24T22:40:00.081188+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "drain-storage-cleanup-queue",
+          "start_time": "2026-10-24T22:40:00.076789+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "monitor-storage-cleanup-drain",
+          "start_time": "2026-10-24T22:30:00.115334+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "drain-storage-cleanup-queue",
+          "start_time": "2026-10-24T22:30:00.114081+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "expire-stale-cheer-payments",
+          "start_time": "2026-10-24T22:30:00.11288+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "monitor-storage-cleanup-drain",
+          "start_time": "2026-10-24T22:20:00.071837+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "expire-stale-cheer-payments",
+          "start_time": "2026-10-24T22:20:00.070647+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "drain-storage-cleanup-queue",
+          "start_time": "2026-10-24T22:20:00.066844+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "monitor-storage-cleanup-drain",
+          "start_time": "2026-10-24T22:10:00.071835+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "expire-stale-cheer-payments",
+          "start_time": "2026-10-24T22:10:00.070227+00:00"
+        },
+        {
+          "status": "succeeded",
+          "jobname": "drain-storage-cleanup-queue",
+          "start_time": "2026-10-24T22:10:00.066452+00:00"
+        }
+      ],
+      "profile_deferred_cleanup": 1
+    }
+  }
+]

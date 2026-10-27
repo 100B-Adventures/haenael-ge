@@ -1,0 +1,3 @@
+8e0164e0407c67fa8e8bf195308150b52a290bc286853b8c684df78d3966db78  web/src/app/globals.css
+a4dfd05076ff5c11b3722c5bfec9dc93003cb283748bbd113e304eabcfe55b4a  web/src/components/goal/Wordmap.tsx
+3162b7090791e1b19baa79a994817c513fcc59117ba961a6959ea52bc22d9854  web/e2e/social-web-first.spec.ts

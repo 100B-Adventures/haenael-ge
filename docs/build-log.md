@@ -1,5 +1,61 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-10-28 S3 독립 코드검토 P1 보완, 독립 QA 대기
+
+- 친구 목표 상세 UI 클릭 직전의 인증 HTTP 사전 요청을 제거했다. 01A는 친구 목록 DOM, 실제 Link 클릭, 최종 URL, 상세 DOM과 목표 제목으로 cold UI navigation을 검증한다.
+- F6 정식 verify에 staging `PAYMENTS_ENABLED` 활성화, 전체 Playwright 실행, 종료 처리의 비활성화, HTTP 503 `payments_disabled` 검사를 한 수명주기로 고정했다.
+- 최종 E2E SHA-256은 `a5b18a71ed2e3601ed2f29a5e427e5e7ec85c354c0f50a80c76b462598922234`다. 전체 Chromium 17/17, 실패 0, skip 0, exit 0이며 테스트 실행 식별자 `1793117012267` 정리 계수는 모두 0이다.
+- 결제 설정 복구 rc 0, 비활성화 확인 503, 외부 결제 호출 0이다. 제품 `web/src`, staging deployment, 운영 환경은 변경하지 않았다.
+- v9는 실행 위치를 `web`로 잘못 지정해 정식 명령의 `cd web`이 테스트 시작 전에 실패했다. staging 설정은 바뀌지 않았고, 저장소 루트에서 재실행한 v10만 최종 증거로 채택했다.
+- 로그는 `docs/qa/evidence/v2-goal-20261027/S3/logs/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.log`, 데모 허브는 같은 S3 폴더의 `index.html`이다. 독립 QA 전 S3 closed를 선언하지 않는다.
+
+> STAMP: 생성 2026-10-28 01:11 KST. 모델 gpt-codex. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 S3 독립 코드검토 P1, staging Playwright·Supabase, prototype v3.0.0이다. 독립 QA 대기, production 미반영.
+
+## 2026-10-27 S3 친구 초대 전체 E2E, 독립 QA 대기
+
+- 기존 `web/e2e/social-web-first.spec.ts` 안에서 S3 happy path와 거부 경계를 분리했다. happy path는 초대 생성·링크·다른 계정 수락·친구 목록·친구 목표를 실제 UI/API/DB로 검증하고 5단계 PNG를 남긴다. 거부 경계는 잘못된 owner·PRIVATE·REMOVED의 HTTP 404와 비인증 307→landing 200·금지 DOM 0을 보존한다.
+- F5 명시 verify는 7/7, skip 0, exit 0이다. 최신 전체 Chromium 회차는 17/17, 실패 0, skip 0, exit 0이다. 최종 namespace `1793090343902`는 DB/Auth/Storage/profile cleanup 전 항목 0이다.
+- 관리자 검수 locator는 고정 제목을 버리고 DB의 현재 goal title·owner와 exact asset ID 검증을 연결했다. 최종 회차는 `goalId 669`, asset `102dd934-0c78-4c2a-bbd5-47b3907ba11f`, 승인 CTA visible, 승인 뒤 같은 asset `APPROVED`와 public Storage 69,612 bytes를 확인했다.
+- 정리 실패 원인은 승인 asset보다 reviewer member 삭제가 먼저 처리돼 `reviewed_by=NULL`이 상태 제약을 깨뜨린 것이었다. teardown이 namespace goal cover asset을 먼저 삭제하도록 바꿨고, 실패 namespace `1793089655551`도 exact email/goal/payment/asset 범위로 Auth·DB·Storage 0을 재확인했다.
+- staging `PAYMENTS_ENABLED`는 ORDER-ATTR 검증 동안만 임시 활성화했다. 종료 시 false 복구 rc 0과 HTTP 503 `payments_disabled`를 확인했고 Toss 호출·실결제는 없었다.
+- S3는 제품 `web/src`를 변경하지 않았다. 제품 SHA는 S2 최종 staging과 같아 78파일·439/439 회귀를 재사용했으며 unit 전량을 다시 돌리지 않았다. E2E SHA-256은 `0798c5770875d0eb43801eddd4084f6c5eb15160fcdbbcfdeb6a2f4f34011d7a`다.
+- 증거 허브는 `docs/qa/evidence/v2-goal-20261027/S3/index.html`, source manifest는 같은 폴더의 `source-manifest.json`이다. builder 판정은 독립 QA 대기이며 S3 closed가 아니다. production·운영 DB·과금·커밋·STATE 수정은 없다.
+
+> STAMP: 생성 2026-10-27 17:46 KST. 모델 gpt-codex. 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 prototype v3.0.0, staging Playwright·Supabase Auth/API/DB/Storage, S2 최종 제품 소스와 회귀다. 독립 QA 대기, production 미반영.
+
+## 2026-10-27 S2 프로필·커버 실제 쓰기 검증, 독립 QA 재검수 대기
+
+- 기존 구현을 확인한 결과 `/my` 프로필 이름·소개·사진, semantic preset 커버, 실제 Storage 커버 업로드와 관리자 승인 경로가 이미 제품에 연결돼 있었다. 제품 소스는 바꾸지 않고 `web/e2e/social-web-first.spec.ts`에 실제 흐름의 영속성·DB·Storage assertion과 단계별 캡처만 보강했다.
+- F3는 MY-01과 PW-03 2/2, skip 0이다. MY-01은 이름·소개 저장과 reload, 실제 사진 sign→PUT→finalize, preset 복귀를 검증했다. PW-03은 건강 preset의 저장 완료, reload, 공개 목표 반영을 검증했다.
+- F4는 PW-04와 PW-05 2/2, skip 0이다. 실제 69,612 byte JPEG를 quarantine Storage에 올리고 finalize 200·DB `REVIEW`·active cover 불변을 확인했다. 관리자 승인 뒤 DB `APPROVED`, goal active asset, public Storage 69,612 bytes, owner·public 이미지 완전 로드를 확인했다.
+- `/my`와 인증된 `/me/goal/{id}`를 각각 360·390·412·600·700·780·820·900·1000px에서 측정했다. 18/18 모두 13px 미만 0, 본문 토큰 16px, 44px 미만 누름 0, active 100%, 가로 overflow 0, fixed overlap 0, 하단 clearance 80px다. 중앙값 13px은 참고값으로만 기록했다.
+- 승인 prototype과 실제 제품을 프로필 display와 건강 커버 display 각각 같은 390×844, scroll top 0, 이미지 완전 로드 상태로 대조했다. 픽셀 변화율은 프로필 21.53%, 커버 44.60%이며 fixture 데이터 차이 경계를 JSON에 함께 기록했다.
+- 현재 `web/src`는 staging deployment `dpl_2QeUAd65Qn4Tcfs9SvCuZaFWmbC3`의 S1 올바른 snapshot과 diff exit 0이다. S2 제품 소스 변경과 재배포가 없으므로 S1 04:03 전체 회귀 78파일 439/439를 재사용했다. E2E TypeScript 보강은 최종 `npx tsc --noEmit --pretty false` exit 0으로 확인했지만 empty-success stdout은 별도 로그 파일로 남기지 못했다.
+- 실패 이력은 MY-01 timeout 1회, PW-03 저장 완료 전 reload race 1회, PW-05 닫힌 context locator 로깅 1회다. 모두 테스트 계약·증거 수명 문제로 기존 E2E 안에서 고쳤고 동일 항목 3회 실패는 없었다.
+- 증거 허브는 `docs/qa/evidence/v2-goal-20261027/S2/index.html`, source manifest는 같은 폴더의 `source-manifest.json`이다. builder가 S2 PASS를 자가 선언하지 않으며 독립 qa-verifier 재검수 대기다. S1 보존, S3 미수정, production·운영 DB·과금·커밋·상태 파일 수정 없음.
+- 데모 허브는 headless Chromium으로 1회 렌더했다. 표시 이미지 19개가 모두 완전 로드됐고 console error 0, 가로 overflow 0, 상태 배지 `독립 QA 재검수 대기`를 확인했다.
+
+증거: `docs/qa/evidence/v2-goal-20261027/S2/logs/F3-MY-01-PW-03-attempt-3.log`, `F4-PW-04-PW-05-attempt-2.log`, `env-check.log`, `served-source-diff.log`, `captures/flow/`, `source-manifest.json`.
+
+> STAMP: 생성 2026-10-27 04:49 KST. 모델 gpt-codex(API model ID 미노출). 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 승인 prototype v3.0.0, staging Playwright·Supabase Auth/API/DB/Storage, 정본 mobile ergonomics 기준, S1 전체 회귀다. production 미반영, 독립 QA 재검수 대기.
+
+## 2026-10-27 S1 독립 QA 반려 보완, 재검수 PASS
+
+- 독립 QA의 QAS1-01~04를 대상으로 S1만 보완했다. `web/e2e/social-web-first.spec.ts`의 PW-02 한 실행에서 owner 로그인, 목표 관리 상단, 편집 입력, 저장, reload 제목 보존, 응원자 8명 preview, 18명 전개와 pill 18개 assertion을 연속 검증하고 단계별 PNG 6장을 남겼다.
+- 인증된 `/me/goal/{id}` 화면을 360·390·412·600·700·780·820·900·1000px에서 측정했다. 9폭 모두 13px 미만 글자 0, 본문 토큰 `.font-designer-14r` 16px, 44px 미만 누름 0, active coverage 100%(27개 규칙), 가로 overflow 0, 하단 clearance 80px다. 글자 중앙값 13px은 참고값이며 정본 판정 축이 아니다.
+- 승인 prototype과 staging을 같은 390×844 viewport, 같은 응원자 목록 전개 상태, 첫 card top 72px로 캡처했다. prototype은 11행, 실제 fixture는 18행이며 이름·횟수 데이터도 달라 픽셀 변화율은 22.14%, 평균 채널 차이는 10.42다. 이 데이터 차이를 숨기지 않고 manifest에 기록했다.
+- 응원자 pill의 기존 정합 수정과 실제 active 누락 보완은 유지했다. 정본에 없는 `median_font >= 16` 기준으로 이름·메시지·날짜를 16px로 키운 CSS 3곳은 기존 `text-label-small`·`text-meta-micro` 토큰으로 복구했다. 잘못된 snapshot `/private/tmp/haenael-s1-remediation-20261027-mCP7b6`은 staging alias에 연결하지 않았고 증거에서도 제외했다.
+- 올바른 snapshot을 Vercel preview `dpl_2QeUAd65Qn4Tcfs9SvCuZaFWmbC3`로 build·배포해 staging alias에 연결했다. health는 HTTP 정상, version 2.0.0, database ok, Supabase project `ezzklgotgydwxqebfoys`다. production 배포는 하지 않았다.
+- 기능 검증은 F1 PW-02 1/1, skip 0이다. F2 2/2는 독립 QA 통과 증거를 재사용했으며 인증 로직은 바뀌지 않았다. active CSS 변경 때문에 QA 계약과 전체 Vitest를 1회 재실행해 78파일 439/439를 통과했다.
+- F1 연속 실패는 1회다. 제품 결함이 아니라 정본과 충돌하는 median assertion을 새로 만든 테스트 계약 오류였다. 검사 범위를 축소한 것이 아니라 정본 `fontBelow13=0`과 본문 토큰 16px, tap·active·overflow·fixed-bottom 축으로 복원했다.
+- 공식 build-log 미기록은 이 항목으로 해소했다. 독립 qa-verifier가 현재 staging F1을 1회 재실행해 1/1 PASS, skip 0과 QAS1-01~04 해소를 확인했고 S1을 closed로 판정했다. 04 reload 캡처의 cover loading은 비차단 데모 품질 제한으로 기록했다. S2/S3, 상태 파일, 운영, 과금, 커밋은 건드리지 않았다.
+
+증거: `docs/qa/evidence/v2-goal-20261027/S1/logs/F1-PW-02-remediation-corrected.log`, `full-regression-remediation.log`, `staging-remediation-correct-deploy.log`, `staging-remediation-correct-alias.log`, `staging-remediation-health.json`, `captures/flow/`, `source-manifest.json`.
+
+> STAMP: 생성 2026-10-27 04:15 KST. 모델 gpt-codex(API model ID 미노출). 에이전트 code-builder. 스킬 haenael-supabase-build. 근거는 독립 QA 반려보고, 승인 prototype v3.0.0, 정본 mobile ergonomics 측정기, staging Playwright·Vercel build·Vitest 실측이다. 운영 미반영, builder 제출 시 독립 재검수 대기.
+
+> 독립 재검수 STAMP: 2026-10-27 04:23 KST. 모델 gpt-codex(API model ID 미노출). 에이전트 qa-verifier. 스킬 qa·review. 근거는 독립 F1, 캡처 01~08, source manifest, 정본 측정기, 회귀·배포 로그다. 판정 PASS, S1 closed, production 미반영.
+
 ## 2026-10-25 승인 프로토타입 v3 구현과 free staging 실제 검증
 
 - `docs/design/prototypes/social-viral-loop-v3-opus5.html`을 화면·상태의 SSOT로 삼아 목표 관리, 마이페이지, 친구 목록·상세, 초대, 공개 목표, 랜딩, 관리자 화면을 다시 맞췄다. 최종 독립 source review와 390px 승인본 9장 대 제품 9장 직접 대조는 신규 finding 0으로 종료됐다.

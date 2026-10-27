@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-10-25T01:18:26Z",
+  "source": "supabase status -o env and web/.env.local comparison",
+  "url_match": true,
+  "anon_match": true,
+  "service_role_present": true,
+  "public_env_present": true,
+  "target_ref_match": true,
+  "secrets_recorded": false
+}

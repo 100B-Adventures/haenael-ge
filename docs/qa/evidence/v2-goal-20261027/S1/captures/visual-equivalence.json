@@ -1,0 +1,32 @@
+{
+  "approved_state": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "aligned_element": "supporter list first card",
+    "aligned_top": 72,
+    "visible_supporter_rows": 11
+  },
+  "actual_state": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "aligned_element": "supporter list first card",
+    "aligned_top": 72,
+    "visible_supporter_rows": 18
+  },
+  "pixel_data": {
+    "width": 390,
+    "height": 844,
+    "total_pixels": 329160,
+    "changed_pixels": 72865,
+    "changed_ratio": 0.22136650868878358,
+    "mean_absolute_channel_delta": 10.421724996961963,
+    "max_channel_delta": 255,
+    "approved_sha256": "bf6839367bd492171d431b737e54ff6e9bc42ae183c320af9b4b9bf16b113df4",
+    "actual_sha256": "19eab5ea6b0a3de06f6e76713f8cc9a92d878ebb9e0903b44195bb32ae808913",
+    "interpretation": "동일 viewport·scroll·응원자 목록 영역이며 실제 fixture 데이터와 구현 표현 차이로 픽셀 동일성은 요구하지 않는다."
+  }
+}

@@ -762,6 +762,7 @@
   .goal-cover-picker { min-width: 0; }
   .goal-cover-picker-preview { position: relative; }
   .goal-cover-picker-preview .goal-cover--hero { height: 7.5rem; margin-bottom: 0; }
+  .goal-cover-picker-preview .goal-cover-mark { display: none; }
   .goal-cover-picker-toggle {
     position: absolute;
     right: var(--sp-2);
@@ -850,6 +851,8 @@
   .goal-management-actions > div > a,
   .goal-management-actions > div > button { display: flex; min-height: var(--tap-min-size); align-items: center; justify-content: center; gap: var(--sp-1); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--card); padding: var(--sp-2); color: var(--foreground); font-size: var(--text-label-small); font-weight: 850; text-align: center; text-decoration: none; }
   .goal-management-actions > div > .is-primary { border-color: var(--clover); color: var(--primary-foreground); background: var(--clover); }
+  .goal-management-actions > div > a:active,
+  .goal-management-actions > div > button:active { transform: scale(0.98); }
   .goal-management-actions svg { width: 1rem; height: 1rem; }
   .goal-close-button,
   .account-withdrawal-button { min-height: var(--tap-min-size); color: var(--destructive); font-size: var(--text-label-small); font-weight: 800; }
@@ -865,12 +868,14 @@
   .goal-supporter-row > div:nth-child(2) > strong { font-size: var(--text-label-small); }
   .goal-supporter-message { margin-top: var(--sp-1); color: var(--muted-color); font-size: var(--text-label-small); line-height: 1.45; }
   .goal-supporter-meta { display: grid; justify-items: end; gap: var(--sp-1); text-align: right; }
-  .goal-supporter-meta strong { color: var(--clover-ink); font-size: var(--text-label-small); }
+  .goal-supporter-meta strong { display: inline-flex; align-items: center; border-radius: 9999px; padding: 0.25rem 0.5625rem; color: var(--clover-ink); background: var(--clover-soft); font-size: var(--text-label-small); font-weight: 850; line-height: 1; white-space: nowrap; }
   .goal-supporter-meta small { color: var(--muted-color); font-size: var(--text-meta-micro); }
   .goal-supporter-summary,
   .goal-supporter-search-empty { padding: var(--sp-3); color: var(--muted-color); font-size: var(--text-label-small); text-align: center; }
   .goal-supporter-search-trigger,
   .goal-supporter-reset { display: grid; min-height: var(--tap-min-size); width: 100%; place-items: center; border-top: 1px solid var(--line); color: var(--clover-ink); font-size: var(--text-label-small); font-weight: 850; text-decoration: none; }
+  .goal-supporter-search-trigger:active,
+  .goal-supporter-reset:active { background: var(--clover-soft); }
   .goal-supporter-search-form { display: grid; gap: var(--sp-2); border-top: 1px solid var(--line); background: var(--muted); padding: var(--sp-3); }
   .goal-supporter-search-form label { color: var(--muted-color); font-size: var(--text-label-small); font-weight: 850; }
   .goal-supporter-search-form > div { display: flex; gap: var(--sp-2); }
@@ -1734,6 +1739,7 @@
   .wordmap-ambient,
   .wordmap-heart,
   .landing-preview-heart { animation: none; }
+  .wordmap-ambient { display: none; }
 }
 
 @keyframes wordmap-cloud-float {

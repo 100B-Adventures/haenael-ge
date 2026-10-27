@@ -1,0 +1,15 @@
+{
+  "http": "201",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "observed": [
+    {
+      "migration_count": 54,
+      "bio_exists": true,
+      "close_rpc_exists": true,
+      "withdrawal_rpc_exists": true,
+      "authenticated_can_activate_avatar": false,
+      "authenticated_can_write_image": false,
+      "authenticated_can_read_avatar_table": false
+    }
+  ]
+}

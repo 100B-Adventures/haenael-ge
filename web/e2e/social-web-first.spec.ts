@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import sharp from "sharp";
 import {
   type Browser,
   type BrowserContext,
@@ -129,6 +130,7 @@ async function captureApprovedPrototype(browser: Browser, evidenceDir: string) {
   try {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(pathToFileURL(prototypePath).href, { waitUntil: "load" });
+    await page.evaluate(() => document.documentElement.classList.remove("force-motion"));
     await page.addStyleTag({ content: cleanCss });
     for (const [label, screenId] of screens) {
       await page.evaluate((id) => {
@@ -252,6 +254,329 @@ async function captureApprovedPrototype(browser: Browser, evidenceDir: string) {
     await context.close();
   }
   return stateMetrics;
+}
+
+async function captureApprovedS1SupporterState(
+  browser: Browser,
+  capturePath: string,
+) {
+  const prototypePath = resolve(
+    process.cwd(),
+    "../docs/design/prototypes/social-viral-loop-v3-opus5.html",
+  );
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 1,
+  });
+  const page = await context.newPage();
+  try {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(pathToFileURL(prototypePath).href, { waitUntil: "load" });
+    await page.addStyleTag({ content: [
+      ".flowrail,.console,.review,.stagehint,.statusbar,.motionbar{display:none!important}",
+      "html,body{margin:0!important;padding:0!important;overflow:hidden!important;background:#fff!important}",
+      ".stage{padding:0!important;margin:0!important;gap:0!important}",
+      ".frame{border:0!important;border-radius:0!important;box-shadow:none!important}",
+    ].join("") });
+    await page.evaluate(() => {
+      const scope = globalThis as typeof globalThis & {
+        go: (screen: string) => void;
+        setMotionLoop?: (on: boolean) => void;
+        setState?: (state: string) => void;
+        expandCheers?: (button: HTMLButtonElement) => void;
+      };
+      scope.setMotionLoop?.(false);
+      scope.go("goaldetail");
+      scope.setState?.("normal");
+      const more = document.querySelector<HTMLButtonElement>(
+        '#goaldetail [data-view="normal"] .cheer-more button',
+      );
+      if (more) scope.expandCheers?.(more);
+    });
+    const frame = page.locator("#goaldetail .frame");
+    const list = frame.locator('[data-view="normal"] .card').first();
+    await expect(frame).toBeVisible();
+    await expect(list.locator(".fr")).toHaveCount(11);
+    await list.evaluate((element) => {
+      const frameElement = element.closest<HTMLElement>(".frame");
+      const scrollHost = frameElement?.querySelector<HTMLElement>(".app");
+      if (!scrollHost) throw new Error("prototype_scroll_host_missing");
+      const elementRect = element.getBoundingClientRect();
+      const hostRect = scrollHost.getBoundingClientRect();
+      scrollHost.scrollTop += elementRect.top - hostRect.top - 72;
+    });
+    await page.waitForTimeout(50);
+    const box = await frame.boundingBox();
+    expect(Math.round(box?.width ?? 0)).toBe(390);
+    expect(Math.round(box?.height ?? 0)).toBe(844);
+    await page.screenshot({ path: capturePath, animations: "disabled" });
+    return {
+      viewport: { width: 390, height: 844 },
+      aligned_element: "supporter list first card",
+      aligned_top: 72,
+      visible_supporter_rows: await list.locator(".fr:visible").count(),
+    };
+  } finally {
+    await context.close();
+  }
+}
+
+async function captureS2Step(
+  page: Page,
+  capturePath: string,
+  animations: "allow" | "disabled" = "disabled",
+) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await Promise.all(Array.from(document.images).map(async (image) => {
+      if (!image.complete) {
+        await new Promise<void>((done) => {
+          image.addEventListener("load", () => done(), { once: true });
+          image.addEventListener("error", () => done(), { once: true });
+        });
+      }
+      await image.decode().catch(() => undefined);
+    }));
+  });
+  await page.screenshot({ path: capturePath, animations });
+}
+
+async function captureApprovedS2State(
+  browser: Browser,
+  state: "mypage" | "goal-health",
+  capturePath: string,
+) {
+  const prototypePath = resolve(
+    process.cwd(),
+    "../docs/design/prototypes/social-viral-loop-v3-opus5.html",
+  );
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 1,
+  });
+  const page = await context.newPage();
+  try {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(pathToFileURL(prototypePath).href, { waitUntil: "load" });
+    await page.addStyleTag({ content: [
+      ".flowrail,.console,.review,.stagehint,.statusbar,.motionbar{display:none!important}",
+      "html,body{margin:0!important;padding:0!important;overflow:hidden!important;background:#fff!important}",
+      ".stage{padding:0!important;margin:0!important;gap:0!important}",
+      ".frame{border:0!important;border-radius:0!important;box-shadow:none!important}",
+    ].join("") });
+    await page.evaluate((requestedState) => {
+      const scope = globalThis as typeof globalThis & {
+        go: (screen: string) => void;
+        setMotionLoop?: (on: boolean) => void;
+        setState?: (state: string) => void;
+        setCover?: (targetId: string, key: string) => unknown;
+      };
+      scope.setMotionLoop?.(false);
+      scope.go(requestedState === "mypage" ? "mypage" : "goaldetail");
+      scope.setState?.("normal");
+      if (requestedState === "goal-health") {
+        scope.setCover?.("gdCover", "health");
+        const picker = document.getElementById("gdCoverPick");
+        if (picker) picker.style.display = "none";
+      }
+      const frame = document.querySelector<HTMLElement>(
+        `#${requestedState === "mypage" ? "mypage" : "goaldetail"} .frame`,
+      );
+      const scrollHost = frame?.querySelector<HTMLElement>(".app");
+      if (scrollHost) scrollHost.scrollTop = 0;
+    }, state);
+    const frame = page.locator(`#${state === "mypage" ? "mypage" : "goaldetail"} .frame`);
+    await expect(frame).toBeVisible();
+    await frame.evaluate(async (element) => {
+      await document.fonts.ready;
+      await Promise.all(Array.from(element.querySelectorAll("img")).map(async (image) => {
+        if (!image.complete) {
+          await new Promise<void>((done) => {
+            image.addEventListener("load", () => done(), { once: true });
+            image.addEventListener("error", () => done(), { once: true });
+          });
+        }
+        await image.decode().catch(() => undefined);
+      }));
+    });
+    const box = await frame.boundingBox();
+    expect(Math.round(box?.width ?? 0)).toBe(390);
+    expect(Math.round(box?.height ?? 0)).toBe(844);
+    await frame.screenshot({ path: capturePath, animations: "allow" });
+    return {
+      viewport: { width: 390, height: 844 },
+      state,
+      scroll_top: 0,
+      reduced_motion: true,
+      images_complete: await frame.locator("img").evaluateAll((images) =>
+        images.every((image) =>
+          (image as HTMLImageElement).complete &&
+          (image as HTMLImageElement).naturalWidth > 0
+        )
+      ),
+    };
+  } finally {
+    await context.close();
+  }
+}
+
+async function comparePngPixels(
+  approvedPath: string,
+  actualPath: string,
+  interpretation = "동일 viewport·scroll·응원자 목록 영역이며 실제 fixture 데이터와 구현 표현 차이로 픽셀 동일성은 요구하지 않는다.",
+) {
+  const [approved, actual] = await Promise.all([
+    sharp(approvedPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(actualPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+  expect(actual.info.width).toBe(approved.info.width);
+  expect(actual.info.height).toBe(approved.info.height);
+  let changedPixels = 0;
+  let absoluteChannelDelta = 0;
+  let maxChannelDelta = 0;
+  for (let offset = 0; offset < approved.data.length; offset += 4) {
+    let pixelChanged = false;
+    for (let channel = 0; channel < 4; channel += 1) {
+      const delta = Math.abs(approved.data[offset + channel] - actual.data[offset + channel]);
+      absoluteChannelDelta += delta;
+      maxChannelDelta = Math.max(maxChannelDelta, delta);
+      if (delta > 0) pixelChanged = true;
+    }
+    if (pixelChanged) changedPixels += 1;
+  }
+  const totalPixels = approved.info.width * approved.info.height;
+  return {
+    width: approved.info.width,
+    height: approved.info.height,
+    total_pixels: totalPixels,
+    changed_pixels: changedPixels,
+    changed_ratio: changedPixels / totalPixels,
+    mean_absolute_channel_delta: absoluteChannelDelta / (totalPixels * 4),
+    max_channel_delta: maxChannelDelta,
+    approved_sha256: createHash("sha256").update(readFileSync(approvedPath)).digest("hex"),
+    actual_sha256: createHash("sha256").update(readFileSync(actualPath)).digest("hex"),
+    interpretation,
+  };
+}
+
+async function measureCanonicalErgonomics(page: Page) {
+  return page.evaluate(() => {
+    const visible = (element: Element) => {
+      const node = element as HTMLElement;
+      const rect = node.getBoundingClientRect();
+      return node.offsetParent !== null && rect.width > 0 && rect.height > 0;
+    };
+    const textSizes = Array.from(document.querySelectorAll("body *"))
+      .filter((element) =>
+        visible(element) &&
+        !["SCRIPT", "STYLE", "SVG", "PATH"].includes(element.tagName) &&
+        Array.from(element.childNodes).some((node) =>
+          node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim())
+        )
+      )
+      .map((element) => Number.parseFloat(getComputedStyle(element).fontSize))
+      .sort((left, right) => left - right);
+    const taps = Array.from(document.querySelectorAll(
+      'a[href],button,[role="button"],input:not([type="hidden"]),select,textarea,summary,label[for]',
+    )).filter(visible);
+    const activeSelectors: string[] = [];
+    let activeRules = 0;
+    const walk = (rules: CSSRuleList) => {
+      for (const rule of Array.from(rules)) {
+        const selector = (rule as CSSStyleRule).selectorText ?? "";
+        if (selector.includes(":active")) {
+          activeRules += 1;
+          activeSelectors.push(...selector.split(",").map((item) =>
+            item.replaceAll(":active", "").trim()
+          ));
+        }
+        const nested = (rule as CSSGroupingRule).cssRules;
+        if (nested?.length) walk(nested);
+      }
+    };
+    for (const sheet of Array.from(document.styleSheets)) {
+      try {
+        walk(sheet.cssRules);
+      } catch {
+        // Cross-origin stylesheets are not part of the product contract.
+      }
+    }
+    const hasActiveRule = (element: Element) => activeSelectors.some((selector) => {
+      try {
+        return Boolean(selector) && element.matches(selector);
+      } catch {
+        return false;
+      }
+    });
+    const fixedElements = Array.from(document.querySelectorAll<HTMLElement>("body *"))
+      .filter((element) => visible(element) && getComputedStyle(element).position === "fixed");
+    const viewportTaps = taps.filter((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < innerHeight && rect.right > 0 && rect.left < innerWidth;
+    });
+    const fixedOverlapWithControls = viewportTaps.filter((tap) => {
+      if (fixedElements.some((fixed) => fixed.contains(tap))) return false;
+      const tapRect = tap.getBoundingClientRect();
+      return fixedElements.some((fixed) => {
+        const fixedRect = fixed.getBoundingClientRect();
+        return !(
+          tapRect.right <= fixedRect.left || fixedRect.right <= tapRect.left ||
+          tapRect.bottom <= fixedRect.top || fixedRect.bottom <= tapRect.top
+        );
+      });
+    }).length;
+    const tapBelow44 = taps.filter((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.width < 43.5 || rect.height < 43.5;
+    });
+    const fixedBottom = Array.from(document.querySelectorAll<HTMLElement>("body *"))
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        if (style.position !== "fixed" && style.position !== "sticky") return false;
+        const rect = element.getBoundingClientRect();
+        return rect.bottom >= innerHeight - 2 && rect.height > 24 && rect.height < innerHeight / 2;
+      });
+    const fixedBottomHeight = fixedBottom.reduce(
+      (height, element) => Math.max(height, element.getBoundingClientRect().height),
+      0,
+    );
+    const mainElement = document.querySelector("main") ?? document.body;
+    const bottomClearance = Math.max(
+      Number.parseFloat(getComputedStyle(document.body).paddingBottom) || 0,
+      Number.parseFloat(getComputedStyle(mainElement).paddingBottom) || 0,
+    );
+    const tokenProbe = document.createElement("span");
+    tokenProbe.className = "font-designer-14r";
+    tokenProbe.textContent = "x";
+    tokenProbe.style.position = "absolute";
+    tokenProbe.style.visibility = "hidden";
+    document.body.appendChild(tokenProbe);
+    const tokenBodyPx = Number.parseFloat(getComputedStyle(tokenProbe).fontSize);
+    tokenProbe.remove();
+    return {
+      route: location.pathname,
+      font_below_13: textSizes.filter((size) => size < 13).length,
+      median_font: textSizes[Math.floor(textSizes.length / 2)] ?? 0,
+      token_body_px: tokenBodyPx,
+      tap_below_44: tapBelow44.length,
+      tap_below_44_sample: tapBelow44.slice(0, 5).map((element) => ({
+        test_id: element.getAttribute("data-testid") ?? "",
+        label: (element.getAttribute("aria-label") ?? element.textContent ?? "").trim().slice(0, 40),
+      })),
+      active_ratio: taps.length ? taps.filter(hasActiveRule).length / taps.length : 1,
+      active_rules: activeRules,
+      active_missing: taps.filter((element) => !hasActiveRule(element)).map((element) => ({
+        test_id: element.getAttribute("data-testid") ?? "",
+        class_name: typeof element.className === "string" ? element.className.slice(0, 80) : "",
+        label: (element.getAttribute("aria-label") ?? element.textContent ?? "").trim().slice(0, 40),
+      })),
+      horizontal_overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      fixed_count: fixedElements.length,
+      fixed_overlap_with_controls: fixedOverlapWithControls,
+      fixed_bottom_height: fixedBottomHeight,
+      bottom_clearance: bottomClearance,
+    };
+  });
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ??
@@ -468,7 +793,9 @@ async function authContext(
 }
 
 test.describe("V2 web-first social slice", () => {
-  test.describe.configure({ mode: "serial" });
+  // Playwright config keeps this file on one worker. Individual failures must not
+  // suppress the remaining security cases, so do not use serial skip semantics.
+  test.describe.configure({ mode: "default" });
   test.skip(
     IS_STAGING ? process.env.RUN_STAGING_SUPABASE_E2E !== "1" : !process.env.RUN_LOCAL_SUPABASE_E2E,
     "RUN_LOCAL_SUPABASE_E2E 또는 staging 실행 플래그가 필요",
@@ -499,6 +826,7 @@ test.describe("V2 web-first social slice", () => {
   test.beforeAll(async () => {
     test.setTimeout(120_000);
     await assertStagingRuntime();
+    console.info("SOCIAL_RUN_NAMESPACE", JSON.stringify({ runId }));
     const warmup = await fetch(`${E2E_BASE_URL}/admin`);
     if (!warmup.ok) throw new Error(`admin_warmup_failed:${warmup.status}`);
     assertStagingGuards();
@@ -874,6 +1202,12 @@ test.describe("V2 web-first social slice", () => {
           delete from public.cheer where goal_id in (
             select id from public.goal where member_id in (${members})
           );
+          delete from public.goal_cover_asset
+          where owner_member_id in (${members})
+             or reviewed_by in (${members})
+             or goal_id in (
+               select id from public.goal where member_id in (${members})
+             );
           delete from public.admin_member where member_id in (${members});
           delete from public.member where id in (${members});
           delete from public.payment where id in (${payments});
@@ -942,6 +1276,34 @@ test.describe("V2 web-first social slice", () => {
         objectExists,
         expectedDelayed: queue.status !== "DONE",
       }));
+      if (objectExists) {
+        const { error: removeError } = await admin.storage.from("profile-avatars")
+          .remove([expected.objectPath]);
+        if (removeError) cleanupErrors.push(`profile-avatar-remove:${expected.queueId}:${removeError.message}`);
+      }
+      const { error: queueDeleteError } = await admin.from("storage_cleanup_queue")
+        .delete().eq("id", expected.queueId);
+      if (queueDeleteError) cleanupErrors.push(`profile-cleanup-queue-delete:${expected.queueId}:${queueDeleteError.message}`);
+      const { error: assetDeleteError } = await admin.from("profile_avatar_asset")
+        .delete().eq("id", expected.assetId);
+      if (assetDeleteError) cleanupErrors.push(`profile-avatar-asset-delete:${expected.assetId}:${assetDeleteError.message}`);
+      const [{ data: remainingQueue, error: remainingQueueError }, {
+        data: remainingAsset,
+        error: remainingAssetError,
+      }, { data: remainingObjects, error: remainingObjectsError }] = await Promise.all([
+        admin.from("storage_cleanup_queue").select("id").eq("id", expected.queueId).maybeSingle(),
+        admin.from("profile_avatar_asset").select("id").eq("id", expected.assetId).maybeSingle(),
+        admin.storage.from("profile-avatars").list(folder, { search: fileName }),
+      ]);
+      if (remainingQueueError || remainingQueue) {
+        cleanupErrors.push(`profile-cleanup-queue-remains:${expected.queueId}:${remainingQueueError?.message ?? "present"}`);
+      }
+      if (remainingAssetError || remainingAsset) {
+        cleanupErrors.push(`profile-avatar-asset-remains:${expected.assetId}:${remainingAssetError?.message ?? "present"}`);
+      }
+      if (remainingObjectsError || remainingObjects?.some((object) => object.name === fileName)) {
+        cleanupErrors.push(`profile-avatar-object-remains:${expected.objectPath}:${remainingObjectsError?.message ?? "present"}`);
+      }
     }
     for (const id of Object.values(ids)) {
       if (!id) continue;
@@ -984,6 +1346,16 @@ test.describe("V2 web-first social slice", () => {
     if (cleanupErrors.length) {
       throw new Error(`social fixture 정리 실패: ${cleanupErrors.join(" | ")}`);
     }
+    console.info("SOCIAL_FIXTURE_CLEANUP_ZERO", JSON.stringify({
+      runId,
+      databaseMemberGoalPaymentRows: 0,
+      authUsers: 0,
+      goalCoverPrivateObjects: 0,
+      goalCoverPublicObjects: 0,
+      profileAvatarQueues: 0,
+      profileAvatarAssets: 0,
+      profileAvatarObjects: 0,
+    }));
   });
 
   test("OPS-ALERT-01 관리자 화면이 ops_event 경보를 실제 수신한다", async ({ browser }) => {
@@ -1044,8 +1416,18 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("PW-02 목표 관리는 프로토타입 순서와 필드별 편집, 응원자 집계, 환전·관리 액션을 보존한다", async ({ browser }) => {
+    test.setTimeout(180_000);
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const captureDir = process.env.S1_DEMO_CAPTURE_DIR?.trim();
+    const captureStep = async (fileName: string) => {
+      if (!captureDir) return null;
+      mkdirSync(captureDir, { recursive: true });
+      const path = resolve(captureDir, fileName);
+      await page.screenshot({ path, animations: "disabled" });
+      return path;
+    };
     const consoleErrors: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "error") consoleErrors.push(message.text());
@@ -1059,6 +1441,8 @@ test.describe("V2 web-first social slice", () => {
     await expect(page.getByRole("button", { name: "응원 링크 복사" })).toBeVisible();
     await expect(page.getByRole("button", { name: "이 목표 종료하기" })).toBeVisible();
     await expect(page.getByTestId("open-goal-edit-sheet")).toBeVisible();
+    await page.evaluate(() => scrollTo(0, 0));
+    await captureStep("01-owner-goal-top-390.png");
     await page.getByRole("button", { name: "마감일 편집" }).click();
     await expect(page.getByTestId("edit-goal-due-date-input")).toBeVisible();
     await expect(page.getByTestId("edit-goal-title-input")).toHaveCount(0);
@@ -1066,14 +1450,38 @@ test.describe("V2 web-first social slice", () => {
     await page.getByTestId("open-goal-edit-sheet").click();
     await expect(page.getByTestId("edit-goal-title-input")).toBeVisible();
     await expect(page.getByTestId("edit-goal-due-date-input")).toHaveCount(0);
-    await page.getByRole("button", { name: "취소" }).click();
+    await captureStep("02-edit-sheet-open-390.png");
+    await page.getByTestId("edit-goal-title-input").fill("토익 950 넘길게");
+    await captureStep("03-edit-title-filled-390.png");
+    await page.getByTestId("save-goal-edit").click();
+    await expect(page.getByTestId("goal-edit-sheet")).toHaveCount(0);
+    await expect(page.getByTestId("goal-inline-title")).toContainText("토익 950 넘길게");
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("goal-management-page")).toBeVisible();
+    await expect(page.getByTestId("goal-inline-title")).toContainText("토익 950 넘길게");
+    await page.evaluate(() => scrollTo(0, 0));
+    await captureStep("04-saved-reloaded-title-390.png");
     await expect(page.getByTestId("goal-management-wordmap")).toBeVisible();
     await expect(page.getByTestId("goal-management-wordmap")).toContainText(
       /지금까지\s*18명이 이 단어들로 응원했어요/,
     );
     await expect(page.getByTestId("goal-supporter-item")).toHaveCount(8);
+    await page.getByTestId("goal-supporter-list").scrollIntoViewIfNeeded();
+    await captureStep("05-supporters-preview-8-390.png");
     await page.getByRole("button", { name: "응원 목록 펼치기" }).click();
     await expect(page.getByTestId("goal-supporter-item")).toHaveCount(18);
+    const supporterPills = page.getByTestId("goal-supporter-cheer-count");
+    await expect(supporterPills).toHaveCount(18);
+    // Grid item의 inline-flex는 CSS blockification으로 computed display가 flex가 된다.
+    await expect(supporterPills.first()).toHaveCSS("display", "flex");
+    await expect(supporterPills.first()).toHaveCSS("background-color", "rgb(231, 244, 236)");
+    await expect(supporterPills.first()).toHaveCSS("border-radius", "9999px");
+    await expect(supporterPills.first()).toHaveCSS("padding", "4px 9px");
+    await page.getByTestId("goal-supporter-list").evaluate((element) => {
+      scrollTo({ top: element.getBoundingClientRect().top + scrollY - 72 });
+    });
+    await page.waitForTimeout(50);
+    await captureStep("06-supporters-expanded-18-390.png");
     expect(await page.getByTestId("goal-details-card").evaluate((node, wordmap) =>
       Boolean(node.compareDocumentPosition(wordmap as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
     await page.getByTestId("goal-management-wordmap").elementHandle())).toBe(true);
@@ -1083,6 +1491,67 @@ test.describe("V2 web-first social slice", () => {
         document.documentElement.clientWidth
       ),
     ).toBe(0);
+    const screenshotPath = process.env.S1_DEMO_SCREENSHOT?.trim();
+    if (screenshotPath) {
+      mkdirSync(resolve(screenshotPath, ".."), { recursive: true });
+      await page.screenshot({ path: screenshotPath });
+    }
+    const viewportMetrics: Array<Record<string, unknown>> = [];
+    for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
+      await page.setViewportSize({ width, height: width <= 412 ? 844 : 900 });
+      await expect(page.getByTestId("goal-management-page")).toBeVisible();
+      await expect(page.getByTestId("goal-supporter-item")).toHaveCount(18);
+      const metrics = await measureCanonicalErgonomics(page);
+      console.info("S1_GOAL_ERGONOMICS", JSON.stringify({ width, ...metrics }));
+      expect(metrics.route).toBe(`/me/goal/${ownerGoal}`);
+      expect(metrics.font_below_13, `${width}px font <13`).toBe(0);
+      expect(metrics.token_body_px, `${width}px font-designer-14r`).toBeGreaterThanOrEqual(16);
+      expect(metrics.tap_below_44, `${width}px tap <44`).toBe(0);
+      expect(metrics.active_rules, `${width}px active rules`).toBeGreaterThanOrEqual(1);
+      expect(metrics.active_ratio, `${width}px active coverage`).toBeGreaterThanOrEqual(0.9);
+      expect(metrics.horizontal_overflow, `${width}px horizontal overflow`).toBe(0);
+      expect(
+        metrics.fixed_bottom_height === 0 ||
+        metrics.bottom_clearance >= metrics.fixed_bottom_height,
+        `${width}px fixed bottom clearance`,
+      ).toBe(true);
+      viewportMetrics.push({ width, ...metrics });
+    }
+    let visualComparison: Record<string, unknown> | null = null;
+    if (captureDir) {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.getByTestId("goal-supporter-list").evaluate((element) => {
+        scrollTo({ top: element.getBoundingClientRect().top + scrollY - 72 });
+      });
+      await page.waitForTimeout(50);
+      const approvedPath = resolve(captureDir, "07-approved-supporters-expanded-390.png");
+      const actualPath = resolve(captureDir, "08-staging-supporters-expanded-390.png");
+      const approvedState = await captureApprovedS1SupporterState(browser, approvedPath);
+      await page.screenshot({ path: actualPath, animations: "disabled" });
+      visualComparison = {
+        approved_state: approvedState,
+        actual_state: {
+          viewport: { width: 390, height: 844 },
+          aligned_element: "supporter list first card",
+          aligned_top: 72,
+          visible_supporter_rows: await page.getByTestId("goal-supporter-item").count(),
+        },
+        pixel_data: await comparePngPixels(approvedPath, actualPath),
+      };
+      writeFileSync(
+        resolve(captureDir, "../visual-equivalence.json"),
+        `${JSON.stringify(visualComparison, null, 2)}\n`,
+      );
+    }
+    console.info("S1_DEMO", JSON.stringify({
+      url: page.url(),
+      flow: "owner login -> goal top -> edit input -> save -> reload persisted -> supporters 8 -> supporters 18",
+      supporterCount: await supporterPills.count(),
+      screenshotPath: screenshotPath ?? null,
+      captureDir: captureDir ?? null,
+      viewportMetrics,
+      visualComparison,
+    }));
     expect(consoleErrors).toEqual([]);
     await context.close();
   });
@@ -1109,15 +1578,19 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("MY-01 마이페이지는 프로필, 목표, 친구 수, 업적, 소속감 큐와 활성 탭을 렌더한다", async ({ browser }) => {
+    test.setTimeout(IS_STAGING ? 180_000 : 120_000);
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
+    const s2CaptureDir = process.env.S2_DEMO_CAPTURE_DIR;
+    if (s2CaptureDir) mkdirSync(s2CaptureDir, { recursive: true });
     const consoleErrors: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
 
     await page.goto("/my");
+    await waitForVisualReady(page, ["[data-testid=my-page-overview]"]);
     await expect(page.getByTestId("my-page-overview")).toBeVisible();
     await expect(page.getByTestId("my-profile-summary")).toContainText("서연");
     await expect(page.getByTestId("my-profile-summary")).toContainText("친구 3명");
@@ -1125,6 +1598,30 @@ test.describe("V2 web-first social slice", () => {
     await expect(page.getByTestId("my-page-overview")).toContainText("윤도경");
     await expect(page.getByTestId("my-page-overview")).not.toContainText("주 연속");
     await expect(page.getByTestId("my-page-overview")).not.toContainText("번 함께");
+    const myViewportMetrics: Array<Record<string, unknown>> = [];
+    for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/my");
+      await waitForVisualReady(page, ["[data-testid=my-page-overview]"]);
+      const metrics = await measureCanonicalErgonomics(page);
+      console.info("S2_MY_ERGONOMICS", JSON.stringify({ width, ...metrics }));
+      expect(metrics.route).toBe("/my");
+      expect(metrics.font_below_13, `${width}px font below 13`).toBe(0);
+      expect(metrics.token_body_px, `${width}px body token`).toBeGreaterThanOrEqual(16);
+      expect(metrics.tap_below_44, `${width}px tap below 44`).toBe(0);
+      expect(metrics.active_ratio, `${width}px active coverage`).toBeGreaterThanOrEqual(0.9);
+      expect(metrics.horizontal_overflow, `${width}px overflow`).toBe(0);
+      expect(metrics.fixed_overlap_with_controls, `${width}px fixed overlap`).toBe(0);
+      expect(metrics.bottom_clearance, `${width}px bottom clearance`)
+        .toBeGreaterThanOrEqual(metrics.fixed_bottom_height);
+      myViewportMetrics.push({ width, ...metrics });
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/my");
+    await waitForVisualReady(page, ["[data-testid=my-page-overview]"]);
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/01-profile-initial-390.png`);
+    }
     const profileHitGeometry = await page.evaluate(() => {
       const name = document.querySelector<HTMLElement>(".my-profile-name-button");
       const bio = document.querySelector<HTMLElement>(".my-profile-bio-button");
@@ -1324,10 +1821,13 @@ test.describe("V2 web-first social slice", () => {
       if (friendBeforeError) throw friendBeforeError;
       await page.getByTestId("my-profile-summary").getByRole("button", { name: /서연/ }).click();
       await expect(page.locator(".my-profile-bio-button")).toHaveCount(0);
+      await page.getByRole("textbox", { name: "이름" }).fill("서연 QA");
       if (profileEvidenceDir) {
         await page.screenshot({ path: `${profileEvidenceDir}/dev-mypage-profile-name-edit-390.png` });
       }
-      await page.getByRole("textbox", { name: "이름" }).fill("서연 QA");
+      if (s2CaptureDir) {
+        await captureS2Step(page, `${s2CaptureDir}/02-profile-name-input-390.png`);
+      }
       await page.getByRole("button", { name: "저장" }).click();
       await expect(page.getByTestId("my-profile-summary").getByRole("button", { name: /서연 QA/ }))
         .toBeVisible();
@@ -1350,10 +1850,13 @@ test.describe("V2 web-first social slice", () => {
       });
       expect(bioEditGeometry.intersection).toBe(0);
       expect(bioEditGeometry.nameOwnsCenter).toBe(true);
+      await page.getByRole("textbox", { name: "한 줄 소개" }).fill("매일 조금씩 오래 가요");
       if (profileEvidenceDir) {
         await page.screenshot({ path: `${profileEvidenceDir}/dev-mypage-profile-bio-edit-390.png` });
       }
-      await page.getByRole("textbox", { name: "한 줄 소개" }).fill("매일 조금씩 오래 가요");
+      if (s2CaptureDir) {
+        await captureS2Step(page, `${s2CaptureDir}/03-profile-bio-input-390.png`);
+      }
       await page.getByRole("button", { name: "저장" }).click();
       await expect(page.getByRole("button", { name: /매일 조금씩 오래 가요/ })).toBeVisible();
       await page.getByRole("button", { name: "프로필 사진 바꾸기" }).click();
@@ -1363,6 +1866,9 @@ test.describe("V2 web-first social slice", () => {
       await expect(page.getByTestId("my-profile-summary")).toContainText("매일 조금씩 오래 가요");
       await expect(page.getByTestId("my-profile-summary").getByRole("img", { name: "서연 QA 프로필" }))
         .toHaveAttribute("src", /jimin\.png/);
+      if (s2CaptureDir) {
+        await captureS2Step(page, `${s2CaptureDir}/04-profile-saved-reloaded-390.png`);
+      }
       await page.getByRole("tab", { name: "보낸 응원" }).click();
       await expect(page.getByText("윤도경에게")).toBeVisible();
       await expect(page.getByText(/꾸준히/)).toBeVisible();
@@ -1375,10 +1881,10 @@ test.describe("V2 web-first social slice", () => {
             return false;
           }
         });
-        const png = Buffer.from(
-          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-          "base64",
-        );
+        const png = readFileSync(resolve(
+          process.cwd(),
+          "public/images/social-viral/dogyeong.png",
+        ));
         const finalizeResponsePromise = page.waitForResponse((response) => {
           if (!response.url().includes("/functions/v1/profile-update")) return false;
           try {
@@ -1403,6 +1909,9 @@ test.describe("V2 web-first social slice", () => {
         expect(finalizeBody.profile_image).toMatch(/profile-avatars/);
         await expect(page.getByTestId("my-profile-summary").getByRole("img", { name: "서연 QA 프로필" }))
           .toHaveAttribute("src", /profile-avatars/);
+        if (s2CaptureDir) {
+          await captureS2Step(page, `${s2CaptureDir}/05-profile-storage-finalized-390.png`);
+        }
         await page.getByRole("button", { name: "프로필 사진 바꾸기" }).click();
         const presetResponsePromise = page.waitForResponse((response) => {
           if (!response.url().includes("/functions/v1/profile-update")) return false;
@@ -1430,6 +1939,7 @@ test.describe("V2 web-first social slice", () => {
         });
         console.info("PROFILE_AVATAR_DELAYED_CLEANUP", JSON.stringify(delayedProfileCleanups.at(-1)));
       await page.reload();
+      await waitForVisualReady(page, ["[data-testid=my-profile-summary]"]);
       const [{ data: ownerProfileAfter, error: ownerAfterError }, {
         data: friendProfileAfter,
         error: friendAfterError,
@@ -1445,6 +1955,42 @@ test.describe("V2 web-first social slice", () => {
         profile_image: "/images/social-viral/jimin.png",
       });
       expect(friendProfileAfter).toEqual(friendProfileBefore);
+      let profileVisualComparison: Record<string, unknown> | null = null;
+      if (s2CaptureDir) {
+        await captureS2Step(page, `${s2CaptureDir}/06-profile-preset-restored-reloaded-390.png`);
+        const approvedPath = resolve(s2CaptureDir, "07-approved-mypage-display-390.png");
+        const approvedState = await captureApprovedS2State(browser, "mypage", approvedPath);
+        const actualPath = resolve(s2CaptureDir, "06-profile-preset-restored-reloaded-390.png");
+        profileVisualComparison = {
+          approved_state: approvedState,
+          actual_state: {
+            viewport: { width: 390, height: 844 },
+            state: "mypage-display",
+            scroll_top: 0,
+            images_complete: await page.locator("img").evaluateAll((images) =>
+              images.every((image) =>
+                (image as HTMLImageElement).complete &&
+                (image as HTMLImageElement).naturalWidth > 0
+              )
+            ),
+          },
+          pixel_data: await comparePngPixels(
+            approvedPath,
+            actualPath,
+            "동일 390x844·scroll top·프로필 display 상태다. prototype과 fixture의 이름·소개·사진·집계 데이터 차이를 픽셀 차이에 포함한다.",
+          ),
+        };
+        writeFileSync(
+          resolve(s2CaptureDir, "profile-visual-equivalence.json"),
+          `${JSON.stringify(profileVisualComparison, null, 2)}\n`,
+        );
+      }
+      console.info("S2_PROFILE_DEMO", JSON.stringify({
+        route: "/my",
+        flow: "profile initial -> name input/save -> bio input/save -> preset photo/save -> reload persisted -> real Storage avatar finalize -> preset restore/reload",
+        viewportMetrics: myViewportMetrics,
+        visualComparison: profileVisualComparison,
+      }));
       const longNickname = "서연의아주긴프로필이름이카드너비를넘지않는지확인";
       const { error: longNicknameError } = await admin.from("member")
         .update({ nickname: longNickname }).eq("id", ids.owner);
@@ -1479,8 +2025,12 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("PW-03 기존 c1 목표에서 건강 사진을 명시 선택하면 reload와 public 화면에 우선 적용된다", async ({ browser }) => {
+    test.setTimeout(IS_STAGING ? 180_000 : 120_000);
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const s2CaptureDir = process.env.S2_DEMO_CAPTURE_DIR;
+    if (s2CaptureDir) mkdirSync(s2CaptureDir, { recursive: true });
     await page.goto(`/me/goal/${ownerGoal}`);
     await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
     const coverToggle = page.locator(".goal-cover-picker-toggle");
@@ -1492,40 +2042,151 @@ test.describe("V2 web-first social slice", () => {
     await expect(coverToggle).toHaveAttribute("aria-expanded", "true");
     await expect(coverToggle).toHaveAccessibleName("선택 닫기");
     await expect(page.getByTestId("goal-cover-options")).toBeVisible();
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/08-cover-picker-open-390.png`);
+    }
     await page.getByRole("button", { name: /건강·식단/ }).click();
+    await expect(
+      page.getByTestId("goal-cover-picker").getByTestId("goal-cover").first(),
+    ).toHaveAttribute("data-preset", "health", { timeout: 15_000 });
     await page.reload();
+    await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
     await expect(
       page.getByTestId("goal-cover-picker").getByTestId("goal-cover").first(),
     ).toHaveAttribute("data-preset", "health");
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/09-cover-preset-saved-reloaded-390.png`);
+    }
+    const coverViewportMetrics: Array<Record<string, unknown>> = [];
+    for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(`/me/goal/${ownerGoal}`);
+      await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
+      const metrics = await measureCanonicalErgonomics(page);
+      console.info("S2_COVER_ERGONOMICS", JSON.stringify({ width, ...metrics }));
+      expect(metrics.route).toBe(`/me/goal/${ownerGoal}`);
+      expect(metrics.font_below_13, `${width}px font below 13`).toBe(0);
+      expect(metrics.token_body_px, `${width}px body token`).toBeGreaterThanOrEqual(16);
+      expect(metrics.tap_below_44, `${width}px tap below 44`).toBe(0);
+      expect(metrics.active_ratio, `${width}px active coverage`).toBeGreaterThanOrEqual(0.9);
+      expect(metrics.horizontal_overflow, `${width}px overflow`).toBe(0);
+      expect(metrics.fixed_overlap_with_controls, `${width}px fixed overlap`).toBe(0);
+      expect(metrics.bottom_clearance, `${width}px bottom clearance`)
+        .toBeGreaterThanOrEqual(metrics.fixed_bottom_height);
+      coverViewportMetrics.push({ width, ...metrics });
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/me/goal/${ownerGoal}`);
+    await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
+    await expect(page.locator(".goal-cover-picker-preview .goal-cover-mark")).toBeHidden();
+    await expect(page.getByTestId("wordmap").locator(".wordmap-heart")).toHaveCount(0);
+    await expect(page.getByTestId("wordmap").locator(".wordmap-ambient")).toHaveCount(5);
+    let coverVisualComparison: Record<string, unknown> | null = null;
+    if (s2CaptureDir) {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      const decorationBoundary = await page.evaluate(() => ({
+        reducedMotionMatches: matchMedia("(prefers-reduced-motion: reduce)").matches,
+        ownerCoverMarkDisplay: getComputedStyle(
+          document.querySelector<HTMLElement>(".goal-cover-picker-preview .goal-cover-mark")!,
+        ).display,
+        staticHeartCount: document.querySelectorAll("[data-testid=wordmap] .wordmap-heart").length,
+        ambient: Array.from(
+          document.querySelectorAll<HTMLElement>("[data-testid=wordmap] .wordmap-ambient"),
+        ).map((element) => ({
+          text: element.textContent,
+          display: getComputedStyle(element).display,
+          opacity: getComputedStyle(element).opacity,
+        })),
+        wordItems: Array.from(
+          document.querySelectorAll<HTMLElement>("[data-testid=wordmap] [data-wordmap-item]"),
+        ).map((element) => element.textContent?.trim()),
+      }));
+      expect(decorationBoundary.reducedMotionMatches).toBe(true);
+      expect(decorationBoundary.ownerCoverMarkDisplay).toBe("none");
+      expect(decorationBoundary.staticHeartCount).toBe(0);
+      expect(decorationBoundary.ambient).toHaveLength(5);
+      expect(decorationBoundary.ambient.every((item) => item.display === "none")).toBe(true);
+      console.info("S2_VISUAL_DECORATION_BOUNDARY", JSON.stringify(decorationBoundary));
+      const actualPath = resolve(s2CaptureDir, "10-cover-owner-health-display-390.png");
+      await captureS2Step(page, actualPath, "allow");
+      const approvedPath = resolve(s2CaptureDir, "11-approved-goal-health-display-390.png");
+      const approvedState = await captureApprovedS2State(browser, "goal-health", approvedPath);
+      coverVisualComparison = {
+        approved_state: approvedState,
+        actual_state: {
+          viewport: { width: 390, height: 844 },
+          state: "goal-health",
+          scroll_top: 0,
+          reduced_motion: true,
+          images_complete: await page.locator("img").evaluateAll((images) =>
+            images.every((image) =>
+              (image as HTMLImageElement).complete &&
+              (image as HTMLImageElement).naturalWidth > 0
+            )
+          ),
+        },
+        pixel_data: await comparePngPixels(
+          approvedPath,
+          actualPath,
+          "동일 390x844·scroll top·reduced-motion·건강 프리셋 display 상태다. prototype과 fixture의 제목·날짜·집계 데이터 차이를 픽셀 차이에 포함하며, 승인 motion particle DOM은 유지하되 reduced-motion에서는 숨긴다.",
+        ),
+      };
+      writeFileSync(
+        resolve(s2CaptureDir, "cover-visual-equivalence.json"),
+        `${JSON.stringify(coverVisualComparison, null, 2)}\n`,
+      );
+    }
     await page.goto(`/g/${publicSlug}`);
+    await waitForVisualReady(page, ["[data-testid=goal-public-page]", "[data-testid=goal-cover]"]);
     await expect(page.getByTestId("goal-public-page").getByTestId("goal-cover"))
       .toHaveAttribute("data-preset", "health");
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/12-cover-public-health-reflected-390.png`);
+    }
+    console.info("S2_COVER_DEMO", JSON.stringify({
+      ownerRoute: `/me/goal/${ownerGoal}`,
+      publicRoute: `/g/${publicSlug}`,
+      flow: "open picker -> choose health preset -> reload persisted -> public reflected",
+      viewportMetrics: coverViewportMetrics,
+      visualComparison: coverVisualComparison,
+    }));
     await context.close();
   });
 
   test("PW-04 custom upload finalize는 REVIEW 안내를 내고 기존 커버를 유지한다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const s2CaptureDir = process.env.S2_DEMO_CAPTURE_DIR;
+    if (s2CaptureDir) mkdirSync(s2CaptureDir, { recursive: true });
     await page.goto(`/me/goal/${ownerGoal}`);
+    await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
     await page.getByRole("button", { name: "배너 바꾸기" }).click();
     const currentCover = page.getByTestId("goal-cover-picker").getByTestId(
       "goal-cover",
     ).first();
     const initialPreset = await currentCover.getAttribute("data-preset");
     expect(initialPreset).toBeTruthy();
-    const png = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-      "base64",
-    );
+    const uploadedCover = readFileSync(resolve(
+      process.cwd(),
+      "public/images/v2-cover-presets/cover-health.jpg",
+    ));
     const signResponsePromise = page.waitForResponse((response) =>
       response.url().includes("/functions/v1/goal-cover-sign-upload")
     );
     await page.locator('input[type="file"]').setInputFiles({
-      name: "cover.png",
-      mimeType: "image/png",
-      buffer: png,
+      name: "cover-health.jpg",
+      mimeType: "image/jpeg",
+      buffer: uploadedCover,
     });
     await expect(page.getByTestId("goal-cover-upload-preview")).toBeVisible();
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/13-cover-upload-preview-390.png`);
+    }
+    const finalizeResponsePromise = page.waitForResponse((response) =>
+      response.url().includes("/functions/v1/goal-cover-finalize") &&
+      response.request().method() === "POST"
+    );
     await page.getByRole("button", { name: "이 사진으로 배너 만들기" }).click();
     const signResponse = await signResponsePromise;
     const signBody = await signResponse.json() as { upload_url?: string };
@@ -1535,8 +2196,48 @@ test.describe("V2 web-first social slice", () => {
     ).toBe(200);
     expect(signBody.upload_url).toBeTruthy();
     expect(new URL(signBody.upload_url!).origin).toBe(SUPABASE_URL);
+    const finalizeResponse = await finalizeResponsePromise;
+    expect(finalizeResponse.status()).toBe(200);
+    const finalizeBody = await finalizeResponse.json() as {
+      asset_id?: string;
+      status?: string;
+      active_cover_changed?: boolean;
+    };
+    expect(finalizeBody).toEqual(expect.objectContaining({
+      status: "REVIEW",
+      active_cover_changed: false,
+    }));
+    expect(finalizeBody.asset_id).toBeTruthy();
+    const { data: reviewAsset, error: reviewAssetError } = await admin
+      .from("goal_cover_asset")
+      .select("id,goal_id,owner_member_id,quarantine_path,status")
+      .eq("id", finalizeBody.asset_id!)
+      .single();
+    if (reviewAssetError) throw reviewAssetError;
+    expect(reviewAsset).toEqual(expect.objectContaining({
+      goal_id: ownerGoal,
+      owner_member_id: ids.owner,
+      status: "REVIEW",
+    }));
+    const { data: storedUpload, error: storedUploadError } = await admin.storage
+      .from("goal-cover-quarantine")
+      .download(reviewAsset.quarantine_path);
+    expect(storedUploadError).toBeNull();
+    expect(storedUpload?.size).toBe(uploadedCover.length);
     await expect(page.getByText(/검수 대기열/)).toBeVisible();
     await expect(currentCover).toHaveAttribute("data-preset", initialPreset!);
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/14-cover-review-status-390.png`);
+    }
+    console.info("S2_UPLOAD_REVIEW_DEMO", JSON.stringify({
+      route: `/me/goal/${ownerGoal}`,
+      signStatus: signResponse.status(),
+      finalizeStatus: finalizeResponse.status(),
+      assetId: finalizeBody.asset_id,
+      databaseStatus: reviewAsset.status,
+      quarantineBytes: storedUpload?.size ?? 0,
+      activeCoverChanged: finalizeBody.active_cover_changed,
+    }));
     await context.close();
   });
 
@@ -1801,7 +2502,133 @@ test.describe("V2 web-first social slice", () => {
     }
   });
 
-  test("QA-REVERIFY-FLOW-01 friendId와 목표 소유자가 다르면 실제 HTTP 404다", async ({ browser }) => {
+  test("QA-REVERIFY-FLOW-01A 초대 생성부터 친구 공개 목표 조회까지 실제 UI와 DB가 이어진다", async ({ browser }) => {
+    test.setTimeout(IS_STAGING ? 120_000 : 60_000);
+    const s3CaptureDir = process.env.S3_DEMO_CAPTURE_DIR;
+    const s3EvidenceStamp = process.env.S3_EVIDENCE_STAMP;
+    const captureS3 = async (page: Page, step: string, name: string) => {
+      if (!s3CaptureDir) return;
+      expect(s3EvidenceStamp, "S3 capture filename stamp is required").toMatch(/^\d{8}-\d{4}$/);
+      await page.addStyleTag({ content: "nextjs-portal{display:none!important}" });
+      await page.locator("img").evaluateAll(async (images) => {
+        await Promise.all(images.map((image) => {
+          const node = image as HTMLImageElement;
+          if (node.complete && node.naturalWidth > 0) return Promise.resolve();
+          return new Promise<void>((resolve) => {
+            node.addEventListener("load", () => resolve(), { once: true });
+            node.addEventListener("error", () => resolve(), { once: true });
+          });
+        }));
+      });
+      await page.screenshot({
+        path: `${s3CaptureDir}/haenael-s3-${step}-${name}-v1-gpt-codex-${s3EvidenceStamp}.png`,
+        fullPage: true,
+        animations: "disabled",
+      });
+    };
+
+    const [inviteLowId, inviteHighId] = [ids.owner, ids.acceptB].sort();
+    let ownerInviteContext: BrowserContext | null = null;
+    let acceptInviteContext: BrowserContext | null = null;
+    try {
+      ownerInviteContext = await authContext(browser, emails.owner);
+      await ownerInviteContext.grantPermissions(
+        ["clipboard-read", "clipboard-write"],
+        { origin: new URL(E2E_BASE_URL).origin },
+      );
+      const ownerInvitePage = await ownerInviteContext.newPage();
+      await ownerInvitePage.setViewportSize({ width: 390, height: 844 });
+      await ownerInvitePage.goto("/invite");
+      await waitForVisualReady(ownerInvitePage, ["[data-testid=friend-invite-card]"]);
+      await captureS3(ownerInvitePage, "01", "invite-create");
+      await ownerInvitePage.getByRole("button", { name: "초대 링크 복사" }).click();
+      await expect(ownerInvitePage.getByRole("status")).toHaveText("초대 링크를 복사했어요.");
+      const invitationUrl = await ownerInvitePage.evaluate(() => navigator.clipboard.readText());
+      const invitation = new URL(invitationUrl);
+      expect(invitation.origin).toBe(new URL(E2E_BASE_URL).origin);
+      expect(invitation.pathname).toMatch(/^\/invite\/[A-Za-z0-9_-]+$/);
+      await captureS3(ownerInvitePage, "02", "invite-link-created");
+
+      acceptInviteContext = await authContext(browser, emails.acceptB);
+      const acceptInvitePage = await acceptInviteContext.newPage();
+      await acceptInvitePage.setViewportSize({ width: 390, height: 844 });
+      const inviteResponse = await acceptInvitePage.goto(invitation.pathname);
+      expect(inviteResponse?.status()).toBe(200);
+      await waitForVisualReady(acceptInvitePage, ["[data-testid=invite-accept-card]"]);
+      await expect(acceptInvitePage.getByRole("button", { name: "초대 수락하고 함께하기" })).toBeVisible();
+      await captureS3(acceptInvitePage, "03", "invite-accept");
+      await Promise.all([
+        acceptInvitePage.waitForURL(/\/friends$/, { timeout: 30_000 }),
+        acceptInvitePage.getByRole("button", { name: "초대 수락하고 함께하기" }).click(),
+      ]);
+      const friendListReload = await acceptInvitePage.reload({ waitUntil: "commit" });
+      expect(friendListReload?.status()).toBe(200);
+      await expect(acceptInvitePage).toHaveURL(/\/friends$/);
+      await waitForVisualReady(acceptInvitePage, ["[data-testid=friend-goal-list]"]);
+      const [{ data: inviteConnection, error: inviteConnectionError }, {
+        data: acceptedInvite,
+        error: acceptedInviteError,
+      }, { data: currentOwnerGoal, error: currentOwnerGoalError }] = await Promise.all([
+        admin.from("friend_connection")
+          .select("id,status")
+          .eq("member_low_id", inviteLowId)
+          .eq("member_high_id", inviteHighId)
+          .single(),
+        admin.from("friend_invite")
+          .select("id,accepted_by,accepted_at")
+          .eq("accepted_by", ids.acceptB)
+          .order("accepted_at", { ascending: false })
+          .limit(1)
+          .single(),
+        admin.from("goal").select("title").eq("id", ownerGoal).single(),
+      ]);
+      expect(inviteConnectionError).toBeNull();
+      expect(inviteConnection?.status).toBe("ACTIVE");
+      expect(acceptedInviteError).toBeNull();
+      expect(acceptedInvite?.accepted_by).toBe(ids.acceptB);
+      expect(acceptedInvite?.accepted_at).toBeTruthy();
+      expect(currentOwnerGoalError).toBeNull();
+      expect(currentOwnerGoal?.title).toBeTruthy();
+      const expectedFriendGoalPath = `/friends/${ids.owner}?goal=${ownerGoal}`;
+      const ownerFriendCard = acceptInvitePage.getByTestId("friend-card")
+        .filter({ has: acceptInvitePage.locator(`[data-testid="friend-goal-link"][href="${expectedFriendGoalPath}"]`) });
+      await expect(ownerFriendCard).toHaveCount(1);
+      await expect(ownerFriendCard).toContainText(currentOwnerGoal!.title);
+      await captureS3(acceptInvitePage, "04", "friend-list");
+      const ownerGoalLink = ownerFriendCard.getByTestId("friend-goal-link");
+      await expect(ownerGoalLink).toHaveAttribute("href", expectedFriendGoalPath);
+      await Promise.all([
+        acceptInvitePage.waitForURL(
+          new RegExp(`/friends/${ids.owner}\\?goal=${ownerGoal}$`),
+          { timeout: 30_000 },
+        ),
+        ownerGoalLink.click(),
+      ]);
+      await expect(acceptInvitePage.getByTestId("friend-detail-page")).toBeVisible();
+      await expect(acceptInvitePage.getByTestId("friend-goal-detail")).toContainText(currentOwnerGoal!.title);
+      await captureS3(acceptInvitePage, "05", "friend-public-goal");
+      console.info("S3_INVITE_FRIEND_DEMO", JSON.stringify({
+        createRoute: "/invite",
+        acceptRoute: "/invite/{token}",
+        friendListRoute: "/friends",
+        friendGoalRoute: `/friends/${ids.owner}?goal=${ownerGoal}`,
+        inviteAccepted: true,
+        connectionStatus: inviteConnection?.status,
+        goalTitle: currentOwnerGoal?.title,
+        captureCount: s3CaptureDir ? 5 : 0,
+      }));
+    } finally {
+      await acceptInviteContext?.close();
+      await ownerInviteContext?.close();
+      await admin.from("friend_connection").delete()
+        .eq("member_low_id", inviteLowId)
+        .eq("member_high_id", inviteHighId);
+      await admin.from("friend_invite").delete().eq("accepted_by", ids.acceptB);
+    }
+  });
+
+  test("QA-REVERIFY-FLOW-01B friendId와 목표 소유자·공개 범위가 다르면 실제 HTTP 404다", async ({ browser }) => {
+    test.setTimeout(IS_STAGING ? 120_000 : 60_000);
     const [memberLowId, memberHighId] = [ids.owner, ids.acceptA].sort();
     await admin.from("friend_connection").upsert({
       member_low_id: memberLowId,
@@ -1809,10 +2636,17 @@ test.describe("V2 web-first social slice", () => {
       status: "ACTIVE",
       blocked_by_member_id: null,
     }, { onConflict: "member_low_id,member_high_id" });
+    let context: BrowserContext | null = null;
     try {
-      const context = await authContext(browser, emails.owner);
+      context = await authContext(browser, emails.owner);
       const page = await context.newPage();
-      await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`);
+      const detailResponse = await page.goto(
+        `/friends/${ids.friend}?goal=${friendPublicGoal}`,
+        { waitUntil: "commit" },
+      );
+      expect(detailResponse?.status()).toBe(200);
+      await expect(page).toHaveURL(new RegExp(`/friends/${ids.friend}\\?goal=${friendPublicGoal}$`));
+      await expect(page.getByTestId("friend-goal-detail")).toBeVisible();
       await page.getByRole("link", { name: "전체 보기 ›" }).click();
       await expect(page).toHaveURL(new RegExp(`/friends/${ids.friend}/wordmap\\?goal=${friendPublicGoal}$`));
       await expect(page.getByTestId("friend-wordmap-page")).toBeVisible();
@@ -1821,21 +2655,29 @@ test.describe("V2 web-first social slice", () => {
 
       const response = await page.goto(
         `/friends/${ids.acceptA}?goal=${friendPublicGoal}`,
+        { waitUntil: "commit" },
       );
       expect(response?.status()).toBe(404);
+      await expect(page).toHaveURL(new RegExp(`/friends/${ids.acceptA}\\?goal=${friendPublicGoal}$`));
+      await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
       await expect(page.getByTestId("friend-goal-detail")).toHaveCount(0);
       const wordmapMismatch = await page.goto(
         `/friends/${ids.acceptA}/wordmap?goal=${friendPublicGoal}`,
+        { waitUntil: "commit" },
       );
       expect(wordmapMismatch?.status()).toBe(404);
+      await expect(page).toHaveURL(new RegExp(`/friends/${ids.acceptA}/wordmap\\?goal=${friendPublicGoal}$`));
+      await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
       await expect(page.getByTestId("friend-wordmap-page")).toHaveCount(0);
 
       await admin.from("goal").update({ visibility: "PRIVATE" }).eq("id", friendPublicGoal);
       try {
         const privateWordmap = await page.goto(
           `/friends/${ids.friend}/wordmap?goal=${friendPublicGoal}`,
+          { waitUntil: "commit" },
         );
         expect(privateWordmap?.status()).toBe(404);
+        await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
         await expect(page.getByTestId("friend-wordmap-page")).toHaveCount(0);
       } finally {
         await admin.from("goal").update({ visibility: "PUBLIC" }).eq("id", friendPublicGoal);
@@ -1847,25 +2689,48 @@ test.describe("V2 web-first social slice", () => {
       try {
         const removedWordmap = await page.goto(
           `/friends/${ids.friend}/wordmap?goal=${friendPublicGoal}`,
+          { waitUntil: "commit" },
         );
         expect(removedWordmap?.status()).toBe(404);
+        await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
         await expect(page.getByTestId("friend-wordmap-page")).toHaveCount(0);
       } finally {
         await admin.from("friend_connection").update({ status: "ACTIVE" })
           .eq("member_low_id", ownerLowId).eq("member_high_id", ownerHighId);
       }
-      await context.close();
-
-      const anonymousPage = await newRemotePage(browser);
-      await anonymousPage.goto(`/friends/${ids.friend}/wordmap?goal=${friendPublicGoal}`);
-      expect(new URL(anonymousPage.url()).pathname).toBe("/");
-      await expect(anonymousPage.getByTestId("friend-wordmap-page")).toHaveCount(0);
-      await anonymousPage.close();
     } finally {
+      await context?.close();
       await admin.from("friend_connection").delete()
         .eq("member_low_id", memberLowId)
         .eq("member_high_id", memberHighId);
     }
+  });
+
+  test("QA-REVERIFY-FLOW-01C 비인증 친구 워드맵 요청은 HTTP 307 뒤 landing DOM으로 거부된다", async ({ page: anonymousPage }) => {
+    await routeStagingOriginWithoutToolbar(anonymousPage);
+    const route = `/friends/${ids.friend}/wordmap?goal=${friendPublicGoal}`;
+    const boundaryResponse = await anonymousPage.request.get(route, {
+      headers: { "x-vercel-skip-toolbar": "1" },
+      maxRedirects: 0,
+    });
+    expect(boundaryResponse.status()).toBe(307);
+    const location = boundaryResponse.headers().location;
+    expect(location).toBe(`/?next=${encodeURIComponent(route)}`);
+
+    const landingResponse = await anonymousPage.goto(route, { waitUntil: "commit" });
+    expect(landingResponse?.status()).toBe(200);
+    await expect(anonymousPage).toHaveURL(new URL(location!, E2E_BASE_URL).href);
+    await expect(anonymousPage.locator("main")).toBeVisible();
+    await expect(anonymousPage.getByTestId("receiver-bottom-nav")).toBeVisible();
+    await expect(anonymousPage.getByTestId("friend-wordmap-page")).toHaveCount(0);
+    console.info("S3_ANON_REDIRECT_EVIDENCE", JSON.stringify({
+      route,
+      boundaryStatus: boundaryResponse.status(),
+      location,
+      landingStatus: landingResponse?.status(),
+      finalUrl: anonymousPage.url(),
+      forbiddenDomCount: await anonymousPage.getByTestId("friend-wordmap-page").count(),
+    }));
   });
 
   test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
@@ -2309,8 +3174,8 @@ test.describe("V2 web-first social slice", () => {
       await expect(cashoutQueue).toContainText("소영 · QA ••••••1234");
       await expect(cashoutQueue).toContainText("도윤 · QA ••••••1234");
       await expect(cashoutCards).toContainText(["지급 예정", "지급 예정"]);
-      await expect(adminPage.getByRole("button", { name: "지급 완료" })).toHaveCount(2);
-      await expect(adminPage.getByRole("button", { name: "반려", exact: true })).toHaveCount(2);
+      await expect(cashoutCards.getByRole("button", { name: "지급 완료" })).toHaveCount(2);
+      await expect(cashoutCards.getByRole("button", { name: "반려", exact: true })).toHaveCount(2);
       const memberSection = adminPage.getByTestId("admin-members-section");
       const ledgerSection = adminPage.getByTestId("admin-ledger-section");
       const memberCards = memberSection.locator(":scope > .admin-record-list > .admin-member-card");
@@ -2345,6 +3210,8 @@ test.describe("V2 web-first social slice", () => {
 
   test("PW-05 admin 승인 후 owner와 public 화면에 승인 커버만 보인다", async ({ browser }) => {
     test.setTimeout(IS_STAGING ? 120_000 : 60_000);
+    const s2CaptureDir = process.env.S2_DEMO_CAPTURE_DIR;
+    if (s2CaptureDir) mkdirSync(s2CaptureDir, { recursive: true });
     const { count: pendingCount } = await admin.from("goal_cover_asset")
       .select("id", { head: true, count: "exact" })
       .eq("goal_id", ownerGoal)
@@ -2362,12 +3229,12 @@ test.describe("V2 web-first social slice", () => {
       await expect(coverToggle).toHaveAttribute("aria-expanded", "true");
       await expect(ownerPage.getByTestId("goal-cover-options")).toBeVisible();
       await ownerPage.locator('input[type="file"]').setInputFiles({
-        name: "cover-for-review.png",
-        mimeType: "image/png",
-        buffer: Buffer.from(
-          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-          "base64",
-        ),
+        name: "cover-for-review.jpg",
+        mimeType: "image/jpeg",
+        buffer: readFileSync(resolve(
+          process.cwd(),
+          "public/images/v2-cover-presets/cover-health.jpg",
+        )),
       });
       await expect(ownerPage.getByTestId("goal-cover-upload-preview")).toBeVisible();
       const finalizeResponse = ownerPage.waitForResponse((response) =>
@@ -2389,7 +3256,7 @@ test.describe("V2 web-first social slice", () => {
     }
     const { data: reviewAssets, error: reviewAssetsError } = await admin
       .from("goal_cover_asset")
-      .select("id,quarantine_path,status")
+      .select("id,quarantine_path,status,goal_id,owner_member_id")
       .eq("goal_id", ownerGoal)
       .eq("status", "REVIEW")
       .order("created_at", { ascending: false })
@@ -2397,7 +3264,21 @@ test.describe("V2 web-first social slice", () => {
     if (reviewAssetsError) throw reviewAssetsError;
     const reviewAsset = reviewAssets?.[0];
     expect(reviewAsset?.status).toBe("REVIEW");
+    expect(reviewAsset?.goal_id).toBe(ownerGoal);
+    expect(reviewAsset?.owner_member_id).toBe(ids.owner);
     expect(reviewAsset?.quarantine_path).toBeTruthy();
+    const { data: reviewGoal, error: reviewGoalError } = await admin
+      .from("goal")
+      .select("title")
+      .eq("id", ownerGoal)
+      .single();
+    if (reviewGoalError) throw reviewGoalError;
+    const { data: reviewOwner, error: reviewOwnerError } = await admin
+      .from("member")
+      .select("nickname")
+      .eq("id", ids.owner)
+      .single();
+    if (reviewOwnerError) throw reviewOwnerError;
     const { data: reviewSource, error: reviewSourceError } = await admin.storage
       .from("goal-cover-quarantine")
       .download(reviewAsset!.quarantine_path);
@@ -2405,22 +3286,104 @@ test.describe("V2 web-first social slice", () => {
     expect(reviewSource?.size).toBeGreaterThan(0);
     const context = await authContext(browser, emails.admin);
     const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/admin");
-    await expect(page.getByTestId("goal-cover-review-queue")).toBeVisible();
-    const ownerReviewCard = page.locator("[data-testid=goal-cover-review-queue] article")
-      .filter({ hasText: "토익 900 넘길게" });
+    await waitForVisualReady(page, ["[data-testid=goal-cover-review-queue]"]);
+    const reviewQueue = page.getByTestId("goal-cover-review-queue");
+    await expect(reviewQueue).toBeVisible();
+    const ownerReviewCard = reviewQueue.locator("article").filter({
+      has: page.getByText(reviewGoal.title, { exact: true }),
+    });
     await expect(ownerReviewCard).toHaveCount(1);
+    await ownerReviewCard.scrollIntoViewIfNeeded();
+    await expect(ownerReviewCard.getByText(reviewGoal.title, { exact: true })).toBeVisible();
+    await expect(ownerReviewCard).toContainText(reviewOwner.nickname);
+    const approveButton = ownerReviewCard.getByRole("button", { name: "승인" });
+    await expect(approveButton).toBeVisible();
+    const reviewCardBox = await ownerReviewCard.boundingBox();
+    expect(reviewCardBox).not.toBeNull();
+    expect(reviewCardBox!.y).toBeGreaterThanOrEqual(0);
+    expect(reviewCardBox!.y + reviewCardBox!.height).toBeLessThanOrEqual(844);
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/15-admin-review-queue-390.png`);
+    }
+    console.info("S2_ADMIN_REVIEW_TARGET", JSON.stringify({
+      goalId: reviewAsset!.goal_id,
+      assetId: reviewAsset!.id,
+      ownerMemberId: reviewAsset!.owner_member_id,
+      goalTitle: reviewGoal.title,
+      ownerNickname: reviewOwner.nickname,
+      approvalCtaVisible: await approveButton.isVisible(),
+    }));
     const reviewResponse = page.waitForResponse((response) =>
       response.url().includes("/functions/v1/admin-review-goal-cover")
     );
-    await ownerReviewCard.getByRole("button", { name: "승인" }).click();
+    await approveButton.click();
     const response = await reviewResponse;
     const responseBody = await response.text();
     expect(response.ok(), `admin review ${response.status()} ${responseBody}`)
       .toBe(true);
     await expect(page.getByText("검수 대기 커버가 없습니다.")).toBeVisible();
+    const { data: approvedAsset, error: approvedAssetError } = await admin
+      .from("goal_cover_asset")
+      .select("id,status,public_path,goal_id")
+      .eq("id", reviewAsset!.id)
+      .single();
+    if (approvedAssetError) throw approvedAssetError;
+    expect(approvedAsset).toEqual(expect.objectContaining({
+      status: "APPROVED",
+      goal_id: ownerGoal,
+    }));
+    expect(approvedAsset.public_path).toBeTruthy();
+    const { data: approvedGoal, error: approvedGoalError } = await admin
+      .from("goal")
+      .select("active_cover_asset_id")
+      .eq("id", ownerGoal)
+      .single();
+    if (approvedGoalError) throw approvedGoalError;
+    expect(approvedGoal.active_cover_asset_id).toBe(reviewAsset!.id);
+    const { data: publicStoredCover, error: publicStoredCoverError } = await admin.storage
+      .from("goal-cover-public")
+      .download(approvedAsset.public_path!);
+    expect(publicStoredCoverError).toBeNull();
+    expect(publicStoredCover?.size).toBeGreaterThan(0);
+    const ownerContext = await authContext(browser, emails.owner);
+    const ownerPage = await ownerContext.newPage();
+    await ownerPage.setViewportSize({ width: 390, height: 844 });
+    await ownerPage.goto(`/me/goal/${ownerGoal}`);
+    await waitForVisualReady(ownerPage, ["[data-testid=goal-cover-picker]", "[data-testid=goal-cover] img"]);
+    const ownerApprovedImage = ownerPage.getByTestId("goal-cover-picker")
+      .getByTestId("goal-cover").first().getByRole("img", { name: /목표 커버/ });
+    await expect(ownerApprovedImage).toHaveAttribute("src", /goal-cover-public/);
+    if (s2CaptureDir) {
+      await captureS2Step(ownerPage, `${s2CaptureDir}/16-owner-approved-cover-390.png`);
+    }
+    const ownerImageLoaded = await ownerApprovedImage.evaluate((image) =>
+      (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0
+    );
+    await ownerContext.close();
     await page.goto(`/g/${publicSlug}`);
-    await expect(page.getByRole("img", { name: /목표 커버/ })).toBeVisible();
+    await waitForVisualReady(page, ["[data-testid=goal-public-page]", "[data-testid=goal-cover] img"]);
+    const publicApprovedImage = page.getByTestId("goal-public-page")
+      .getByTestId("goal-cover").getByRole("img", { name: /목표 커버/ });
+    await expect(publicApprovedImage).toHaveAttribute("src", /goal-cover-public/);
+    if (s2CaptureDir) {
+      await captureS2Step(page, `${s2CaptureDir}/17-public-approved-cover-390.png`);
+    }
+    console.info("S2_ADMIN_APPROVAL_DEMO", JSON.stringify({
+      adminRoute: "/admin",
+      ownerRoute: `/me/goal/${ownerGoal}`,
+      publicRoute: `/g/${publicSlug}`,
+      reviewStatus: "REVIEW",
+      approvedStatus: approvedAsset.status,
+      activeCoverAssetId: approvedGoal.active_cover_asset_id,
+      publicPath: approvedAsset.public_path,
+      publicStorageBytes: publicStoredCover?.size ?? 0,
+      ownerImageLoaded,
+      publicImageLoaded: await publicApprovedImage.evaluate((image) =>
+        (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0
+      ),
+    }));
     await context.close();
   });
 

@@ -1,0 +1,230 @@
+{
+  "captured_at": "2026-10-25T03:48:42.788Z",
+  "prototype": "docs/design/prototypes/social-viral-loop-v3-opus5.html",
+  "prototype_sha256": "afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a",
+  "viewport_css": {
+    "width": 390,
+    "height": 844
+  },
+  "device_scale_factor": 3,
+  "output_physical": {
+    "width": 1170,
+    "height": 2532
+  },
+  "clean_export_css": ".flowrail,.console,.review,.stagehint,.statusbar,.motionbar{display:none!important}.frame{border:0!important;border-radius:0!important;box-shadow:none!important}body{padding-left:0!important}.stage{padding:0!important;margin:0!important;gap:0!important}",
+  "states": [
+    {
+      "label": "goal-detail",
+      "screen_id": "goaldetail",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "goaldetail",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": {
+          "why": {
+            "x": 22,
+            "y": 249.296875,
+            "width": 346,
+            "height": 20.296875
+          },
+          "label": {
+            "x": 22,
+            "y": 293.59375,
+            "width": 346,
+            "height": 15
+          },
+          "count": {
+            "x": 22,
+            "y": 312.59375,
+            "width": 346,
+            "height": 24
+          },
+          "wordmap": {
+            "x": 22,
+            "y": 346.59375,
+            "width": 346,
+            "height": 236
+          },
+          "why_to_label": 24,
+          "label_to_count": 4,
+          "count_to_wordmap": 10,
+          "why_font_weight": "400",
+          "label_margin": "24px 0px 4px",
+          "count_margin": "2px 0px 0px",
+          "wordmap_margin": "10px 0px 0px"
+        }
+      }
+    },
+    {
+      "label": "mypage",
+      "screen_id": "mypage",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "mypage",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": null
+      }
+    },
+    {
+      "label": "friends",
+      "screen_id": "friends",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "friends",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": null
+      }
+    },
+    {
+      "label": "belong",
+      "screen_id": "belong",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "belong",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": null
+      }
+    },
+    {
+      "label": "connect",
+      "screen_id": "connect",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "connect",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": null
+      }
+    },
+    {
+      "label": "inviteaccept",
+      "screen_id": "inviteaccept",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "inviteaccept",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": {
+          "x": 22,
+          "y": 60,
+          "width": 346,
+          "height": 692
+        },
+        "invite_accept_cover_rect": {
+          "x": 22,
+          "y": 211.921875,
+          "width": 346,
+          "height": 128
+        },
+        "goal_detail_geometry": null
+      }
+    },
+    {
+      "label": "landing",
+      "screen_id": "landing",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "landing",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": null
+      }
+    },
+    {
+      "label": "goalpublic",
+      "screen_id": "goalpublic",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "goalpublic",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": "none",
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": null
+      }
+    },
+    {
+      "label": "cover-review",
+      "screen_id": "admin",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "screen_id": "admin",
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null,
+        "goal_detail_geometry": null
+      }
+    }
+  ]
+}

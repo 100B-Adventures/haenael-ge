@@ -1,0 +1,164 @@
+[
+  {
+    "screen": "goal-detail",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-goal-detail-390.png",
+        "sha256": "1e23dd32bf594110d0c4de5b0fe62ee834bd918c9ab5f0e285541ed584145874"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-goal-detail-390.png",
+        "sha256": "2df0afce0c9a64b95d10f5dffac3e29e9dcdce697199b74c533ef72fc39e9527"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "mypage",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-mypage-390.png",
+        "sha256": "5a13f6f137917eed1850b7bcbf897b7433f9ea9e38b3c57c8c8f8d0146608d67"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-mypage-390.png",
+        "sha256": "b0c2f3177e40d0312680aadc9037d120facc37095b86aeb18430ff1ae40a4f84"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "friends",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-friends-390.png",
+        "sha256": "35d95937f229e6dbdd26fcfe76e171cb4b1925754b5f9be239a945f9f749fac2"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-friends-390.png",
+        "sha256": "0133c1a34531b2c6192b6f1fe48c697ac209ee038837594514867160590fca30"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "belong",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-belong-390.png",
+        "sha256": "46865895ce06b7ab3c8efe11d3bade867333dc3ca4b7de5d96f531d5f8b921e2"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-belong-390.png",
+        "sha256": "59d257b97ae9017b94ba2c0bee5e20b2abd5400741ae0a713b2603a8f01856ac"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "connect",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-connect-390.png",
+        "sha256": "54b1a7bf28460d4b1850a4decada8ca2da91adb6abbddd95e22b1ee0c9e7b200"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-connect-390.png",
+        "sha256": "ee8c4a21b325ba9d03ea732b360ed62736b5d1d197f0c41f1debb47406d48db9"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "inviteaccept",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-inviteaccept-390.png",
+        "sha256": "c18baa111f0e76eb9a5ee8408a82f55d47dda9fe33ba9f3cc94faba52b1eebb7"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-inviteaccept-390.png",
+        "sha256": "4a7a7ee4c71ee5bf57a1337c296d9d8f05efcb3274bce23d4c216eac26ad4c7f"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "landing",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-landing-390.png",
+        "sha256": "45c0233b0cf322dda23036e569bd08534a0f07aeb7bdf2c28b7db50874266c3d"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-landing-390.png",
+        "sha256": "99adf9e6868fbd98f6139878bbf39af668da48b3689661bef8733b7a48455d6e"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "goalpublic",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-goalpublic-390.png",
+        "sha256": "44ca5a4f74171938795f5a80e3abc2e63d41171917c7c4fce58fe9dbefbb3af9"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-goalpublic-390.png",
+        "sha256": "0d6ef7f6de574256da7f5814dde99cd2d273b6d1b948d3f41cccf5cee90dcc7a"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  },
+  {
+    "screen": "cover-review",
+    "dimensions_per_side": [
+      1170,
+      2532
+    ],
+    "sources": [
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/approved-cover-review-390.png",
+        "sha256": "c4e4752f2c948af42db259e25a4a7bcd8bc6a360ae411655308b3f1cb8de982a"
+      },
+      {
+        "path": "docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-123603/dev-cover-review-390.png",
+        "sha256": "b8ad9e73b00df583bfc138cd9e7f427d20ebc5f9b242507ed9f0963a5548347f"
+      }
+    ],
+    "operation": "raw side-by-side paste, no scaling or source changes"
+  }
+]

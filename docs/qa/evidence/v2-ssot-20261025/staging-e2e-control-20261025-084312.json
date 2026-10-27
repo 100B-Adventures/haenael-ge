@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-10-25T08:43:12+0900",
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "temporary_payments_enabled_status": 201,
+  "test_exit_code": 1,
+  "restored_payments_disabled_status": 201,
+  "payments_disabled_smoke": {
+    "status": 503,
+    "body": {
+      "error": {
+        "code": "payments_disabled",
+        "message": "응원 결제를 준비하고 있습니다."
+      }
+    }
+  },
+  "finished_at": "2026-10-25T08:44:11+0900"
+}

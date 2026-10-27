@@ -1,0 +1,180 @@
+{
+  "captured_at": "2026-10-25T01:19:48.091Z",
+  "prototype": "docs/design/prototypes/social-viral-loop-v3-opus5.html",
+  "prototype_sha256": "afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a",
+  "viewport_css": {
+    "width": 390,
+    "height": 844
+  },
+  "device_scale_factor": 3,
+  "output_physical": {
+    "width": 1170,
+    "height": 2532
+  },
+  "clean_export_css": ".flowrail,.console,.review,.stagehint,.statusbar,.motionbar{display:none!important}.frame{border:0!important;border-radius:0!important;box-shadow:none!important}body{padding-left:0!important}.stage{padding:0!important;margin:0!important;gap:0!important}",
+  "states": [
+    {
+      "label": "goal-detail",
+      "screen_id": "goaldetail",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    },
+    {
+      "label": "mypage",
+      "screen_id": "mypage",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    },
+    {
+      "label": "friends",
+      "screen_id": "friends",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    },
+    {
+      "label": "belong",
+      "screen_id": "belong",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    },
+    {
+      "label": "connect",
+      "screen_id": "connect",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    },
+    {
+      "label": "inviteaccept",
+      "screen_id": "inviteaccept",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": {
+          "x": 22,
+          "y": 60,
+          "width": 346,
+          "height": 692
+        },
+        "invite_accept_cover_rect": {
+          "x": 22,
+          "y": 211.921875,
+          "width": 346,
+          "height": 128
+        }
+      }
+    },
+    {
+      "label": "landing",
+      "screen_id": "landing",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    },
+    {
+      "label": "goalpublic",
+      "screen_id": "goalpublic",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": "none",
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    },
+    {
+      "label": "cover-review",
+      "screen_id": "admin",
+      "scroll_top": 0,
+      "menu": "closed",
+      "teaser": "closed",
+      "motion": "reduced-fixed",
+      "count": "final",
+      "computed": {
+        "opacity": "1",
+        "transform": "none",
+        "goal_public_sheet_display": null,
+        "visible_overlays": [],
+        "invite_accept_card_rect": null,
+        "invite_accept_cover_rect": null
+      }
+    }
+  ]
+}

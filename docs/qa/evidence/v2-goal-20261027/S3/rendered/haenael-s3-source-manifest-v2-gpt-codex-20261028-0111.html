@@ -1,0 +1,110 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>S3 source manifest v2</title><style>body{margin:0;background:#f5f7f4;color:#17372b;font:15px/1.6 system-ui}main{max-width:1100px;margin:32px auto;padding:0 20px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;border:1px solid #dbe7df;border-radius:16px;padding:20px;box-shadow:0 8px 28px #17372b0a;font:13px/1.55 ui-monospace,SFMono-Regular,monospace}a{color:#14613a}</style></head><body><main><p><a href="../index.html">← S3 데모 허브</a></p><h1>S3 source manifest v2</h1><pre>{
+  "generated_at": "2026-10-28T01:13:26+09:00",
+  "scope": "S3",
+  "status": "verification_pass_independent_qa_pending",
+  "approved_prototype": {
+    "path": "docs/design/prototypes/social-viral-loop-v3-opus5.html",
+    "version": "3.0.0",
+    "sha256": "afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a"
+  },
+  "staging": {
+    "alias": "https://haenael-ge-v2-staging-100-b.vercel.app",
+    "deployment_id": "dpl_8vUvNNqSBhBa2cJ98bnMrRxKNt58",
+    "supabase_project_ref": "ezzklgotgydwxqebfoys",
+    "production_deployed": false
+  },
+  "served_source_identity": {
+    "repository_head_observed": "0f1cd23f92807cedb8aafc9c700d07ec69e6f22f",
+    "product_source_same_as_s2_final_staging": true,
+    "same_source_basis": "S2 final staging snapshot versus current product files had diff exit 0, and the S3 work changed only web/e2e/social-web-first.spec.ts plus evidence documents.",
+    "e2e_sha256": "a5b18a71ed2e3601ed2f29a5e427e5e7ec85c354c0f50a80c76b462598922234",
+    "product_sources": [
+      {
+        "path": "web/src/app/globals.css",
+        "sha256": "8e0164e0407c67fa8e8bf195308150b52a290bc286853b8c684df78d3966db78"
+      },
+      {
+        "path": "web/src/components/goal/Wordmap.tsx",
+        "sha256": "a4dfd05076ff5c11b3722c5bfec9dc93003cb283748bbd113e304eabcfe55b4a"
+      }
+    ]
+  },
+  "verification": {
+    "f5": {
+      "result": "7 passed, 0 failed, 0 skipped",
+      "exit_code": 0,
+      "evidence": "logs/haenael-s3-f5-verify-v7-gpt-codex-20261027-1627.log",
+      "sha256": "3f1aefbcb92dc506db207ef662546f87ca049a3624b66ab15edb62f4c873a900"
+    },
+    "f6": {
+      "result": "17 passed, 0 failed, 0 skipped",
+      "exit_code": 0,
+      "run_namespace": "1793117012267",
+      "evidence": "logs/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.log",
+      "sha256": "44992bf6bf746b375c0a2adf2d9e1db4627d00515ae581a5341636ed380863fe",
+      "cold_ui_navigation": "friend list DOM -&gt; actual goal Link click -&gt; URL -&gt; detail DOM; no authenticated HTTP preflight"
+    },
+    "unit_regression": {
+      "result": "78 files passed, 439 tests passed",
+      "reused": true,
+      "reuse_basis": "S3 changed no web/src product file. Product hashes remain identical to the S2 final staging source that passed 439/439."
+    }
+  },
+  "s3_flow": {
+    "steps": [
+      "invite create",
+      "invite link created",
+      "second account accepts",
+      "friend list shows ACTIVE connection",
+      "friend public goal opens"
+    ],
+    "database_connection_status": "ACTIVE",
+    "capture_count": 5,
+    "capture_stamp": "20261028-0103"
+  },
+  "security_and_concurrency": {
+    "wrong_owner_http_status": 404,
+    "private_http_status": 404,
+    "removed_connection_http_status": 404,
+    "anonymous_initial_http_status": 307,
+    "anonymous_landing_http_status": 200,
+    "anonymous_forbidden_dom_count": 0,
+    "concurrent_accept": "success 1, used 1, connection 1"
+  },
+  "cleanup": {
+    "final_run_namespace": "1793117012267",
+    "database_member_goal_payment_rows": 0,
+    "auth_users": 0,
+    "goal_cover_private_objects": 0,
+    "goal_cover_public_objects": 0,
+    "profile_avatar_queues": 0,
+    "profile_avatar_assets": 0,
+    "profile_avatar_objects": 0,
+    "interrupted_namespace_evidence": "haenael-s3-interrupted-namespace-cleanup-v1-gpt-codex-20261027-1610.json",
+    "failed_cleanup_namespace_evidence": "haenael-s3-cleanup-result-v2-gpt-codex-20261027-1746.json"
+  },
+  "payment_control": {
+    "temporary_staging_enable_rc": 0,
+    "restore_false_rc": 0,
+    "disabled_smoke_http_status": 503,
+    "disabled_smoke_code": "payments_disabled",
+    "external_payment_called": false,
+    "evidence": "logs/haenael-s3-f6-full-v10-gpt-codex-20261028-0055.log"
+  },
+  "render_validation": {
+    "result": "pass",
+    "image_count": 5,
+    "images_loaded": 5,
+    "broken_images": 0,
+    "horizontal_overflow": 0,
+    "console_errors": 0,
+    "evidence": "haenael-s3-demo-render-v2-gpt-codex-20261028-0113.json",
+    "screenshot": "haenael-s3-demo-render-v2-gpt-codex-20261028-0113.png"
+  },
+  "external_boundaries": {
+    "kakao_oauth": "not claimed complete",
+    "toss_sandbox_approval_callback": "not executed",
+    "real_payment": "not executed"
+  }
+}
+</pre></main></body></html>

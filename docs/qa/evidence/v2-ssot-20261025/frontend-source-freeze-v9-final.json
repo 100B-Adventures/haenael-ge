@@ -1,0 +1,27 @@
+{
+  "captured_at": "2026-10-25T12:21:01+0900",
+  "source_tree_sha256": "a516eb146307d4e0c416bc716cfc29fbe2c4ef3210609e8165d1e79b737b1278",
+  "scope": "web/src + web/e2e + qa/contracts/deploy-env.contract.json",
+  "build": {
+    "result": "PASS",
+    "log": "docs/qa/evidence/v2-ssot-20261025/web-build-v9-final-why-weight-20261025.log"
+  },
+  "unit": {
+    "result": "PASS",
+    "files": 78,
+    "tests": 439,
+    "log": "docs/qa/evidence/v2-ssot-20261025/web-unit-full-v9-final-20261025.log",
+    "note": "전체 unit 통과 후 CSS WHY font-weight 600→400과 해당 E2E computed assertion만 변경; 제품 로직 변경 없음"
+  },
+  "runtime": {
+    "goal_detail": {
+      "result": "PASS_BEFORE_WHY_WEIGHT_FIX",
+      "log": "docs/qa/evidence/v2-ssot-20261025/local-visual-v9-final-20261025-1110-r1.log",
+      "note": "간격·hit target PASS; WHY 400은 다음 preview actual 검증 필요"
+    },
+    "admin": {
+      "result": "PASS",
+      "log": "docs/qa/evidence/v2-ssot-20261025/local-visual-v9-final-admin-20261025-1114.log"
+    }
+  }
+}

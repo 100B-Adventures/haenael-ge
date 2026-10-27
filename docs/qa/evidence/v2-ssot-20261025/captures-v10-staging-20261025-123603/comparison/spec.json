@@ -1,0 +1,105 @@
+{
+  "mode": "mobile",
+  "title": "해낼게 V2 · 프로토타입과 스테이징 대조",
+  "labels": [
+    "승인 프로토타입",
+    "Supabase 스테이징"
+  ],
+  "opts": [
+    "프로토타입 기준 적용"
+  ],
+  "prefill": {
+    "v2-goal-detail": "프로토타입 기준 적용",
+    "v2-mypage": "프로토타입 기준 적용",
+    "v2-friends": "프로토타입 기준 적용",
+    "v2-belong": "프로토타입 기준 적용",
+    "v2-connect": "프로토타입 기준 적용",
+    "v2-inviteaccept": "프로토타입 기준 적용",
+    "v2-landing": "프로토타입 기준 적용",
+    "v2-goalpublic": "프로토타입 기준 적용",
+    "v2-cover-review": "프로토타입 기준 적용"
+  },
+  "items": [
+    {
+      "id": "v2-goal-detail",
+      "t": "목표 관리",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "goal-detail-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-mypage",
+      "t": "마이페이지",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "mypage-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-friends",
+      "t": "친구 목록",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "friends-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-belong",
+      "t": "친구 상세",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "belong-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-connect",
+      "t": "친구 초대",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "connect-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-inviteaccept",
+      "t": "초대 수락",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "inviteaccept-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-landing",
+      "t": "랜딩",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "landing-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-goalpublic",
+      "t": "공개 목표",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "goalpublic-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    },
+    {
+      "id": "v2-cover-review",
+      "t": "관리자",
+      "where": "390px · 동일 배율 원본 대조",
+      "rec": "프로토타입 기준 적용",
+      "recLabel": "확정 기준",
+      "img": "cover-review-pair.png",
+      "why": "D-049에 따른 구현 대조입니다. 실제 데이터와 환경 상태의 차이 및 검수 결과는 QA 문서에서 구분합니다."
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "generated_at": "2026-10-27T04:15:03+09:00",
+  "independent_qa_updated_at": "2026-10-27T04:23:00+09:00",
+  "scope": "S1",
+  "remediation_status": "closed_independent_qa_pass",
+  "base_commit": "f4d38f3fae0d5c7908ef5499281f2f9bf9d956de",
+  "approved_prototype": {
+    "path": "docs/design/prototypes/social-viral-loop-v3-opus5.html",
+    "version": "3.0.0",
+    "sha256": "afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a"
+  },
+  "independent_qa": {
+    "report": "docs/qa/evidence/v2-goal-20261027/S1/haenael-s1-independent-qa-v2-gpt-codex.md",
+    "prior_report": "docs/qa/evidence/v2-goal-20261027/S1/haenael-s1-independent-qa-v1-gpt-codex.md",
+    "prior_decision": "FAIL",
+    "final_decision": "PASS",
+    "closed_findings": ["QAS1-01", "QAS1-02", "QAS1-03", "QAS1-04"],
+    "evidence": "logs/F1-PW-02-independent-recheck-v2.log",
+    "fixture_route": "/me/goal/372",
+    "fixture_removed_after_run": true
+  },
+  "staging": {
+    "alias": "https://haenael-ge-v2-staging-100-b.vercel.app",
+    "deployment_url": "https://haenael-gmop3fi0x-100-b.vercel.app",
+    "deployment_id": "dpl_2QeUAd65Qn4Tcfs9SvCuZaFWmbC3",
+    "supabase_project_ref": "ezzklgotgydwxqebfoys",
+    "health_evidence": "docs/qa/evidence/v2-goal-20261027/S1/logs/staging-remediation-health.json",
+    "production_deployed": false
+  },
+  "rejected_snapshot": {
+    "path": "/private/tmp/haenael-s1-remediation-20261027-mCP7b6",
+    "reason": "contained the invalid median-font-driven 16px overrides",
+    "alias_connected": false,
+    "allowed_as_evidence": false
+  },
+  "sources": [
+    {
+      "path": "web/src/app/globals.css",
+      "sha256": "e83cb2dc47aa609877fdd60de19bcce81f0a218d678458cf0e443bc72db8598a",
+      "deployed_snapshot_sha256": "e83cb2dc47aa609877fdd60de19bcce81f0a218d678458cf0e443bc72db8598a"
+    },
+    {
+      "path": "web/src/components/goal/GoalSupporterList.tsx",
+      "sha256": "0bd01649c16ad15b74da9af83d348fe9d9f72e245720b5cabe69adc16caa219d",
+      "deployed_snapshot_sha256": "0bd01649c16ad15b74da9af83d348fe9d9f72e245720b5cabe69adc16caa219d"
+    },
+    {
+      "path": "web/src/components/goal/__tests__/GoalSupporterList.test.tsx",
+      "sha256": "0bdba2b18c4dacf373d271edc22b01ebd244c8c766ab4e6447647ec479ef911f"
+    },
+    {
+      "path": "web/e2e/social-web-first.spec.ts",
+      "sha256": "cde309c92a2321b4b5c34a393f678af1d4cdf1af3b10f679d143af5f6910a102"
+    }
+  ],
+  "pw02_flow": {
+    "fixture_route": "/me/goal/363",
+    "fixture_removed_after_run": true,
+    "steps": [
+      "owner login",
+      "goal-management top",
+      "open editor",
+      "enter title",
+      "save",
+      "reload and assert title persistence",
+      "assert supporter preview 8",
+      "expand and assert supporters and pills 18"
+    ],
+    "captures": [
+      "captures/flow/01-owner-goal-top-390.png",
+      "captures/flow/02-edit-sheet-open-390.png",
+      "captures/flow/03-edit-title-filled-390.png",
+      "captures/flow/04-saved-reloaded-title-390.png",
+      "captures/flow/05-supporters-preview-8-390.png",
+      "captures/flow/06-supporters-expanded-18-390.png"
+    ]
+  },
+  "authenticated_goal_ergonomics": {
+    "route_template": "/me/goal/{id}",
+    "widths": [360, 390, 412, 600, 700, 780, 820, 900, 1000],
+    "results": {
+      "font_below_13": 0,
+      "token_body_px": 16,
+      "tap_below_44": 0,
+      "active_ratio": 1,
+      "active_rules": 27,
+      "active_missing": [],
+      "horizontal_overflow": 0,
+      "fixed_bottom_height": 64,
+      "bottom_clearance": 80
+    },
+    "reference_only": {
+      "median_font": 13,
+      "note": "The canonical mobile ergonomics script does not use median font size as a pass criterion."
+    },
+    "evidence": "logs/F1-PW-02-remediation-corrected.log"
+  },
+  "visual_comparison": {
+    "approved_path": "captures/flow/07-approved-supporters-expanded-390.png",
+    "approved_sha256": "bf6839367bd492171d431b737e54ff6e9bc42ae183c320af9b4b9bf16b113df4",
+    "actual_path": "captures/flow/08-staging-supporters-expanded-390.png",
+    "actual_sha256": "19eab5ea6b0a3de06f6e76713f8cc9a92d878ebb9e0903b44195bb32ae808913",
+    "viewport": "390x844",
+    "aligned_element": "supporter list first card",
+    "aligned_top": 72,
+    "approved_visible_rows": 11,
+    "actual_visible_rows": 18,
+    "row_count_semantics": "rendered DOM rows, not rows fully visible inside the viewport",
+    "changed_pixels": 72865,
+    "total_pixels": 329160,
+    "changed_ratio": 0.22136650868878358,
+    "mean_absolute_channel_delta": 10.421724996961963,
+    "max_channel_delta": 255,
+    "difference_boundary": "same viewport, scroll alignment, and semantic supporter-list state; fixture names, counts, and row count differ from prototype data"
+  },
+  "verification": {
+    "f1": {
+      "result": "1 passed, 0 skipped",
+      "evidence": "logs/F1-PW-02-remediation-corrected.log"
+    },
+    "f2": {
+      "result": "2 passed, 0 skipped",
+      "evidence": "logs/F2-AUTH-SMOKE-final.log",
+      "reuse_basis": "independent QA already passed F2; active-feedback-only CSS does not alter authentication or smoke behavior"
+    },
+    "full_regression": {
+      "result": "78 files passed, 439 tests passed",
+      "evidence": "logs/full-regression-remediation.log",
+      "rerun_reason": "active-state CSS changed"
+    },
+    "vercel_build": {
+      "result": "Build Completed in /vercel/output",
+      "evidence": "logs/staging-remediation-correct-deploy.log"
+    }
+  },
+  "failure_history": {
+    "f1_consecutive_failures": 1,
+    "cause": "a newly invented median_font >= 16 assertion contradicted the canonical measurement script",
+    "correction": "restored canonical criteria without narrowing scope: fontBelow13=0 and font-designer-14r>=16, plus tap, active, overflow, and fixed-bottom checks",
+    "invalid_font_overrides_reverted": true
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "project_ref": "ezzklgotgydwxqebfoys",
+  "previous_observation": "docs/qa/evidence/v2-ssot-20261025/staging-profile-avatar-cleanup-observation-20261025-0948.json",
+  "observation": "CLEANUP_COMPLETED_BY_SCHEDULE",
+  "observed_at": "2026-10-25T01:01:39.253524+00:00",
+  "observed_at_kst": "2026-10-25T10:01:39.253524+09:00",
+  "target": {
+    "queue_id": 1,
+    "original_profile_avatar_asset_id": "27026715-a9a9-431d-b043-f7602ce19434",
+    "bucket_id": "profile-avatars",
+    "object_path": "1437fa7f-e0f8-4176-90ac-9032de8f30f4/27026715-a9a9-431d-b043-f7602ce19434.png",
+    "reason": "PROFILE_AVATAR_REPLACED",
+    "available_at": "2026-10-25T00:50:07.467885+00:00",
+    "available_at_kst": "2026-10-25T09:50:07.467885+09:00",
+    "queue_status": "DONE",
+    "attempts": 0,
+    "locked_at": null,
+    "lease_until": null,
+    "completed_at": "2026-10-25T01:00:02.700465+00:00",
+    "completed_at_kst": "2026-10-25T10:00:02.700465+09:00",
+    "profile_avatar_asset_id_after_cleanup": null,
+    "queue_receipt_rows": 1,
+    "asset_metadata_rows": 0,
+    "storage_object_rows": 0
+  },
+  "scheduler": {
+    "job_id": 4,
+    "job_name": "drain-storage-cleanup-queue",
+    "run_id": 61,
+    "run_status": "succeeded",
+    "return_message": "DO",
+    "started_at": "2026-10-25T01:00:00.082413+00:00",
+    "ended_at": "2026-10-25T01:00:00.104783+00:00"
+  },
+  "pg_net": {
+    "response_id": 17,
+    "created_at": "2026-10-25T01:00:00.105382+00:00",
+    "status_code": 200,
+    "transport_error": false
+  },
+  "mutations_by_observer": {
+    "available_at_changed": false,
+    "worker_invoked_manually": false,
+    "database_rows_changed": false,
+    "storage_objects_changed": false,
+    "secrets_changed": false,
+    "product_code_changed": false
+  },
+  "pass": true
+}
