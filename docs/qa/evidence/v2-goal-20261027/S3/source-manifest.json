@@ -123,13 +123,13 @@
     "image_count": 5,
     "images_loaded": 5,
     "broken_images": 0,
-    "link_count": 4,
-    "links_opened": 4,
+    "link_count": 9,
+    "links_opened": 9,
     "horizontal_overflow": 0,
     "console_errors": 0,
     "page_errors": 0,
-    "evidence": "haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.json",
-    "screenshot": "haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.png"
+    "evidence": "haenael-s3-independent-demo-render-v2-gpt-codex-20261028-0151.json",
+    "screenshot": "haenael-s3-independent-demo-render-v2-gpt-codex-20261028-0151.png"
   },
   "external_boundaries": {
     "kakao_oauth": "not claimed complete",

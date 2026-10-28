@@ -53,7 +53,7 @@ S3는 무료 staging 내부 범위에서 **PASS, S3 closed**다. 독립 실행�
 | 친구 목록 | `approved-friends-390.png` | 독립 캡처 04 | 일치. 제목·추가 CTA·카드 구조·관계 badge·progress·message·chevron 유지. 승인본 3명과 독립 fixture 1명은 데이터량 차이이며, 1명 상태의 초대 유도 카드가 정상 노출됨 |
 | 친구 공개 목표 | 승인 prototype의 친구 상세 흐름 | 독립 캡처 05 | 일치. cover·목표·관계 badge·응원자·wordmap·다른 목표·관계 해제 흐름 유지 |
 
-S3 데모 허브를 별도 headless Chromium으로 열어 이미지 5/5 로드, 깨진 이미지 0, 링크 4/4 실제 열림, 가로 overflow 0, console·page error 0을 확인했다. 증거는 `haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.json`과 같은 이름의 PNG다.
+S3 데모 허브의 최종 상태를 별도 headless Chromium으로 열어 이미지 5/5 로드, 깨진 이미지 0, 링크 9/9 실제 열림, 가로 overflow 0, console·page error 0을 확인했다. 증거는 `haenael-s3-independent-demo-render-v2-gpt-codex-20261028-0151.json`과 같은 이름의 PNG다.
 
 ## 이 QA가 보장하는 것과 보장하지 않는 것
 
@@ -69,7 +69,7 @@ S3 데모 허브를 별도 headless Chromium으로 열어 이미지 5/5 로드, 
 |---|---:|---|
 | staging wrapper + heavy-slot + Playwright grep `QA-REVERIFY-FLOW-01A|01B|01C` | 0 | 3 passed, 실패 0, skip 0, fixture 8계수 0 |
 | wrapper 주입 `cheer-order` disabled smoke | 0 | curl rc 0, HTTP 503, `payments_disabled` |
-| S3 demo headless Chromium smoke | 0 | 이미지 5/5, 링크 4/4, overflow 0, console/page error 0 |
+| S3 demo headless Chromium smoke | 0 | 이미지 5/5, 링크 9/9, overflow 0, console/page error 0 |
 | 전체 F6 v10 로그·source hash 대조 | 0 | 17/17, skip 0, hash 일치 |
 
 SKILLS_USED: qa, staging 실제 flow·보안 경계·정리·데모 종료 증거 판정. review, 기존 P1 두 건과 assertion 보존 여부의 독립 대조.

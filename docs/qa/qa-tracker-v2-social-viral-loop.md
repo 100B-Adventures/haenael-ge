@@ -6,7 +6,7 @@
 |---|---|---|---|
 | QA-S3-P1-20261028-01 | 친구 목표 상세의 최초 UI 탐색 | ✅ PASS · 해소 | E2E SHA-256 `a5b18a71ed2e3601ed2f29a5e427e5e7ec85c354c0f50a80c76b462598922234`에 인증 HTTP preflight가 없다. 독립 01A가 친구 목록 DOM → 실제 목표 Link 클릭 → URL → 상세 DOM과 DB `ACTIVE`까지 PASS했다. |
 | QA-S3-P1-20261028-02 | F6 staging 결제 설정 수명주기 | ✅ PASS · 해소 | F6 v10 17/17·skip 0 뒤 `false` 복구 rc 0과 HTTP 503 `payments_disabled`를 확인했다. 독립 실행 종료 뒤에도 별도 wrapper smoke로 같은 503·code를 재확인했다. |
-| QA-S3-FLOW-20261027-01 | 초대·친구 흐름 전체 검증 | ✅ PASS · S3 closed | 독립 01A·01B·01C 3/3, 실패 0, skip 0. run `1793119379683`의 DB/Auth/Storage/queue/asset/object 0. 승인본과 staging의 초대·수락·친구 390px 이미지를 직접 대조했고, demo는 이미지 5/5·링크 4/4·overflow 0·console/page error 0이다. 보고서 `S3/haenael-s3-independent-qa-v1-gpt-codex-20261028-0147.md`. |
+| QA-S3-FLOW-20261027-01 | 초대·친구 흐름 전체 검증 | ✅ PASS · S3 closed | 독립 01A·01B·01C 3/3, 실패 0, skip 0. run `1793119379683`의 DB/Auth/Storage/queue/asset/object 0. 승인본과 staging의 초대·수락·친구 390px 이미지를 직접 대조했고, demo는 이미지 5/5·링크 9/9·overflow 0·console/page error 0이다. 보고서 `S3/haenael-s3-independent-qa-v1-gpt-codex-20261028-0147.md`. |
 
 S3 내부 staging 범위만 닫았다. 실제 Kakao OAuth, Toss sandbox 승인·callback, 실결제, production 배포와 전체 제품 QA 승인은 미검증이다. 정리된 fixture URL과 token은 재사용할 수 없다.
 

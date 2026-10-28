@@ -1,5 +1,22 @@
 # ops-control 인계
 
+## 2026-10-28 18:09 KST · 3회차 실행 회고 요청에 대한 기록 대조
+
+- 이번요청은진행내역/1·2회대비회고/남은작업정리이며추가개발·QA발주없음. 착수02:37(10/27)~내부종료01:59(10/28),경과23h22m(대기·중단·재개포함,연속실작업시간아님). S1독립PASS04:23, S2최종11:16, S3독립01:47. S3착수11:22부터14h25m경과.
+- S3 F6전체관련로그v2~v10 9개확인(미완주/중단포함이라9번완주로세지않음). selector·fixture공유제목·익명context·teardown·payment설정으로반복. root1800/2400timeout·앱writer혼용·자의5%p중단기준도원인. 개선은3흐름실제결과/닫힌흐름보존/동일worker재사용/439재사용/엄격한독립QA. 완전자율실행성공이라고평가하지않음.
+- 현재신규CUA도구 getState 읽기전용실행: apps[],browsers[]. 제어도구미제공이라는과거사유는현재그대로쓰지않고연결브라우저0개로정정. 로그인/키부재주장없음. 새탭/프로세스생성없음.
+- QA전체잔여는Kakao/Toss실제callback,최신근거통합및QA승인·릴리스준비·운영승인이다. cross-browser Firefox/WebKit와WebVitals/p95부하는기존문서상미확인선택검사,무조건새필수게이트로승격하지않음. 운영변경없음.
+
+## 2026-10-28 01:59 KST · S1/S2/S3 내부 개발·독립 QA 종료
+
+- S3 qa-verifier wrapper16147 종료0. 최신F6v10 17/17·7.2분,독립01A/B/C3/3·1.3분·skip0,sourcea5b18a71일치. coldUI사전HTTP없음·DBACTIVE·404·307·금지DOM0. S1S2기존독립판정유지·동일제품439회귀재사용.
+- namespace1793119379683 DB/Auth/Storage/avatarqueue/asset/object0,별도HTTP503 payments_disabled확인. 자연TTL대신정확한test-owned강제fixture정리임을유지.
+- 최종데모v2이미지5/5·링크9/9·overflow0·console/pageerror0. QA보고원문렌더와소스manifest갱신,날짜시각빠진QA코드검토파일은QA본인이rename·참조교정. 원발주자는승인connect+실제invite두장직접열어주축/순서대조(전체픽셀동일주장없음).
+- verify-agent-quality QA누적로그PASS:qa/review2, RUBRIC25/25. weakest-line외부callback/production미포함직접읽고실제범위일치확인. builder는동일UUID과거+현재로그를단순연결한원문으로검사PASS(재사용된skillRead근거포함),단일재개로그만의falseFAIL과구분. 컨트롤러산출물handpatch없음.
+- show-artifact가S3/index.html Chrome9342탭실제확인. 최종결과열람탭유지,새개발서버/포트/컨테이너없음,root위임67096/16147·확인명령종료회수. 다른프로젝트heavy작업은보존.
+- .goal/feature-list S3closed·F1~F6pass. 원목표와전체제품QA/ship완료선언안함. external X1Kakao OAuth·X2Toss sandbox callback미검증유지. 메인Chrome계정로그인부재주장안함. 현세션Chrome/computer자동화tool목록0확인,키부재라고추측안함. 운영/실결제/과금/commit/push실행없음.
+- 요청이이어지면닫힌3흐름/439재실행말고외부실제callback검증부터계속. 최신기준은execution-brief상단과resume-20261028-0125.md.
+
 ## 2026-10-28 01:33 KST · 최신17/17 회수, 독립QA 실행 시작
 
 - 앱send_message로로드됐던builder가idlewriter보유하여CLI재개충돌. idle확인→앱archive로unload→codex unarchive CLI로복구. 동일UUID재개성공(unified67096). 구체오류별조치후재시도,새worker없음.

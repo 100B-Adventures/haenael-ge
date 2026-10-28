@@ -154,7 +154,7 @@ body{max-width:none;margin:0;padding:0} pre,pre code{white-space:pre-wrap;overfl
 </tr>
 </tbody>
 </table>
-<p>S3 데모 허브를 별도 headless Chromium으로 열어 이미지 5/5 로드, 깨진 이미지 0, 링크 4/4 실제 열림, 가로 overflow 0, console·page error 0을 확인했다. 증거는 <code>haenael-s3-independent-demo-render-v1-gpt-codex-20261028-0145.json</code>과 같은 이름의 PNG다.</p>
+<p>S3 데모 허브의 최종 상태를 별도 headless Chromium으로 열어 이미지 5/5 로드, 깨진 이미지 0, 링크 9/9 실제 열림, 가로 overflow 0, console·page error 0을 확인했다. 증거는 <code>haenael-s3-independent-demo-render-v2-gpt-codex-20261028-0151.json</code>과 같은 이름의 PNG다.</p>
 <h2 id="이-qa가-보장하는-것과-보장하지-않는-것">이 QA가 보장하는 것과 보장하지 않는 것</h2>
 <p>보장한다: 배포 ID <code>dpl_8vUvNNqSBhBa2cJ98bnMrRxKNt58</code>의 무료 staging에서 S3 초대·수락·친구 목록·친구 공개 목표·접근 거부 흐름, 현재 E2E source의 F5/F6 assertion coverage, test-owned fixture 잔여 0, staging 결제 플래그 false 경계, 승인 v3.0.0의 S3 화면 구조 정합.</p>
 <p>보장하지 않는다: 실제 Kakao OAuth, 실제 Toss sandbox 승인·callback, 실결제·환불·송금, production 배포·production DB 쓰기, 성능·부하·크로스브라우징, S1·S2 재검증, 전체 제품 QA 승인과 출시 준비.</p>
@@ -182,7 +182,7 @@ body{max-width:none;margin:0;padding:0} pre,pre code{white-space:pre-wrap;overfl
 <tr>
 <td>S3 demo headless Chromium smoke</td>
 <td style="text-align: right;">0</td>
-<td>이미지 5/5, 링크 4/4, overflow 0, console/page error 0</td>
+<td>이미지 5/5, 링크 9/9, overflow 0, console/page error 0</td>
 </tr>
 <tr>
 <td>전체 F6 v10 로그·source hash 대조</td>
