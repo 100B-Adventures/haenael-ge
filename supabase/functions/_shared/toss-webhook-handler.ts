@@ -48,6 +48,7 @@ export interface TossWebhookSupabaseClient {
 
 export interface TossWebhookTossClient {
   getPayment(paymentKey: string): Promise<TossPaymentResponse>;
+  cancelPayment(paymentKey: string, cancelReason: string): Promise<unknown>;
 }
 
 export interface TossWebhookDeps {
@@ -61,6 +62,8 @@ export interface TossWebhookDeps {
   supabase: TossWebhookSupabaseClient | undefined;
   /** 미주입(undefined)이면 503 missing_server_env. */
   toss: TossWebhookTossClient | undefined;
+  /** ./toss.ts의 단일 결제수단 판정기를 런타임에서 주입한다. */
+  isCardPaymentMethod: (method: string) => boolean;
   sendSlackAlert: (alert: SlackAlert) => Promise<boolean>;
   /**
    * 결제 확정(DB 커밋) 직후 관제 송신. 로컬 import 금지 규칙 때문에 index.ts 가 주입한다.
@@ -107,7 +110,8 @@ export async function handleTossWebhook(
   const suppliedToken =
     new URL(req.url).pathname.split("/").filter(Boolean).at(-1) ?? "";
   if (
-    !deps.expectedToken || !constantTimeEqual(suppliedToken, deps.expectedToken)
+    !deps.expectedToken ||
+    !constantTimeEqual(suppliedToken, deps.expectedToken)
   ) {
     return json(401, { error: "unauthorized" });
   }
@@ -129,15 +133,15 @@ export async function handleTossWebhook(
   }
   if (
     body.eventType !== "PAYMENT_STATUS_CHANGED" ||
-    typeof body.data !== "object" || !body.data
+    typeof body.data !== "object" ||
+    !body.data
   ) {
     return json(200, { ignored: true });
   }
 
   const incoming = body.data as Record<string, unknown>;
-  const paymentKey = typeof incoming.paymentKey === "string"
-    ? incoming.paymentKey
-    : "";
+  const paymentKey =
+    typeof incoming.paymentKey === "string" ? incoming.paymentKey : "";
   if (!paymentKey) return json(400, { error: "payment_key_required" });
 
   if (!deps.supabase || !deps.toss) {
@@ -145,9 +149,8 @@ export async function handleTossWebhook(
   }
   const { supabase, toss, sendSlackAlert } = deps;
 
-  const transmissionId = req.headers.get(
-    "tosspayments-webhook-transmission-id",
-  )?.trim() ?? "";
+  const transmissionId =
+    req.headers.get("tosspayments-webhook-transmission-id")?.trim() ?? "";
   if (deps.requireTransmissionId && !transmissionId) {
     return json(400, { error: "transmission_id_required" });
   }
@@ -199,26 +202,24 @@ export async function handleTossWebhook(
     return finish(json(502, { error: "verification_failed" }));
   }
 
-  const incomingOrderId = typeof incoming.orderId === "string"
-    ? incoming.orderId
-    : null;
-  const incomingAmount = typeof incoming.totalAmount === "number"
-    ? incoming.totalAmount
-    : null;
-  const incomingStatus = typeof incoming.status === "string"
-    ? incoming.status
-    : null;
-  const incomingMerchantId = typeof incoming.mId === "string"
-    ? incoming.mId
-    : null;
+  const incomingOrderId =
+    typeof incoming.orderId === "string" ? incoming.orderId : null;
+  const incomingAmount =
+    typeof incoming.totalAmount === "number" ? incoming.totalAmount : null;
+  const incomingStatus =
+    typeof incoming.status === "string" ? incoming.status : null;
+  const incomingMerchantId =
+    typeof incoming.mId === "string" ? incoming.mId : null;
   if (
     (incomingOrderId !== null && payment.orderId !== incomingOrderId) ||
     (incomingAmount !== null && payment.totalAmount !== incomingAmount) ||
     (incomingStatus !== null && payment.status !== incomingStatus) ||
     (deps.requireMerchantId &&
-      (!incomingMerchantId || !payment.mId ||
+      (!incomingMerchantId ||
+        !payment.mId ||
         payment.mId !== incomingMerchantId)) ||
-    (!deps.requireMerchantId && incomingMerchantId !== null &&
+    (!deps.requireMerchantId &&
+      incomingMerchantId !== null &&
       payment.mId !== incomingMerchantId)
   ) {
     await sendSlackAlert({
@@ -231,6 +232,59 @@ export async function handleTossWebhook(
   }
 
   if (payment.status === "DONE") {
+    if (!deps.isCardPaymentMethod(payment.method)) {
+      let canceled = false;
+      let cancelError: string | null = null;
+      try {
+        await toss.cancelPayment(
+          payment.paymentKey,
+          "해낼게 카드 전용 주문에 허용되지 않은 결제수단",
+        );
+        canceled = true;
+      } catch (error) {
+        cancelError = error instanceof Error ? error.message : "cancel_failed";
+        console.error("[toss-webhook] non-card cancellation failed", error);
+      }
+
+      const { error: compensationError } = await supabase.rpc(
+        "record_payment_compensation",
+        {
+          p_order_id: payment.orderId,
+          p_payment_key: payment.paymentKey,
+          p_amount_krw: payment.totalAmount,
+          p_target_status: canceled ? "CANCELED" : "FAILED",
+          p_detail: {
+            source: "toss-webhook",
+            reason: "unsupported_payment_method",
+            method: payment.method,
+            compensation: canceled
+              ? "toss_cancelled"
+              : "manual_reconcile_required",
+            compensationError: cancelError,
+          },
+        },
+      );
+      if (compensationError || !canceled) {
+        await sendSlackAlert({
+          event: "payment_reconcile_failed",
+          severity: "critical",
+          summary: "Non-card webhook payment could not be safely canceled",
+          fields: {
+            orderId: payment.orderId,
+            method: payment.method,
+            compensationRecorded: !compensationError,
+          },
+        });
+        return finish(json(500, { error: "non_card_compensation_failed" }));
+      }
+      return finish(
+        json(200, {
+          processed: true,
+          compensated: true,
+          status: "CANCELED",
+        }),
+      );
+    }
     const { error } = await supabase.rpc("confirm_cheer_payment", {
       p_order_id: payment.orderId,
       p_payment_key: payment.paymentKey,
@@ -252,9 +306,12 @@ export async function handleTossWebhook(
     }
     try {
       deps.reportPaid?.(payment.orderId, payment.totalAmount);
-    } catch (_e) { /* 관제 송신 실패는 웹훅 처리에 영향 없음 */ }
+    } catch (_e) {
+      /* 관제 송신 실패는 웹훅 처리에 영향 없음 */
+    }
   } else if (
-    payment.status === "CANCELED" || payment.status === "PARTIAL_CANCELED"
+    payment.status === "CANCELED" ||
+    payment.status === "PARTIAL_CANCELED"
   ) {
     if (payment.status === "PARTIAL_CANCELED") {
       const { error } = await supabase.rpc("record_partial_cancel_review", {

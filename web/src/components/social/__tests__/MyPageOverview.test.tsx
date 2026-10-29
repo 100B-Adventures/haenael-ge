@@ -137,7 +137,7 @@ describe("MyPageOverview", () => {
     expect(updatePreferences).toHaveBeenCalledWith(false, false);
   });
 
-  it("MY-UI-04 받은 응원 탭은 승인 시안처럼 개별 메시지를 표시한다", () => {
+  it("CL-02 해낼게 관리의 받은 응원은 ClampText의 2줄 정책을 쓴다", () => {
     render(
       <MyPageOverview
         dashboard={dashboard}
@@ -155,6 +155,9 @@ describe("MyPageOverview", () => {
     expect(screen.getByText("도경")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "도경 프로필" })).toBeInTheDocument();
     expect(screen.getByText(/이번 주도 해낼 수 있어요/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/이번 주도 해낼 수 있어요/).closest("[data-collapsible]"),
+    ).toBeInTheDocument();
     expect(screen.getByText("2시간 전")).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent("🍀 1번");
   });

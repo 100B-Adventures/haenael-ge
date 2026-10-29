@@ -19,12 +19,13 @@ const primary: FriendGoalDetailData = {
   wordmap: [{ word: "꾸준히", weight: 2 }],
 };
 
-it("CT-FRIEND-03 친구 상세는 소속감 정보와 read-only 전체 워드맵 화면 동선을 표시한다", () => {
+it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-only 동선을 쓴다", () => {
   render(
     <FriendGoalDetail
       friendId="friend-a"
       nickname="서연"
       relationshipDirection="MUTUAL"
+      recentMessage="긴 응원 메시지는 두 줄에서 접히고 꺾쇠 하나로 다시 펼칠 수 있어요."
       detail={primary}
       friendGoals={[primary, {
         ...primary,
@@ -40,6 +41,10 @@ it("CT-FRIEND-03 친구 상세는 소속감 정보와 read-only 전체 워드맵
   expect(screen.getByText(primary.title)).toBeInTheDocument();
   expect(screen.getByText("서로 응원")).toBeInTheDocument();
   expect(screen.getByText("13명이 서연을 응원하고 있어요")).toBeInTheDocument();
+  expect(
+    screen.getByText(/긴 응원 메시지는 두 줄에서 접히고/)
+      .closest("[data-collapsible]"),
+  ).toBeInTheDocument();
   expect(screen.queryByText("응원자에게만 보이는 근황")).not.toBeInTheDocument();
   expect(screen.queryByText("함께한 자취 타임라인")).not.toBeInTheDocument();
   expect(screen.getByText("꾸준함")).toBeInTheDocument();

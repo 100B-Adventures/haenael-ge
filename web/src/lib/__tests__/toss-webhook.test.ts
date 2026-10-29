@@ -29,7 +29,9 @@ function makeRequest(pathToken: string | null, body: unknown): Request {
   });
 }
 
-function makePayment(overrides: Partial<TossPaymentResponse> = {}): TossPaymentResponse {
+function makePayment(
+  overrides: Partial<TossPaymentResponse> = {},
+): TossPaymentResponse {
   return {
     paymentKey: PAYMENT_KEY,
     orderId: ORDER_ID,
@@ -45,19 +47,23 @@ function makePayment(overrides: Partial<TossPaymentResponse> = {}): TossPaymentR
 function makeDeps(overrides: Partial<TossWebhookDeps> = {}): TossWebhookDeps & {
   rpcMock: ReturnType<typeof vi.fn>;
   getPaymentMock: ReturnType<typeof vi.fn>;
+  cancelPaymentMock: ReturnType<typeof vi.fn>;
   slackMock: ReturnType<typeof vi.fn>;
 } {
   const rpcMock = vi.fn().mockResolvedValue({ error: null });
   const getPaymentMock = vi.fn().mockResolvedValue(makePayment());
+  const cancelPaymentMock = vi.fn().mockResolvedValue({ status: "CANCELED" });
   const slackMock = vi.fn().mockResolvedValue(true);
 
   return {
     expectedToken: TOKEN,
     supabase: { rpc: rpcMock },
-    toss: { getPayment: getPaymentMock },
+    toss: { getPayment: getPaymentMock, cancelPayment: cancelPaymentMock },
+    isCardPaymentMethod: (method) => method === "카드",
     sendSlackAlert: slackMock,
     rpcMock,
     getPaymentMock,
+    cancelPaymentMock,
     slackMock,
     ...overrides,
   };
@@ -73,13 +79,19 @@ describe("handleTossWebhook", () => {
     const deps = makeDeps();
 
     // 틀린 토큰
-    const wrongTokenReq = makeRequest("wrong-token", eventBody({ paymentKey: PAYMENT_KEY }));
+    const wrongTokenReq = makeRequest(
+      "wrong-token",
+      eventBody({ paymentKey: PAYMENT_KEY }),
+    );
     const wrongTokenRes = await handleTossWebhook(wrongTokenReq, deps);
     expect(wrongTokenRes.status).toBe(401);
     expect(await wrongTokenRes.json()).toEqual({ error: "unauthorized" });
 
     // 경로 토큰 없음
-    const noTokenReq = makeRequest(null, eventBody({ paymentKey: PAYMENT_KEY }));
+    const noTokenReq = makeRequest(
+      null,
+      eventBody({ paymentKey: PAYMENT_KEY }),
+    );
     const noTokenRes = await handleTossWebhook(noTokenReq, deps);
     expect(noTokenRes.status).toBe(401);
 
@@ -117,7 +129,10 @@ describe("handleTossWebhook", () => {
     expect(res.status).toBe(502);
     expect(await res.json()).toEqual({ error: "verification_failed" });
     expect(deps.slackMock).toHaveBeenCalledWith(
-      expect.objectContaining({ event: "toss_webhook_lookup_failed", severity: "critical" }),
+      expect.objectContaining({
+        event: "toss_webhook_lookup_failed",
+        severity: "critical",
+      }),
     );
     expect(deps.rpcMock).not.toHaveBeenCalled();
   });
@@ -125,7 +140,12 @@ describe("handleTossWebhook", () => {
   it("4a. totalAmount 없는 이벤트 + authoritative DONE → confirm_cheer_payment RPC + 200", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "DONE",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
 
     // incoming payload에는 paymentKey만 있고 totalAmount/orderId/status는 없음
@@ -149,7 +169,13 @@ describe("handleTossWebhook", () => {
   it("4b. totalAmount 없는 이벤트 + authoritative CANCELED → reconcile_canceled_payment RPC + 200", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "CANCELED", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY, canceledAt: "2026-07-16T01:00:00Z" }),
+      makePayment({
+        status: "CANCELED",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+        canceledAt: "2026-07-16T01:00:00Z",
+      }),
     );
 
     const req = makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY }));
@@ -168,10 +194,69 @@ describe("handleTossWebhook", () => {
     );
   });
 
+  it("G4-PAY-02 DONE 비카드 webhook은 전액 취소·감사 기록 후 원장에 반영하지 않는다", async () => {
+    const deps = makeDeps();
+    deps.getPaymentMock.mockResolvedValueOnce(
+      makePayment({ method: "계좌이체" }),
+    );
+
+    const res = await handleTossWebhook(
+      makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })),
+      deps,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      processed: true,
+      compensated: true,
+      status: "CANCELED",
+    });
+    expect(deps.cancelPaymentMock).toHaveBeenCalledWith(
+      PAYMENT_KEY,
+      expect.stringContaining("카드 전용"),
+    );
+    expect(deps.rpcMock).toHaveBeenCalledWith(
+      "record_payment_compensation",
+      expect.objectContaining({ p_target_status: "CANCELED" }),
+    );
+    expect(deps.rpcMock).not.toHaveBeenCalledWith(
+      "confirm_cheer_payment",
+      expect.anything(),
+    );
+  });
+
+  it("G4-PAY-02 DONE 비카드 취소 실패는 FAILED 감사 기록·경고로 격리한다", async () => {
+    const deps = makeDeps();
+    deps.getPaymentMock.mockResolvedValueOnce(
+      makePayment({ method: "가상계좌" }),
+    );
+    deps.cancelPaymentMock.mockRejectedValueOnce(new Error("vendor failure"));
+
+    const res = await handleTossWebhook(
+      makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })),
+      deps,
+    );
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "non_card_compensation_failed" });
+    expect(deps.rpcMock).toHaveBeenCalledWith(
+      "record_payment_compensation",
+      expect.objectContaining({ p_target_status: "FAILED" }),
+    );
+    expect(deps.slackMock).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "payment_reconcile_failed" }),
+    );
+  });
+
   it("5. optional payload mismatch(orderId 다름) → 400 payload_mismatch + Slack toss_webhook_mismatch", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "DONE",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
 
     // incoming payload가 orderId를 명시했는데 authoritative 값과 다름
@@ -184,7 +269,10 @@ describe("handleTossWebhook", () => {
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: "payload_mismatch" });
     expect(deps.slackMock).toHaveBeenCalledWith(
-      expect.objectContaining({ event: "toss_webhook_mismatch", severity: "critical" }),
+      expect.objectContaining({
+        event: "toss_webhook_mismatch",
+        severity: "critical",
+      }),
     );
     expect(deps.rpcMock).not.toHaveBeenCalled();
   });
@@ -192,7 +280,12 @@ describe("handleTossWebhook", () => {
   it("5b. optional payload mismatch(totalAmount 다름) → 400 payload_mismatch", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "DONE",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
 
     const req = makeRequest(
@@ -208,7 +301,12 @@ describe("handleTossWebhook", () => {
   it("6. 중복 취소(CANCELED) 웹훅 재시도 — 매번 200, 재시도 안전", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValue(
-      makePayment({ status: "CANCELED", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "CANCELED",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
 
     const req1 = makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY }));
@@ -225,25 +323,43 @@ describe("handleTossWebhook", () => {
     expect(deps.rpcMock).toHaveBeenNthCalledWith(
       1,
       "reconcile_canceled_payment",
-      expect.objectContaining({ p_order_id: ORDER_ID, p_payment_key: PAYMENT_KEY }),
+      expect.objectContaining({
+        p_order_id: ORDER_ID,
+        p_payment_key: PAYMENT_KEY,
+      }),
     );
     expect(deps.rpcMock).toHaveBeenNthCalledWith(
       2,
       "reconcile_canceled_payment",
-      expect.objectContaining({ p_order_id: ORDER_ID, p_payment_key: PAYMENT_KEY }),
+      expect.objectContaining({
+        p_order_id: ORDER_ID,
+        p_payment_key: PAYMENT_KEY,
+      }),
     );
   });
 
   it("6b. 취소 시 잔액부족 review_required → 200 reviewRequired:true + Slack payment_cancel_balance_insufficient(critical)", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "CANCELED", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "CANCELED",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
     // reconcile_canceled_payment(20260716120000)이 잔액부족 durable 마커를 세팅하고
     // review_required=true를 반환하는 경우를 mock — 예외 없이 성공 응답이 온다.
     deps.rpcMock.mockResolvedValueOnce({
       error: null,
-      data: [{ payment_id: 1, payment_status: "DONE", idempotent: false, review_required: true }],
+      data: [
+        {
+          payment_id: 1,
+          payment_status: "DONE",
+          idempotent: false,
+          review_required: true,
+        },
+      ],
     });
 
     const req = makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY }));
@@ -254,7 +370,10 @@ describe("handleTossWebhook", () => {
     expect(deps.rpcMock).toHaveBeenCalledTimes(1);
     expect(deps.rpcMock).toHaveBeenCalledWith(
       "reconcile_canceled_payment",
-      expect.objectContaining({ p_order_id: ORDER_ID, p_payment_key: PAYMENT_KEY }),
+      expect.objectContaining({
+        p_order_id: ORDER_ID,
+        p_payment_key: PAYMENT_KEY,
+      }),
     );
     expect(deps.slackMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -268,11 +387,23 @@ describe("handleTossWebhook", () => {
   it("6c. 취소 시 review_required 없는 정상 응답(data 배열이지만 review_required=false) → 기존 200 status 응답 유지", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "CANCELED", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "CANCELED",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
     deps.rpcMock.mockResolvedValueOnce({
       error: null,
-      data: [{ payment_id: 1, payment_status: "CANCELED", idempotent: false, review_required: false }],
+      data: [
+        {
+          payment_id: 1,
+          payment_status: "CANCELED",
+          idempotent: false,
+          review_required: false,
+        },
+      ],
     });
 
     const req = makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY }));
@@ -286,7 +417,12 @@ describe("handleTossWebhook", () => {
   it("7(선택). DONE 처리 중 confirm_cheer_payment RPC 실패 → 500 + Slack payment_reconcile_failed", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "DONE",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
     deps.rpcMock.mockResolvedValueOnce({ error: { code: "P0001" } });
 
@@ -360,7 +496,10 @@ describe("handleTossWebhook", () => {
   it("10. body가 JSON 원시값(문자열/숫자/불리언) → 400 invalid_payload, 다운스트림 미호출", async () => {
     const deps = makeDeps();
 
-    const stringRes = await handleTossWebhook(makeRequest(TOKEN, "just a string"), deps);
+    const stringRes = await handleTossWebhook(
+      makeRequest(TOKEN, "just a string"),
+      deps,
+    );
     expect(stringRes.status).toBe(400);
     expect(await stringRes.json()).toEqual({ error: "invalid_payload" });
 
@@ -381,9 +520,17 @@ describe("handleTossWebhook", () => {
     const reportPaid = vi.fn();
     const deps = makeDeps({ reportPaid });
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "DONE",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
-    const res = await handleTossWebhook(makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })), deps);
+    const res = await handleTossWebhook(
+      makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })),
+      deps,
+    );
     expect(res.status).toBe(200);
     expect(reportPaid).toHaveBeenCalledTimes(1);
     expect(reportPaid).toHaveBeenCalledWith(ORDER_ID, 3000);
@@ -393,20 +540,40 @@ describe("handleTossWebhook", () => {
     const reportPaid = vi.fn();
     const deps = makeDeps({ reportPaid });
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "DONE",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
     deps.rpcMock.mockResolvedValue({ error: { code: "XX000" } });
-    const res = await handleTossWebhook(makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })), deps);
+    const res = await handleTossWebhook(
+      makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })),
+      deps,
+    );
     expect(res.status).toBe(500);
     expect(reportPaid).not.toHaveBeenCalled();
   });
 
   it("관제. reportPaid 가 던져도 웹훅은 200 으로 끝난다", async () => {
-    const deps = makeDeps({ reportPaid: () => { throw new Error("boom"); } });
+    const deps = makeDeps({
+      reportPaid: () => {
+        throw new Error("boom");
+      },
+    });
     deps.getPaymentMock.mockResolvedValueOnce(
-      makePayment({ status: "DONE", totalAmount: 3000, orderId: ORDER_ID, paymentKey: PAYMENT_KEY }),
+      makePayment({
+        status: "DONE",
+        totalAmount: 3000,
+        orderId: ORDER_ID,
+        paymentKey: PAYMENT_KEY,
+      }),
     );
-    const res = await handleTossWebhook(makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })), deps);
+    const res = await handleTossWebhook(
+      makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })),
+      deps,
+    );
     expect(res.status).toBe(200);
   });
 });

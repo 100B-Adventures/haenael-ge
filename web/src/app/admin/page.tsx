@@ -114,18 +114,33 @@ function MemberCard({ member }: { member: AdminMember }) {
   return (
     <li className="admin-member-card">
       <div className="admin-record-row">
-        <div><strong>{member.nickname || "미설정"}</strong><small>가입 {formatDateTime(member.created_at)}</small></div>
-        <div><strong>🍀 {formatNumber(member.clover_count)}</strong><small>보유 클로버</small></div>
-      </div>
-      <details className="admin-member-details">
-        <summary aria-label={`${member.nickname || "미설정"} 회원 상세`}>⋯</summary>
         <div>
-          <p>로그인 {member.provider || "미확인"}</p>
-          <p>본인인증 {member.kyc_status === "VERIFIED" ? "완료" : "미완료"}</p>
-          <p>회원 ID {shortId(member.id)}</p>
-          {member.goal_slug && <a href={`/g/${member.goal_slug}`} target="_blank" rel="noopener noreferrer">목표 보기</a>}
+          <strong>{member.nickname || "미설정"}</strong>
+          <small>가입 {formatDateTime(member.created_at)}</small>
         </div>
-      </details>
+        <div>
+          <strong>🍀 {formatNumber(member.clover_count)}</strong>
+          <small>보유 클로버</small>
+        </div>
+      </div>
+      <div
+        className="admin-member-details"
+        role="group"
+        aria-label={`${member.nickname || "미설정"} 회원 상세`}
+      >
+        <p>로그인 {member.provider || "미확인"}</p>
+        <p>본인인증 {member.kyc_status === "VERIFIED" ? "완료" : "미완료"}</p>
+        <p>회원 ID {shortId(member.id)}</p>
+        {member.goal_slug && (
+          <a
+            href={`/g/${member.goal_slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            목표 보기
+          </a>
+        )}
+      </div>
     </li>
   );
 }
@@ -133,8 +148,25 @@ function MemberCard({ member }: { member: AdminMember }) {
 function LedgerRow({ entry }: { entry: AdminLedgerEntry }) {
   return (
     <li className="admin-record-row">
-      <div><strong>{ledgerTypeLabels[entry.entry_type] ?? entry.entry_type} ({entry.nickname || "미설정"})</strong><small>{formatDateTime(entry.created_at)} · {entry.ref_type ? `${entry.ref_type}${entry.ref_id !== null ? ` #${entry.ref_id}` : ""}` : `원장 #${entry.id}`}</small></div>
-      <div><strong className={entry.clover_delta < 0 ? "is-negative" : ""}>{entry.clover_delta > 0 ? "+" : ""}{formatNumber(entry.clover_delta)}</strong><small>{formatNumber(entry.balance_after)} 잔액</small></div>
+      <div>
+        <strong>
+          {ledgerTypeLabels[entry.entry_type] ?? entry.entry_type} (
+          {entry.nickname || "미설정"})
+        </strong>
+        <small>
+          {formatDateTime(entry.created_at)} ·{" "}
+          {entry.ref_type
+            ? `${entry.ref_type}${entry.ref_id !== null ? ` #${entry.ref_id}` : ""}`
+            : `원장 #${entry.id}`}
+        </small>
+      </div>
+      <div>
+        <strong className={entry.clover_delta < 0 ? "is-negative" : ""}>
+          {entry.clover_delta > 0 ? "+" : ""}
+          {formatNumber(entry.clover_delta)}
+        </strong>
+        <small>{formatNumber(entry.balance_after)} 잔액</small>
+      </div>
     </li>
   );
 }
@@ -165,7 +197,13 @@ export default async function AdminPage() {
   }
 
   const serviceClient = createServiceRoleClient();
-  const [membersResult, ledgerResult, cashoutsResult, coversResult, alertsResult] = await Promise.all([
+  const [
+    membersResult,
+    ledgerResult,
+    cashoutsResult,
+    coversResult,
+    alertsResult,
+  ] = await Promise.all([
     callAdminRpc<AdminMember[]>("admin_list_members", { p_limit: 100 }),
     callAdminRpc<AdminLedgerEntry[]>("admin_list_ledger", { p_limit: 200 }),
     callAdminRpc<AdminCashout[]>("admin_list_cashouts_v2", { p_limit: 100 }),
@@ -178,7 +216,13 @@ export default async function AdminPage() {
       .limit(50),
   ]);
 
-  if (membersResult.error || ledgerResult.error || cashoutsResult.error || coversResult.error || alertsResult.error) {
+  if (
+    membersResult.error ||
+    ledgerResult.error ||
+    cashoutsResult.error ||
+    coversResult.error ||
+    alertsResult.error
+  ) {
     throw new Error("관리자 데이터를 불러오지 못했습니다.");
   }
 
@@ -194,17 +238,18 @@ export default async function AdminPage() {
       <div className="admin-dashboard-inner">
         <header className="admin-dashboard-head">
           <p>해낼게 운영</p>
-          <h1>
-            관리자 운영 대시보드
-          </h1>
+          <h1>관리자 운영 대시보드</h1>
           <p>
-            회원과 클로버 원장은 조회만 합니다. 환전 요청은 실제 은행 송금을 마친 뒤
-            지급 완료로 표시하거나, 사유를 남기고 반려할 수 있습니다.
+            회원과 클로버 원장은 조회만 합니다. 환전 요청은 실제 은행 송금을
+            마친 뒤 지급 완료로 표시하거나, 사유를 남기고 반려할 수 있습니다.
           </p>
         </header>
 
         <div className="admin-dashboard-stack">
-          <section className="admin-dashboard-section" data-testid="admin-cashout-section">
+          <section
+            className="admin-dashboard-section"
+            data-testid="admin-cashout-section"
+          >
             <SectionHeader
               title="환전 요청 큐"
               description="계좌는 기본 마스킹 · 실제 송금 후 지급 완료 · 반려 시 클로버 잠금 해제(총량은 그대로)"
@@ -212,54 +257,80 @@ export default async function AdminPage() {
             />
             <CashoutQueue cashouts={cashouts} />
           </section>
-          <section className="admin-dashboard-section" data-testid="admin-members-section">
+          <section
+            className="admin-dashboard-section"
+            data-testid="admin-members-section"
+          >
             <SectionHeader
               title="회원"
               description="최근 가입순 · 현재 클로버 잔액 포함"
               countLabel={`최근 ${formatNumber(members.length)}명`}
             />
             <ul className="admin-record-list" aria-label="회원 목록">
-              {members.length === 0
-                ? <li className="admin-record-empty">조회된 회원이 없습니다.</li>
-                : members.map((member) => <MemberCard key={member.id} member={member} />)}
+              {members.length === 0 ? (
+                <li className="admin-record-empty">조회된 회원이 없습니다.</li>
+              ) : (
+                members.map((member) => (
+                  <MemberCard key={member.id} member={member} />
+                ))
+              )}
             </ul>
           </section>
 
-          <section className="admin-dashboard-section" data-testid="admin-ledger-section">
+          <section
+            className="admin-dashboard-section"
+            data-testid="admin-ledger-section"
+          >
             <SectionHeader
               title="클로버 원장"
               description="적립·환전·환불·웰컴 기록 · 최근순"
               countLabel={`최근 ${formatNumber(ledger.length)}건`}
             />
             <ul className="admin-record-list" aria-label="클로버 원장 목록">
-              {ledger.length === 0
-                ? <li className="admin-record-empty">조회된 원장 기록이 없습니다.</li>
-                : ledger.map((entry) => <LedgerRow key={entry.id} entry={entry} />)}
+              {ledger.length === 0 ? (
+                <li className="admin-record-empty">
+                  조회된 원장 기록이 없습니다.
+                </li>
+              ) : (
+                ledger.map((entry) => (
+                  <LedgerRow key={entry.id} entry={entry} />
+                ))
+              )}
             </ul>
           </section>
 
           <GoalCoverReviewQueue initialItems={covers} />
 
-          <details
+          <section
             className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
             data-testid="admin-ops-alerts"
           >
-            <summary className="min-h-11 cursor-pointer list-none">
+            <div className="min-h-11">
               <SectionHeader
                 title="운영 경보"
-                description="Storage cleanup 정체와 스케줄 실패를 접어서 표시합니다."
+                description="Storage cleanup 정체와 스케줄 실패를 표시합니다."
                 countLabel={`${formatNumber(alerts.length)}건`}
               />
-            </summary>
+            </div>
             {alerts.length === 0 ? (
-              <p className="py-6 text-sm text-muted-foreground">현재 수신된 운영 경보가 없습니다.</p>
+              <p className="py-6 text-sm text-muted-foreground">
+                현재 수신된 운영 경보가 없습니다.
+              </p>
             ) : (
               <ul className="divide-y" aria-label="운영 경보 목록">
                 {alerts.map((alert) => (
-                  <li className="grid gap-1 py-3 text-sm sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-4" key={alert.id}>
-                    <strong className="text-destructive">{alert.severity}</strong>
+                  <li
+                    className="grid gap-1 py-3 text-sm sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-4"
+                    key={alert.id}
+                  >
+                    <strong className="text-destructive">
+                      {alert.severity}
+                    </strong>
                     <span className="font-semibold">{alert.event_type}</span>
-                    <time className="text-muted-foreground" dateTime={alert.created_at}>
+                    <time
+                      className="text-muted-foreground"
+                      dateTime={alert.created_at}
+                    >
                       {formatDateTime(alert.created_at)}
                     </time>
                     <code className="break-all text-xs text-muted-foreground sm:col-span-3">
@@ -269,7 +340,7 @@ export default async function AdminPage() {
                 ))}
               </ul>
             )}
-          </details>
+          </section>
         </div>
       </div>
     </main>

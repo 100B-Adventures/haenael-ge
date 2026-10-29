@@ -4,7 +4,7 @@
 // 이 파일의 책임은 env 읽기 + 실 client(supabase/toss/slack) 준비 + 핸들러 호출뿐이다.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { TossClient } from "../_shared/toss.ts";
+import { isCardPaymentMethod, TossClient } from "../_shared/toss.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
 import { firePay } from "../_shared/ops-event.ts";
 import { handleTossWebhook } from "../_shared/toss-webhook-handler.ts";
@@ -15,11 +15,12 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const tossSecret = Deno.env.get("TOSS_SECRET_KEY");
 
-  const supabase = supabaseUrl && serviceKey
-    ? createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    })
-    : undefined;
+  const supabase =
+    supabaseUrl && serviceKey
+      ? createClient(supabaseUrl, serviceKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        })
+      : undefined;
   const toss = tossSecret ? new TossClient(tossSecret) : undefined;
 
   return handleTossWebhook(req, {
@@ -28,6 +29,7 @@ Deno.serve(async (req) => {
     requireTransmissionId: true,
     supabase,
     toss,
+    isCardPaymentMethod,
     sendSlackAlert,
     reportPaid: firePay,
   });

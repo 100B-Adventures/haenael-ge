@@ -50,7 +50,7 @@ describe("TC-OV-01 응원 목록 오버플로", () => {
     expect(screen.getByRole("button", { name: "응원 목록 펼치기" })).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("TC-OV-04 정상 경로: 시안의 12px 행 패딩과 12px 간격을 쓰고 우측 하단에 순번을 보여준다", () => {
+  it("CL-01 목표 관리 응원 메시지는 ClampText의 2줄 정책과 단일 꺾쇠를 쓴다", () => {
     render(<CheerList cheers={cheers(2)} totalCount={2} />);
 
     const [firstRow] = screen.getAllByTestId("cheer-item");
@@ -59,6 +59,9 @@ describe("TC-OV-01 응원 목록 오버플로", () => {
     expect(screen.getAllByTestId("cheer-item-ordinal")[1]).toHaveTextContent("2번째");
     expect(screen.queryByText("날짜 미상")).not.toBeInTheDocument();
     expect(screen.getByText("1번째 응원 메시지")).toHaveAttribute("title", "1번째 응원 메시지");
+    expect(
+      screen.getByText("1번째 응원 메시지").closest("[data-collapsible]"),
+    ).toBeInTheDocument();
   });
 
   it("TC-OV-05 거절 경로: 잘못된 생성 시간이어도 상대 시간을 만들지 않고 목록 순번을 유지한다", () => {

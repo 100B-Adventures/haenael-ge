@@ -84,16 +84,14 @@ export default async function LandingPage() {
           data-testid="brand-logo-link"
           aria-label="해낼게 홈으로"
         >
-          해낼게
-          <span className="[color:var(--clover-bright)]!">.</span>
+          해낼<span className="[color:var(--clover-bright)]!">게.</span>
         </Link>
       </div>
 
       {/* Hero */}
       <div className="landing-approved-hero">
         <h1>
-          해낼게
-          <span className="[color:var(--clover-bright)]!">.</span>
+          해낼<span className="[color:var(--clover-bright)]!">게.</span>
         </h1>
         <p>
           응원은 돈으로 하는 겁니다.

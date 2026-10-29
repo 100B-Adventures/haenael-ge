@@ -1,7 +1,7 @@
 // app/page.test.tsx — 루트 랜딩 세션 리다이렉트(user-flow.md §1.3 (a)).
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: vi.fn(),
@@ -68,6 +68,9 @@ describe("루트 / 세션 리다이렉트", () => {
     expect(redirectMock).not.toHaveBeenCalled();
     expect(screen.getByTestId("landing-cta")).toBeInTheDocument();
     expect(screen.getByTestId("brand-logo-link")).toHaveAttribute("href", "/");
+    expect(
+      within(screen.getByTestId("brand-logo-link")).getByText("게."),
+    ).toHaveClass("[color:var(--clover-bright)]!");
     expect(screen.getByTestId("landing-relogin-link")).toBeInTheDocument();
     expect(screen.queryByTestId("lead-form")).not.toBeInTheDocument();
   });

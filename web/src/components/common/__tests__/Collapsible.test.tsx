@@ -1,18 +1,58 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, resolve, sep } from "node:path";
 import { Collapsible, shouldCollapse } from "../Collapsible";
 
+function sourceFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    return /\.(?:tsx|jsx)$/.test(entry.name) ? [path] : [];
+  });
+}
+
 it("CP-01 세 조건이 모두 참일 때만 접는다", () => {
-  expect(shouldCollapse({ auxiliary: true, exceedsLimit: true, hasCollapsedContext: true })).toBe(true);
-  expect(shouldCollapse({ auxiliary: false, exceedsLimit: true, hasCollapsedContext: true })).toBe(false);
-  expect(shouldCollapse({ auxiliary: true, exceedsLimit: false, hasCollapsedContext: true })).toBe(false);
-  expect(shouldCollapse({ auxiliary: true, exceedsLimit: true, hasCollapsedContext: false })).toBe(false);
+  expect(
+    shouldCollapse({
+      auxiliary: true,
+      exceedsLimit: true,
+      hasCollapsedContext: true,
+    }),
+  ).toBe(true);
+  expect(
+    shouldCollapse({
+      auxiliary: false,
+      exceedsLimit: true,
+      hasCollapsedContext: true,
+    }),
+  ).toBe(false);
+  expect(
+    shouldCollapse({
+      auxiliary: true,
+      exceedsLimit: false,
+      hasCollapsedContext: true,
+    }),
+  ).toBe(false);
+  expect(
+    shouldCollapse({
+      auxiliary: true,
+      exceedsLimit: true,
+      hasCollapsedContext: false,
+    }),
+  ).toBe(false);
 });
 
 it("CP-03 토글은 꺾쇠 하나로 왕복한다", async () => {
   render(
-    <Collapsible policy={{ auxiliary: true, exceedsLimit: true, hasCollapsedContext: true }}>
+    <Collapsible
+      policy={{
+        auxiliary: true,
+        exceedsLimit: true,
+        hasCollapsedContext: true,
+      }}
+    >
       {(expanded) => <span>{expanded ? "열림" : "닫힘"}</span>}
     </Collapsible>,
   );
@@ -21,10 +61,21 @@ it("CP-03 토글은 꺾쇠 하나로 왕복한다", async () => {
   expect(screen.getByText("열림")).toBeInTheDocument();
 });
 
+it("CP-04 제품 화면은 details 요소를 쓰지 않고 Collapsible로 접기를 단일화한다", () => {
+  const violations = sourceFiles(resolve(process.cwd(), "src"))
+    .filter((path) => !path.includes(`${sep}__tests__${sep}`))
+    .filter((path) => readFileSync(path, "utf8").includes("<details"));
+  expect(violations).toEqual([]);
+});
+
 it("CP-06 서버 컴포넌트가 넘긴 정적 ReactNode를 펼침 상태로 교체한다", async () => {
   render(
     <Collapsible
-      policy={{ auxiliary: true, exceedsLimit: true, hasCollapsedContext: true }}
+      policy={{
+        auxiliary: true,
+        exceedsLimit: true,
+        hasCollapsedContext: true,
+      }}
       collapsedContent={<p>접힌 내용</p>}
       expandedContent={<p>펼친 내용</p>}
     />,
@@ -37,7 +88,14 @@ it("CP-06 서버 컴포넌트가 넘긴 정적 ReactNode를 펼침 상태로 교
 it("CP-01 조건이 빠지면 접지 않고 개발 경고를 남긴다", () => {
   const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
   render(
-    <Collapsible warnWhenDisabled policy={{ auxiliary: true, exceedsLimit: false, hasCollapsedContext: true }}>
+    <Collapsible
+      warnWhenDisabled
+      policy={{
+        auxiliary: true,
+        exceedsLimit: false,
+        hasCollapsedContext: true,
+      }}
+    >
       {(expanded) => <span>{expanded ? "전체" : "축약"}</span>}
     </Collapsible>,
   );

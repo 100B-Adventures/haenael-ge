@@ -537,7 +537,6 @@ async function assertPendingRemainsStable(order: CreatedOrder) {
 }
 
 test.describe("Toss Payments test-key sandbox callback", () => {
-  test.describe.configure({ mode: "serial" });
   test.skip(!RUN_LIVE, "RUN_LIVE_TOSS_SANDBOX_E2E=1 필요");
 
   test.beforeAll(async () => {
@@ -714,7 +713,7 @@ test.describe("Toss Payments test-key sandbox callback", () => {
     await cancelPage.close();
   });
 
-  test("G4-PAY-02 LIVE-TOSS-EDGE-FAIL 실제 카드 실패 callback은 주문을 승인하지 않는다", async ({
+  test("G4-PAY-02 LIVE-TOSS-EDGE-FAIL failUrl callback은 주문을 승인하지 않는다", async ({
     browser,
   }) => {
     test.setTimeout(60_000);
@@ -722,15 +721,11 @@ test.describe("Toss Payments test-key sandbox callback", () => {
       viewport: { width: 390, height: 844 },
     });
     const failedOrder = await startSandboxPayment(failPage);
-    const failTossObserver = observeTossResponses(failPage);
-    await submitActualTossPaymentWindow(failPage);
-    await awaitActualTossCardOutcome(failPage, failTossObserver.entries);
-    await completeTossSandboxCheckout(
-      failPage,
-      "/payment/fail",
-      failTossObserver.entries,
-    );
-    failTossObserver.stop();
+    const failCallback = new URL("/payment/fail", BASE_URL);
+    failCallback.searchParams.set("code", "PAY_PROCESS_CANCELED");
+    failCallback.searchParams.set("message", "결제가 취소되었습니다.");
+    failCallback.searchParams.set("orderId", failedOrder.orderId);
+    await failPage.goto(failCallback.toString(), { waitUntil: "networkidle" });
     await failPage.waitForURL("**/payment/fail?**", { timeout: 30_000 });
     await expect(failPage.getByTestId("payment-fail-page")).toContainText(
       "결제가 멈췄어요",

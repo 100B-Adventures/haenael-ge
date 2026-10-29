@@ -49,12 +49,14 @@ function deps(overrides: Partial<TossWebhookDeps> = {}) {
     return { data: null, error: null };
   });
   const getPayment = vi.fn().mockResolvedValue(payment());
+  const cancelPayment = vi.fn().mockResolvedValue({ status: "CANCELED" });
   const base: TossWebhookDeps = {
     expectedToken: TOKEN,
     requireMerchantId: true,
     requireTransmissionId: true,
     supabase: { rpc },
-    toss: { getPayment },
+    toss: { getPayment, cancelPayment },
+    isCardPaymentMethod,
     sendSlackAlert: vi.fn().mockResolvedValue(true),
     ...overrides,
   };
@@ -66,6 +68,7 @@ describe("Toss 웹훅 보안 경계", () => {
     const test = deps({
       toss: {
         getPayment: vi.fn().mockResolvedValue(payment({ mId: "other-mid" })),
+        cancelPayment: vi.fn().mockResolvedValue({ status: "CANCELED" }),
       },
     });
 

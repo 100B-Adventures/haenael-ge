@@ -14,6 +14,7 @@ import { removeFriendAction } from "@/app/(receiver)/social-actions";
 import { GoalCover } from "./GoalCover";
 import { Wordmap } from "@/components/goal/Wordmap";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
+import { ClampText } from "@/components/common/ClampText";
 
 function objectParticle(name: string) {
   const code = name.codePointAt(name.length - 1) ?? 0;
@@ -23,11 +24,12 @@ function objectParticle(name: string) {
 }
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, relationshipDirection, detail, friendGoals }: {
+  { friendId, nickname, profileImage, relationshipDirection, recentMessage, detail, friendGoals }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
     relationshipDirection: RelationshipDirection;
+    recentMessage?: string | null;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
   },
@@ -92,6 +94,13 @@ export function FriendGoalDetail(
           <strong>{detail.cheer_count}명이 {displayName}{objectParticle(displayName)} 응원하고 있어요</strong>
         </div>
       </section>
+      {recentMessage && (
+        <section className="friend-recent-cheer" aria-label="최근 응원 메시지">
+          <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>
+            {recentMessage}
+          </ClampText>
+        </section>
+      )}
       <section className="friend-wordmap-card">
         <div className="friend-wordmap-heading">
           <h2>{displayName}이가 받은 응원</h2>

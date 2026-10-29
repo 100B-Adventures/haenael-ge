@@ -10,7 +10,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { GoalCard } from "@/components/goal/GoalCard";
 import { CheerCount } from "@/components/goal/CheerCount";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
-import { ReportButton } from "@/components/common/ReportButton";
+import { GoalPublicMenu } from "@/components/goal/GoalPublicMenu";
 import { CheerPaymentButton } from "@/components/goal/CheerPaymentButton";
 import { OwnerBar } from "@/components/goal/OwnerBar";
 import { GoalCover } from "@/components/social/GoalCover";
@@ -57,7 +57,9 @@ export default async function GoalPublicPage({ params }: Props) {
   // (과거: .single()이 일시오류에도 error를 반환 → 전부 notFound()로 처리해 정상 목표가 간헐 404).
   const { data: goal, error } = await supabase
     .from("goal_public")
-    .select("id, slug, title, reason, due_date, status, cheer_count, cover_preset_key, cover_public_path")
+    .select(
+      "id, slug, title, reason, due_date, status, cheer_count, cover_preset_key, cover_public_path",
+    )
     .eq("slug", slug)
     .maybeSingle();
 
@@ -106,7 +108,9 @@ export default async function GoalPublicPage({ params }: Props) {
 
   const cheerCount = goal.cheer_count ?? 0;
   const coverUrl = goal.cover_public_path
-    ? supabase.storage.from("goal-cover-public").getPublicUrl(goal.cover_public_path).data.publicUrl
+    ? supabase.storage
+        .from("goal-cover-public")
+        .getPublicUrl(goal.cover_public_path).data.publicUrl
     : null;
 
   // ─── owner bar 판정 (user-flow.md §1.3 (b) — 2026-07-19) ──────────────────
@@ -152,102 +156,98 @@ export default async function GoalPublicPage({ params }: Props) {
 
   return (
     <ReceiverAppShell locked={!user} currentPath={`/g/${slug}`}>
-    <main
-      className="goal-public-approved min-h-svh pb-32 [background-color:var(--background)]!"
-      data-testid="goal-public-page"
-    >
-      {/* 스크롤 영역 */}
-      <div className="goal-public-content px-[22px] pb-4">
-        <div className="goal-public-intro">
-          {/* BrandMark */}
-          <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
-            해낼게<span className="[color:var(--clover-bright)]!">.</span>
-          </p>
-          <details className="goal-public-menu">
-            <summary aria-label="이 목표 더보기">⋯</summary>
-            <div className="goal-public-menu-panel">
-              <ReportButton targetType="GOAL" targetId={goal.id!} variant="text" />
-            </div>
-          </details>
-
-          {/* owner bar — 본인 세션 열람 시에만 렌더(위에서 이미 판정 완료) */}
-          {isOwner && <OwnerBar cheerCreatedAts={ownerCheerCreatedAts} />}
-
-          {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
-          {!user && (
-            <p
-            className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
-              data-testid="relogin-hint"
-            >
-              내 목표가 있으신가요?{" "}
-              <Link
-                href="/auth/kakao/start?redirect=/me"
-                prefetch={false}
-                className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
-                data-testid="relogin-link"
-              >
-                카카오로 로그인
-              </Link>
+      <main
+        className="goal-public-approved min-h-svh pb-32 [background-color:var(--background)]!"
+        data-testid="goal-public-page"
+      >
+        {/* 스크롤 영역 */}
+        <div className="goal-public-content px-[22px] pb-4">
+          <div className="goal-public-intro">
+            {/* BrandMark */}
+            <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
+              해낼<span className="[color:var(--clover-bright)]!">게.</span>
             </p>
-          )}
-        </div>
+            <GoalPublicMenu goalId={goal.id!} />
 
-        {/* GoalCard */}
-        <GoalCard
-          title={rawTitle}
-          reason={null}
-          dueDate={goal.due_date}
-          status={(goal.status as "ACTIVE" | "CLOSED" | "DELETED") ?? "ACTIVE"}
-          variant="public"
-        />
+            {/* owner bar — 본인 세션 열람 시에만 렌더(위에서 이미 판정 완료) */}
+            {isOwner && <OwnerBar cheerCreatedAts={ownerCheerCreatedAts} />}
 
-        <GoalCover
-          presetKey={goal.cover_preset_key}
-          imageUrl={coverUrl}
-          title={goal.title ?? slug}
-          size="banner"
-          caption={goal.title ?? slug}
-        />
-
-        {goal.reason && (
-          <div className="public-goal-why" data-testid="goal-reason">
-            <strong>WHY</strong>
-            <p>{goal.reason}</p>
+            {/* 재로그인 진입 (user-flow.md §1.3 갭2 — 비로그인 전용, owner bar와 서로 배타적) */}
+            {!user && (
+              <p
+                className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
+                data-testid="relogin-hint"
+              >
+                내 목표가 있으신가요?{" "}
+                <Link
+                  href="/auth/kakao/start?redirect=/me"
+                  prefetch={false}
+                  className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
+                  data-testid="relogin-link"
+                >
+                  카카오로 로그인
+                </Link>
+              </p>
+            )}
           </div>
-        )}
 
-        {/* CheerCount */}
-        <div className="public-cheer-wrap">
-          <CheerCount count={cheerCount} variant="public" />
+          {/* GoalCard */}
+          <GoalCard
+            title={rawTitle}
+            reason={null}
+            dueDate={goal.due_date}
+            status={
+              (goal.status as "ACTIVE" | "CLOSED" | "DELETED") ?? "ACTIVE"
+            }
+            variant="public"
+          />
+
+          <GoalCover
+            presetKey={goal.cover_preset_key}
+            imageUrl={coverUrl}
+            title={goal.title ?? slug}
+            size="banner"
+            caption={goal.title ?? slug}
+          />
+
+          {goal.reason && (
+            <div className="public-goal-why" data-testid="goal-reason">
+              <strong>WHY</strong>
+              <p>{goal.reason}</p>
+            </div>
+          )}
+
+          {/* CheerCount */}
+          <div className="public-cheer-wrap">
+            <CheerCount count={cheerCount} variant="public" />
+          </div>
+
+          {/* Wordmap */}
+          <div className="mb-4">
+            <Wordmap words={words} showOverflowDisclosure={false} />
+          </div>
+
+          {/* 최근 응원자 리스트는 공개 RLS/정렬 정책 확정 후 연결 */}
         </div>
 
-        {/* Wordmap */}
-        <div className="mb-4">
-          <Wordmap words={words} showOverflowDisclosure={false} />
+        {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}
+        <div className="receiver-fixed-action receiver-public-action receiver-bottom-fade">
+          <CheerPaymentButton
+            goalId={goal.id!}
+            goalTitle={rawTitle}
+            goalSlug={slug}
+          />
+
+          {/* role-transition: "나도 해낼게 만들래" */}
+          <Link
+            href="/"
+            className="block w-full text-center font-semibold mt-1 [font-size:var(--text-wordmark)]! [color:var(--muted-color)]! p-[9px_0_0]! [min-height:var(--tap-min-size)]! [display:flex]! [align-items:center]! [justify-content:center]! transition-opacity active:opacity-70"
+            data-testid="role-transition-link"
+          >
+            나도 해낼게 만들래 →
+          </Link>
         </div>
-
-        {/* 최근 응원자 리스트는 공개 RLS/정렬 정책 확정 후 연결 */}
-
-      </div>
-
-      {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}
-      <div className="receiver-fixed-action receiver-public-action receiver-bottom-fade">
-        <CheerPaymentButton
-          goalId={goal.id!}
-          goalTitle={rawTitle}
-          goalSlug={slug}
-        />
-
-        {/* role-transition: "나도 해낼게 만들래" */}
-        <Link
-          href="/"
-          className="block w-full text-center font-semibold mt-1 [font-size:var(--text-wordmark)]! [color:var(--muted-color)]! p-[9px_0_0]! [min-height:var(--tap-min-size)]! [display:flex]! [align-items:center]! [justify-content:center]! transition-opacity active:opacity-70"
-          data-testid="role-transition-link"
-        >
-          나도 해낼게 만들래 →
-        </Link>
-      </div>
-    </main>
+      </main>
     </ReceiverAppShell>
   );
 }
