@@ -2941,6 +2941,12 @@ test.describe("V2 web-first social slice", () => {
                 goalFontSize: goal ? getComputedStyle(goal).fontSize : null,
                 goalClamp: goal ? getComputedStyle(goal).webkitLineClamp : null,
                 newsClamp: news ? getComputedStyle(news).webkitLineClamp : null,
+                newsOverflows: news
+                  ? news.scrollHeight > news.clientHeight + 1
+                  : null,
+                newsCollapsible: news
+                  ? news.closest("[data-collapsible]")?.getAttribute("data-collapsible")
+                  : null,
                 goalMarginTop: goal ? getComputedStyle(goal).marginTop : null,
                 progressMarginTop: row.querySelector<HTMLElement>(".friend-list-progress")
                   ? getComputedStyle(row.querySelector<HTMLElement>(".friend-list-progress")!).marginTop
@@ -2955,7 +2961,10 @@ test.describe("V2 web-first social slice", () => {
             expect(row.alignItems).toBe("flex-start");
             expect(row.goalFontSize).toBe("13px");
             expect(row.goalClamp).toBe("2");
-            expect(row.newsClamp).toBe("2");
+            expect(row.newsClamp).toBe(row.newsOverflows ? "2" : "none");
+            expect(row.newsCollapsible).toBe(
+              row.newsOverflows ? "enabled" : "disabled",
+            );
             expect(row.goalMarginTop).toBe("3px");
             expect(row.progressMarginTop).toBe("9px");
             expect(row.newsMarginTop).toBe("5px");
