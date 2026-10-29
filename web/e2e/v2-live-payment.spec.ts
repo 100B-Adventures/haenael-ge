@@ -30,6 +30,7 @@ const SERVICE_KEY = RUN_LIVE
   ? requiredEnv("SUPABASE_SERVICE_ROLE_KEY")
   : "unused";
 const ACCESS_TOKEN = RUN_LIVE ? requiredEnv("SUPABASE_ACCESS_TOKEN") : "unused";
+const TOSS_CLIENT_KEY = RUN_LIVE ? requiredEnv("TOSS_CLIENT_KEY") : "test_ck_mock";
 const PROJECT_REF = RUN_LIVE
   ? requiredEnv("SUPABASE_STAGING_PROJECT_REF")
   : "unused";
@@ -551,6 +552,7 @@ test.describe("Toss Payments test-key sandbox callback", () => {
       "haenael-ge-v2-staging-100-b.vercel.app",
     );
     expect(PROJECT_REF).toBe(APPROVED_STAGING_PROJECT_REF);
+    expect(TOSS_CLIENT_KEY).toMatch(/^test_(?:gck|ck)_/);
     expect(new URL(SUPABASE_URL).hostname).toBe(
       `${APPROVED_STAGING_PROJECT_REF}.supabase.co`,
     );
@@ -732,17 +734,29 @@ test.describe("Toss Payments test-key sandbox callback", () => {
         failTossObserver.entries,
       );
       await submitActualTossPaymentWindow(failPage);
+      await expect
+        .poll(
+          () =>
+            failTossObserver.entries.some((entry) =>
+              /(?:^|\.)payment-gateway-sandbox\.tosspayments\.com$/i.test(
+                new URL(entry.url).hostname,
+              ),
+            ),
+          { message: "실결제 전 sandbox Toss Payments 응답을 관찰해야 한다" },
+        )
+        .toBe(true);
       await closeActualTossPaymentWindow(failPage);
       await failPage.waitForURL("**/payment/fail?**", { timeout: 30_000 });
 
       const actualFailCallback = new URL(failPage.url());
       expect(actualFailCallback.pathname).toBe("/payment/fail");
-      expect(actualFailCallback.searchParams.get("code")).toBeTruthy();
+      expect(["PAY_PROCESS_CANCELED", "USER_CANCEL"]).toContain(
+        actualFailCallback.searchParams.get("code"),
+      );
       expect(actualFailCallback.searchParams.get("message")).toBeTruthy();
-      const callbackOrderId = actualFailCallback.searchParams.get("orderId");
-      if (callbackOrderId !== null) {
-        expect(callbackOrderId).toBe(failedOrder.orderId);
-      }
+      expect(actualFailCallback.searchParams.get("orderId")).toBe(
+        failedOrder.orderId,
+      );
       await expect(failPage.getByTestId("payment-fail-page")).toContainText(
         "결제가 멈췄어요",
       );

@@ -228,6 +228,11 @@ describe("CheerPaymentButton Toss v2 request", () => {
     await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalled());
     fireEvent.click(screen.getByRole("button", { name: "닫기" }));
     await waitFor(() => expect(mockPaymentWindowDestroy).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    expect(screen.getByTestId("cheer-payment-submit")).toBeEnabled();
+    expect(screen.getByTestId("cheer-payment-submit")).toHaveTextContent(
+      "결제하고 응원하기",
+    );
   });
 
   it("G4-PAY-01 컴포넌트가 unmount되면 렌더된 결제창을 제거한다", async () => {

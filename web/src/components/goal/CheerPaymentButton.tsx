@@ -83,12 +83,14 @@ export function CheerPaymentButton({
   // 결제 의도) null로 리셋해 다음 결제 시도에서 새 키를 만든다.
   const requestKeyRef = useRef<string | null>(null);
   const sheetOpenRef = useRef(false);
+  const paymentAttemptRef = useRef(0);
   const paymentWindowRef = useRef<{
     destroy: () => Promise<unknown>;
   } | null>(null);
 
   useEffect(
     () => () => {
+      paymentAttemptRef.current += 1;
       const paymentWindow = paymentWindowRef.current;
       paymentWindowRef.current = null;
       if (paymentWindow) void paymentWindow.destroy().catch(() => undefined);
@@ -138,9 +140,11 @@ export function CheerPaymentButton({
   function closeSheet() {
     requestKeyRef.current = null;
     sheetOpenRef.current = false;
+    paymentAttemptRef.current += 1;
     const paymentWindow = paymentWindowRef.current;
     paymentWindowRef.current = null;
     if (paymentWindow) void paymentWindow.destroy().catch(() => undefined);
+    setLoading(false);
     setOpen(false);
   }
 
@@ -184,6 +188,7 @@ export function CheerPaymentButton({
   }
 
   async function handlePayment() {
+    const paymentAttempt = ++paymentAttemptRef.current;
     setError(null);
     setLoading(true);
     try {
@@ -224,7 +229,10 @@ export function CheerPaymentButton({
           orderName: commonRequest.orderName,
         });
         paymentWindowRef.current = paymentWindow;
-        if (!sheetOpenRef.current) {
+        if (
+          !sheetOpenRef.current ||
+          paymentAttemptRef.current !== paymentAttempt
+        ) {
           paymentWindowRef.current = null;
           await paymentWindow.destroy().catch(() => undefined);
           setLoading(false);
@@ -232,6 +240,10 @@ export function CheerPaymentButton({
         }
         let paymentRequestStarted = false;
         paymentWindow.on("paymentRequest", async ({ paymentMethod }) => {
+          if (paymentAttemptRef.current !== paymentAttempt) {
+            await paymentWindow.destroy().catch(() => undefined);
+            return;
+          }
           if (paymentRequestStarted) return;
           paymentRequestStarted = true;
           if (paymentMethod.method !== "CARD") {
@@ -251,8 +263,10 @@ export function CheerPaymentButton({
                 paymentWindowRef.current = null;
               }
               await paymentWindow.destroy().catch(() => undefined);
-              setError(paymentErrorMessage(paymentError));
-              setLoading(false);
+              if (paymentAttemptRef.current === paymentAttempt) {
+                setError(paymentErrorMessage(paymentError));
+                setLoading(false);
+              }
             });
         });
         paymentWindow.on("cancel", () => {
@@ -260,8 +274,10 @@ export function CheerPaymentButton({
             paymentWindowRef.current = null;
           }
           void paymentWindow.destroy().catch(() => undefined);
-          setError("결제를 취소했어요. 다시 시도할 수 있어요.");
-          setLoading(false);
+          if (paymentAttemptRef.current === paymentAttempt) {
+            setError("결제를 취소했어요. 다시 시도할 수 있어요.");
+            setLoading(false);
+          }
         });
       } else {
         const payment = tossPayments.payment({
@@ -270,8 +286,10 @@ export function CheerPaymentButton({
         await payment.requestPayment({ method: "CARD", ...commonRequest });
       }
     } catch (e) {
-      setError(paymentErrorMessage(e));
-      setLoading(false);
+      if (paymentAttemptRef.current === paymentAttempt) {
+        setError(paymentErrorMessage(e));
+        setLoading(false);
+      }
     }
   }
 

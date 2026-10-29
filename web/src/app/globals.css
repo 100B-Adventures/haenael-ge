@@ -3901,7 +3901,7 @@
   .admin-cashout-history {
     margin-top: var(--sp-3);
   }
-  .admin-cashout-history > button {
+  .admin-cashout-history-title {
     display: flex;
     min-height: var(--tap-min-size);
     width: 100%;
@@ -3912,7 +3912,7 @@
     font-size: var(--text-label-small);
     font-weight: 850;
   }
-  .admin-cashout-history > button span {
+  .admin-cashout-history-title span {
     color: var(--clover-ink);
   }
   .admin-cashout-history > .admin-cashout-list {

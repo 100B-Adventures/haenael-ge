@@ -7,7 +7,6 @@ import {
   rejectCashout,
   revealCashoutAccount,
 } from "@/app/admin/actions";
-import { Collapsible } from "@/components/common/Collapsible";
 
 export type AdminCashout = {
   id: number;
@@ -215,21 +214,12 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
       </div>
       {handled.length > 0 && (
         <section className="admin-cashout-history" aria-label="처리한 요청">
-          <Collapsible
-            policy={{
-              auxiliary: true,
-              exceedsLimit: handled.length > 8,
-              hasCollapsedContext: true,
-            }}
-            controlsId="admin-cashout-history-list"
-            toggleLabel="처리한 요청"
-          >
-            {(expanded) => (
-              <div id="admin-cashout-history-list" className="admin-cashout-list">
-                {(expanded ? handled : handled.slice(0, 8)).map(cashoutCard)}
-              </div>
-            )}
-          </Collapsible>
+          <h3 className="admin-cashout-history-title">
+            처리한 요청 <span>{handled.length}건</span>
+          </h3>
+          <div className="admin-cashout-list">
+            {handled.map(cashoutCard)}
+          </div>
         </section>
       )}
 

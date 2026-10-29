@@ -6,7 +6,7 @@
 
 BEGIN;
 
-SELECT plan(61);
+SELECT plan(63);
 
 -- =========================================================================
 -- 픽스처 설정 (postgres = superuser, RLS bypass)
@@ -752,7 +752,7 @@ SELECT is(
     'payment_key_comp_2000',
     2000,
     'CANCELED',
-    '{"source":"toss-webhook","reason":"unsupported_payment_method"}'::jsonb
+    '{"source":"toss-webhook","reason":"unsupported_payment_method","paymentKey":"spoofed_key","targetStatus":"FAILED"}'::jsonb
   )),
   'CANCELED'::payment_status_enum,
   'B2-PAY24: 주문이 허용한 2,000원도 보상 취소와 감사 기록이 성공함'
@@ -762,9 +762,31 @@ SELECT is(
   (SELECT count(*)::integer FROM payment_log
    WHERE payment_id = (SELECT id FROM payment WHERE order_id = 'hnl_test_comp_2000')
      AND to_status = 'CANCELED'
-     AND detail->>'source' = 'toss-webhook'),
+     AND detail->>'source' = 'toss-webhook'
+     AND detail->>'paymentKey' = 'payment_key_comp_2000'
+     AND detail->>'targetStatus' = 'CANCELED'),
   1,
-  'B2-PAY25: webhook 보상 출처가 payment_log에 보존됨'
+  'B2-PAY25: webhook 출처는 보존하고 시스템 결제키·상태는 호출자 detail보다 우선함'
+);
+
+SELECT is(
+  (SELECT status FROM record_payment_compensation(
+    'hnl_test_comp_2000',
+    'payment_key_comp_2000',
+    2000,
+    'FAILED',
+    '{"source":"toss-confirm-compensation","reason":"late_duplicate_cancel"}'::jsonb
+  )),
+  'CANCELED'::payment_status_enum,
+  'B2-PAY26: 늦은 실패 보상은 이미 취소된 결제를 FAILED로 되돌리지 않음'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM payment_log
+   WHERE payment_id = (SELECT id FROM payment WHERE order_id = 'hnl_test_comp_2000')
+     AND to_status = 'FAILED'),
+  0,
+  'B2-PAY27: 이미 취소된 결제의 중복 보상은 거짓 FAILED 감사기록을 만들지 않음'
 );
 
 -- =========================================================================
