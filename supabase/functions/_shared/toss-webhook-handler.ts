@@ -210,18 +210,54 @@ export async function handleTossWebhook(
     typeof incoming.status === "string" ? incoming.status : null;
   const incomingMerchantId =
     typeof incoming.mId === "string" ? incoming.mId : null;
-  if (
+  const identityMismatch =
     (incomingOrderId !== null && payment.orderId !== incomingOrderId) ||
     (incomingAmount !== null && payment.totalAmount !== incomingAmount) ||
-    (incomingStatus !== null && payment.status !== incomingStatus) ||
     (deps.requireMerchantId &&
       (!incomingMerchantId ||
         !payment.mId ||
         payment.mId !== incomingMerchantId)) ||
     (!deps.requireMerchantId &&
       incomingMerchantId !== null &&
-      payment.mId !== incomingMerchantId)
+      payment.mId !== incomingMerchantId);
+  const statusMismatch =
+    incomingStatus !== null && payment.status !== incomingStatus;
+
+  if (
+    !identityMismatch &&
+    incomingStatus === "DONE" &&
+    payment.status === "CANCELED"
   ) {
+    const { error } = await supabase.rpc("record_payment_compensation", {
+      p_order_id: payment.orderId,
+      p_payment_key: payment.paymentKey,
+      p_amount_krw: payment.totalAmount,
+      p_target_status: "CANCELED",
+      p_detail: {
+        source: "toss-webhook-late-done",
+        reason: "authoritative_payment_already_canceled",
+        canceledAt: payment.canceledAt ?? null,
+      },
+    });
+    if (error) {
+      await sendSlackAlert({
+        event: "payment_cancel_reconcile_failed",
+        severity: "critical",
+        summary: "Late DONE webhook could not preserve canceled payment",
+        fields: { orderId: payment.orderId, code: error.code ?? "unknown" },
+      });
+      return finish(json(500, { error: "cancel_reconcile_failed" }));
+    }
+    return finish(
+      json(200, {
+        processed: true,
+        duplicate: true,
+        status: "CANCELED",
+      }),
+    );
+  }
+
+  if (identityMismatch || statusMismatch) {
     await sendSlackAlert({
       event: "toss_webhook_mismatch",
       severity: "critical",

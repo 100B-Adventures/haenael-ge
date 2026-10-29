@@ -228,16 +228,14 @@ export function CheerPaymentButton({
         const paymentWindow = await widgets.renderPaymentWindow({
           orderName: commonRequest.orderName,
         });
-        paymentWindowRef.current = paymentWindow;
         if (
           !sheetOpenRef.current ||
           paymentAttemptRef.current !== paymentAttempt
         ) {
-          paymentWindowRef.current = null;
           await paymentWindow.destroy().catch(() => undefined);
-          setLoading(false);
           return;
         }
+        paymentWindowRef.current = paymentWindow;
         let paymentRequestStarted = false;
         paymentWindow.on("paymentRequest", async ({ paymentMethod }) => {
           if (paymentAttemptRef.current !== paymentAttempt) {

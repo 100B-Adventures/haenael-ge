@@ -235,6 +235,59 @@ describe("CheerPaymentButton Toss v2 request", () => {
     );
   });
 
+  it("G4-PAY-01 이전 결제창 렌더 완료가 새 시도의 핸들과 loading을 덮지 않는다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
+    const firstDestroy = vi.fn().mockResolvedValue(undefined);
+    const secondDestroy = vi.fn().mockResolvedValue(undefined);
+    let resolveFirstWindow!: (window: {
+      on: (eventName: string, callback: (params?: unknown) => void) => void;
+      destroy: typeof firstDestroy;
+    }) => void;
+    const firstWindow = new Promise<{
+      on: (eventName: string, callback: (params?: unknown) => void) => void;
+      destroy: typeof firstDestroy;
+    }>((resolve) => {
+      resolveFirstWindow = resolve;
+    });
+    mockRenderPaymentWindow
+      .mockImplementationOnce(() => firstWindow)
+      .mockResolvedValueOnce({
+        on: (eventName: string, callback: (params?: unknown) => void) => {
+          paymentWindowHandlers.set(eventName, callback);
+        },
+        destroy: secondDestroy,
+      });
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalledTimes(2));
+    expect(screen.getByTestId("cheer-payment-submit")).toBeDisabled();
+
+    resolveFirstWindow({
+      on: () => undefined,
+      destroy: firstDestroy,
+    });
+    await waitFor(() => expect(firstDestroy).toHaveBeenCalledTimes(1));
+    expect(secondDestroy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("cheer-payment-submit")).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    await waitFor(() => expect(secondDestroy).toHaveBeenCalledTimes(1));
+  });
+
   it("G4-PAY-01 컴포넌트가 unmount되면 렌더된 결제창을 제거한다", async () => {
     vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
 

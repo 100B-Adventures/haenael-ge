@@ -312,6 +312,7 @@ async function submitActualTossPaymentWindow(page: Page) {
       }
       const submit = frame.getByRole("button", { name: /^결제하기$/ }).first();
       if (await submit.isVisible().catch(() => false)) {
+        expect(new URL(frame.url()).hostname).toMatch(/sandbox/i);
         console.log(
           "TOSS_PAYMENT_WINDOW_SURFACE",
           JSON.stringify(await tossSurfaceEvidence(page)),
@@ -337,10 +338,15 @@ async function submitActualTossPaymentWindow(page: Page) {
 async function awaitActualTossCardOutcome(
   page: Page,
   responses: TossResponseEvidence[],
-) {
+): Promise<
+  | { kind: "callback" }
+  | { kind: "external-card-auth"; evidence: Record<string, unknown> }
+> {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
-    if (/\/payment\/(?:success|fail)/.test(page.url())) return;
+    if (/\/payment\/(?:success|fail)/.test(page.url())) {
+      return { kind: "callback" };
+    }
     const cardGatewayFrames = page
       .context()
       .pages()
@@ -362,9 +368,7 @@ async function awaitActualTossCardOutcome(
           responses: responses.slice(-20),
         };
         console.log("TOSS_CARD_EXTERNAL_AUTH", JSON.stringify(evidence));
-        throw new Error(
-          `toss_card_external_auth_required:${JSON.stringify(evidence)}`,
-        );
+        return { kind: "external-card-auth", evidence };
       }
     }
     await page.waitForTimeout(250);
@@ -453,7 +457,19 @@ async function closeActualTossPaymentWindow(page: Page) {
   const deadline = Date.now() + 15_000;
   while (Date.now() < deadline) {
     if (page.url().includes("/payment/fail?")) return;
-    const tossSurfaces = await tossPaymentFrames(page);
+    const appOrigin = new URL(BASE_URL).origin;
+    const tossSurfaces = page
+      .context()
+      .pages()
+      .flatMap((candidatePage) => candidatePage.frames())
+      .filter((frame) => {
+        try {
+          const url = new URL(frame.url());
+          return url.origin !== appOrigin && url.protocol.startsWith("http");
+        } catch {
+          return false;
+        }
+      });
 
     for (const frame of tossSurfaces) {
       const candidates = [
@@ -474,6 +490,21 @@ async function closeActualTossPaymentWindow(page: Page) {
           }
         }
       }
+    }
+    const externalPopup = page
+      .context()
+      .pages()
+      .find((candidatePage) => {
+        if (candidatePage === page || candidatePage.isClosed()) return false;
+        try {
+          return new URL(candidatePage.url()).origin !== appOrigin;
+        } catch {
+          return false;
+        }
+      });
+    if (externalPopup) {
+      await externalPopup.close();
+      return;
     }
     await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
   }
@@ -751,15 +782,20 @@ test.describe("Toss Payments test-key sandbox callback", () => {
                 new URL(entry.url).hostname,
               ),
             ),
-          { message: "실결제 전 sandbox Toss Payments 응답을 관찰해야 한다" },
+          { message: "sandbox Toss Payments 응답을 관찰해야 한다" },
         )
         .toBe(true);
       phase = "external-card-auth";
       console.log("LIVE_TOSS_FAIL_PHASE", phase);
-      await awaitActualTossCardOutcome(failPage, failTossObserver.entries);
-      phase = "payment-window-close";
-      console.log("LIVE_TOSS_FAIL_PHASE", phase);
-      await closeActualTossPaymentWindow(failPage);
+      const outcome = await awaitActualTossCardOutcome(
+        failPage,
+        failTossObserver.entries,
+      );
+      if (outcome.kind === "external-card-auth") {
+        phase = "payment-window-close";
+        console.log("LIVE_TOSS_FAIL_PHASE", phase);
+        await closeActualTossPaymentWindow(failPage);
+      }
       phase = "fail-callback";
       console.log("LIVE_TOSS_FAIL_PHASE", phase);
       await failPage.waitForURL("**/payment/fail?**", { timeout: 10_000 });
@@ -797,7 +833,15 @@ test.describe("Toss Payments test-key sandbox callback", () => {
     const successOrder = await startSandboxPayment(successPage);
     const successTossObserver = observeTossResponses(successPage);
     await submitActualTossPaymentWindow(successPage);
-    await awaitActualTossCardOutcome(successPage, successTossObserver.entries);
+    const successOutcome = await awaitActualTossCardOutcome(
+      successPage,
+      successTossObserver.entries,
+    );
+    if (successOutcome.kind === "external-card-auth") {
+      throw new Error(
+        `toss_card_external_auth_required:${JSON.stringify(successOutcome.evidence)}`,
+      );
+    }
     await completeTossSandboxCheckout(
       successPage,
       "/payment/success",

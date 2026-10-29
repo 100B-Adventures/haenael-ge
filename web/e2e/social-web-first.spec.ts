@@ -2920,8 +2920,9 @@ test.describe("V2 web-first social slice", () => {
           await page.getByRole("button", { name: "취소" }).click();
         }
         if (width === 390 && label === "friends") {
-          const friendRows = await page.locator(".friend-list-main").evaluateAll((rows) =>
+          const friendRows = await page.locator(".friend-list-item").evaluateAll((rows) =>
             rows.slice(0, 3).map((row) => {
+              const main = row.querySelector<HTMLElement>(".friend-list-main");
               const avatar = row.querySelector<HTMLElement>(".friend-list-avatar");
               const name = row.querySelector<HTMLElement>(".friend-list-name");
               const goal = row.querySelector<HTMLElement>(".friend-list-copy > strong");
@@ -2932,7 +2933,7 @@ test.describe("V2 web-first social slice", () => {
                 return { top: value.top, bottom: value.bottom, height: value.height };
               };
               return {
-                alignItems: getComputedStyle(row).alignItems,
+                alignItems: main ? getComputedStyle(main).alignItems : null,
                 avatar: rect(avatar),
                 name: rect(name),
                 goal: rect(goal),

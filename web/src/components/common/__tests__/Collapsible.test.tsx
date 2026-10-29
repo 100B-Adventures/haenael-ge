@@ -61,11 +61,35 @@ it("CP-03 토글은 꺾쇠 하나로 왕복한다", async () => {
   expect(screen.getByText("열림")).toBeInTheDocument();
 });
 
-it("CP-04 제품 화면은 details 요소를 쓰지 않고 Collapsible로 접기를 단일화한다", () => {
-  const violations = sourceFiles(resolve(process.cwd(), "src"))
+it("CP-04 제품 화면은 details·직접 토글·지역 접기 상태 없이 Collapsible로 단일화한다", () => {
+  const sources = sourceFiles(resolve(process.cwd(), "src"))
     .filter((path) => !path.includes(`${sep}__tests__${sep}`))
-    .filter((path) => readFileSync(path, "utf8").includes("<details"));
-  expect(violations).toEqual([]);
+    .map((path) => ({ path, source: readFileSync(path, "utf8") }));
+  const detailsViolations = sources
+    .filter(({ source }) => source.includes("<details"))
+    .map(({ path }) => path);
+  const directToggleViolations = sources
+    .filter(({ path }) => !path.endsWith(`${sep}common${sep}Collapsible.tsx`))
+    .filter(({ source }) => /["'`](?:[^"'`]|\\.)*(?:접기|펼치기)(?:[^"'`]|\\.)*["'`]/.test(source))
+    .map(({ path }) => path);
+  const localStateViolations = sources
+    .filter(({ path }) => !path.endsWith(`${sep}common${sep}Collapsible.tsx`))
+    .filter(({ source }) =>
+      /const\s*\[\s*(?:is)?(?:expanded|collapsed|showMore|showAll)\b/i.test(
+        source,
+      ),
+    )
+    .map(({ path }) => path);
+
+  expect({
+    detailsViolations,
+    directToggleViolations,
+    localStateViolations,
+  }).toEqual({
+    detailsViolations: [],
+    directToggleViolations: [],
+    localStateViolations: [],
+  });
 });
 
 it("CP-06 서버 컴포넌트가 넘긴 정적 ReactNode를 펼침 상태로 교체한다", async () => {

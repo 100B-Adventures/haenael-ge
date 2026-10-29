@@ -6,7 +6,7 @@
 
 BEGIN;
 
-SELECT plan(63);
+SELECT plan(70);
 
 -- =========================================================================
 -- 픽스처 설정 (postgres = superuser, RLS bypass)
@@ -787,6 +787,83 @@ SELECT is(
      AND to_status = 'FAILED'),
   0,
   'B2-PAY27: 이미 취소된 결제의 중복 보상은 거짓 FAILED 감사기록을 만들지 않음'
+);
+
+SELECT is(
+  (SELECT status FROM record_payment_compensation(
+    'hnl_test_comp_failed',
+    'payment_key_comp_failed',
+    3000,
+    'FAILED',
+    '{"source":"toss-webhook","reason":"duplicate_failure"}'::jsonb
+  )),
+  'FAILED'::payment_status_enum,
+  'B2-PAY30: 동일 실패 보상 재시도는 기존 FAILED 상태로 멱등 성공함'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM payment_log
+   WHERE payment_id = (SELECT id FROM payment WHERE order_id = 'hnl_test_comp_failed')
+     AND to_status = 'FAILED'),
+  1,
+  'B2-PAY31: 동일 실패 보상 재시도는 payment_log를 중복 생성하지 않음'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM risk_event
+   WHERE type = 'PAYMENT_RECONCILE_REQUIRED'
+     AND detail->>'paymentKey' = 'payment_key_comp_failed'),
+  1,
+  'B2-PAY32: 동일 실패 보상 재시도는 수동 정산 risk_event를 중복 생성하지 않음'
+);
+
+SELECT throws_ok(
+  $$SELECT * FROM record_payment_compensation(
+    'hnl_test_comp_failed',
+    'other_payment_key_failed',
+    3000,
+    'CANCELED',
+    '{"source":"toss-webhook"}'::jsonb
+  )$$,
+  '22023',
+  NULL,
+  'B2-PAY33: FAILED 결제도 다른 payment_key로 보상 상태를 바꿀 수 없음'
+);
+
+SELECT throws_ok(
+  $$SELECT * FROM record_payment_compensation(
+    'hnl_test_rpc_no_balance',
+    'payment_key_no_balance',
+    3000,
+    'FAILED',
+    '{"source":"toss-webhook"}'::jsonb
+  )$$,
+  '22023',
+  NULL,
+  'B2-PAY34: DONE 결제는 실패 보상으로 강등할 수 없음'
+);
+
+SELECT is(
+  (SELECT status FROM record_payment_compensation(
+    'hnl_test_comp_failed',
+    'payment_key_comp_failed',
+    3000,
+    'CANCELED',
+    '{"source":"toss-webhook","reason":"late_cancel_succeeded"}'::jsonb
+  )),
+  'CANCELED'::payment_status_enum,
+  'B2-PAY35: 실패 기록 뒤 실제 취소 성공은 동일 payment_key로 CANCELED에 수렴함'
+);
+
+SELECT is(
+  (SELECT idempotent FROM reconcile_canceled_payment(
+    'hnl_test_comp_2000',
+    'payment_key_comp_2000',
+    2000,
+    '{"source":"toss-webhook","retry":true}'::jsonb
+  )),
+  true,
+  'B2-PAY36: 보상으로 CANCELED가 된 결제의 후속 취소 webhook도 멱등 처리됨'
 );
 
 -- =========================================================================

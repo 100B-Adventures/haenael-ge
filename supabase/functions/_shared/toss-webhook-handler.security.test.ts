@@ -136,6 +136,46 @@ describe("Toss 웹훅 보안 경계", () => {
       p_transmission_id: "transmission-security",
     });
   });
+
+  it("G4-PAY-02 늦은 DONE webhook은 authoritative CANCELED 상태를 멱등 보존한다", async () => {
+    const sendSlackAlert = vi.fn().mockResolvedValue(true);
+    const test = deps({
+      toss: {
+        getPayment: vi.fn().mockResolvedValue(
+          payment({ status: "CANCELED", canceledAt: "2026-10-30T00:00:00+09:00" }),
+        ),
+        cancelPayment: vi.fn().mockResolvedValue({ status: "CANCELED" }),
+      },
+      sendSlackAlert,
+    });
+
+    const response = await handleTossWebhook(
+      request({
+        paymentKey: PAYMENT_KEY,
+        orderId: "order-security",
+        totalAmount: 3000,
+        status: "DONE",
+        mId: MID,
+      }),
+      test.base,
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      processed: true,
+      duplicate: true,
+      status: "CANCELED",
+    });
+    expect(test.rpc).toHaveBeenCalledWith(
+      "record_payment_compensation",
+      expect.objectContaining({
+        p_order_id: "order-security",
+        p_payment_key: PAYMENT_KEY,
+        p_target_status: "CANCELED",
+      }),
+    );
+    expect(sendSlackAlert).not.toHaveBeenCalled();
+  });
 });
 
 describe("TossClient Payment 객체", () => {
