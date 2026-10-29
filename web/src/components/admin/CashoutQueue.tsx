@@ -7,6 +7,7 @@ import {
   rejectCashout,
   revealCashoutAccount,
 } from "@/app/admin/actions";
+import { Collapsible } from "@/components/common/Collapsible";
 
 export type AdminCashout = {
   id: number;
@@ -70,7 +71,6 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [modal, setModal] = useState<ModalState>(null);
   const [paidConfirmed, setPaidConfirmed] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
 
   const requested = cashouts.filter(
     (cashout) => cashout.status === "REQUESTED",
@@ -214,20 +214,22 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
         )}
       </div>
       {handled.length > 0 && (
-        <section className="admin-cashout-history">
-          <button
-            type="button"
-            aria-expanded={historyOpen}
-            aria-controls="admin-cashout-history-list"
-            onClick={() => setHistoryOpen((current) => !current)}
+        <section className="admin-cashout-history" aria-label="처리한 요청">
+          <Collapsible
+            policy={{
+              auxiliary: true,
+              exceedsLimit: handled.length > 8,
+              hasCollapsedContext: true,
+            }}
+            controlsId="admin-cashout-history-list"
+            toggleLabel="처리한 요청"
           >
-            처리한 요청 보기 <span>{handled.length}건</span>
-          </button>
-          {historyOpen && (
-            <div id="admin-cashout-history-list" className="admin-cashout-list">
-              {handled.map(cashoutCard)}
-            </div>
-          )}
+            {(expanded) => (
+              <div id="admin-cashout-history-list" className="admin-cashout-list">
+                {(expanded ? handled : handled.slice(0, 8)).map(cashoutCard)}
+              </div>
+            )}
+          </Collapsible>
         </section>
       )}
 

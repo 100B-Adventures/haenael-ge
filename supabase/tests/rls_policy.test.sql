@@ -6,7 +6,7 @@
 
 BEGIN;
 
-SELECT plan(58);
+SELECT plan(61);
 
 -- =========================================================================
 -- 픽스처 설정 (postgres = superuser, RLS bypass)
@@ -729,6 +729,42 @@ SELECT is(
      AND detail->>'paymentKey' = 'payment_key_comp_failed'),
   1,
   'B2-PAY22: Toss 취소 실패 보상은 수동 정산 risk_event를 남김'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM create_cheer_order(
+    (SELECT id FROM goal WHERE slug = 'goal-a-live' LIMIT 1),
+    'hnl_test_comp_2000',
+    2000,
+    2,
+    '2천원 보상취소',
+    false,
+    '자유 금액 보상 테스트',
+    'anonymous_comp_2000'
+  )),
+  1,
+  'B2-PAY23: 2,000원 보상 취소 검증용 주문 생성'
+);
+
+SELECT is(
+  (SELECT status FROM record_payment_compensation(
+    'hnl_test_comp_2000',
+    'payment_key_comp_2000',
+    2000,
+    'CANCELED',
+    '{"source":"toss-webhook","reason":"unsupported_payment_method"}'::jsonb
+  )),
+  'CANCELED'::payment_status_enum,
+  'B2-PAY24: 주문이 허용한 2,000원도 보상 취소와 감사 기록이 성공함'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM payment_log
+   WHERE payment_id = (SELECT id FROM payment WHERE order_id = 'hnl_test_comp_2000')
+     AND to_status = 'CANCELED'
+     AND detail->>'source' = 'toss-webhook'),
+  1,
+  'B2-PAY25: webhook 보상 출처가 payment_log에 보존됨'
 );
 
 -- =========================================================================

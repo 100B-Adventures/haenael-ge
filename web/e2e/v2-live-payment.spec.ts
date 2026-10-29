@@ -1,5 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
-import { type Page, type Response, expect, test } from "@playwright/test";
+import {
+  devices,
+  type Page,
+  type Response,
+  expect,
+  test,
+} from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -717,25 +723,38 @@ test.describe("Toss Payments test-key sandbox callback", () => {
     browser,
   }) => {
     test.setTimeout(60_000);
-    const failPage = await browser.newPage({
-      viewport: { width: 390, height: 844 },
-    });
-    const failedOrder = await startSandboxPayment(failPage);
-    const failCallback = new URL("/payment/fail", BASE_URL);
-    failCallback.searchParams.set("code", "PAY_PROCESS_CANCELED");
-    failCallback.searchParams.set("message", "결제가 취소되었습니다.");
-    failCallback.searchParams.set("orderId", failedOrder.orderId);
-    await failPage.goto(failCallback.toString(), { waitUntil: "networkidle" });
-    await failPage.waitForURL("**/payment/fail?**", { timeout: 30_000 });
-    await expect(failPage.getByTestId("payment-fail-page")).toContainText(
-      "결제가 멈췄어요",
-    );
-    await assertPendingRemainsStable(failedOrder);
-    await failPage.screenshot({
-      path: `${evidenceDir}/live-toss-fail-390.png`,
-      fullPage: true,
-    });
-    await failPage.close();
+    const failContext = await browser.newContext({ ...devices["iPhone 13"] });
+    const failPage = await failContext.newPage();
+    const failTossObserver = observeTossResponses(failPage);
+    try {
+      const failedOrder = await startSandboxPayment(
+        failPage,
+        failTossObserver.entries,
+      );
+      await submitActualTossPaymentWindow(failPage);
+      await closeActualTossPaymentWindow(failPage);
+      await failPage.waitForURL("**/payment/fail?**", { timeout: 30_000 });
+
+      const actualFailCallback = new URL(failPage.url());
+      expect(actualFailCallback.pathname).toBe("/payment/fail");
+      expect(actualFailCallback.searchParams.get("code")).toBeTruthy();
+      expect(actualFailCallback.searchParams.get("message")).toBeTruthy();
+      const callbackOrderId = actualFailCallback.searchParams.get("orderId");
+      if (callbackOrderId !== null) {
+        expect(callbackOrderId).toBe(failedOrder.orderId);
+      }
+      await expect(failPage.getByTestId("payment-fail-page")).toContainText(
+        "결제가 멈췄어요",
+      );
+      await assertPendingRemainsStable(failedOrder);
+      await failPage.screenshot({
+        path: `${evidenceDir}/live-toss-fail-390.png`,
+        fullPage: true,
+      });
+    } finally {
+      failTossObserver.stop();
+      await failContext.close();
+    }
   });
 
   test("G4-PAY-02 LIVE-TOSS-EDGE-IDEMPOTENT 실제 카드 성공 callback 중복은 원장 효과를 늘리지 않는다", async ({

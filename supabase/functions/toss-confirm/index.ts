@@ -51,7 +51,7 @@ function sanitizedConfirmResponse(confirm: {
   };
 }
 
-Deno.serve(async (req: Request) => {
+export async function handleTossConfirm(req: Request) {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -90,8 +90,9 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const paymentKey =
-    typeof body.paymentKey === "string" ? body.paymentKey.trim() : "";
+  const paymentKey = typeof body.paymentKey === "string"
+    ? body.paymentKey.trim()
+    : "";
   const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
   const amount = Number(body.amount);
 
@@ -217,26 +218,61 @@ Deno.serve(async (req: Request) => {
   // 클라이언트의 CARD 선택 검사는 UX 경계일 뿐 보안 경계가 아니다. 승인 응답이
   // 카드가 아니면 DB·원장에 반영하기 전에 즉시 전액취소해 비카드 결제를 격리한다.
   if (!isCardPaymentMethod(confirm.method)) {
+    let canceled = false;
+    let cancelError: string | null = null;
     try {
       await toss.cancelPayment(
         confirm.paymentKey,
         "해낼게 카드 전용 주문에 허용되지 않은 결제수단",
       );
-    } catch (cancelError) {
+      canceled = true;
+    } catch (error) {
+      const cancelErrorMessage = error instanceof Error
+        ? error.message
+        : "cancel_failed";
+      cancelError = cancelErrorMessage;
       console.error(
         "[toss-confirm] non-card compensation failed:",
-        cancelError,
+        error,
       );
+    }
+
+    const { error: compensationRecordError } = await supabase.rpc(
+      "record_payment_compensation",
+      {
+        p_order_id: orderId,
+        p_payment_key: confirm.paymentKey,
+        p_amount_krw: amount,
+        p_target_status: canceled ? "CANCELED" : "FAILED",
+        p_detail: {
+          source: "toss-confirm",
+          reason: "unsupported_payment_method",
+          method: confirm.method,
+          compensation: canceled
+            ? "toss_cancelled"
+            : "manual_reconcile_required",
+          compensationError: cancelError,
+        },
+      },
+    );
+    const compensationRecorded = !compensationRecordError;
+
+    if (!canceled || !compensationRecorded) {
       await sendSlackAlert({
         event: "payment_reconcile_failed",
         severity: "critical",
-        summary: "Non-card payment cancellation failed",
-        fields: { orderId, method: confirm.method },
+        summary: "Non-card payment could not be safely compensated",
+        fields: {
+          orderId,
+          method: confirm.method,
+          canceled,
+          compensationRecorded,
+        },
       });
       return json(502, {
         error: {
           code: "non_card_compensation_failed",
-          message: "허용되지 않은 결제수단 취소에 실패했습니다.",
+          message: "허용되지 않은 결제수단을 안전하게 정리하지 못했습니다.",
         },
       });
     }
@@ -284,8 +320,9 @@ Deno.serve(async (req: Request) => {
       );
       compensated = true;
     } catch (cancelErr) {
-      compensationError =
-        cancelErr instanceof Error ? cancelErr.message : "Toss cancel failed";
+      compensationError = cancelErr instanceof Error
+        ? cancelErr.message
+        : "Toss cancel failed";
       console.error(
         "[toss-confirm] Toss cancel compensation failed:",
         cancelErr,
@@ -353,8 +390,8 @@ Deno.serve(async (req: Request) => {
       },
       invokeNotify: async (payload) => {
         const notifyInternalToken = Deno.env.get("NOTIFY_INTERNAL_TOKEN") ?? "";
-        const { data: notifyData, error: notifyError } =
-          await supabase.functions.invoke("notify", {
+        const { data: notifyData, error: notifyError } = await supabase
+          .functions.invoke("notify", {
             headers: { "x-notify-internal-token": notifyInternalToken },
             body: payload,
           });
@@ -375,4 +412,8 @@ Deno.serve(async (req: Request) => {
     goalTitle: confirmed.goal_title,
     displayName: confirmed.display_name,
   });
-});
+}
+
+if (import.meta.main) {
+  Deno.serve(handleTossConfirm);
+}

@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { CheerPaymentButton } from "../CheerPaymentButton";
 
 const mockRequestPayment = vi.fn();
@@ -51,6 +57,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     mockWidgetSetAmount.mockResolvedValue(undefined);
     mockWidgetRequestPayment.mockResolvedValue(undefined);
     mockPaymentWindowDestroy.mockResolvedValue(undefined);
+    paymentWindowHandlers.clear();
     mockRenderPaymentWindow.mockResolvedValue({
       on: (eventName: string, callback: (params?: unknown) => void) => {
         paymentWindowHandlers.set(eventName, callback);
@@ -72,6 +79,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
     vi.clearAllMocks();
@@ -202,6 +210,42 @@ describe("CheerPaymentButton Toss v2 request", () => {
     ).toBeVisible();
     expect(mockWidgetRequestPayment).not.toHaveBeenCalled();
     expect(mockPaymentWindowDestroy).toHaveBeenCalledTimes(1);
+  });
+
+  it("G4-PAY-01 결제 시트를 닫으면 렌더된 결제창을 제거한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    await waitFor(() => expect(mockPaymentWindowDestroy).toHaveBeenCalledTimes(1));
+  });
+
+  it("G4-PAY-01 컴포넌트가 unmount되면 렌더된 결제창을 제거한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
+
+    const view = render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalled());
+    view.unmount();
+    await waitFor(() => expect(mockPaymentWindowDestroy).toHaveBeenCalledTimes(1));
   });
 
   it("G4-PAY-01 특수문자 없는 이전 customerKey는 Toss 규격 UUID 키로 교체한다", async () => {

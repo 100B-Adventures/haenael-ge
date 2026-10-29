@@ -122,4 +122,35 @@ describe("CashoutQueue", () => {
     fireEvent.click(confirmButton);
     await waitFor(() => expect(rejectCashout).toHaveBeenCalledWith(cashout.id, "예금주 불일치"));
   });
+
+  it("CP-04 처리 이력은 8건 초과일 때만 공용 Collapsible로 접는다", async () => {
+    const handled = Array.from({ length: 9 }, (_, index) => ({
+      ...cashout,
+      id: 100 + index,
+      nickname: `처리회원${index + 1}`,
+      status: "PAID",
+    }));
+    render(<CashoutQueue cashouts={handled} />);
+
+    expect(screen.getAllByTestId("cashout-request-card")).toHaveLength(8);
+    const toggle = screen.getByRole("button", { name: "처리한 요청 펼치기" });
+    fireEvent.click(toggle);
+    expect(screen.getAllByTestId("cashout-request-card")).toHaveLength(9);
+    expect(toggle).toHaveAccessibleName("처리한 요청 접기");
+  });
+
+  it("CP-04 처리 이력이 8건 이하면 접지 않고 전부 표시한다", () => {
+    const handled = Array.from({ length: 8 }, (_, index) => ({
+      ...cashout,
+      id: 200 + index,
+      nickname: `처리회원${index + 1}`,
+      status: "PAID",
+    }));
+    render(<CashoutQueue cashouts={handled} />);
+
+    expect(screen.getAllByTestId("cashout-request-card")).toHaveLength(8);
+    expect(
+      screen.queryByRole("button", { name: /처리한 요청 (?:펼치기|접기)/ }),
+    ).not.toBeInTheDocument();
+  });
 });
