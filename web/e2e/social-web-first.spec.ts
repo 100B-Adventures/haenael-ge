@@ -644,8 +644,17 @@ async function assertStagingRuntime() {
   assertStagingGuards();
   const response = await fetch(`${E2E_BASE_URL}/api/health`, { redirect: "error" });
   if (!response.ok) throw new Error(`staging_health_failed:${response.status}`);
-  const health = await response.json() as { supabaseProjectRef?: string };
+  const health = await response.json() as {
+    supabaseProjectRef?: string;
+    sourceSha?: string | null;
+  };
   if (health.supabaseProjectRef !== STAGING_PROJECT_REF) throw new Error("staging_runtime_project_ref_mismatch");
+  const expectedSourceSha = process.env.GITHUB_SHA;
+  if (expectedSourceSha && health.sourceSha !== expectedSourceSha) {
+    throw new Error(
+      `staging_runtime_source_mismatch:expected=${expectedSourceSha}:actual=${health.sourceSha ?? "missing"}`,
+    );
+  }
 }
 
 async function routeStagingOriginWithoutToolbar(target: BrowserContext | Page) {

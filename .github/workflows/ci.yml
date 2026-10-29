@@ -22,14 +22,23 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # workflow_dispatch는 staging 결제 설정을 쓰므로 브랜치가 달라도 한 번에 하나만 실행한다.
+  # 로컬 수동 결제 진단은 이 workflow가 끝난 뒤에만 실행한다.
+  group: ${{ github.event_name == 'workflow_dispatch' && 'haenael-staging-write' || format('ci-{0}', github.ref) }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
 
 jobs:
   supabase-server-contracts:
     name: Supabase pgTAP + 서버 런타임 계약
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # Supabase CLI 공식 registry override. GitHub 호스팅 러너의 ECR 공유 IP 제한을 피한다.
+      SUPABASE_INTERNAL_IMAGE_REGISTRY: ghcr.io
     steps:
       - uses: actions/checkout@v4
 
@@ -37,16 +46,28 @@ jobs:
         with:
           node-version: 22
 
+      - name: GitHub Container Registry 인증
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: supabase/setup-cli@v3
         with:
-          version: 2.109.0
+          # 2.110.0부터 internal registry override 누락 회귀가 수정됐다.
+          version: 2.114.0
 
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
       - name: 로컬 Supabase 기동
-        run: supabase start
+        run: |
+          # 서버 계약이 실제 사용하는 DB·Auth·REST·Storage·Kong·Edge Runtime만 기동한다.
+          supabase start \
+            -x realtime -x imgproxy -x mailpit -x postgres-meta -x studio \
+            -x logflare -x vector -x supavisor
 
       - name: pgTAP 전수
         run: supabase test db
