@@ -41,6 +41,19 @@ function getCustomerKey() {
   return next;
 }
 
+function paymentErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+  return "결제 요청 실패";
+}
+
 export function CheerPaymentButton({
   goalId,
   goalTitle,
@@ -178,7 +191,7 @@ export function CheerPaymentButton({
       const payment = tossPayments.payment({ customerKey: order.customerKey });
       await payment.requestPayment({ method: "CARD", ...commonRequest });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "결제 요청 실패");
+      setError(paymentErrorMessage(e));
       setLoading(false);
     }
   }
