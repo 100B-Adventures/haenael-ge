@@ -93,7 +93,10 @@ async function waitForPaymentState(
   throw new Error(`payment_state_timeout:${orderId}:${last}`);
 }
 
-async function startSandboxPayment(page: Page) {
+async function startSandboxPayment(
+  page: Page,
+  responses: TossResponseEvidence[] = [],
+) {
   await page.goto(`${BASE_URL}/g/${goalSlug}`, { waitUntil: "networkidle" });
   const cta = page.getByTestId("cheer-cta");
   await expect(cta).toBeVisible();
@@ -117,6 +120,30 @@ async function startSandboxPayment(page: Page) {
   ).toBe(201);
   expect(orderBody.orderId).toMatch(/^hnl_[a-f0-9]{24}$/);
   createdOrders.push(orderBody);
+  await expect.poll(async () => {
+    const hasTossSurface = (await tossPaymentFrames(page)).length > 0;
+    if (hasTossSurface) return "toss-surface";
+    const visibleError = await page
+      .getByTestId("cheer-payment-sheet")
+      .locator('p[class*="B3261E"], [role=alert]')
+      .allTextContents()
+      .catch(() => []);
+    return visibleError.find((text) => text.trim()) ?? "waiting";
+  }, {
+    message: "Toss 결제창 또는 SDK 오류가 나타나야 한다",
+    timeout: 10_000,
+  }).not.toBe("waiting");
+  const sdkError = await page
+    .getByTestId("cheer-payment-sheet")
+    .locator('p[class*="B3261E"], [role=alert]')
+    .allTextContents()
+    .catch(() => []);
+  const sdkErrorMessage = sdkError.find((text) => text.trim());
+  if (sdkErrorMessage) {
+    throw new Error(`toss_sdk_rejected:${sdkErrorMessage}:${JSON.stringify({
+      responses: responses.slice(-20),
+    })}`);
+  }
   return orderBody;
 }
 
@@ -133,6 +160,7 @@ type TossResponseEvidence = {
   skipAuth: "FORCE_SUCCESS" | "FORCE_FAIL" | "absent";
   status: number;
   url: string;
+  detail?: string;
 };
 
 function observeTossResponses(page: Page) {
@@ -141,7 +169,7 @@ function observeTossResponses(page: Page) {
     if (!/tosspayments\.com|toss\.im|bankpay/i.test(response.url())) return;
     const url = new URL(response.url());
     const requestText = `${response.request().url()} ${response.request().postData() ?? ""}`;
-    entries.push({
+    const entry: TossResponseEvidence = {
       method: response.request().method(),
       skipAuth: requestText.includes("FORCE_SUCCESS")
         ? "FORCE_SUCCESS"
@@ -150,7 +178,13 @@ function observeTossResponses(page: Page) {
           : "absent",
       status: response.status(),
       url: `${url.origin}${url.pathname}`,
-    });
+    };
+    entries.push(entry);
+    if (response.status() >= 400) {
+      void response.text().then((body) => {
+        entry.detail = body.slice(0, 500);
+      }).catch(() => undefined);
+    }
   };
   page.context().on("response", listener);
   return {
@@ -168,6 +202,7 @@ async function tossSurfaceEvidence(page: Page) {
     headings: await frame.locator("h1:visible, h2:visible, [role=heading]:visible")
       .allTextContents()
       .catch(() => []),
+    bodyText: await frame.locator("body").innerText().then((text) => text.slice(0, 2_000)).catch(() => ""),
     fields: await frame.locator("input:visible").evaluateAll((inputs) =>
       inputs.map((input) => {
         const element = input as HTMLInputElement;
@@ -182,6 +217,9 @@ async function tossSurfaceEvidence(page: Page) {
         };
       }),
     ).catch(() => []),
+    comboboxes: await frame.getByRole("combobox").evaluateAll((elements) =>
+      elements.map((element) => element.outerHTML.slice(0, 1_000)),
+    ).catch(() => []),
     buttons: await frame.getByRole("button").allTextContents().catch(() => []),
   })));
 }
@@ -190,12 +228,36 @@ async function submitActualTossPaymentWindow(page: Page) {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
     for (const frame of await tossPaymentFrames(page)) {
+      const cardMethod = frame
+        .getByRole("button")
+        .filter({ hasText: /신용.*체크카드/ })
+        .first();
+      if (await cardMethod.count()) {
+        await cardMethod.click({ force: true });
+        console.log(
+          "TOSS_CARD_METHOD_DOM",
+          await cardMethod.evaluate((element) => element.outerHTML.slice(0, 1_000)),
+        );
+        const issuerSelect = frame.getByRole("combobox").first();
+        if (await issuerSelect.count()) {
+          console.log(
+            "TOSS_CARD_ISSUER_SELECT_DOM",
+            await issuerSelect.evaluate((element) => element.outerHTML.slice(0, 1_000)),
+          );
+          await issuerSelect.selectOption({ label: "신한" });
+          await expect(issuerSelect).toHaveValue("CARD__SHINHAN");
+        }
+      }
       const email = frame.locator('input[type="email"], input[placeholder*="이메일"]').first();
       if (await email.isVisible().catch(() => false)) {
         await email.fill("payment-e2e@haenael.test");
       }
       const submit = frame.getByRole("button", { name: /^결제하기$/ }).first();
       if (await submit.isVisible().catch(() => false)) {
+        console.log(
+          "TOSS_PAYMENT_WINDOW_SURFACE",
+          JSON.stringify(await tossSurfaceEvidence(page)),
+        );
         await expect(submit).toBeEnabled();
         await submit.click();
         return;
@@ -203,105 +265,43 @@ async function submitActualTossPaymentWindow(page: Page) {
     }
     await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
   }
-  throw new Error("toss_payment_window_submit_not_found");
+  throw new Error(`toss_payment_window_submit_not_found:${JSON.stringify({
+    pages: page.context().pages().map((candidate) => candidate.url()),
+    surfaces: await tossSurfaceEvidence(page),
+  })}`);
 }
 
-async function submitActualTossPaySandboxIdentity(
+async function awaitActualTossCardOutcome(
   page: Page,
   responses: TossResponseEvidence[],
 ) {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
-    for (const frame of await tossPaymentFrames(page)) {
-      const phone = frame.getByRole("textbox", { name: /휴대폰번호/ }).first();
-      const next = frame.getByRole("button", { name: /^다음(?:, 새창 열림)?$/ }).first();
-      if (!(await phone.isVisible().catch(() => false))) continue;
-      if (!(await next.isVisible().catch(() => false))) continue;
-
-      await phone.fill("01000000000");
-      const email = frame.getByRole("textbox", { name: /이메일/ }).first();
-      if (await email.isVisible().catch(() => false)) {
-        await email.fill("payment-e2e@haenael.test");
+    if (/\/payment\/(?:success|fail)/.test(page.url())) return;
+    const cardGatewayFrames = page
+      .context()
+      .pages()
+      .flatMap((candidatePage) => candidatePage.frames())
+      .filter((frame) => frame.url() && frame.url() !== "about:blank");
+    for (const frame of cardGatewayFrames) {
+      const bodyText = await frame.locator("body").innerText().catch(() => "");
+      if (/신한\s*super\s*SOL|신한SOL-Pay|신한카드/.test(bodyText)) {
+        const evidence = {
+          issuer: "SHINHAN",
+          gatewayUrl: (() => {
+            const url = new URL(frame.url());
+            return `${url.origin}${url.pathname}`;
+          })(),
+          bodyText: bodyText.slice(0, 500),
+          responses: responses.slice(-20),
+        };
+        console.log("TOSS_CARD_EXTERNAL_AUTH", JSON.stringify(evidence));
+        throw new Error(`toss_card_external_auth_required:${JSON.stringify(evidence)}`);
       }
-
-      const requiredAgreements = frame.getByRole("checkbox", { name: /\[필수\]/ });
-      const agreementCount = await requiredAgreements.count();
-      expect(agreementCount, "Toss 필수 약관 checkbox가 없다").toBeGreaterThan(0);
-      for (let index = 0; index < agreementCount; index += 1) {
-        const agreement = requiredAgreements.nth(index);
-        if (await agreement.isVisible().catch(() => false)) {
-          await agreement.check();
-          await expect(agreement).toBeChecked();
-        }
-      }
-
-      const initialUrl = frame.url();
-      const pagesBeforeSubmit = new Set(page.context().pages());
-      await expect(next).toBeEnabled();
-      await next.click();
-
-      const readTransition = async () => {
-        if (/\/payment\/(?:success|fail)/.test(page.url())) return "callback";
-        const openedExternalPage = page.context().pages().some((candidate) =>
-          !pagesBeforeSubmit.has(candidate) &&
-          candidate.url() !== "about:blank" &&
-          candidate.url() !== "",
-        );
-        if (openedExternalPage) return "next-auth";
-        const frames = await tossPaymentFrames(page);
-        const original = frames.find((candidate) => candidate === frame);
-        if (!original) return "next-auth";
-        const phoneStillVisible = await original
-          .getByRole("textbox", { name: /휴대폰번호/ })
-          .first()
-          .isVisible()
-          .catch(() => false);
-        if (!phoneStillVisible || original.url() !== initialUrl) return "next-auth";
-        return "identity-form";
-      };
-      await expect.poll(readTransition, {
-        message: "Toss 필수 입력 제출 뒤 callback 또는 다음 인증 단계가 나타나야 한다",
-        timeout: 10_000,
-      }).not.toBe("identity-form");
-      const transition = await readTransition();
-
-      const invalidFields = await frame.locator("input:visible").evaluateAll((inputs) =>
-        inputs.filter((input) => {
-          const element = input as HTMLInputElement;
-          return element.getAttribute("aria-invalid") === "true" || !element.validity.valid;
-        }).length,
-      ).catch(() => 0);
-      expect(invalidFields, "Toss 입력 validation 오류가 남았다").toBe(0);
-
-      const transitionEvidence = {
-        transition,
-        pages: page.context().pages().map((candidate) => {
-          const url = new URL(candidate.url());
-          return `${url.origin}${url.pathname}`;
-        }),
-        surfaces: await tossSurfaceEvidence(page),
-        responses: responses.slice(-20),
-      };
-      console.log("TOSS_IDENTITY_TRANSITION", JSON.stringify(transitionEvidence));
-      const bankPayPage = page.context().pages().find((candidate) =>
-        /bankpay/i.test(candidate.url()),
-      );
-      if (bankPayPage) {
-        const requiresSecurityProgram = await bankPayPage
-          .getByText(/보안 프로그램 설치 안내/)
-          .isVisible()
-          .catch(() => false);
-        if (requiresSecurityProgram) {
-          throw new Error(`toss_external_bankpay_security_program_required:${JSON.stringify(
-            transitionEvidence,
-          )}`);
-        }
-      }
-      return;
     }
     await page.waitForTimeout(250);
   }
-  throw new Error(`toss_pay_sandbox_identity_form_not_found:${JSON.stringify({
+  throw new Error(`toss_card_outcome_not_reached:${JSON.stringify({
     surfaces: await tossSurfaceEvidence(page),
     responses: responses.slice(-20),
   })}`);
@@ -549,11 +549,11 @@ test.describe("Toss Payments test-key sandbox callback", () => {
   }) => {
     test.setTimeout(60_000);
     await page.setViewportSize({ width: 390, height: 844 });
-    const effectsBefore = await memberPaymentEffects(ownerId);
-    const order = await startSandboxPayment(page);
     const tossObserver = observeTossResponses(page);
+    const effectsBefore = await memberPaymentEffects(ownerId);
+    const order = await startSandboxPayment(page, tossObserver.entries);
     await submitActualTossPaymentWindow(page);
-    await submitActualTossPaySandboxIdentity(page, tossObserver.entries);
+    await awaitActualTossCardOutcome(page, tossObserver.entries);
     await completeTossSandboxCheckout(page, "/payment/success", tossObserver.entries);
     tossObserver.stop();
     await page.waitForURL("**/payment/success?**", { timeout: 30_000 });
@@ -630,7 +630,7 @@ test.describe("Toss Payments test-key sandbox callback", () => {
     const failedOrder = await startSandboxPayment(failPage);
     const failTossObserver = observeTossResponses(failPage);
     await submitActualTossPaymentWindow(failPage);
-    await submitActualTossPaySandboxIdentity(failPage, failTossObserver.entries);
+    await awaitActualTossCardOutcome(failPage, failTossObserver.entries);
     await completeTossSandboxCheckout(failPage, "/payment/fail", failTossObserver.entries);
     failTossObserver.stop();
     await failPage.waitForURL("**/payment/fail?**", { timeout: 30_000 });
@@ -649,7 +649,7 @@ test.describe("Toss Payments test-key sandbox callback", () => {
     const successOrder = await startSandboxPayment(successPage);
     const successTossObserver = observeTossResponses(successPage);
     await submitActualTossPaymentWindow(successPage);
-    await submitActualTossPaySandboxIdentity(successPage, successTossObserver.entries);
+    await awaitActualTossCardOutcome(successPage, successTossObserver.entries);
     await completeTossSandboxCheckout(successPage, "/payment/success", successTossObserver.entries);
     successTossObserver.stop();
     await successPage.waitForURL("**/payment/success?**", { timeout: 30_000 });
