@@ -3235,10 +3235,21 @@ test.describe("V2 web-first social slice", () => {
         }),
       );
       expect.soft(requestedStatusStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
-      expect.soft(await adminPage.evaluate(() =>
-        document.documentElement.scrollWidth -
-        document.documentElement.clientWidth
-      )).toBe(0);
+      const adminOverflow = await adminPage.evaluate(() => {
+        const viewportWidth = document.documentElement.clientWidth;
+        const offenders = [...document.querySelectorAll<HTMLElement>("body *")]
+          .map((element) => ({
+            selector: element.className || element.tagName,
+            right: Math.ceil(element.getBoundingClientRect().right),
+          }))
+          .filter(({ right }) => right > viewportWidth)
+          .slice(0, 10);
+        return {
+          delta: document.documentElement.scrollWidth - viewportWidth,
+          offenders,
+        };
+      });
+      expect.soft(adminOverflow.delta, JSON.stringify(adminOverflow.offenders)).toBe(0);
       expect.soft(adminErrors).toEqual([]);
       await adminContext.close();
       }

@@ -62,6 +62,22 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Docker registry 요청 직렬화
+        run: |
+          # Docker 공식 daemon 옵션으로 한 이미지 내부 layer pull도 직렬화한다.
+          # 이미지 목록만 순차 처리해도 postgres의 다수 layer가 동시에 요청되면
+          # GHCR의 GitHub 호스팅 러너 IP rate limit을 넘을 수 있다.
+          daemon_config="$(mktemp)"
+          if sudo test -f /etc/docker/daemon.json; then
+            sudo jq '. + {"max-concurrent-downloads": 1}' /etc/docker/daemon.json |
+              tee "$daemon_config" >/dev/null
+          else
+            printf '%s\n' '{"max-concurrent-downloads":1}' > "$daemon_config"
+          fi
+          sudo install -m 0644 "$daemon_config" /etc/docker/daemon.json
+          sudo systemctl restart docker
+          jq -e '."max-concurrent-downloads" == 1' /etc/docker/daemon.json
+
       - name: Supabase 필수 이미지 순차 준비
         run: |
           # supabase start는 여러 이미지를 동시에 pull해 GitHub 호스팅 러너의
