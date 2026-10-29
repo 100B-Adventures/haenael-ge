@@ -35,8 +35,8 @@ function getAppUrl() {
 
 function getCustomerKey() {
   const key = window.localStorage.getItem("haenael_ge_customer_key");
-  if (key) return key;
-  const next = `anonymous_${crypto.randomUUID().slice(0, 8)}`;
+  if (key && /^[A-Za-z0-9_=.@-]{22,50}$/.test(key)) return key;
+  const next = `anonymous_${crypto.randomUUID()}`;
   window.localStorage.setItem("haenael_ge_customer_key", next);
   return next;
 }
@@ -169,7 +169,7 @@ export function CheerPaymentButton({
       if (!clientKey) {
         throw new Error("토스 테스트 클라이언트 키가 필요합니다.");
       }
-      if (!/^(?:test|live)_ck_/.test(clientKey)) {
+      if (!/^(?:test|live)_(?:gck|ck)_/.test(clientKey)) {
         throw new Error("카드 결제용 Toss Payments API 키가 필요합니다.");
       }
       const order = await createOrder();
@@ -193,8 +193,33 @@ export function CheerPaymentButton({
         },
       } as const;
 
-      const payment = tossPayments.payment({ customerKey: order.customerKey });
-      await payment.requestPayment({ method: "CARD", ...commonRequest });
+      if (/^(?:test|live)_gck_/.test(clientKey)) {
+        const widgets = tossPayments.widgets({ customerKey: order.customerKey });
+        await widgets.setAmount(commonRequest.amount);
+        const paymentWindow = await widgets.renderPaymentWindow({
+          orderName: commonRequest.orderName,
+        });
+        paymentWindow.on("paymentRequest", ({ paymentMethod }) => {
+          if (paymentMethod.method !== "CARD") {
+            setError("카드를 선택해야 응원 결제를 계속할 수 있어요.");
+            setLoading(false);
+            return;
+          }
+          const { amount: _amount, ...paymentRequest } = commonRequest;
+          void widgets.requestPayment(paymentRequest).catch((paymentError: unknown) => {
+            setError(paymentErrorMessage(paymentError));
+            setLoading(false);
+          });
+        });
+        paymentWindow.on("cancel", () => {
+          void paymentWindow.destroy().catch(() => undefined);
+          setError("결제를 취소했어요. 다시 시도할 수 있어요.");
+          setLoading(false);
+        });
+      } else {
+        const payment = tossPayments.payment({ customerKey: order.customerKey });
+        await payment.requestPayment({ method: "CARD", ...commonRequest });
+      }
     } catch (e) {
       setError(paymentErrorMessage(e));
       setLoading(false);

@@ -3,6 +3,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { CheerPaymentButton } from "../CheerPaymentButton";
 
 const mockRequestPayment = vi.fn();
+const mockWidgetSetAmount = vi.fn();
+const mockWidgetRequestPayment = vi.fn();
+const mockRenderPaymentWindow = vi.fn();
+const mockPaymentWindowDestroy = vi.fn();
+const paymentWindowHandlers = new Map<string, (params?: unknown) => void>();
 const mockLoadTossPayments = vi.fn();
 const mockGetSession = vi.fn();
 
@@ -37,17 +42,31 @@ describe("CheerPaymentButton Toss v2 request", () => {
             orderId: "order-1",
             orderName: "친구 목표 응원",
             amountKrw: 3000,
-            customerKey: "anonymous-customer",
+            customerKey: "anonymous-customer-0001",
           }),
       }),
     );
 
     mockRequestPayment.mockResolvedValue(undefined);
+    mockWidgetSetAmount.mockResolvedValue(undefined);
+    mockWidgetRequestPayment.mockResolvedValue(undefined);
+    mockPaymentWindowDestroy.mockResolvedValue(undefined);
+    mockRenderPaymentWindow.mockResolvedValue({
+      on: (eventName: string, callback: (params?: unknown) => void) => {
+        paymentWindowHandlers.set(eventName, callback);
+      },
+      destroy: mockPaymentWindowDestroy,
+    });
     mockGetSession.mockResolvedValue({ data: { session: null } });
     mockLoadTossPayments.mockResolvedValue({
       payment: () => ({
         requestPayment: mockRequestPayment,
         destroy: vi.fn(),
+      }),
+      widgets: () => ({
+        setAmount: mockWidgetSetAmount,
+        renderPaymentWindow: mockRenderPaymentWindow,
+        requestPayment: mockWidgetRequestPayment,
       }),
     });
   });
@@ -134,7 +153,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     });
   });
 
-  it("G4-PAY-01 주문서형 키는 주문 생성 전에 거절한다", async () => {
+  it("G4-PAY-01 결제창형 키에서 CARD 선택만 승인 요청한다", async () => {
     vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
 
     render(
@@ -148,10 +167,40 @@ describe("CheerPaymentButton Toss v2 request", () => {
     fireEvent.click(screen.getByTestId("cheer-cta"));
     fireEvent.click(screen.getByTestId("cheer-payment-submit"));
 
-    expect(await screen.findByText("카드 결제용 Toss Payments API 키가 필요합니다.")).toBeVisible();
-    expect(fetch).not.toHaveBeenCalled();
-    expect(mockLoadTossPayments).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalled());
+    paymentWindowHandlers.get("paymentRequest")?.({
+      paymentMethod: { method: "CARD", card: { issuerCode: "11" } },
+    });
+    await waitFor(() => {
+      expect(mockWidgetRequestPayment).toHaveBeenCalledWith(
+        expect.objectContaining({ orderId: "order-1" }),
+      );
+    });
     expect(mockRequestPayment).not.toHaveBeenCalled();
+  });
+
+  it("G4-PAY-01 결제창형 키에서 계좌이체 선택은 승인 요청 전에 거절한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalled());
+    paymentWindowHandlers.get("paymentRequest")?.({
+      paymentMethod: { method: "TRANSFER", transfer: { provider: "BANKPAY" } },
+    });
+    expect(
+      await screen.findByText("카드를 선택해야 응원 결제를 계속할 수 있어요."),
+    ).toBeVisible();
+    expect(mockWidgetRequestPayment).not.toHaveBeenCalled();
   });
 
   it("G4-PAY-02 Toss SDK의 일반 객체 오류 메시지를 사용자에게 표시한다", async () => {

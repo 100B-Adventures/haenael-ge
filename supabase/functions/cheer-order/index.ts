@@ -42,10 +42,10 @@ function makeOrderId(): string {
 }
 
 function normalizeCustomerKey(input: unknown): string {
-  if (typeof input === "string" && /^[A-Za-z0-9_=.@-]{2,50}$/.test(input)) {
+  if (typeof input === "string" && /^[A-Za-z0-9_=.@-]{22,50}$/.test(input)) {
     return input;
   }
-  return `anonymous_${crypto.randomUUID().slice(0, 8)}`;
+  return `anonymous_${crypto.randomUUID()}`;
 }
 
 const REQUEST_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
