@@ -30,7 +30,9 @@ const SERVICE_KEY = RUN_LIVE
   ? requiredEnv("SUPABASE_SERVICE_ROLE_KEY")
   : "unused";
 const ACCESS_TOKEN = RUN_LIVE ? requiredEnv("SUPABASE_ACCESS_TOKEN") : "unused";
-const TOSS_CLIENT_KEY = RUN_LIVE ? requiredEnv("TOSS_CLIENT_KEY") : "test_ck_mock";
+const TOSS_CLIENT_KEY = RUN_LIVE
+  ? requiredEnv("TOSS_CLIENT_KEY")
+  : "test_ck_mock";
 const PROJECT_REF = RUN_LIVE
   ? requiredEnv("SUPABASE_STAGING_PROJECT_REF")
   : "unused";
@@ -270,7 +272,7 @@ async function tossSurfaceEvidence(page: Page) {
 }
 
 async function submitActualTossPaymentWindow(page: Page) {
-  const deadline = Date.now() + 30_000;
+  const deadline = Date.now() + 20_000;
   while (Date.now() < deadline) {
     for (const frame of await tossPaymentFrames(page)) {
       const cardMethod = frame
@@ -354,7 +356,7 @@ async function awaitActualTossCardOutcome(
           issuer: "SHINHAN",
           gatewayUrl: (() => {
             const url = new URL(frame.url());
-            return `${url.origin}${url.pathname}`;
+            return `${url.origin}${url.pathname.split(";")[0]}`;
           })(),
           bodyText: bodyText.slice(0, 500),
           responses: responses.slice(-20),
@@ -448,8 +450,9 @@ async function completeTossSandboxCheckout(
 }
 
 async function closeActualTossPaymentWindow(page: Page) {
-  const deadline = Date.now() + 30_000;
+  const deadline = Date.now() + 15_000;
   while (Date.now() < deadline) {
+    if (page.url().includes("/payment/fail?")) return;
     const tossSurfaces = await tossPaymentFrames(page);
 
     for (const frame of tossSurfaces) {
@@ -728,12 +731,18 @@ test.describe("Toss Payments test-key sandbox callback", () => {
     const failContext = await browser.newContext({ ...devices["iPhone 13"] });
     const failPage = await failContext.newPage();
     const failTossObserver = observeTossResponses(failPage);
+    let phase = "fixture";
     try {
+      console.log("LIVE_TOSS_FAIL_PHASE", phase);
       const failedOrder = await startSandboxPayment(
         failPage,
         failTossObserver.entries,
       );
+      phase = "card-submit";
+      console.log("LIVE_TOSS_FAIL_PHASE", phase);
       await submitActualTossPaymentWindow(failPage);
+      phase = "sandbox-response";
+      console.log("LIVE_TOSS_FAIL_PHASE", phase);
       await expect
         .poll(
           () =>
@@ -745,18 +754,24 @@ test.describe("Toss Payments test-key sandbox callback", () => {
           { message: "실결제 전 sandbox Toss Payments 응답을 관찰해야 한다" },
         )
         .toBe(true);
+      phase = "external-card-auth";
+      console.log("LIVE_TOSS_FAIL_PHASE", phase);
+      await awaitActualTossCardOutcome(failPage, failTossObserver.entries);
+      phase = "payment-window-close";
+      console.log("LIVE_TOSS_FAIL_PHASE", phase);
       await closeActualTossPaymentWindow(failPage);
-      await failPage.waitForURL("**/payment/fail?**", { timeout: 30_000 });
+      phase = "fail-callback";
+      console.log("LIVE_TOSS_FAIL_PHASE", phase);
+      await failPage.waitForURL("**/payment/fail?**", { timeout: 10_000 });
 
       const actualFailCallback = new URL(failPage.url());
       expect(actualFailCallback.pathname).toBe("/payment/fail");
-      expect(["PAY_PROCESS_CANCELED", "USER_CANCEL"]).toContain(
-        actualFailCallback.searchParams.get("code"),
+      expect(actualFailCallback.searchParams.get("code")).toBe(
+        "PAY_PROCESS_CANCELED",
       );
       expect(actualFailCallback.searchParams.get("message")).toBeTruthy();
-      expect(actualFailCallback.searchParams.get("orderId")).toBe(
-        failedOrder.orderId,
-      );
+      // Toss 공식 계약: 인증 전 사용자 취소는 주문번호를 failUrl에 싣지 않는다.
+      expect(actualFailCallback.searchParams.get("orderId")).toBeNull();
       await expect(failPage.getByTestId("payment-fail-page")).toContainText(
         "결제가 멈췄어요",
       );
@@ -767,7 +782,7 @@ test.describe("Toss Payments test-key sandbox callback", () => {
       });
     } finally {
       failTossObserver.stop();
-      await failContext.close();
+      await failContext.close().catch(() => undefined);
     }
   });
 

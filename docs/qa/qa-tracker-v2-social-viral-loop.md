@@ -1,5 +1,15 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+- **2026-10-30 · 실제 CARD 실패 callback 재검증 ❌ BLOCKED:** Preview 환경변수 추가 명령이 공개 변수 타입 선택 안내만 출력하고 종료코드 0을 반환해 실제 저장되지 않은 내부 환경 결함을 확인했다. `Config` 타입을 명시해 수선하고 캐시 없이 재배포한 뒤 `LIVE-TOSS-EDGE-FAIL`을 다시 실행했다. 주문 생성, `신용·체크카드`와 신한카드 선택, Toss Payments sandbox 세션 POST HTTP 200까지 관찰했으나 `vbv.shinhancard.com`의 SuperSOL·SOLPay 카드 소유자 인증 화면에서 중단돼 실제 `failUrl` callback은 미관찰, EXIT 1이다. 직접 URL 이동·mock·BankPay 대체는 사용하지 않았다. `PAYMENTS_ENABLED=false`와 `TOSS_SECRET_KEY` 제거는 각각 EXIT 0. 근거 `.goal/runs/g4-card-fail-external-auth-final.log`, `docs/qa/evidence/v2-goal-round4-20261029/payment/live-toss-card-external-auth-390.png`.
+
+- **2026-10-30 · 결제 독립 코드리뷰 ❌ NG:** HEAD `6f22b4f`의 독립 검수에서 비카드 보상 RPC의 2,000원 감사기록 실패, `toss-confirm` 비카드 취소 DB 미기록, 실제 Toss 실패 callback을 직접 URL 이동으로 대체한 테스트, `CashoutQueue`의 `Collapsible` 우회, 결제창 닫기·unmount 시 SDK 인스턴스 미정리 등 MAJOR 4건·MINOR 1건이 확인됐다. 직접 URL 이동 결과는 통과 증거에서 제외한다. 수정·표적 검증·독립 재검수 전 결제 및 QA 항목은 PASS로 올리지 않는다. 근거 `.goal/runs/g4-independent-code-review-final-v3.log`.
+
+- **2026-10-29 22:00 KST · 검수 소유권 교정 ❌ NG:** 메인 Chrome의 Claude in Chrome 연결과 카카오 로그인 상태 읽기 전용 검수는 원발주가 단독 소유한다. 이 builder는 해당 브라우저 검증·Claude 보조 검수를 중복 실행하지 않고 결과가 실행 브리프에 반영될 때까지 로그아웃·계정부재를 판정하지 않는다. builder 소유 범위는 Toss Payments 카드 결제 계약·누락 QA·독립 코드/QA 검수다.
+
+- **2026-10-29 21:50 KST · 브라우저·결제 경로 교정 ❌ NG:** 카카오 OAuth는 메인 Chrome의 기존 로그인 세션과 Claude in Chrome 확장으로 검증해야 한다. 전용 Chrome 9342 응답·Codex 브라우저 제어 연결 부재를 로그아웃 근거로 쓰지 않는다. Toss Payments가 PG이고 BankPay는 계좌이체 하위 수단이므로, BankPay 보안 프로그램 화면으로 카드 결제 전체를 외부 차단 판정한 기존 근거는 무효다. 승인된 `CARD` 경로·공식 테스트 방법·상점키 지원 수단과 staging OAuth 종단을 각각 재검증하며, 실카드·개인정보·보안 프로그램 설치·실결제는 금지한다. 계약 `.goal/execution-brief.md` 21:50 절.
+
+- **2026-10-29 21:50 KST · 결제 후속검수 ❌ NG:** 기존 구현은 Toss Payments SDK의 `payment().requestPayment({ method: "CARD" })`로 카드 결제를 강제했지만 현재 `test_gck_` 경로는 `widgets().renderPaymentWindow()`가 상점에 설정된 결제수단 선택 UI를 연다. BankPay 한 경로의 보안 프로그램 요구만으로 카드 결제 전체를 외부 차단으로 판정할 수 없다. 공식 카드 샌드박스 경로·상점키별 지원 수단·최신 staging 배포 소스핀과 독립 검수 완료 전 결제 항목은 PASS로 승격하지 않는다. 근거 `.goal/runs/g4-post-ci-owner-review.md`, 독립 `code-reviewer`·`qa-verifier` 진행 중.
+
 - **2026-10-29 18:38 KST · G4-PAY ❌ NG:** PAY01 v23 EXIT1, PAY02 v5 EXIT1, v26 중단으로 verify EXIT 미생성. staging 정리 실행: PAYMENTS_ENABLED=false EXIT0, TOSS_SECRET_KEY 부재 조회 EXIT0, 전용 fixture 정리 EXIT0·remaining0. 로그 `.goal/runs/g4-budget-{cleanup-payments,cleanup-toss,fixture-cleanup}.log`, secrets 조회 `.goal/runs/g4-budget-secrets-after.json`. callback·중복승인 미완료, QA 미착수. 예산 초과 뒤 새 실행 없음.
 
 - **G4-PAY-01 ❌ NG · EXIT 1 · staging Playwright:** v17/v18/v19와 v22에서 `/payment/success` callback 대기 timeout. 실패 화면은 Toss 본인인증 입력 validation 상태이며 `submitActualTossPaySandboxIdentity()`가 첫 다음 클릭 직후 반환한다는 발주측 진단을 접수했다. 다음 단계 DOM 전환·iframe 오류·최종 URL·popup·Toss 응답을 확인하기 전 서버 승인 장애로 판정하지 않는다. 로그 `.goal/runs/g4-pay01-v22.log`. timeout 연장·mock·강제 성공 URL 금지.
