@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sourceRoots": ["web/src", "supabase/functions"],
-  "systemVariables": ["NODE_ENV", "VERCEL_ENV"],
+  "systemVariables": ["NODE_ENV", "VERCEL_ENV", "VERCEL_GIT_COMMIT_SHA"],
   "vaultSecrets": [
     { "name": "storage_cleanup_worker_url", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" },
     { "name": "edge_invoke_publishable_key", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" },
