@@ -62,6 +62,34 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Supabase 필수 이미지 순차 준비
+        run: |
+          # supabase start는 여러 이미지를 동시에 pull해 GitHub 호스팅 러너의
+          # 공유 egress rate limit을 넘길 수 있다. 고정 CLI의 필수 이미지를
+          # 한 번에 하나씩 받아 로컬 Docker cache에서 기동한다.
+          images=(
+            ghcr.io/supabase/postgres:17.6.1.158
+            ghcr.io/supabase/gotrue:v2.195.0
+            ghcr.io/supabase/postgrest:v16.1
+            ghcr.io/supabase/storage-api:v1.69.0
+            ghcr.io/supabase/kong:2.8.1
+            ghcr.io/supabase/edge-runtime:v1.74.3
+          )
+          for image in "${images[@]}"; do
+            pull_ok=0
+            for attempt in 1 2 3; do
+              if docker pull "$image"; then
+                pull_ok=1
+                break
+              fi
+              sleep "$((attempt * 5))"
+            done
+            if [ "$pull_ok" -ne 1 ]; then
+              echo "::error::Supabase image pull failed after 3 attempts: $image"
+              exit 1
+            fi
+          done
+
       - name: 로컬 Supabase 기동
         run: |
           # 서버 계약이 실제 사용하는 DB·Auth·REST·Storage·Kong·Edge Runtime만 기동한다.
