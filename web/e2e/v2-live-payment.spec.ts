@@ -312,7 +312,12 @@ async function submitActualTossPaymentWindow(page: Page) {
       }
       const submit = frame.getByRole("button", { name: /^결제하기$/ }).first();
       if (await submit.isVisible().catch(() => false)) {
-        expect(new URL(frame.url()).hostname).toMatch(/sandbox/i);
+        expect(new URL(frame.url()).hostname).toBe(
+          "payment-widget.tosspayments.com",
+        );
+        await expect(
+          frame.getByText(/테스트 환경이에요.*실제로 결제되지 않아요/),
+        ).toBeVisible();
         console.log(
           "TOSS_PAYMENT_WINDOW_SURFACE",
           JSON.stringify(await tossSurfaceEvidence(page)),
