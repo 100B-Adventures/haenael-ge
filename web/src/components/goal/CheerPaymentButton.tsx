@@ -404,7 +404,7 @@ export function CheerPaymentButton({
 
             {error && (
               <p
-                className="mt-3 text-[13px] font-semibold [color:#B3261E]!"
+                className="mt-3 text-[13px] font-semibold text-danger-ink"
                 role="alert"
               >
                 {error}
