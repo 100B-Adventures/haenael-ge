@@ -1,5 +1,7 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+- **2026-10-29 04:23 KST · G4-AUTH ❌ NG:** AUTH-01은 전용 Chrome Kakao 쿠키 13개 주입과 메인 Chrome 최소 프로필 headless 재시도 뒤에도 실제 계정 재로그인이 필요해 BLOCKED, AUTH-02는 상대 `Location`을 절대 URL로 오판한 테스트 계약을 교정한 뒤 Playwright 1/1 EXIT 0, 비인증 `/my` HTTP 307·세션/개인정보 DOM 0, 기준 회귀 EXIT 0·새 실패 0. demo `docs/qa/evidence/v2-goal-round4-20261029/auth/index.html`.
+
 ## 2026-10-28 01:47 KST · S3 독립 QA PASS
 
 | 요청 번호 | 범위 | 최종 판정 | 독립 관찰 근거 |

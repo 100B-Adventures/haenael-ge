@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>해낼게 V2 G4-AUTH 실제 검증</title>
+  <style>
+    :root{color-scheme:light;--ink:#17372b;--muted:#5c6f66;--line:#dbe7df;--paper:#fbfcfa;--brand:#14613a;--soft:#edf7f0;--warn:#fff3cd;--warn-ink:#6a4e00}
+    *{box-sizing:border-box}body{margin:0;background:#f3f6f2;color:var(--ink);font:16px/1.65 system-ui,-apple-system,sans-serif}
+    main{max-width:1000px;margin:0 auto;padding:40px 22px 72px}h1,h2{line-height:1.25}h1{margin:0 0 8px;font-size:clamp(30px,5vw,46px)}h2{margin-top:42px}
+    .lead{color:var(--muted);max-width:820px}.status{display:inline-block;margin:12px 0 22px;padding:8px 12px;border-radius:999px;background:var(--warn);color:var(--warn-ink);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.card,.metric,.shot{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 30px #17372b0a}
+    .metric strong{display:block;color:var(--brand);font-size:24px}.shot{max-width:430px}.shot img{width:100%;height:auto;display:block;border-radius:12px}.shot b{display:block;margin-top:12px}
+    a{color:var(--brand);font-weight:700;overflow-wrap:anywhere}ul{padding-left:22px}.note{background:var(--soft);border-left:4px solid var(--brand);padding:14px 16px;border-radius:10px}
+    code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.92em}footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>G4-AUTH Kakao OAuth 실제 검증</h1>
+  <p class="lead">무료 staging의 실제 OAuth 시작·callback·보호 라우트를 대상으로 실행했습니다. 제품 인증 코드는 이미 승인 설계대로 연결돼 있어 재구현하지 않고, 누락됐던 실제 Kakao E2E를 추가했습니다.</p>
+  <div class="status">슬라이스 판정: BLOCKED · 실제 Kakao 계정 재로그인 필요</div>
+
+  <section class="grid" aria-label="검증 요약">
+    <div class="metric"><strong>BLOCKED</strong>G4-AUTH-01 실제 계정 성공 왕복</div>
+    <div class="metric"><strong>PASS</strong>G4-AUTH-02 취소·state·비인증 경계</div>
+    <div class="metric"><strong>307</strong>비인증 <code>/my</code> → <code>/?next=/my</code></div>
+    <div class="metric"><strong>0</strong>비인증 Supabase 세션·개인정보 DOM</div>
+    <div class="metric"><strong>EXIT 0</strong>기준 회귀, 새 실패 0</div>
+  </section>
+
+  <h2>G4-AUTH-02 실제 UI와 서버 결과</h2>
+  <figure class="shot">
+    <img src="live-kakao-cancelled-390.png" alt="Kakao 로그인 취소 뒤 해낼게 landing으로 복귀한 390px 실제 화면">
+    <b>사용자 취소 뒤 landing 복귀</b>
+    <span>실제 staging callback에 유효한 1회용 state와 <code>access_denied</code>를 전달한 결과입니다.</span>
+  </figure>
+  <div class="card">
+    <ul>
+      <li>취소 callback은 <code>/?auth_error=cancelled</code>로 복귀하고 재로그인 링크가 노출됐습니다.</li>
+      <li>잘못된 state와 가짜 code는 HTTP 307, <code>auth_error=invalid_state</code>, 세션 쿠키 0으로 거부됐습니다.</li>
+      <li>비인증 <code>/my</code>는 HTTP 307과 정확한 <code>next=/my</code>를 반환했고, 마이페이지 개인정보 DOM은 0건입니다.</li>
+      <li>Playwright headless 실행은 1/1 PASS, console·page error 0입니다.</li>
+    </ul>
+  </div>
+
+  <h2>G4-AUTH-01 외부 차단 증거</h2>
+  <div class="card">
+    <ul>
+      <li>haenael 전용 Chrome에서 Kakao 쿠키 13개를 값 노출 없이 읽어 headless 컨텍스트에 주입했습니다.</li>
+      <li>실제 Kakao authorize 화면은 계정 비밀번호 입력을 요구했고 테스트는 <code>external_kakao_session_expired</code>로 종료됐습니다.</li>
+      <li>메인 Chrome의 최소 쿠키 프로필을 복제한 두 번째 headless 시도도 제한시간 안에 사용할 수 있는 세션을 만들지 못했고, 생성한 임시 프로필과 프로세스는 정리했습니다.</li>
+      <li>따라서 Kakao 동의 → callback → Supabase 세션 → <code>/my</code> 성공 왕복은 PASS로 승격하지 않았습니다.</li>
+    </ul>
+  </div>
+
+  <h2>소스와 기준</h2>
+  <div class="card">
+    <ul>
+      <li><a href="../../../../../web/e2e/v2-live-auth.spec.ts">G4-AUTH 실제 E2E 원문</a></li>
+      <li><a href="https://haenael-ge-v2-staging-100-b.vercel.app">검증 대상 staging</a></li>
+      <li><a href="https://developers.kakao.com/docs/ko/kakaologin/trouble-shooting">Kakao Login 공식 오류·취소 기준</a></li>
+      <li><a href="https://developers.kakao.com/docs/ko/kakaologin/prerequisite">Kakao Login 공식 redirect URI·사전 설정 기준</a></li>
+    </ul>
+  </div>
+  <p class="note">G4-AUTH-02와 로컬 기준 회귀는 PASS지만 G4-AUTH-01이 외부 재로그인 대기이므로 슬라이스 전체는 BLOCKED입니다. 작업 브랜치 push는 현재 세션의 외부쓰기 정책이 실행 전에 차단해 원격 CI는 미실행입니다. 전체 제품 QA, 운영 배포, 다음 결제 슬라이스는 진행하지 않았습니다.</p>
+
+  <footer>
+    STAMP: 2026-10-29 04:23 KST · model Codex(model ID 미노출) · agent code-builder · skill haenael-supabase-build · basis 승인 prototype v3.0.0, eng-design v1.2.5, staging Playwright, Kakao 공식 문서 · 고민: 서버·테스트 결함과 실제 계정 재인증 의존을 분리해 PASS를 과장하지 않음<br>
+    SKILLS_USED: haenael-supabase-build · 해낼게 Supabase build 슬라이스의 staging·보안·정리 계약 적용<br>
+    SKILLS_SKIPPED: 없음<br>
+    KNOWLEDGE_QUERY: 해낼게 G4-AUTH 승인 설계·D-049·Kakao OAuth 공식 취소/redirect 계약<br>
+    HITS_USED: pipeline-state.v2 승인 버전핀, D-049, Kakao 공식 문서 · 구현·검증 기준으로 사용<br>
+    HITS_REJECTED: 과거 storageState·test adapter 인증 증거 · 이번 실제 계정 왕복을 대체하지 못해 제외<br>
+    CONFLICTS: 승인 test-plan은 adapter를 허용하지만 4회차 실행 계약은 실제 Kakao 계정 왕복을 요구하므로 더 강한 실행 계약을 적용<br>
+    SOURCES/MODEL: Codex(model ID 미노출) · web/e2e/v2-live-auth.spec.ts · .goal/execution-brief.md · Kakao Login 공식 문서
+  </footer>
+</main>
+</body>
+</html>
