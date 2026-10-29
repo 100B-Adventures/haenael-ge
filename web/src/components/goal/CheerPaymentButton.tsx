@@ -42,11 +42,12 @@ function getCustomerKey() {
 }
 
 function paymentErrorMessage(error: unknown) {
-  if (error instanceof Error) return error.message;
   if (typeof error === "string") return error;
   if (typeof error === "object" && error !== null) {
     const message =
-      "message" in error && typeof error.message === "string"
+      error instanceof Error
+        ? error.message
+        : "message" in error && typeof error.message === "string"
         ? error.message
         : null;
     const code =

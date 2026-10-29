@@ -155,10 +155,11 @@ describe("CheerPaymentButton Toss v2 request", () => {
   });
 
   it("G4-PAY-02 Toss SDK의 일반 객체 오류 메시지를 사용자에게 표시한다", async () => {
-    mockRequestPayment.mockRejectedValue({
-      code: "INVALID_CLIENT_KEY",
-      message: "클라이언트 키가 잘못되었습니다.",
-    });
+    mockRequestPayment.mockRejectedValue(
+      Object.assign(new Error("클라이언트 키가 잘못되었습니다."), {
+        code: "INVALID_CLIENT_KEY",
+      }),
+    );
 
     render(
       <CheerPaymentButton
