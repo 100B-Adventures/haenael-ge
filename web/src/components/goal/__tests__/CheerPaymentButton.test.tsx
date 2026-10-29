@@ -171,6 +171,10 @@ describe("CheerPaymentButton Toss v2 request", () => {
     fireEvent.click(screen.getByTestId("cheer-cta"));
     fireEvent.click(screen.getByTestId("cheer-payment-submit"));
 
-    expect(await screen.findByText("클라이언트 키가 잘못되었습니다.")).toBeVisible();
+    expect(
+      await screen.findByText(
+        "클라이언트 키가 잘못되었습니다. (INVALID_CLIENT_KEY)",
+      ),
+    ).toBeVisible();
   });
 });

@@ -43,13 +43,17 @@ function getCustomerKey() {
 
 function paymentErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof error.message === "string"
-  ) {
-    return error.message;
+  if (typeof error === "string") return error;
+  if (typeof error === "object" && error !== null) {
+    const message =
+      "message" in error && typeof error.message === "string"
+        ? error.message
+        : null;
+    const code =
+      "code" in error && typeof error.code === "string" ? error.code : null;
+    if (code && message) return `${message} (${code})`;
+    if (message) return message;
+    if (code) return code;
   }
   return "결제 요청 실패";
 }
@@ -358,7 +362,10 @@ export function CheerPaymentButton({
             </label>
 
             {error && (
-              <p className="mt-3 text-[13px] font-semibold [color:#B3261E]!">
+              <p
+                className="mt-3 text-[13px] font-semibold [color:#B3261E]!"
+                role="alert"
+              >
                 {error}
               </p>
             )}
