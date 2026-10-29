@@ -7,7 +7,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { withRegionHeader } from "../_shared/region.ts";
-import { TossClient } from "../_shared/toss.ts";
+import { isCardPaymentMethod, TossClient } from "../_shared/toss.ts";
 import { toPublicError } from "../_shared/errors.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
 import { dispatchCheerReceivedNotification } from "../_shared/cheer-notification.ts";
@@ -90,9 +90,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const paymentKey = typeof body.paymentKey === "string"
-    ? body.paymentKey.trim()
-    : "";
+  const paymentKey =
+    typeof body.paymentKey === "string" ? body.paymentKey.trim() : "";
   const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
   const amount = Number(body.amount);
 
@@ -215,6 +214,40 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  // 클라이언트의 CARD 선택 검사는 UX 경계일 뿐 보안 경계가 아니다. 승인 응답이
+  // 카드가 아니면 DB·원장에 반영하기 전에 즉시 전액취소해 비카드 결제를 격리한다.
+  if (!isCardPaymentMethod(confirm.method)) {
+    try {
+      await toss.cancelPayment(
+        confirm.paymentKey,
+        "해낼게 카드 전용 주문에 허용되지 않은 결제수단",
+      );
+    } catch (cancelError) {
+      console.error(
+        "[toss-confirm] non-card compensation failed:",
+        cancelError,
+      );
+      await sendSlackAlert({
+        event: "payment_reconcile_failed",
+        severity: "critical",
+        summary: "Non-card payment cancellation failed",
+        fields: { orderId, method: confirm.method },
+      });
+      return json(502, {
+        error: {
+          code: "non_card_compensation_failed",
+          message: "허용되지 않은 결제수단 취소에 실패했습니다.",
+        },
+      });
+    }
+    return json(400, {
+      error: {
+        code: "unsupported_payment_method",
+        message: "카드 결제만 지원합니다.",
+      },
+    });
+  }
+
   const confirmExtended = confirm as typeof confirm & {
     receiptUrl?: string;
     raw?: unknown;
@@ -251,9 +284,8 @@ Deno.serve(async (req: Request) => {
       );
       compensated = true;
     } catch (cancelErr) {
-      compensationError = cancelErr instanceof Error
-        ? cancelErr.message
-        : "Toss cancel failed";
+      compensationError =
+        cancelErr instanceof Error ? cancelErr.message : "Toss cancel failed";
       console.error(
         "[toss-confirm] Toss cancel compensation failed:",
         cancelErr,
@@ -305,33 +337,36 @@ Deno.serve(async (req: Request) => {
   const confirmed = data[0];
   // 결제 확정(DB 커밋 직후) 관제 송신. idempotency_key 가 orderId 라 웹훅 경로와 중복돼도 한 건.
   firePay(orderId, amount);
-  await dispatchCheerReceivedNotification({
-    alimtalkConfigured: isAlimtalkConfigured(),
-    getMemberPhone: async (memberId) => {
-      const { data: member, error: phoneError } = await supabase
-        .from("member")
-        .select("phone")
-        .eq("id", memberId)
-        .maybeSingle();
-      return {
-        phone: typeof member?.phone === "string" ? member.phone : null,
-        error: phoneError?.message,
-      };
+  await dispatchCheerReceivedNotification(
+    {
+      alimtalkConfigured: isAlimtalkConfigured(),
+      getMemberPhone: async (memberId) => {
+        const { data: member, error: phoneError } = await supabase
+          .from("member")
+          .select("phone")
+          .eq("id", memberId)
+          .maybeSingle();
+        return {
+          phone: typeof member?.phone === "string" ? member.phone : null,
+          error: phoneError?.message,
+        };
+      },
+      invokeNotify: async (payload) => {
+        const notifyInternalToken = Deno.env.get("NOTIFY_INTERNAL_TOKEN") ?? "";
+        const { data: notifyData, error: notifyError } =
+          await supabase.functions.invoke("notify", {
+            headers: { "x-notify-internal-token": notifyInternalToken },
+            body: payload,
+          });
+        return { data: notifyData, error: notifyError?.message };
+      },
     },
-    invokeNotify: async (payload) => {
-      const notifyInternalToken = Deno.env.get("NOTIFY_INTERNAL_TOKEN") ?? "";
-      const { data: notifyData, error: notifyError } = await supabase.functions
-        .invoke("notify", {
-          headers: { "x-notify-internal-token": notifyInternalToken },
-          body: payload,
-        });
-      return { data: notifyData, error: notifyError?.message };
+    {
+      memberId: confirmed.member_id,
+      displayName: confirmed.display_name,
+      goalTitle: confirmed.goal_title,
     },
-  }, {
-    memberId: confirmed.member_id,
-    displayName: confirmed.display_name,
-    goalTitle: confirmed.goal_title,
-  });
+  );
 
   return json(200, {
     paymentId: confirmed.payment_id,

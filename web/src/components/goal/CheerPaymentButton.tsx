@@ -35,7 +35,9 @@ function getAppUrl() {
 
 function getCustomerKey() {
   const key = window.localStorage.getItem("haenael_ge_customer_key");
-  if (key && /^[A-Za-z0-9_=.@-]{22,50}$/.test(key)) return key;
+  if (key && /^(?=.{22,50}$)(?=.*[-_=.@])[A-Za-z0-9_=.@-]+$/.test(key)) {
+    return key;
+  }
   const next = `anonymous_${crypto.randomUUID()}`;
   window.localStorage.setItem("haenael_ge_customer_key", next);
   return next;
@@ -48,8 +50,8 @@ function paymentErrorMessage(error: unknown) {
       error instanceof Error
         ? error.message
         : "message" in error && typeof error.message === "string"
-        ? error.message
-        : null;
+          ? error.message
+          : null;
     const code =
       "code" in error && typeof error.code === "string" ? error.code : null;
     if (code && message) return `${message} (${code})`;
@@ -131,7 +133,9 @@ export function CheerPaymentButton({
       throw new Error("Supabase 환경변수가 필요합니다.");
     }
 
-    const { data: { session } } = await createClient().auth.getSession();
+    const {
+      data: { session },
+    } = await createClient().auth.getSession();
     const accessToken = session?.access_token ?? anonKey;
 
     const res = await fetch(`${supabaseUrl}/functions/v1/cheer-order`, {
@@ -194,22 +198,31 @@ export function CheerPaymentButton({
       } as const;
 
       if (/^(?:test|live)_gck_/.test(clientKey)) {
-        const widgets = tossPayments.widgets({ customerKey: order.customerKey });
+        const widgets = tossPayments.widgets({
+          customerKey: order.customerKey,
+        });
         await widgets.setAmount(commonRequest.amount);
         const paymentWindow = await widgets.renderPaymentWindow({
           orderName: commonRequest.orderName,
         });
-        paymentWindow.on("paymentRequest", ({ paymentMethod }) => {
+        let paymentRequestStarted = false;
+        paymentWindow.on("paymentRequest", async ({ paymentMethod }) => {
+          if (paymentRequestStarted) return;
+          paymentRequestStarted = true;
           if (paymentMethod.method !== "CARD") {
+            await paymentWindow.destroy().catch(() => undefined);
             setError("카드를 선택해야 응원 결제를 계속할 수 있어요.");
             setLoading(false);
             return;
           }
           const { amount: _amount, ...paymentRequest } = commonRequest;
-          void widgets.requestPayment(paymentRequest).catch((paymentError: unknown) => {
-            setError(paymentErrorMessage(paymentError));
-            setLoading(false);
-          });
+          void widgets
+            .requestPayment(paymentRequest)
+            .catch(async (paymentError: unknown) => {
+              await paymentWindow.destroy().catch(() => undefined);
+              setError(paymentErrorMessage(paymentError));
+              setLoading(false);
+            });
         });
         paymentWindow.on("cancel", () => {
           void paymentWindow.destroy().catch(() => undefined);
@@ -217,7 +230,9 @@ export function CheerPaymentButton({
           setLoading(false);
         });
       } else {
-        const payment = tossPayments.payment({ customerKey: order.customerKey });
+        const payment = tossPayments.payment({
+          customerKey: order.customerKey,
+        });
         await payment.requestPayment({ method: "CARD", ...commonRequest });
       }
     } catch (e) {

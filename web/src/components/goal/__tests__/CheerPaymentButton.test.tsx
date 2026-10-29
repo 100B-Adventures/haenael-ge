@@ -201,6 +201,30 @@ describe("CheerPaymentButton Toss v2 request", () => {
       await screen.findByText("카드를 선택해야 응원 결제를 계속할 수 있어요."),
     ).toBeVisible();
     expect(mockWidgetRequestPayment).not.toHaveBeenCalled();
+    expect(mockPaymentWindowDestroy).toHaveBeenCalledTimes(1);
+  });
+
+  it("G4-PAY-01 특수문자 없는 이전 customerKey는 Toss 규격 UUID 키로 교체한다", async () => {
+    window.localStorage.setItem(
+      "haenael_ge_customer_key",
+      "abcdefghijklmnopqrstuvwxyz",
+    );
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    await waitFor(() => expect(mockLoadTossPayments).toHaveBeenCalled());
+    expect(window.localStorage.getItem("haenael_ge_customer_key")).toMatch(
+      /^anonymous_[0-9a-f-]{36}$/,
+    );
   });
 
   it("G4-PAY-02 Toss SDK의 일반 객체 오류 메시지를 사용자에게 표시한다", async () => {

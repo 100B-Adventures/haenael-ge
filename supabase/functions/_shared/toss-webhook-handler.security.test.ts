@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { TossClient } from "./toss";
+import { isCardPaymentMethod, TossClient } from "./toss";
 import {
   handleTossWebhook,
   type TossPaymentResponse,
@@ -159,5 +159,11 @@ describe("TossClient Payment 객체", () => {
 
     const result = await new TossClient("test-secret").getPayment(PAYMENT_KEY);
     expect(result.mId).toBe(MID);
+  });
+
+  it("G4-PAY-01 승인 응답은 공식 카드 method만 허용한다", () => {
+    expect(isCardPaymentMethod("카드")).toBe(true);
+    expect(isCardPaymentMethod("계좌이체")).toBe(false);
+    expect(isCardPaymentMethod("간편결제")).toBe(false);
   });
 });

@@ -30,6 +30,11 @@ export interface TossPaymentResponse extends TossConfirmResponse {
   canceledAt?: string;
 }
 
+/** Toss Payment 객체의 카드 승인 응답만 허용한다. 공식 응답 enum은 한국어 "카드"다. */
+export function isCardPaymentMethod(method: string): boolean {
+  return method === "카드";
+}
+
 export class TossClient {
   private readonly baseUrl = "https://api.tosspayments.com/v1";
 
@@ -67,13 +72,13 @@ export class TossClient {
       totalAmount,
       method: String(body.method ?? body.easyPay?.provider ?? "UNKNOWN"),
       approvedAt: typeof body.approvedAt === "string" ? body.approvedAt : "",
-      receiptUrl: typeof body.receipt?.url === "string"
-        ? body.receipt.url
-        : undefined,
-      canceledAt: Array.isArray(body.cancels) &&
-          typeof body.cancels.at(-1)?.canceledAt === "string"
-        ? body.cancels.at(-1).canceledAt
-        : undefined,
+      receiptUrl:
+        typeof body.receipt?.url === "string" ? body.receipt.url : undefined,
+      canceledAt:
+        Array.isArray(body.cancels) &&
+        typeof body.cancels.at(-1)?.canceledAt === "string"
+          ? body.cancels.at(-1).canceledAt
+          : undefined,
       raw: body,
     };
   }
@@ -90,20 +95,19 @@ export class TossClient {
 
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const message = typeof body?.message === "string"
-        ? body.message
-        : `Toss confirm failed (${res.status})`;
+      const message =
+        typeof body?.message === "string"
+          ? body.message
+          : `Toss confirm failed (${res.status})`;
       throw new Error(message);
     }
 
-    const paymentKey = typeof body.paymentKey === "string"
-      ? body.paymentKey
-      : "";
+    const paymentKey =
+      typeof body.paymentKey === "string" ? body.paymentKey : "";
     const orderId = typeof body.orderId === "string" ? body.orderId : "";
     const totalAmount = Number(body.totalAmount);
-    const approvedAt = typeof body.approvedAt === "string"
-      ? body.approvedAt
-      : "";
+    const approvedAt =
+      typeof body.approvedAt === "string" ? body.approvedAt : "";
 
     if (paymentKey !== req.paymentKey || orderId !== req.orderId) {
       throw new Error("Toss confirm response identity mismatch");
@@ -122,9 +126,8 @@ export class TossClient {
       totalAmount,
       method: String(body.method ?? body.easyPay?.provider ?? "UNKNOWN"),
       approvedAt,
-      receiptUrl: typeof body.receipt?.url === "string"
-        ? body.receipt.url
-        : undefined,
+      receiptUrl:
+        typeof body.receipt?.url === "string" ? body.receipt.url : undefined,
       raw: body,
     };
   }
@@ -145,17 +148,17 @@ export class TossClient {
 
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const message = typeof body?.message === "string"
-        ? body.message
-        : `Toss cancel failed (${res.status})`;
+      const message =
+        typeof body?.message === "string"
+          ? body.message
+          : `Toss cancel failed (${res.status})`;
       throw new Error(message);
     }
 
     // 응답 body의 paymentKey가 요청 paymentKey와 다르면, 우리가 취소했다고 믿는 결제가
     // 실제로는 다른 결제일 수 있다 — 보상(compensation) 무결성이 깨지므로 성공으로 간주하지 않는다.
-    const responsePaymentKey = typeof body.paymentKey === "string"
-      ? body.paymentKey
-      : "";
+    const responsePaymentKey =
+      typeof body.paymentKey === "string" ? body.paymentKey : "";
     if (responsePaymentKey !== paymentKey) {
       throw new Error("Toss cancel response paymentKey mismatch");
     }
@@ -175,9 +178,8 @@ export class TossClient {
     return {
       paymentKey: responsePaymentKey,
       status,
-      canceledAt: typeof body.canceledAt === "string"
-        ? body.canceledAt
-        : undefined,
+      canceledAt:
+        typeof body.canceledAt === "string" ? body.canceledAt : undefined,
       raw: body,
     };
   }

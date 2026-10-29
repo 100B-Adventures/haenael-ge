@@ -42,7 +42,10 @@ function makeOrderId(): string {
 }
 
 function normalizeCustomerKey(input: unknown): string {
-  if (typeof input === "string" && /^[A-Za-z0-9_=.@-]{22,50}$/.test(input)) {
+  if (
+    typeof input === "string" &&
+    /^(?=.{22,50}$)(?=.*[-_=.@])[A-Za-z0-9_=.@-]+$/.test(input)
+  ) {
     return input;
   }
   return `anonymous_${crypto.randomUUID()}`;
@@ -50,7 +53,9 @@ function normalizeCustomerKey(input: unknown): string {
 
 const REQUEST_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
 
-function normalizeRequestKey(input: unknown): { ok: true; value: string | null } | { ok: false } {
+function normalizeRequestKey(
+  input: unknown,
+): { ok: true; value: string | null } | { ok: false } {
   if (input === undefined || input === null || input === "") {
     return { ok: true, value: null };
   }
@@ -69,34 +74,48 @@ Deno.serve(async (req: Request) => {
   }
 
   if (req.method !== "POST") {
-    return json(405, { error: { code: "method_not_allowed", message: "POST only" } });
+    return json(405, {
+      error: { code: "method_not_allowed", message: "POST only" },
+    });
   }
 
   if (Deno.env.get("PAYMENTS_ENABLED") !== "true") {
-    return json(503, { error: { code: "payments_disabled", message: "응원 결제를 준비하고 있습니다." } });
+    return json(503, {
+      error: {
+        code: "payments_disabled",
+        message: "응원 결제를 준비하고 있습니다.",
+      },
+    });
   }
 
   const authHeader = req.headers.get("Authorization") ?? "";
   if (!authHeader.startsWith("Bearer ")) {
-    return json(401, { error: { code: "unauthorized", message: "Authorization required" } });
+    return json(401, {
+      error: { code: "unauthorized", message: "Authorization required" },
+    });
   }
 
   let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
-    return json(400, { error: { code: "invalid_json", message: "body must be JSON" } });
+    return json(400, {
+      error: { code: "invalid_json", message: "body must be JSON" },
+    });
   }
 
   const goalId = Number(body.goalId);
   const amountKrw = Number(body.amountKrw);
   const message = typeof body.message === "string" ? body.message.trim() : "";
-  const displayName = typeof body.displayName === "string" ? body.displayName.trim() : "";
+  const displayName =
+    typeof body.displayName === "string" ? body.displayName.trim() : "";
   const isAnonymous = body.isAnonymous === true;
   const customerKey = normalizeCustomerKey(body.customerKey);
 
   if (!Number.isInteger(goalId) || goalId <= 0) {
-    return json(400, { error: { code: "invalid_goal", message: "goalId required" } });
+    return json(400, {
+      error: { code: "invalid_goal", message: "goalId required" },
+    });
   }
   if (!isValidAmount(amountKrw)) {
     return json(400, {
@@ -111,10 +130,14 @@ Deno.serve(async (req: Request) => {
   // 미검증 입력을 먼저 연산하지 않는 신뢰경계 준수(Codex 리뷰 2026-07-20).
   const cloverAmount = amountKrw / 1000;
   if (displayName.length > 30) {
-    return json(400, { error: { code: "invalid_name", message: "displayName max 30 chars" } });
+    return json(400, {
+      error: { code: "invalid_name", message: "displayName max 30 chars" },
+    });
   }
   if (message.length > 140) {
-    return json(400, { error: { code: "invalid_message", message: "message max 140 chars" } });
+    return json(400, {
+      error: { code: "invalid_message", message: "message max 140 chars" },
+    });
   }
 
   // 요청 멱등키(선택): 클라이언트 재시도가 새 payment/cheer 행을 만들지 않게 한다.
@@ -122,7 +145,10 @@ Deno.serve(async (req: Request) => {
   const requestKeyResult = normalizeRequestKey(body.requestKey);
   if (!requestKeyResult.ok) {
     return json(400, {
-      error: { code: "invalid_request_key", message: "requestKey는 8~128자여야 합니다" },
+      error: {
+        code: "invalid_request_key",
+        message: "requestKey는 8~128자여야 합니다",
+      },
     });
   }
   const requestKey = requestKeyResult.value;
@@ -130,9 +156,16 @@ Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) {
-    await sendSlackAlert({ event: "cheer_order_missing_env", severity: "critical", summary: "cheer-order missing Supabase service env" });
+    await sendSlackAlert({
+      event: "cheer_order_missing_env",
+      severity: "critical",
+      summary: "cheer-order missing Supabase service env",
+    });
     return json(503, {
-      error: { code: "missing_supabase_env", message: "Supabase service env missing" },
+      error: {
+        code: "missing_supabase_env",
+        message: "Supabase service env missing",
+      },
     });
   }
 
@@ -144,9 +177,9 @@ Deno.serve(async (req: Request) => {
   // anon key 호출은 기존 비회원 결제와 동일하게 귀속 없이 진행한다. 원문 JWT나
   // 사용자 식별자는 payment/cheer 공개 계약과 응답에 포함하지 않는다.
   const accessToken = authHeader.slice("Bearer ".length);
-  const { data: { user: supporter } } = await supabase.auth.getUser(
-    accessToken,
-  );
+  const {
+    data: { user: supporter },
+  } = await supabase.auth.getUser(accessToken);
 
   const orderId = makeOrderId();
   const { data, error } = await supabase.rpc("create_cheer_order", {
@@ -165,8 +198,15 @@ Deno.serve(async (req: Request) => {
     // 원문(error.message/error.code)은 Postgres 내부 라벨·SQLSTATE — 클라이언트엔
     // 화이트리스트로 매핑된 안전한 코드+메시지만 보낸다. 상세는 서버 로그에만.
     console.error("[cheer-order] create_cheer_order failed:", error);
-    await sendSlackAlert({ event: "cheer_order_failed", severity: "warning", summary: "Payment order creation failed", fields: { code: error?.code ?? "unknown" } });
-    return json(toPublicHttpStatus(error?.message), { error: toPublicError(error?.message) });
+    await sendSlackAlert({
+      event: "cheer_order_failed",
+      severity: "warning",
+      summary: "Payment order creation failed",
+      fields: { code: error?.code ?? "unknown" },
+    });
+    return json(toPublicHttpStatus(error?.message), {
+      error: toPublicError(error?.message),
+    });
   }
 
   const row = data[0] as {
@@ -181,10 +221,13 @@ Deno.serve(async (req: Request) => {
   if (supporter && !row.is_replay) {
     const { error: attributionError } = await supabase
       .from("social_cheer_member_attribution")
-      .upsert({
-        cheer_id: row.cheer_id,
-        supporter_member_id: supporter.id,
-      }, { onConflict: "cheer_id", ignoreDuplicates: true });
+      .upsert(
+        {
+          cheer_id: row.cheer_id,
+          supporter_member_id: supporter.id,
+        },
+        { onConflict: "cheer_id", ignoreDuplicates: true },
+      );
     if (attributionError) {
       console.error(
         "[cheer-order] supporter attribution failed:",
