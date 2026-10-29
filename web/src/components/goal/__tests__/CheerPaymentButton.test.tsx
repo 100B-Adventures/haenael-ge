@@ -3,6 +3,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { CheerPaymentButton } from "../CheerPaymentButton";
 
 const mockRequestPayment = vi.fn();
+const mockWidgetSetAmount = vi.fn();
+const mockWidgetRequestPayment = vi.fn();
+const mockRenderPaymentWindow = vi.fn();
+const mockPaymentWindowDestroy = vi.fn();
+const paymentWindowHandlers = new Map<string, () => void>();
 const mockLoadTossPayments = vi.fn();
 const mockGetSession = vi.fn();
 
@@ -43,11 +48,25 @@ describe("CheerPaymentButton Toss v2 request", () => {
     );
 
     mockRequestPayment.mockResolvedValue(undefined);
+    mockWidgetSetAmount.mockResolvedValue(undefined);
+    mockWidgetRequestPayment.mockResolvedValue(undefined);
+    mockPaymentWindowDestroy.mockResolvedValue(undefined);
+    mockRenderPaymentWindow.mockResolvedValue({
+      on: (eventName: string, callback: () => void) => {
+        paymentWindowHandlers.set(eventName, callback);
+      },
+      destroy: mockPaymentWindowDestroy,
+    });
     mockGetSession.mockResolvedValue({ data: { session: null } });
     mockLoadTossPayments.mockResolvedValue({
       payment: () => ({
         requestPayment: mockRequestPayment,
         destroy: vi.fn(),
+      }),
+      widgets: () => ({
+        setAmount: mockWidgetSetAmount,
+        renderPaymentWindow: mockRenderPaymentWindow,
+        requestPayment: mockWidgetRequestPayment,
       }),
     });
   });
@@ -132,5 +151,64 @@ describe("CheerPaymentButton Toss v2 request", () => {
         }),
       );
     });
+  });
+
+  it("PAY-WIDGET-01 주문서형 키는 widget 결제창 경로를 사용한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    await waitFor(() => {
+      expect(mockWidgetSetAmount).toHaveBeenCalledWith({
+        value: 3000,
+        currency: "KRW",
+      });
+      expect(mockRenderPaymentWindow).toHaveBeenCalledWith({
+        orderName: "친구 목표 응원",
+      });
+    });
+    paymentWindowHandlers.get("paymentRequest")?.();
+    await waitFor(() => {
+      expect(mockWidgetRequestPayment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderId: "order-1",
+        }),
+      );
+    });
+    expect(mockRequestPayment).not.toHaveBeenCalled();
+  });
+
+  it("PAY-WIDGET-02 실제 결제창 cancel 이벤트는 재시도 상태를 복구한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    await waitFor(() => {
+      expect(mockRenderPaymentWindow).toHaveBeenCalled();
+    });
+    paymentWindowHandlers.get("cancel")?.();
+    expect(
+      await screen.findByText("결제를 취소했어요. 다시 시도할 수 있어요."),
+    ).toBeVisible();
+    expect(mockPaymentWindowDestroy).toHaveBeenCalledOnce();
+    expect(mockWidgetRequestPayment).not.toHaveBeenCalled();
   });
 });

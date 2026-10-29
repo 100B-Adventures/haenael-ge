@@ -1,5 +1,11 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+- **2026-10-29 18:38 KST · G4-PAY ❌ NG:** PAY01 v23 EXIT1, PAY02 v5 EXIT1, v26 중단으로 verify EXIT 미생성. staging 정리 실행: PAYMENTS_ENABLED=false EXIT0, TOSS_SECRET_KEY 부재 조회 EXIT0, 전용 fixture 정리 EXIT0·remaining0. 로그 `.goal/runs/g4-budget-{cleanup-payments,cleanup-toss,fixture-cleanup}.log`, secrets 조회 `.goal/runs/g4-budget-secrets-after.json`. callback·중복승인 미완료, QA 미착수. 예산 초과 뒤 새 실행 없음.
+
+- **G4-PAY-01 ❌ NG · EXIT 1 · staging Playwright:** v17/v18/v19와 v22에서 `/payment/success` callback 대기 timeout. 실패 화면은 Toss 본인인증 입력 validation 상태이며 `submitActualTossPaySandboxIdentity()`가 첫 다음 클릭 직후 반환한다는 발주측 진단을 접수했다. 다음 단계 DOM 전환·iframe 오류·최종 URL·popup·Toss 응답을 확인하기 전 서버 승인 장애로 판정하지 않는다. 로그 `.goal/runs/g4-pay01-v22.log`. timeout 연장·mock·강제 성공 URL 금지.
+
+- **2026-10-29 20:53 KST · Toss Payments 샌드박스 종단 검증 ❌ BLOCKED:** 필수 약관·휴대전화·이메일 validation 오류 0과 다음 인증 단계 전환을 확인했고 Toss Payments BankPay 인증 준비 POST 200, BankPay 시작 POST 200 뒤 nProtect·IPinside 설치 화면까지 관찰했다. 실제 취소와 금액 불일치는 PASS지만 외부 계좌 인증이 필요한 성공 callback·주문 상태 반영·실패·중복 callback은 PAY01·PAY02 각각 EXIT 1이라 PASS로 올리지 않았다. stage 복구는 `PAYMENTS_ENABLED=false` EXIT 0, `TOSS_SECRET_KEY` 잔여 0, fixture 잔여 0이며 demo는 `docs/qa/evidence/v2-goal-round4-20261029/payment/index.html`이다.
+
 - **2026-10-29 04:23 KST · G4-AUTH ❌ NG:** AUTH-01은 전용 Chrome Kakao 쿠키 13개 주입과 메인 Chrome 최소 프로필 headless 재시도 뒤에도 실제 계정 재로그인이 필요해 BLOCKED, AUTH-02는 상대 `Location`을 절대 URL로 오판한 테스트 계약을 교정한 뒤 Playwright 1/1 EXIT 0, 비인증 `/my` HTTP 307·세션/개인정보 DOM 0, 기준 회귀 EXIT 0·새 실패 0. demo `docs/qa/evidence/v2-goal-round4-20261029/auth/index.html`.
 
 ## 2026-10-28 01:47 KST · S3 독립 QA PASS

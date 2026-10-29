@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>해낼게 V2 Toss Payments 샌드박스 검증</title>
+  <style>
+    :root{color-scheme:light;--ink:#17372b;--muted:#5c6f66;--line:#dbe7df;--paper:#fbfcfa;--brand:#14613a;--soft:#edf7f0;--warn:#fff3cd;--warn-ink:#6a4e00;--ok:#e9f7ee;--ok-ink:#185b36}
+    *{box-sizing:border-box}body{margin:0;background:#f3f6f2;color:var(--ink);font:16px/1.65 system-ui,-apple-system,sans-serif}
+    main{max-width:1080px;margin:0 auto;padding:40px 22px 72px}h1,h2{line-height:1.25}h1{margin:0 0 8px;font-size:clamp(30px,5vw,46px)}h2{margin-top:42px}
+    .lead{color:var(--muted);max-width:880px}.status{display:inline-block;margin:12px 0 22px;padding:8px 12px;border-radius:999px;background:var(--warn);color:var(--warn-ink);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.card,.metric,.shot{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 30px #17372b0a}
+    .metric strong{display:block;color:var(--brand);font-size:24px}.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}.shot{margin:0}.shot img{width:100%;height:auto;display:block;border-radius:12px}.shot b{display:block;margin-top:12px}
+    a{color:var(--brand);font-weight:700;overflow-wrap:anywhere}ul{padding-left:22px}.note{background:var(--soft);border-left:4px solid var(--brand);padding:14px 16px;border-radius:10px}.ok{color:var(--ok-ink);background:var(--ok);padding:2px 7px;border-radius:999px;font-weight:800}
+    code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.92em;overflow-wrap:anywhere}footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Toss Payments 샌드박스 종단 검증</h1>
+  <p class="lead"><strong>G4-PAY</strong>는 테스트 주문 생성부터 Toss Payments 샌드박스 승인 콜백과 주문 상태 반영까지 확인하는 결제 검증 범위입니다. 실제 staging과 Toss Payments 샌드박스를 사용했고, mock 승인이나 성공 URL 강제 이동은 사용하지 않았습니다.</p>
+  <div class="status">범위 판정: BLOCKED · BankPay 데스크톱 보안 프로그램을 통한 외부 계좌 인증 필요</div>
+
+  <section class="grid" aria-label="검증 요약">
+    <div class="metric"><strong>EXIT 1</strong>주문 생성·승인·콜백·상태 반영</div>
+    <div class="metric"><strong>EXIT 1</strong>취소·실패·중복 콜백 전체</div>
+    <div class="metric"><strong>HTTP 200</strong>Toss Payments BankPay 인증 준비</div>
+    <div class="metric"><strong>HTTP 200</strong>BankPay 시작 요청</div>
+    <div class="metric"><strong>PASS</strong>실제 사용자 취소·금액 불일치</div>
+    <div class="metric"><strong>EXIT 0</strong>QA 계약·전체 단위 회귀</div>
+  </section>
+
+  <h2>필수 입력 검증과 외부 인증 전환</h2>
+  <div class="shots">
+    <figure class="shot">
+      <img src="live-toss-required-inputs-accepted-390.png" alt="Toss Payments 샌드박스에서 필수 동의와 연락처 입력 오류가 모두 사라진 실제 화면">
+      <b>필수 입력 검증 오류 0건</b>
+      <span>필수 약관 동의, 휴대전화 번호와 이메일을 접근성 label로 입력한 뒤 브라우저 validation 오류가 없음을 확인했습니다.</span>
+    </figure>
+    <figure class="shot">
+      <img src="live-toss-external-auth-required-390.png" alt="BankPay 보안 프로그램 설치 안내가 표시된 실제 샌드박스 인증 화면">
+      <b>BankPay 외부 인증 단계</b>
+      <span>Toss Payments의 인증 준비 요청과 BankPay 시작 요청이 각각 HTTP 200을 반환한 뒤 nProtect·IPinside 설치 안내로 전환됐습니다.</span>
+    </figure>
+  </div>
+  <div class="card">
+    <ul>
+      <li>기존 자동화는 첫 번째 <em>다음</em> 클릭 직후 성공으로 간주해 빨간 validation 화면에서 콜백을 기다렸습니다. 필수 label과 실제 DOM 전환을 검증하도록 수정했습니다.</li>
+      <li>관찰된 popup은 Toss Payments의 <code>/transfer/bankpay</code>와 BankPay의 <code>/StartBankPay.do</code>입니다.</li>
+      <li>Toss Payments <code>transfer-authentication/BANKPAY/prepare</code> POST와 BankPay <code>StartBankPay.do</code> POST가 모두 HTTP 200이었습니다.</li>
+      <li>그 다음 단계는 브라우저 입력이나 제품 callback이 아니라 데스크톱 뱅킹 보안 프로그램 설치와 실제 계좌 인증입니다. 이 경계를 우회하지 않았으므로 성공 콜백과 DB 상태 반영은 PASS로 기록하지 않았습니다.</li>
+    </ul>
+  </div>
+
+  <h2>취소·오류 경로</h2>
+  <div class="shots">
+    <figure class="shot">
+      <img src="live-toss-cancel-390.png" alt="Toss Payments 샌드박스 결제창을 취소한 뒤 재시도 안내가 표시된 해낼게 실제 화면">
+      <b>실제 결제창 취소 <span class="ok">PASS</span></b>
+      <span>결제창 취소 뒤 제품의 재시도 안내가 표시되고 주문 상태가 READY 또는 PENDING에서 잘못 승인되지 않았습니다.</span>
+    </figure>
+    <div class="card">
+      <ul>
+        <li>금액이 다른 callback은 HTTP 400으로 거부됐습니다.</li>
+        <li>취소 뒤 주문은 승인 상태로 변하지 않았습니다.</li>
+        <li>실패 callback과 중복 성공 callback은 성공 승인을 선행해야 검증할 수 있어 외부 인증 경계와 함께 BLOCKED입니다.</li>
+        <li>staging의 <code>PAYMENTS_ENABLED</code>는 검증 뒤 <code>false</code>로 복구했고, <code>TOSS_SECRET_KEY</code>는 남지 않았으며 테스트 fixture 잔여도 0건입니다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>소스와 기준</h2>
+  <div class="card">
+    <ul>
+      <li><a href="../../../../../web/e2e/v2-live-payment.spec.ts">Toss Payments 실제 E2E 원문</a></li>
+      <li><a href="https://haenael-ge-v2-staging-100-b.vercel.app">검증 대상 staging</a></li>
+      <li><a href="https://docs.tosspayments.com/guides/v2/payment-widget/integration-window">Toss Payments 결제위젯 연동 공식 문서</a></li>
+      <li><a href="https://docs.tosspayments.com/sdk/v2/js/payment-window">Toss Payments 결제창 SDK 공식 문서</a></li>
+      <li><a href="https://docs.tosspayments.com/blog/how-to-test-toss-payments">Toss Payments 테스트 환경 공식 안내</a></li>
+    </ul>
+  </div>
+  <p class="note">필수 입력 selector와 validation 전환 결함은 수정했지만 실제 승인 콜백은 BankPay 외부 계좌 인증을 통과하지 못했습니다. 따라서 주문 승인·상태 반영과 실패·중복 콜백을 포함한 결제 검증 범위 전체는 BLOCKED이며, 운영 결제·실제 과금·운영 배포는 실행하지 않았습니다.</p>
+
+  <footer>
+    STAMP: 2026-10-29 20:53 KST · model Codex(model ID 미노출) · agent code-builder · skill haenael-supabase-build · basis 승인 prototype v3.0.0, eng-design v1.2.5, staging Playwright, Toss Payments 공식 문서 · 고민: 제품 validation 결함과 실제 금융기관 인증 경계를 분리해 미완료를 PASS로 과장하지 않음<br>
+    SKILLS_USED: haenael-supabase-build · Next.js·Supabase·staging 결제 검증과 복구 계약 적용<br>
+    SKILLS_SKIPPED: 없음<br>
+    KNOWLEDGE_QUERY: 해낼게 결제 승인 계약, Toss Payments 샌드박스 결제창·테스트 환경 공식 문서<br>
+    HITS_USED: 승인 설계, 실제 DOM·popup·네트워크 응답, Toss Payments 공식 문서 · 검증 기준과 외부 경계 판정에 사용<br>
+    HITS_REJECTED: mock 승인, 강제 성공 URL, 입력 순서·maxlength 추정 · 실제 샌드박스 승인을 증명하지 못해 제외<br>
+    CONFLICTS: 없음<br>
+    SOURCES/MODEL: Codex(model ID 미노출) · web/e2e/v2-live-payment.spec.ts · .goal/execution-brief.md · Toss Payments 공식 문서
+  </footer>
+</main>
+</body>
+</html>

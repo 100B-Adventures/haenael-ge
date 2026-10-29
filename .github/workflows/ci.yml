@@ -176,3 +176,86 @@ jobs:
             web/playwright-report/
             web/test-results/
           retention-days: 14
+
+  e2e-v2-social:
+    name: e2e-v2-social
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: web
+    env:
+      E2E_ENVIRONMENT: staging
+      RUN_STAGING_SUPABASE_E2E: "1"
+      E2E_BASE_URL: https://haenael-ge-v2-staging-100-b.vercel.app
+      STAGING_WEB_BASE_URL: https://haenael-ge-v2-staging-100-b.vercel.app
+      SUPABASE_STAGING_PROJECT_REF: ezzklgotgydwxqebfoys
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.QA_STAGING_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.QA_STAGING_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.QA_STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.QA_STAGING_SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.109.0
+
+      - name: 웹 의존성 설치
+        run: npm ci
+
+      - name: 브라우저 설치
+        run: npx playwright install --with-deps chromium
+
+      - name: staging 결제 기능 활성화
+        working-directory: .
+        run: supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=true
+
+      - name: V2 social staging E2E
+        run: |
+          mkdir -p ../.goal/runs
+          set +e
+          npx playwright test e2e/social-web-first.spec.ts --project=chromium --reporter=line \
+            > ../.goal/runs/e2e-v2-social.log 2>&1
+          test_exit=$?
+          printf 'E2E_V2_SOCIAL_EXIT=%s\n' "$test_exit" \
+            > ../.goal/runs/e2e-v2-social.exit
+          exit "$test_exit"
+
+      - name: staging 결제 기능 비활성화 복구
+        if: always()
+        working-directory: .
+        run: |
+          supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=false
+          response_file="$(mktemp)"
+          status="$(curl -sS -o "$response_file" -w '%{http_code}' \
+            -X POST "$NEXT_PUBLIC_SUPABASE_URL/functions/v1/cheer-order" \
+            -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+            -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+            -H 'Content-Type: application/json' \
+            --data '{}')"
+          mkdir -p .goal/runs
+          printf 'RESTORE_PAYMENTS_EXIT=0 HTTP_STATUS=%s\n' "$status" \
+            > .goal/runs/e2e-v2-social-restore.txt
+          rm -f "$response_file"
+          test "$status" = "503"
+
+      - name: V2 social 실행 증거 보관
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-v2-social-${{ github.run_id }}
+          path: |
+            .goal/runs/e2e-v2-social-restore.txt
+            .goal/runs/e2e-v2-social.exit
+            .goal/runs/e2e-v2-social.log
+            web/test-results/
+          if-no-files-found: warn
+          retention-days: 14

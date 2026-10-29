@@ -23,8 +23,30 @@ export interface TossPaymentClient {
   destroy(): void;
 }
 
+export interface TossWidgetPaymentRequest {
+  orderId: string;
+  orderName: string;
+  successUrl: string;
+  failUrl: string;
+  customerName?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface TossPaymentWindowClient {
+  on(eventName: "paymentRequest", callback: () => void): void;
+  on(eventName: "cancel", callback: () => void): void;
+  destroy(): Promise<void>;
+}
+
+export interface TossWidgetsClient {
+  setAmount(amount: { value: number; currency: "KRW" }): Promise<void>;
+  renderPaymentWindow(params: { orderName: string }): Promise<TossPaymentWindowClient>;
+  requestPayment(request: TossWidgetPaymentRequest): Promise<void>;
+}
+
 export interface TossPaymentsClient {
   payment(params: { customerKey: string }): TossPaymentClient;
+  widgets(params: { customerKey: string }): TossWidgetsClient;
 }
 
 declare global {
