@@ -1388,7 +1388,6 @@ test.describe("V2 web-first social slice", () => {
       expect(await coverQueue.evaluate((node, alertNode) =>
         Boolean(node.compareDocumentPosition(alertNode as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
       await alerts.elementHandle())).toBe(true);
-      await alerts.locator("summary").click();
       const currentRunAlert = alerts.locator("li").filter({ hasText: `playwright-${runId}` });
       await expect(currentRunAlert).toHaveCount(1);
       await expect(currentRunAlert).toContainText("STORAGE_CLEANUP_DRAIN_STALLED");
@@ -2926,7 +2925,7 @@ test.describe("V2 web-first social slice", () => {
               const avatar = row.querySelector<HTMLElement>(".friend-list-avatar");
               const name = row.querySelector<HTMLElement>(".friend-list-name");
               const goal = row.querySelector<HTMLElement>(".friend-list-copy > strong");
-              const news = row.querySelector<HTMLElement>(".friend-list-news > span");
+              const news = row.querySelector<HTMLElement>(".friend-list-news-message");
               const rect = (element: HTMLElement | null) => {
                 if (!element) return null;
                 const value = element.getBoundingClientRect();
@@ -3504,7 +3503,7 @@ test.describe("V2 web-first social slice", () => {
       displayName: "첫 응원자",
       isAnonymous: false,
       message: "귀속 보안 검증",
-      customerKey: `attr_${runId}`,
+      customerKey: `attr_${runId}_member_replay`,
       requestKey: `attr-${runId}`,
     };
     const createOrder = (accessToken: string) =>
