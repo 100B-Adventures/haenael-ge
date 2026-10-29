@@ -6,7 +6,7 @@
 
 BEGIN;
 
-SELECT plan(70);
+SELECT plan(75);
 
 -- =========================================================================
 -- 픽스처 설정 (postgres = superuser, RLS bypass)
@@ -843,6 +843,16 @@ SELECT throws_ok(
   'B2-PAY34: DONE 결제는 실패 보상으로 강등할 수 없음'
 );
 
+CREATE TEMP TABLE hnl_test_comp_failed_baseline AS
+SELECT
+  cb.clover_count,
+  (SELECT count(*)::integer FROM clover_ledger WHERE member_id = g.member_id) AS ledger_count
+FROM payment p
+JOIN cheer c ON c.payment_id = p.id
+JOIN goal g ON g.id = c.goal_id
+JOIN clover_balance cb ON cb.member_id = g.member_id
+WHERE p.order_id = 'hnl_test_comp_failed';
+
 SELECT is(
   (SELECT payment_status FROM reconcile_canceled_payment(
     'hnl_test_comp_failed',
@@ -855,14 +865,66 @@ SELECT is(
 );
 
 SELECT is(
+  (SELECT cb.clover_count
+   FROM payment p
+   JOIN cheer c ON c.payment_id = p.id
+   JOIN goal g ON g.id = c.goal_id
+   JOIN clover_balance cb ON cb.member_id = g.member_id
+   WHERE p.order_id = 'hnl_test_comp_failed'),
+  (SELECT clover_count FROM hnl_test_comp_failed_baseline),
+  'B2-PAY36: FAILED 취소 수렴은 클로버 잔액을 다시 차감하지 않음'
+);
+
+SELECT is(
+  (SELECT count(*)::integer
+   FROM clover_ledger
+   WHERE member_id = (
+     SELECT g.member_id
+     FROM payment p
+     JOIN cheer c ON c.payment_id = p.id
+     JOIN goal g ON g.id = c.goal_id
+     WHERE p.order_id = 'hnl_test_comp_failed'
+   )),
+  (SELECT ledger_count FROM hnl_test_comp_failed_baseline),
+  'B2-PAY37: FAILED 취소 수렴은 클로버 원장을 추가하지 않음'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM payment_log
+   WHERE payment_id = (SELECT id FROM payment WHERE order_id = 'hnl_test_comp_failed')
+     AND from_status = 'FAILED'
+     AND to_status = 'CANCELED'),
+  1,
+  'B2-PAY38: FAILED에서 CANCELED로의 감사기록은 정확히 1건임'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM risk_event
+   WHERE type = 'PAYMENT_RECONCILE_REQUIRED'
+     AND detail->>'paymentKey' = 'payment_key_comp_failed'
+     AND resolved = true),
+  1,
+  'B2-PAY39: 실제 취소 성공은 수동 정산 risk_event를 해소함'
+);
+
+SELECT is(
   (SELECT idempotent FROM reconcile_canceled_payment(
-    'hnl_test_comp_2000',
-    'payment_key_comp_2000',
-    2000,
+    'hnl_test_comp_failed',
+    'payment_key_comp_failed',
+    3000,
     '{"source":"toss-webhook","retry":true}'::jsonb
   )),
   true,
-  'B2-PAY36: 보상으로 CANCELED가 된 결제의 후속 취소 webhook도 멱등 처리됨'
+  'B2-PAY40: FAILED에서 CANCELED로 수렴한 결제의 후속 webhook도 멱등 처리됨'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM payment_log
+   WHERE payment_id = (SELECT id FROM payment WHERE order_id = 'hnl_test_comp_failed')
+     AND from_status = 'FAILED'
+     AND to_status = 'CANCELED'),
+  1,
+  'B2-PAY41: 후속 취소 webhook은 감사기록을 중복 생성하지 않음'
 );
 
 -- =========================================================================
