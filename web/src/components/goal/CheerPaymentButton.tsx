@@ -151,6 +151,9 @@ export function CheerPaymentButton({
       if (!clientKey) {
         throw new Error("토스 테스트 클라이언트 키가 필요합니다.");
       }
+      if (!/^(?:test|live)_ck_/.test(clientKey)) {
+        throw new Error("카드 결제용 Toss Payments API 키가 필요합니다.");
+      }
       const order = await createOrder();
       trackEvent("cheer_started", {
         goal_id: String(goalId),
@@ -172,30 +175,8 @@ export function CheerPaymentButton({
         },
       } as const;
 
-      if (/^(?:test|live)_gck_/.test(clientKey)) {
-        const widgets = tossPayments.widgets({ customerKey: order.customerKey });
-        await widgets.setAmount(commonRequest.amount);
-        const paymentWindow = await widgets.renderPaymentWindow({
-          orderName: commonRequest.orderName,
-        });
-        paymentWindow.on("paymentRequest", () => {
-          const { amount: _amount, ...paymentRequest } = commonRequest;
-          void widgets.requestPayment(paymentRequest).catch((paymentError: unknown) => {
-            setError(
-              paymentError instanceof Error ? paymentError.message : "결제 요청 실패",
-            );
-            setLoading(false);
-          });
-        });
-        paymentWindow.on("cancel", () => {
-          void paymentWindow.destroy().catch(() => undefined);
-          setError("결제를 취소했어요. 다시 시도할 수 있어요.");
-          setLoading(false);
-        });
-      } else {
-        const payment = tossPayments.payment({ customerKey: order.customerKey });
-        await payment.requestPayment({ method: "CARD", ...commonRequest });
-      }
+      const payment = tossPayments.payment({ customerKey: order.customerKey });
+      await payment.requestPayment({ method: "CARD", ...commonRequest });
     } catch (e) {
       setError(e instanceof Error ? e.message : "결제 요청 실패");
       setLoading(false);

@@ -1,5 +1,4 @@
-// lib/toss/index.ts — 토스페이먼츠 결제위젯 로더 + ANONYMOUS 게스트 처리
-// architecture §1: 간편결제(카카오페이·네이버페이·토스페이) 포함.
+// lib/toss/index.ts — 토스페이먼츠 카드 결제창 로더 + ANONYMOUS 게스트 처리
 
 export interface TossWidgetOptions {
   clientKey: string;
@@ -23,30 +22,8 @@ export interface TossPaymentClient {
   destroy(): void;
 }
 
-export interface TossWidgetPaymentRequest {
-  orderId: string;
-  orderName: string;
-  successUrl: string;
-  failUrl: string;
-  customerName?: string;
-  metadata?: Record<string, string>;
-}
-
-export interface TossPaymentWindowClient {
-  on(eventName: "paymentRequest", callback: () => void): void;
-  on(eventName: "cancel", callback: () => void): void;
-  destroy(): Promise<void>;
-}
-
-export interface TossWidgetsClient {
-  setAmount(amount: { value: number; currency: "KRW" }): Promise<void>;
-  renderPaymentWindow(params: { orderName: string }): Promise<TossPaymentWindowClient>;
-  requestPayment(request: TossWidgetPaymentRequest): Promise<void>;
-}
-
 export interface TossPaymentsClient {
   payment(params: { customerKey: string }): TossPaymentClient;
-  widgets(params: { customerKey: string }): TossWidgetsClient;
 }
 
 declare global {
