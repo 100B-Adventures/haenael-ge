@@ -844,15 +844,14 @@ SELECT throws_ok(
 );
 
 SELECT is(
-  (SELECT status FROM record_payment_compensation(
+  (SELECT payment_status FROM reconcile_canceled_payment(
     'hnl_test_comp_failed',
     'payment_key_comp_failed',
     3000,
-    'CANCELED',
     '{"source":"toss-webhook","reason":"late_cancel_succeeded"}'::jsonb
   )),
   'CANCELED'::payment_status_enum,
-  'B2-PAY35: 실패 기록 뒤 실제 취소 성공은 동일 payment_key로 CANCELED에 수렴함'
+  'B2-PAY35: FAILED 기록 뒤 실제 CANCELED webhook은 동일 payment_key로 CANCELED에 수렴함'
 );
 
 SELECT is(

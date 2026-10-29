@@ -176,6 +176,45 @@ describe("Toss 웹훅 보안 경계", () => {
     );
     expect(sendSlackAlert).not.toHaveBeenCalled();
   });
+
+  it("G4-PAY-02 실제 CANCELED webhook은 FAILED 결제 복구 RPC를 호출한다", async () => {
+    const test = deps({
+      toss: {
+        getPayment: vi.fn().mockResolvedValue(
+          payment({
+            status: "CANCELED",
+            canceledAt: "2026-10-30T00:00:00+09:00",
+          }),
+        ),
+        cancelPayment: vi.fn().mockResolvedValue({ status: "CANCELED" }),
+      },
+    });
+
+    const response = await handleTossWebhook(
+      request({
+        paymentKey: PAYMENT_KEY,
+        orderId: "order-security",
+        totalAmount: 3000,
+        status: "CANCELED",
+        mId: MID,
+      }),
+      test.base,
+    );
+
+    expect(response.status).toBe(200);
+    expect(test.rpc).toHaveBeenCalledWith("reconcile_canceled_payment", {
+      p_order_id: "order-security",
+      p_payment_key: PAYMENT_KEY,
+      p_amount_krw: 3000,
+      p_detail: {
+        status: "CANCELED",
+        canceledAt: "2026-10-30T00:00:00+09:00",
+      },
+    });
+    expect(test.rpc).toHaveBeenCalledWith("complete_toss_webhook", {
+      p_transmission_id: "transmission-security",
+    });
+  });
 });
 
 describe("TossClient Payment 객체", () => {
