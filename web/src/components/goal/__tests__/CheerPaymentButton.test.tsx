@@ -9,6 +9,7 @@ import {
 import { CheerPaymentButton } from "../CheerPaymentButton";
 
 const mockRequestPayment = vi.fn();
+const mockPaymentDestroy = vi.fn();
 const mockWidgetSetAmount = vi.fn();
 const mockWidgetRequestPayment = vi.fn();
 const mockRenderPaymentWindow = vi.fn();
@@ -54,6 +55,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     );
 
     mockRequestPayment.mockResolvedValue(undefined);
+    mockPaymentDestroy.mockResolvedValue(undefined);
     mockWidgetSetAmount.mockResolvedValue(undefined);
     mockWidgetRequestPayment.mockResolvedValue(undefined);
     mockPaymentWindowDestroy.mockResolvedValue(undefined);
@@ -68,7 +70,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     mockLoadTossPayments.mockResolvedValue({
       payment: () => ({
         requestPayment: mockRequestPayment,
-        destroy: vi.fn(),
+        destroy: mockPaymentDestroy,
       }),
       widgets: () => ({
         setAmount: mockWidgetSetAmount,
@@ -233,6 +235,71 @@ describe("CheerPaymentButton Toss v2 request", () => {
     expect(screen.getByTestId("cheer-payment-submit")).toHaveTextContent(
       "결제하고 응원하기",
     );
+  });
+
+  it("G4-PAY-01 일반 CARD SDK 로딩 중 시트를 닫으면 늦은 결제 요청을 열지 않는다", async () => {
+    let resolveSdk!: (value: Awaited<ReturnType<typeof mockLoadTossPayments>>) => void;
+    const pendingSdk = new Promise<Awaited<ReturnType<typeof mockLoadTossPayments>>>(
+      (resolve) => {
+        resolveSdk = resolve;
+      },
+    );
+    mockLoadTossPayments.mockReturnValueOnce(pendingSdk);
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    await waitFor(() => expect(mockLoadTossPayments).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+
+    resolveSdk({
+      payment: () => ({
+        requestPayment: mockRequestPayment,
+        destroy: mockPaymentDestroy,
+      }),
+      widgets: () => ({
+        setAmount: mockWidgetSetAmount,
+        renderPaymentWindow: mockRenderPaymentWindow,
+        requestPayment: mockWidgetRequestPayment,
+      }),
+    });
+
+    await waitFor(() => expect(mockPaymentDestroy).toHaveBeenCalledTimes(1));
+    expect(mockRequestPayment).not.toHaveBeenCalled();
+  });
+
+  it("G4-PAY-01 일반 CARD 결제 요청 중 시트 닫기와 unmount는 SDK를 한 번만 제거한다", async () => {
+    let resolveRequest!: () => void;
+    mockRequestPayment.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveRequest = resolve;
+      }),
+    );
+    const view = render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    await waitFor(() => expect(mockRequestPayment).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole("button", { name: "닫기" }));
+    view.unmount();
+    await waitFor(() => expect(mockPaymentDestroy).toHaveBeenCalledTimes(1));
+
+    resolveRequest();
+    await Promise.resolve();
+    expect(mockPaymentDestroy).toHaveBeenCalledTimes(1);
   });
 
   it("G4-PAY-01 이전 결제창 렌더 완료가 새 시도의 핸들과 loading을 덮지 않는다", async () => {

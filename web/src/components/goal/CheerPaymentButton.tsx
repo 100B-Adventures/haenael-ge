@@ -61,6 +61,21 @@ function paymentErrorMessage(error: unknown) {
   return "결제 요청 실패";
 }
 
+type DestroyablePaymentSurface = {
+  destroy: () => void | Promise<unknown>;
+};
+
+async function destroyPaymentSurface(
+  surface: DestroyablePaymentSurface | null,
+) {
+  if (!surface) return;
+  try {
+    await surface.destroy();
+  } catch {
+    // SDK 정리는 사용자 결제 오류보다 우선하지 않는다.
+  }
+}
+
 export function CheerPaymentButton({
   goalId,
   goalTitle,
@@ -84,16 +99,14 @@ export function CheerPaymentButton({
   const requestKeyRef = useRef<string | null>(null);
   const sheetOpenRef = useRef(false);
   const paymentAttemptRef = useRef(0);
-  const paymentWindowRef = useRef<{
-    destroy: () => Promise<unknown>;
-  } | null>(null);
+  const paymentWindowRef = useRef<DestroyablePaymentSurface | null>(null);
 
   useEffect(
     () => () => {
       paymentAttemptRef.current += 1;
       const paymentWindow = paymentWindowRef.current;
       paymentWindowRef.current = null;
-      if (paymentWindow) void paymentWindow.destroy().catch(() => undefined);
+      void destroyPaymentSurface(paymentWindow);
     },
     [],
   );
@@ -143,7 +156,7 @@ export function CheerPaymentButton({
     paymentAttemptRef.current += 1;
     const paymentWindow = paymentWindowRef.current;
     paymentWindowRef.current = null;
-    if (paymentWindow) void paymentWindow.destroy().catch(() => undefined);
+    void destroyPaymentSurface(paymentWindow);
     setLoading(false);
     setOpen(false);
   }
@@ -232,14 +245,14 @@ export function CheerPaymentButton({
           !sheetOpenRef.current ||
           paymentAttemptRef.current !== paymentAttempt
         ) {
-          await paymentWindow.destroy().catch(() => undefined);
+          await destroyPaymentSurface(paymentWindow);
           return;
         }
         paymentWindowRef.current = paymentWindow;
         let paymentRequestStarted = false;
         paymentWindow.on("paymentRequest", async ({ paymentMethod }) => {
           if (paymentAttemptRef.current !== paymentAttempt) {
-            await paymentWindow.destroy().catch(() => undefined);
+            await destroyPaymentSurface(paymentWindow);
             return;
           }
           if (paymentRequestStarted) return;
@@ -248,7 +261,8 @@ export function CheerPaymentButton({
             if (paymentWindowRef.current === paymentWindow) {
               paymentWindowRef.current = null;
             }
-            await paymentWindow.destroy().catch(() => undefined);
+            await destroyPaymentSurface(paymentWindow);
+            if (paymentAttemptRef.current !== paymentAttempt) return;
             setError("카드를 선택해야 응원 결제를 계속할 수 있어요.");
             setLoading(false);
             return;
@@ -260,7 +274,7 @@ export function CheerPaymentButton({
               if (paymentWindowRef.current === paymentWindow) {
                 paymentWindowRef.current = null;
               }
-              await paymentWindow.destroy().catch(() => undefined);
+              await destroyPaymentSurface(paymentWindow);
               if (paymentAttemptRef.current === paymentAttempt) {
                 setError(paymentErrorMessage(paymentError));
                 setLoading(false);
@@ -271,7 +285,7 @@ export function CheerPaymentButton({
           if (paymentWindowRef.current === paymentWindow) {
             paymentWindowRef.current = null;
           }
-          void paymentWindow.destroy().catch(() => undefined);
+          void destroyPaymentSurface(paymentWindow);
           if (paymentAttemptRef.current === paymentAttempt) {
             setError("결제를 취소했어요. 다시 시도할 수 있어요.");
             setLoading(false);
@@ -281,7 +295,22 @@ export function CheerPaymentButton({
         const payment = tossPayments.payment({
           customerKey: order.customerKey,
         });
-        await payment.requestPayment({ method: "CARD", ...commonRequest });
+        if (
+          !sheetOpenRef.current ||
+          paymentAttemptRef.current !== paymentAttempt
+        ) {
+          await destroyPaymentSurface(payment);
+          return;
+        }
+        paymentWindowRef.current = payment;
+        try {
+          await payment.requestPayment({ method: "CARD", ...commonRequest });
+        } finally {
+          if (paymentWindowRef.current === payment) {
+            paymentWindowRef.current = null;
+            await destroyPaymentSurface(payment);
+          }
+        }
       }
     } catch (e) {
       if (paymentAttemptRef.current === paymentAttempt) {
