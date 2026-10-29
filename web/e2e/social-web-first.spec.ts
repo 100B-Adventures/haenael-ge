@@ -1860,7 +1860,24 @@ test.describe("V2 web-first social slice", () => {
       await page.getByRole("button", { name: "저장" }).click();
       await expect(page.getByRole("button", { name: /매일 조금씩 오래 가요/ })).toBeVisible();
       await page.getByRole("button", { name: "프로필 사진 바꾸기" }).click();
+      const initialPresetResponsePromise = page.waitForResponse((response) => {
+        if (!response.url().includes("/functions/v1/profile-update")) return false;
+        try {
+          const body = response.request().postDataJSON() as {
+            action?: string;
+            profile_image?: string;
+          };
+          return body.action === "save" && body.profile_image?.endsWith("jimin.png") === true;
+        } catch {
+          return false;
+        }
+      });
       await page.getByRole("button", { name: "프로필 사진 3" }).click();
+      const initialPresetResponse = await initialPresetResponsePromise;
+      expect(initialPresetResponse.status()).toBe(200);
+      await expect(page.getByTestId("my-profile-summary").getByRole("img", {
+        name: "서연 QA 프로필",
+      })).toHaveAttribute("src", /jimin\.png/);
       await page.reload();
       await expect(page.getByTestId("my-profile-summary")).toContainText("서연 QA");
       await expect(page.getByTestId("my-profile-summary")).toContainText("매일 조금씩 오래 가요");
