@@ -3220,8 +3220,10 @@ test.describe("V2 web-first social slice", () => {
       expect(await memberCards.count()).toBeGreaterThanOrEqual(3);
       expect(await ledgerRows.count()).toBeGreaterThanOrEqual(3);
       await expect(memberCards.first()).toBeVisible();
-      await expect(memberCards.first().locator("details")).not.toHaveAttribute("open", "");
-      await expect(memberCards.first().locator(".admin-member-details > div")).not.toBeVisible();
+      await expect(memberCards.first().locator("details")).toHaveCount(0);
+      const memberDetails = memberCards.first().locator(".admin-member-details");
+      await expect(memberDetails).toBeVisible();
+      await expect(memberDetails.locator("p")).toHaveCount(3);
       await adminPage.addStyleTag({ content: "nextjs-portal{display:none!important}" });
       await adminPage.screenshot({
         path: `${evidenceDir}/dev-cover-review-${width}.png`,
