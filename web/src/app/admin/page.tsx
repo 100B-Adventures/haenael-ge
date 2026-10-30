@@ -9,6 +9,7 @@ import {
   GoalCoverReviewQueue,
   type CoverReviewItem,
 } from "@/components/admin/GoalCoverReviewQueue";
+import { Collapsible } from "@/components/common/Collapsible";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,12 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ko-KR", {
 
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 
+const adminMemberDetailCollapsePolicy = {
+  auxiliary: true,
+  exceedsLimit: true,
+  hasCollapsedContext: true,
+} as const;
+
 // DESIGN.md §8.2 용어 사전: A안에서 "보류·복원"은 폐기어다(2026-08-21 확정).
 // CASHOUT_HOLD = 잠금(총량 불변) · CASHOUT_SETTLED = 확정 차감(총량 감소 유일 지점) ·
 // CASHOUT_REVERSAL = 잠금 해제(되돌릴 잔액 없음). 관리자 화면도 같은 단어를 쓴다.
@@ -111,6 +118,8 @@ function SectionHeader({
 }
 
 function MemberCard({ member }: { member: AdminMember }) {
+  const memberDetailsId = `admin-member-details-${member.id}`;
+
   return (
     <li className="admin-member-card">
       <div className="admin-record-row">
@@ -123,24 +132,36 @@ function MemberCard({ member }: { member: AdminMember }) {
           <small>보유 클로버</small>
         </div>
       </div>
-      <div
-        className="admin-member-details"
-        role="group"
-        aria-label={`${member.nickname || "미설정"} 회원 상세`}
-      >
-        <p>로그인 {member.provider || "미확인"}</p>
-        <p>본인인증 {member.kyc_status === "VERIFIED" ? "완료" : "미완료"}</p>
-        <p>회원 ID {shortId(member.id)}</p>
-        {member.goal_slug && (
-          <a
-            href={`/g/${member.goal_slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
+      <Collapsible
+        className="admin-member-disclosure"
+        policy={adminMemberDetailCollapsePolicy}
+        collapsedContent={<span id={memberDetailsId} hidden />}
+        expandedContent={
+          <div
+            id={memberDetailsId}
+            className="admin-member-details"
+            role="group"
+            aria-label={`${member.nickname || "미설정"} 회원 상세`}
           >
-            목표 보기
-          </a>
-        )}
-      </div>
+            <p>로그인 {member.provider || "미확인"}</p>
+            <p>
+              본인인증 {member.kyc_status === "VERIFIED" ? "완료" : "미완료"}
+            </p>
+            <p>회원 ID {shortId(member.id)}</p>
+            {member.goal_slug && (
+              <a
+                href={`/g/${member.goal_slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                목표 보기
+              </a>
+            )}
+          </div>
+        }
+        controlsId={memberDetailsId}
+        toggleLabel={`${member.nickname || "미설정"} 회원 상세`}
+      />
     </li>
   );
 }

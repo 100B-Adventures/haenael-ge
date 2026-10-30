@@ -3786,6 +3786,11 @@
     border: 0;
     padding-right: calc(var(--tap-min-size) + var(--sp-2));
   }
+  .admin-member-disclosure > .collapse-chevron {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
   .admin-cashout-card {
     padding: 0.75rem 0.875rem;
   }
@@ -3889,6 +3894,9 @@
     padding: 0;
     color: var(--muted-color);
     font-weight: 700;
+  }
+  .admin-cashout-card.is-requested .admin-cashout-value > strong {
+    color: var(--clover-ink);
   }
   .admin-cashout-controls {
     margin-top: var(--sp-2);

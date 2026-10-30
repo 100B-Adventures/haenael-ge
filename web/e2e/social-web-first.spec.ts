@@ -3219,22 +3219,65 @@ test.describe("V2 web-first social slice", () => {
       await expect(ledgerSection.locator(".admin-section-head p")).toHaveCount(0);
       expect(await memberCards.count()).toBeGreaterThanOrEqual(3);
       expect(await ledgerRows.count()).toBeGreaterThanOrEqual(3);
-      await expect(memberCards.first()).toBeVisible();
-      await expect(memberCards.first().locator("details")).toHaveCount(0);
-      const memberDetails = memberCards.first().locator(".admin-member-details");
+      const firstMemberCard = memberCards.first();
+      await expect(firstMemberCard).toBeVisible();
+      await expect(firstMemberCard.locator("details")).toHaveCount(0);
+      await expect(
+        firstMemberCard.locator(".admin-record-row strong").first(),
+      ).toBeVisible();
+      await expect(
+        firstMemberCard.locator(".admin-record-row small"),
+      ).toContainText(["가입", "보유 클로버"]);
+      const memberDetails = firstMemberCard.locator(".admin-member-details");
+      const memberDetailsToggle = firstMemberCard.getByRole("button", {
+        name: /회원 상세 펼치기$/,
+      });
+      await expect(memberDetails).toHaveCount(0);
+      await expect(memberDetailsToggle).toHaveAttribute("aria-expanded", "false");
+      await memberDetailsToggle.click();
+      await expect(memberDetailsToggle).toHaveAttribute("aria-expanded", "true");
       await expect(memberDetails).toBeVisible();
       await expect(memberDetails.locator("p")).toHaveCount(3);
+      await memberDetailsToggle.click();
+      await expect(memberDetails).toHaveCount(0);
+
+      const memberWithGoal = memberCards.filter({ hasText: "서연" }).first();
+      const memberWithGoalToggle = memberWithGoal.getByRole("button", {
+        name: /회원 상세 펼치기$/,
+      });
+      await memberWithGoalToggle.click();
+      await expect(
+        memberWithGoal.getByRole("link", { name: "목표 보기" }),
+      ).toBeVisible();
+      await memberWithGoalToggle.click();
       await adminPage.addStyleTag({ content: "nextjs-portal{display:none!important}" });
       await adminPage.screenshot({
         path: `${evidenceDir}/dev-cover-review-${width}.png`,
       });
-      const requestedStatusStyle = await cashoutCards.first().locator(".admin-cashout-value > span").evaluate(
-        (element) => ({
-          backgroundColor: getComputedStyle(element).backgroundColor,
-          color: getComputedStyle(element).color,
-        }),
-      );
-      expect.soft(requestedStatusStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      const requestedStatusStyle = await cashoutCards
+        .first()
+        .locator(".admin-cashout-value")
+        .evaluate((element) => {
+          const amount = element.querySelector("strong");
+          const status = element.querySelector("span");
+          if (!amount || !status) throw new Error("requested_cashout_value_missing");
+          const colorProbe = document.createElement("span");
+          colorProbe.style.color = "var(--clover-ink)";
+          element.append(colorProbe);
+          const cloverInk = getComputedStyle(colorProbe).color;
+          colorProbe.remove();
+          return {
+            amountColor: getComputedStyle(amount).color,
+            cloverInk,
+            statusBackgroundColor: getComputedStyle(status).backgroundColor,
+          };
+        });
+      expect
+        .soft(requestedStatusStyle.amountColor)
+        .toBe(requestedStatusStyle.cloverInk);
+      expect
+        .soft(requestedStatusStyle.statusBackgroundColor)
+        .toBe("rgba(0, 0, 0, 0)");
       const adminOverflow = await adminPage.evaluate(() => {
         const viewportWidth = document.documentElement.clientWidth;
         const offenders = [...document.querySelectorAll<HTMLElement>("body *")]
