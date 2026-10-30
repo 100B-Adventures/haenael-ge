@@ -3734,6 +3734,7 @@
     display: grid;
     gap: var(--sp-4);
   }
+  .admin-dashboard-section,
   .admin-dashboard-stack > section {
     min-width: 0;
   }

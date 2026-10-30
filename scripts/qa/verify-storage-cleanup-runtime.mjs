@@ -39,7 +39,7 @@ const secretDir = mkdtempSync(join(tmpdir(), "haenael-cleanup-"));
 const secretFile = join(secretDir, "runtime.env");
 writeFileSync(secretFile, `STORAGE_CLEANUP_INTERNAL_TOKEN=${cleanupToken}\n`, { mode: 0o600 });
 const logFd = openSync("/tmp/haenael-storage-cleanup-function.log", "w");
-const server = spawn("supabase", ["functions", "serve", "storage-cleanup-worker", "--no-verify-jwt", "--env-file", secretFile], {
+const server = spawn("supabase", ["functions", "serve", "--no-verify-jwt", "--env-file", secretFile], {
   cwd: repo,
   env: {
     ...process.env,

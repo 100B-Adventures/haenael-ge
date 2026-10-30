@@ -320,20 +320,22 @@ export default async function AdminPage() {
               <ul className="divide-y" aria-label="운영 경보 목록">
                 {alerts.map((alert) => (
                   <li
-                    className="grid gap-1 py-3 text-sm sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-4"
+                    className="grid min-w-0 gap-1 py-3 text-sm sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-4"
                     key={alert.id}
                   >
                     <strong className="text-destructive">
                       {alert.severity}
                     </strong>
-                    <span className="font-semibold">{alert.event_type}</span>
+                    <span className="min-w-0 break-words font-semibold">
+                      {alert.event_type}
+                    </span>
                     <time
-                      className="text-muted-foreground"
+                      className="min-w-0 break-words text-muted-foreground"
                       dateTime={alert.created_at}
                     >
                       {formatDateTime(alert.created_at)}
                     </time>
-                    <code className="break-all text-xs text-muted-foreground sm:col-span-3">
+                    <code className="min-w-0 break-all text-xs text-muted-foreground sm:col-span-3">
                       {JSON.stringify(alert.details)}
                     </code>
                   </li>
