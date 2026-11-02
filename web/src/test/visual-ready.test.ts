@@ -11,7 +11,9 @@ describe("visual ready image policy", () => {
       "https://example.com",
     )).toBe("https://example.com/object/avatar.png");
     expect(isVisualImageSnapshotInScope({
-      hiddenByAttribute: false,
+      hiddenAttribute: false,
+      ariaHidden: false,
+      inert: false,
       display: "block",
       visibility: "visible",
       width: 40,
@@ -21,12 +23,28 @@ describe("visual ready image policy", () => {
 
   it("명시적으로 숨긴 image는 검증 범위에서 제외한다", () => {
     expect(isVisualImageSnapshotInScope({
-      hiddenByAttribute: true,
+      hiddenAttribute: true,
+      ariaHidden: false,
+      inert: false,
       display: "block",
       visibility: "visible",
       width: 40,
       height: 40,
     })).toBe(false);
+  });
+
+  it.each([
+    { ariaHidden: true, inert: false },
+    { ariaHidden: false, inert: true },
+  ])("aria-hidden 또는 inert 내부의 보이는 image는 broken 검증 범위에 둔다", (semanticState) => {
+    expect(isVisualImageSnapshotInScope({
+      hiddenAttribute: false,
+      ...semanticState,
+      display: "block",
+      visibility: "visible",
+      width: 40,
+      height: 40,
+    })).toBe(true);
   });
 
   it("data URL payload는 진단에 노출하지 않는다", () => {

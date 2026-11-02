@@ -7,7 +7,9 @@ type RawImageDiagnostic = {
 };
 
 export type VisualImageScopeSnapshot = {
-  hiddenByAttribute: boolean;
+  hiddenAttribute: boolean;
+  ariaHidden: boolean;
+  inert: boolean;
   display: string;
   visibility: string;
   width: number;
@@ -30,7 +32,7 @@ export function sanitizeVisualAssetUrl(rawUrl: string, baseUrl: string) {
 }
 
 export function isVisualImageSnapshotInScope(snapshot: VisualImageScopeSnapshot) {
-  return !snapshot.hiddenByAttribute
+  return !snapshot.hiddenAttribute
     && snapshot.display !== "none"
     && snapshot.visibility !== "hidden"
     && snapshot.visibility !== "collapse"
@@ -62,7 +64,7 @@ export async function waitForVisualAssets(page: Page) {
 
   const initial = await page.evaluate(async () => {
     const inScope = (image: HTMLImageElement) => {
-      if (image.closest('[hidden],[aria-hidden="true"],[inert]')) return false;
+      if (image.closest("[hidden]")) return false;
       const style = getComputedStyle(image);
       const rect = image.getBoundingClientRect();
       return style.display !== "none"
@@ -131,7 +133,7 @@ export async function waitForVisualAssets(page: Page) {
   let incomplete: RawImageDiagnostic[] = [];
   try {
     await page.waitForFunction(() => Array.from(document.images).every((image) => {
-      if (image.closest('[hidden],[aria-hidden="true"],[inert]')) return true;
+      if (image.closest("[hidden]")) return true;
       const style = getComputedStyle(image);
       const rect = image.getBoundingClientRect();
       const inScope = style.display !== "none"
@@ -147,7 +149,7 @@ export async function waitForVisualAssets(page: Page) {
       .filter((image) => {
         const style = getComputedStyle(image);
         const rect = image.getBoundingClientRect();
-        return !image.closest('[hidden],[aria-hidden="true"],[inert]')
+        return !image.closest("[hidden]")
           && style.display !== "none"
           && style.visibility !== "hidden"
           && style.visibility !== "collapse"
@@ -196,7 +198,7 @@ export async function waitForVisualAssets(page: Page) {
   const broken = await page.evaluate(async () => {
     const failures: RawImageDiagnostic[] = [];
     for (const image of Array.from(document.images)) {
-      if (image.closest('[hidden],[aria-hidden="true"],[inert]')) continue;
+      if (image.closest("[hidden]")) continue;
       const style = getComputedStyle(image);
       const rect = image.getBoundingClientRect();
       if (style.display === "none" || style.visibility === "hidden"
