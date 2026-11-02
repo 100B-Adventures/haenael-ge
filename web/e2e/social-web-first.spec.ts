@@ -10,6 +10,7 @@ import {
   runStagingFixtureSql,
   STAGING_PROJECT_REF,
 } from "./support/staging-fixture-sql";
+import { waitForVisualAssets } from "./support/visual-ready";
 import {
   type Browser,
   type BrowserContext,
@@ -29,18 +30,7 @@ async function waitForVisualReady(page: Page, selectors: string[]) {
     await expect(page.locator(selector).first()).toBeVisible({ timeout: 15_000 });
   }
   await expect(page.locator("body")).not.toContainText(/(?:로딩|불러오는) 중/);
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all(Array.from(document.images).map(async (image) => {
-      if (!image.complete) {
-        await new Promise<void>((resolve) => {
-          image.addEventListener("load", () => resolve(), { once: true });
-          image.addEventListener("error", () => resolve(), { once: true });
-        });
-      }
-      await image.decode().catch(() => undefined);
-    }));
-  });
+  await waitForVisualAssets(page);
   await page.waitForFunction(() => Array.from(
     document.querySelectorAll<HTMLElement>("[data-wordmap-layout]"),
   ).every((wordmap) => wordmap.dataset.layoutReady === "true"));
@@ -1604,7 +1594,7 @@ test.describe("V2 web-first social slice", () => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
 
-    await page.goto("/my");
+    await page.goto("/my", { waitUntil: "domcontentloaded" });
     await waitForVisualReady(page, ["[data-testid=my-page-overview]"]);
     await expect(page.getByTestId("my-page-overview")).toBeVisible();
     await expect(page.getByTestId("my-profile-summary")).toContainText("서연");
@@ -1616,7 +1606,6 @@ test.describe("V2 web-first social slice", () => {
     const myViewportMetrics: Array<Record<string, unknown>> = [];
     for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
       await page.setViewportSize({ width, height: 844 });
-      await page.goto("/my");
       await waitForVisualReady(page, ["[data-testid=my-page-overview]"]);
       const metrics = await measureCanonicalErgonomics(page);
       console.info("S2_MY_ERGONOMICS", JSON.stringify({ width, ...metrics }));
@@ -1632,7 +1621,6 @@ test.describe("V2 web-first social slice", () => {
       myViewportMetrics.push({ width, ...metrics });
     }
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/my");
     await waitForVisualReady(page, ["[data-testid=my-page-overview]"]);
     if (s2CaptureDir) {
       await captureS2Step(page, `${s2CaptureDir}/01-profile-initial-390.png`);
@@ -2063,7 +2051,7 @@ test.describe("V2 web-first social slice", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     const s2CaptureDir = process.env.S2_DEMO_CAPTURE_DIR;
     if (s2CaptureDir) mkdirSync(s2CaptureDir, { recursive: true });
-    await page.goto(`/me/goal/${ownerGoal}`);
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
     await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
     const coverToggle = page.locator(".goal-cover-picker-toggle");
     await expect(coverToggle).toHaveAccessibleName("배너 바꾸기");
@@ -2081,7 +2069,7 @@ test.describe("V2 web-first social slice", () => {
     await expect(
       page.getByTestId("goal-cover-picker").getByTestId("goal-cover").first(),
     ).toHaveAttribute("data-preset", "health", { timeout: 15_000 });
-    await page.reload();
+    await page.reload({ waitUntil: "domcontentloaded" });
     await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
     await expect(
       page.getByTestId("goal-cover-picker").getByTestId("goal-cover").first(),
@@ -2092,7 +2080,6 @@ test.describe("V2 web-first social slice", () => {
     const coverViewportMetrics: Array<Record<string, unknown>> = [];
     for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
       await page.setViewportSize({ width, height: 844 });
-      await page.goto(`/me/goal/${ownerGoal}`);
       await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
       const metrics = await measureCanonicalErgonomics(page);
       console.info("S2_COVER_ERGONOMICS", JSON.stringify({ width, ...metrics }));
@@ -2108,7 +2095,6 @@ test.describe("V2 web-first social slice", () => {
       coverViewportMetrics.push({ width, ...metrics });
     }
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`/me/goal/${ownerGoal}`);
     await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
     await expect(page.locator(".goal-cover-picker-preview .goal-cover-mark")).toBeHidden();
     await expect(page.getByTestId("wordmap").locator(".wordmap-heart")).toHaveCount(0);
