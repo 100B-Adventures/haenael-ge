@@ -116,7 +116,9 @@ export async function waitForVisualAssets(page: Page) {
     for (const image of pending) image.loading = "eager";
     for (const image of pending) {
       image.scrollIntoView({ block: "center", inline: "nearest" });
-      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise<void>((resolve) => requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      }));
     }
     return { baseUrl: document.baseURI, diagnostics };
   });
