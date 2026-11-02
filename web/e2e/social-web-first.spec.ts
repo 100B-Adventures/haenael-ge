@@ -7,6 +7,10 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import sharp from "sharp";
 import {
+  runStagingFixtureSql,
+  STAGING_PROJECT_REF,
+} from "./support/staging-fixture-sql";
+import {
   type Browser,
   type BrowserContext,
   type Page,
@@ -591,7 +595,6 @@ const runId = Date.now();
 const E2E_BASE_URL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 const E2E_ENVIRONMENT = process.env.E2E_ENVIRONMENT ?? "local";
 const IS_STAGING = E2E_ENVIRONMENT === "staging";
-const STAGING_PROJECT_REF = "ezzklgotgydwxqebfoys";
 const PRODUCTION_WEB_HOSTS = new Set([
   "haenael-ge.vercel.app",
   "haenael-ge-100-b.vercel.app",
@@ -682,6 +685,10 @@ async function newRemotePage(
 async function runFixtureSql(sql: string) {
   if (!IS_STAGING) return runLocalSql(sql);
   assertStagingGuards();
+  const stagingDatabaseUrl = process.env.STAGING_DATABASE_URL?.trim();
+  if (stagingDatabaseUrl) {
+    return runStagingFixtureSql(sql, stagingDatabaseUrl);
+  }
   let response: Response;
   try {
     response = await fetch(

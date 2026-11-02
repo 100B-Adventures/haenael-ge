@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
+import { renderToString } from "react-dom/server";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { Collapsible, shouldCollapse } from "../Collapsible";
@@ -58,6 +59,26 @@ it("CP-03 토글은 꺾쇠 하나로 왕복한다", async () => {
   );
   expect(screen.getByText("닫힘")).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "내용 펼치기" }));
+  expect(screen.getByText("열림")).toBeInTheDocument();
+});
+
+it("CP-02 hydration 전 SSR 토글은 비활성이고 hydration 뒤에만 클릭을 받는다", async () => {
+  const element = (
+    <Collapsible
+      policy={{ auxiliary: true, exceedsLimit: true, hasCollapsedContext: true }}
+    >
+      {(expanded) => <span>{expanded ? "열림" : "닫힘"}</span>}
+    </Collapsible>
+  );
+  const serverHtml = renderToString(element);
+  expect(serverHtml).toContain('data-hydrated="false"');
+  expect(serverHtml).toContain("disabled");
+
+  render(element);
+  const toggle = await screen.findByRole("button", { name: "내용 펼치기" });
+  expect(toggle).toBeEnabled();
+  expect(toggle).toHaveAttribute("data-hydrated", "true");
+  await userEvent.click(toggle);
   expect(screen.getByText("열림")).toBeInTheDocument();
 });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type CollapsePolicy = {
   auxiliary: boolean;
@@ -35,7 +35,9 @@ export function Collapsible({
   onExpandedChange?: (expanded: boolean) => void;
 }) {
   const enabled = shouldCollapse(policy);
+  const [hydrated, setHydrated] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  useEffect(() => setHydrated(true), []);
   if (warnWhenDisabled && !enabled && process.env.NODE_ENV !== "production") {
     console.warn("Collapsible ignored: all three collapse conditions are required.");
   }
@@ -54,6 +56,8 @@ export function Collapsible({
           aria-label={`${toggleLabel} ${expanded ? "접기" : "펼치기"}`}
           aria-expanded={expanded}
           aria-controls={controlsId}
+          data-hydrated={hydrated ? "true" : "false"}
+          disabled={!hydrated}
           onClick={() =>
             setExpanded((value) => {
               const next = !value;
