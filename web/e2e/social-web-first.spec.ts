@@ -3223,7 +3223,7 @@ test.describe("V2 web-first social slice", () => {
       ).toContainText(["가입", "보유 클로버"]);
       const memberDetails = firstMemberCard.locator(".admin-member-details");
       const memberDetailsToggle = firstMemberCard.getByRole("button", {
-        name: /회원 상세 펼치기$/,
+        name: /회원 상세 (?:펼치기|접기)$/,
       });
       await expect(memberDetails).toHaveCount(0);
       await expect(memberDetailsToggle).toHaveAttribute("aria-expanded", "false");
@@ -3236,7 +3236,7 @@ test.describe("V2 web-first social slice", () => {
 
       const memberWithGoal = memberCards.filter({ hasText: "서연" }).first();
       const memberWithGoalToggle = memberWithGoal.getByRole("button", {
-        name: /회원 상세 펼치기$/,
+        name: /회원 상세 (?:펼치기|접기)$/,
       });
       await memberWithGoalToggle.click();
       await expect(
