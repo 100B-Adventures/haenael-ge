@@ -2640,7 +2640,7 @@
     font-weight: 700;
     white-space: nowrap;
   }
-  .my-cheer-list strong {
+  .my-cheer-list article > div:not(.my-cheer-status) > strong {
     font-size: 0.9375rem;
   }
   .my-cheer-list p {
