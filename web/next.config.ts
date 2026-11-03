@@ -43,6 +43,7 @@ export function buildContentSecurityPolicy(
     development ? "'unsafe-eval'" : "",
     "https://js.tosspayments.com",
     "https://www.googletagmanager.com",
+    "https://*.clarity.ms",
   ]
     .filter(Boolean)
     .join(" "),
@@ -62,6 +63,7 @@ export function buildContentSecurityPolicy(
     "https://*.google-analytics.com",
     "https://*.analytics.google.com",
     "https://www.googletagmanager.com",
+    "https://*.clarity.ms",
   ].filter(Boolean).join(" "),
   "frame-src https://*.tosspayments.com https://*.toss.im",
   "worker-src 'self' blob:",
