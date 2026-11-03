@@ -3,6 +3,16 @@
 이 파일은 운영에 나간 것만 적는다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/),
 버전은 [유의적 버전](https://semver.org/lang/ko/)을 따른다.
 
+## Unreleased: 2.1.0-rc.1 후보 (2026-11-03, 운영 배포 아님)
+
+- staging source `28b483f13a46e2af34f41b216410c8149dad88e2`를 릴리스 후보로 묶었다.
+  staging health는 `version=2.0.0`, `sourceSha=28b483f…`, `database=ok`을 반환했고,
+  staging 브라우저 E2E는 17/17, 종료코드 0이었다.
+- 이 항목은 운영 변경 기록이 아니다. 실제 Kakao OAuth와 Toss sandbox callback은 미검증이고,
+  QA artifact는 `changes-requested`다. 노출 이력이 있는 운영 Toss secret 교체와 운영 migration·Function
+  적용도 승인 대기다.
+- 따라서 `2.0.0` 운영 기록을 유지한다. QA 승인과 운영 배포 후에만 이 후보를 정식 릴리스 섹션으로 승격한다.
+
 ## 2.0.0 (2026-10-14)
 
 소셜 바이럴 루프 1차. 받는 사람이 목표를 공개 범위로 나누고 친구를 초대해 서로 응원하는 구조를 웹에서 완결했다.

@@ -1,3 +1,66 @@
+# 릴리스 후보 매니페스트: 해낼게 2.1.0-rc.1
+
+> 상태: **제안 בלבד, QA 미승인, 운영 미배포.** 이 후보는 현재 운영 릴리스 `2.0.0`을 대체하거나
+> `VERSION`을 선언하지 않는다. 실제 배포 승인 후에만 런타임 버전과 루트 `VERSION`을 함께 올린다.
+
+```yaml
+release: 2.1.0-rc.1
+date: 2026-11-03
+status: proposed-not-approved
+line: v2
+delivery: vercel
+canonical_url: https://haenael-ge.vercel.app
+source_commit: 28b483f13a46e2af34f41b216410c8149dad88e2
+build: staging deployment haenael-c6m5vrlk5-100-b.vercel.app
+channel: staging
+runtime_observation:
+  url: https://haenael-ge-v2-staging-100-b.vercel.app/api/health
+  observed_at: 2026-11-03T00:46:35+09:00
+  release: 2.0.0
+  source_sha: 28b483f13a46e2af34f41b216410c8149dad88e2
+  database: ok
+  note: candidate version is not yet assembled into a deployable runtime
+ships:
+  plan: 1.0.0
+  prototype: 3.0.0
+  eng_design: 1.2.5
+  build: approved
+  qa: changes-requested
+  code: source_commit:28b483f13a46e2af34f41b216410c8149dad88e2
+qa_gate:
+  approved: false
+  blockers:
+    - actual Kakao OAuth callback and product session unverified
+    - actual Toss sandbox callback and persistence unverified
+    - production TOSS_SECRET_KEY rotation pending account-owner action
+    - production migrations six and Edge Function deployment pending QA approval
+carried_forward:
+  - approved plan 1.0.0, prototype 3.0.0, and eng-design 1.2.5 remain their own artifact revision lines
+upstream_unchanged_reason: candidate assembly records approved upstream revisions without changing their meaning
+changelog: CHANGELOG.md#unreleased-210-rc1
+artifact_to_release:
+  docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md: { release: 2.1.0-rc.1, tag: target }
+  docs/design/prototypes/social-viral-loop-v3-opus5.html: { release: 2.1.0-rc.1, tag: target }
+  docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md: { release: 2.1.0-rc.1, tag: target }
+  docs/build-log.md: { release: 2.1.0-rc.1, tag: target }
+  docs/qa/qa-tracker-v2-social-viral-loop.md: { release: 2.1.0-rc.1, tag: blocked-qa }
+```
+
+후보의 실제 staging 증거는 `.goal/runs/final-controller-verification-20261103.json`에 고정한다.
+CI 실행 `41474029952`는 성공했으며, staging 브라우저 E2E는 17/17, 종료코드 0이었다.
+그 증거는 QA 승인, 운영 배포, 또는 실제 외부 인증 callback 성공을 뜻하지 않는다.
+
+### 배포 전 정합 메모
+
+- `VERSION`은 의도적으로 없다. 현재 checker는 prerelease 표기(`2.1.0-rc.1`)를 `release`의
+  정규 semver(`2.1.0`)와 동일 비교하지 못한다. 승인 전 `2.1.0`을 쓰면 정식 릴리스가 선언된 것처럼
+  보이므로 이 후보에서는 해소하지 않는다.
+- production의 현재 관찰 릴리스는 `2.0.0`이다. `2.1.0-rc.1`을 production runtime으로 기록하지 않는다.
+- 배포 시에는 QA 승인 뒤 `VERSION`, 패키지 버전, RELEASE, runtime identity를 같은 최종 버전으로 조립하고
+  production smoke를 기록한다.
+
+---
+
 # 릴리스 매니페스트: 해낼게 2.0.0
 
 이 문서는 `v2` 소셜 바이럴 루프 슬라이스의 운영 배포와 승인 산출물을 한 릴리스로 묶는다.

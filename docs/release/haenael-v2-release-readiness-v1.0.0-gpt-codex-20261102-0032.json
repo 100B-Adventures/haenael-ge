@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0.0",
+  "document": "haenael-v2-release-readiness-v1.0.0-gpt-codex-20261102-0032",
+  "generated_at": "2026-11-02",
+  "status": "not_release_ready",
+  "approval": "not_approved",
+  "candidate": {
+    "release": "2.1.0-rc.1",
+    "release_state": "proposed_only",
+    "source_commit": "28b483f13a46e2af34f41b216410c8149dad88e2",
+    "base_production_release": "2.0.0",
+    "base_release_commit": "3894147f6aed9a331ab0103fa2a29d689175180f",
+    "delivery": [
+      "vercel",
+      "managed-supabase"
+    ],
+    "docker_image": null,
+    "runtime_observation": {
+      "environment": "staging",
+      "health_version": "2.0.0",
+      "source_sha": "28b483f13a46e2af34f41b216410c8149dad88e2",
+      "database": "ok",
+      "observed_at": "2026-11-01T15:23:21.266Z"
+    }
+  },
+  "artifact_pins": {
+    "plan": [
+      {
+        "path": "docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md",
+        "version": "1.0.0",
+        "status": "approved"
+      }
+    ],
+    "design": [
+      {
+        "path": "docs/design/prototypes/social-viral-loop-v3-opus5.html",
+        "version": "3.0.0",
+        "status": "approved"
+      }
+    ],
+    "eng_design": [
+      {
+        "family": "V2 web-first FDD/ERD/API/architecture/test-plan",
+        "version": "1.2.5",
+        "status": "approved"
+      }
+    ],
+    "build": [
+      {
+        "path": "supabase/migrations/20261025010000_v2_prototype_contract_completion.sql",
+        "version": "unversioned",
+        "status": "approved"
+      }
+    ],
+    "qa": {
+      "status": "changes-requested",
+      "approved": false
+    }
+  },
+  "verification": {
+    "ci_run": "41474029952",
+    "ci_overall": "success",
+    "successful_jobs": [
+      "배포 환경·환전 층간 계약",
+      "단위 테스트 + 빌드",
+      "Supabase pgTAP + 서버 런타임 계약",
+      "환전 브라우저 E2E"
+    ],
+    "failed_job": null,
+    "admin_staging_dom": "observed in actual staging browser E2E",
+    "external_integrations": {
+      "kakao_callback": "unverified",
+      "toss_callback": "unverified"
+    },
+    "prod_smoke": "unverified",
+    "social_browser_e2e": {
+      "file": "web/e2e/social-web-first.spec.ts",
+      "passed": 17,
+      "exit_code": 0,
+      "evidence": ".goal/runs/final-qa-28b483f-all.exit",
+      "ci_social_job": "skipped; staging browser run verified separately"
+    }
+  },
+  "server_assets": {
+    "new": [
+      "profile-update",
+      "storage-cleanup-worker"
+    ],
+    "modified": [
+      "auth-kakao",
+      "cheer-order",
+      "toss-confirm",
+      "toss-webhook"
+    ],
+    "shared": [
+      "cleanup-auth",
+      "profile",
+      "storage-cleanup",
+      "toss",
+      "toss-webhook-handler"
+    ]
+  },
+  "payment_migrations": [
+    "20261030010000_payment_compensation_amount_contract.sql",
+    "20261030020000_payment_compensation_idempotency.sql",
+    "20261030030000_payment_compensation_replay_guard.sql",
+    "20261030040000_reconcile_failed_cancel_webhook.sql",
+    "20261030050000_resolve_payment_reconcile_risk.sql"
+  ],
+  "candidate_version_observation": {
+    "current_staging_runtime_version": "2.0.0",
+    "meaning": "Observed before the proposed candidate version bump; not an independent product defect or pre-deployment blocker."
+  },
+  "pre_deployment_blockers": [
+    "Actual Kakao OAuth callback and product session remain unverified",
+    "Actual Toss sandbox callback and database persistence remain unverified",
+    "Previously exposed production TOSS_SECRET_KEY requires rotation"
+  ],
+  "release_assembly_before_deploy": [
+    "Assemble the approved candidate version across package/VERSION/RELEASE/runtime identity",
+    "Approve QA artifacts and align approved_artifacts with release manifest ships",
+    "Compare linked production migration list and function list with planned set",
+    "Resolve candidate-specific artifact drift findings"
+  ],
+  "post_deployment_verification": [
+    "Observe canonical production runtime identity",
+    "Run production smoke for health, anonymous core entry, and read-only authenticated core screen"
+  ],
+  "rollback": {
+    "code": "Vercel rollback to the immediately prior eligible production deployment, then re-observe health SHA/version and auto-assignment state.",
+    "database": "No destructive down migration. Correct an applied database contract with a new forward-fix migration.",
+    "compatibility_rule": "Do not declare code rollback complete until the rolled-back code is verified compatible with the forward-only database functions."
+  },
+  "drift_check": {
+    "command": "artifact-drift-check.sh .",
+    "exit_code": 1,
+    "initial_issue_count": 8,
+    "resolved_issue_count": 7,
+    "remaining": [
+      "VERSION absent: checker cannot compare prerelease 2.1.0-rc.1 without treating 2.1.0 as an approved release"
+    ],
+    "release_blocking": true
+  },
+  "sources": [
+    "pipeline-state.v2.md",
+    ".goal/runs/final-qa-20261102/",
+    ".goal/runs/final-qa-20261102-ci-social-job.log",
+    "https://vercel.com/docs/deployments/promote-preview-to-production",
+    "https://vercel.com/docs/instant-rollback",
+    "https://supabase.com/docs/guides/local-development/declarative-database-schemas",
+    ".goal/runs/final-controller-verification-20261103.json"
+  ],
+  "updated_at": "2026-11-03T15:49:33+09:00",
+  "production_migrations_pending": [
+    "20261025010000_v2_prototype_contract_completion.sql",
+    "20261030010000_payment_compensation_amount_contract.sql",
+    "20261030020000_payment_compensation_idempotency.sql",
+    "20261030030000_payment_compensation_replay_guard.sql",
+    "20261030040000_reconcile_failed_cancel_webhook.sql",
+    "20261030050000_resolve_payment_reconcile_risk.sql"
+  ],
+  "production_functions_to_deploy": [
+    "auth-kakao",
+    "cheer-order",
+    "profile-update",
+    "toss-confirm",
+    "toss-webhook"
+  ]
+}
