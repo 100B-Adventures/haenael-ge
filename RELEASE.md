@@ -1,6 +1,6 @@
 # 릴리스 후보 매니페스트: 해낼게 2.1.0-rc.1
 
-> 상태: **제안 בלבד, QA 미승인, 운영 미배포.** 이 후보는 현재 운영 릴리스 `2.0.0`을 대체하거나
+> 상태: **제안, QA 미승인, 운영 미배포.** 이 후보는 현재 운영 릴리스 `2.0.0`을 대체하거나
 > `VERSION`을 선언하지 않는다. 실제 배포 승인 후에만 런타임 버전과 루트 `VERSION`을 함께 올린다.
 
 ```yaml
@@ -15,7 +15,7 @@ build: staging deployment haenael-c6m5vrlk5-100-b.vercel.app
 channel: staging
 runtime_observation:
   url: https://haenael-ge-v2-staging-100-b.vercel.app/api/health
-  observed_at: 2026-11-03T00:46:35+09:00
+  observed_at: 2026-11-03T06:38:46.858630+00:00
   release: 2.0.0
   source_sha: 28b483f13a46e2af34f41b216410c8149dad88e2
   database: ok
