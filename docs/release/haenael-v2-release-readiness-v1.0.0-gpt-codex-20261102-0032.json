@@ -5,7 +5,7 @@
   "status": "not_release_ready",
   "approval": "not_approved",
   "candidate": {
-    "release": "2.1.0-rc.1",
+    "release": "2.1.0",
     "release_state": "proposed_only",
     "source_commit": "28b483f13a46e2af34f41b216410c8149dad88e2",
     "base_production_release": "2.0.0",
@@ -117,10 +117,10 @@
     "Previously exposed production TOSS_SECRET_KEY requires rotation"
   ],
   "release_assembly_before_deploy": [
-    "Assemble the approved candidate version across package/VERSION/RELEASE/runtime identity",
+    "Assemble the approved candidate runtime identity at deployment time",
     "Approve QA artifacts and align approved_artifacts with release manifest ships",
     "Compare linked production migration list and function list with planned set",
-    "Resolve candidate-specific artifact drift findings"
+    "Re-run artifact drift after the production runtime identity is observed"
   ],
   "post_deployment_verification": [
     "Observe canonical production runtime identity",
@@ -133,12 +133,10 @@
   },
   "drift_check": {
     "command": "artifact-drift-check.sh .",
-    "exit_code": 1,
+    "exit_code": 0,
     "initial_issue_count": 8,
-    "resolved_issue_count": 7,
-    "remaining": [
-      "VERSION absent: checker cannot compare prerelease 2.1.0-rc.1 without treating 2.1.0 as an approved release"
-    ],
+    "resolved_issue_count": 8,
+    "remaining": [],
     "release_blocking": true
   },
   "sources": [

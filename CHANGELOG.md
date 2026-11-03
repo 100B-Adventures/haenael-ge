@@ -3,7 +3,7 @@
 이 파일은 운영에 나간 것만 적는다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/),
 버전은 [유의적 버전](https://semver.org/lang/ko/)을 따른다.
 
-## Unreleased: 2.1.0-rc.1 후보 (2026-11-03, 운영 배포 아님)
+## Unreleased: 2.1.0 후보 (2026-11-03, 운영 배포 아님)
 
 - staging source `28b483f13a46e2af34f41b216410c8149dad88e2`를 릴리스 후보로 묶었다.
   staging health는 `version=2.0.0`, `sourceSha=28b483f…`, `database=ok`을 반환했고,

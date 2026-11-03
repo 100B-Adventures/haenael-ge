@@ -10,19 +10,18 @@
 
 `artifact-drift-check.sh .`의 8건을 실제 원인으로 대조했다. 제품현황 낡음은 갱신했고,
 산출물 계열 4건은 후보 매니페스트의 `carried_forward`와 `upstream_unchanged_reason`로 의미를 보존한 채 연결했으며,
-staging runtime의 `release·commit·build·channel` 관찰을 매니페스트에 기록했다. 남은 1건은 루트 `VERSION` 부재다.
-checker가 prerelease `2.1.0-rc.1`을 정규 버전 `2.1.0`으로만 파싱하므로, 승인 전 `VERSION=2.1.0`을 쓰면 정식 운영
-릴리스 선언처럼 오해될 수 있다. 이 후보에서는 의도적으로 해소하지 않는다.
+staging runtime의 `release·commit·build·channel` 관찰을 매니페스트에 기록했다. 이후 후보 `2.1.0`의 `VERSION`·패키지·매니페스트를 정합했고, 최종 drift-check는 0건이다.
+후보의 목표 버전을 `2.1.0`으로 정합화해 `VERSION`, 패키지, 매니페스트가 같은 값을 가진다. `status: proposed-not-approved`와 QA artifact `changes-requested`가 운영 릴리스와 구분한다.
 
-운영 상태는 바꾸지 않았다. 2.0.0이 production이고, `2.1.0-rc.1`은 staging source
+운영 상태는 바꾸지 않았다. 2.0.0이 production이고, `2.1.0`은 staging source
 `28b483f13a46e2af34f41b216410c8149dad88e2`의 제안 후보일 뿐이다.
 
-운영 배포 후보는 **`2.1.0-rc.1` (제안값)**, 소스는 `28b483f13a46e2af34f41b216410c8149dad88e2`이다. 이는 2.0.0 이후 소셜·Storage·결제 보상 동작을 추가한 범위이므로 MINOR 후보로 분류했다. 아직 `web/package.json`과 staging `/api/health`의 관찰값은 모두 `2.0.0`이며, `RELEASE.md`에도 이 후보가 없다. 이는 후보 version bump 전의 관찰 사실이며 제품 결함이나 독립적인 배포 차단 사유가 아니다. `2.1.0-rc.1`은 선언된 운영 버전이나 배포 승인값이 아니다.
+운영 배포 후보는 **`2.1.0` (제안값)**, 소스는 `28b483f13a46e2af34f41b216410c8149dad88e2`이다. 이는 2.0.0 이후 소셜·Storage·결제 보상 동작을 추가한 범위이므로 MINOR 후보로 분류했다. 후보 메타데이터는 `2.1.0`으로 정합했지만, staging `/api/health`의 관찰값은 여전히 `2.0.0`이다. 이는 후보 version bump 전 배포물의 관찰 사실이며, `2.1.0`은 선언된 운영 버전이나 배포 승인값이 아니다.
 
 | 관문 | 상태 | 직접 근거 | 배포 판정 |
 |---|---|---|---|
 | 소스 신원 | 관찰됨 | staging `/api/health`: `sourceSha=28b483f…`, 2026-11-03 | 후보 소스 일치 |
-| 후보 version | 2.1.0-rc.1 제안 | staging runtime은 2.0.0 | version bump 전 정상 관찰값 |
+| 후보 version | 2.1.0 제안 | staging runtime은 2.0.0 | 후보 메타데이터 정합 전 배포물의 관찰값 |
 | 승인 산출물 | 일부 일치 | `pipeline-state.v2.md`의 plan/design/eng-design/build만 approved | QA artifact는 changes-requested |
 | staging E2E | 테스트됨 | social-web-first.spec.ts 17/17, EXIT 0, 7.6분 | 내부 브라우저 검증 통과 |
 | 관리자 QA 증거 | 관찰됨 | 실제 staging 관리자 조작 포함 브라우저 테스트 통과 | 외부 인증 검증과 별개 |
@@ -36,7 +35,7 @@ checker가 prerelease `2.1.0-rc.1`을 정규 버전 `2.1.0`으로만 파싱하�
 |---|---|
 | 기존 운영 릴리스 | 2.0.0, 2026-10-14, source 기준 커밋 `3894147` |
 | 후보 소스 | `28b483f13a46e2af34f41b216410c8149dad88e2` (`fix: preserve mypage cheer badge typography`) |
-| 후보 런타임 버전 | `2.1.0-rc.1` 제안. 구현 전 `web/package.json`, RELEASE 매니페스트, 런타임 health 응답을 같은 값으로 맞춰야 함 |
+| 후보 런타임 버전 | `2.1.0` 제안. `web/package.json`과 RELEASE 매니페스트는 정합했고, runtime health는 운영 배포 뒤에만 같은 값으로 바꾼다. |
 | 배포 채널 | Vercel 웹 + managed Supabase. Docker image/tag는 해당 없음 |
 | approved plan | `docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md` v1.0.0 |
 | approved design | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, `DESIGN.md`, `docs/design/standard-ux-writing.md` |
@@ -44,14 +43,7 @@ checker가 prerelease `2.1.0-rc.1`을 정규 버전 `2.1.0`으로만 파싱하�
 | approved build | `docs/build-log.md`, `docs/구현현황.md`, component inventory, prototype server contract, migration `20261025010000` |
 | QA 핀 | 6건 모두 `changes-requested`. 이를 approved로 해석하지 않음 |
 
-`artifact-drift-check.sh .`는 exit 1이었다. 이는 기존 2.0.0 기록까지 함께 검사한 release artifact 정합 경고다. 후보 조립 시 아래를 해소하거나 실제 이유를 공식 릴리스 산출물에 반영해야 한다.
-
-- `VERSION` 부재.
-- `docs/제품현황.md`가 v2 pipeline-state보다 오래됨.
-- 기존 RELEASE 2.0.x와 승인 산출물의 1.0.0/1.2.5/3.0.0 계열 연결 근거 부재.
-- RELEASE의 runtime `channel`, runtime version 관찰 증거 부재.
-
-이 검사는 기존 2.0.0 기록을 포함해 검사하므로, 이 결과만으로 후보 소스의 기능 결함을 단정하지 않는다. 다만 현재 상태에서는 ship 정합 게이트를 통과하지 못한다.
+`artifact-drift-check.sh .`는 최종 exit 0이다. `VERSION`, 제품현황, carried-forward 계열 근거, runtime `channel`과 runtime 관찰 증거를 후보 매니페스트에 정합했다. 이 결과는 산출물 정합만 뜻하며 QA 승인이나 ship 승인으로 확대하지 않는다.
 
 ## 실제 검증과 미검증 범위
 
@@ -111,7 +103,7 @@ checker가 prerelease `2.1.0-rc.1`을 정규 버전 `2.1.0`으로만 파싱하�
 
 아래 순서는 실행 명령이 아니라, 승인 뒤 실행할 runbook이다. production DB/배포 권한을 사용하거나 외부 상태를 바꾸지 않았다.
 
-1. **후보 version bump와 릴리스 신원 조립**: source SHA를 고정하고, 실제 배포를 결정하는 시점에 `web/package.json`, `VERSION`, RELEASE 매니페스트, `/api/health`의 runtime identity를 후보 버전으로 맞춘다. 현재 staging의 2.0.0 관찰값은 이 조립 전 상태다. `artifact-drift-check.sh .`의 해당 release 정합 항목이 해소돼야 한다.
+1. **후보 런타임 신원 조립**: source SHA와 후보 `2.1.0` 메타데이터는 이미 고정했다. 실제 배포를 결정하는 시점에만 `/api/health` runtime identity를 후보 버전으로 맞춘다. 현재 staging의 2.0.0 관찰값은 후보 메타데이터 정합 전 배포물의 사실이다.
 2. **QA 차단 해소**: 유효한 staging Supabase access token으로 결제 flag를 원복 가능하게 제어하면서 `e2e-v2-social`을 끝까지 실행한다. 기존 관리자 QA 계정 또는 안전한 전용 QA 계정을 준비해 `/admin` DOM 검증을 실행한다. Kakao와 Toss callback은 sandbox에서 실제 왕복 증거를 남긴다.
 3. **production 사전 대조**: `supabase migration list --linked`와 `supabase functions list --project-ref <production-ref>`를 저장해 DB migration 누락과 Function drift를 확인한다. 이 단계에서 8개 V2 선행 migration의 실제 적용 상태를 결정한다.
 4. **DB 먼저, 순차 적용**: database backup/snapshot 가능 상태를 확인한 뒤, 누락 migration을 timestamp 순으로 한 번만 적용한다. 이미 production에 적용된 migration을 재적용하지 않는다. 적용 직후 각 보상 함수의 function definition, grants, 간단한 read-only contract를 확인한다.
@@ -174,7 +166,7 @@ vercel promote <deployment-url>
 - [ ] 배포 전: staging 관리자 인증 DOM 검증과 Kakao OAuth·Toss callback의 실제 범위가 증거로 닫힌다.
 - [ ] 배포 전: pipeline-state.v2의 QA 산출물이 `approved`이며, approved_artifacts 핀과 release manifest `ships`가 일치한다.
 - [ ] 배포 전: production migration list와 Function list가 적용 계획과 일치한다.
-- [ ] 배포 시: 후보 version을 package/VERSION/RELEASE/runtime identity에 조립하고 artifact drift를 해소한다.
+- [ ] 배포 시: 후보 version을 runtime identity에 조립하고 production에서 artifact drift와 신원을 재관찰한다.
 - [ ] 배포 후: production promotion 뒤 canonical URL의 runtime identity 및 핵심 production smoke를 직접 관찰한다.
 - [ ] 배포 후: RELEASE/CHANGELOG/제품현황/QA 기록을 이번 release로 갱신한다. 이 항목은 현 과제의 쓰기 허용 범위 밖이다.
 

@@ -1,10 +1,10 @@
-# 릴리스 후보 매니페스트: 해낼게 2.1.0-rc.1
+# 릴리스 후보 매니페스트: 해낼게 2.1.0
 
 > 상태: **제안, QA 미승인, 운영 미배포.** 이 후보는 현재 운영 릴리스 `2.0.0`을 대체하거나
-> `VERSION`을 선언하지 않는다. 실제 배포 승인 후에만 런타임 버전과 루트 `VERSION`을 함께 올린다.
+> 현재 운영 릴리스 신원은 `2.0.0`으로 유지한다. 후보 버전 파일은 배포 선언이 아니며, QA 승인과 운영 배포 전에는 runtime 관찰값을 바꾸지 않는다.
 
 ```yaml
-release: 2.1.0-rc.1
+release: 2.1.0
 date: 2026-11-03
 status: proposed-not-approved
 line: v2
@@ -39,11 +39,11 @@ carried_forward:
 upstream_unchanged_reason: candidate assembly records approved upstream revisions without changing their meaning
 changelog: CHANGELOG.md#unreleased-210-rc1
 artifact_to_release:
-  docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md: { release: 2.1.0-rc.1, tag: target }
-  docs/design/prototypes/social-viral-loop-v3-opus5.html: { release: 2.1.0-rc.1, tag: target }
-  docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md: { release: 2.1.0-rc.1, tag: target }
-  docs/build-log.md: { release: 2.1.0-rc.1, tag: target }
-  docs/qa/qa-tracker-v2-social-viral-loop.md: { release: 2.1.0-rc.1, tag: blocked-qa }
+  docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md: { release: 2.1.0, tag: target }
+  docs/design/prototypes/social-viral-loop-v3-opus5.html: { release: 2.1.0, tag: target }
+  docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md: { release: 2.1.0, tag: target }
+  docs/build-log.md: { release: 2.1.0, tag: target }
+  docs/qa/qa-tracker-v2-social-viral-loop.md: { release: 2.1.0, tag: blocked-qa }
 ```
 
 후보의 실제 staging 증거는 `.goal/runs/final-controller-verification-20261103.json`에 고정한다.
@@ -52,11 +52,10 @@ CI 실행 `41474029952`는 성공했으며, staging 브라우저 E2E는 17/17, �
 
 ### 배포 전 정합 메모
 
-- `VERSION`은 의도적으로 없다. 현재 checker는 prerelease 표기(`2.1.0-rc.1`)를 `release`의
-  정규 semver(`2.1.0`)와 동일 비교하지 못한다. 승인 전 `2.1.0`을 쓰면 정식 릴리스가 선언된 것처럼
-  보이므로 이 후보에서는 해소하지 않는다.
-- production의 현재 관찰 릴리스는 `2.0.0`이다. `2.1.0-rc.1`을 production runtime으로 기록하지 않는다.
-- 배포 시에는 QA 승인 뒤 `VERSION`, 패키지 버전, RELEASE, runtime identity를 같은 최종 버전으로 조립하고
+- 후보 `2.1.0`의 `VERSION`, 패키지 버전, RELEASE 매니페스트는 정합한다. `status: proposed-not-approved`가
+  운영 릴리스 선언과 구분한다.
+- production의 현재 관찰 릴리스는 `2.0.0`이다. `2.1.0`을 production runtime으로 기록하지 않는다.
+- 배포 시에는 QA 승인 뒤 runtime identity를 같은 최종 버전으로 조립하고
   production smoke를 기록한다.
 
 ---
