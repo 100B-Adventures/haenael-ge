@@ -66,7 +66,7 @@ it("CT-NAV-07 비회원 초대 수락 화면에서도 하단탭과 초대 활성
   pathname = "/invite/sample-token";
   render(<ReceiverBottomNav locked />);
   expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "초대" }))
-    .toHaveClass("is-active")
-    .toHaveAttribute("aria-current", "page");
+  const inviteTab = screen.getByRole("button", { name: "초대" });
+  expect(inviteTab).toHaveClass("is-active");
+  expect(inviteTab).toHaveAttribute("aria-current", "page");
 });
