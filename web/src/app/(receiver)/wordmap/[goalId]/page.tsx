@@ -9,6 +9,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { WordmapShareIcons } from "@/components/goal/WordmapShareIcons";
 import { WordmapViewTracker } from "@/components/goal/WordmapViewTracker";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-wordmap-goalid-page";
 
 type Props = { params: Promise<{ goalId: string }> };
 
@@ -82,8 +83,7 @@ export default async function WordmapFullViewPage({ params }: Props) {
         >
           ‹
         </Link>
-        <p className="font-extrabold [font-size:12.5px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
-          해낼게<span className="[color:var(--clover-bright)]!">.</span>
+        <p className="font-extrabold [font-size:12.5px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_001}<span className="[color:var(--clover-bright)]!">.</span>
         </p>
         {/* 균형 spacer */}
         <div className="[width:40px]!" />
@@ -104,7 +104,7 @@ export default async function WordmapFullViewPage({ params }: Props) {
           <p className="text-center mt-1 mb-3 [font-size:11px]! [color:var(--muted-foreground)]!">
             {cheerCount != null && cheerCount > 0
               ? `${cheerCount}명이 조용히 응원했어요`
-              : "응원이 아직 없어요 — 첫 번째를 기다리고 있어요"}
+              : PRODUCT_COPY.TEXT_002}
           </p>
 
           {/* 워드맵 (flex-1 채움) */}
@@ -115,9 +115,7 @@ export default async function WordmapFullViewPage({ params }: Props) {
           </div>
 
           {/* 워터마크 */}
-          <p className="text-right font-extrabold mt-2 [font-size:10px]! [color:var(--accent-foreground)]! [opacity:0.8]!">
-            해낼게.
-          </p>
+          <p className="text-right font-extrabold mt-2 [font-size:10px]! [color:var(--accent-foreground)]! [opacity:0.8]!">{PRODUCT_COPY.TEXT_003}</p>
         </div>
       </div>
 
@@ -126,7 +124,7 @@ export default async function WordmapFullViewPage({ params }: Props) {
         <WordmapShareIcons
           goalId={goalIdNum}
           goalSlug={goal.slug}
-          goalTitle={goal.title ?? "해낼게"}
+          goalTitle={goal.title ?? PRODUCT_COPY.TEXT_004}
         />
       </div>
     </main>

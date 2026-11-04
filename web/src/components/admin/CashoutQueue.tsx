@@ -7,6 +7,7 @@ import {
   rejectCashout,
   revealCashoutAccount,
 } from "@/app/admin/actions";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-admin-cashoutqueue";
 
 export type AdminCashout = {
   id: number;
@@ -134,7 +135,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
     if (cashout.status !== "REQUESTED") {
       return (
         <p className="text-xs leading-5 text-muted-foreground">
-          {cashout.processing_note || "처리 메모 없음"}
+          {cashout.processing_note || PRODUCT_COPY.TEXT_001}
         </p>
       );
     }
@@ -146,17 +147,13 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
             onClick={() => openModal(cashout, "paid")}
             disabled={pending}
             className="flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
-          >
-            지급 완료
-          </button>
+          >{PRODUCT_COPY.TEXT_002}</button>
           <button
             type="button"
             onClick={() => openModal(cashout, "rejected")}
             disabled={pending}
             className="flex-1 rounded-lg bg-danger-soft px-3 py-2 text-xs font-bold text-danger-ink disabled:opacity-50"
-          >
-            반려
-          </button>
+          >{PRODUCT_COPY.TEXT_003}</button>
         </div>
         {errors[cashout.id] && (
           <p
@@ -180,11 +177,10 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
         <div className="admin-cashout-head">
           <div>
             <strong>
-              <span>{cashout.nickname || "미설정"}</span> · {cashout.bank_code}{" "}
+              <span>{cashout.nickname || PRODUCT_COPY.TEXT_004}</span> · {cashout.bank_code}{" "}
               {cashout.account_masked}
             </strong>
-            <small>
-              신청 {formatDateTime(cashout.requested_at)} · {cashout.status}
+            <small>{PRODUCT_COPY.TEXT_005}{formatDateTime(cashout.requested_at)} · {cashout.status}
             </small>
           </div>
           <div className="admin-cashout-value">
@@ -205,17 +201,14 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
     <div>
       <div className="admin-cashout-list" data-testid="cashout-mobile-cards">
         {requested.length === 0 ? (
-          <div className="admin-record-empty">
-            지급 대기 중인 신청이 없어요.
-          </div>
+          <div className="admin-record-empty">{PRODUCT_COPY.TEXT_006}</div>
         ) : (
           requested.map(cashoutCard)
         )}
       </div>
       {handled.length > 0 && (
-        <section className="admin-cashout-history" aria-label="처리한 요청">
-          <h3 className="admin-cashout-history-title">
-            처리한 요청 <span>{handled.length}건</span>
+        <section className="admin-cashout-history" aria-label={PRODUCT_COPY.TEXT_007}>
+          <h3 className="admin-cashout-history-title">{PRODUCT_COPY.TEXT_008}<span>{handled.length}{PRODUCT_COPY.TEXT_009}</span>
           </h3>
           <div className="admin-cashout-list">
             {handled.map(cashoutCard)}
@@ -231,8 +224,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
           aria-labelledby="cashout-modal-title"
         >
           <div className="w-full max-w-md rounded-lg bg-card p-5 shadow-2xl">
-            <h3 id="cashout-modal-title" className="text-[17px] font-black">
-              이 건을{" "}
+            <h3 id="cashout-modal-title" className="text-[17px] font-black">{PRODUCT_COPY.TEXT_010}{" "}
               <span
                 className={
                   modal.action === "paid"
@@ -240,19 +232,17 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
                     : "text-danger-ink"
                 }
               >
-                {modal.action === "paid" ? "지급 완료" : "반려"}
-              </span>
-              로 확정할까요?
-            </h3>
+                {modal.action === "paid" ? PRODUCT_COPY.TEXT_011 : PRODUCT_COPY.TEXT_012}
+              </span>{PRODUCT_COPY.TEXT_013}</h3>
             <div className="mt-4 rounded-sm bg-muted p-4 text-[12.5px]">
               <div className="flex justify-between py-1">
-                <span>신청자</span>
+                <span>{PRODUCT_COPY.TEXT_014}</span>
                 <strong>
                   {modal.cashout.nickname} ({modal.cashout.account_holder})
                 </strong>
               </div>
               <div className="flex justify-between gap-4 py-1">
-                <span>입금 계좌</span>
+                <span>{PRODUCT_COPY.TEXT_015}</span>
                 <strong className="text-right">
                   {modal.cashout.bank_code}{" "}
                   {modal.action === "paid"
@@ -261,18 +251,18 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
                 </strong>
               </div>
               <div className="flex justify-between py-1">
-                <span>친구 응원분</span>
+                <span>{PRODUCT_COPY.TEXT_016}</span>
                 <strong>
                   🍀 {modal.cashout.clover_amount} ·{" "}
                   {formatKrw(modal.cashout.gross_krw)}
                 </strong>
               </div>
               <div className="flex justify-between py-1">
-                <span>원천징수</span>
+                <span>{PRODUCT_COPY.TEXT_017}</span>
                 <strong>−{formatKrw(modal.cashout.withholding_krw)}</strong>
               </div>
               <div className="flex justify-between py-1">
-                <span>실지급액</span>
+                <span>{PRODUCT_COPY.TEXT_018}</span>
                 <strong className="text-[15px] text-accent-foreground">
                   {formatKrw(modal.cashout.net_krw)}
                 </strong>
@@ -286,11 +276,9 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
                   onChange={(event) => setPaidConfirmed(event.target.checked)}
                   className="mt-1 size-4 accent-primary"
                 />
-                <span>
-                  은행 앱에서 위 계좌로{" "}
+                <span>{PRODUCT_COPY.TEXT_019}{" "}
                   <strong>
-                    {formatKrw(modal.cashout.net_krw)} 이체를 실제로 마쳤습니다.
-                  </strong>
+                    {formatKrw(modal.cashout.net_krw)}{PRODUCT_COPY.TEXT_020}</strong>
                 </span>
               </label>
             ) : (
@@ -299,17 +287,12 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
                 <p
                   className="rounded-sm bg-danger-soft p-3 text-[11.5px] leading-relaxed text-danger-ink"
                   data-testid="cashout-reject-warning"
-                >
-                  반려하면 친구 응원분 🍀{modal.cashout.clover_amount}개에 걸린{" "}
-                  <strong>잠금이 풀려요.</strong> 총량은 애초에 줄지 않았으므로
-                  되돌릴 잔액이 없습니다. 신청자는 사유를 보고 다시 신청할 수
-                  있어요.
-                </p>
+                >{PRODUCT_COPY.TEXT_021}{modal.cashout.clover_amount}{PRODUCT_COPY.TEXT_022}{" "}
+                  <strong>{PRODUCT_COPY.TEXT_023}</strong>{PRODUCT_COPY.TEXT_024}</p>
                 <label
                   htmlFor="cashout-reject-note"
                   className="mt-3 block text-[11.5px] font-bold text-muted-foreground"
-                >
-                  반려 사유 <span className="text-danger-ink">*필수</span>
+                >{PRODUCT_COPY.TEXT_025}<span className="text-danger-ink">{PRODUCT_COPY.TEXT_026}</span>
                 </label>
                 <textarea
                   id="cashout-reject-note"
@@ -339,9 +322,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
                 type="button"
                 onClick={() => setModal(null)}
                 className="flex-1 rounded-md border border-border py-3 text-sm font-bold"
-              >
-                취소
-              </button>
+              >{PRODUCT_COPY.TEXT_027}</button>
               <button
                 type="button"
                 onClick={processSelected}
@@ -352,8 +333,8 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
                 data-testid="cashout-modal-confirm-button"
               >
                 {modal.action === "paid"
-                  ? "지급 완료 확정"
-                  : "반려하고 잠금 해제"}
+                  ? PRODUCT_COPY.TEXT_028
+                  : PRODUCT_COPY.TEXT_029}
               </button>
             </div>
           </div>

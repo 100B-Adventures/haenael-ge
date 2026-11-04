@@ -3,18 +3,17 @@ import Link from "next/link";
 import { LegalFooter } from "@/components/common/LegalFooter";
 import { ReceiverPageShell } from "@/components/receiver/ReceiverShell";
 import { COMMERCE_REGISTRATION, LEGAL_EXPOSURE } from "@/lib/legal/exposure";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-my-legal-page";
 
 export default function BusinessInformationPage() {
   return (
     <ReceiverPageShell testId="business-information-page" bottomSafe>
       <header className="social-detail-head">
         <Link href="/my" aria-label="관리로 돌아가기">‹</Link>
-        <strong>사업자 정보</strong>
+        <strong>{PRODUCT_COPY.TEXT_001}</strong>
         <span aria-hidden="true" />
       </header>
-      <p className="social-description">
-        해낼게를 운영하는 사업자의 정보를 확인할 수 있어요.
-      </p>
+      <p className="social-description">{PRODUCT_COPY.TEXT_002}</p>
       <LegalFooter mode={LEGAL_EXPOSURE.myLegal} />
       <section
         className="business-registration-status"

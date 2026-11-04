@@ -10,6 +10,7 @@
 // 구현하고, 잔액 유지형 부분 에러바운더리는 별도 슬라이스로 회장 판단을 받는다.
 
 import { useEffect } from "react";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-me-error";
 
 export default function HomeError({
   error,
@@ -27,20 +28,14 @@ export default function HomeError({
       className="min-h-svh flex flex-col items-center justify-center px-[22px] text-center [background-color:var(--background)]!"
       data-testid="me-error-card"
     >
-      <p className="text-[18px] font-bold mb-2 [color:var(--foreground)]!">
-        불러오지 못했어요
-      </p>
-      <p className="text-[13.5px] mb-6 [color:var(--muted-foreground)]!">
-        네트워크 상태를 확인하고 다시 시도해 주세요.
-      </p>
+      <p className="text-[18px] font-bold mb-2 [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_001}</p>
+      <p className="text-[13.5px] mb-6 [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</p>
       <button
         type="button"
         onClick={() => reset()}
         className="py-3 px-6 rounded-[14px] text-[14px] font-semibold [background-color:var(--primary)]! [color:var(--card)]!"
         data-testid="me-error-retry"
-      >
-        다시 불러오기
-      </button>
+      >{PRODUCT_COPY.TEXT_003}</button>
     </main>
   );
 }

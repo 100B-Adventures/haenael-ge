@@ -1,4 +1,5 @@
-// components/goal/CheerCount.tsx — 응원 수 표시
+
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-cheercount";// components/goal/CheerCount.tsx — 응원 수 표시
 // DESIGN.md §6 금액 3층 (a): 친구/공개 화면 = "N명"만. 금액·개수 비노출.
 // 와이어프레임: goal-page.html .proof 섹션.
 
@@ -33,9 +34,7 @@ export function CheerCount({ count, variant = "default" }: CheerCountProps) {
 
   if (variant === "public") {
     return (
-      <p className="public-cheer-count" data-testid="cheer-count">
-        지금까지 <strong>{count.toLocaleString("ko-KR")}</strong>명이 응원했어요
-      </p>
+      <p className="public-cheer-count" data-testid="cheer-count">{PRODUCT_COPY.TEXT_001}<strong>{count.toLocaleString("ko-KR")}</strong>{PRODUCT_COPY.TEXT_002}</p>
     );
   }
 
@@ -47,10 +46,7 @@ export function CheerCount({ count, variant = "default" }: CheerCountProps) {
         // --muted
       >
         <strong className="[color:var(--foreground)]! [font-weight:700]!">
-          {count.toLocaleString("ko-KR")}명
-        </strong>
-        이 조용히 응원했어요
-      </p>
+          {count.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_003}</strong>{PRODUCT_COPY.TEXT_004}</p>
     </div>
   );
 }

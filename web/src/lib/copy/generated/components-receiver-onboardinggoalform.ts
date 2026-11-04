@@ -1,0 +1,19 @@
+// Centralized user-facing copy extracted from web/src/components/receiver/OnboardingGoalForm.tsx.
+// Keep wording exact unless the approved UX-writing contract changes.
+export const PRODUCT_COPY = {
+  TEXT_001: "목표", // source line 255
+  TEXT_002: "목표를 저장하는 중이에요...", // source line 271
+  TEXT_003: "해낼게.", // source line 290
+  TEXT_004: "무엇을 해낼 거예요?", // source line 293
+  TEXT_005: "작성하고 저장하면 나만의 응원 링크가 생겨요.", // source line 296
+  TEXT_006: "목표", // source line 306
+  TEXT_007: "해낼게", // source line 330
+  TEXT_008: "언제까지?", // source line 346
+  TEXT_009: "(응원의 이유가 돼요 · 선택)", // source line 374
+  TEXT_010: "내 링크 받기", // source line 412
+  TEXT_011: "저장하고 내 링크 받기", // source line 412
+  TEXT_012: "바로 저장돼요.", // source line 418
+  TEXT_013: "저장하면 로그인 화면이 잠깐 뜨고, 작성 중인 목표는 안전하게 보관 중이에요.", // source line 419
+} as const;
+
+export const PRODUCT_COPY_SOURCE = "web/src/components/receiver/OnboardingGoalForm.tsx";

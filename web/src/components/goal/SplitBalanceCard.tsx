@@ -12,6 +12,7 @@
 
 import { krwFromClover } from "@/lib/clover";
 import { formatCashoutKrw } from "@/lib/cashout";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-splitbalancecard";
 
 export interface SplitBalanceCardProps {
   /** 총 클로버(총량). clover_eligibility.total_balance */
@@ -37,18 +38,14 @@ export function SplitBalanceCard({
   return (
     <div data-testid="split-balance-card">
       <div className="flex items-baseline justify-between">
-        <p className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
-          모인 클로버
-        </p>
+        <p className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_001}</p>
       </div>
       <p
         className="text-xl font-extrabold text-accent-foreground"
         data-testid="split-balance-total"
       >
         🍀 {total}
-        <small className="ml-0.5 text-[11px] font-semibold text-muted-foreground">
-          개
-        </small>
+        <small className="ml-0.5 text-[11px] font-semibold text-muted-foreground">{PRODUCT_COPY.TEXT_002}</small>
       </p>
 
       {/* 잠김이 있을 때만 등가 은닉. 없을 때는 기존 원화 등가 보조표기 유지 */}
@@ -57,8 +54,7 @@ export function SplitBalanceCard({
           className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]"
           data-testid="clover-krw-equivalent"
         >
-          ≈{krwFromClover(total).toLocaleString("ko-KR")}원 상당
-        </p>
+          ≈{krwFromClover(total).toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_003}</p>
       )}
 
       {hasLock && (
@@ -72,43 +68,35 @@ export function SplitBalanceCard({
           />
 
           <div className="mt-2 flex items-start justify-between gap-3">
-            <p className="pt-0.5 text-[length:var(--text-label-small)]! font-bold text-foreground">
-              지금 쓸 수 있어요
-            </p>
+            <p className="pt-0.5 text-[length:var(--text-label-small)]! font-bold text-foreground">{PRODUCT_COPY.TEXT_004}</p>
             <div className="shrink-0 text-right tabular-nums">
               <strong
                 className="block whitespace-nowrap text-[13px] text-accent-foreground"
                 data-testid="split-balance-available"
               >
-                🍀 {available}개
-              </strong>
+                🍀 {available}{PRODUCT_COPY.TEXT_005}</strong>
               <p
                 className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]"
                 data-testid="split-balance-available-krw"
               >
-                ≈{krwFromClover(available).toLocaleString("ko-KR")}원 상당
-              </p>
+                ≈{krwFromClover(available).toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_006}</p>
             </div>
           </div>
 
           <div className="mt-2 flex items-start justify-between gap-3 border-t border-border pt-2">
-            <p className="pt-0.5 text-[length:var(--text-label-small)]! font-bold text-amber-ink">
-              🔒 환전으로 잠김
-            </p>
+            <p className="pt-0.5 text-[length:var(--text-label-small)]! font-bold text-amber-ink">{PRODUCT_COPY.TEXT_007}</p>
             <div className="shrink-0 text-right tabular-nums">
               <strong
                 className="block whitespace-nowrap text-[13px] text-amber-ink"
                 data-testid="split-balance-locked"
               >
-                🍀 {locked}개
-              </strong>
+                🍀 {locked}{PRODUCT_COPY.TEXT_008}</strong>
               {typeof pendingNetKrw === "number" && (
                 <p
                   className="mt-0.5 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]"
                   data-testid="split-balance-locked-krw"
                 >
-                  {formatCashoutKrw(pendingNetKrw)} 입금 예정
-                </p>
+                  {formatCashoutKrw(pendingNetKrw)}{PRODUCT_COPY.TEXT_009}</p>
               )}
             </div>
           </div>
@@ -116,11 +104,7 @@ export function SplitBalanceCard({
           <p
             className="mt-2 text-[11px] leading-relaxed text-muted-foreground"
             data-testid="split-balance-note"
-          >
-            모은 <b>{total}개는 그대로</b>예요. 그중 {locked}개에 잠금이 걸려
-            있어요. 입금이 끝나면 그때 {locked}개가 총량에서 빠지고, 반려되면
-            잠금만 풀려요.
-          </p>
+          >{PRODUCT_COPY.TEXT_010}<b>{total}{PRODUCT_COPY.TEXT_011}</b>{PRODUCT_COPY.TEXT_012}{locked}{PRODUCT_COPY.TEXT_013}{locked}{PRODUCT_COPY.TEXT_014}</p>
         </div>
       )}
     </div>

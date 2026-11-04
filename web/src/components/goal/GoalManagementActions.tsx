@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, Share2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-goalmanagementactions";
 
 export function GoalManagementActions({ goalId, slug, active }: { goalId: number; slug: string; active: boolean }) {
   const router = useRouter();
@@ -48,16 +49,16 @@ export function GoalManagementActions({ goalId, slug, active }: { goalId: number
 
   return (
     <section className="goal-management-actions" aria-labelledby="goal-management-actions-title">
-      <h2 id="goal-management-actions-title">이 목표 관리</h2>
+      <h2 id="goal-management-actions-title">{PRODUCT_COPY.TEXT_001}</h2>
       <div>
-        <Link href={`/g/${slug}`}><Eye aria-hidden="true" />친구 화면 미리보기</Link>
+        <Link href={`/g/${slug}`}><Eye aria-hidden="true" />{PRODUCT_COPY.TEXT_002}</Link>
         <button type="button" className="is-primary" onClick={() => void copyLink()}>
-          <Share2 aria-hidden="true" />{copied ? "응원 링크 복사됨" : "응원 링크 복사"}
+          <Share2 aria-hidden="true" />{copied ? PRODUCT_COPY.TEXT_003 : PRODUCT_COPY.TEXT_004}
         </button>
       </div>
       {active && (
         <button type="button" className="goal-close-button" disabled={closing} onClick={() => void closeGoal()}>
-          {closing ? "종료 중…" : "이 목표 종료하기"}
+          {closing ? PRODUCT_COPY.TEXT_005 : PRODUCT_COPY.TEXT_006}
         </button>
       )}
       {error && <p className="social-error" role="alert">{error}</p>}

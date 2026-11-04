@@ -8,6 +8,7 @@
 // DESIGN.md 톤 준수: 과하지 않게 — 텍스트 버튼, 헤더 아이콘 톤(--muted)과 통일.
 
 import { useState } from "react";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-auth-logoutbutton";
 
 export function LogoutButton() {
   const [pending, setPending] = useState(false);
@@ -39,7 +40,7 @@ export function LogoutButton() {
       data-testid="logout-button"
       aria-label="로그아웃"
     >
-      {pending ? "로그아웃 중..." : "로그아웃"}
+      {pending ? PRODUCT_COPY.TEXT_001 : PRODUCT_COPY.TEXT_002}
     </button>
   );
 }

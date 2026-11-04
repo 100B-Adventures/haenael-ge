@@ -6,6 +6,7 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-how-page";
 
 export const metadata: Metadata = {
   title: "어떻게 쓰는 건가요? — 해낼게",
@@ -44,20 +45,14 @@ export default function HowPage() {
     <main className="flex flex-col min-h-svh px-[22px] [background-color:var(--background)]! [background-image:radial-gradient(120%_60%_at_50%_6%,_rgba(31,158,90,.05),_transparent_60%)]!">
       {/* BrandMark */}
       <div className="pt-14 pb-0">
-        <p className="font-extrabold [font-size:13px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
-          해낼게
-          <span className="[color:var(--clover-bright)]!">.</span>
+        <p className="font-extrabold [font-size:13px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_001}<span className="[color:var(--clover-bright)]!">.</span>
         </p>
       </div>
 
       {/* Hero */}
       <div className="text-center mt-7 mb-10 flex flex-col items-center gap-3.5">
-        <h1 className="font-black [font-size:28px]! [letter-spacing:-1px]! [line-height:1.2]! [color:var(--foreground)]!">
-          어떻게 쓰는 건가요?
-        </h1>
-        <p className="font-medium leading-snug [font-size:15.5px]! [color:var(--muted-foreground)]!">
-          응원은 돈으로 하는 겁니다.
-        </p>
+        <h1 className="font-black [font-size:28px]! [letter-spacing:-1px]! [line-height:1.2]! [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_002}</h1>
+        <p className="font-medium leading-snug [font-size:15.5px]! [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_003}</p>
       </div>
 
       {/* 3단계 설명 */}
@@ -91,17 +86,13 @@ export default function HowPage() {
           href="/onboarding"
           className="block w-full text-center font-extrabold rounded-[15px] transition-opacity active:opacity-80 p-[16px]! [font-size:15.5px]! [background-color:var(--primary)]! [color:var(--card)]! [box-shadow:0_6px_16px_rgba(27,138,79,.22)]! [letter-spacing:-0.2px]!"
           data-testid="how-cta"
-        >
-          시작하기
-        </Link>
+        >{PRODUCT_COPY.TEXT_004}</Link>
 
         <Link
           href="/"
           className="block w-full text-center font-semibold transition-opacity active:opacity-70 [font-size:13px]! [color:var(--muted-foreground)]! p-[12px]! [min-height:44px]! [display:flex]! [align-items:center]! [justify-content:center]!"
           data-testid="how-home-link"
-        >
-          홈으로
-        </Link>
+        >{PRODUCT_COPY.TEXT_005}</Link>
       </div>
     </main>
   );

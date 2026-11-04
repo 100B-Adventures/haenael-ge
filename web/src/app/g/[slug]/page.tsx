@@ -15,6 +15,7 @@ import { CheerPaymentButton } from "@/components/goal/CheerPaymentButton";
 import { OwnerBar } from "@/components/goal/OwnerBar";
 import { GoalCover } from "@/components/social/GoalCover";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-g-slug-page";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -78,18 +79,12 @@ export default async function GoalPublicPage({ params }: Props) {
         className="min-h-svh px-[22px] py-12 flex flex-col items-center justify-center text-center [background-color:var(--background)]!"
         data-testid="goal-deleted-page"
       >
-        <p className="text-[20px] font-bold mb-2 [color:var(--foreground)]!">
-          종료된 목표예요
-        </p>
-        <p className="text-[14px] mb-6 [color:var(--muted-foreground)]!">
-          이 목표는 더 이상 활성화되어 있지 않아요.
-        </p>
+        <p className="text-[20px] font-bold mb-2 [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_001}</p>
+        <p className="text-[14px] mb-6 [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</p>
         <Link
           href="/"
           className="inline-block py-3 px-6 rounded-[14px] text-[14px] font-semibold [background-color:var(--primary)]! [color:var(--card)]!"
-        >
-          나도 목표 만들기
-        </Link>
+        >{PRODUCT_COPY.TEXT_003}</Link>
       </main>
     );
   }
@@ -164,8 +159,7 @@ export default async function GoalPublicPage({ params }: Props) {
         <div className="goal-public-content px-[22px] pb-4">
           <div className="goal-public-intro">
             {/* BrandMark */}
-            <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">
-              해낼<span className="[color:var(--clover-bright)]!">게.</span>
+            <p className="goal-public-wordmark font-extrabold [font-size:var(--text-wordmark)]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_004}<span className="[color:var(--clover-bright)]!">{PRODUCT_COPY.TEXT_005}</span>
             </p>
             <GoalPublicMenu goalId={goal.id!} />
 
@@ -177,16 +171,13 @@ export default async function GoalPublicPage({ params }: Props) {
               <p
                 className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
                 data-testid="relogin-hint"
-              >
-                내 목표가 있으신가요?{" "}
+              >{PRODUCT_COPY.TEXT_006}{" "}
                 <Link
                   href="/auth/kakao/start?redirect=/me"
                   prefetch={false}
                   className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
                   data-testid="relogin-link"
-                >
-                  카카오로 로그인
-                </Link>
+                >{PRODUCT_COPY.TEXT_007}</Link>
               </p>
             )}
           </div>
@@ -243,9 +234,7 @@ export default async function GoalPublicPage({ params }: Props) {
             href="/"
             className="block w-full text-center font-semibold mt-1 [font-size:var(--text-wordmark)]! [color:var(--muted-color)]! p-[9px_0_0]! [min-height:var(--tap-min-size)]! [display:flex]! [align-items:center]! [justify-content:center]! transition-opacity active:opacity-70"
             data-testid="role-transition-link"
-          >
-            나도 해낼게 만들래 →
-          </Link>
+          >{PRODUCT_COPY.TEXT_008}</Link>
         </div>
       </main>
     </ReceiverAppShell>

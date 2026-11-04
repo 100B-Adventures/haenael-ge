@@ -25,6 +25,7 @@ import {
   ReceiverPageShell,
   ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-me-page";
 
 // ─── 페이지 ───────────────────────────────────────────────────────────────────
 
@@ -268,9 +269,7 @@ export default async function ReceiverHomePage({
         {/* 목표 제목 */}
         <p className="receiver-goal-title mb-2" data-testid="goal-title">
           {cleanTitle}
-          <br />
-          해낼게
-        </p>
+          <br />{PRODUCT_COPY.TEXT_001}</p>
 
         {/* D-day 칩 */}
         {goal.due_date && (
@@ -299,9 +298,7 @@ export default async function ReceiverHomePage({
           href={`/me/goal/${goal.id}`}
           className="mb-3 flex min-h-11 items-center justify-center rounded-sm bg-accent px-4 text-[13px] font-bold text-accent-foreground"
           data-testid="primary-goal-manage-link"
-        >
-          이 목표 관리
-        </Link>
+        >{PRODUCT_COPY.TEXT_002}</Link>
 
         {/* 내 응원 링크 재접근 (user-flow.md §1.3 갭3, 2026-07-20) */}
         <MyLinkCard slug={goal.slug} />
@@ -313,9 +310,7 @@ export default async function ReceiverHomePage({
           rel="noopener noreferrer"
           className="mb-4 block rounded-sm bg-muted px-4 py-3 text-center text-[13px] font-semibold text-accent-foreground"
           data-testid="friend-view-preview-link"
-        >
-          👀 친구에게 이렇게 보여요 (미리보기)
-        </Link>
+        >{PRODUCT_COPY.TEXT_003}</Link>
 
         {/* 클로버 잔액 — 환전 잠금(A안) 분할 표시. DESIGN.md §6-(d) · §4 SplitBalanceCard */}
         <div
@@ -326,9 +321,7 @@ export default async function ReceiverHomePage({
             <p
               className="text-xs text-danger-ink"
               data-testid="clover-balance-error"
-            >
-              🍀 잔액을 불러오지 못했어요. 새로고침 해주세요.
-            </p>
+            >{PRODUCT_COPY.TEXT_004}</p>
           ) : (
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -355,11 +348,9 @@ export default async function ReceiverHomePage({
                       : "cashout-button-belowthreshold"
                 }
               >
-                <span>{pendingCashout ? "진행중" : "환전"}</span>
+                <span>{pendingCashout ? PRODUCT_COPY.TEXT_005 : PRODUCT_COPY.TEXT_006}</span>
                 {pendingCashout && (
-                  <small className="text-[length:var(--text-meta-micro)]! font-bold opacity-85">
-                    상태 보기
-                  </small>
+                  <small className="text-[length:var(--text-meta-micro)]! font-bold opacity-85">{PRODUCT_COPY.TEXT_007}</small>
                 )}
               </Link>
             </div>
@@ -372,9 +363,8 @@ export default async function ReceiverHomePage({
             className="mb-3 flex items-center justify-between rounded-md border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground"
             data-testid="cashout-history-link"
           >
-            <span>환전 내역</span>
-            <span className="text-[length:var(--text-label-small)]! font-medium text-[var(--muted-color)]">
-              최근 #{cashoutStatus.id} ›
+            <span>{PRODUCT_COPY.TEXT_008}</span>
+            <span className="text-[length:var(--text-label-small)]! font-medium text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_009}{cashoutStatus.id} ›
             </span>
           </Link>
         )}
@@ -398,9 +388,7 @@ export default async function ReceiverHomePage({
             data-testid="wordmap-mini-preview"
           >
             <div className="px-4 py-4">
-              <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">
-                워드맵 과다 데이터
-              </p>
+              <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">{PRODUCT_COPY.TEXT_010}</p>
               <div className="flex flex-wrap gap-2">
                 {previewWords.map((w) => {
                   const emphasized = maxCount > 0 && w.word_count === maxCount;
@@ -422,11 +410,8 @@ export default async function ReceiverHomePage({
                 data-testid="wordmap-overflow-summary"
               >
                 <strong className="text-accent-foreground">
-                  {WORDMAP_PREVIEW_LIMIT}개 표시
-                </strong>{" "}
-                · {wordmapTotal - WORDMAP_PREVIEW_LIMIT}개는 전체 워드맵에서
-                확인
-              </p>
+                  {WORDMAP_PREVIEW_LIMIT}{PRODUCT_COPY.TEXT_011}</strong>{" "}
+                · {wordmapTotal - WORDMAP_PREVIEW_LIMIT}{PRODUCT_COPY.TEXT_012}</p>
             )}
           </div>
         )}
@@ -436,16 +421,12 @@ export default async function ReceiverHomePage({
           href={`/wordmap/${goal.id}`}
           className="block w-full rounded-md border border-border bg-card p-4 text-center text-[15px] font-extrabold tracking-[-0.2px] text-foreground"
           data-testid="wordmap-view-cta"
-        >
-          워드맵 보기
-        </Link>
+        >{PRODUCT_COPY.TEXT_013}</Link>
 
         {/* 다중 목표(설계 §4.5): 진행 중인 다른 목표들 — 세로 스택, 간단 카드 */}
         {otherInProgressGoals.length > 0 && (
           <div className="mt-6" data-testid="other-goals-section">
-            <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">
-              진행 중인 다른 목표
-            </p>
+            <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">{PRODUCT_COPY.TEXT_014}</p>
             {otherInProgressGoals.map((g) => (
               <MyGoalListCard
                 key={g.id}
@@ -466,7 +447,7 @@ export default async function ReceiverHomePage({
         {/* 지난 목표 — 마감(due_date < 오늘) 목표를 접어서 둔다(설계 §4.5). */}
         {pastGoals.length > 0 && (
           <section className="mt-6" data-testid="past-goals-section">
-            <p className="py-2 text-[13px] font-bold text-muted-foreground">지난 목표 {pastGoals.length}개</p>
+            <p className="py-2 text-[13px] font-bold text-muted-foreground">{PRODUCT_COPY.TEXT_015}{pastGoals.length}{PRODUCT_COPY.TEXT_016}</p>
             <Collapsible
               policy={{ auxiliary: true, exceedsLimit: pastGoals.length > 8, hasCollapsedContext: true }}
               collapsedContent={renderPastGoals(8)}

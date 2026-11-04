@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { ReportButton } from "@/components/common/ReportButton";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-goalpublicmenu";
 
 export function GoalPublicMenu({ goalId }: { goalId: number }) {
   const [open, setOpen] = useState(false);
@@ -35,9 +36,7 @@ export function GoalPublicMenu({ goalId }: { goalId: number }) {
           className="goal-public-menu-panel"
           role="menu"
         >
-          <button type="button" role="menuitem" onClick={copyLink}>
-            링크 복사
-          </button>
+          <button type="button" role="menuitem" onClick={copyLink}>{PRODUCT_COPY.TEXT_001}</button>
           <div role="none">
             <ReportButton targetType="GOAL" targetId={goalId} variant="text" />
           </div>

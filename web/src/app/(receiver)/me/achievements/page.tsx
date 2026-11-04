@@ -8,6 +8,7 @@ import {
 } from "@/components/receiver/ReceiverShell";
 import { asMySocialDashboard } from "@/lib/social/contracts";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-me-achievements-page";
 
 export const dynamic = "force-dynamic";
 
@@ -38,8 +39,8 @@ export default async function AchievementsPage() {
             priority
           />
         </div>
-        <h1>지금까지의 업적</h1>
-        <p>목표와 응원 기록이 생길 때마다 차곡차곡 쌓여요.</p>
+        <h1>{PRODUCT_COPY.TEXT_001}</h1>
+        <p>{PRODUCT_COPY.TEXT_002}</p>
       </div>
       <div className="achievement-list">
         {items.map(([label, count, description, Icon]) => (
@@ -50,8 +51,8 @@ export default async function AchievementsPage() {
           </article>
         ))}
       </div>
-      <p className="my-quiet-note">금액과 순위는 업적에 반영하지 않아요.</p>
-      <BackHomeLink label="해낼게 관리로" href="/my" />
+      <p className="my-quiet-note">{PRODUCT_COPY.TEXT_003}</p>
+      <BackHomeLink label={PRODUCT_COPY.TEXT_004} href="/my" />
     </ReceiverPageShell>
   );
 }

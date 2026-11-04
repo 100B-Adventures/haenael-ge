@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-common-reportbutton";
 
 const REASON_PRESETS = [
   "스팸 또는 광고",
@@ -49,7 +50,7 @@ export function ReportButton({
         ) : (
           <>
             <span aria-hidden="true">🚩</span>
-            <span>신고</span>
+            <span>{PRODUCT_COPY.TEXT_001}</span>
           </>
         )}
       </button>
@@ -171,38 +172,26 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
               <span className="text-4xl" aria-hidden="true">
                 ✅
               </span>
-              <p className="text-center text-[15px] font-semibold [color:var(--foreground)]!">
-                신고가 접수됐어요
-              </p>
-              <p className="text-center text-[13px] [color:var(--muted-foreground)]!">
-                검토 후 조치할게요.
-                <br />
-                소중한 신고 감사해요.
-              </p>
+              <p className="text-center text-[15px] font-semibold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_002}</p>
+              <p className="text-center text-[13px] [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_003}<br />{PRODUCT_COPY.TEXT_004}</p>
               <button
                 type="button"
                 className="mt-2 rounded-full px-6 py-2 text-[14px] font-semibold text-white [background-color:var(--accent-foreground)]!"
                 onClick={onClose}
-              >
-                닫기
-              </button>
+              >{PRODUCT_COPY.TEXT_005}</button>
             </div>
           ) : (
             // 신고 폼
             <>
-              <h2 className="mb-1 text-[17px] font-bold [color:var(--foreground)]!">
-                신고하기
-              </h2>
+              <h2 className="mb-1 text-[17px] font-bold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_006}</h2>
               <p className="mb-4 text-[13px] [color:var(--muted-foreground)]!">
-                {targetType === "GOAL" ? "이 목표를" : "이 응원 메시지를"} 왜
-                신고하나요?
-              </p>
+                {targetType === "GOAL" ? PRODUCT_COPY.TEXT_007 : PRODUCT_COPY.TEXT_008}{PRODUCT_COPY.TEXT_009}</p>
 
               {/* 사유 선택 */}
               <div
                 className="flex flex-col gap-2 mb-4"
                 role="group"
-                aria-label="신고 사유 선택"
+                aria-label={PRODUCT_COPY.TEXT_010}
               >
                 {REASON_PRESETS.map((preset) => (
                   <button
@@ -231,15 +220,15 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
               </div>
 
               {/* 기타 사유 입력 */}
-              {selectedReason === "기타" && (
+              {selectedReason === PRODUCT_COPY.TEXT_011 && (
                 <textarea
                   className="mb-4 w-full resize-none rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:ring-2 [background-color:#F5F2EE]! [color:var(--foreground)]! [border:1.5px_solid_#D5D0C8]! [min-height:80px]!"
-                  placeholder="신고 사유를 입력해주세요 (최대 500자)"
+                  placeholder={PRODUCT_COPY.TEXT_012}
                   maxLength={500}
                   value={customReason}
                   onChange={(e) => setCustomReason(e.target.value)}
                   data-testid="report-custom-reason"
-                  aria-label="기타 신고 사유"
+                  aria-label={PRODUCT_COPY.TEXT_013}
                 />
               )}
 
@@ -257,7 +246,7 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
                 data-testid="report-submit"
                 aria-disabled={!canSubmit}
               >
-                {submitting ? "접수 중…" : "신고 접수"}
+                {submitting ? PRODUCT_COPY.TEXT_014 : PRODUCT_COPY.TEXT_015}
               </button>
 
               <button
@@ -265,9 +254,7 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
                 className="mt-3 w-full rounded-2xl py-2.5 text-[14px] [color:#A09B93]!"
                 onClick={onClose}
                 data-testid="report-cancel"
-              >
-                취소
-              </button>
+              >{PRODUCT_COPY.TEXT_016}</button>
             </>
           )}
         </div>

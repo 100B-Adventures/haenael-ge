@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-common-collapsible";
 
 export type CollapsePolicy = {
   auxiliary: boolean;
@@ -53,7 +54,7 @@ export function Collapsible({
         <button
           type="button"
           className={`collapse-chevron${expanded ? " is-expanded" : ""}`}
-          aria-label={`${toggleLabel} ${expanded ? "접기" : "펼치기"}`}
+          aria-label={`${toggleLabel} ${expanded ? PRODUCT_COPY.TEXT_001 : PRODUCT_COPY.TEXT_002}`}
           aria-expanded={expanded}
           aria-controls={controlsId}
           data-hydrated={hydrated ? "true" : "false"}

@@ -6,6 +6,7 @@ import {
 } from "@/components/receiver/ReceiverShell";
 import { asMySocialDashboard } from "@/lib/social/contracts";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-my-page";
 
 export const dynamic = "force-dynamic";
 
@@ -26,14 +27,14 @@ export default async function MyPage() {
   return (
     <ReceiverPageShell testId="my-page" bottomSafe>
       <header className="my-page-head">
-        <h1 className="receiver-page-title">마이페이지</h1>
-        <div><span className="my-page-wordmark">해낼<span>게</span></span><NotificationBadge /></div>
+        <h1 className="receiver-page-title">{PRODUCT_COPY.TEXT_001}</h1>
+        <div><span className="my-page-wordmark">{PRODUCT_COPY.TEXT_002}<span>{PRODUCT_COPY.TEXT_003}</span></span><NotificationBadge /></div>
       </header>
       {error || !dashboard
         ? (
           <section className="social-empty" data-testid="my-page-error">
-            <h2>마이페이지를 불러오지 못했어요.</h2>
-            <p className="social-description">잠시 뒤 다시 시도해 주세요.</p>
+            <h2>{PRODUCT_COPY.TEXT_004}</h2>
+            <p className="social-description">{PRODUCT_COPY.TEXT_005}</p>
           </section>
         )
         : (

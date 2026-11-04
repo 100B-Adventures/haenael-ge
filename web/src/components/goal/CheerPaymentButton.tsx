@@ -6,6 +6,7 @@ import { loadTossPayments } from "@/lib/toss";
 import { trackEvent } from "@/lib/analytics";
 import { KRW_PER_CLOVER, krwFromClover } from "@/lib/clover";
 import { createClient } from "@/lib/supabase/client";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-cheerpaymentbutton";
 
 // 클로버 개수 프리셋(2026-07-21, 회장 지시: "1000개가 아니고 1개, 더 큰 금액 예
 // 1만개도 보낼수있게") — 프리셋은 1/3/5/10클로버(=1천~1만원), 그 외엔 직접입력으로
@@ -331,7 +332,7 @@ export function CheerPaymentButton({
         disabled={!paymentsEnabled}
       >
         <span aria-hidden="true">🍀</span>
-        {paymentsEnabled ? "조용히 밀어줄게" : "응원 결제 준비 중"}
+        {paymentsEnabled ? PRODUCT_COPY.TEXT_001 : PRODUCT_COPY.TEXT_002}
       </button>
 
       {open && (
@@ -344,17 +345,13 @@ export function CheerPaymentButton({
           <div className="w-full max-w-[430px] rounded-[22px] p-5 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[12px] font-extrabold [color:var(--accent-foreground)]!">
-                  조용한 응원
-                </p>
-                <h2 className="mt-1 text-[19px] font-black [color:var(--foreground)]!">
-                  친구의 목표에 클로버를 보냅니다
-                </h2>
+                <p className="text-[12px] font-extrabold [color:var(--accent-foreground)]!">{PRODUCT_COPY.TEXT_003}</p>
+                <h2 className="mt-1 text-[19px] font-black [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_004}</h2>
               </div>
               <button
                 type="button"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full [color:var(--muted-foreground)]! [background-color:#F3F0EA]!"
-                aria-label="닫기"
+                aria-label={PRODUCT_COPY.TEXT_005}
                 onClick={closeSheet}
               >
                 <X aria-hidden="true" size={18} strokeWidth={2.5} />
@@ -384,8 +381,7 @@ export function CheerPaymentButton({
                   >
                     <span className="flex items-center gap-1.5">
                       <Clover aria-hidden="true" size={16} strokeWidth={2.5} />
-                      {value}클로버
-                    </span>
+                      {value}{PRODUCT_COPY.TEXT_006}</span>
                     <span
                       className="text-[11px] font-semibold"
                       style={{
@@ -394,17 +390,14 @@ export function CheerPaymentButton({
                           : "var(--muted-color)",
                       }}
                     >
-                      {(value * KRW_PER_CLOVER).toLocaleString("ko-KR")}원
-                    </span>
+                      {(value * KRW_PER_CLOVER).toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_007}</span>
                   </button>
                 );
               })}
             </div>
 
             {/* 직접 입력 — 상한 없음(서버 상한 100,000클로버=1억원까지) */}
-            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">
-              직접 입력 (클로버 개수)
-              <div
+            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">{PRODUCT_COPY.TEXT_008}<div
                 className="mt-1 flex items-center gap-2 rounded-[13px] border px-3 py-2.5"
                 style={{
                   borderColor:
@@ -424,16 +417,14 @@ export function CheerPaymentButton({
                   inputMode="numeric"
                   pattern="[0-9]*"
                   className="w-full bg-transparent text-[15px] font-bold outline-none [color:var(--foreground)]!"
-                  placeholder="예: 100"
+                  placeholder={PRODUCT_COPY.TEXT_009}
                   maxLength={6}
                   value={customInput}
                   onChange={(e) => handleCustomInputChange(e.target.value)}
                   data-testid="cheer-custom-clover-input"
-                  aria-label="클로버 개수 직접 입력"
+                  aria-label={PRODUCT_COPY.TEXT_010}
                 />
-                <span className="text-[13px] font-bold [color:var(--muted-foreground)]!">
-                  클로버
-                </span>
+                <span className="text-[13px] font-bold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_011}</span>
               </div>
             </label>
 
@@ -442,19 +433,16 @@ export function CheerPaymentButton({
               className="mt-3 text-[13px] font-bold [color:var(--accent-foreground)]!"
               data-testid="cheer-selected-summary"
             >
-              🍀 {cloverAmount.toLocaleString("ko-KR")}클로버 ·{" "}
-              {amountKrw.toLocaleString("ko-KR")}원
-            </p>
+              🍀 {cloverAmount.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_012}{" "}
+              {amountKrw.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_013}</p>
 
-            <label className="mt-4 block text-[13px] font-bold [color:#4a4640]!">
-              이름
-              <input
+            <label className="mt-4 block text-[13px] font-bold [color:#4a4640]!">{PRODUCT_COPY.TEXT_014}<input
                 className="mt-1 w-full rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
                 maxLength={30}
                 value={displayName}
                 disabled={isAnonymous}
                 placeholder={
-                  isAnonymous ? "익명으로 보낼게요" : "친구에게 보일 이름"
+                  isAnonymous ? PRODUCT_COPY.TEXT_015 : PRODUCT_COPY.TEXT_016
                 }
                 onChange={(e) => setDisplayName(e.target.value)}
               />
@@ -465,18 +453,14 @@ export function CheerPaymentButton({
                 type="checkbox"
                 checked={isAnonymous}
                 onChange={(e) => setIsAnonymous(e.target.checked)}
-              />
-              익명으로 조용히 응원하기
-            </label>
+              />{PRODUCT_COPY.TEXT_017}</label>
 
-            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">
-              한 줄 응원
-              <textarea
+            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">{PRODUCT_COPY.TEXT_018}<textarea
                 className="mt-1 w-full resize-none rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
                 maxLength={140}
                 rows={3}
                 value={message}
-                placeholder="말은 짧게, 응원은 진짜로."
+                placeholder={PRODUCT_COPY.TEXT_019}
                 onChange={(e) => setMessage(e.target.value)}
               />
             </label>
@@ -498,7 +482,7 @@ export function CheerPaymentButton({
               data-testid="cheer-payment-submit"
               onClick={handlePayment}
             >
-              {loading ? "결제창 여는 중..." : "결제하고 응원하기"}
+              {loading ? PRODUCT_COPY.TEXT_020 : PRODUCT_COPY.TEXT_021}
             </button>
           </div>
         </div>

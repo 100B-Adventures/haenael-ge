@@ -10,6 +10,7 @@ import {
   type CoverReviewItem,
 } from "@/components/admin/GoalCoverReviewQueue";
 import { Collapsible } from "@/components/common/Collapsible";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-admin-page";
 
 export const dynamic = "force-dynamic";
 
@@ -124,12 +125,12 @@ function MemberCard({ member }: { member: AdminMember }) {
     <li className="admin-member-card">
       <div className="admin-record-row">
         <div>
-          <strong>{member.nickname || "미설정"}</strong>
-          <small>가입 {formatDateTime(member.created_at)}</small>
+          <strong>{member.nickname || PRODUCT_COPY.TEXT_001}</strong>
+          <small>{PRODUCT_COPY.TEXT_002}{formatDateTime(member.created_at)}</small>
         </div>
         <div>
           <strong>🍀 {formatNumber(member.clover_count)}</strong>
-          <small>보유 클로버</small>
+          <small>{PRODUCT_COPY.TEXT_003}</small>
         </div>
       </div>
       <Collapsible
@@ -141,26 +142,23 @@ function MemberCard({ member }: { member: AdminMember }) {
             id={memberDetailsId}
             className="admin-member-details"
             role="group"
-            aria-label={`${member.nickname || "미설정"} 회원 상세`}
+            aria-label={`${member.nickname || PRODUCT_COPY.TEXT_004} 회원 상세`}
           >
-            <p>로그인 {member.provider || "미확인"}</p>
-            <p>
-              본인인증 {member.kyc_status === "VERIFIED" ? "완료" : "미완료"}
+            <p>{PRODUCT_COPY.TEXT_005}{member.provider || PRODUCT_COPY.TEXT_006}</p>
+            <p>{PRODUCT_COPY.TEXT_007}{member.kyc_status === "VERIFIED" ? PRODUCT_COPY.TEXT_008 : PRODUCT_COPY.TEXT_009}
             </p>
-            <p>회원 ID {shortId(member.id)}</p>
+            <p>{PRODUCT_COPY.TEXT_010}{shortId(member.id)}</p>
             {member.goal_slug && (
               <a
                 href={`/g/${member.goal_slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-              >
-                목표 보기
-              </a>
+              >{PRODUCT_COPY.TEXT_011}</a>
             )}
           </div>
         }
         controlsId={memberDetailsId}
-        toggleLabel={`${member.nickname || "미설정"} 회원 상세`}
+        toggleLabel={`${member.nickname || PRODUCT_COPY.TEXT_012} 회원 상세`}
       />
     </li>
   );
@@ -172,7 +170,7 @@ function LedgerRow({ entry }: { entry: AdminLedgerEntry }) {
       <div>
         <strong>
           {ledgerTypeLabels[entry.entry_type] ?? entry.entry_type} (
-          {entry.nickname || "미설정"})
+          {entry.nickname || PRODUCT_COPY.TEXT_013})
         </strong>
         <small>
           {formatDateTime(entry.created_at)} ·{" "}
@@ -186,7 +184,7 @@ function LedgerRow({ entry }: { entry: AdminLedgerEntry }) {
           {entry.clover_delta > 0 ? "+" : ""}
           {formatNumber(entry.clover_delta)}
         </strong>
-        <small>{formatNumber(entry.balance_after)} 잔액</small>
+        <small>{formatNumber(entry.balance_after)}{PRODUCT_COPY.TEXT_014}</small>
       </div>
     </li>
   );
@@ -258,12 +256,9 @@ export default async function AdminPage() {
     <main className="admin-dashboard">
       <div className="admin-dashboard-inner">
         <header className="admin-dashboard-head">
-          <p>해낼게 운영</p>
-          <h1>관리자 운영 대시보드</h1>
-          <p>
-            회원과 클로버 원장은 조회만 합니다. 환전 요청은 실제 은행 송금을
-            마친 뒤 지급 완료로 표시하거나, 사유를 남기고 반려할 수 있습니다.
-          </p>
+          <p>{PRODUCT_COPY.TEXT_015}</p>
+          <h1>{PRODUCT_COPY.TEXT_016}</h1>
+          <p>{PRODUCT_COPY.TEXT_017}</p>
         </header>
 
         <div className="admin-dashboard-stack">
@@ -273,7 +268,7 @@ export default async function AdminPage() {
           >
             <SectionHeader
               title="환전 요청 큐"
-              description="계좌는 기본 마스킹 · 실제 송금 후 지급 완료 · 반려 시 클로버 잠금 해제(총량은 그대로)"
+              description={PRODUCT_COPY.TEXT_022}
               countLabel={`${formatNumber(cashouts.filter((item) => item.status === "REQUESTED").length)}건 대기`}
             />
             <CashoutQueue cashouts={cashouts} />
@@ -284,12 +279,12 @@ export default async function AdminPage() {
           >
             <SectionHeader
               title="회원"
-              description="최근 가입순 · 현재 클로버 잔액 포함"
+              description={PRODUCT_COPY.TEXT_023}
               countLabel={`최근 ${formatNumber(members.length)}명`}
             />
             <ul className="admin-record-list" aria-label="회원 목록">
               {members.length === 0 ? (
-                <li className="admin-record-empty">조회된 회원이 없습니다.</li>
+                <li className="admin-record-empty">{PRODUCT_COPY.TEXT_018}</li>
               ) : (
                 members.map((member) => (
                   <MemberCard key={member.id} member={member} />
@@ -304,14 +299,12 @@ export default async function AdminPage() {
           >
             <SectionHeader
               title="클로버 원장"
-              description="적립·환전·환불·웰컴 기록 · 최근순"
+              description={PRODUCT_COPY.TEXT_024}
               countLabel={`최근 ${formatNumber(ledger.length)}건`}
             />
             <ul className="admin-record-list" aria-label="클로버 원장 목록">
               {ledger.length === 0 ? (
-                <li className="admin-record-empty">
-                  조회된 원장 기록이 없습니다.
-                </li>
+                <li className="admin-record-empty">{PRODUCT_COPY.TEXT_019}</li>
               ) : (
                 ledger.map((entry) => (
                   <LedgerRow key={entry.id} entry={entry} />
@@ -329,16 +322,14 @@ export default async function AdminPage() {
             <div className="min-h-11">
               <SectionHeader
                 title="운영 경보"
-                description="Storage cleanup 정체와 스케줄 실패를 표시합니다."
+                description={PRODUCT_COPY.TEXT_025}
                 countLabel={`${formatNumber(alerts.length)}건`}
               />
             </div>
             {alerts.length === 0 ? (
-              <p className="py-6 text-sm text-muted-foreground">
-                현재 수신된 운영 경보가 없습니다.
-              </p>
+              <p className="py-6 text-sm text-muted-foreground">{PRODUCT_COPY.TEXT_020}</p>
             ) : (
-              <ul className="divide-y" aria-label="운영 경보 목록">
+              <ul className="divide-y" aria-label={PRODUCT_COPY.TEXT_021}>
                 {alerts.map((alert) => (
                   <li
                     className="grid min-w-0 gap-1 py-3 text-sm sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-4"

@@ -15,6 +15,7 @@ import { GoalCover } from "./GoalCover";
 import { Wordmap } from "@/components/goal/Wordmap";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { ClampText } from "@/components/common/ClampText";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoaldetail";
 
 function objectParticle(name: string) {
   const code = name.codePointAt(name.length - 1) ?? 0;
@@ -62,9 +63,9 @@ export function FriendGoalDetail(
         caption={detail.title}
       />
       <section className="friend-detail-hero">
-        <h1>{displayName}의 <span>해낼게</span></h1>
+        <h1>{displayName}{PRODUCT_COPY.TEXT_001}<span>{PRODUCT_COPY.TEXT_002}</span></h1>
         <FriendRelationshipBadge direction={relationshipDirection} />
-        <p>{displayName}의 목표와 응원 워드맵을 함께 봐요.</p>
+        <p>{displayName}{PRODUCT_COPY.TEXT_003}</p>
       </section>
       <div className="friend-detail-portrait">
         {profileImage
@@ -91,11 +92,11 @@ export function FriendGoalDetail(
           </div>
         )}
         <div>
-          <strong>{detail.cheer_count}명이 {displayName}{objectParticle(displayName)} 응원하고 있어요</strong>
+          <strong>{detail.cheer_count}{PRODUCT_COPY.TEXT_004}{displayName}{objectParticle(displayName)}{PRODUCT_COPY.TEXT_005}</strong>
         </div>
       </section>
       {recentMessage && (
-        <section className="friend-recent-cheer" aria-label="최근 응원 메시지">
+        <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
           <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>
             {recentMessage}
           </ClampText>
@@ -103,8 +104,8 @@ export function FriendGoalDetail(
       )}
       <section className="friend-wordmap-card">
         <div className="friend-wordmap-heading">
-          <h2>{displayName}이가 받은 응원</h2>
-          <Link href={`/friends/${friendId}/wordmap?goal=${detail.goal_id}`}>전체 보기 ›</Link>
+          <h2>{displayName}{PRODUCT_COPY.TEXT_007}</h2>
+          <Link href={`/friends/${friendId}/wordmap?goal=${detail.goal_id}`}>{PRODUCT_COPY.TEXT_008}</Link>
         </div>
         <Wordmap
           words={detail.wordmap.map((item) => ({
@@ -114,19 +115,19 @@ export function FriendGoalDetail(
           ownerName={displayName}
           goalTitle={detail.title}
         />
-        <p className="social-muted">같은 단어가 쌓일수록 크게 자라요.</p>
+        <p className="social-muted">{PRODUCT_COPY.TEXT_009}</p>
       </section>
       <Link href="/invite" className="friend-reinvite">
         <span><Plus aria-hidden="true" /></span>
-        <div><strong>다른 친구도 초대할까요?</strong><small>초대한 친구가 들어오면 서로의 목표를 같이 응원해요.</small></div>
+        <div><strong>{PRODUCT_COPY.TEXT_010}</strong><small>{PRODUCT_COPY.TEXT_011}</small></div>
         <b aria-hidden="true">›</b>
       </Link>
       {otherGoals.length > 0 && (
         <section className="friend-other-goals">
-          <h2>{displayName}의 다른 목표</h2>
+          <h2>{displayName}{PRODUCT_COPY.TEXT_012}</h2>
           {otherGoals.map((goal) => (
             <Link key={goal.goal_id} href={`/friends/${friendId}?goal=${goal.goal_id}`}>
-              <span>{goal.title}</span><small>응원 {goal.cheer_count}개</small>
+              <span>{goal.title}</span><small>{PRODUCT_COPY.TEXT_013}{goal.cheer_count}{PRODUCT_COPY.TEXT_014}</small>
             </Link>
           ))}
         </section>
@@ -137,7 +138,7 @@ export function FriendGoalDetail(
         onClick={remove}
         disabled={removing}
       >
-        {removing ? "해제 중" : "친구 관계 해제"}
+        {removing ? PRODUCT_COPY.TEXT_015 : PRODUCT_COPY.TEXT_016}
       </button>
       {error && <p className="social-error" role="alert">{error}</p>}
     </article>

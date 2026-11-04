@@ -8,6 +8,7 @@
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-wordmapshareicons";
 
 export interface WordmapShareIconsProps {
   goalId: number;
@@ -233,9 +234,7 @@ export function WordmapShareIcons({
           <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center [background-color:var(--primary)]!">
             {loading === "image" ? <SpinnerIcon /> : <DownloadIcon />}
           </div>
-          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">
-            이미지 저장
-          </span>
+          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_001}</span>
         </button>
 
         {/* 인스타 공유 */}
@@ -250,9 +249,7 @@ export function WordmapShareIcons({
           <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center border [background-color:var(--card)]! [border-color:var(--border)]!">
             {loading === "instagram" ? <SpinnerIcon dark /> : <InstagramIcon />}
           </div>
-          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">
-            인스타 공유
-          </span>
+          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</span>
         </button>
 
         {/* 링크 복사 */}
@@ -266,9 +263,7 @@ export function WordmapShareIcons({
           <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center border [background-color:var(--card)]! [border-color:var(--border)]!">
             <LinkIcon />
           </div>
-          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">
-            링크 복사
-          </span>
+          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_003}</span>
         </button>
       </div>
 

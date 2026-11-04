@@ -13,6 +13,7 @@ import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import type { GoalCheerSummary } from "@/lib/social/contracts";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-me-goal-id-page";
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +34,9 @@ export default async function GoalManagementPage(
       <ReceiverPageShell testId="goal-access-required" bottomSafe>
         <ReceiverBrandMark />
         <section className="social-empty mt-5">
-          <h1>권한이 필요한 화면이에요.</h1>
-          <p className="social-description">
-            내 목표 관리 화면은 로그인한 목표 소유자만 볼 수 있어요.
-          </p>
-          <Link className="social-primary-action" href="/">
-            로그인하러 가기
-          </Link>
+          <h1>{PRODUCT_COPY.TEXT_001}</h1>
+          <p className="social-description">{PRODUCT_COPY.TEXT_002}</p>
+          <Link className="social-primary-action" href="/">{PRODUCT_COPY.TEXT_003}</Link>
         </section>
       </ReceiverPageShell>
     );
@@ -97,7 +94,7 @@ export default async function GoalManagementPage(
     <ReceiverPageShell testId="goal-management-page" bottomSafe>
       <header className="social-detail-head">
         <Link href="/me" aria-label="홈으로 돌아가기"><ChevronLeft aria-hidden="true" /></Link>
-        <strong>목표 관리</strong>
+        <strong>{PRODUCT_COPY.TEXT_004}</strong>
         <span aria-hidden="true" />
       </header>
       <div className="social-stack">
@@ -116,13 +113,13 @@ export default async function GoalManagementPage(
           editable={goal.status === "ACTIVE"}
         />
         <section className="goal-management-wordmap" data-testid="goal-management-wordmap">
-          <h2 className="goal-section-label">응원 워드맵</h2>
-          <p className="goal-wordmap-count"><span>지금까지</span><span><strong>{supporterCount}</strong>명이 이 단어들로 응원했어요</span></p>
+          <h2 className="goal-section-label">{PRODUCT_COPY.TEXT_005}</h2>
+          <p className="goal-wordmap-count"><span>{PRODUCT_COPY.TEXT_006}</span><span><strong>{supporterCount}</strong>{PRODUCT_COPY.TEXT_007}</span></p>
           <Wordmap words={words} ownerName={cleanTitle} goalTitle={cleanTitle} />
-          <p className="goal-wordmap-legend">같은 단어가 쌓일수록 <strong>크게</strong> 자라요.</p>
+          <p className="goal-wordmap-legend">{PRODUCT_COPY.TEXT_008}<strong>{PRODUCT_COPY.TEXT_009}</strong>{PRODUCT_COPY.TEXT_010}</p>
         </section>
         <section className="goal-supporter-section">
-          <h2 className="goal-supporter-heading">이 목표를 응원한 사람</h2>
+          <h2 className="goal-supporter-heading">{PRODUCT_COPY.TEXT_011}</h2>
           <GoalSupporterList
             goalId={goal.id}
             slug={goal.slug}
@@ -137,15 +134,15 @@ export default async function GoalManagementPage(
           data-testid="goal-clover-summary"
           aria-labelledby="goal-clover-summary-title"
         >
-          <h2 id="goal-clover-summary-title">모은 클로버 · 환전</h2>
+          <h2 id="goal-clover-summary-title">{PRODUCT_COPY.TEXT_012}</h2>
           <div>
-            <span><small>모은 클로버</small><strong>🍀 {eligibility?.total_balance ?? 0}</strong></span>
-            <span><small>잠금(진행 중)</small><strong>🍀 {eligibility?.locked_amount ?? 0}</strong></span>
-            <span className="is-available"><small>환전 가능</small><strong>🍀 {eligibility?.available_amount ?? 0}</strong></span>
+            <span><small>{PRODUCT_COPY.TEXT_013}</small><strong>🍀 {eligibility?.total_balance ?? 0}</strong></span>
+            <span><small>{PRODUCT_COPY.TEXT_014}</small><strong>🍀 {eligibility?.locked_amount ?? 0}</strong></span>
+            <span className="is-available"><small>{PRODUCT_COPY.TEXT_015}</small><strong>🍀 {eligibility?.available_amount ?? 0}</strong></span>
           </div>
           <Link href="/cashout" className="goal-cashout-link">
-            <span>🍀 모은 클로버로 환전하기</span>
-            <strong>{eligibility?.available_amount ?? 0}개 지급 가능 ›</strong>
+            <span>{PRODUCT_COPY.TEXT_016}</span>
+            <strong>{eligibility?.available_amount ?? 0}{PRODUCT_COPY.TEXT_017}</strong>
           </Link>
         </section>
         <GoalManagementActions goalId={goal.id} slug={goal.slug} active={goal.status === "ACTIVE"} />

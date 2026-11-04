@@ -5,6 +5,7 @@ import { Wordmap } from "@/components/goal/Wordmap";
 import { ReceiverPageShell } from "@/components/receiver/ReceiverShell";
 import { asFriendGoalDetail, asFriendGoals } from "@/lib/social/contracts";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-friends-friendid-wordmap-page";
 
 export const dynamic = "force-dynamic";
 
@@ -40,18 +41,18 @@ export default async function FriendWordmapPage(
     <ReceiverPageShell testId="friend-wordmap-page" bottomSafe>
       <header className="social-detail-head">
         <Link href={`/friends/${friendId}?goal=${goalId}`} aria-label="친구 목표로 돌아가기"><ChevronLeft aria-hidden="true" /></Link>
-        <strong>응원 워드맵</strong>
+        <strong>{PRODUCT_COPY.TEXT_001}</strong>
         <span aria-hidden="true" />
       </header>
       <section className="friend-wordmap-full">
-        <h1>{displayName}이가 받은 응원</h1>
-        <p>지금까지 <strong>{detail.cheer_count}명</strong>이 조용히 응원했어요.</p>
+        <h1>{displayName}{PRODUCT_COPY.TEXT_002}</h1>
+        <p>{PRODUCT_COPY.TEXT_003}<strong>{detail.cheer_count}{PRODUCT_COPY.TEXT_004}</strong>{PRODUCT_COPY.TEXT_005}</p>
         <Wordmap
           words={detail.wordmap.map((item) => ({ word: item.word, word_count: item.weight }))}
           ownerName={displayName}
           goalTitle={detail.title}
         />
-        <p>받은 응원을 전부 모았어요.</p>
+        <p>{PRODUCT_COPY.TEXT_006}</p>
       </section>
     </ReceiverPageShell>
   );

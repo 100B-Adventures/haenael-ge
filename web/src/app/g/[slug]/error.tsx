@@ -5,6 +5,7 @@
 // (과거: 일시 조회오류를 notFound()로 처리해 정상 목표가 간헐 404로 보이던 버그의 짝).
 
 import { useEffect } from "react";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-g-slug-error";
 
 export default function GoalError({
   error,
@@ -22,20 +23,14 @@ export default function GoalError({
       className="min-h-svh flex flex-col items-center justify-center px-[22px] text-center [background-color:var(--background)]!"
       data-testid="goal-error-card"
     >
-      <p className="text-[20px] font-bold mb-2 [color:var(--foreground)]!">
-        잠시 후 다시 시도해 주세요
-      </p>
-      <p className="text-[14px] mb-6 [color:var(--muted-foreground)]!">
-        목표를 불러오지 못했어요. 네트워크 문제일 수 있어요.
-      </p>
+      <p className="text-[20px] font-bold mb-2 [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_001}</p>
+      <p className="text-[14px] mb-6 [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</p>
       <button
         type="button"
         onClick={reset}
         className="rounded-[14px] px-6 py-3 text-[15px] font-extrabold text-white [background-color:var(--primary)]!"
         data-testid="goal-error-retry"
-      >
-        다시 불러오기
-      </button>
+      >{PRODUCT_COPY.TEXT_003}</button>
     </main>
   );
 }

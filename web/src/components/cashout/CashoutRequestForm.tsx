@@ -17,6 +17,7 @@ import {
 } from "@/lib/cashout";
 import { KRW_PER_CLOVER, calcCashoutFee } from "@/lib/cashout-fee";
 import { getCashoutErrorMessage } from "@/lib/cashout-errors";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-cashout-cashoutrequestform";
 
 type Props = {
   cashoutEnabled: boolean;
@@ -217,21 +218,14 @@ export function CashoutRequestForm({
           className="rounded-md border border-amber-line bg-amber-soft p-4"
           data-testid="cashout-pending-block"
         >
-          <p className="text-sm font-extrabold text-amber-ink">
-            이미 처리 중인 신청이 있어요
-          </p>
+          <p className="text-sm font-extrabold text-amber-ink">{PRODUCT_COPY.TEXT_001}</p>
           <p className="mt-1 text-xs leading-relaxed text-amber-ink">
-            {new Date(currentCashout.requested_at).toLocaleDateString("ko-KR")}
-            에 신청한{" "}
-            <strong>{formatCashoutKrw(currentCashout.net_krw)}</strong> 건을
-            확인하고 있어요. 한 번에 한 건씩만 신청할 수 있어요.
-          </p>
+            {new Date(currentCashout.requested_at).toLocaleDateString("ko-KR")}{PRODUCT_COPY.TEXT_002}{" "}
+            <strong>{formatCashoutKrw(currentCashout.net_krw)}</strong>{PRODUCT_COPY.TEXT_003}</p>
           <Link
             href="/cashout/status"
             className="mt-4 block rounded-md bg-primary px-4 py-3 text-center text-[13px] font-extrabold text-primary-foreground"
-          >
-            진행 상태 보기
-          </Link>
+          >{PRODUCT_COPY.TEXT_004}</Link>
         </div>
       ) : canRequest && screen === "form" ? (
         <form
@@ -244,9 +238,7 @@ export function CashoutRequestForm({
             <label
               htmlFor="cashout-clover-amount"
               className="mb-1.5 block text-[12.5px] font-bold text-foreground"
-            >
-              환전할 클로버
-            </label>
+            >{PRODUCT_COPY.TEXT_005}</label>
             <div className="flex items-center gap-2">
               <input
                 id="cashout-clover-amount"
@@ -259,7 +251,7 @@ export function CashoutRequestForm({
                   const nextAmount = Number(event.target.value);
                   const browserMessage =
                     nextAmount < 1
-                      ? "환전할 클로버를 한 개 이상 입력해 주세요."
+                      ? PRODUCT_COPY.TEXT_006
                       : nextAmount > payableAmount
                         ? `지금 환전할 수 있는 클로버는 ${payableAmount}개예요. ${payableAmount}개 이하로 입력해 주세요.`
                         : "";
@@ -269,9 +261,7 @@ export function CashoutRequestForm({
                 className="min-w-0 flex-1 rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
                 required
               />
-              <span className="text-sm font-bold text-accent-foreground">
-                클로버
-              </span>
+              <span className="text-sm font-bold text-accent-foreground">{PRODUCT_COPY.TEXT_007}</span>
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
               {`환전 기준: 모인 클로버 ${minCashoutClover}개 이상 · 지금 지급 가능 ${payableAmount}개`}
@@ -282,9 +272,7 @@ export function CashoutRequestForm({
             <label
               htmlFor="cashout-bank"
               className="mb-1.5 block text-[12.5px] font-bold text-foreground"
-            >
-              은행
-            </label>
+            >{PRODUCT_COPY.TEXT_008}</label>
             <select
               id="cashout-bank"
               value={bankCode}
@@ -292,7 +280,7 @@ export function CashoutRequestForm({
               className="w-full rounded-sm border border-border bg-card px-3 py-3 text-sm outline-none focus:border-primary"
               required
             >
-              <option value="">은행을 선택해주세요</option>
+              <option value="">{PRODUCT_COPY.TEXT_009}</option>
               {CASHOUT_BANKS.map(([code, name]) => (
                 <option key={code} value={code}>
                   {name}
@@ -305,9 +293,7 @@ export function CashoutRequestForm({
             <label
               htmlFor="cashout-account"
               className="mb-1.5 block text-[12.5px] font-bold text-foreground"
-            >
-              계좌번호
-            </label>
+            >{PRODUCT_COPY.TEXT_010}</label>
             <input
               id="cashout-account"
               type="text"
@@ -316,7 +302,7 @@ export function CashoutRequestForm({
               value={accountNo}
               onChange={(event) => setAccountNo(event.target.value)}
               className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
-              placeholder="하이픈 없이 숫자만 입력"
+              placeholder={PRODUCT_COPY.TEXT_011}
               required
             />
           </div>
@@ -325,9 +311,7 @@ export function CashoutRequestForm({
             <label
               htmlFor="cashout-holder"
               className="mb-1.5 block text-[12.5px] font-bold text-foreground"
-            >
-              예금주
-            </label>
+            >{PRODUCT_COPY.TEXT_012}</label>
             <input
               id="cashout-holder"
               type="text"
@@ -338,18 +322,14 @@ export function CashoutRequestForm({
               className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
               required
             />
-            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--muted-color)]">
-              본인 명의 계좌만 입금할 수 있어요. 예금주가 다르면 반려돼요.
-            </p>
+            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_013}</p>
           </div>
 
           <div>
             <label
               htmlFor="cashout-phone"
               className="mb-1.5 block text-[12.5px] font-bold text-foreground"
-            >
-              전화번호
-            </label>
+            >{PRODUCT_COPY.TEXT_014}</label>
             <input
               id="cashout-phone"
               type="tel"
@@ -363,10 +343,7 @@ export function CashoutRequestForm({
               placeholder="010-1234-5678"
               data-testid="cashout-phone"
             />
-            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--muted-color)]">
-              지급 완료 안내를 보내드릴 번호예요. 신청할 때 최신 번호로
-              저장해요.
-            </p>
+            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_015}</p>
           </div>
 
           <div
@@ -374,10 +351,10 @@ export function CashoutRequestForm({
             data-testid="cashout-live-preview"
           >
             <p className="text-xs leading-6 text-accent-foreground">
-              {formatCashoutKrw(grossKrw)} 요청 → 서비스 이용료{" "}
-              {formatCashoutKrw(feeTotalKrw)} · 원천징수{" "}
+              {formatCashoutKrw(grossKrw)}{PRODUCT_COPY.TEXT_016}{" "}
+              {formatCashoutKrw(feeTotalKrw)}{PRODUCT_COPY.TEXT_017}{" "}
               {formatCashoutKrw(withholdingKrw)} →{" "}
-              <strong>{formatCashoutKrw(netKrw)} 입금</strong>
+              <strong>{formatCashoutKrw(netKrw)}{PRODUCT_COPY.TEXT_018}</strong>
             </p>
           </div>
           <div className="flex gap-2 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
@@ -386,12 +363,8 @@ export function CashoutRequestForm({
               className="shrink-0 text-primary"
               aria-hidden="true"
             />
-            <p>
-              계좌는 암호화해 보관하고 입금 처리에만 사용해요. 관리자가 전체
-              계좌를 보면 열람 기록이 남아요.{" "}
-              <Link href="/privacy" className="font-semibold underline">
-                개인정보처리방침
-              </Link>
+            <p>{PRODUCT_COPY.TEXT_019}{" "}
+              <Link href="/privacy" className="font-semibold underline">{PRODUCT_COPY.TEXT_020}</Link>
             </p>
           </div>
 
@@ -404,9 +377,7 @@ export function CashoutRequestForm({
             type="submit"
             className="flex w-full items-center justify-center rounded-md bg-primary py-4 text-[15px] font-extrabold text-primary-foreground"
             data-testid="cashout-confirm-button"
-          >
-            환전 신청하기
-          </button>
+          >{PRODUCT_COPY.TEXT_021}</button>
         </form>
       ) : canRequest && (screen === "confirm" || screen === "submitting") ? (
         <section
@@ -425,18 +396,18 @@ export function CashoutRequestForm({
               <div className="rounded-md border border-border bg-card p-3">
                 <dl className="divide-y divide-border text-[12.5px]">
                   <div className="flex justify-between gap-4 py-2">
-                    <dt className="text-muted-foreground">입금 계좌</dt>
+                    <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_022}</dt>
                     <dd className="text-right font-bold">
                       {cashoutBankName(bankCode)}{" "}
                       {maskAccountNumber(normalizedAccountNo)}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4 py-2">
-                    <dt className="text-muted-foreground">예금주</dt>
+                    <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_023}</dt>
                     <dd className="font-bold">{normalizedHolder}</dd>
                   </div>
                   <div className="flex justify-between gap-4 py-2">
-                    <dt className="font-bold text-foreground">받으실 금액</dt>
+                    <dt className="font-bold text-foreground">{PRODUCT_COPY.TEXT_024}</dt>
                     <dd className="text-[19px] font-extrabold text-accent-foreground">
                       {formatCashoutKrw(netKrw)}
                     </dd>
@@ -444,16 +415,9 @@ export function CashoutRequestForm({
                 </dl>
               </div>
               <div className="rounded-md border border-border bg-card p-4">
-                <p className="text-[length:var(--text-label-small)]! font-bold text-accent-foreground">
-                  환전 신청 제출 중
-                </p>
-                <p className="mt-2 text-[19px] font-black text-foreground">
-                  신청을 안전하게 보내고 있어요
-                </p>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  계좌와 금액을 다시 확인해 접수하고 있어요. 이 화면을 닫아도
-                  같은 신청이 두 번 들어가지 않습니다.
-                </p>
+                <p className="text-[length:var(--text-label-small)]! font-bold text-accent-foreground">{PRODUCT_COPY.TEXT_025}</p>
+                <p className="mt-2 text-[19px] font-black text-foreground">{PRODUCT_COPY.TEXT_026}</p>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_027}</p>
                 <div
                   className="mt-5 flex min-h-14 items-center justify-center gap-2 rounded-md bg-primary text-[15px] font-extrabold text-primary-foreground"
                   aria-disabled="true"
@@ -462,31 +426,26 @@ export function CashoutRequestForm({
                     className="animate-spin"
                     size={18}
                     aria-hidden="true"
-                  />
-                  신청을 보내는 중이에요
-                </div>
+                  />{PRODUCT_COPY.TEXT_028}</div>
               </div>
-              <p className="rounded-sm bg-muted p-3 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">
-                🔒 제출이 끝날 때까지 이전 화면과 재신청 버튼은 잠겨요. 성공
-                또는 오류 결과가 나오면 다음 행동을 바로 보여줍니다.
-              </p>
+              <p className="rounded-sm bg-muted p-3 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_029}</p>
             </div>
           ) : (
             <>
               <div className="rounded-md border border-border bg-card p-3">
                 <dl className="divide-y divide-border text-[12.5px]">
                   <div className="flex justify-between gap-4 py-2">
-                    <dt className="text-muted-foreground">보내는 곳</dt>
+                    <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_030}</dt>
                     <dd className="text-right font-bold">
                       {cashoutBankName(bankCode)} {accountNo}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4 py-2">
-                    <dt className="text-muted-foreground">예금주</dt>
+                    <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_031}</dt>
                     <dd className="font-bold">{normalizedHolder}</dd>
                   </div>
                   <div className="flex justify-between gap-4 py-2">
-                    <dt className="text-muted-foreground">받으실 금액</dt>
+                    <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_032}</dt>
                     <dd className="text-[15px] font-extrabold text-accent-foreground">
                       {formatCashoutKrw(netKrw)}
                     </dd>
@@ -497,15 +456,9 @@ export function CashoutRequestForm({
                 className="rounded-md border border-amber-line bg-amber-soft p-3"
                 data-testid="cashout-confirm-banner"
               >
-                <p className="text-sm font-extrabold text-amber-ink">
-                  신청하면 클로버 {cloverAmount}개가 잠겨요
-                </p>
-                <p className="mt-1 text-[length:var(--text-label-small)]! leading-relaxed text-amber-ink">
-                  모은 {totalBalance}개는 그대로 남고, 그중 {cloverAmount}개에만
-                  잠금이 걸려요.{" "}
-                  <b>입금이 끝나면 그때 {cloverAmount}개가 빠져요.</b> 반려되면
-                  잠금이 풀립니다.
-                </p>
+                <p className="text-sm font-extrabold text-amber-ink">{PRODUCT_COPY.TEXT_033}{cloverAmount}{PRODUCT_COPY.TEXT_034}</p>
+                <p className="mt-1 text-[length:var(--text-label-small)]! leading-relaxed text-amber-ink">{PRODUCT_COPY.TEXT_035}{totalBalance}{PRODUCT_COPY.TEXT_036}{cloverAmount}{PRODUCT_COPY.TEXT_037}{" "}
+                  <b>{PRODUCT_COPY.TEXT_038}{cloverAmount}{PRODUCT_COPY.TEXT_039}</b>{PRODUCT_COPY.TEXT_040}</p>
               </div>
               {errorMessage && (
                 <p
@@ -520,16 +473,12 @@ export function CashoutRequestForm({
                 onClick={submitConfirmed}
                 className="flex w-full items-center justify-center rounded-md bg-primary py-4 text-[15px] font-extrabold text-primary-foreground"
                 data-testid="cashout-submit-button"
-              >
-                이 계좌로 신청하기
-              </button>
+              >{PRODUCT_COPY.TEXT_041}</button>
               <button
                 type="button"
                 onClick={() => changeScreen("form")}
                 className="w-full rounded-md border border-border bg-card py-3 text-[13px] font-bold text-muted-foreground"
-              >
-                계좌 다시 입력
-              </button>
+              >{PRODUCT_COPY.TEXT_042}</button>
             </>
           )}
         </section>
@@ -541,30 +490,22 @@ export function CashoutRequestForm({
         >
           <div className="rounded-md border border-primary/30 bg-accent p-6 text-center">
             <p className="text-[30px]">🍀</p>
-            <h2 className="mt-2 text-[17px] font-black text-accent-foreground">
-              환전 신청이 접수됐어요
-            </h2>
+            <h2 className="mt-2 text-[17px] font-black text-accent-foreground">{PRODUCT_COPY.TEXT_043}</h2>
             <p className="mt-2 text-xs leading-relaxed text-accent-foreground">
               {cashoutBankName(success.bankCode)} {success.accountMasked} (
               {success.accountHolder})<br />
               <strong className="text-[15px]">
                 {formatCashoutKrw(success.netKrw)}
-              </strong>
-              을 1~3영업일 안에 보내드릴게요.
-            </p>
+              </strong>{PRODUCT_COPY.TEXT_044}</p>
           </div>
           <Link
             href="/cashout/status"
             className="block rounded-md bg-primary py-4 text-center text-sm font-extrabold text-primary-foreground"
-          >
-            진행 상태 보기
-          </Link>
+          >{PRODUCT_COPY.TEXT_045}</Link>
           <Link
             href="/me"
             className="block rounded-md border border-border bg-card py-3 text-center text-[13px] font-bold text-muted-foreground"
-          >
-            홈으로
-          </Link>
+          >{PRODUCT_COPY.TEXT_046}</Link>
         </section>
       ) : (
         <div
@@ -574,16 +515,16 @@ export function CashoutRequestForm({
           <Clock3 className="mb-2 text-primary" size={22} aria-hidden="true" />
           <p className="text-sm font-bold text-foreground">
             {!cashoutEnabled
-              ? "환전 기능을 준비하고 있어요"
+              ? PRODUCT_COPY.TEXT_047
               : reachedThreshold
-                ? "친구 응원이 들어오면 신청할 수 있어요"
-                : "조금만 더 모으면 환전할 수 있어요"}
+                ? PRODUCT_COPY.TEXT_048
+                : PRODUCT_COPY.TEXT_049}
           </p>
           <p className="mt-1 max-w-64 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">
             {!cashoutEnabled
-              ? "쌓인 클로버는 그대로 보관됩니다."
+              ? PRODUCT_COPY.TEXT_050
               : reachedThreshold
-                ? "웰컴 클로버는 환전되지 않아요. 친구 응원이 들어오면 지급 가능한 만큼 신청할 수 있어요."
+                ? PRODUCT_COPY.TEXT_051
                 : `환전 기준은 모인 클로버 ${minCashoutClover}개 이상이에요. 지금 모인 클로버는 그대로 보관됩니다.`}
           </p>
         </div>
@@ -595,15 +536,11 @@ export function CashoutRequestForm({
             <h2
               id="cashout-history-title"
               className="text-[15px] font-extrabold text-foreground"
-            >
-              환전 내역
-            </h2>
+            >{PRODUCT_COPY.TEXT_052}</h2>
             <Link
               href="/cashout/history"
               className="text-[length:var(--text-label-small)]! font-bold text-primary"
-            >
-              전체 보기 ›
-            </Link>
+            >{PRODUCT_COPY.TEXT_053}</Link>
           </div>
           <div className="space-y-2">
             {history.slice(0, 3).map((item) => (

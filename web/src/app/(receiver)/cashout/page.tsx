@@ -7,6 +7,7 @@ import { CashoutPageView } from "@/components/cashout/CashoutPageView";
 import { type CashoutRecord } from "@/lib/cashout";
 import { isCashoutAllowedMember } from "@/lib/supabase/service";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-cashout-page";
 
 export const dynamic = "force-dynamic";
 
@@ -44,15 +45,11 @@ export default async function CashoutPage() {
       <ReceiverPageShell testId="cashout-load-error-page">
         <ReceiverTopBar variant="detail" />
         <div className="rounded-md border border-border bg-card p-6 text-center">
-          <h1 className="text-xl font-black text-foreground">
-            환전 화면을 불러오지 못했어요
-          </h1>
+          <h1 className="text-xl font-black text-foreground">{PRODUCT_COPY.TEXT_001}</h1>
           <p
             className="mt-2 text-sm text-muted-foreground"
             data-testid="cashout-load-error"
-          >
-            잔액이 0이라는 뜻이 아니에요. 잠시 뒤 새로고침 해주세요.
-          </p>
+          >{PRODUCT_COPY.TEXT_002}</p>
         </div>
       </ReceiverPageShell>
     );

@@ -18,6 +18,7 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 import { AccountWithdrawalButton } from "@/components/social/AccountWithdrawalButton";
 import { LEGAL_EXPOSURE } from "@/lib/legal/exposure";
 import type { MySocialDashboard } from "@/lib/social/contracts";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-mypageoverview";
 
 type Preferences = {
   notifyCheer: boolean;
@@ -233,7 +234,7 @@ export function MyPageOverview({
           {editingNickname
             ? (
               <div className="my-profile-name-editor">
-                <label className="sr-only" htmlFor="my-profile-nickname">이름</label>
+                <label className="sr-only" htmlFor="my-profile-nickname">{PRODUCT_COPY.TEXT_001}</label>
                 <input
                   id="my-profile-nickname"
                   value={draftNickname}
@@ -242,13 +243,13 @@ export function MyPageOverview({
                   autoComplete="nickname"
                 />
                 <button type="button" disabled={profileSaving} onClick={() => void saveNickname()}>
-                  {profileSaving ? "저장 중" : "저장"}
+                  {profileSaving ? PRODUCT_COPY.TEXT_002 : PRODUCT_COPY.TEXT_003}
                 </button>
                 <button type="button" disabled={profileSaving} onClick={() => {
                   setDraftNickname(nickname);
                   setEditingNickname(false);
                   setProfileError(null);
-                }}>취소</button>
+                }}>{PRODUCT_COPY.TEXT_004}</button>
               </div>
             )
             : (
@@ -259,19 +260,19 @@ export function MyPageOverview({
           {editingBio
             ? (
               <div className="my-profile-bio-editor">
-                <label className="sr-only" htmlFor="my-profile-bio">한 줄 소개</label>
+                <label className="sr-only" htmlFor="my-profile-bio">{PRODUCT_COPY.TEXT_005}</label>
                 <textarea id="my-profile-bio" value={draftBio} maxLength={80} disabled={profileSaving} onChange={(event) => setDraftBio(event.target.value)} />
-                <div><button type="button" disabled={profileSaving} onClick={() => void saveBio()}>저장</button><button type="button" disabled={profileSaving} onClick={() => { setDraftBio(bio); setEditingBio(false); setProfileError(null); }}>취소</button></div>
+                <div><button type="button" disabled={profileSaving} onClick={() => void saveBio()}>{PRODUCT_COPY.TEXT_006}</button><button type="button" disabled={profileSaving} onClick={() => { setDraftBio(bio); setEditingBio(false); setProfileError(null); }}>{PRODUCT_COPY.TEXT_007}</button></div>
               </div>
             )
             : (
               <div className="my-profile-bio-row">
-                <span>{bio || "한 줄 소개를 적어 주세요."}</span>
+                <span>{bio || PRODUCT_COPY.TEXT_008}</span>
                 {!editingNickname && (
                   <button
                     type="button"
                     className="my-profile-bio-button"
-                    aria-label={`${bio || "한 줄 소개를 적어 주세요."} 한 줄 소개 편집`}
+                    aria-label={`${bio || PRODUCT_COPY.TEXT_009} 한 줄 소개 편집`}
                     onClick={() => setEditingBio(true)}
                   >
                     <Pencil aria-hidden="true" />
@@ -279,13 +280,11 @@ export function MyPageOverview({
                 )}
               </div>
             )}
-          <small>
-            친구 {dashboard.friend_count}명 · 진행 중 목표 {activeGoalCount}개
-          </small>
+          <small>{PRODUCT_COPY.TEXT_010}{dashboard.friend_count}{PRODUCT_COPY.TEXT_011}{activeGoalCount}{PRODUCT_COPY.TEXT_012}</small>
         </div>
       </section>
       {avatarPickerOpen && (
-        <section className="my-profile-avatar-picker" aria-label="프로필 사진 프리셋">
+        <section className="my-profile-avatar-picker" aria-label={PRODUCT_COPY.TEXT_013}>
           <div>
             {PROFILE_PRESETS.map((src, index) => (
               <button
@@ -300,33 +299,31 @@ export function MyPageOverview({
               </button>
             ))}
             <button type="button" className="my-profile-upload-button" disabled={profileSaving} onClick={() => profileFileRef.current?.click()}>
-              <span aria-hidden="true">＋</span><small>내 사진</small>
+              <span aria-hidden="true">＋</span><small>{PRODUCT_COPY.TEXT_014}</small>
             </button>
           </div>
           <input ref={profileFileRef} type="file" className="sr-only" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (file) void uploadProfileImage(file); }} />
-          <p>프로필 사진을 고르거나, 내 사진으로 바꿀 수 있어요.</p>
+          <p>{PRODUCT_COPY.TEXT_015}</p>
         </section>
       )}
       {profileError && <p className="social-error" role="alert">{profileError}</p>}
 
       <section aria-labelledby="my-activity-heading">
-        <h2 className="my-section-title" id="my-activity-heading">나의 활동</h2>
+        <h2 className="my-section-title" id="my-activity-heading">{PRODUCT_COPY.TEXT_016}</h2>
         <div className="my-menu-card">
           <Link href="/me/achievements" className="my-menu-row">
             <span className="my-menu-icon" aria-hidden="true">🏆</span>
             <span>
-              <strong>업적</strong>
-              <small>
-                완료 목표 {dashboard.achievements.completed_goal_count}개 · 받은 응원 {dashboard.achievements.received_cheer_count}개 · 친구 {dashboard.achievements.connected_friend_count}명
-              </small>
+              <strong>{PRODUCT_COPY.TEXT_017}</strong>
+              <small>{PRODUCT_COPY.TEXT_018}{dashboard.achievements.completed_goal_count}{PRODUCT_COPY.TEXT_019}{dashboard.achievements.received_cheer_count}{PRODUCT_COPY.TEXT_020}{dashboard.achievements.connected_friend_count}{PRODUCT_COPY.TEXT_021}</small>
             </span>
             <ChevronRight aria-hidden="true" />
           </Link>
           <Link href="/cashout/history" className="my-menu-row">
             <span className="my-menu-icon" aria-hidden="true">🧾</span>
             <span>
-              <strong>환전 내역</strong>
-              <small>누적 입금 · 진행 중 신청</small>
+              <strong>{PRODUCT_COPY.TEXT_022}</strong>
+              <small>{PRODUCT_COPY.TEXT_023}</small>
             </span>
             <ChevronRight aria-hidden="true" />
           </Link>
@@ -334,7 +331,7 @@ export function MyPageOverview({
       </section>
 
       <section aria-labelledby="my-cheers-heading">
-        <h2 className="my-section-title" id="my-cheers-heading">응원 내역</h2>
+        <h2 className="my-section-title" id="my-cheers-heading">{PRODUCT_COPY.TEXT_024}</h2>
         <div className="my-cheer-tabs" role="tablist" aria-label="응원 내역 구분">
           <button
             type="button"
@@ -342,20 +339,20 @@ export function MyPageOverview({
             aria-selected={cheerTab === "received"}
             className={cheerTab === "received" ? "is-active" : undefined}
             onClick={() => setCheerTab("received")}
-          >받은 응원</button>
+          >{PRODUCT_COPY.TEXT_025}</button>
           <button
             type="button"
             role="tab"
             aria-selected={cheerTab === "sent"}
             className={cheerTab === "sent" ? "is-active" : undefined}
             onClick={() => setCheerTab("sent")}
-          >보낸 응원</button>
+          >{PRODUCT_COPY.TEXT_026}</button>
         </div>
         <div className="my-cheer-list" role="tabpanel">
           {cheerTab === "received"
             ? receivedCheers.length > 0
               ? receivedCheers.slice(0, 3).map((cheer) => {
-                  const name = cheer.displayName?.trim() || "익명의 누군가";
+                  const name = cheer.displayName?.trim() || PRODUCT_COPY.TEXT_027;
                   return (
                     <article key={cheer.id}>
                       <span className="my-cheer-avatar">
@@ -363,9 +360,9 @@ export function MyPageOverview({
                           ? <Image src={cheer.profileImage} alt={`${name} 프로필`} fill sizes="44px" unoptimized />
                           : <span aria-hidden="true">{cheer.isAnonymous ? "?" : Array.from(name)[0]}</span>}
                       </span>
-                      <div><strong>{name}</strong><ClampText className="my-cheer-message">{`💬 ${cheer.message || "조용한 응원이 도착했어요."}`}</ClampText></div>
+                      <div><strong>{name}</strong><ClampText className="my-cheer-message">{`💬 ${cheer.message || PRODUCT_COPY.TEXT_028}`}</ClampText></div>
                       <div className="my-cheer-status">
-                        <strong>응원 도착</strong>
+                        <strong>{PRODUCT_COPY.TEXT_029}</strong>
                         <small>{formatCheerDate(cheer.createdAt)}</small>
                       </div>
                     </article>
@@ -375,18 +372,18 @@ export function MyPageOverview({
                 <div className="my-cheer-empty" data-testid="received-cheers-empty">
                   <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
                   <div>
-                    <strong>첫 응원을 받아볼까요?</strong>
-                    <p>내 해낼게 링크를 공유하면 친구의 응원 메시지가 여기에 쌓여요.</p>
+                    <strong>{PRODUCT_COPY.TEXT_030}</strong>
+                    <p>{PRODUCT_COPY.TEXT_031}</p>
                     {dashboard.goals.length > 0
-                      ? <Link href="/me">응원 링크 공유하기</Link>
-                      : <Link href="/onboarding">해낼게 만들기</Link>}
+                      ? <Link href="/me">{PRODUCT_COPY.TEXT_032}</Link>
+                      : <Link href="/onboarding">{PRODUCT_COPY.TEXT_033}</Link>}
                   </div>
                 </div>
               )
             : (
               dashboard.sent_cheers.length > 0
                 ? dashboard.sent_cheers.slice(0, 3).map((cheer) => {
-                    const name = cheer.target_name?.trim() || "친구";
+                    const name = cheer.target_name?.trim() || PRODUCT_COPY.TEXT_034;
                     return (
                       <article key={cheer.id}>
                         <span className="my-cheer-avatar">
@@ -394,15 +391,15 @@ export function MyPageOverview({
                             ? <Image src={cheer.profile_image} alt={`${name} 프로필`} fill sizes="44px" unoptimized />
                             : <span aria-hidden="true">{Array.from(name)[0]}</span>}
                         </span>
-                        <div><strong>{name}에게</strong><ClampText className="my-cheer-message">{`💬 ${cheer.message || "조용한 응원을 보냈어요."}`}</ClampText></div>
-                        <div className="my-cheer-status"><strong>응원 보냄</strong><small>{formatCheerDate(cheer.created_at)}</small></div>
+                        <div><strong>{name}{PRODUCT_COPY.TEXT_035}</strong><ClampText className="my-cheer-message">{`💬 ${cheer.message || PRODUCT_COPY.TEXT_036}`}</ClampText></div>
+                        <div className="my-cheer-status"><strong>{PRODUCT_COPY.TEXT_037}</strong><small>{formatCheerDate(cheer.created_at)}</small></div>
                       </article>
                     );
                   })
                 : (
                   <div className="my-cheer-empty" data-testid="sent-cheers-empty">
                     <span className="my-menu-icon"><HandHeart aria-hidden="true" /></span>
-                    <div><strong>내가 응원한 친구</strong><p>친구의 목표와 응원 메시지를 확인할 수 있어요.</p><Link href="/friends">친구 목표 보기</Link></div>
+                    <div><strong>{PRODUCT_COPY.TEXT_038}</strong><p>{PRODUCT_COPY.TEXT_039}</p><Link href="/friends">{PRODUCT_COPY.TEXT_040}</Link></div>
                   </div>
                 )
             )}
@@ -410,12 +407,12 @@ export function MyPageOverview({
       </section>
 
       <section aria-labelledby="my-settings-heading">
-        <h2 className="my-section-title" id="my-settings-heading">알림</h2>
+        <h2 className="my-section-title" id="my-settings-heading">{PRODUCT_COPY.TEXT_041}</h2>
         <div className="my-menu-card my-settings-group">
           <PreferenceRow
             icon={<BellRing aria-hidden="true" />}
             title="응원 도착 알림"
-            description="응원이 오면 알림으로 알려드려요."
+            description={PRODUCT_COPY.TEXT_045}
             checked={preferences.notifyCheer}
             disabled={saving}
             onChange={(value) => void setPreference("notifyCheer", value)}
@@ -423,18 +420,18 @@ export function MyPageOverview({
           <PreferenceRow
             icon={<Megaphone aria-hidden="true" />}
             title="마케팅 소식 받기"
-            description="이벤트와 업데이트 소식을 받아요."
+            description={PRODUCT_COPY.TEXT_046}
             checked={preferences.notifyMarketing}
             disabled={saving}
             onChange={(value) => void setPreference("notifyMarketing", value)}
           />
         </div>
-        {saveError && <p className="social-error" role="alert">설정을 저장하지 못했어요. 다시 시도해 주세요.</p>}
-        <Link href="/how" className="my-guide-link">이용안내</Link>
+        {saveError && <p className="social-error" role="alert">{PRODUCT_COPY.TEXT_042}</p>}
+        <Link href="/how" className="my-guide-link">{PRODUCT_COPY.TEXT_043}</Link>
       </section>
 
       <section aria-labelledby="my-account-heading">
-        <h2 className="my-section-title" id="my-account-heading">계정</h2>
+        <h2 className="my-section-title" id="my-account-heading">{PRODUCT_COPY.TEXT_044}</h2>
         <div className="my-account-card">
           <LegalFooter mode={LEGAL_EXPOSURE.my} />
           <LogoutButton />

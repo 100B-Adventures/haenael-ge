@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
 import { WordmapCloudLayout } from "@/components/goal/WordmapCloudLayout";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-page";
 
 export const metadata: Metadata = {
   title: "해낼게 — 응원은 돈으로 하는 겁니다",
@@ -36,7 +37,7 @@ function WordmapPreview() {
   return (
     <WordmapCloudLayout
       className="landing-wordmap-preview"
-      label="응원 메시지 예시"
+      label={PRODUCT_COPY.TEXT_015}
       seed="landing-preview"
     >
       <span className="landing-preview-heart landing-preview-heart--left" aria-hidden="true">♥</span>
@@ -83,22 +84,16 @@ export default async function LandingPage() {
           className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center font-extrabold transition-opacity active:opacity-70 [font-size:13px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!"
           data-testid="brand-logo-link"
           aria-label="해낼게 홈으로"
-        >
-          해낼<span className="[color:var(--clover-bright)]!">게.</span>
+        >{PRODUCT_COPY.TEXT_001}<span className="[color:var(--clover-bright)]!">{PRODUCT_COPY.TEXT_002}</span>
         </Link>
       </div>
 
       {/* Hero */}
       <div className="landing-approved-hero">
-        <h1>
-          해낼<span className="[color:var(--clover-bright)]!">게.</span>
+        <h1>{PRODUCT_COPY.TEXT_003}<span className="[color:var(--clover-bright)]!">{PRODUCT_COPY.TEXT_004}</span>
         </h1>
-        <p>
-          응원은 돈으로 하는 겁니다.
-        </p>
-        <span>
-          그게 무슨 말이냐면 ↓
-        </span>
+        <p>{PRODUCT_COPY.TEXT_005}</p>
+        <span>{PRODUCT_COPY.TEXT_006}</span>
       </div>
 
       {/* 워드맵 프리뷰 */}
@@ -110,19 +105,14 @@ export default async function LandingPage() {
       <div className="landing-approved-actions">
         {/* 3스텝 안내 */}
         <div className="landing-approved-steps">
-          <span>선언</span>
+          <span>{PRODUCT_COPY.TEXT_007}</span>
           <span className="[opacity:0.45]!">›</span>
-          <span>
-            친구가{" "}
-            <strong>
-              🍀로 응원
-            </strong>
+          <span>{PRODUCT_COPY.TEXT_008}{" "}
+            <strong>{PRODUCT_COPY.TEXT_009}</strong>
           </span>
           <span className="[opacity:0.45]!">›</span>
           <span>
-            <strong>
-              응원이 쌓여요
-            </strong>
+            <strong>{PRODUCT_COPY.TEXT_010}</strong>
           </span>
         </div>
 
@@ -131,9 +121,7 @@ export default async function LandingPage() {
           href="/onboarding"
           className="landing-approved-primary"
           data-testid="landing-cta"
-        >
-          시작하기
-        </Link>
+        >{PRODUCT_COPY.TEXT_011}</Link>
 
         {/* Ghost CTA — 슬라이스 #9 how-to modal 연결 예정 */}
         <Link
@@ -142,14 +130,12 @@ export default async function LandingPage() {
           className="landing-approved-ghost"
           data-testid="landing-how-cta"
           aria-label="어떻게 쓰는 건가요?"
-        >
-          어떻게 쓰는 건가요?
-        </Link>
+        >{PRODUCT_COPY.TEXT_012}</Link>
 
         {/* 재로그인 진입 (user-flow.md §1.3 갭2) — 주 CTA와 시각적으로 구분되되
             "로그인"임을 명확히 읽히게: 라벨(muted)+동사(강조 underline)로 분리 */}
         <p className="landing-approved-relogin">
-          <span>이미 계정이 있으신가요?</span>
+          <span>{PRODUCT_COPY.TEXT_013}</span>
           {/* prefetch 를 끈다. Next 가 이 경로를 미리 가져가면 서버가 302 로
               kauth.kakao.com 을 가리키고, 그 크로스 오리진 요청이 우리 CSP
               connect-src 에 막혀 모든 방문자 콘솔에 에러가 찍힌다. 카카오는
@@ -159,9 +145,7 @@ export default async function LandingPage() {
             prefetch={false}
             className="landing-approved-relogin-link"
             data-testid="landing-relogin-link"
-          >
-            카카오로 로그인
-          </Link>
+          >{PRODUCT_COPY.TEXT_014}</Link>
         </p>
       </div>
     </main>

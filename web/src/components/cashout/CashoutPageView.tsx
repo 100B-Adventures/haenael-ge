@@ -12,6 +12,7 @@ import {
 } from "@/components/cashout/CashoutRequestForm";
 import { type CashoutRecord, formatCashoutKrw } from "@/lib/cashout";
 import { KRW_PER_CLOVER, calcCashoutFee } from "@/lib/cashout-fee";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-cashout-cashoutpageview";
 
 type Props = {
   cashoutEnabled: boolean;
@@ -53,18 +54,11 @@ export function CashoutPageView({
     >
       <ReceiverTopBar variant="detail" />
       {isFormScreen ? (
-        <h1 className="receiver-page-title mb-6 sm:text-[length:var(--text-page-title-desktop)]!">
-          환전 전에
-          <br className="sm:hidden" /> 정직하게 보여드릴게요
-        </h1>
+        <h1 className="receiver-page-title mb-6 sm:text-[length:var(--text-page-title-desktop)]!">{PRODUCT_COPY.TEXT_001}<br className="sm:hidden" />{PRODUCT_COPY.TEXT_002}</h1>
       ) : screen === "confirm" ? (
-        <h1 className="receiver-page-title mb-4 sm:text-[length:var(--text-page-title-desktop)]!">
-          이 계좌가 맞나요?
-        </h1>
+        <h1 className="receiver-page-title mb-4 sm:text-[length:var(--text-page-title-desktop)]!">{PRODUCT_COPY.TEXT_003}</h1>
       ) : screen === "submitting" ? (
-        <h1 className="receiver-page-title mb-4 sm:text-[length:var(--text-page-title-desktop)]!">
-          잠깐 기다리는 동안에도 지금 하는 일을 알려드려요
-        </h1>
+        <h1 className="receiver-page-title mb-4 sm:text-[length:var(--text-page-title-desktop)]!">{PRODUCT_COPY.TEXT_004}</h1>
       ) : null}
 
       {isFormScreen && !reachedThreshold && (
@@ -73,15 +67,9 @@ export function CashoutPageView({
           data-testid="cashout-below-threshold-banner"
           role="status"
         >
-          <p className="text-sm font-bold text-foreground">
-            조금만 더 모으면 환전할 수 있어요
-          </p>
-          <p className="mt-1 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">
-            지금 🍀 {totalBalance}개(웰컴 포함) · 최소 환전 {minCashoutClover}
-            개까지{" "}
-            <strong className="text-accent-foreground">{remaining}개</strong>{" "}
-            남았어요. 쌓인 클로버는 그대로 보관돼요.
-          </p>
+          <p className="text-sm font-bold text-foreground">{PRODUCT_COPY.TEXT_005}</p>
+          <p className="mt-1 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_006}{totalBalance}{PRODUCT_COPY.TEXT_007}{minCashoutClover}{PRODUCT_COPY.TEXT_008}{" "}
+            <strong className="text-accent-foreground">{remaining}{PRODUCT_COPY.TEXT_009}</strong>{" "}{PRODUCT_COPY.TEXT_010}</p>
         </div>
       )}
 
@@ -99,38 +87,29 @@ export function CashoutPageView({
               data-testid="cashout-breakdown-table"
             >
               <div className="flex items-center justify-between py-2">
-                <span className="text-[13px] text-muted-foreground">
-                  모인 클로버 (웰컴 포함)
-                </span>
+                <span className="text-[13px] text-muted-foreground">{PRODUCT_COPY.TEXT_011}</span>
                 <span
                   className="text-[13px] font-bold text-foreground"
                   data-testid="breakdown-total"
                 >
-                  🍀 {totalBalance}개
-                </span>
+                  🍀 {totalBalance}{PRODUCT_COPY.TEXT_012}</span>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-[13px] text-[var(--muted-color)]">
-                  − 해낼게 웰컴 (지급 대상 아님)
-                </span>
+                <span className="text-[13px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_013}</span>
                 <span
                   className="text-[13px] font-bold text-[var(--muted-color)]"
                   data-testid="breakdown-welcome"
                 >
-                  − 🍀 {welcomeAmount}개
-                </span>
+                  − 🍀 {welcomeAmount}{PRODUCT_COPY.TEXT_014}</span>
               </div>
               <div className="my-2 border-t border-border" />
               <div className="flex items-center justify-between py-2">
-                <span className="text-[13px] font-bold text-foreground">
-                  친구 응원분 (지급 대상)
-                </span>
+                <span className="text-[13px] font-bold text-foreground">{PRODUCT_COPY.TEXT_015}</span>
                 <span
                   className="text-sm font-extrabold text-accent-foreground"
                   data-testid="breakdown-payable"
                 >
-                  🍀 {payableAmount}개
-                </span>
+                  🍀 {payableAmount}{PRODUCT_COPY.TEXT_016}</span>
               </div>
             </div>
 
@@ -139,26 +118,24 @@ export function CashoutPageView({
               data-testid="cashout-net-preview"
             >
               <div className="flex items-center justify-between py-1.5 text-[12.5px] text-accent-foreground">
-                <span>환산 (🍀1개 = 1,000원)</span>
+                <span>{PRODUCT_COPY.TEXT_017}</span>
                 <strong>{formatCashoutKrw(grossKrw)}</strong>
               </div>
               <div className="flex items-center justify-between py-1.5 text-[12.5px] text-accent-foreground">
-                <span>서비스 이용료 (부가세 포함)</span>
+                <span>{PRODUCT_COPY.TEXT_018}</span>
                 <strong data-testid="cashout-fee-amount">
                   − {formatCashoutKrw(feeTotalKrw)}
                 </strong>
               </div>
               <div className="flex items-center justify-between py-1.5 text-[12.5px] text-accent-foreground">
-                <span>사업소득 원천징수 3.3%</span>
+                <span>{PRODUCT_COPY.TEXT_019}</span>
                 <strong data-testid="cashout-withholding-amount">
                   − {formatCashoutKrw(withholdingKrw)}
                 </strong>
               </div>
               <div className="my-2 border-t border-accent-foreground/20" />
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-sm font-bold text-foreground">
-                  받으실 금액
-                </span>
+                <span className="text-sm font-bold text-foreground">{PRODUCT_COPY.TEXT_020}</span>
                 <strong
                   className="text-lg font-extrabold text-accent-foreground"
                   data-testid="cashout-net-amount"
@@ -166,13 +143,7 @@ export function CashoutPageView({
                   {formatCashoutKrw(netKrwPreview)}
                 </strong>
               </div>
-              <p className="mt-2 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">
-                서비스 이용료는 커피 한 잔 값이에요. 카드 결제 수수료, 응원 알림
-                발송, 계좌 확인과 송금에 쓰입니다. 소득세는 저희가 가져가는 돈이
-                아니라 국세청에 대신 내드리는 금액이에요. 다음 해 5월에
-                종합소득세 신고하시면 돌려받으실 수도 있어요. 실제 지급액은 신청
-                시점에 다시 확정합니다.
-              </p>
+              <p className="mt-2 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_021}</p>
             </div>
           </section>
         )}
@@ -192,7 +163,7 @@ export function CashoutPageView({
         </aside>
       </div>
 
-      {isFormScreen && <BackHomeLink label="해낼게 관리로 돌아가기" href="/my" />}
+      {isFormScreen && <BackHomeLink label={PRODUCT_COPY.TEXT_022} href="/my" />}
     </ReceiverPageShell>
   );
 }

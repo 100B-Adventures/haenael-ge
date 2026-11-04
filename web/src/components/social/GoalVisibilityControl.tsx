@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { setGoalVisibilityAction } from "@/app/(receiver)/social-actions";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-goalvisibilitycontrol";
 
 const options = [
   {
@@ -36,10 +37,10 @@ export function GoalVisibilityControl(
     <section className="social-card" aria-labelledby="goal-visibility-title">
       <div className="social-card-heading">
         <div>
-          <p className="social-eyebrow">공개범위</p>
-          <h2 id="goal-visibility-title">누가 볼 수 있나요?</h2>
+          <p className="social-eyebrow">{PRODUCT_COPY.TEXT_001}</p>
+          <h2 id="goal-visibility-title">{PRODUCT_COPY.TEXT_002}</h2>
         </div>
-        <span>{pending ? "저장 중" : "저장됨"}</span>
+        <span>{pending ? PRODUCT_COPY.TEXT_003 : PRODUCT_COPY.TEXT_004}</span>
       </div>
       <div className="social-segmented">
         {options.map((option) => (
@@ -61,9 +62,7 @@ export function GoalVisibilityControl(
         )?.help}
       </p>
       {error && (
-        <p role="alert" className="social-error">
-          공개범위를 저장하지 못했어요.
-        </p>
+        <p role="alert" className="social-error">{PRODUCT_COPY.TEXT_005}</p>
       )}
     </section>
   );

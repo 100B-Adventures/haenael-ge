@@ -5,6 +5,7 @@
 
 import { normalizeWordmapKeywords } from "@/lib/wordmap/keywords";
 import { WordmapCloudLayout } from "./WordmapCloudLayout";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-wordmap";
 
 export interface WordmapWord {
   word: string;
@@ -45,8 +46,8 @@ function EmptyWordmap({ ownerName }: { ownerName?: string }) {
   return (
     <div className="wordmap-empty" data-testid="wordmap-empty">
       <span className="wordmap-empty-icon" aria-hidden="true">♥</span>
-      <p>아직 응원 메시지가 없어요</p>
-      <small><strong>{name}</strong>에게 첫 응원을 남겨보세요.</small>
+      <p>{PRODUCT_COPY.TEXT_001}</p>
+      <small><strong>{name}</strong>{PRODUCT_COPY.TEXT_002}</small>
     </div>
   );
 }
@@ -80,7 +81,7 @@ export function Wordmap({
     >
       {trimmedGoalTitle && (
         <strong className="wordmap-goal-title" data-wordmap-heading data-testid="wordmap-goal-title">
-          🍀 {trimmedGoalTitle}{needsHaenaelSuffix && <> <span>해낼게</span></>}
+          🍀 {trimmedGoalTitle}{needsHaenaelSuffix && <> <span>{PRODUCT_COPY.TEXT_003}</span></>}
         </strong>
       )}
       {normalizedWords.map((item) => {

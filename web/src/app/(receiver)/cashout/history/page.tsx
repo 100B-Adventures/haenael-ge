@@ -11,6 +11,7 @@ import {
   ReceiverPageShell,
   ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-cashout-history-page";
 
 export const dynamic = "force-dynamic";
 
@@ -35,28 +36,24 @@ export default async function CashoutHistoryPage() {
   return (
     <ReceiverPageShell testId="cashout-history-page">
       <ReceiverTopBar variant="detail" />
-      <h1 className="receiver-page-title mt-2 sm:text-[length:var(--text-page-title-desktop)]!">
-        환전 내역
-      </h1>
+      <h1 className="receiver-page-title mt-2 sm:text-[length:var(--text-page-title-desktop)]!">{PRODUCT_COPY.TEXT_001}</h1>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         <div className="rounded-md border border-border bg-card p-4">
-          <p className="text-[11px] text-[var(--muted-color)]">지금까지 받은 금액</p>
+          <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_002}</p>
           <p className="mt-1 text-xl font-extrabold text-accent-foreground">
             {formatCashoutKrw(paidTotal)}
           </p>
         </div>
         <div className="rounded-md border border-border bg-card p-4">
-          <p className="text-[11px] text-[var(--muted-color)]">입금 완료</p>
+          <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_003}</p>
           <p className="mt-1 text-xl font-extrabold text-accent-foreground">
-            {paid.length}건
-          </p>
+            {paid.length}{PRODUCT_COPY.TEXT_004}</p>
         </div>
         <div className="rounded-md border border-border bg-card p-4">
-          <p className="text-[11px] text-[var(--muted-color)]">진행중</p>
+          <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_005}</p>
           <p className="mt-1 text-xl font-extrabold text-amber-ink">
-            {pendingCount}건
-          </p>
+            {pendingCount}{PRODUCT_COPY.TEXT_006}</p>
         </div>
       </div>
 
@@ -68,21 +65,13 @@ export default async function CashoutHistoryPage() {
             <p
               className="text-sm font-bold text-muted-foreground"
               data-testid="cashout-history-load-error"
-            >
-              환전 내역을 불러오지 못했어요
-            </p>
-            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">
-              내역이 없다는 뜻이 아니에요. 잠시 뒤 새로고침 해주세요.
-            </p>
+            >{PRODUCT_COPY.TEXT_007}</p>
+            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_008}</p>
           </div>
         ) : history.length === 0 ? (
           <div className="py-14 text-center">
-            <p className="text-sm font-bold text-muted-foreground">
-              아직 환전 내역이 없어요
-            </p>
-            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">
-              신청하면 이곳에 처리 상태가 남아요.
-            </p>
+            <p className="text-sm font-bold text-muted-foreground">{PRODUCT_COPY.TEXT_009}</p>
+            <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_010}</p>
           </div>
         ) : (
           history.map((item) => (
@@ -101,7 +90,7 @@ export default async function CashoutHistoryPage() {
                 </p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   {item.status === "REJECTED"
-                    ? (item.processing_note ?? "반려됨")
+                    ? (item.processing_note ?? PRODUCT_COPY.TEXT_011)
                     : `${cashoutBankName(item.bank_code)} ${item.account_masked}`}
                 </p>
               </div>
@@ -116,23 +105,16 @@ export default async function CashoutHistoryPage() {
         )}
       </section>
 
-      <div className="mt-4 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
-        🧾 원천징수 3.3%가 제외된 실지급액이에요. 세금 신고 자료가 필요하면
-        고객센터로 문의해 주세요.
-      </div>
+      <div className="mt-4 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_012}</div>
       <div className="mt-5 flex gap-2">
         <Link
           href="/cashout"
           className="flex-1 rounded-md border border-border bg-card py-3 text-center text-[13px] font-bold text-foreground"
-        >
-          환전 화면
-        </Link>
+        >{PRODUCT_COPY.TEXT_013}</Link>
         <Link
           href="/me"
           className="flex-1 rounded-md border border-border bg-card py-3 text-center text-[13px] font-bold text-foreground"
-        >
-          홈으로
-        </Link>
+        >{PRODUCT_COPY.TEXT_014}</Link>
       </div>
     </ReceiverPageShell>
   );

@@ -12,6 +12,7 @@ import {
   ReceiverPageShell,
   ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-cashout-status-page";
 
 export const dynamic = "force-dynamic";
 
@@ -78,15 +79,11 @@ export default async function CashoutStatusPage() {
       <ReceiverPageShell testId="cashout-status-error-page">
         <ReceiverTopBar variant="detail" />
         <div className="rounded-md border border-border bg-card p-6 text-center">
-          <h1 className="text-xl font-black text-foreground">
-            환전 상태를 불러오지 못했어요
-          </h1>
+          <h1 className="text-xl font-black text-foreground">{PRODUCT_COPY.TEXT_001}</h1>
           <p
             className="mt-2 text-sm text-muted-foreground"
             data-testid="cashout-status-load-error"
-          >
-            신청이 없다는 뜻이 아니에요. 잠시 뒤 새로고침 해주세요.
-          </p>
+          >{PRODUCT_COPY.TEXT_002}</p>
         </div>
       </ReceiverPageShell>
     );
@@ -97,20 +94,12 @@ export default async function CashoutStatusPage() {
       <ReceiverPageShell testId="cashout-status-empty-page">
         <ReceiverTopBar variant="detail" />
         <div className="rounded-md border border-border bg-card p-6 text-center">
-          <h1 className="text-xl font-black text-foreground">
-            아직 환전 신청이 없어요
-          </h1>
-          <p className="mt-2 text-xs text-muted-foreground">
-            모인 클로버가 {minCashoutClover}개 이상이면 환전 자격을 채워요.
-            신청량은 지금 지급 가능한 클로버 안에서 1개 이상 선택할 수
-            있어요.
-          </p>
+          <h1 className="text-xl font-black text-foreground">{PRODUCT_COPY.TEXT_003}</h1>
+          <p className="mt-2 text-xs text-muted-foreground">{PRODUCT_COPY.TEXT_004}{minCashoutClover}{PRODUCT_COPY.TEXT_005}</p>
           <Link
             href="/cashout"
             className="mt-5 block rounded-md bg-primary py-3 text-[13px] font-extrabold text-primary-foreground"
-          >
-            환전 화면으로
-          </Link>
+          >{PRODUCT_COPY.TEXT_006}</Link>
         </div>
       </ReceiverPageShell>
     );
@@ -157,12 +146,9 @@ export default async function CashoutStatusPage() {
   return (
     <ReceiverPageShell testId="cashout-status-page">
       <ReceiverTopBar variant="detail" />
-      <h1 className="receiver-page-title mt-2 sm:text-[length:var(--text-page-title-desktop)]!">
-        환전 진행 상태
-      </h1>
+      <h1 className="receiver-page-title mt-2 sm:text-[length:var(--text-page-title-desktop)]!">{PRODUCT_COPY.TEXT_007}</h1>
       <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">
-        {dateTime.format(new Date(cashout.requested_at))} 신청 · 신청번호 #
-        {cashout.id}
+        {dateTime.format(new Date(cashout.requested_at))}{PRODUCT_COPY.TEXT_008}{cashout.id}
       </p>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
@@ -184,9 +170,7 @@ export default async function CashoutStatusPage() {
               <li className="text-accent-foreground">
                 <span className="mx-auto mb-2 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   1
-                </span>
-                접수됨
-                <p className="mt-1 font-normal text-muted-foreground">
+                </span>{PRODUCT_COPY.TEXT_009}<p className="mt-1 font-normal text-muted-foreground">
                   {formatStepDateTime(cashout.requested_at)}
                 </p>
               </li>
@@ -203,10 +187,8 @@ export default async function CashoutStatusPage() {
                   className={`mx-auto mb-2 flex size-7 items-center justify-center rounded-full ${cashout.status === "REQUESTED" ? "border-2 border-amber bg-card" : "bg-primary text-primary-foreground"}`}
                 >
                   2
-                </span>
-                확인중
-                <p className="mt-1 font-normal text-muted-foreground">
-                  {cashout.status === "REQUESTED" ? "예정" : "확인됨"}
+                </span>{PRODUCT_COPY.TEXT_010}<p className="mt-1 font-normal text-muted-foreground">
+                  {cashout.status === "REQUESTED" ? PRODUCT_COPY.TEXT_011 : PRODUCT_COPY.TEXT_012}
                 </p>
               </li>
               <li
@@ -223,13 +205,13 @@ export default async function CashoutStatusPage() {
                 >
                   3
                 </span>
-                {isRejected ? "반려됨" : "입금완료"}
+                {isRejected ? PRODUCT_COPY.TEXT_013 : PRODUCT_COPY.TEXT_014}
                 <p className="mt-1 font-normal text-muted-foreground">
                   {cashout.paid_at
                     ? formatStepDateTime(cashout.paid_at)
                     : cashout.rejected_at
                       ? formatStepDateTime(cashout.rejected_at)
-                      : "예정"}
+                      : PRODUCT_COPY.TEXT_015}
                 </p>
               </li>
             </ol>
@@ -237,38 +219,35 @@ export default async function CashoutStatusPage() {
               <p
                 className="mt-3 border-t border-border pt-3 text-center text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground"
                 data-testid="cashout-step-note"
-              >
-                지금은{" "}
+              >{PRODUCT_COPY.TEXT_016}{" "}
                 <strong className="text-amber-ink">
-                  {checking ? "확인중" : "확인 대기 중"}
-                </strong>
-                이에요. 따로 하실 일은 없어요.
-              </p>
+                  {checking ? PRODUCT_COPY.TEXT_017 : PRODUCT_COPY.TEXT_018}
+                </strong>{PRODUCT_COPY.TEXT_019}</p>
             )}
           </div>
 
           <dl className="mt-3 divide-y divide-border rounded-md border border-border bg-card px-4">
             <div className="flex justify-between gap-4 py-3 text-[13px]">
               <dt className="text-muted-foreground">
-                {isPaid ? "입금된 금액" : "받으실 금액"}
+                {isPaid ? PRODUCT_COPY.TEXT_020 : PRODUCT_COPY.TEXT_021}
               </dt>
               <dd className="font-extrabold text-accent-foreground">
                 {formatCashoutKrw(cashout.net_krw)}
               </dd>
             </div>
             <div className="flex justify-between gap-4 py-3 text-[13px]">
-              <dt className="text-muted-foreground">입금 계좌</dt>
+              <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_022}</dt>
               <dd className="text-right font-bold">
                 {cashoutBankName(cashout.bank_code)} {cashout.account_masked}
               </dd>
             </div>
             <div className="flex justify-between gap-4 py-3 text-[13px]">
-              <dt className="text-muted-foreground">예금주</dt>
+              <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_023}</dt>
               <dd className="font-bold">{cashout.account_holder}</dd>
             </div>
             {cashout.paid_at && (
               <div className="flex justify-between gap-4 py-3 text-[13px]">
-                <dt className="text-muted-foreground">입금 완료</dt>
+                <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_024}</dt>
                 <dd className="font-bold">
                   {dateTime.format(new Date(cashout.paid_at))}
                 </dd>
@@ -293,9 +272,7 @@ export default async function CashoutStatusPage() {
               <p
                 className="text-xs text-danger-ink"
                 data-testid="status-balance-error"
-              >
-                🍀 잔액을 불러오지 못했어요. 새로고침 해주세요.
-              </p>
+              >{PRODUCT_COPY.TEXT_025}</p>
             ) : (
               <>
                 <SplitBalanceCard
@@ -311,58 +288,40 @@ export default async function CashoutStatusPage() {
                       사실을 또 말하면 중복이다. REJECTED/PAID 분기는 잠김이 0이라 부품 노트가 사라지므로
                       중복이 아니어서 그대로 둔다. */}
                 {cashout.status === "REQUESTED" ? null : isRejected ? (
-                  <p className="mt-3 text-[11px] leading-relaxed text-accent-foreground">
-                    잠겨 있던 {cashout.clover_amount}개의 잠금이 풀렸어요. 모은
-                    개수는 그대로예요.
-                  </p>
+                  <p className="mt-3 text-[11px] leading-relaxed text-accent-foreground">{PRODUCT_COPY.TEXT_026}{cashout.clover_amount}{PRODUCT_COPY.TEXT_027}</p>
                 ) : (
-                  <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-                    잠겨 있던 {cashout.clover_amount}개는 이 돈으로 바뀌었어요.
-                  </p>
+                  <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_028}{cashout.clover_amount}{PRODUCT_COPY.TEXT_029}</p>
                 )}
               </>
             )}
           </div>
-          <div className="mt-3 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
-            💬 지급이 끝나면 카카오톡 알림으로 알려드릴 예정이에요. 문의할 때는
-            신청번호 #{cashout.id}을 알려주세요.
-          </div>
+          <div className="mt-3 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_030}{cashout.id}{PRODUCT_COPY.TEXT_031}</div>
           {cashout.status === "REQUESTED" ? (
             <button
               type="button"
               disabled
               className="mt-4 block w-full cursor-not-allowed rounded-md bg-muted py-4 text-center text-[15px] font-extrabold text-muted-foreground"
-            >
-              새 환전 신청하기
-              <span className="mt-1 block text-[length:var(--text-meta-micro)]! font-semibold">
-                이 건이 끝나면 다시 신청할 수 있어요
-              </span>
+            >{PRODUCT_COPY.TEXT_032}<span className="mt-1 block text-[length:var(--text-meta-micro)]! font-semibold">{PRODUCT_COPY.TEXT_033}</span>
             </button>
           ) : (
             <Link
               href="/cashout/history"
               className="mt-4 block rounded-md border border-border bg-card py-3 text-center text-[13px] font-bold text-foreground"
-            >
-              환전 내역 보기
-            </Link>
+            >{PRODUCT_COPY.TEXT_034}</Link>
           )}
           {isRejected && (
             <Link
               href="/cashout"
               className="mt-2 block rounded-md bg-primary py-3 text-center text-[13px] font-extrabold text-primary-foreground"
-            >
-              계좌 고쳐서 다시 신청하기
-            </Link>
+            >{PRODUCT_COPY.TEXT_035}</Link>
           )}
           {cashout.status === "REQUESTED" ? (
             <Link
               href="/me"
               className="mt-3 block rounded-md border border-border bg-card py-4 text-center text-[15px] font-extrabold text-foreground"
-            >
-              홈으로
-            </Link>
+            >{PRODUCT_COPY.TEXT_036}</Link>
           ) : (
-            <BackHomeLink label="홈으로" />
+            <BackHomeLink label={PRODUCT_COPY.TEXT_037} />
           )}
         </aside>
       </div>

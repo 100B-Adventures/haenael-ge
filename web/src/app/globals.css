@@ -569,8 +569,9 @@
     gap: var(--sp-3);
     border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     background: var(--card);
-    padding: var(--sp-5) var(--space-mobile-gutter)
+    padding-block: var(--sp-5)
       calc(var(--sp-5) + env(safe-area-inset-bottom, 0px));
+    padding-inline: var(--space-mobile-gutter);
   }
   .guest-teaser-sheet h2 {
     padding-right: var(--sp-6);
@@ -723,7 +724,8 @@
     width: 100%;
     max-width: var(--receiver-native-width);
     margin-inline: auto;
-    padding: 0 var(--space-mobile-gutter) var(--sp-5);
+    padding-block: 0 var(--sp-5);
+    padding-inline: var(--space-mobile-gutter);
   }
 
   .landing-approved {
@@ -3705,7 +3707,8 @@
   .admin-dashboard {
     min-height: 100svh;
     background: var(--background);
-    padding: var(--sp-3) var(--space-mobile-gutter) var(--sp-6);
+    padding-block: var(--sp-3) var(--sp-6);
+    padding-inline: var(--space-mobile-gutter);
     color: var(--foreground);
   }
   .admin-dashboard-inner {

@@ -5,6 +5,7 @@ import {
   ReceiverBottomNav,
   ReceiverBottomNavView,
 } from "@/components/social/ReceiverBottomNav";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-receiver-receivershell";
 
 export function ReceiverAppShell({
   children,
@@ -50,8 +51,7 @@ export function ReceiverPageShell({
 
 export function ReceiverBrandMark() {
   return (
-    <p className="receiver-wordmark">
-      해낼게<span className="text-[var(--clover-bright)]">.</span>
+    <p className="receiver-wordmark">{PRODUCT_COPY.TEXT_001}<span className="text-[var(--clover-bright)]">.</span>
     </p>
   );
 }

@@ -8,6 +8,7 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { asFriendGoals } from "@/lib/social/contracts";
 import { resolveFriendGoalCovers } from "@/lib/social/server";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-friends-page";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function FriendsPage() {
   return (
     <ReceiverPageShell testId="friends-page" bottomSafe>
       <header className="friends-page-head">
-        <h1 className="receiver-page-title">친구</h1>
+        <h1 className="receiver-page-title">{PRODUCT_COPY.TEXT_001}</h1>
         <Link href="/invite" aria-label="친구 초대">
           <Plus aria-hidden="true" />
         </Link>

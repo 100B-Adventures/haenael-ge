@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Clover } from "lucide-react";
 import { DdayChip, StatusChip } from "./DdayChip";
 import { ClampText } from "@/components/common/ClampText";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-goalcard";
 
 export interface GoalCardProps {
   title: string; // "나 편입 평점 4.0"
@@ -83,7 +84,7 @@ export function GoalCard({
       <article className="public-goal-card" data-testid="goal-card">
         <h1 data-testid="goal-title">
           {trimmedTitle}{needsHaenaelSuffix && (
-            <> <span>해낼게</span></>
+            <> <span>{PRODUCT_COPY.TEXT_001}</span></>
           )}
         </h1>
         <div className="public-goal-chips">
@@ -118,9 +119,7 @@ export function GoalCard({
           <p
             className="mt-0.5 [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
             // --faint
-          >
-            해낼게 목표
-          </p>
+          >{PRODUCT_COPY.TEXT_002}</p>
         </div>
       </div>
 
@@ -132,7 +131,7 @@ export function GoalCard({
         data-testid="goal-title"
       >
         {trimmedTitle}{needsHaenaelSuffix && (
-          <> <span className="[color:var(--clover-bright)]!">해낼게</span></>
+          <> <span className="[color:var(--clover-bright)]!">{PRODUCT_COPY.TEXT_003}</span></>
         )}
       </h1>
 

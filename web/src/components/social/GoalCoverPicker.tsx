@@ -6,6 +6,7 @@ import { setGoalCoverPresetAction } from "@/app/(receiver)/social-actions";
 import { createClient } from "@/lib/supabase/client";
 import { GoalCover } from "./GoalCover";
 import { automaticGoalCoverKey, GOAL_COVER_PRESETS, resolveGoalCoverPreset } from "./goal-cover-presets";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-goalcoverpicker";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 type FailureStage = "format" | "preset" | "sign" | "put" | "finalize";
@@ -142,13 +143,13 @@ export function GoalCoverPicker(
           onClick={() => setPickerOpen((value) => !value)}
         >
           <span aria-hidden="true">✎</span>
-          {pickerOpen ? "선택 닫기" : "배너 바꾸기"}
+          {pickerOpen ? PRODUCT_COPY.TEXT_001 : PRODUCT_COPY.TEXT_002}
         </button>
       </div>
       {pickerOpen && (
         <div id={`goal-cover-options-${goalId}`} data-testid="goal-cover-options">
           <div className="cover-picker-heading">
-            <strong>배너 고르기</strong><span>자동 = 목표에 맞춰 고른 사진</span>
+            <strong>{PRODUCT_COPY.TEXT_003}</strong><span>{PRODUCT_COPY.TEXT_004}</span>
           </div>
           <input
             ref={inputRef}
@@ -162,20 +163,20 @@ export function GoalCoverPicker(
             }}
           />
           <button type="button" className="cover-picker-upload-entry" disabled={state === "uploading" || state === "saving"} onClick={() => inputRef.current?.click()}>
-            <span aria-hidden="true">↑</span>{pendingFile ? "다른 내 사진 고르기" : "내 사진 올리기"}
+            <span aria-hidden="true">↑</span>{pendingFile ? PRODUCT_COPY.TEXT_005 : PRODUCT_COPY.TEXT_006}
           </button>
           {pendingFile && previewUrl && (
             <div className="cover-picker-upload-preview" data-testid="goal-cover-upload-preview">
-              <GoalCover presetKey={preset} imageUrl={previewUrl} title="직접 올린 배너 미리보기" size="hero" />
+              <GoalCover presetKey={preset} imageUrl={previewUrl} title={PRODUCT_COPY.TEXT_007} size="hero" />
               <button type="button" disabled={state === "uploading"} onClick={() => void upload(pendingFile)}>
-                {state === "uploading" ? "검수 요청 중…" : failureStage ? "검수 요청 다시" : "이 사진으로 배너 만들기"}
+                {state === "uploading" ? PRODUCT_COPY.TEXT_008 : failureStage ? PRODUCT_COPY.TEXT_009 : PRODUCT_COPY.TEXT_010}
               </button>
             </div>
           )}
           <div
             className="cover-preset-grid"
             role="group"
-            aria-label="기본 커버 선택"
+            aria-label={PRODUCT_COPY.TEXT_011}
           >
             {GOAL_COVER_PRESETS.map((item) => (
               <button
@@ -187,17 +188,13 @@ export function GoalCoverPicker(
                 disabled={state === "saving" || state === "uploading"}
               >
                 <GoalCover presetKey={item.key} title={item.label} />
-                <span>{item.label}{item.key === automaticPreset && <small>자동</small>}</span>
+                <span>{item.label}{item.key === automaticPreset && <small>{PRODUCT_COPY.TEXT_012}</small>}</span>
               </button>
             ))}
           </div>
-          <p className="social-muted">
-            JPG, PNG, WEBP 5MB 이하. 검수 중에는 현재 커버가 유지돼요.
-          </p>
+          <p className="social-muted">{PRODUCT_COPY.TEXT_013}</p>
           {state === "review" && (
-            <p className="social-success" role="status">
-              사진을 검수 대기열에 보냈어요. 승인 전까지 현재 커버를 유지해요.
-            </p>
+            <p className="social-success" role="status">{PRODUCT_COPY.TEXT_014}</p>
           )}
           {state === "error" && (
             <p className="social-error" role="alert">

@@ -25,6 +25,7 @@ import {
 } from "@/lib/utils/draft";
 import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-receiver-onboardinggoalform";
 
 interface OnboardingGoalFormProps {
   /** 서버에서 전달한 초기 유저 (null = 미인증) */
@@ -252,7 +253,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
   if (savedSlug) {
     return (
       <div className="w-full max-w-sm mx-auto px-[22px] py-10">
-        <ShareLinkCard slug={savedSlug} goalTitle={values.title || "목표"} />
+        <ShareLinkCard slug={savedSlug} goalTitle={values.title || PRODUCT_COPY.TEXT_001} />
       </div>
     );
   }
@@ -268,9 +269,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           className="w-10 h-10 rounded-full border-4 animate-spin mb-4 [border-color:var(--accent)]! [border-top-color:var(--primary)]!"
           aria-label="저장 중"
         />
-        <p className="text-[14px] [color:var(--muted-foreground)]!">
-          목표를 저장하는 중이에요...
-        </p>
+        <p className="text-[14px] [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</p>
       </div>
     );
   }
@@ -287,15 +286,9 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           <p
             className="text-[13px] font-extrabold [color:var(--primary)]!"
             // --clover
-          >
-            해낼게.
-          </p>
-          <h1 className="font-black leading-tight [font-size:24px]! [letter-spacing:-0.5px]! [color:var(--foreground)]!">
-            무엇을 해낼 거예요?
-          </h1>
-          <p className="text-[13px] mt-0.5 [color:var(--muted-foreground)]!">
-            작성하고 저장하면 나만의 응원 링크가 생겨요.
-          </p>
+          >{PRODUCT_COPY.TEXT_003}</p>
+          <h1 className="font-black leading-tight [font-size:24px]! [letter-spacing:-0.5px]! [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_004}</h1>
+          <p className="text-[13px] mt-0.5 [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_005}</p>
         </div>
 
         {/* 목표 입력 */}
@@ -303,9 +296,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           <label
             htmlFor="goal-title"
             className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
-          >
-            목표
-          </label>
+          >{PRODUCT_COPY.TEXT_006}</label>
           <div
             className="flex items-center rounded-[12px] px-4 py-3 gap-2 [background-color:var(--card)]!"
             style={{
@@ -327,9 +318,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             <span
               className="flex-shrink-0 text-[13px] font-bold [color:var(--accent-foreground)]!"
               // --clover-ink
-            >
-              해낼게
-            </span>
+            >{PRODUCT_COPY.TEXT_007}</span>
           </div>
           {errors.title && (
             <p className="text-[12px] [color:var(--destructive)]!" role="alert">
@@ -343,9 +332,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           <label
             htmlFor="goal-due-date"
             className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
-          >
-            언제까지?
-          </label>
+          >{PRODUCT_COPY.TEXT_008}</label>
           <input
             id="goal-due-date"
             type="date"
@@ -371,9 +358,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
           >
             WHY{" "}
-            <span className="text-[10px] font-normal normal-case [color:var(--muted-color)]!">
-              (응원의 이유가 돼요 · 선택)
-            </span>
+            <span className="text-[10px] font-normal normal-case [color:var(--muted-color)]!">{PRODUCT_COPY.TEXT_009}</span>
           </label>
           <textarea
             id="goal-reason"
@@ -409,14 +394,14 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           style={{ opacity: isSaving ? 0.7 : 1 }}
           data-testid="save-goal-button"
         >
-          {user ? "내 링크 받기" : "저장하고 내 링크 받기"}
+          {user ? PRODUCT_COPY.TEXT_010 : PRODUCT_COPY.TEXT_011}
         </button>
 
         {/* 안내 */}
         <p className="text-center text-[12px] [color:var(--muted-color)]!">
           {user
-            ? "바로 저장돼요."
-            : "저장하면 로그인 화면이 잠깐 뜨고, 작성 중인 목표는 안전하게 보관 중이에요."}
+            ? PRODUCT_COPY.TEXT_012
+            : PRODUCT_COPY.TEXT_013}
         </p>
       </div>
 

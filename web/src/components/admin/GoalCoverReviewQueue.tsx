@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-admin-goalcoverreviewqueue";
 
 export type CoverReviewItem = {
   asset_id: string;
@@ -45,16 +46,12 @@ export function GoalCoverReviewQueue(
       data-testid="goal-cover-review-queue"
     >
       <div className="mb-4">
-        <h2 className="text-lg font-extrabold">목표 커버 검수</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          검수 전 원본 사진을 확인하고, 승인한 사진만 목표 커버에 반영합니다.
-        </p>
+        <h2 className="text-lg font-extrabold">{PRODUCT_COPY.TEXT_001}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{PRODUCT_COPY.TEXT_002}</p>
       </div>
       {items.length === 0
         ? (
-          <p className="py-8 text-center text-muted-foreground">
-            검수 대기 커버가 없습니다.
-          </p>
+          <p className="py-8 text-center text-muted-foreground">{PRODUCT_COPY.TEXT_003}</p>
         )
         : (
           <div className="space-y-3">
@@ -74,17 +71,13 @@ export function GoalCoverReviewQueue(
                       disabled={pending === item.asset_id}
                       onClick={() =>
                         decide(item.asset_id, "APPROVE")}
-                    >
-                      승인
-                    </button>
+                    >{PRODUCT_COPY.TEXT_004}</button>
                     <button
                       className="min-h-11 rounded-lg bg-danger-soft px-4 font-bold text-danger-ink"
                       disabled={pending === item.asset_id}
                       onClick={() =>
                         decide(item.asset_id, "REJECT")}
-                    >
-                      반려
-                    </button>
+                    >{PRODUCT_COPY.TEXT_005}</button>
                   </div>
                 </div>
               </article>
@@ -92,9 +85,7 @@ export function GoalCoverReviewQueue(
           </div>
         )}
       {error && (
-        <p role="alert" className="mt-3 text-sm text-danger-ink">
-          검수 결과를 저장하지 못했습니다.
-        </p>
+        <p role="alert" className="mt-3 text-sm text-danger-ink">{PRODUCT_COPY.TEXT_006}</p>
       )}
     </section>
   );

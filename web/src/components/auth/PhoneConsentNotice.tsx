@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-auth-phoneconsentnotice";
 
 const PHONE_CONSENT_PENDING_KEY = "haenael_phone_consent_pending";
 
@@ -39,13 +40,11 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
         data-testid="phone-consent-notice"
         role="status"
       >
-        <p className="text-[13.5px] font-extrabold text-[#8A6218]">
-          카카오에서 전화번호를 받지 못했어요
-        </p>
+        <p className="text-[13.5px] font-extrabold text-[#8A6218]">{PRODUCT_COPY.TEXT_001}</p>
         <p className="mt-1 text-[11.5px] leading-relaxed text-[#8A6218]">
           {context === "cashout"
-            ? "아래에 전화번호를 직접 입력해 주세요."
-            : "환전 신청할 때 전화번호를 직접 입력할 수 있어요."}
+            ? PRODUCT_COPY.TEXT_002
+            : PRODUCT_COPY.TEXT_003}
         </p>
       </section>
     );
@@ -83,9 +82,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
         }}
         className="mt-3 block rounded-[12px] bg-[#FEE500] px-4 py-3 text-center text-[13px] font-extrabold text-[#191600]"
         data-testid="phone-consent-cta"
-      >
-        카카오에서 동의하기
-      </Link>
+      >{PRODUCT_COPY.TEXT_004}</Link>
     </section>
   );
 }

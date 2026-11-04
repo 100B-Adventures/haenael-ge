@@ -9,6 +9,7 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { asFriendGoalDetail, asFriendGoals } from "@/lib/social/contracts";
 import { resolveFriendDetailCover } from "@/lib/social/server";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-friends-friendid-page";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export default async function FriendDetailPage(
     <ReceiverPageShell testId="friend-detail-page" bottomSafe>
       <header className="social-detail-head">
         <Link href="/friends" aria-label="친구 목록으로"><ChevronLeft aria-hidden="true" /></Link>
-        <strong>{friend.nickname ?? "친구"}의 해낼게</strong>
+        <strong>{friend.nickname ?? PRODUCT_COPY.TEXT_001}{PRODUCT_COPY.TEXT_002}</strong>
         <span aria-hidden="true" />
       </header>
       <FriendGoalDetail
@@ -61,7 +62,7 @@ export default async function FriendDetailPage(
         detail={detail}
         friendGoals={friend.goals}
       />
-      <BackHomeLink label="친구 목록으로" href="/friends" />
+      <BackHomeLink label={PRODUCT_COPY.TEXT_003} href="/friends" />
     </ReceiverPageShell>
   );
 }

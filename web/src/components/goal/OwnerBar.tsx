@@ -11,6 +11,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HOME_LAST_SEEN_KEY } from "@/lib/home-seen";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-ownerbar";
 
 export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
   const [newCount, setNewCount] = useState<number | null>(null);
@@ -37,15 +38,13 @@ export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
       data-testid="owner-bar"
     >
       <p className="[font-size:10.5px]! [color:#7a7363]! [line-height:1.4]!">
-        <b className="[color:var(--accent-foreground)]! [font-size:11px]!">
-          내 목표예요
-        </b>
+        <b className="[color:var(--accent-foreground)]! [font-size:11px]!">{PRODUCT_COPY.TEXT_001}</b>
         {" · "}
         <span data-testid="owner-bar-status">
           {newCount === null
-            ? "확인 중…"
+            ? PRODUCT_COPY.TEXT_002
             : isEmpty
-              ? "받은 응원을 여기서 관리해요"
+              ? PRODUCT_COPY.TEXT_003
               : `새 응원 ${newCount}개`}
         </span>
       </p>
@@ -53,9 +52,7 @@ export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
         href="/me"
         className="text-white font-bold rounded-[8px] text-center [font-size:10.5px]! [background-color:var(--primary)]! p-[6px_10px]! [flex:0_0_auto]!"
         data-testid="owner-bar-cta"
-      >
-        내 해낼게 관리
-      </Link>
+      >{PRODUCT_COPY.TEXT_004}</Link>
     </div>
   );
 }

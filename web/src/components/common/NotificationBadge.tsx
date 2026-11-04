@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/database.types";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-common-notificationbadge";
 
 type NotificationRow = Database["public"]["Tables"]["notification"]["Row"];
 
@@ -129,7 +130,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
           setOpen((v) => !v);
           if (!open && unreadCount > 0) markAllRead();
         }}
-        aria-label={`알림 ${unreadCount > 0 ? `${unreadCount}개 새 알림` : "없음"}`}
+        aria-label={`알림 ${unreadCount > 0 ? `${unreadCount}개 새 알림` : PRODUCT_COPY.TEXT_001}`}
         data-testid="notification-badge-button"
       >
         <span className="text-[22px]" aria-hidden="true">
@@ -158,30 +159,24 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
           <div
             className="absolute right-0 z-50 mt-2 w-72 rounded-2xl shadow-xl [background-color:var(--background)]! [border:1px_solid_#E4E0D8]!"
             role="dialog"
-            aria-label="알림 목록"
+            aria-label={PRODUCT_COPY.TEXT_002}
             data-testid="notification-dropdown"
           >
             <div className="flex items-center justify-between px-4 py-3 [border-bottom:1px_solid_#E4E0D8]!">
-              <span className="text-[13px] font-semibold [color:var(--foreground)]!">
-                알림
-              </span>
+              <span className="text-[13px] font-semibold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_003}</span>
               <button
                 type="button"
                 className="min-h-11 min-w-11 text-[13px] text-muted-foreground"
                 onClick={() => setOpen(false)}
-                aria-label="알림 닫기"
-              >
-                닫기
-              </button>
+                aria-label={PRODUCT_COPY.TEXT_004}
+              >{PRODUCT_COPY.TEXT_005}</button>
             </div>
 
             {notifications.length === 0 ? (
               <div
                 className="px-4 py-8 text-center text-[13px] text-muted-foreground"
                 data-testid="notification-empty"
-              >
-                아직 알림이 없어요
-              </div>
+              >{PRODUCT_COPY.TEXT_006}</div>
             ) : (
               <ul className="max-h-80 overflow-y-auto" role="list">
                 {notifications.map((n) => (
@@ -220,7 +215,7 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
                     {!n.read && (
                       <span
                         className="mt-1 h-2 w-2 flex-shrink-0 rounded-full [background-color:var(--accent-foreground)]!"
-                        aria-label="읽지 않음"
+                        aria-label={PRODUCT_COPY.TEXT_007}
                       />
                     )}
                   </li>

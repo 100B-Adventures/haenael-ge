@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import { createClient } from "@/lib/supabase/client";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-goaleditsheet";
 
 interface GoalEditSheetProps {
   goalId: number;
@@ -122,9 +123,9 @@ export function GoalEditSheet({
 
   const editorActions = (
     <div className="goal-inline-form-actions">
-      <button type="button" onClick={closeField} disabled={saving}>취소</button>
+      <button type="button" onClick={closeField} disabled={saving}>{PRODUCT_COPY.TEXT_001}</button>
       <button type="button" onClick={() => void saveGoal()} disabled={saving} data-testid="save-goal-edit">
-        {saving ? "저장 중…" : "저장"}
+        {saving ? PRODUCT_COPY.TEXT_002 : PRODUCT_COPY.TEXT_003}
       </button>
     </div>
   );
@@ -134,7 +135,7 @@ export function GoalEditSheet({
       <div className="goal-inline-chips">
         {editable
           ? (
-            <button type="button" className="goal-inline-date-target" aria-label="마감일 편집" aria-expanded={editingField === "dueDate"} onClick={() => openField("dueDate")}>
+            <button type="button" className="goal-inline-date-target" aria-label={PRODUCT_COPY.TEXT_004} aria-expanded={editingField === "dueDate"} onClick={() => openField("dueDate")}>
               <DdayChip dueDate={savedValues.dueDate} tone="warm" />
             </button>
           )
@@ -144,7 +145,7 @@ export function GoalEditSheet({
 
       {editingField === "dueDate" && (
         <div className="goal-inline-form" data-testid="goal-edit-sheet">
-          <label htmlFor="edit-goal-due-date">마감일</label>
+          <label htmlFor="edit-goal-due-date">{PRODUCT_COPY.TEXT_005}</label>
           <input id="edit-goal-due-date" type="date" value={values.dueDate} onChange={(event) => updateField("dueDate", event.target.value)} data-testid="edit-goal-due-date-input" aria-invalid={Boolean(errors.dueDate)} />
           {errors.dueDate && <p role="alert">{errors.dueDate}</p>}
           {saveError && <p role="alert">{saveError}</p>}
@@ -156,12 +157,12 @@ export function GoalEditSheet({
         ? (
           <div className="goal-inline-display-row goal-inline-title">
             <span className="goal-inline-display-copy" data-testid="goal-inline-title">
-              {displayTitle}{needsHaenaelSuffix && <> <strong>해낼게</strong></>}
+              {displayTitle}{needsHaenaelSuffix && <> <strong>{PRODUCT_COPY.TEXT_006}</strong></>}
               <button
                 type="button"
                 className="goal-inline-pencil-button"
                 data-testid="open-goal-edit-sheet"
-                aria-label="목표 제목 편집"
+                aria-label={PRODUCT_COPY.TEXT_007}
                 aria-expanded={editingField === "title"}
                 onClick={() => openField("title")}
               >
@@ -170,14 +171,14 @@ export function GoalEditSheet({
             </span>
           </div>
         )
-        : <div className="goal-inline-display-row goal-inline-title"><span data-testid="goal-inline-title">{displayTitle}{needsHaenaelSuffix && <> <strong>해낼게</strong></>}</span></div>}
+        : <div className="goal-inline-display-row goal-inline-title"><span data-testid="goal-inline-title">{displayTitle}{needsHaenaelSuffix && <> <strong>{PRODUCT_COPY.TEXT_008}</strong></>}</span></div>}
 
       {editingField === "title" && (
         <div className="goal-inline-form" data-testid="goal-edit-sheet">
-          <label htmlFor="edit-goal-title">목표</label>
+          <label htmlFor="edit-goal-title">{PRODUCT_COPY.TEXT_009}</label>
           <div className="goal-inline-title-input">
             <input id="edit-goal-title" value={values.title} onChange={(event) => updateField("title", event.target.value)} maxLength={60} autoComplete="off" data-testid="edit-goal-title-input" aria-invalid={Boolean(errors.title)} />
-            <span>해낼게</span>
+            <span>{PRODUCT_COPY.TEXT_010}</span>
           </div>
           {errors.title && <p role="alert">{errors.title}</p>}
           {saveError && <p role="alert">{saveError}</p>}
@@ -189,11 +190,11 @@ export function GoalEditSheet({
         ? (
           <div className="goal-inline-display-row goal-inline-why">
             <span className="goal-inline-display-copy whitespace-pre-wrap" data-empty={!savedValues.reason} data-testid="goal-reason">
-              {savedValues.reason || "아직 이유를 적지 않았어요."}
+              {savedValues.reason || PRODUCT_COPY.TEXT_011}
               <button
                 type="button"
                 className="goal-inline-pencil-button"
-                aria-label="WHY 편집"
+                aria-label={PRODUCT_COPY.TEXT_012}
                 aria-expanded={editingField === "reason"}
                 onClick={() => openField("reason")}
               >
@@ -202,11 +203,11 @@ export function GoalEditSheet({
             </span>
           </div>
         )
-        : <div className="goal-inline-display-row goal-inline-why"><span className="whitespace-pre-wrap" data-empty={!savedValues.reason} data-testid="goal-reason">{savedValues.reason || "아직 이유를 적지 않았어요."}</span></div>}
+        : <div className="goal-inline-display-row goal-inline-why"><span className="whitespace-pre-wrap" data-empty={!savedValues.reason} data-testid="goal-reason">{savedValues.reason || PRODUCT_COPY.TEXT_013}</span></div>}
 
       {editingField === "reason" && (
         <div className="goal-inline-form" data-testid="goal-edit-sheet">
-          <label htmlFor="edit-goal-reason">WHY <small>응원의 이유가 돼요. 선택</small></label>
+          <label htmlFor="edit-goal-reason">WHY <small>{PRODUCT_COPY.TEXT_014}</small></label>
           <textarea id="edit-goal-reason" value={values.reason} onChange={(event) => updateField("reason", event.target.value)} rows={3} maxLength={200} data-testid="edit-goal-reason-input" />
           <small className="goal-inline-counter">{values.reason.length}/200</small>
           {saveError && <p role="alert">{saveError}</p>}

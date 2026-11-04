@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ClampText } from "@/components/common/ClampText";
 import { Collapsible } from "@/components/common/Collapsible";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-receiver-cheerlist";
 
 export type ReceiverCheer = {
   id: number;
@@ -77,8 +78,7 @@ function CheerItem({
           data-testid="cheer-item-ordinal"
           aria-hidden="true"
         >
-          {ordinal}번째
-        </span>
+          {ordinal}{PRODUCT_COPY.TEXT_001}</span>
       </div>
     </div>
   );
@@ -106,12 +106,9 @@ export function CheerList({
         <h2
           id="receiver-cheer-list-title"
           className="text-[length:var(--text-label-small)]! font-semibold text-muted-foreground"
-        >
-          응원한 사람
-        </h2>
+        >{PRODUCT_COPY.TEXT_002}</h2>
         <span className="text-[length:var(--text-meta-micro)]! text-muted-foreground">
-          {totalCount}명
-        </span>
+          {totalCount}{PRODUCT_COPY.TEXT_003}</span>
       </div>
       <div
         className="overflow-hidden rounded-md border border-border bg-card"
@@ -120,7 +117,7 @@ export function CheerList({
         <Collapsible
           policy={{ auxiliary: true, exceedsLimit: totalCount > PREVIEW_LIMIT, hasCollapsedContext: true }}
           controlsId="receiver-cheer-list"
-          toggleLabel="응원 목록"
+          toggleLabel={PRODUCT_COPY.TEXT_010}
           onExpandedChange={(expanded) => { if (!expanded) setSearchOpen(false); }}
         >
           {(expanded) => {
@@ -128,7 +125,7 @@ export function CheerList({
             return <>
               <div id="receiver-cheer-list" className="px-4" data-testid="receiver-cheer-list" aria-live="polite">
                 {visibleCheers.map((cheer, index) => <CheerItem key={cheer.id} cheer={cheer} ordinal={index + 1} />)}
-                {isSearching && visibleCheers.length === 0 && <p className="py-8 text-center text-[length:var(--text-label-small)]! text-muted-foreground" role="status">검색 결과가 없어요.</p>}
+                {isSearching && visibleCheers.length === 0 && <p className="py-8 text-center text-[length:var(--text-label-small)]! text-muted-foreground" role="status">{PRODUCT_COPY.TEXT_004}</p>}
               </div>
               <p className="cheer-overflow-summary" data-testid="cheer-overflow-summary">
                 {isSearching
@@ -139,11 +136,10 @@ export function CheerList({
                       ? `${visibleCheers.length}개를 모두 보여줘요`
                     : `${Math.max(totalCount - visibleCheers.length, 0)}개 더 있음`}
               </p>
-              {isSearching && <Link href="/me" className="cheer-list-reset">전체 목록</Link>}
+              {isSearching && <Link href="/me" className="cheer-list-reset">{PRODUCT_COPY.TEXT_005}</Link>}
               {!isSearching && expanded && totalCount > EXPANDED_LIMIT && (
                 <button type="button" className="cheer-list-search" aria-expanded={searchOpen} aria-controls="receiver-cheer-search-form" onClick={() => setSearchOpen((value) => !value)} data-testid="cheer-search-trigger">
-                  {totalCount - EXPANDED_LIMIT}개는 검색으로 찾기
-                </button>
+                  {totalCount - EXPANDED_LIMIT}{PRODUCT_COPY.TEXT_006}</button>
               )}
             </>;
           }}
@@ -159,16 +155,14 @@ export function CheerList({
             <label
               htmlFor="receiver-cheer-search"
               className="mb-2 block text-[length:var(--text-label-small)]! font-semibold text-muted-foreground"
-            >
-              지난 응원 찾기
-            </label>
+            >{PRODUCT_COPY.TEXT_007}</label>
             <div className="flex gap-2">
               <input
                 id="receiver-cheer-search"
                 name="q"
                 type="search"
                 defaultValue={searchQuery}
-                placeholder="응원자 이름이나 메시지 검색"
+                placeholder={PRODUCT_COPY.TEXT_008}
                 minLength={1}
                 maxLength={80}
                 required
@@ -178,9 +172,7 @@ export function CheerList({
               <button
                 type="submit"
                 className="h-12 shrink-0 rounded-sm bg-primary px-4 text-sm font-bold text-primary-foreground"
-              >
-                찾기
-              </button>
+              >{PRODUCT_COPY.TEXT_009}</button>
             </div>
           </form>
         )}

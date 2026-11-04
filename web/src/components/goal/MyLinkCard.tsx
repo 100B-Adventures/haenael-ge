@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-mylinkcard";
 
 export interface MyLinkCardProps {
   slug: string;
@@ -80,9 +81,7 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="mb-1 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
-            내 응원 링크
-          </p>
+          <p className="mb-1 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_001}</p>
           <p
             className="truncate select-text text-[length:var(--text-input-label)]! font-bold text-accent-foreground"
             data-testid="my-link-url"
@@ -116,9 +115,7 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
           className="mt-2 text-[11px] text-danger-ink"
           role="status"
           data-testid="my-link-copy-error"
-        >
-          복사하지 못했어요. 링크를 길게 눌러 복사해 주세요.
-        </p>
+        >{PRODUCT_COPY.TEXT_002}</p>
       )}
     </div>
   );

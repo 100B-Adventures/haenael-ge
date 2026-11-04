@@ -18,6 +18,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isSafeRedirectPath } from "@/lib/auth/redirect-path";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-auth-loginsheet";
 // useAppStore: draft 상태 읽기 용도 (이 컴포넌트에서 직접 사용하진 않으나 향후 확장점)
 // import { useAppStore } from "@/store";
 
@@ -161,28 +162,21 @@ export function LoginSheet({
             <p
               className="font-bold text-lg leading-snug [color:var(--foreground)]! [letter-spacing:-0.3px]!"
               // --ink
-            >
-              저장하려면 로그인이 필요해요
-            </p>
+            >{PRODUCT_COPY.TEXT_001}</p>
 
             {goalTitle ? (
               <p
                 className="text-sm leading-relaxed [color:var(--muted-foreground)]!"
                 // --muted
-              >
-                작성 중인{" "}
+              >{PRODUCT_COPY.TEXT_002}{" "}
                 <span
                   className="font-semibold [color:var(--foreground)]!"
                   data-testid="login-sheet-goal-title"
                 >
                   &ldquo;{goalTitle}&rdquo;
-                </span>{" "}
-                은(는) 로그인 후에도 그대로 있어요.
-              </p>
+                </span>{" "}{PRODUCT_COPY.TEXT_003}</p>
             ) : (
-              <p className="text-sm leading-relaxed [color:var(--muted-foreground)]!">
-                로그인하면 목표를 저장하고 나만의 링크를 받을 수 있어요.
-              </p>
+              <p className="text-sm leading-relaxed [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_004}</p>
             )}
           </div>
 
@@ -198,7 +192,7 @@ export function LoginSheet({
             >
               {/* 카카오 아이콘 (SVG 인라인 — 공식 로고 없이 텍스트만) */}
               <KakaoIcon />
-              <span>카카오로 계속하기</span>
+              <span>{PRODUCT_COPY.TEXT_005}</span>
             </button>
 
             {/* 구글/애플 — 회장 결정(2026-07-19)으로 카카오 단일 통일, 숨김.
@@ -211,7 +205,7 @@ export function LoginSheet({
                   // --faint
                 >
                   <div className="flex-1 h-px [background-color:var(--border)]!" />
-                  <span className="text-xs">또는</span>
+                  <span className="text-xs">{PRODUCT_COPY.TEXT_006}</span>
                   <div className="flex-1 h-px [background-color:var(--border)]!" />
                 </div>
 
@@ -228,27 +222,19 @@ export function LoginSheet({
           <p
             className="text-center text-xs leading-relaxed [color:var(--muted-color)]!"
             // --faint
-          >
-            로그인 시{" "}
+          >{PRODUCT_COPY.TEXT_007}{" "}
             <a
               href="/terms"
               className="underline underline-offset-2"
               target="_blank"
               rel="noopener noreferrer"
-            >
-              이용약관
-            </a>{" "}
-            및{" "}
+            >{PRODUCT_COPY.TEXT_008}</a>{" "}{PRODUCT_COPY.TEXT_009}{" "}
             <a
               href="/privacy"
               className="underline underline-offset-2"
               target="_blank"
               rel="noopener noreferrer"
-            >
-              개인정보처리방침
-            </a>
-            에 동의하게 됩니다.
-          </p>
+            >{PRODUCT_COPY.TEXT_010}</a>{PRODUCT_COPY.TEXT_011}</p>
         </div>
       </div>
     </div>
@@ -326,7 +312,7 @@ export function GoogleLoginButton({
       aria-label="구글로 로그인"
     >
       <GoogleIcon />
-      <span>Google로 계속하기</span>
+      <span>{PRODUCT_COPY.TEXT_012}</span>
     </button>
   );
 }
@@ -376,7 +362,7 @@ export function AppleLoginButton({
       aria-label="애플로 로그인"
     >
       <AppleIcon />
-      <span>Apple로 계속하기</span>
+      <span>{PRODUCT_COPY.TEXT_013}</span>
     </button>
   );
 }

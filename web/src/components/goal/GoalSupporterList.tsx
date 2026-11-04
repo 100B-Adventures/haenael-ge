@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ClampText } from "@/components/common/ClampText";
 import { Collapsible } from "@/components/common/Collapsible";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-goalsupporterlist";
 
 export type GoalSupporter = {
   supporter_key: string;
@@ -50,7 +51,7 @@ function SupporterRow({ supporter, renderedAt }: { supporter: GoalSupporter; ren
         {supporter.message && <ClampText className="goal-supporter-message">{supporter.message}</ClampText>}
       </div>
       <div className="goal-supporter-meta">
-        <strong data-testid="goal-supporter-cheer-count">🍀 {supporter.cheer_count}번</strong>
+        <strong data-testid="goal-supporter-cheer-count">🍀 {supporter.cheer_count}{PRODUCT_COPY.TEXT_001}</strong>
         <small>{relativeDate(supporter.latest_at, renderedAt)}</small>
       </div>
     </article>
@@ -108,10 +109,10 @@ export function GoalSupporterList({
     return (
       <div className="goal-supporter-empty" data-testid="goal-supporter-empty">
         <span aria-hidden="true">🍀</span>
-        <h3>아직 응원이 없어요</h3>
-        <p>응원 링크를 친구에게 보내면 여기에 응원한 사람이 한 명씩 쌓여요.</p>
-        <button type="button" onClick={() => void copyLink()}>{copied ? "응원 링크 복사됨" : "응원 링크 복사하기"}</button>
-        {copyFailed && <p className="social-error" role="alert">링크를 복사하지 못했어요. 다시 시도해 주세요.</p>}
+        <h3>{PRODUCT_COPY.TEXT_002}</h3>
+        <p>{PRODUCT_COPY.TEXT_003}</p>
+        <button type="button" onClick={() => void copyLink()}>{copied ? PRODUCT_COPY.TEXT_004 : PRODUCT_COPY.TEXT_005}</button>
+        {copyFailed && <p className="social-error" role="alert">{PRODUCT_COPY.TEXT_006}</p>}
       </div>
     );
   }
@@ -121,7 +122,7 @@ export function GoalSupporterList({
       <Collapsible
         policy={{ auxiliary: true, exceedsLimit: totalCount > PREVIEW_LIMIT, hasCollapsedContext: true }}
         controlsId="goal-supporter-list"
-        toggleLabel="응원 목록"
+        toggleLabel={PRODUCT_COPY.TEXT_014}
         onExpandedChange={(expanded) => { if (!expanded) setSearchOpen(false); }}
       >
         {(expanded) => {
@@ -135,22 +136,20 @@ export function GoalSupporterList({
                   renderedAt={renderedAt}
                 />
               ))}
-              {isSearching && visible.length === 0 && <p className="goal-supporter-search-empty" role="status">검색 결과가 없어요.</p>}
+              {isSearching && visible.length === 0 && <p className="goal-supporter-search-empty" role="status">{PRODUCT_COPY.TEXT_007}</p>}
             </div>
-            {!isSearching && !expanded && totalCount > PREVIEW_LIMIT && <p className="goal-supporter-summary">목록은 8명까지 보여요</p>}
-            {isSearching && <Link href={`/me/goal/${goalId}`} className="goal-supporter-reset">전체 목록</Link>}
+            {!isSearching && !expanded && totalCount > PREVIEW_LIMIT && <p className="goal-supporter-summary">{PRODUCT_COPY.TEXT_008}</p>}
+            {isSearching && <Link href={`/me/goal/${goalId}`} className="goal-supporter-reset">{PRODUCT_COPY.TEXT_009}</Link>}
             {!isSearching && expanded && totalCount > EXPANDED_LIMIT && (
-              <button type="button" className="goal-supporter-search-trigger" onClick={() => setSearchOpen((value) => !value)} aria-expanded={searchOpen} aria-controls="goal-supporter-search-form">
-                지난 응원 찾기
-              </button>
+              <button type="button" className="goal-supporter-search-trigger" onClick={() => setSearchOpen((value) => !value)} aria-expanded={searchOpen} aria-controls="goal-supporter-search-form">{PRODUCT_COPY.TEXT_010}</button>
             )}
           </>;
         }}
       </Collapsible>
       {(searchOpen || isSearching) && totalCount > EXPANDED_LIMIT && (
         <form id="goal-supporter-search-form" action={`/me/goal/${goalId}`} method="get" role="search" className="goal-supporter-search-form">
-          <label htmlFor="goal-supporter-search">지난 응원 찾기</label>
-          <div><input id="goal-supporter-search" name="q" type="search" defaultValue={searchQuery} placeholder="응원자 이름이나 메시지 검색" minLength={1} maxLength={80} required /><button type="submit">찾기</button></div>
+          <label htmlFor="goal-supporter-search">{PRODUCT_COPY.TEXT_011}</label>
+          <div><input id="goal-supporter-search" name="q" type="search" defaultValue={searchQuery} placeholder={PRODUCT_COPY.TEXT_012} minLength={1} maxLength={80} required /><button type="submit">{PRODUCT_COPY.TEXT_013}</button></div>
         </form>
       )}
     </div>

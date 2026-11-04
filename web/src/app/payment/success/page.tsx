@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CircleAlert, Clover } from "lucide-react";
 import { AnalyticsEvent } from "@/components/analytics/AnalyticsEvent";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-payment-success-page";
 
 type Props = {
   searchParams: Promise<{
@@ -112,7 +113,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
           className="mt-6 block rounded-[16px] py-4 text-[15px] font-extrabold [background-color:var(--primary)]! [color:var(--card)]!"
           data-testid="payment-success-back"
         >
-          {status === "success" ? backLabel : "해낼게 홈으로"}
+          {status === "success" ? backLabel : PRODUCT_COPY.TEXT_001}
         </Link>
       </div>
     </main>

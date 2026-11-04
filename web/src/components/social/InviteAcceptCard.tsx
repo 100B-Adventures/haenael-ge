@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { acceptFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InvitePreview } from "@/lib/social/contracts";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-inviteacceptcard";
 
 const ERROR_COPY: Record<string, string> = {
   invite_expired: "이 초대는 더 이상 사용할 수 없어요.",
@@ -41,9 +42,9 @@ export function InviteAcceptCard(
   if (!preview || state === "error") {
     return (
       <section className="social-empty" data-testid="invite-error">
-        <h1>이 초대를 사용할 수 없어요</h1>
-        <p>{ERROR_COPY[errorCode] ?? "링크 상태를 확인하지 못했어요."}</p>
-        <Link href="/" className="social-primary-action">해낼게 홈으로</Link>
+        <h1>{PRODUCT_COPY.TEXT_001}</h1>
+        <p>{ERROR_COPY[errorCode] ?? PRODUCT_COPY.TEXT_002}</p>
+        <Link href="/" className="social-primary-action">{PRODUCT_COPY.TEXT_003}</Link>
       </section>
     );
   }
@@ -56,14 +57,13 @@ export function InviteAcceptCard(
         <span>🍀</span>
       </div>
       <div className="invite-accept-person" aria-hidden="true">
-        {Array.from(preview.inviter_nickname ?? "친구")[0]}
+        {Array.from(preview.inviter_nickname ?? PRODUCT_COPY.TEXT_004)[0]}
       </div>
-      <p className="social-eyebrow">함께 응원할 친구 초대</p>
-      <h1>{preview.inviter_nickname ?? "친구"}님이 함께 해내자고 초대했어요</h1>
+      <p className="social-eyebrow">{PRODUCT_COPY.TEXT_005}</p>
+      <h1>{preview.inviter_nickname ?? PRODUCT_COPY.TEXT_006}{PRODUCT_COPY.TEXT_007}</h1>
       {preview.goal_title && (
         <p className="social-description">
-          {preview.inviter_nickname ?? "친구"}님의 “{preview.goal_title}” 목표를 보고 서로 응원할 수 있어요.
-        </p>
+          {preview.inviter_nickname ?? PRODUCT_COPY.TEXT_008}{PRODUCT_COPY.TEXT_009}{preview.goal_title}{PRODUCT_COPY.TEXT_010}</p>
       )}
       {isAuthenticated
         ? (
@@ -73,7 +73,7 @@ export function InviteAcceptCard(
             onClick={accept}
             disabled={state === "loading"}
           >
-            {state === "loading" ? "함께하는 중" : "초대 수락하고 함께하기"}
+            {state === "loading" ? PRODUCT_COPY.TEXT_011 : PRODUCT_COPY.TEXT_012}
           </button>
         )
         : (
@@ -83,9 +83,7 @@ export function InviteAcceptCard(
             }`}
             prefetch={false}
             className="social-primary-action"
-          >
-            로그인하고 초대 수락하기
-          </Link>
+          >{PRODUCT_COPY.TEXT_013}</Link>
         )}
     </section>
   );

@@ -4,6 +4,7 @@ import { MessageCircle, UserPlus } from "lucide-react";
 import { ClampText } from "@/components/common/ClampText";
 import type { SocialFriend } from "@/lib/social/contracts";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoallist";
 
 export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
   if (friends.length === 0) {
@@ -12,51 +13,46 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
         <span className="friends-cold-icon" aria-hidden="true">
           🍀
         </span>
-        <h2>아직 친구가 없어요</h2>
-        <p>
-          아는 사람을 초대하거나 서로 응원하면 친구가 돼요. 친구의 목표는 여기에
-          쌓여요.
-        </p>
+        <h2>{PRODUCT_COPY.TEXT_001}</h2>
+        <p>{PRODUCT_COPY.TEXT_002}</p>
         <ol className="friends-cold-steps">
           <li>
             <span>1</span>
             <div>
-              <strong>친구를 초대해요</strong>
-              <small>내가 아는 사람에게 카카오톡이나 링크로 보내요.</small>
+              <strong>{PRODUCT_COPY.TEXT_003}</strong>
+              <small>{PRODUCT_COPY.TEXT_004}</small>
             </div>
           </li>
           <li>
             <span>2</span>
             <div>
-              <strong>친구가 목표를 써요</strong>
-              <small>“나 ○○ 해낼게” 한 줄이면 시작할 수 있어요.</small>
+              <strong>{PRODUCT_COPY.TEXT_005}</strong>
+              <small>{PRODUCT_COPY.TEXT_006}</small>
             </div>
           </li>
           <li>
             <span>3</span>
             <div>
-              <strong>응원이 도착해요</strong>
-              <small>응원을 주고받으면 친구 목록에 바로 보여요.</small>
+              <strong>{PRODUCT_COPY.TEXT_007}</strong>
+              <small>{PRODUCT_COPY.TEXT_008}</small>
             </div>
           </li>
         </ol>
-        <Link href="/invite" className="social-primary-action">
-          친구 초대하기
-        </Link>
+        <Link href="/invite" className="social-primary-action">{PRODUCT_COPY.TEXT_009}</Link>
       </section>
     );
   }
   return (
     <section data-testid="friend-goal-list">
       <p className="friends-count">
-        <span>친구</span>
-        <strong>{friends.length}명</strong>
+        <span>{PRODUCT_COPY.TEXT_010}</span>
+        <strong>{friends.length}{PRODUCT_COPY.TEXT_011}</strong>
       </p>
       <div className="friends-list-card">
         {friends.map((friend) => {
           const [primaryGoal] = friend.goals;
           const recentMessage = friend.recent_message;
-          const nickname = friend.nickname ?? "친구";
+          const nickname = friend.nickname ?? PRODUCT_COPY.TEXT_012;
           const progress = primaryGoal
             ? primaryGoal.cheer_count >= 10
               ? "high"
@@ -119,7 +115,7 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                       className="friend-list-news-message"
                       toggleLabel={`${nickname}의 최근 응원 내용`}
                     >
-                      {recentMessage || "아직 최근 응원 메시지가 없어요."}
+                      {recentMessage || PRODUCT_COPY.TEXT_013}
                     </ClampText>
                   </div>
                 </>
@@ -132,7 +128,7 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                     <span className="friend-list-name" title={nickname}>
                       {nickname}
                     </span>
-                    <strong>지금 공개한 목표가 없어요.</strong>
+                    <strong>{PRODUCT_COPY.TEXT_014}</strong>
                   </span>
                   <span className="friend-list-relation">
                     <FriendRelationshipBadge
@@ -154,12 +150,10 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
             <UserPlus />
           </span>
           <div>
-            <strong>한 명 더 함께 응원해볼까요?</strong>
-            <p>친구를 초대하거나 응원을 주고받으면 이 목록에 바로 이어져요.</p>
+            <strong>{PRODUCT_COPY.TEXT_015}</strong>
+            <p>{PRODUCT_COPY.TEXT_016}</p>
           </div>
-          <Link href="/invite" className="social-primary-action">
-            친구 초대하기
-          </Link>
+          <Link href="/invite" className="social-primary-action">{PRODUCT_COPY.TEXT_017}</Link>
         </aside>
       )}
     </section>

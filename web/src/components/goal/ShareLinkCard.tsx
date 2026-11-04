@@ -7,6 +7,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-sharelinkcard";
 
 export interface ShareLinkCardProps {
   slug: string;
@@ -50,11 +51,8 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
       {/* 제목 */}
       <div className="mb-5">
         <p className="text-[15px] font-extrabold leading-snug mb-1 [color:var(--foreground)]! [letter-spacing:-0.3px]!">
-          &ldquo;{goalTitle} 해낼게&rdquo; 준비됐어요 🍀
-        </p>
-        <p className="text-[13px] leading-relaxed [color:var(--muted-foreground)]!">
-          이제 이 링크를 인스타 바이오에 걸면 끝이에요.
-        </p>
+          &ldquo;{goalTitle}{PRODUCT_COPY.TEXT_001}</p>
+        <p className="text-[13px] leading-relaxed [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</p>
       </div>
 
       {/* 웰컴 클로버 안내 — 목표 생성 시 시스템이 자동으로 웰컴 응원(클로버 3개)을 보냄 */}
@@ -66,11 +64,9 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
           🍀
         </span>
         <p className="text-[12.5px] leading-snug [color:var(--accent-foreground)]!">
-          <strong>해낼게 팀이 먼저 웰컴 클로버 3개를 보냈어요.</strong>
+          <strong>{PRODUCT_COPY.TEXT_003}</strong>
           <br />
-          <span className="[color:#3d7a5a]!">
-            다음 응원은 곧 친구들 차례예요.
-          </span>
+          <span className="[color:#3d7a5a]!">{PRODUCT_COPY.TEXT_004}</span>
         </p>
       </div>
 
@@ -94,7 +90,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
           data-testid="copy-link-button"
           aria-label="링크 복사"
         >
-          {copied ? "복사됐어요 ✓" : "링크 복사"}
+          {copied ? PRODUCT_COPY.TEXT_005 : PRODUCT_COPY.TEXT_006}
         </button>
       </div>
 
@@ -104,12 +100,8 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
         // --warm
       >
         <p className="text-[12px] leading-relaxed [color:var(--muted-foreground)]!">
-          <strong className="[color:var(--foreground)]!">다음 한 걸음</strong>
-          <br />
-          인스타 프로필 편집 → 웹사이트 칸에 붙여넣기.
-          <br />
-          친구가 눈팅하다 조용히 밀어줄 거예요.
-        </p>
+          <strong className="[color:var(--foreground)]!">{PRODUCT_COPY.TEXT_007}</strong>
+          <br />{PRODUCT_COPY.TEXT_008}<br />{PRODUCT_COPY.TEXT_009}</p>
       </div>
 
       {/* 내 목표 바로가기 */}
@@ -117,9 +109,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
         href={`/g/${slug}`}
         className="block w-full py-3 rounded-[14px] text-center text-[14px] font-semibold transition-opacity active:opacity-75 [border:1px_solid_var(--border)]! [background-color:var(--card)]! [color:var(--muted-foreground)]!"
         data-testid="view-goal-link"
-      >
-        내 목표 페이지 확인하기 →
-      </Link>
+      >{PRODUCT_COPY.TEXT_010}</Link>
     </div>
   );
 }

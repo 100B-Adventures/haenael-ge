@@ -2,6 +2,7 @@
 // DESIGN.md 톤: 조용함(Discreet) — 작게, 목소리 낮춰. 장식 없음.
 
 import Link from "next/link";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-common-footer";
 
 export function Footer() {
   return (
@@ -15,9 +16,7 @@ export function Footer() {
             href="/terms"
             className="inline-flex min-h-11 items-center underline underline-offset-2 transition-transform active:translate-y-px"
             data-testid="footer-terms-link"
-          >
-            이용약관
-          </Link>
+          >{PRODUCT_COPY.TEXT_001}</Link>
           <span className="[color:var(--border)]!" aria-hidden="true">
             |
           </span>
@@ -25,22 +24,19 @@ export function Footer() {
             href="/privacy"
             className="inline-flex min-h-11 items-center underline underline-offset-2 transition-transform active:translate-y-px"
             data-testid="footer-privacy-link"
-          >
-            개인정보처리방침
-          </Link>
+          >{PRODUCT_COPY.TEXT_002}</Link>
         </div>
 
         <ul className="flex flex-col gap-0.5 text-[13px] leading-relaxed [color:var(--muted-color)]!">
-          <li>상호: 정성컴퍼니 · 대표: 조성진</li>
-          <li>사업자등록번호: 798-31-01774</li>
-          <li>주소: 서울시 강남구 역삼동 620-17 203호</li>
-          <li>이메일: haenaelge.official@gmail.com</li>
-          <li>개인정보보호책임자: 윤동주</li>
+          <li>{PRODUCT_COPY.TEXT_003}</li>
+          <li>{PRODUCT_COPY.TEXT_004}</li>
+          <li>{PRODUCT_COPY.TEXT_005}</li>
+          <li>{PRODUCT_COPY.TEXT_006}</li>
+          <li>{PRODUCT_COPY.TEXT_007}</li>
         </ul>
 
         <p className="text-[13px] [color:var(--muted-color)]!">
-          © {new Date().getFullYear()} 정성컴퍼니. All rights reserved.
-        </p>
+          © {new Date().getFullYear()}{PRODUCT_COPY.TEXT_008}</p>
       </div>
     </footer>
   );

@@ -5,6 +5,7 @@ import { Home, UserPlus, UserRound, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { GuestTeaserSheet } from "./GuestTeaserSheet";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-receiverbottomnav";
 
 const tabs = [
   { href: "/me", label: "홈", Icon: Home },
@@ -53,7 +54,7 @@ export function ReceiverBottomNavView({
     <>
       <nav className="receiver-tabbar" aria-label="주요 메뉴" data-testid="receiver-bottom-nav">
       {tabs.map(({ href, label, Icon }, index) => {
-        const active = label === "홈"
+        const active = label === PRODUCT_COPY.TEXT_001
           ? pathname === "/" || pathname === "/me" || pathname.startsWith("/me/")
           : pathname === href || pathname.startsWith(`${href}/`);
         return locked && index > 0 ? (

@@ -10,6 +10,7 @@ import { MyLinkCard } from "@/components/goal/MyLinkCard";
 import { CheerSummaryBar } from "@/components/social/CheerSummaryBar";
 import { GoalCover } from "@/components/social/GoalCover";
 import type { MySocialGoal } from "@/lib/social/contracts";
+import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-mygoallistcard";
 
 export interface MyGoalListCardData {
   id: number;
@@ -32,7 +33,7 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="min-w-0 flex-1 truncate text-[15px] font-extrabold text-foreground">
           {goal.title}
-          <span className="ml-1 font-normal text-muted-foreground">해낼게</span>
+          <span className="ml-1 font-normal text-muted-foreground">{PRODUCT_COPY.TEXT_001}</span>
         </p>
         <div className="flex shrink-0 gap-1.5">
           <DdayChip dueDate={goal.due_date} />
@@ -50,16 +51,12 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
           href={`/me/goal/${goal.id}`}
           className="shrink-0 rounded-sm bg-accent px-3 py-2 text-[12.5px] font-bold text-accent-foreground"
           data-testid="my-goal-list-card-manage-link"
-        >
-          관리
-        </Link>
+        >{PRODUCT_COPY.TEXT_002}</Link>
         <Link
           href={`/wordmap/${goal.id}`}
           className="shrink-0 rounded-sm border border-border px-3 py-2 text-[12.5px] font-bold text-foreground"
           data-testid="my-goal-list-card-detail-link"
-        >
-          워드맵
-        </Link>
+        >{PRODUCT_COPY.TEXT_003}</Link>
       </div>
     </div>
   );
