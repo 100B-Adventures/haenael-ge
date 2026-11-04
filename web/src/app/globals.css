@@ -146,6 +146,7 @@
   --wordmap-text-large: 1.625rem;
   --invite-preview: #b2c7da;
   --kakao-fill: #fee500;
+  --kakao-line: #efd95b;
   --public-cover: #1f714c;
   --cover-c1-start: #2a8f57;
   --cover-c1-end: #136b3c;
@@ -396,7 +397,7 @@
     background: transparent;
   }
 
-  .receiver-tabbar a.is-active {
+  .receiver-tabbar .is-active {
     color: var(--clover-ink);
   }
 
@@ -2983,7 +2984,7 @@
     font-size: 1.0625rem;
   }
   .invite-share-row .is-kakao {
-    border-color: var(--line);
+    border-color: var(--kakao-line);
     background: var(--card);
   }
   .invite-share-row .is-kakao .invite-share-icon {
@@ -3208,7 +3209,6 @@
 
   .friend-list-main {
     display: grid;
-    min-height: 7rem;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: flex-start;
     gap: 0.75rem;

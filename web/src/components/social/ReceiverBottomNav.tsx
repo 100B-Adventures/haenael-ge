@@ -28,7 +28,6 @@ export function shouldShowBottomNav(pathname: string) {
   return !(
     pathname === "/cashout" ||
     pathname.startsWith("/cashout/") ||
-    pathname.startsWith("/invite/") ||
     pathname === "/payment/success" ||
     pathname === "/payment/fail" ||
     pathname === "/onboarding"
@@ -61,7 +60,8 @@ export function ReceiverBottomNavView({
           <button
             type="button"
             key={`${label}-${index}`}
-            className="transition-transform active:translate-y-px"
+            className={`${active ? "is-active " : ""}transition-transform active:translate-y-px`}
+            aria-current={active ? "page" : undefined}
             onClick={() => setTeaserOpen(true)}
           >
             <span className="receiver-tabbar-icon"><Icon aria-hidden="true" /></span>

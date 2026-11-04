@@ -61,3 +61,12 @@ it("CT-NAV-06 프로토타입 정본에 따라 목표 관리에서도 하단탭�
   expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /^홈$/ })).toHaveAttribute("aria-current", "page");
 });
+
+it("CT-NAV-07 비회원 초대 수락 화면에서도 하단탭과 초대 활성 상태를 유지한다", () => {
+  pathname = "/invite/sample-token";
+  render(<ReceiverBottomNav locked />);
+  expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "초대" }))
+    .toHaveClass("is-active")
+    .toHaveAttribute("aria-current", "page");
+});
