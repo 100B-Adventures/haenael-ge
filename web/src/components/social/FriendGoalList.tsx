@@ -74,7 +74,7 @@ export function FriendGoalList({ friends }: { friends: SocialFriend[] }) {
                 <>
                   <Link
                     href={`/friends/${friend.friend_member_id}?goal=${primaryGoal.goal_id}`}
-                    className="friend-list-main"
+                    className="friend-list-main friend-list-main--with-news"
                     data-testid="friend-goal-link"
                   >
                     <span className="friend-list-avatar">

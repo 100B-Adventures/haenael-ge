@@ -3216,6 +3216,9 @@
     color: var(--foreground);
     text-decoration: none;
   }
+  .friend-list-main--with-news {
+    padding-bottom: 0;
+  }
 
   .friend-list-avatar,
   .friend-detail-avatar {
