@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 import { setGoalCoverPresetAction } from "@/app/(receiver)/social-actions";
 import { createClient } from "@/lib/supabase/client";
 import { GoalCover } from "./GoalCover";
@@ -188,6 +189,9 @@ export function GoalCoverPicker(
                 disabled={state === "saving" || state === "uploading"}
               >
                 <GoalCover presetKey={item.key} title={item.label} />
+                {preset === item.key && (
+                  <Check className="selection-check" data-testid="selection-check" aria-hidden="true" />
+                )}
                 <span>{item.label}{item.key === automaticPreset && <small>{PRODUCT_COPY.TEXT_012}</small>}</span>
               </button>
             ))}

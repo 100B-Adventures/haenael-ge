@@ -152,7 +152,7 @@ export default async function GoalPublicPage({ params }: Props) {
   return (
     <ReceiverAppShell locked={!user} currentPath={`/g/${slug}`}>
       <main
-        className="goal-public-approved min-h-svh pb-32 [background-color:var(--background)]!"
+        className="goal-public-approved [background-color:var(--background)]!"
         data-testid="goal-public-page"
       >
         {/* 스크롤 영역 */}

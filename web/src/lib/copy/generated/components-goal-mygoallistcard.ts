@@ -4,6 +4,7 @@ export const PRODUCT_COPY = {
   TEXT_001: "해낼게", // source line 35
   TEXT_002: "관리", // source line 53
   TEXT_003: "워드맵", // source line 60
+  TEXT_004: "아직 응원이 없어요", // empty cheer summary
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/goal/MyGoalListCard.tsx";

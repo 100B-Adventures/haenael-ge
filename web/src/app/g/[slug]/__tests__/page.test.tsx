@@ -3,6 +3,8 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: vi.fn(),
@@ -180,4 +182,12 @@ describe("/g/[slug] owner bar 노출 스코프", () => {
     expect(screen.queryByTestId("owner-bar")).not.toBeInTheDocument();
     expect(screen.queryByTestId("relogin-link")).not.toBeInTheDocument();
   });
+});
+
+it("SP-03 공개 목표 CTA는 118px 토큰을 쓰고 본문과 같은 흐름에 배치된다", () => {
+  const css = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
+
+  expect(css).toMatch(/--cta-h:\s*118px/);
+  expect(css).toMatch(/\.receiver-public-action\s*\{[\s\S]*?position:\s*static/);
+  expect(css).toMatch(/\.goal-public-approved\s*\{[\s\S]*?padding-bottom:\s*var\(--cta-h\)/);
 });

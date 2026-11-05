@@ -60,6 +60,21 @@ describe("GoalCoverPicker 단계별 실패", () => {
     expect(screen.getByText("자동")).toBeInTheDocument();
   });
 
+  it("CV-02 선택을 바꿔도 선택된 프리셋과 체크 글리프는 각각 하나다", async () => {
+    const { container } = picker();
+    openPicker();
+
+    expect(container.querySelectorAll('.cover-preset-grid button[aria-pressed="true"]')).toHaveLength(1);
+    expect(screen.getAllByTestId("selection-check")).toHaveLength(1);
+
+    await userEvent.click(screen.getByText("운동·달리기").closest("button")!);
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.cover-preset-grid button[aria-pressed="true"]')).toHaveLength(1);
+      expect(screen.getAllByTestId("selection-check")).toHaveLength(1);
+    });
+  });
+
   it("GC-01 형식 실패는 형식 문구와 format 로그를 남긴다", async () => {
     const { container } = picker();
     openPicker();

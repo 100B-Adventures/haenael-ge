@@ -41,7 +41,9 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
         </div>
       </div>
 
-      <CheerSummaryBar goal={goal.cheerSummary} />
+      {goal.cheerSummary.cheer_count > 0
+        ? <CheerSummaryBar goal={goal.cheerSummary} />
+        : <p className="social-muted" data-testid="cheer-summary-empty">{PRODUCT_COPY.TEXT_004}</p>}
 
       <div className="flex items-center gap-2">
         <div className="flex-1">

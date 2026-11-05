@@ -79,7 +79,7 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
       className="mb-4 rounded-md border border-border bg-card p-4"
       data-testid="my-link-card"
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_44px] items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="mb-1 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_001}</p>
           <p
@@ -92,7 +92,7 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
         <button
           type="button"
           onClick={handleCopy}
-          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+          className={`flex h-11 w-11 items-center justify-center rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
             copied
               ? "bg-primary text-primary-foreground"
               : copyFailed

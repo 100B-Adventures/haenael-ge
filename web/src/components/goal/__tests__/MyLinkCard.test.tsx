@@ -26,7 +26,8 @@ describe("MyLinkCard", () => {
     const { container } = render(<MyLinkCard slug="dogyeong" />);
 
     const button = screen.getByRole("button", { name: "내 응원 링크 복사" });
-    expect(button).toHaveClass("h-11", "w-11", "flex-shrink-0");
+    expect(button).toHaveClass("h-11", "w-11");
+    expect(button.parentElement).toHaveClass("grid", "min-w-0", "grid-cols-[minmax(0,1fr)_44px]");
     expect(container.querySelector(".lucide-copy")).toBeInTheDocument();
     expect(screen.getByTestId("my-link-url")).toHaveClass("truncate", "select-text");
   });
