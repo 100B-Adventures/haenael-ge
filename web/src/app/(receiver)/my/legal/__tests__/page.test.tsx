@@ -6,6 +6,10 @@ import { BUSINESS_INFORMATION } from "@/lib/legal/exposure";
 it("LG-04 사업자 정보 본문은 법정 기재 6항목과 미확정 신고번호 상태를 표시한다", () => {
   render(<BusinessInformationPage />);
 
+  const legalLinks = screen.getByRole("navigation", { name: "법적 고지" });
+  expect(within(legalLinks).getAllByRole("link")).toHaveLength(3);
+  expect(within(legalLinks).getByRole("link", { name: "이용약관" })).toHaveAttribute("href", "/terms");
+  expect(within(legalLinks).getByRole("link", { name: "개인정보처리방침" })).toHaveAttribute("href", "/privacy");
   const information = screen.getByTestId("business-information");
   expect(within(information).getAllByRole("term")).toHaveLength(6);
   expect(within(information).getAllByRole("definition")).toHaveLength(6);

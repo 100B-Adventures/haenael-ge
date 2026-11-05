@@ -25,7 +25,12 @@ export function ClampText({
   useLayoutEffect(() => {
     const node = measureRef.current;
     if (!node) return;
-    const measure = () => setOverflows(node.scrollHeight > node.clientHeight + 1);
+    const measure = () => {
+      // 펼친 높이를 overflow 기준으로 쓰면 clientHeight와 scrollHeight가
+      // 같아져 토글 자격이 사라진다. clamp가 적용된 상태만 재측정한다.
+      if (!node.classList.contains("clamp-text")) return;
+      setOverflows(node.scrollHeight > node.clientHeight + 1);
+    };
     measure();
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(measure);

@@ -47,6 +47,11 @@ export function Collapsible({
     : enabled && !expanded
       ? collapsedContent
       : (expandedContent ?? collapsedContent);
+  const toggleExpanded = () => {
+    const next = !expanded;
+    setExpanded(next);
+    onExpandedChange?.(next);
+  };
   return (
     <div className={className} data-collapsible={enabled ? "enabled" : "disabled"}>
       {content}
@@ -59,12 +64,7 @@ export function Collapsible({
           aria-controls={controlsId}
           data-hydrated={hydrated ? "true" : "false"}
           disabled={!hydrated}
-          onClick={() =>
-            setExpanded((value) => {
-              const next = !value;
-              onExpandedChange?.(next);
-              return next;
-            })}
+          onClick={toggleExpanded}
         >
           <ChevronDown aria-hidden="true" />
         </button>

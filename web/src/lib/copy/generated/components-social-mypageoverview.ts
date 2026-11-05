@@ -47,6 +47,8 @@ export const PRODUCT_COPY = {
   TEXT_044: "계정", // source line 437
   TEXT_045: "응원이 오면 알림으로 알려드려요.", // component description
   TEXT_046: "이벤트와 업데이트 소식을 받아요.", // component description
+  TEXT_047: "법적 고지", // account navigation
+  TEXT_048: "이용약관 · 개인정보처리방침 · 사업자 정보", // account navigation description
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/social/MyPageOverview.tsx";

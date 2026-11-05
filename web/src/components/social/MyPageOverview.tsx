@@ -13,10 +13,8 @@ import {
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
 import { createClient } from "@/lib/supabase/client";
 import { ClampText } from "@/components/common/ClampText";
-import { LegalFooter } from "@/components/common/LegalFooter";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { AccountWithdrawalButton } from "@/components/social/AccountWithdrawalButton";
-import { LEGAL_EXPOSURE } from "@/lib/legal/exposure";
 import type { MySocialDashboard } from "@/lib/social/contracts";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-mypageoverview";
 
@@ -433,7 +431,14 @@ export function MyPageOverview({
       <section aria-labelledby="my-account-heading">
         <h2 className="my-section-title" id="my-account-heading">{PRODUCT_COPY.TEXT_044}</h2>
         <div className="my-account-card">
-          <LegalFooter mode={LEGAL_EXPOSURE.my} />
+          <Link href="/my/legal" className="my-menu-row">
+            <span className="my-menu-icon" aria-hidden="true">📄</span>
+            <span>
+              <strong>{PRODUCT_COPY.TEXT_047}</strong>
+              <small>{PRODUCT_COPY.TEXT_048}</small>
+            </span>
+            <ChevronRight aria-hidden="true" />
+          </Link>
           <LogoutButton />
           <AccountWithdrawalButton />
         </div>
