@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Clock3, LoaderCircle, ShieldCheck } from "lucide-react";
 import { createCashoutRequest } from "@/app/(receiver)/cashout/actions";
 import { PhoneConsentNotice } from "@/components/auth/PhoneConsentNotice";
+import { PrivacyPolicyLink } from "@/components/common/LegalFooter";
 import { trackEvent } from "@/lib/analytics";
 import { normalizeKoreanMobilePhone } from "@/lib/phone";
 import {
@@ -364,7 +365,7 @@ export function CashoutRequestForm({
               aria-hidden="true"
             />
             <p>{PRODUCT_COPY.TEXT_019}{" "}
-              <Link href="/privacy" className="font-semibold underline">{PRODUCT_COPY.TEXT_020}</Link>
+              <PrivacyPolicyLink className="font-semibold underline" />
             </p>
           </div>
 

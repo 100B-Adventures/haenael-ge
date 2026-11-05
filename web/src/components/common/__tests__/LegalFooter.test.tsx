@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
-import { BusinessInfoBlock, LegalFooter } from "../LegalFooter";
+import {
+  BusinessInfoBlock,
+  LegalFooter,
+  PrivacyPolicyLink,
+} from "../LegalFooter";
+import { Footer } from "../Footer";
 import { BUSINESS_INFORMATION } from "@/lib/legal/exposure";
 
 it("LG-04 법정 기재사항 6항목이 한 데이터 원본에서 전수 렌더된다", () => {
@@ -28,4 +33,16 @@ it("LG-04 biz 모드는 법정 기재사항을 표 기반 집행 컴포넌트에
   for (const value of Object.values(BUSINESS_INFORMATION)) {
     expect(screen.getByText(value)).toBeInTheDocument();
   }
+});
+
+it("LG-05 개인정보 안내 링크는 노출 정본과 공통 카피를 사용한다", () => {
+  render(<PrivacyPolicyLink confirmLabel />);
+  expect(
+    screen.getByRole("link", { name: "개인정보처리방침 확인" }),
+  ).toHaveAttribute("href", "/privacy");
+});
+
+it("LG-05 구형 Footer도 랜딩 노출 정본을 우회하지 않는다", () => {
+  const { container } = render(<Footer />);
+  expect(container).toBeEmptyDOMElement();
 });

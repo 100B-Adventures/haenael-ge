@@ -10,6 +10,7 @@ export const PRODUCT_COPY = {
   TEXT_007: "주소", // source line 23
   TEXT_008: "이메일", // source line 24
   TEXT_009: "개인정보보호책임자", // source line 25
+  TEXT_010: "개인정보처리방침 확인", // shared confirmation link
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/common/LegalFooter.tsx";

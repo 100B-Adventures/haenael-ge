@@ -20,7 +20,6 @@ export const PRODUCT_COPY = {
   TEXT_017: " · 원천징수", // source line 378
   TEXT_018: " 입금", // source line 380
   TEXT_019: "계좌는 암호화해 보관하고 입금 처리에만 사용해요. 관리자가 전체 계좌를 보면 열람 기록이 남아요.", // source line 389
-  TEXT_020: "개인정보처리방침", // source line 392
   TEXT_021: "환전 신청하기", // source line 407
   TEXT_022: "입금 계좌", // source line 428
   TEXT_023: "예금주", // source line 435

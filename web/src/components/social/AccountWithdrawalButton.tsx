@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import { PrivacyPolicyLink } from "@/components/common/LegalFooter";
 import { createClient } from "@/lib/supabase/client";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-accountwithdrawalbutton";
 
@@ -58,7 +58,7 @@ export function AccountWithdrawalButton() {
                   {eligibility.blocked_reasons.cashout && <p>{PRODUCT_COPY.TEXT_007}</p>}
                 </div>
               )}
-            <Link href="/privacy">{PRODUCT_COPY.TEXT_008}</Link>
+            <PrivacyPolicyLink confirmLabel />
             <button type="button" onClick={() => setOpen(false)}>{PRODUCT_COPY.TEXT_009}</button>
           </div>
         </div>

@@ -1,16 +1,36 @@
 import Link from "next/link";
 import {
   BUSINESS_INFORMATION,
+  LEGAL_EXPOSURE,
   type LegalExposureMode,
 } from "@/lib/legal/exposure";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-common-legalfooter";
 
+export function PrivacyPolicyLink({
+  className,
+  confirmLabel = false,
+}: {
+  className?: string;
+  confirmLabel?: boolean;
+}) {
+  if (LEGAL_EXPOSURE.privacy !== "page") return null;
+  return (
+    <Link href="/privacy" className={className}>
+      {confirmLabel ? PRODUCT_COPY.TEXT_010 : PRODUCT_COPY.TEXT_002}
+    </Link>
+  );
+}
+
 export function LegalLinkList() {
   return (
     <nav className="my-policy-links" aria-label="법적 고지">
-      <Link href="/terms">{PRODUCT_COPY.TEXT_001}</Link>
-      <Link href="/privacy">{PRODUCT_COPY.TEXT_002}</Link>
-      <Link href="/my/legal">{PRODUCT_COPY.TEXT_003}</Link>
+      {LEGAL_EXPOSURE.terms === "page" && (
+        <Link href="/terms">{PRODUCT_COPY.TEXT_001}</Link>
+      )}
+      <PrivacyPolicyLink />
+      {LEGAL_EXPOSURE.myLegal === "biz" && (
+        <Link href="/my/legal">{PRODUCT_COPY.TEXT_003}</Link>
+      )}
     </nav>
   );
 }
