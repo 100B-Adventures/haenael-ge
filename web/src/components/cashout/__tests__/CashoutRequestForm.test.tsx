@@ -234,7 +234,7 @@ describe("CashoutRequestForm", () => {
     const loading = await screen.findByTestId("cashout-submitting-state");
     expect(screen.getByTestId("cashout-confirm-step")).toHaveAttribute("aria-busy", "true");
     expect(loading).toHaveTextContent("환전 신청 제출 중");
-    expect(loading).toHaveTextContent("같은 신청이 두 번 들어가지 않습니다");
+    expect(loading).toHaveTextContent("같은 신청이 두 번 들어가지 않아요");
     expect(screen.queryByRole("button", { name: "계좌 다시 입력" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("cashout-submit-button")).not.toBeInTheDocument();
 

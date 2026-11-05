@@ -163,6 +163,17 @@ describe("CheerPaymentButton Toss v2 request", () => {
     });
   });
 
+  it("VO-04 code-only 주문 오류는 클라이언트 카피로 표시한다", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ error: { code: "invalid_amount" } }),
+    }));
+    render(<CheerPaymentButton goalId={11} goalTitle="편입 합격 해낼게" goalSlug="goal-slug" />);
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    expect(await screen.findByRole("alert")).toHaveTextContent("응원 금액을 다시 확인해 주세요.");
+  });
+
   it("G4-PAY-01 결제창형 키에서 CARD 선택만 승인 요청한다", async () => {
     vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
 

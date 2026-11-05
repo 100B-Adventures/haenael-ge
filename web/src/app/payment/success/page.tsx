@@ -14,6 +14,12 @@ type Props = {
   }>;
 };
 
+const TOSS_CONFIRM_ERROR_COPY: Record<string, string> = {
+  payments_disabled: PRODUCT_COPY.ERROR_PAYMENTS_DISABLED,
+  payment_not_found: PRODUCT_COPY.ERROR_PAYMENT_NOT_FOUND,
+  amount_mismatch: PRODUCT_COPY.ERROR_AMOUNT_MISMATCH,
+};
+
 async function confirmPayment(params: {
   paymentKey: string;
   orderId: string;
@@ -37,7 +43,8 @@ async function confirmPayment(params: {
 
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(body?.error?.message ?? "결제 승인 실패");
+    const code = typeof body?.error?.code === "string" ? body.error.code : "unknown";
+    throw new Error(`toss_confirm:${code}`);
   }
   return body as { goalTitle?: string };
 }
@@ -72,7 +79,10 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
       console.error("[payment/success] confirmation failed", error);
       status = "error";
       title = "결제 확인이 필요해요";
-      message = "결제 상태를 바로 확인하지 못했어요. 잠시 후 다시 확인해 주세요.";
+      const code = error instanceof Error && error.message.startsWith("toss_confirm:")
+        ? error.message.slice("toss_confirm:".length)
+        : "";
+      message = TOSS_CONFIRM_ERROR_COPY[code] ?? PRODUCT_COPY.ERROR_GENERIC;
     }
   }
 

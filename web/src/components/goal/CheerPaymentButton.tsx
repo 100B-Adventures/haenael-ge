@@ -45,6 +45,10 @@ function getCustomerKey() {
 }
 
 function paymentErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message.startsWith("cheer_order:")) {
+    const code = error.message.slice("cheer_order:".length);
+    return CHEER_ORDER_ERROR_COPY[code] ?? PRODUCT_COPY.ERROR_GENERIC;
+  }
   if (typeof error === "string") return error;
   if (typeof error === "object" && error !== null) {
     const message =
@@ -59,8 +63,13 @@ function paymentErrorMessage(error: unknown) {
     if (message) return message;
     if (code) return code;
   }
-  return "결제 요청 실패";
+  return PRODUCT_COPY.ERROR_GENERIC;
 }
+
+const CHEER_ORDER_ERROR_COPY: Record<string, string> = {
+  payments_disabled: PRODUCT_COPY.ERROR_PAYMENTS_DISABLED,
+  invalid_amount: PRODUCT_COPY.ERROR_INVALID_AMOUNT,
+};
 
 type DestroyablePaymentSurface = {
   destroy: () => void | Promise<unknown>;
@@ -196,7 +205,8 @@ export function CheerPaymentButton({
 
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(body?.error?.message ?? "응원 주문 생성 실패");
+      const code = typeof body?.error?.code === "string" ? body.error.code : "unknown";
+      throw new Error(`cheer_order:${code}`);
     }
     return body as CheerOrderResponse;
   }

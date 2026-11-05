@@ -65,7 +65,7 @@ function normalizeRequestKey(
   return { ok: false };
 }
 
-Deno.serve(async (req: Request) => {
+export async function handleCheerOrder(req: Request) {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
 
   if (req.method !== "POST") {
     return json(405, {
-      error: { code: "method_not_allowed", message: "POST only" },
+      error: { code: "method_not_allowed" },
     });
   }
 
@@ -83,7 +83,6 @@ Deno.serve(async (req: Request) => {
     return json(503, {
       error: {
         code: "payments_disabled",
-        message: "응원 결제를 준비하고 있습니다.",
       },
     });
   }
@@ -91,7 +90,7 @@ Deno.serve(async (req: Request) => {
   const authHeader = req.headers.get("Authorization") ?? "";
   if (!authHeader.startsWith("Bearer ")) {
     return json(401, {
-      error: { code: "unauthorized", message: "Authorization required" },
+      error: { code: "unauthorized" },
     });
   }
 
@@ -100,7 +99,7 @@ Deno.serve(async (req: Request) => {
     body = await req.json();
   } catch {
     return json(400, {
-      error: { code: "invalid_json", message: "body must be JSON" },
+      error: { code: "invalid_json" },
     });
   }
 
@@ -114,14 +113,13 @@ Deno.serve(async (req: Request) => {
 
   if (!Number.isInteger(goalId) || goalId <= 0) {
     return json(400, {
-      error: { code: "invalid_goal", message: "goalId required" },
+      error: { code: "invalid_goal" },
     });
   }
   if (!isValidAmount(amountKrw)) {
     return json(400, {
       error: {
         code: "invalid_amount",
-        message: `amountKrw는 1,000원 단위 정수이며 ${MIN_AMOUNT_KRW}~${MAX_AMOUNT_KRW} 범위여야 합니다`,
       },
     });
   }
@@ -131,12 +129,12 @@ Deno.serve(async (req: Request) => {
   const cloverAmount = amountKrw / 1000;
   if (displayName.length > 30) {
     return json(400, {
-      error: { code: "invalid_name", message: "displayName max 30 chars" },
+      error: { code: "invalid_name" },
     });
   }
   if (message.length > 140) {
     return json(400, {
-      error: { code: "invalid_message", message: "message max 140 chars" },
+      error: { code: "invalid_message" },
     });
   }
 
@@ -147,7 +145,6 @@ Deno.serve(async (req: Request) => {
     return json(400, {
       error: {
         code: "invalid_request_key",
-        message: "requestKey는 8~128자여야 합니다",
       },
     });
   }
@@ -164,7 +161,6 @@ Deno.serve(async (req: Request) => {
     return json(503, {
       error: {
         code: "missing_supabase_env",
-        message: "Supabase service env missing",
       },
     });
   }
@@ -196,7 +192,7 @@ Deno.serve(async (req: Request) => {
 
   if (error || !data?.[0]) {
     // 원문(error.message/error.code)은 Postgres 내부 라벨·SQLSTATE — 클라이언트엔
-    // 화이트리스트로 매핑된 안전한 코드+메시지만 보낸다. 상세는 서버 로그에만.
+    // 화이트리스트로 매핑된 안전한 코드만 보낸다. 상세는 서버 로그에만.
     console.error("[cheer-order] create_cheer_order failed:", error);
     await sendSlackAlert({
       event: "cheer_order_failed",
@@ -205,7 +201,7 @@ Deno.serve(async (req: Request) => {
       fields: { code: error?.code ?? "unknown" },
     });
     return json(toPublicHttpStatus(error?.message), {
-      error: toPublicError(error?.message),
+      error: { code: toPublicError(error?.message).code },
     });
   }
 
@@ -252,4 +248,8 @@ Deno.serve(async (req: Request) => {
     cheerId: row.cheer_id,
     ...(row.is_replay ? { idempotent: true } : {}),
   });
-});
+}
+
+if (import.meta.main) {
+  Deno.serve(handleCheerOrder);
+}

@@ -61,7 +61,7 @@ export async function handleTossConfirm(req: Request) {
 
   if (req.method !== "POST") {
     return json(405, {
-      error: { code: "method_not_allowed", message: "POST only" },
+      error: { code: "method_not_allowed" },
     });
   }
 
@@ -69,7 +69,6 @@ export async function handleTossConfirm(req: Request) {
     return json(503, {
       error: {
         code: "payments_disabled",
-        message: "응원 결제를 준비하고 있습니다.",
       },
     });
   }
@@ -77,7 +76,7 @@ export async function handleTossConfirm(req: Request) {
   const authHeader = req.headers.get("Authorization") ?? "";
   if (!authHeader.startsWith("Bearer ")) {
     return json(401, {
-      error: { code: "unauthorized", message: "Authorization required" },
+      error: { code: "unauthorized" },
     });
   }
 
@@ -86,13 +85,12 @@ export async function handleTossConfirm(req: Request) {
     body = await req.json();
   } catch {
     return json(400, {
-      error: { code: "invalid_json", message: "body must be JSON" },
+      error: { code: "invalid_json" },
     });
   }
 
-  const paymentKey = typeof body.paymentKey === "string"
-    ? body.paymentKey.trim()
-    : "";
+  const paymentKey =
+    typeof body.paymentKey === "string" ? body.paymentKey.trim() : "";
   const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
   const amount = Number(body.amount);
 
@@ -100,7 +98,6 @@ export async function handleTossConfirm(req: Request) {
     return json(400, {
       error: {
         code: "validation_error",
-        message: "paymentKey, orderId, amount required",
       },
     });
   }
@@ -117,7 +114,6 @@ export async function handleTossConfirm(req: Request) {
     return json(503, {
       error: {
         code: "missing_supabase_env",
-        message: "Supabase service env missing",
       },
     });
   }
@@ -130,7 +126,6 @@ export async function handleTossConfirm(req: Request) {
     return json(503, {
       error: {
         code: "missing_toss_secret",
-        message: "TOSS_SECRET_KEY missing",
       },
     });
   }
@@ -147,12 +142,12 @@ export async function handleTossConfirm(req: Request) {
 
   if (paymentLookupErr || !existingPayment) {
     return json(404, {
-      error: { code: "payment_not_found", message: "주문을 찾을 수 없음" },
+      error: { code: "payment_not_found" },
     });
   }
   if (existingPayment.amount_krw !== amount) {
     return json(400, {
-      error: { code: "amount_mismatch", message: "주문 금액 불일치" },
+      error: { code: "amount_mismatch" },
     });
   }
 
@@ -168,7 +163,7 @@ export async function handleTossConfirm(req: Request) {
     });
 
     if (error || !data?.[0]) {
-      // 원문은 서버 로그에만 — 클라이언트엔 화이트리스트로 매핑된 안전한 코드+메시지만.
+      // 원문은 서버 로그에만 — 클라이언트엔 화이트리스트로 매핑된 안전한 코드만.
       console.error("[toss-confirm] idempotent confirm failed:", error);
       await sendSlackAlert({
         event: "toss_confirm_idempotent_failed",
@@ -176,7 +171,7 @@ export async function handleTossConfirm(req: Request) {
         summary: "Idempotent replay confirm failed",
         fields: { orderId, code: error?.code ?? "unknown" },
       });
-      return json(409, { error: toPublicError(error?.message) });
+      return json(409, { error: { code: toPublicError(error?.message).code } });
     }
 
     // 웹훅이 먼저 확정했거나 최초 송신이 유실된 경우의 복구 경로. 키가 같아 수신 측에서 한 건이 된다.
@@ -196,21 +191,22 @@ export async function handleTossConfirm(req: Request) {
   try {
     confirm = await toss.confirmPayment({ paymentKey, orderId, amount });
   } catch (e) {
-    // 원문(Toss 벤더 예외 메시지)은 서버 로그에만 — 클라이언트엔 고정 공개 메시지만.
+    // 원문(Toss 벤더 예외 메시지)은 서버 로그에만 — 클라이언트엔 고정 공개 코드만.
     console.error("[toss-confirm] Toss confirm failed:", e);
     await sendSlackAlert({
       event: "toss_confirm_failed",
       severity: "critical",
       summary: "Toss payment confirmation failed",
     });
-    return json(502, { error: toPublicError("toss_confirm_failed") });
+    return json(502, {
+      error: { code: toPublicError("toss_confirm_failed").code },
+    });
   }
 
   if (confirm.status !== "DONE" || confirm.totalAmount !== amount) {
     return json(400, {
       error: {
         code: "invalid_toss_status",
-        message: "Toss confirm response is not DONE or amount mismatch",
       },
     });
   }
@@ -227,14 +223,10 @@ export async function handleTossConfirm(req: Request) {
       );
       canceled = true;
     } catch (error) {
-      const cancelErrorMessage = error instanceof Error
-        ? error.message
-        : "cancel_failed";
+      const cancelErrorMessage =
+        error instanceof Error ? error.message : "cancel_failed";
       cancelError = cancelErrorMessage;
-      console.error(
-        "[toss-confirm] non-card compensation failed:",
-        error,
-      );
+      console.error("[toss-confirm] non-card compensation failed:", error);
     }
 
     const { error: compensationRecordError } = await supabase.rpc(
@@ -272,14 +264,12 @@ export async function handleTossConfirm(req: Request) {
       return json(502, {
         error: {
           code: "non_card_compensation_failed",
-          message: "허용되지 않은 결제수단을 안전하게 정리하지 못했습니다.",
         },
       });
     }
     return json(400, {
       error: {
         code: "unsupported_payment_method",
-        message: "카드 결제만 지원합니다.",
       },
     });
   }
@@ -308,7 +298,6 @@ export async function handleTossConfirm(req: Request) {
     });
     let compensated = false;
     let compensationError: string | undefined;
-    let compensationRecorded = false;
     const compensationDetail = {
       originalErrorCode: error?.code ?? "confirm_failed",
       originalErrorMessage: error?.message ?? "결제 반영 실패",
@@ -320,9 +309,8 @@ export async function handleTossConfirm(req: Request) {
       );
       compensated = true;
     } catch (cancelErr) {
-      compensationError = cancelErr instanceof Error
-        ? cancelErr.message
-        : "Toss cancel failed";
+      compensationError =
+        cancelErr instanceof Error ? cancelErr.message : "Toss cancel failed";
       console.error(
         "[toss-confirm] Toss cancel compensation failed:",
         cancelErr,
@@ -347,24 +335,13 @@ export async function handleTossConfirm(req: Request) {
     );
     if (recordErr) {
       console.error("[toss-confirm] compensation audit failed:", recordErr);
-    } else {
-      compensationRecorded = true;
     }
 
-    // 클라이언트 응답: code는 화이트리스트 매핑(모르는 라벨은 internal_error)만,
-    // message는 고정 공개 문구만. compensationError(Toss cancel 벤더 원문)는 절대
-    // 응답 바디에 싣지 않고 boolean 플래그로만 노출 — 원문은 위 console.error에만 남는다.
+    // 클라이언트 응답은 화이트리스트 code 하나뿐이다. compensation 관련 세부와
+    // Toss 벤더 원문은 응답 바디에 싣지 않고 서버 로그와 보상 감사 기록에만 남긴다.
     return json(500, {
       error: {
         code: toPublicError(error?.message).code,
-        message: compensated
-          ? "결제 반영 실패로 승인 취소 처리했습니다."
-          : "결제 승인 후 반영 실패. 운영자 확인이 필요합니다.",
-        compensation: compensated
-          ? "toss_cancelled"
-          : "manual_reconcile_required",
-        compensationRecorded,
-        compensationErrorOccurred: compensationError !== undefined,
       },
     });
   }
@@ -390,8 +367,8 @@ export async function handleTossConfirm(req: Request) {
       },
       invokeNotify: async (payload) => {
         const notifyInternalToken = Deno.env.get("NOTIFY_INTERNAL_TOKEN") ?? "";
-        const { data: notifyData, error: notifyError } = await supabase
-          .functions.invoke("notify", {
+        const { data: notifyData, error: notifyError } =
+          await supabase.functions.invoke("notify", {
             headers: { "x-notify-internal-token": notifyInternalToken },
             body: payload,
           });
