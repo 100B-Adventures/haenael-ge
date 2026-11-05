@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CircleAlert, Clover } from "lucide-react";
 import { AnalyticsEvent } from "@/components/analytics/AnalyticsEvent";
+import { PurchaseConversion } from "./PurchaseConversion";
 
 type Props = {
   searchParams: Promise<{
@@ -10,6 +11,7 @@ type Props = {
     orderId?: string;
     amount?: string;
     goalSlug?: string;
+    confirmed?: string;
   }>;
 };
 
@@ -57,7 +59,13 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   let title = "응원이 전달됐어요";
   let message = "친구의 워드맵에 조용한 응원이 쌓였습니다.";
 
-  if (!paymentKey || !orderId || !Number.isInteger(amount)) {
+  // 승인 뒤 주소에서 결제 키를 지우므로(PurchaseConversion) 새로고침하면 이 분기로 온다.
+  // 승인을 다시 부르지 않고, 전환 이벤트도 보내지 않는다.
+  const alreadyConfirmed = !paymentKey && params.confirmed === "1";
+
+  if (alreadyConfirmed) {
+    // 위 기본 문구 그대로 보여 준다.
+  } else if (!paymentKey || !orderId || !Number.isInteger(amount)) {
     status = "error";
     title = "결제 정보가 부족해요";
     message = "결제창에서 돌아온 정보가 올바르지 않습니다.";
@@ -81,11 +89,18 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
       data-testid="payment-success-page"
     >
       <div className="w-full max-w-[390px] rounded-[24px] p-7 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
-        {status === "success" && (
-          <AnalyticsEvent
-            event="payment_success"
-            params={{ value: amount, currency: "KRW" }}
-          />
+        {status === "success" && !alreadyConfirmed && (
+          <>
+            <AnalyticsEvent
+              event="payment_success"
+              params={{ value: amount, currency: "KRW" }}
+            />
+            <PurchaseConversion
+              orderId={orderId}
+              value={amount}
+              cleanPath={`/payment/success?confirmed=1${goalSlug ? `&goalSlug=${goalSlug}` : ""}`}
+            />
+          </>
         )}
         <div
           className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-[26px]"

@@ -8,7 +8,7 @@ export default function PrivacyPage() {
         본 방침은 표준 개인정보처리방침 템플릿을 기반으로 &ldquo;해낼게&rdquo;
         서비스의 실제 수집 항목에 맞춰 작성되었으며, 정식 법률 검토를
         대체하지 않는 잠정 문서입니다. 서비스 확장 및 기능 활성화(결제,
-        환전, 분석 도구 등)에 따라 개정될 수 있습니다.
+        환전, 분석·광고 측정 도구 등)에 따라 개정될 수 있습니다.
       </p>
 
       <p className="mb-8 leading-relaxed">
@@ -211,16 +211,60 @@ export default function PrivacyPage() {
           이용 예정
         </li>
         <li>
-          <strong>Google Analytics(GA4)</strong>(서비스 이용행태 분석):
-          연동 코드는 포함되어 있으나 측정 ID(Measurement ID)가 설정되지
-          않아 현재 <strong>비활성</strong> 상태이며 실제 이용자 데이터를
-          수집하지 않습니다. 활성화 시 별도 고지 후 이용합니다.
+          <strong>Google Analytics(GA4)</strong>(서비스 이용행태 분석): 현재
+          활성 이용 중. 상세는 아래 &ldquo;자동 수집 도구&rdquo;를 참고하세요.
+        </li>
+        <li>
+          <strong>Microsoft Clarity</strong>(세션 리플레이·히트맵): 현재 활성
+          이용 중. 상세는 아래 &ldquo;자동 수집 도구&rdquo;를 참고하세요.
+        </li>
+        <li>
+          <strong>Meta 픽셀</strong>(광고 성과 측정): 현재 활성 이용 중.
+          상세는 아래 &ldquo;자동 수집 도구&rdquo;를 참고하세요.
         </li>
       </ul>
       <p className="mb-4 leading-relaxed">
         회사는 법령에 특별한 규정이 있거나 수사기관이 적법한 절차에 따라
         요구하는 경우를 제외하고는 이용자의 개인정보를 위 목적 범위를
         초과하여 제3자에게 제공하지 않습니다.
+      </p>
+
+      <h3 className="font-semibold mt-6 mb-2">자동 수집 도구</h3>
+      <p className="mb-2 leading-relaxed">
+        회사는 서비스 개선과 광고 성과 측정을 위해 아래 도구를 사용합니다.
+        닉네임, 전화번호, 이메일은 이 도구들로 보내지 않습니다.
+      </p>
+      <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
+        <li>
+          <strong>Google Analytics(GA4)</strong> — Google LLC(미국). 항목:
+          방문 페이지 경로, 화면 이용 기록, 가입·결제 완료 이벤트와 결제 금액,
+          쿠키 식별자, 기기·브라우저 정보, IP. 목적: 이용 통계와 유입 경로
+          분석. 거부:{" "}
+          <a className="underline" href="https://tools.google.com/dlpage/gaoptout">
+            Google 애널리틱스 차단 부가기능
+          </a>{" "}
+          또는 브라우저 쿠키 차단.
+        </li>
+        <li>
+          <strong>Microsoft Clarity</strong> — Microsoft Corporation(미국).
+          항목: 방문 페이지 주소, 클릭·스크롤·화면 이동 기록(세션 리플레이),
+          쿠키 식별자, 기기·브라우저 정보, IP. 목적: 화면 사용성 개선과 오류
+          원인 분석. 거부: 브라우저 쿠키 차단 또는 추적 방지 기능.
+        </li>
+        <li>
+          <strong>Meta 픽셀</strong> — Meta Platforms, Inc.(미국). 항목: 방문
+          페이지 주소, 가입·결제 완료 이벤트와 결제 금액, 쿠키 식별자, 기기·
+          브라우저 정보, IP. 목적: 광고 성과 측정과 맞춤형 광고. 거부:{" "}
+          <a className="underline" href="https://www.facebook.com/adpreferences">
+            Meta 광고 설정
+          </a>{" "}
+          또는 브라우저 쿠키 차단.
+        </li>
+      </ul>
+      <p className="mb-4 leading-relaxed">
+        위 업체는 해외 법인이므로 페이지를 이용하는 시점에 암호화 통신으로
+        정보가 국외로 전송되어 처리될 수 있으며, 보유 기간은 각 업체의 정책과
+        계정 설정을 따릅니다. 거부해도 서비스 이용에는 제한이 없습니다.
       </p>
 
       <h2 className="text-lg font-semibold mt-10 mb-3">
@@ -309,7 +353,8 @@ export default function PrivacyPage() {
 
       <h2 className="text-lg font-semibold mt-10 mb-3">9. 시행일자</h2>
       <p className="mb-4 leading-relaxed">
-        이 개인정보처리방침은 2026년 7월 28일부터 적용됩니다.
+        이 개인정보처리방침은 2026년 11월 5일부터 적용됩니다. 자동 수집 도구
+        항목을 갱신했습니다. 이전 버전 시행일: 2026년 7월 28일.
       </p>
     </main>
   );

@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@/lib/supabase/route-handler";
 import { isSafeRedirectPath } from "@/lib/auth/redirect-path";
+import { markIfNewAccount } from "@/lib/auth/signup-mark";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
   const successResponse = NextResponse.redirect(new URL(redirectTo, request.url));
   const supabase = createRouteHandlerClient(request, successResponse);
 
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  const { data: exchanged, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
   if (exchangeError) {
     console.error("[auth/callback] exchangeCodeForSession error:", exchangeError);
@@ -45,6 +46,8 @@ export async function GET(request: NextRequest) {
     // (예: "Unsupported provider" / "provider is not enabled")
     return NextResponse.redirect(new URL("/?auth_error=session_failed", request.url));
   }
+
+  markIfNewAccount(successResponse, exchanged?.user);
 
   return successResponse;
 }

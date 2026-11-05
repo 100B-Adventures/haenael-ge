@@ -6,6 +6,7 @@ import localFont from "next/font/local";
 import Script from "next/script";
 import { Toaster } from "sonner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { SignupConversion } from "@/components/analytics/SignupConversion";
 import { ConditionalFooter } from "@/components/common/ConditionalFooter";
 import { RegisterServiceWorker } from "@/components/pwa/RegisterServiceWorker";
 import "./globals.css";
@@ -54,6 +55,10 @@ export const metadata: Metadata = {
 // Microsoft Clarity(세션 녹화·히트맵, 2026-11-03). 운영 빌드에서만 켠다. ID 는 공개값.
 const CLARITY_PROJECT_ID = "z7rlqfvdmm";
 
+// Meta 픽셀(광고 전환 측정, 2026-11-05). 운영 빌드에서만 켠다. ID 는 공개값.
+// /payment/ 화면은 주소에 paymentKey 가 붙어 들어오므로 PageView 를 보내지 않는다.
+const META_PIXEL_ID = "1678305073814051";
+
 export const viewport: Viewport = {
   // design-token-lint-allow: 메타 태그는 CSS 변수를 못 읽는다. globals.css 의 --primary 값 그대로다.
   themeColor: "#1B8A4F",
@@ -76,9 +81,19 @@ export default function RootLayout({
             }}
           />
         )}
+        {process.env.NODE_ENV === "production" && (
+          <Script
+            id="meta-pixel-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init","${META_PIXEL_ID}");if(location.pathname.indexOf("/payment/")!==0){fbq("track","PageView");}`,
+            }}
+          />
+        )}
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]!">
         <GoogleAnalytics />
+        <SignupConversion />
         <RegisterServiceWorker />
         <div className="flex-1 flex flex-col">{children}</div>
         <ConditionalFooter />
