@@ -3155,9 +3155,9 @@
     font-size: 0.9375rem;
   }
 
-  /* 초대 수락 화면만 prototype header 시작점(14px)에 맞춘다. 다른 detail 화면에는 영향 없다. */
-  .invite-token-page .receiver-page-frame {
-    padding-top: 0.875rem;
+  /* Header만 승인 시안의 시작점으로 올린다. 카드의 flex 기준점은 이동시키지 않는다. */
+  .invite-token-page .social-detail-head {
+    transform: translateY(-1.625rem);
   }
 
   .friends-page-head {

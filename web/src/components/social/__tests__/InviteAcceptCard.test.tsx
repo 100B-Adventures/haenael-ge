@@ -33,10 +33,11 @@ it("CT-07 self_invite stable code를 정확한 복구 카드로 표시한다", a
   ).toBeInTheDocument();
 });
 
-it("invite geometry는 승인 시안의 header 시작점과 50px 로그인 CTA를 유지한다", () => {
+it("invite geometry는 카드 기준점을 보존하며 header만 승인 시안의 시작점으로 보정한다", () => {
   const css = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
 
-  expect(css).toMatch(/\.invite-token-page \.receiver-page-frame\s*\{[\s\S]*?padding-top:\s*0\.875rem/);
+  expect(css).toMatch(/\.invite-token-page \.social-detail-head\s*\{[\s\S]*?transform:\s*translateY\(-1\.625rem\)/);
+  expect(css).not.toMatch(/\.invite-token-page \.receiver-page-frame\s*\{/);
   expect(css).toMatch(/\.invite-accept-card \.social-primary-action\s*\{[\s\S]*?padding:\s*var\(--sp-4\)/);
   expect(css).toMatch(/\.invite-preview\s*\{[\s\S]*?padding:\s*var\(--sp-3\) var\(--sp-4\)/);
 });
