@@ -144,6 +144,7 @@
   --wordmap-text-small: 1rem;
   --wordmap-text-medium: 1.25rem;
   --wordmap-text-large: 1.625rem;
+  --wordmap-tier-s1: #467a60;
   --invite-preview: #b2c7da;
   --kakao-fill: #fee500;
   --kakao-line: #efd95b;
@@ -1891,8 +1892,9 @@
     opacity: 0;
   }
   .wordmap-tier-s1 {
-    color: var(--muted-color);
+    color: var(--wordmap-tier-s1);
     font-size: var(--wordmap-text-small);
+    font-weight: 600;
   }
   .wordmap-tier-s2 {
     color: var(--clover);
@@ -2893,7 +2895,8 @@
     border-radius: var(--radius-card);
     background: var(--invite-preview);
     margin-top: 1rem;
-    padding: 0.8125rem 1rem 0.6875rem;
+    /* 승인 시안의 카드 안쪽 상하 12px을 같은 spacing token으로 고정한다. */
+    padding: var(--sp-3) var(--sp-4);
   }
 
   .invite-preview > p {
@@ -3023,7 +3026,7 @@
   .invite-share-row > [role="status"],
   .invite-share-row > [role="alert"] {
     grid-column: 1 / -1;
-    margin-top: 0;
+    margin-top: -2.5625rem;
     text-align: center;
   }
 
@@ -3088,7 +3091,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: -2.5625rem;
+    margin-top: 0;
     padding-bottom: 0.46875rem;
     text-align: center;
     transform: translateY(0.0625rem);
@@ -3146,6 +3149,15 @@
   }
   .invite-accept-card .social-primary-action {
     width: 100%;
+    /* prototype .cbtn: 15px 글자 + 상하 16px. 로그인 CTA가 44px로 줄지 않는다. */
+    min-height: var(--tap-min-size);
+    padding: var(--sp-4);
+    font-size: 0.9375rem;
+  }
+
+  /* 초대 수락 화면만 prototype header 시작점(14px)에 맞춘다. 다른 detail 화면에는 영향 없다. */
+  .invite-token-page .receiver-page-frame {
+    padding-top: 0.875rem;
   }
 
   .friends-page-head {

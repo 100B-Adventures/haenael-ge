@@ -37,7 +37,7 @@ export default async function InviteTokenPage(
   const preview = error ? null : observeInvitePreview(previewData);
   return (
     <ReceiverAppShell locked={!user} currentPath={`/invite/${token}`}>
-    <main className="min-h-[calc(100svh-var(--tabbar-height))] bg-background">
+    <main className="invite-token-page min-h-[calc(100svh-var(--tabbar-height))] bg-background">
       <div className="receiver-page-frame">
         <header className="social-detail-head">
           <Link href="/" aria-label="해낼게 홈으로"><ChevronLeft aria-hidden="true" /></Link>
