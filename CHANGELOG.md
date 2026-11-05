@@ -3,6 +3,19 @@
 이 파일은 운영에 나간 것만 적는다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/),
 버전은 [유의적 버전](https://semver.org/lang/ko/)을 따른다.
 
+## 2.0.1 (2026-11-05)
+
+광고 전환 측정 준비. 화면·결제 동작은 그대로다.
+
+### 추가
+- Meta 픽셀 1678305073814051 기본 코드(운영 빌드, 모든 페이지)
+- 전환 이벤트: 신규 계정 첫 로그인 CompleteRegistration·sign_up, 결제 승인 Purchase·purchase(서버 대조를 통과한 금액, 주문번호별 1회)
+- 개인정보처리방침에 GA4·Clarity·Meta 픽셀 항목과 거부 방법
+
+### 보안
+- CSP 에 connect.facebook.net, www.facebook.com 허용
+- 결제 완료 화면은 픽셀 호출 전에 주소에서 paymentKey 를 지운다
+
 ## 2.0.0 (2026-10-14)
 
 소셜 바이럴 루프 1차. 받는 사람이 목표를 공개 범위로 나누고 친구를 초대해 서로 응원하는 구조를 웹에서 완결했다.

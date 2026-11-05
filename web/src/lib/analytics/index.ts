@@ -25,7 +25,9 @@ export type HaenaelEvent =
   | "cheer_completed"
   | "wordmap_viewed"
   | "wordmap_shared"
-  | "cashout_initiated";
+  | "cashout_initiated"
+  | "sign_up"
+  | "purchase";
 
 export function sanitizePagePath(pagePath: string): string {
   const pathOnly = pagePath.split(/[?#]/, 1)[0] || "/";
