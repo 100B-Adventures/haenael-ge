@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(6);
+SELECT plan(8);
 
 INSERT INTO auth.users(
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -80,6 +80,19 @@ SELECT ok(public.my_friend_goals()->'friends' @> '[{"friend_member_id":"58000000
   'PG-DIRECTION-05 응원 기록 없는 초대 관계는 INVITED');
 SELECT is(jsonb_array_length(public.my_friend_goals()->'friends'), 4,
   'PG-DIRECTION-06 ACTIVE 친구 네 명을 중복 없이 반환한다');
+SELECT ok(
+  public.my_friend_goals()::text !~ '"(amount|amount_krw|clover_amount|gross|fee|vat|withhold|net)"[[:space:]]*:',
+  'FD-02 관계 방향 응답에 금액 필드가 없다'
+);
+SELECT ok(
+  NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public'
+      AND table_name='friend_connection'
+      AND column_name IN ('relationship_direction','direction')
+  ),
+  'FD-02 관계 방향은 저장 컬럼 없이 확정 응원 기록으로 계산된다'
+);
 
 RESET ROLE;
 SELECT * FROM finish();

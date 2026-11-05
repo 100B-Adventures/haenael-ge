@@ -1,5 +1,41 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+- **2026-11-05 · ❌ remediation evidence 갱신, QA NO-GO 유지:** `f25911b`의 40/57 baseline 뒤 LG-05·SP-01·SP-04·VO-02와 VO-04 source contract를 `a0cb0a3`·`f36d0bc`·`b875db8`에서 각각 보강했다. 단, SP-03은 `b875db8` approved/dev visual pair에서 첫 viewport CTA가 없고 `receiver-public-action`이 `position: static`이어서 현재 FAIL이다. `f36d0bc`의 SP-03 PASS는 fixed/sticky Given을 assert하지 않은 약한 검증이었다. 이것은 최신 Preview의 57개 전체 실행이나 전체 통과율이 아니다. VO-04는 Deno/mock 7/7·client unit 15/15이지만 staging Edge Function deploy가 401/403으로 실패해 runtime 미검증이다. `CashoutRequestForm` remediation target 29 tests는 PASS했으나 latest full unit suite는 재실행하지 않았고, 과거 `a0cb0a3` full unit은 475/476이었다. 디자인 9쌍은 아직 NO-GO이며 remaining UI differences·dataset normalization도 남았다. v1.1.0 매핑, 실제 Kakao·Toss callback도 미완료이므로 QA 승인·출고·운영 배포는 NO-GO다. 상세 `docs/qa/v2-qa-status-v2.1.0-gpt-codex-20261104-1446.md`·`.json`.
+
+- **2026-11-05 · ❌ 부분 테스트 성공을 배포 준비로 확대 판정한 보고 오류:** 472개 단위 테스트와 기존 17개 브라우저 흐름 성공은 승인 TC 57개 매핑 완료가 아니다. 승인 TC별 필수 검증 종류·assertion 매핑이 끝나기 전에 이를 전체 배포 준비로 확대한 것이 원인이다. 최신 source `a0cb0a3`의 표적 재검증과 57개 재집계 전에는 QA 승인·출고·운영 배포로 승격하지 않는다. CP-05는 D-049가 보존한 관리자 회원 상세를 삭제 대상으로 보지 않고 선언된 disclosure로 검증하며, SP-02는 투명 페이지 wrapper를 카드 surface로 세지 않고, SP-04는 실제 다중행을 확인한 뒤 마지막 줄 폭을 판정한다.
+
+- **2026-11-05 · ❌ 승인 TC 57개 전체 검증, QA NO-GO:** 고정 Preview source `f25911b`. PASS 40 / FAIL 17 / UNVERIFIED 0, 통과율 70.18%. 실패는 `LG-02·05`, `SP-01~04`, `CV-02`, `CS-03`, `VO-01~04`, `CP-05`, `CL-01~04`다. 표적 Preview·staging 실행의 fixture cleanup은 모두 0이며 운영 쓰기·배포는 없었다. 실제 Kakao callback 성공은 별도 미검증이다. 별도 디자인 9 screens는 일치 0·불일치 3·미확인 6이고, v1.1.0 승계 TC도 별도 분모의 매핑 누락 상태다. 상세 `docs/qa/v2-qa-status-v2.1.0-gpt-codex-20261104-1446.md`·`.json`.
+
+- **2026-11-02 00:50 KST · 🔧 관리자 상세 실제 검증:** 현재92256ae stage에서임시QA관리자1명으로기본aria-expanded=false→true/detail3문단→false,390/1024/1280overflow0,pageerror0 직접관찰. 자기member/auth잔여0. cashout행0이라금액색은미검증. CI41320696899 4job성공,소셜E2E는Invalid access token으로미실행. 전체QA/배포승인불가. 근거 `.goal/runs/final-qa-20261102-root-admin-result.json`.
+
+- **2026-11-02 00:20 KST · ❌ NG 최종 QA 미종결:** 최신92256ae의관리자수정은빌드/단위통과·staging반영만확인됐고실제브라우저·시안대조/로그인/카드callback검증미완료. 이번요청에따라현재소스CI·실화면검증부터회수,관찰전완료판정금지.
+
+- **2026-10-30 · 최신 스테이징 회귀 🔧 PASS, 디자인 불일치 2건 잔존:** 커밋 `a88d137`과 배포 `dpl_4iyj5dWnA7U9cvPhXirsi2yHrVhy`의 `sourceSha`를 일치시킨 뒤 관리자 viewport 표적 Playwright 1/1 EXIT 0, CI [41052383502](https://github.com/100B-Adventures/haenael-ge/actions/runs/41052383502) 5개 job 모두 success. CI `e2e-v2-social` EXIT 0, 결제 기능 비활성화 복구 EXIT 0·HTTP 503, fixture 8개 범주 잔여 0. 390px 시안·제품 PNG는 모두 1170×2532(deviceScaleFactor 3)로 조건이 같지만 지급 예정 금액 색과 회원 상세 기본 펼침은 정본과 달라 전체 디자인 PASS로 올리지 않는다. G4-QA-02 단위 검증 통과도 전체 제품 QA 승인으로 확대하지 않는다.
+
+- **2026-10-30 · 관리자 시각 대조 ❌ NG/미확인:** controller가 approved-admin-v3-frame-clean-390x844.png·dev-cover-review-390.png를모두직접열어환전금액녹색/검정불일치·회원상세노출카드높이차이확인. PNG폭780/946으로viewport/deviceScale/crop동일성미확인. 가로overflow0/표적E2E통과는전체디자인PASS아님. 필수회원상세임의삭제금지,같은캡처조건재대조와승인계약충돌여부확인필요. 증거 `.goal/runs/g4-admin-design-compare/`.
+
+- **2026-10-30 · 스테이징 소스 불일치 ❌ NG:** 배포 `dpl_G2KVfgpZ8tPFQNwUhRuSnpgwrWwG`의 `/api/health`는 HTTP 200이지만 `sourceSha=6357bdc`로 최신 수정 커밋 `a88d137`과 불일치했다. 최신 반영으로 판정하지 않고 CI 실행을 보류했다. 깨끗한 `a88d137` checkout에서 실제 수정 내용과 Vercel Git metadata·runtime/build 환경변수를 명시 정렬한 배포만 스테이징 alias에 연결한다. 근거 `.goal/runs/g4-three-fixes/staging-health.json`.
+
+- **2026-10-30 · CI40931650635 ❌ NG:** social 15 passed/2 failed. QA-REVERIFY-VIEWPORT-01 newsClamp 기대2/실제none, cheer-order payments_disabled. 수동Toss cleanup과CI stagingflag 동시변경 경합을확인하고직렬화후동일최신HEAD재검증. 서버job은ECR/GHCR이미지pull429로pgTAP미실행. 원문실패요약 `.goal/runs/ci-40931650635-root-verification/` 및 `.goal/runs/ci-40931650635-failed.log`. QA02단위verify0을전체QA통과로집계하지않는다.
+
+## 2026-10-30 03:40 KST · ❌ 최신 HEAD CI 서버 계약·V2 E2E 실패
+
+- 커밋 ad1c6c2, CI40931650635 conclusion=failure 직접확인. Supabase pgTAP+서버런타임계약 및e2e-v2-social 실패,나머지3job success. CI감시명령EXIT1. QA02 exact unit verify0을전체필수QA통과로확대하지않음.
+- 현재원발주가실패이름·첫오류만분리해기존Codex컨트롤러/동일builder에전달중. 제품중복위임·Claude호출없음. 실제수정과동일HEAD CI재검증까지미해소.
+- 근거 .goal/runs/ci-40931650635-failed.log, GitHub run40931650635.
+
+## 2026-10-30 02:17 KST · 🔧 Chrome 연결 복구, ❌ OAuth 로그인 미완료
+
+- Chrome 이동·읽기·클릭 실제 성공, Default 확장프로필과 활성프로필 일치 확인. 신규CLI세션 오류를 기존세션 권한부재로 확대한 설명 철회.
+- 실제 staging OAuth·개발자콘솔 두 경로 모두 accounts 로그인폼. 저장자동완성 없음, callback·제품세션 미생성. AUTH01은 PASS 아님. 로그인대기탭1개 준비, 다른제품QA는기존컨트롤러계속수행.
+- 관찰근거 .goal/runs/main-chrome-controller-verification.json, main-chrome-existing-session-result.json, 실제ChromeMCP tool_result. 브라우저 접근관찰을 제품QA PASS로 대체하지 않음.
+
+## 2026-10-30 01:50 KST · ❌ NG 메인 Chrome OAuth 접근 판정 재검증
+
+- 사용자 지적: Claude에서는 접근했는데 Codex가 새 Claude 세션의 requires permission을 전체 접근 불가로 확대한 것인지 확인하고 직접 해결.
+- 이전 사실은 새 print 세션 탭 접근 실패일 뿐이며 기존에 허용된 Claude 대화 세션 접근 결과는 미확인이다. 단독 실행 컨트롤러 %410과 분리해 idle Claude %328에 메인Chrome AUTH UI확인만 위임했다. PAY/QA02·코드/DB/배포 소유권은 변경하지 않았다.
+- 종료증거: 실제 탭 도구 결과·기존 Kakao 세션 관찰·가능하면 staging OAuth callback→제품 세션. 실패 시 정확한 접근 권한 층을 기록. 결과 .goal/runs/main-chrome-existing-session-result.json. 새 Chrome/프로필복사/OTP/실결제 금지.
+
 - **2026-10-30 · 실제 CARD 실패 callback 재검증 ❌ BLOCKED:** Preview 환경변수 추가 명령이 공개 변수 타입 선택 안내만 출력하고 종료코드 0을 반환해 실제 저장되지 않은 내부 환경 결함을 확인했다. `Config` 타입을 명시해 수선하고 캐시 없이 재배포한 뒤 `LIVE-TOSS-EDGE-FAIL`을 다시 실행했다. 주문 생성, `신용·체크카드`와 신한카드 선택, Toss Payments sandbox 세션 POST HTTP 200까지 관찰했으나 `vbv.shinhancard.com`의 SuperSOL·SOLPay 카드 소유자 인증 화면에서 중단돼 실제 `failUrl` callback은 미관찰, EXIT 1이다. 직접 URL 이동·mock·BankPay 대체는 사용하지 않았다. `PAYMENTS_ENABLED=false`와 `TOSS_SECRET_KEY` 제거는 각각 EXIT 0. 근거 `.goal/runs/g4-card-fail-external-auth-final.log`, `docs/qa/evidence/v2-goal-round4-20261029/payment/live-toss-card-external-auth-390.png`.
 
 - **2026-10-30 · 결제 독립 코드리뷰 ❌ NG:** HEAD `6f22b4f`의 독립 검수에서 비카드 보상 RPC의 2,000원 감사기록 실패, `toss-confirm` 비카드 취소 DB 미기록, 실제 Toss 실패 callback을 직접 URL 이동으로 대체한 테스트, `CashoutQueue`의 `Collapsible` 우회, 결제창 닫기·unmount 시 SDK 인스턴스 미정리 등 MAJOR 4건·MINOR 1건이 확인됐다. 직접 URL 이동 결과는 통과 증거에서 제외한다. 수정·표적 검증·독립 재검수 전 결제 및 QA 항목은 PASS로 올리지 않는다. 근거 `.goal/runs/g4-independent-code-review-final-v3.log`.

@@ -1,0 +1,857 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-11-05T18:40:00+09:00",
+  "release": "2.1.0",
+  "sourceSha": "mixed-version remediation evidence; newest product source b875db8",
+  "approvedTestCases": "docs/eng-design/test-cases-social-viral-loop-web-first-v1.2.5.md",
+  "approvedTestPlan": "docs/eng-design/test-plan-social-viral-loop-web-first-v1.2.5.md",
+  "denominator": 57,
+  "summary": {
+    "mode": "remediation-evidence-not-current-suite-aggregate",
+    "historicalBaseline": {
+      "sourceSha": "f25911b",
+      "pass": 40,
+      "fail": 17,
+      "unverified": 0,
+      "denominator": 57
+    },
+    "currentAggregate": null,
+    "releaseGate": "NO_GO",
+    "reason": "Remediation evidence spans f25911b, a0cb0a3, f36d0bc, and b875db8. No single latest Preview ran all 57 approved TC bodies."
+  },
+  "groupAggregation": {
+    "status": "HISTORICAL_MIXED_EVIDENCE_ONLY",
+    "reason": "groups below retain the former evidence map and must not be read as a b875db8 whole-suite pass rate"
+  },
+  "groups": {
+    "LG": {
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "GT": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "SP": {
+      "total": 4,
+      "pass": null,
+      "fail": 1,
+      "unverified": null,
+      "passRatePct": null,
+      "status": "MIXED_EVIDENCE_CURRENT_SP03_FAIL"
+    },
+    "CV": {
+      "total": 13,
+      "pass": 13,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "EA": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "CS": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "VO": {
+      "total": 4,
+      "pass": 2,
+      "fail": 2,
+      "unverified": 0,
+      "passRatePct": 50
+    },
+    "AC": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "CP": {
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "CL": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "AU": {
+      "total": 5,
+      "pass": 5,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    },
+    "FD": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "unverified": 0,
+      "passRatePct": 100
+    }
+  },
+  "evidenceCatalog": {
+    "E1": ".goal/runs/release-regression-20261104.log",
+    "E2": ".goal/runs/release-210-ci-20261104.json",
+    "E2a": "/tmp/haenael-ci-41671172015-unit_build.log",
+    "E2b": "/tmp/haenael-ci-41671172015-deploy_contract.log",
+    "E3": "/tmp/haenael-ci-41671172015-server_contract.log",
+    "E4": ".goal/runs/final-qa-28b483f-all.log",
+    "E4a": ".goal/runs/final-qa-28b483f-all.log",
+    "E4b": ".goal/runs/final-qa-28b483f-all.exit",
+    "E4c": ".goal/runs/final-controller-verification-20261103.json",
+    "E5": ".goal/runs/release-210-preview-health-20261104.json",
+    "E6": "git diff --name-status 28b483f..4e681b5",
+    "E7": ".goal/runs/visual-findings-20261104.json",
+    "E8a": ".goal/runs/v2-qa-static-contracts-20261105-012617.log",
+    "E8b": ".goal/runs/v2-qa-design-token-lint-20261105-012617.log",
+    "E9": ".goal/runs/v2-qa-sp01-exact-20261105-012737.log",
+    "E10a": ".goal/runs/v2-qa-social_my_page_achievements-20261105-013453.log",
+    "E10b": ".goal/runs/v2-qa-social_my_page_achievements-20261105-013453.exit",
+    "E11a": ".goal/runs/v2-qa-social_web_first_contract-20261105-013942.log",
+    "E11b": ".goal/runs/v2-qa-social_web_first_contract-20261105-013942.exit",
+    "E12a": ".goal/runs/v2-qa-supabase-lifecycle-20261105-014327.log",
+    "E12b": ".goal/runs/v2-qa-social_storage_cleanup-20261105-014327.log",
+    "E12c": ".goal/runs/v2-qa-social_storage_cleanup-20261105-014327.exit",
+    "E13": ".goal/runs/anonymous-route-census-f25911b-20261105.json",
+    "E14a": ".goal/runs/v2-qa-lg05-ast-20261105-020122.log",
+    "E14b": ".goal/runs/v2-qa-lg05-ast-20261105-020122.exit",
+    "E15a": ".goal/runs/v2-qa-vo01-ast-20261105-020122.log",
+    "E15b": ".goal/runs/v2-qa-vo01-ast-20261105-020122.exit",
+    "E15c": ".goal/runs/v2-qa-vo03-exact-20261105-015519.log",
+    "E15d": ".goal/runs/v2-qa-vo03-exact-20261105-015519.exit",
+    "E16a": ".goal/runs/v2-qa-targeted-tc-f25911b-20261105.log",
+    "E16b": ".goal/runs/v2-qa-targeted-tc-f25911b-20261105.exit",
+    "E17a": ".goal/runs/v2-qa-targeted-tc-f25911b-rerun-20261105.log",
+    "E17b": ".goal/runs/v2-qa-targeted-tc-f25911b-rerun-20261105.exit",
+    "E18a": ".goal/runs/v2-qa-targeted-cl-f25911b-final-20261105.log",
+    "E18b": ".goal/runs/v2-qa-targeted-cl-f25911b-final-20261105.exit",
+    "E19a": ".goal/runs/v2-qa-targeted-lg01-ac01-f25911b-20261105.log",
+    "E19b": ".goal/runs/v2-qa-targeted-lg01-ac01-f25911b-20261105.exit",
+    "E20": ".goal/runs/v2-qa-targeted-gt-sp-cv-f25911b-20261105.log",
+    "E21": ".goal/runs/v2-qa-targeted-cs-cp-sp-f25911b-20261105.log",
+    "E22": ".goal/runs/qa-vo04-server-code-only-f25911b-20261105.log",
+    "E23": ".goal/runs/qa-cv-cover-contract-exact-with-pgtap-20261105.log",
+    "E24": ".goal/runs/v2-qa-targeted-cv06-f25911b-20261105.log",
+    "E25": ".goal/runs/qa-cv-storage-contract-exact-with-pgtap-20261105.log",
+    "E26": ".goal/runs/qa-fd-direction-contract-exact-with-pgtap-20261105.log",
+    "E27": ".goal/runs/v2-qa-targeted-cp03-f25911b-20261105.log",
+    "E28": ".goal/runs/qa-cs02-roundtrip-contract-f25911b-20261105.log",
+    "E29": ".goal/runs/qa-vo02-voice-contract-f25911b-20261105.log",
+    "E30": ".goal/runs/v2-qa-targeted-sp02-full-f25911b-20261105.log",
+    "E31": ".goal/runs/v2-qa-targeted-au05-f25911b-rerun-20261105.log",
+    "E32": ".goal/runs/qa-au05-all-actions-auth-contract-f25911b-20261105.log",
+    "E33": ".goal/runs/qa-fd-friendship-contract-exact-with-pgtap-20261105.log",
+    "E34": ".goal/runs/v2-qa-f36d0bc-preview-health-20261105.json",
+    "E35": ".goal/runs/qa-cl-lg-a0cb0a3-20261105.log",
+    "E36": ".goal/runs/qa-targeted-f36d0bc-20261105.log",
+    "E37": ".goal/runs/v2-qa-f36d0bc-sp04-final-v2-20261105.log",
+    "E38": ".goal/runs/v2-qa-f36d0bc-sp01-exact-20261105.json",
+    "E39": ".goal/runs/v2-qa-f36d0bc-voice-product-20261105.json",
+    "E40": ".goal/runs/v2-qa-a0cb0a3-targeted-unit-20261105.log",
+    "E41": ".goal/runs/qa-unit-a0cb0a3-20261105.log",
+    "E42": ".goal/runs/qa-vo04-server-code-only-f25911b-20261105.log",
+    "E43": ".goal/runs/v2-qa-f36d0bc-cl-final-20261105.log",
+    "E44": ".goal/runs/v2-qa-f36d0bc-lg02-final-20261105.log",
+    "E45": ".goal/runs/v2-qa-a0cb0a3-lg05-direct-20261105.log",
+    "E46": "git diff --quiet a0cb0a3..f36d0bc -- web/src/components/common web/src/components/admin web/src/components/cashout web/src/lib/legal web/src/app/(receiver)/my/legal web/src/app/(receiver)/my",
+    "E47": ".goal/runs/root-qa-sp04-b875db8-20261105.log",
+    "E48": ".goal/runs/qa-lg05-sp01-source-verify-b875db8-20261105.md",
+    "E49": ".goal/runs/qa-voice-a0cb0a3-20261105.log (root confirmed same product-voice result on b875db8)",
+    "E50": ".goal/runs/vo04-server-error-contract-20261105.md",
+    "E51": ".goal/runs/qa-vo04-b875db8-20261105.log",
+    "E52": "staging Edge Function deployment attempt returned 401/403; runtime deployment unverified",
+    "E53": ".goal/runs/root-visual-b875db8-20261105/{approved,dev}-goalpublic-390.png; b875db8 receiver-public-action was position: static",
+    "E54": ".goal/runs/root-visual-findings-b875db8-20261105.json; 9 approved/dev pairs read, viewport E2E 1 PASS (2.2m), designApproved=false"
+  },
+  "inheritance": {
+    "fromSha": "28b483f",
+    "toSha": "4e681b5406c1f70c908ac600edd14ac3b4d82938",
+    "eligible": true,
+    "basis": "git diff contains release documents, VERSION, and package version metadata only; no product source, test, migration, function, or E2E changes"
+  },
+  "cases": [
+    {
+      "id": "LG-01",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E19a",
+        "E19b"
+      ],
+      "reason": "노출 표 밖 정적·동적·관리자 화면 전수에서 legal footer·링크·사업자 정보 DOM 0, cleanup 0"
+    },
+    {
+      "id": "LG-02",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E44"
+      ],
+      "reason": "390px /my 하단탭 경로에서 legal-footer와 법적 링크 목록이 함께 렌더되지 않음, fixture cleanup 0"
+    },
+    {
+      "id": "LG-03",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E17a"
+      ],
+      "reason": "마이페이지 3개 링크, 전문 미노출, /my/legal 이동과 6항목 전문, /how 고지 0 확인"
+    },
+    {
+      "id": "LG-04",
+      "requirementType": "UNIT",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "local",
+      "evidence": [
+        "E1"
+      ]
+    },
+    {
+      "id": "LG-05",
+      "requirementType": "LINT",
+      "verdict": "PASS",
+    "sourceSha": "b875db8",
+    "environment": "TypeScript AST source verification",
+      "evidence": [
+      "E48"
+      ],
+    "reason": "92 production TSX에서 D-040 허용 owner 밖 직접 법적 고지 literal 0. 주석과 법적 문서 page는 AST/path 규칙으로 오탐 제외"
+    },
+    {
+      "id": "GT-01",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E20"
+      ],
+      "reason": "초대 RPC exact 3-key 집합, 초대·PUBLIC DOM 금지 필드 0, FRIENDS·PRIVATE 404"
+    },
+    {
+      "id": "GT-02",
+      "requirementType": "CONTRACT",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview+git-contract",
+      "evidence": [
+        "E16a"
+      ],
+      "reason": "비회원 탭 조작 중 fetch/xhr 0, guest-preview.ts 상수 존재, platform_social_stats 참조 0"
+    },
+    {
+      "id": "GT-03",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E17a"
+      ],
+      "reason": "dialog·aria-modal·두 행동·예시 라벨 확인, lock 문구·blur·--tabbar-lock-size 0"
+    },
+    {
+      "id": "SP-01",
+      "requirementType": "UNIT",
+      "verdict": "PASS",
+    "sourceSha": "b875db8",
+      "environment": "source-lint",
+      "evidence": [
+      "E48"
+      ],
+    "reason": "comment-stripped globals.css의 모든 padding* 선언에서 --sp-*와 --space-* 혼용 0"
+    },
+    {
+      "id": "SP-02",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E36"
+      ],
+      "reason": "실제 시각 surface 카드 census 통과. 투명 page-layout wrapper는 AGENTS F축 경고 규칙에 따라 카드에서 제외"
+    },
+    {
+      "id": "SP-03",
+      "requirementType": "E2E_READ",
+      "verdict": "FAIL",
+      "sourceSha": "b875db8",
+      "environment": "approved/dev visual pair + source",
+      "evidence": [
+        "E53"
+      ],
+      "reason": "공개 목표 첫 viewport에서 CTA가 없었다. b875db8의 receiver-public-action은 position: static이어서 SP-03 Given(하단 고정 액션 바)을 충족하지 않는다. f36d0bc E36 PASS는 고정 위치 assertion이 빠진 약한 검증이었다."
+    },
+    {
+      "id": "SP-04",
+      "requirementType": "LINT",
+      "verdict": "PASS",
+    "sourceSha": "b875db8",
+      "environment": "Preview",
+      "evidence": [
+      "E47"
+      ],
+    "reason": "staging Preview 1/1 PASS, 실제 다중행 기준 overflow·28px 미만 고아 줄바꿈 0, fixture cleanup 0"
+    },
+    {
+      "id": "CV-01",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E20"
+      ],
+      "reason": "프리셋 스크롤 0·중간·끝에서 파일 선택 3회와 50ms scroll 복귀 0"
+    },
+    {
+      "id": "CV-02",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E36"
+      ],
+      "reason": "선택 상태 1개와 선택 체크 글리프 1개 확인"
+    },
+    {
+      "id": "CV-03",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "28b483f→4e681b5",
+      "environment": "staging+ci",
+      "evidence": [
+        "E4a",
+        "E4b",
+        "E3"
+      ]
+    },
+    {
+      "id": "CV-04",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "28b483f→f25911b",
+      "environment": "staging+source",
+      "evidence": [
+        "E4",
+        "E6"
+      ],
+      "reason": "FRIENDS 승인본 public object 0, friend Presigned URL, nonfriend 404, createSignedUrls 1회 batch"
+    },
+    {
+      "id": "CV-05",
+      "requirementType": "PGTAP",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "staging pgTAP",
+      "evidence": [
+        "E23"
+      ],
+      "reason": "정확한 6상태·미정의 상태 거부·APPROVED field constraint 포함 17/17"
+    },
+    {
+      "id": "CV-06",
+      "requirementType": "PGTAP",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "staging pgTAP+Preview E2E",
+      "evidence": [
+        "E23",
+        "E24"
+      ],
+      "reason": "전이·주체 오류와 이전 승인본 SUPERSEDED, 타인 finalize 404·무변경"
+    },
+    {
+      "id": "CV-07",
+      "requirementType": "PGTAP",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "staging pgTAP",
+      "evidence": [
+        "E25"
+      ],
+      "reason": "ABANDONED_UPLOAD와 기존 3사유 보존, 24/24"
+    },
+    {
+      "id": "CV-08",
+      "requirementType": "PGTAP",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "staging pgTAP",
+      "evidence": [
+        "E25"
+      ],
+      "reason": "25h만 DELETED, 다른 상태·active 불변, PENDING queue, object 잔존"
+    },
+    {
+      "id": "CV-09",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "CV-10",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "CV-11",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "CV-12",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "CV-13",
+      "requirementType": "PGTAP",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "EA-01",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "EA-02",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "EA-03",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "EA-04",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-runtime",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "CS-01",
+      "requirementType": "CONTRACT",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci-pgtap",
+      "evidence": [
+        "E3"
+      ]
+    },
+    {
+      "id": "CS-02",
+      "requirementType": "CONTRACT",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "source+staging contract",
+      "evidence": [
+        "E28"
+      ],
+      "reason": "페이지 RPC 1회, 앱 목표별 RPC 0, SQL grouped summary"
+    },
+    {
+      "id": "CS-03",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E36"
+      ],
+      "reason": "응원 0명은 빈 상태, 응원 존재 목표는 summary bar를 렌더함"
+    },
+    {
+      "id": "CS-04",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview+CI pgTAP",
+      "evidence": [
+        "E3",
+        "E17a"
+      ],
+      "reason": "익명 응답 null 계약, 무채색 ? 자리표시, 프로필 링크 0, 이동 불가 이유 title 확인"
+    },
+    {
+      "id": "VO-01",
+      "requirementType": "LINT",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "source-lint",
+      "evidence": [
+        "E39"
+      ],
+      "reason": "검사 대상 직접 제품 문구 0"
+    },
+    {
+      "id": "VO-02",
+      "requirementType": "LINT",
+    "verdict": "PASS",
+    "sourceSha": "b875db8",
+    "environment": "product voice source lint",
+      "evidence": [
+      "E49"
+      ],
+    "reason": "제품 직접 카피 0, 제품 말투 위반 0. 전체 단위 회귀나 E2E 전체 재실행 증거는 아님"
+    },
+    {
+      "id": "VO-03",
+      "requirementType": "LINT",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "source-lint",
+      "evidence": [
+        "E39"
+      ],
+      "reason": "제품 voice checker가 공유 규칙 데이터를 import함"
+    },
+    {
+      "id": "VO-04",
+      "requirementType": "CONTRACT",
+    "verdict": "PASS",
+    "sourceSha": "b875db8",
+    "environment": "source contract + Deno/mock + client unit",
+      "evidence": [
+      "E50",
+      "E51",
+      "E52"
+      ],
+    "reason": "3 Edge Function Deno/mock 7/7과 client unit 15/15 PASS. staging Edge Function deployment가 401/403으로 실패하여 deployed runtime은 UNVERIFIED이며 이 PASS는 source contract 범위만 뜻함",
+    "runtimeVerification": "UNVERIFIED_DEPLOY_NOT_APPLIED"
+    },
+    {
+      "id": "AC-01",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E19a",
+        "E19b"
+      ],
+      "reason": "업적 화면의 checkbox·switch·input·button과 등급·받는 사람도 토글 0, cleanup 0"
+    },
+    {
+      "id": "AC-02",
+      "requirementType": "CONTRACT",
+      "verdict": "PASS",
+      "sourceSha": "working-tree assertion over 4e681b5 schema",
+      "environment": "local-pgtap",
+      "evidence": [
+        "E10a",
+        "E10b"
+      ],
+      "reason": "exact three-key set and DB-derived values pass 13/13"
+    },
+    {
+      "id": "AC-03",
+      "requirementType": "PGTAP",
+      "verdict": "PASS",
+      "sourceSha": "working-tree assertion over 4e681b5 schema",
+      "environment": "local-pgtap",
+      "evidence": [
+        "E11a",
+        "E11b"
+      ],
+      "reason": "forbidden preference columns absent and RPC has exactly two notification arguments, 3/3 pass"
+    },
+    {
+      "id": "CP-01",
+      "requirementType": "UNIT",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "local",
+      "evidence": [
+        "E1"
+      ]
+    },
+    {
+      "id": "CP-02",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E17a"
+      ],
+      "reason": "응원 8개는 전부 노출·토글 0, 9개는 8개로 접힘→9개 펼침→8개 재접힘 확인"
+    },
+    {
+      "id": "CP-03",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview",
+      "evidence": [
+        "E27"
+      ],
+      "reason": "회원·관리자 렌더 접기 영역 전수에서 토글 1·SVG 1·visible text 0"
+    },
+    {
+      "id": "CP-04",
+      "requirementType": "LINT",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "local",
+      "evidence": [
+        "E1"
+      ]
+    },
+    {
+      "id": "CP-05",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E36"
+      ],
+      "reason": "D-049가 요구하는 관리자 member disclosure와 일반 정책의 선언된 접기 영역만 존재, 미선언 접기 0"
+    },
+    {
+      "id": "CL-01",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "a0cb0a3→f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E43"
+      ],
+      "reason": "목표 관리의 2줄 clamp를 펼친 뒤 다시 접는 왕복 동작 PASS, fixture cleanup 0"
+    },
+    {
+      "id": "CL-02",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E43"
+      ],
+      "reason": "해낼게 관리의 2줄 clamp를 펼친 뒤 다시 접는 왕복 동작 PASS, fixture cleanup 0"
+    },
+    {
+      "id": "CL-03",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E43"
+      ],
+      "reason": "친구 목록의 2줄 clamp를 펼친 뒤 다시 접는 왕복 동작 PASS, fixture cleanup 0"
+    },
+    {
+      "id": "CL-04",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f36d0bc",
+      "environment": "Preview",
+      "evidence": [
+        "E43"
+      ],
+      "reason": "친구 상세의 2줄 clamp를 펼친 뒤 다시 접는 왕복 동작 PASS, fixture cleanup 0"
+    },
+    {
+      "id": "AU-01",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911bdd61e744f558ee256dce194b08a12c2d4",
+      "environment": "preview-raw-http",
+      "evidence": [
+        "E13"
+      ],
+      "reason": "all seven exact routes and six protected prefixes return 307, 15 bytes, and zero member-shell markers"
+    },
+    {
+      "id": "AU-02",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911bdd61e744f558ee256dce194b08a12c2d4",
+      "environment": "preview-raw-http",
+      "evidence": [
+        "E13"
+      ],
+      "reason": "/me is a 15-byte text/plain redirect with zero HTML tags, NEXT_REDIRECT, meta refresh, or member-shell HTML"
+    },
+    {
+      "id": "AU-03",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "28b483f→4e681b5",
+      "environment": "staging",
+      "evidence": [
+        "E4a",
+        "E4b"
+      ]
+    },
+    {
+      "id": "AU-05",
+      "requirementType": "E2E_WRITE",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "Preview+staging contract",
+      "evidence": [
+        "E31",
+        "E32"
+      ],
+      "reason": "쿠키 없는 Next-Action 재전송 거부·무변경, 6 RPC auth guard"
+    },
+    {
+      "id": "AU-04",
+      "requirementType": "LINT",
+      "verdict": "PASS",
+      "sourceSha": "4e681b5",
+      "environment": "ci",
+      "evidence": [
+        "E2b"
+      ]
+    },
+    {
+      "id": "FD-01",
+      "requirementType": "PGTAP",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "staging pgTAP+staging E2E",
+      "evidence": [
+        "E33",
+        "E4"
+      ],
+      "reason": "cheer origin canonical ACTIVE 1행·origin_invite_id NULL·멱등, 동시 invite 1행"
+    },
+    {
+      "id": "FD-02",
+      "requirementType": "CONTRACT",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "staging pgTAP",
+      "evidence": [
+        "E26"
+      ],
+      "reason": "3방향 exact, 금액 필드 0, 저장 direction column 0, 8/8"
+    },
+    {
+      "id": "FD-03",
+      "requirementType": "E2E_READ",
+      "verdict": "PASS",
+      "sourceSha": "f25911b",
+      "environment": "staging pgTAP+Preview E2E",
+      "evidence": [
+        "E33",
+        "E26"
+      ],
+      "reason": "backfill ACTIVE, 목록·상세 방향 표시, 해제 후 양측 FRIENDS 조회 거부"
+    }
+  ],
+  "separateDenominators": {
+    "v1_1_inheritance": {
+      "declaredMinimum": 63,
+      "extractedUniqueIds": 71,
+      "mapped": 0,
+      "status": "UNVERIFIED_DENOMINATOR_CONFLICT"
+    },
+    "design": {
+      "totalScreens": 9,
+      "match": null,
+      "mismatch": null,
+      "unverified": null,
+      "matchRatePct": null,
+      "status": "NO_GO",
+      "evidence": [
+        "E54"
+      ],
+      "reason": "All 9 approved/dev pairs were read, but no forced 0/3/6 totals are valid. P1 fixed CTA regression and remaining UI differences/dataset normalization keep designApproved=false."
+    }
+  },
+  "externalAuth": {
+    "kakaoCallbackObserved": false,
+    "countedAsPass": false,
+    "allowedSubstitute": "storage-state/test auth adapter plus redirect smoke"
+  },
+  "guarantees": "Each case records only its stated source/environment evidence. b875db8 remediation directly covers LG-05, SP-01, SP-04, VO-02 and VO-04 source contract; VO-04 deployed runtime is not verified.",
+  "doesNotGuarantee": [
+    "a latest-Preview execution of all 57 TC",
+    "overall QA approval",
+    "actual Kakao OAuth callback",
+    "actual Toss callback",
+    "v1.1.0 inheritance",
+    "visual conformance",
+    "staging Edge Function deployment/runtime"
+  ]
+}

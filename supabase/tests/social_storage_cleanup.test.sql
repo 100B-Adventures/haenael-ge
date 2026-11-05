@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(23);
+SELECT plan(24);
 
 INSERT INTO auth.users(
   id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,
@@ -27,6 +27,19 @@ SELECT ok(
 );
 
 SELECT ok(
+  EXISTS(
+    SELECT 1
+    FROM pg_catalog.pg_constraint
+    WHERE conname = 'storage_cleanup_queue_reason_check'
+      AND pg_get_constraintdef(oid) LIKE '%VISIBILITY_DOWNGRADE%'
+      AND pg_get_constraintdef(oid) LIKE '%ASSET_REPLACED%'
+      AND pg_get_constraintdef(oid) LIKE '%ASSET_REJECTED%'
+      AND pg_get_constraintdef(oid) LIKE '%ABANDONED_UPLOAD%'
+  ),
+  'CV-07 기존 정리 사유 3종을 보존하고 ABANDONED_UPLOAD를 함께 허용한다'
+);
+
+SELECT ok(
   (SELECT count(*)=4 FROM pg_catalog.pg_proc p
    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
    WHERE n.nspname='public' AND p.proname IN (
@@ -46,19 +59,35 @@ SELECT ok(
 );
 
 INSERT INTO public.goal_cover_asset(
-  id,goal_id,owner_member_id,quarantine_path,status,content_sha256,mime_type,byte_size,created_at
+  id,goal_id,owner_member_id,quarantine_path,status,content_sha256,mime_type,byte_size,created_at,
+  reviewed_by,reviewed_at,rejection_code,public_path
 )
 VALUES
-  ('55100000-0000-0000-0000-000000000001',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/old.webp','UPLOADING',repeat('a',64),'image/webp',10,now()-interval '25 hours'),
-  ('55100000-0000-0000-0000-000000000002',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/recent.webp','UPLOADING',repeat('b',64),'image/webp',10,now()-interval '23 hours'),
-  ('55100000-0000-0000-0000-000000000003',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/review.webp','REVIEW',repeat('c',64),'image/webp',10,now()-interval '25 hours');
+  ('55100000-0000-0000-0000-000000000001',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/old.webp','UPLOADING',repeat('a',64),'image/webp',10,now()-interval '25 hours',NULL,NULL,NULL,NULL),
+  ('55100000-0000-0000-0000-000000000002',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/recent.webp','UPLOADING',repeat('b',64),'image/webp',10,now()-interval '23 hours',NULL,NULL,NULL,NULL),
+  ('55100000-0000-0000-0000-000000000003',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/review.webp','REVIEW',repeat('c',64),'image/webp',10,now()-interval '25 hours',NULL,NULL,NULL,NULL),
+  ('55100000-0000-0000-0000-000000000004',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/approved.webp','APPROVED',repeat('d',64),'image/webp',10,now()-interval '25 hours','55000000-0000-0000-0000-000000000001',now(),NULL,'cleanup/approved-public.webp'),
+  ('55100000-0000-0000-0000-000000000005',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/rejected.webp','REJECTED',repeat('e',64),'image/webp',10,now()-interval '25 hours','55000000-0000-0000-0000-000000000001',now(),'other',NULL),
+  ('55100000-0000-0000-0000-000000000006',(SELECT id FROM public.goal WHERE slug='cleanup-goal'),'55000000-0000-0000-0000-000000000001','cleanup/superseded.webp','SUPERSEDED',repeat('f',64),'image/webp',10,now()-interval '25 hours',NULL,NULL,NULL,NULL);
+
+UPDATE public.goal
+SET active_cover_asset_id='55100000-0000-0000-0000-000000000004'
+WHERE slug='cleanup-goal';
+
+INSERT INTO storage.objects(id,bucket_id,name,owner_id,metadata)
+VALUES(gen_random_uuid(),'goal-cover-quarantine','cleanup/old.webp','55000000-0000-0000-0000-000000000001','{}'::jsonb);
 
 SELECT is(public.purge_abandoned_goal_covers(),1,'CV-08 25시간 UPLOADING 한 건만 정리한다');
 SELECT ok(
   (SELECT status='DELETED' FROM public.goal_cover_asset WHERE id='55100000-0000-0000-0000-000000000001')
   AND (SELECT status='UPLOADING' FROM public.goal_cover_asset WHERE id='55100000-0000-0000-0000-000000000002')
   AND (SELECT status='REVIEW' FROM public.goal_cover_asset WHERE id='55100000-0000-0000-0000-000000000003')
-  AND EXISTS(SELECT 1 FROM public.storage_cleanup_queue WHERE bucket_id='goal-cover-quarantine' AND object_path='cleanup/old.webp' AND reason='ABANDONED_UPLOAD'),
+  AND (SELECT status='APPROVED' FROM public.goal_cover_asset WHERE id='55100000-0000-0000-0000-000000000004')
+  AND (SELECT status='REJECTED' FROM public.goal_cover_asset WHERE id='55100000-0000-0000-0000-000000000005')
+  AND (SELECT status='SUPERSEDED' FROM public.goal_cover_asset WHERE id='55100000-0000-0000-0000-000000000006')
+  AND (SELECT active_cover_asset_id='55100000-0000-0000-0000-000000000004' FROM public.goal WHERE slug='cleanup-goal')
+  AND EXISTS(SELECT 1 FROM public.storage_cleanup_queue WHERE bucket_id='goal-cover-quarantine' AND object_path='cleanup/old.webp' AND reason='ABANDONED_UPLOAD' AND status='PENDING')
+  AND EXISTS(SELECT 1 FROM storage.objects WHERE bucket_id='goal-cover-quarantine' AND name='cleanup/old.webp'),
   'CV-08 상태·시간 경계를 지키고 격리 버킷 큐를 만든다'
 );
 

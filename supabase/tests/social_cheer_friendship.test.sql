@@ -124,12 +124,11 @@ SELECT ok(
 UPDATE public.cheer SET status = 'CONFIRMED'
 WHERE display_name = 'friendship-normal';
 
-SELECT is(
-  (SELECT status FROM public.friend_connection
+SELECT ok(
+  (SELECT status='ACTIVE' AND origin_invite_id IS NULL FROM public.friend_connection
    WHERE member_low_id = '57000000-0000-0000-0000-000000000001'
      AND member_high_id = '57000000-0000-0000-0000-000000000002'),
-  'ACTIVE',
-  'PG-FRIEND-04 확정 응원은 정규화된 양방향 친구 1행을 만든다'
+  'PG-FRIEND-04 확정 응원은 origin_invite_id 없이 정규화된 양방향 ACTIVE 친구 1행을 만든다'
 );
 
 SELECT public.social_connect_cheer_members(cheer.id)

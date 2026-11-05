@@ -14,6 +14,7 @@ import { waitForVisualAssets } from "./support/visual-ready";
 import {
   type Browser,
   type BrowserContext,
+  type Locator,
   type Page,
   expect,
   test,
@@ -51,6 +52,37 @@ async function waitForVisualReady(page: Page, selectors: string[]) {
     });
   }));
   expect(wordmapCollisions, "D-027-E 워드맵 단어 겹침").toEqual([]);
+}
+
+async function expectTwoLineClamp(target: Locator) {
+  await expect(target).toBeVisible();
+  const collapsed = await target.evaluate((element) => ({
+    lineClamp: getComputedStyle(element).webkitLineClamp,
+    clientHeight: element.clientHeight,
+    scrollHeight: element.scrollHeight,
+  }));
+  expect(collapsed.lineClamp).toBe("2");
+  expect(collapsed.scrollHeight).toBeGreaterThan(collapsed.clientHeight + 1);
+  const wrapper = target.locator("xpath=..");
+  await expect(wrapper).toHaveAttribute("data-collapsible", "enabled");
+  const toggle = wrapper.locator("button.collapse-chevron");
+  await expect(toggle).toHaveCount(1);
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle.locator("svg")).toHaveCount(1);
+  expect((await toggle.textContent())?.trim()).toBe("");
+  await toggle.click();
+  const liveToggle = target.page().locator("button.collapse-chevron[aria-expanded='true']");
+  await expect(liveToggle).toHaveCount(1);
+  await expect(liveToggle).toHaveAttribute("aria-expanded", "true");
+  const expanded = await target.evaluate((element) => ({
+    lineClamp: getComputedStyle(element).webkitLineClamp,
+    clientHeight: element.clientHeight,
+    scrollHeight: element.scrollHeight,
+  }));
+  expect(expanded.lineClamp).toBe("none");
+  expect(expanded.clientHeight + 1).toBeGreaterThanOrEqual(expanded.scrollHeight);
+  await liveToggle.click();
+  await expect(target.page().locator("button.collapse-chevron[aria-expanded='true']")).toHaveCount(0);
 }
 
 async function verifyWordmapMotionEnvelope(page: Page) {
@@ -823,11 +855,15 @@ test.describe("V2 web-first social slice", () => {
   let ownerGoal = 0;
   let friendPublicGoal = 0;
   let friendFriendsGoal = 0;
+  let eightCheerGoal = 0;
+  let nineCheerGoal = 0;
   let publicSlug = "";
   let smokeInviteToken = "";
   let smokeInviteId = "";
   const paymentIds: number[] = [];
   const delayedProfileCleanups: Array<{ queueId: number; assetId: string; objectPath: string; availableAt: string }> = [];
+  const ownerLongMessage = "익명으로 남기지만 매일 꾸준히 공부하는 모습을 보고 있어요. 오늘도 한 걸음씩 나아가면 분명히 목표를 해낼 수 있으니 끝까지 함께 응원할게요.";
+  const friendLongMessage = "중간고사 두 과목에서 좋은 결과를 만든 흐름을 그대로 이어가면 이번 학기 평점 목표도 충분히 해낼 수 있어요. 지치지 않게 끝까지 응원할게요.";
 
   test.beforeAll(async () => {
     test.setTimeout(120_000);
@@ -1002,6 +1038,35 @@ test.describe("V2 web-first social slice", () => {
     if (!friendPublicGoal || !friendFriendsGoal) {
       throw new Error("friend_goal_fixture_missing");
     }
+    const { data: collapseGoals, error: collapseGoalsError } = await admin.from("goal")
+      .insert([
+        {
+          member_id: ids.acceptA,
+          slug: `collapse-eight-${runId}`,
+          title: "응원 8개 경계 검증",
+          reason: "접기 정책 8개 경계를 검증해요.",
+          due_date: isoDateFromNow(20),
+          status: "ACTIVE",
+          visibility: "PUBLIC",
+          cover_preset_key: "c1",
+        },
+        {
+          member_id: ids.acceptA,
+          slug: `collapse-nine-${runId}`,
+          title: "응원 9개 경계 검증",
+          reason: "접기 정책 9개 경계를 검증해요.",
+          due_date: isoDateFromNow(21),
+          status: "ACTIVE",
+          visibility: "PUBLIC",
+          cover_preset_key: "c1",
+        },
+      ]).select("id,slug");
+    if (collapseGoalsError || !collapseGoals) {
+      throw collapseGoalsError ?? new Error("collapse_goal_fixture_failed");
+    }
+    eightCheerGoal = collapseGoals.find(({ slug }) => slug === `collapse-eight-${runId}`)?.id ?? 0;
+    nineCheerGoal = collapseGoals.find(({ slug }) => slug === `collapse-nine-${runId}`)?.id ?? 0;
+    if (!eightCheerGoal || !nineCheerGoal) throw new Error("collapse_goal_fixture_missing");
     const extraFriendGoals = [
       {
         member_id: ids.friend2,
@@ -1069,15 +1134,15 @@ test.describe("V2 web-first social slice", () => {
     );
     if (acceptedPanelError) throw acceptedPanelError;
     const ownerCheerFixtures = [
-      ...Array.from({ length: 15 }, (_, index) => ({
+      ...Array.from({ length: 19 }, (_, index) => ({
         displayName: `응원자${index + 1}`,
         message: ["꾸준함", "용기", "성장"][index % 3],
         createdAt: new Date(Date.now() - (index + 8) * 86_400_000).toISOString(),
       })),
       {
         displayName: "익명의 누군가",
-        message: "끝까지 응원할게요",
-        createdAt: new Date(Date.now() - 5 * 86_400_000).toISOString(),
+        message: ownerLongMessage,
+        createdAt: new Date(Date.now() - 60 * 60_000).toISOString(),
       },
       {
         displayName: "서연",
@@ -1086,8 +1151,13 @@ test.describe("V2 web-first social slice", () => {
       },
       {
         displayName: "윤도경",
-        message: "도서관에서 같이 힘낸다, 넌 할 수 있어",
+        message: friendLongMessage,
         createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+      },
+      {
+        displayName: "정민서",
+        message: "오늘 정한 분량까지 같이 해내자",
+        createdAt: new Date(Date.now() - 4 * 3_600_000).toISOString(),
       },
     ];
     const cheerTargets = [
@@ -1095,8 +1165,20 @@ test.describe("V2 web-first social slice", () => {
       ...Array.from({ length: 13 }, (_, index) => ({
         goalId: friendPublicGoal,
         displayName: `도경 응원자${index + 1}`,
-        message: ["꾸준히", "해낼 수 있어", "끝까지"][index % 3],
+        message: index === 0 ? friendLongMessage : ["꾸준히", "해낼 수 있어", "끝까지"][index % 3],
         createdAt: new Date(Date.now() - (index + 1) * 86_400_000).toISOString(),
+      })),
+      ...Array.from({ length: 8 }, (_, index) => ({
+        goalId: eightCheerGoal,
+        displayName: `8경계${index + 1}`,
+        message: `8개 경계 응원 ${index + 1}`,
+        createdAt: new Date(Date.now() - (index + 1) * 60_000).toISOString(),
+      })),
+      ...Array.from({ length: 9 }, (_, index) => ({
+        goalId: nineCheerGoal,
+        displayName: `9경계${index + 1}`,
+        message: `9개 경계 응원 ${index + 1}`,
+        createdAt: new Date(Date.now() - (index + 1) * 60_000).toISOString(),
       })),
     ];
     for (let index = 0; index < cheerTargets.length; index += 1) {
@@ -1127,6 +1209,8 @@ test.describe("V2 web-first social slice", () => {
         ? ids.friend
         : fixture.goalId === ownerGoal && fixture.displayName === "서연"
         ? ids.friend2
+        : fixture.goalId === ownerGoal && fixture.displayName === "정민서"
+        ? ids.friend3
         : fixture.goalId === friendPublicGoal && index === ownerCheerFixtures.length
         ? ids.owner
         : null;
@@ -3292,6 +3376,818 @@ test.describe("V2 web-first social slice", () => {
     }
   });
 
+  test("QA-TC-LG-01 노출 표에 없는 화면은 법적 고지 DOM이 0개다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of [
+      "/me",
+      `/me/goal/${ownerGoal}`,
+      "/me/achievements",
+      "/friends",
+      `/friends/${ids.friend}`,
+      `/friends/${ids.friend}/wordmap`,
+      "/invite",
+      `/wordmap/${ownerGoal}`,
+      "/cashout",
+      "/cashout/history",
+      "/cashout/status",
+    ]) {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      await expect(page.getByTestId("legal-footer"), route).toHaveCount(0);
+      await expect(page.locator(".my-policy-links"), route).toHaveCount(0);
+      await expect(page.getByTestId("business-information"), route).toHaveCount(0);
+    }
+    await context.close();
+
+    const adminContext = await authContext(browser, emails.admin);
+    const adminPage = await adminContext.newPage();
+    await adminPage.goto("/admin", { waitUntil: "domcontentloaded" });
+    await expect(adminPage.getByTestId("legal-footer")).toHaveCount(0);
+    await expect(adminPage.locator(".my-policy-links")).toHaveCount(0);
+    await expect(adminPage.getByTestId("business-information")).toHaveCount(0);
+    await adminContext.close();
+
+    const guestPage = await newRemotePage(browser, { viewport: { width: 390, height: 844 } });
+    for (const route of [
+      "/",
+      "/how",
+      "/onboarding",
+      "/child-safety",
+      "/payment/success",
+      "/payment/fail",
+      `/g/${publicSlug}`,
+      `/invite/${smokeInviteToken}`,
+    ]) {
+      await guestPage.goto(route, { waitUntil: "domcontentloaded" });
+      await expect(guestPage.getByTestId("legal-footer"), route).toHaveCount(0);
+      await expect(guestPage.locator(".my-policy-links"), route).toHaveCount(0);
+      await expect(guestPage.getByTestId("business-information"), route).toHaveCount(0);
+    }
+    await guestPage.close();
+  });
+
+  test("QA-TC-LG-02 하단탭 화면 전수에 법적 고지 블록과 링크 나열이 0개다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of [
+      "/me",
+      `/me/goal/${ownerGoal}`,
+      "/me/achievements",
+      "/friends",
+      `/friends/${ids.friend}`,
+      `/friends/${ids.friend}/wordmap`,
+      "/invite",
+      `/wordmap/${ownerGoal}`,
+      "/my",
+    ]) {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      await expect(page.getByTestId("receiver-bottom-nav"), route).toBeVisible();
+      await expect(page.getByTestId("legal-footer"), route).toHaveCount(0);
+      await expect(page.locator(".my-policy-links"), route).toHaveCount(0);
+      await expect(page.getByTestId("business-information"), route).toHaveCount(0);
+    }
+    await context.close();
+
+    const guestPage = await newRemotePage(browser, { viewport: { width: 390, height: 844 } });
+    for (const route of ["/", `/g/${publicSlug}`, `/invite/${smokeInviteToken}`]) {
+      await guestPage.goto(route, { waitUntil: "domcontentloaded" });
+      await expect(guestPage.getByTestId("receiver-bottom-nav"), route).toBeVisible();
+      await expect(guestPage.getByTestId("legal-footer"), route).toHaveCount(0);
+      await expect(guestPage.locator(".my-policy-links"), route).toHaveCount(0);
+    }
+    await guestPage.close();
+  });
+
+  test("QA-TC-LG-03 마이페이지 한 단계 아래가 사업자 정보 전문을 소유한다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/my", { waitUntil: "domcontentloaded" });
+    const legalLinks = page.locator(".my-policy-links");
+    await expect(legalLinks.getByRole("link")).toHaveCount(3);
+    await expect(legalLinks.getByRole("link")).toHaveText(["이용약관", "개인정보처리방침", "사업자 정보"]);
+    await expect(page.getByTestId("business-information")).toHaveCount(0);
+    await legalLinks.getByRole("link", { name: "사업자 정보" }).click();
+    await expect(page).toHaveURL(/\/my\/legal$/);
+    const information = page.getByTestId("business-information");
+    await expect(information).toBeVisible();
+    await expect(information.locator("dt")).toHaveText([
+      "상호",
+      "대표자",
+      "사업자등록번호",
+      "주소",
+      "이메일",
+      "개인정보보호책임자",
+    ]);
+    await page.goto("/how", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("business-information")).toHaveCount(0);
+    await expect(page.locator(".my-policy-links")).toHaveCount(0);
+    await context.close();
+  });
+
+  test("QA-TC-GT-02 회원 전용 탭 미리보기는 서버 호출 0건이고 클라이언트 상수를 쓴다", async ({ browser }) => {
+    const page = await newRemotePage(browser, { viewport: { width: 390, height: 844 } });
+    await page.goto("/", { waitUntil: "networkidle" });
+    const requests: string[] = [];
+    page.on("request", (request) => {
+      if (["fetch", "xhr"].includes(request.resourceType())) requests.push(request.url());
+    });
+    await page.getByTestId("receiver-bottom-nav").getByRole("button", { name: "친구" }).click();
+    await expect(page.getByTestId("guest-teaser-sheet")).toBeVisible();
+    await page.waitForTimeout(250);
+    expect(requests).toEqual([]);
+    const sourceSha = requiredEnv("GITHUB_SHA");
+    const previewSource = execFileSync("git", [
+      "show",
+      `${sourceSha}:web/src/lib/copy/guest-preview.ts`,
+    ], { encoding: "utf8" });
+    expect(previewSource).toContain("GUEST_PREVIEW");
+    let rpcReferences = "";
+    try {
+      rpcReferences = execFileSync("git", [
+        "grep",
+        "-n",
+        "platform_social_stats",
+        sourceSha,
+        "--",
+        "web/src",
+        "supabase",
+      ], { encoding: "utf8" });
+    } catch (error) {
+      const status = (error as { status?: number }).status;
+      if (status !== 1) throw error;
+    }
+    expect(rpcReferences).toBe("");
+    await page.close();
+  });
+
+  test("QA-TC-GT-03 비회원 예시 시트는 자물쇠와 흐림 없이 두 행동을 제공한다", async ({ browser }) => {
+    const page = await newRemotePage(browser, { viewport: { width: 390, height: 844 } });
+    await page.goto("/", { waitUntil: "networkidle" });
+    const friendTab = page.getByTestId("receiver-bottom-nav").getByRole("button", { name: "친구" });
+    await expect.poll(() => friendTab.evaluate((element) =>
+      Object.keys(element).some((key) => key.startsWith("__reactProps$"))
+    )).toBe(true);
+    await friendTab.click();
+    const dialog = page.getByTestId("guest-teaser-sheet");
+    await expect(dialog).toHaveAttribute("role", "dialog");
+    await expect(dialog).toHaveAttribute("aria-modal", "true");
+    await expect(dialog.getByRole("link", { name: "카카오로 시작하기" })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "먼저 둘러보기" })).toBeVisible();
+    await expect(dialog.locator('[aria-label="예시 목표"]')).toBeVisible();
+    await expect(dialog).not.toContainText(/자물쇠|잠금/);
+    const styleAudit = await dialog.evaluate((element) => ({
+      blurred: Array.from(element.querySelectorAll<HTMLElement>("*")).filter((node) => {
+        const filter = getComputedStyle(node).filter;
+        return filter !== "none" && /blur\(/.test(filter);
+      }).length,
+      lockToken: getComputedStyle(document.documentElement).getPropertyValue("--tabbar-lock-size").trim(),
+    }));
+    expect(styleAudit.blurred).toBe(0);
+    expect(styleAudit.lockToken).toBe("");
+    await page.close();
+  });
+
+  test("QA-TC-GT-01 비회원 초대와 공개 목표 응답은 최소 필드만 노출한다", async ({ browser }) => {
+    const guestClient = createClient(SUPABASE_URL, ANON_KEY, {
+      auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
+    });
+    const { data: preview, error: previewError } = await guestClient.rpc(
+      "friend_invite_preview",
+      { token: smokeInviteToken },
+    );
+    expect(previewError).toBeNull();
+    expect(preview).not.toBeNull();
+    expect(Object.keys(preview as Record<string, unknown>).sort()).toEqual([
+      "cover_preset_key",
+      "goal_title",
+      "inviter_nickname",
+    ]);
+
+    const page = await newRemotePage(browser, { viewport: { width: 390, height: 844 } });
+    const forbidden = [
+      "supporter_ci", "provider_id", "token_hash", "quarantine_path",
+      "amount_krw", "clover_amount", "member_id", "goal_id",
+    ];
+    for (const route of [`/invite/${smokeInviteToken}`, `/g/${publicSlug}`]) {
+      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+      expect(response?.status(), route).toBe(200);
+      await expect(page.locator("main"), route).not.toBeEmpty();
+      const transferred = `${await response!.text()}\n${await page.locator("html").innerText()}`;
+      for (const key of forbidden) expect(transferred, `${route}:${key}`).not.toContain(key);
+    }
+    await expect(page.getByTestId("goal-public-page")).toContainText("토익 900");
+    await expect(page.getByTestId("goal-reason")).toBeVisible();
+
+    for (const slug of [`friend-friends-${runId}`, `friend-private-${runId}`]) {
+      const response = await page.goto(`/g/${slug}`, { waitUntil: "domcontentloaded" });
+      expect(response?.status(), slug).toBe(404);
+      await expect(page.getByTestId("goal-public-page")).toHaveCount(0);
+    }
+    await page.close();
+  });
+
+  test("QA-TC-SP-03 공개 목표의 고정 CTA 자리 예약은 토큰과 일치하고 본문을 가리지 않는다", async ({ browser }) => {
+    const page = await newRemotePage(browser, { viewport: { width: 390, height: 844 } });
+    await page.goto(`/g/${publicSlug}`, { waitUntil: "domcontentloaded" });
+    const main = page.getByTestId("goal-public-page");
+    const action = page.locator(".receiver-fixed-action.receiver-public-action");
+    const bottomNav = page.getByTestId("receiver-bottom-nav");
+    await expect(action).toBeVisible();
+    await expect(bottomNav).toBeVisible();
+    const measure = async () => page.evaluate(() => {
+      const mainElement = document.querySelector<HTMLElement>("[data-testid='goal-public-page']")!;
+      const content = mainElement.querySelector<HTMLElement>(".goal-public-content")!;
+      const fixed = mainElement.querySelector<HTMLElement>(".receiver-fixed-action")!;
+      const bottomNav = document.querySelector<HTMLElement>("[data-testid='receiver-bottom-nav']")!;
+      const token = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--cta-h"));
+      const mainStyle = getComputedStyle(mainElement);
+      const fixedRect = fixed.getBoundingClientRect();
+      const bottomNavRect = bottomNav.getBoundingClientRect();
+      const visibleTextRects: Array<{ rect: DOMRect; parent: Element }> = [];
+      const textNodes = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+      const backgroundIsOpaque = (element: Element) => {
+        const { backgroundColor, opacity } = getComputedStyle(element);
+        if (Number(opacity) < 0.99 || backgroundColor === "transparent") return false;
+        const rgba = backgroundColor.match(/^rgba?\((.+)\)$/)?.[1]?.split(",").map((part) => Number(part.trim()));
+        return Boolean(rgba && (rgba.length < 4 || rgba[3] >= 0.99));
+      };
+      const isClippedOut = (rect: DOMRect, element: Element) => {
+        let clipTop = 0;
+        let clipRight = window.innerWidth;
+        let clipBottom = window.innerHeight;
+        let clipLeft = 0;
+        for (let ancestor: Element | null = element; ancestor; ancestor = ancestor.parentElement) {
+          const style = getComputedStyle(ancestor);
+          if (!["hidden", "clip", "scroll", "auto"].includes(style.overflowX)
+            && !["hidden", "clip", "scroll", "auto"].includes(style.overflowY)) continue;
+          const ancestorRect = ancestor.getBoundingClientRect();
+          if (["hidden", "clip", "scroll", "auto"].includes(style.overflowX)) {
+            clipLeft = Math.max(clipLeft, ancestorRect.left);
+            clipRight = Math.min(clipRight, ancestorRect.right);
+          }
+          if (["hidden", "clip", "scroll", "auto"].includes(style.overflowY)) {
+            clipTop = Math.max(clipTop, ancestorRect.top);
+            clipBottom = Math.min(clipBottom, ancestorRect.bottom);
+          }
+        }
+        return rect.right <= clipLeft || rect.left >= clipRight || rect.bottom <= clipTop || rect.top >= clipBottom;
+      };
+      for (let node = textNodes.nextNode(); node; node = textNodes.nextNode()) {
+        if (!node.textContent?.trim()) continue;
+        const parent = node.parentElement;
+        if (!parent) continue;
+        const style = getComputedStyle(parent);
+        if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        visibleTextRects.push(...[...range.getClientRects()]
+          .filter((rect) => !isClippedOut(rect, parent))
+          .map((rect) => ({ rect, parent })));
+      }
+      const viewportTextRects = visibleTextRects.filter(({ rect }) => rect.width > 0 && rect.height > 0
+        && rect.bottom > 0 && rect.top < window.innerHeight
+        && rect.right > 0 && rect.left < window.innerWidth);
+      const visibleTextOverlap = viewportTextRects.some(({ rect, parent }) => {
+        if (!(rect.left < fixedRect.right && rect.right > fixedRect.left
+          && rect.top < fixedRect.bottom && rect.bottom > fixedRect.top)) return false;
+        const probeX = (Math.max(rect.left, fixedRect.left) + Math.min(rect.right, fixedRect.right)) / 2;
+        const probeY = (Math.max(rect.top, fixedRect.top) + Math.min(rect.bottom, fixedRect.bottom)) / 2;
+        const stack = document.elementsFromPoint(probeX, probeY);
+        const actionIndex = stack.findIndex((element) => element === fixed || fixed.contains(element));
+        const textIndex = stack.findIndex((element) => element === parent || parent.contains(element) || element.contains(parent));
+        // Range는 불투명 CTA 뒤의 글자도 준다. 실제로 읽히는 경우만 실패로 본다:
+        // 투명 CTA 뒤의 글자, 또는 CTA보다 위 z-index로 paint된 본문 텍스트.
+        return !backgroundIsOpaque(fixed) || (actionIndex >= 0 && textIndex >= 0 && textIndex < actionIndex);
+      });
+      return {
+        token,
+        reserved: Number.parseFloat(mainStyle.paddingBottom),
+        fixedHeight: fixedRect.height,
+        position: getComputedStyle(fixed).position,
+        actionInViewport: fixedRect.top >= 0 && fixedRect.bottom <= window.innerHeight,
+        actionAboveBottomNav: fixedRect.bottom <= bottomNavRect.top + 1,
+        ctaReservation: Number.parseFloat(mainStyle.paddingBottom) - bottomNavRect.height,
+        viewportTextCount: viewportTextRects.length,
+        visibleTextOverlap,
+      };
+    });
+    const top = await measure();
+    expect(["fixed", "sticky"]).toContain(top.position);
+    expect(top.actionInViewport).toBe(true);
+    expect(top.actionAboveBottomNav).toBe(true);
+    expect(top.fixedHeight).toBe(top.token);
+    expect(top.ctaReservation).toBe(top.token);
+    expect(top.visibleTextOverlap).toBe(false);
+    await main.evaluate((element) => element.scrollTo(0, element.scrollHeight));
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const end = await measure();
+    expect(["fixed", "sticky"]).toContain(end.position);
+    expect(end.actionInViewport).toBe(true);
+    expect(end.actionAboveBottomNav).toBe(true);
+    expect(end.fixedHeight).toBe(end.token);
+    expect(end.ctaReservation).toBe(end.token);
+    expect(end.viewportTextCount).toBeGreaterThan(0);
+    expect(end.visibleTextOverlap).toBe(false);
+    await page.close();
+  });
+
+  test("QA-TC-AC-01 업적 화면에는 등급 공개 토글이 없다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/me/achievements", { waitUntil: "domcontentloaded" });
+    const achievements = page.getByTestId("achievements-page");
+    await expect(achievements).toBeVisible();
+    await expect(achievements.getByRole("checkbox")).toHaveCount(0);
+    await expect(achievements.getByRole("switch")).toHaveCount(0);
+    await expect(achievements.locator("input")).toHaveCount(0);
+    await expect(achievements.locator("button")).toHaveCount(0);
+    await expect(achievements.locator("button").filter({ hasText: /등급|받는 사람도/ })).toHaveCount(0);
+    await context.close();
+  });
+
+  test("QA-TC-CP-02-03 응원 목록은 8개에서 펼치고 9개부터 꺾쇠 하나로 왕복한다", async ({ browser }) => {
+    const context = await authContext(browser, emails.acceptA);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/me/goal/${eightCheerGoal}`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("goal-supporter-list").locator(":scope > article")).toHaveCount(8);
+    const eightCard = page.getByTestId("goal-supporter-card");
+    await expect(eightCard.locator('[data-collapsible="enabled"]')).toHaveCount(0);
+    await expect(eightCard.locator(".collapse-chevron")).toHaveCount(0);
+
+    await page.goto(`/me/goal/${nineCheerGoal}`, { waitUntil: "domcontentloaded" });
+    const nineCard = page.getByTestId("goal-supporter-card");
+    const toggle = nineCard.locator(".collapse-chevron");
+    await expect(page.getByTestId("goal-supporter-list").locator(":scope > article")).toHaveCount(8);
+    await expect(toggle).toHaveCount(1);
+    await expect(toggle.locator("svg")).toHaveCount(1);
+    expect((await toggle.textContent())?.trim()).toBe("");
+    await expect(nineCard).not.toContainText(/더보기|접기/);
+    await toggle.click();
+    await expect(page.getByTestId("goal-supporter-list").locator(":scope > article")).toHaveCount(9);
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await toggle.click();
+    await expect(page.getByTestId("goal-supporter-list").locator(":scope > article")).toHaveCount(8);
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await context.close();
+  });
+
+  test("QA-TC-CL-01 목표 관리의 긴 응원은 2줄에서 펼치고 다시 접힌다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
+    await expectTwoLineClamp(
+      page.getByTestId("goal-supporter-list").locator("article").filter({ hasText: ownerLongMessage }).locator("p"),
+    );
+    await context.close();
+  });
+
+  test("QA-TC-CL-02 해낼게 관리의 긴 응원은 2줄에서 펼치고 다시 접힌다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/my", { waitUntil: "domcontentloaded" });
+    await expectTwoLineClamp(page.locator(".my-cheer-message").filter({ hasText: ownerLongMessage }));
+    await context.close();
+  });
+
+  test("QA-TC-CL-03 친구 목록의 긴 응원은 2줄에서 펼치고 다시 접힌다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/friends", { waitUntil: "domcontentloaded" });
+    const card = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+    await expectTwoLineClamp(card.locator(".friend-list-news-message").filter({ hasText: friendLongMessage }));
+    await context.close();
+  });
+
+  test("QA-TC-CL-04 친구 상세의 긴 응원은 2줄에서 펼치고 다시 접힌다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`, { waitUntil: "domcontentloaded" });
+    await expectTwoLineClamp(page.locator(".friend-recent-cheer p").filter({ hasText: friendLongMessage }));
+    await context.close();
+  });
+
+  test("QA-TC-CS-03-04 23명 요약은 아바타 3개와 +20이고 익명은 비활성 자리표시다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/me", { waitUntil: "domcontentloaded" });
+    const summary = page.getByTestId("cheer-summary-bar").filter({ hasText: "23명이 응원했어요" });
+    await expect(summary).toBeVisible();
+    await expect(summary.locator(".cheer-summary-avatars > span")).toHaveCount(3);
+    await expect(summary.locator(".cheer-summary-avatars > strong")).toHaveText("+20");
+    await expect(summary.locator(".cheer-summary-recent")).toContainText(`익명의 누군가: ${ownerLongMessage}`);
+    const anonymousAvatar = summary.locator('.cheer-summary-avatars > span[title="익명 응원이라 프로필을 열 수 없어요."]');
+    await expect(anonymousAvatar).toHaveCount(1);
+    await expect(anonymousAvatar).toHaveText("?");
+    await expect(anonymousAvatar.locator("a")).toHaveCount(0);
+    await context.close();
+  });
+
+  test("QA-TC-CS-03 응원 0명 목표는 요약 바 대신 빈 상태를 보인다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/me", { waitUntil: "domcontentloaded" });
+    const zeroCard = page.getByTestId("my-goal-list-card").filter({ hasText: "매일 영어 단어 30개" });
+    await expect(zeroCard).toBeVisible();
+    await expect(zeroCard.getByTestId("cheer-summary-bar")).toHaveCount(0);
+    await expect(zeroCard).toContainText(/아직 응원이 없|첫 응원을 기다|응원을 기다/);
+    await context.close();
+  });
+
+  test("QA-TC-CP-05 정책과 ADR에 선언되지 않은 실제 접힘이 없다", async ({ browser }) => {
+    const inspectUndeclared = async (page: Page, route: string) => {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      return page.locator("[data-collapsible='enabled']").evaluateAll((regions) => regions.flatMap((region) => {
+        const declared = region.classList.contains("admin-member-disclosure")
+          || region.querySelector(".clamp-text, #receiver-cheer-list, #goal-supporter-list") !== null;
+        return declared ? [] : [{ route: location.pathname, className: region.className }];
+      }));
+    };
+    const undeclared: Array<{ route: string; className: string }> = [];
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of ["/me", `/me/goal/${ownerGoal}`, "/friends", `/friends/${ids.friend}`, "/my"])
+      undeclared.push(...await inspectUndeclared(page, route));
+    await context.close();
+
+    const adminContext = await authContext(browser, emails.admin);
+    const adminPage = await adminContext.newPage();
+    await adminPage.setViewportSize({ width: 390, height: 844 });
+    undeclared.push(...await inspectUndeclared(adminPage, "/admin"));
+    const memberCards = adminPage.locator(".admin-member-card");
+    const memberDisclosures = adminPage.locator(".admin-member-disclosure[data-collapsible='enabled']");
+    expect(await memberDisclosures.count()).toBe(await memberCards.count());
+    expect(await memberDisclosures.count()).toBeGreaterThan(0);
+    expect(undeclared).toEqual([]);
+    await adminContext.close();
+  });
+
+  test("QA-TC-CP-03 렌더된 접기 토글 전수는 텍스트 없는 꺾쇠 하나다", async ({ browser }) => {
+    const inspect = async (page: Page, route: string) => {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      return page.locator("[data-collapsible='enabled']").evaluateAll((regions) => regions.map((region) => {
+        const toggles = Array.from(region.querySelectorAll<HTMLElement>(":scope > button.collapse-chevron"));
+        return {
+          toggles: toggles.length,
+          svg: toggles[0]?.querySelectorAll("svg").length ?? 0,
+          text: toggles[0]?.textContent?.trim() ?? "",
+        };
+      }));
+    };
+    const observed: Array<{ toggles: number; svg: number; text: string }> = [];
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of ["/me", `/me/goal/${ownerGoal}`, "/friends", `/friends/${ids.friend}`, "/my"])
+      observed.push(...await inspect(page, route));
+    await context.close();
+    const adminContext = await authContext(browser, emails.admin);
+    const adminPage = await adminContext.newPage();
+    await adminPage.setViewportSize({ width: 390, height: 844 });
+    observed.push(...await inspect(adminPage, "/admin"));
+    await adminContext.close();
+    expect(observed.length).toBeGreaterThan(0);
+    expect(observed.every((item) => item.toggles === 1 && item.svg === 1 && item.text === "")).toBe(true);
+  });
+
+  test("QA-TC-SP-02 카드 전수의 상하 안쪽 여백과 가장자리 margin이 대칭이다", async ({ browser }) => {
+    const violations: Array<Record<string, unknown>> = [];
+    const inspect = async (page: Page, route: string) => {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      const found = await page.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>("main *")).flatMap((element) => {
+        const tokens = typeof element.className === "string" ? element.className.split(/\s+/) : [];
+        const isCard = tokens.some((token) => token === "social-card" || token.endsWith("-card") || token === "bg-card")
+          && (tokens.some((token) => token.includes("rounded")) || tokens.some((token) => token.endsWith("-card")));
+        if (!isCard || element.offsetParent === null) return [];
+        const style = getComputedStyle(element);
+        const hasOpaqueBackground = !["transparent", "rgba(0, 0, 0, 0)"].includes(style.backgroundColor);
+        const hasBorder = [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth]
+          .some((width) => Number.parseFloat(width) > 0);
+        const hasShadow = style.boxShadow !== "none";
+        // `invite-accept-card`처럼 이름만 card인 투명 페이지 정렬 wrapper는 카드 surface가 아니다.
+        // DESIGN.md F축도 이런 여백 비대칭을 경고로만 다루므로 차단 census에서 제외한다.
+        if (!hasOpaqueBackground && !hasBorder && !hasShadow) return [];
+        const first = element.firstElementChild ? getComputedStyle(element.firstElementChild) : null;
+        const last = element.lastElementChild ? getComputedStyle(element.lastElementChild) : null;
+        const top = Number.parseFloat(style.paddingTop);
+        const bottom = Number.parseFloat(style.paddingBottom);
+        const firstTop = first ? Number.parseFloat(first.marginTop) : 0;
+        const lastBottom = last ? Number.parseFloat(last.marginBottom) : 0;
+        return Math.abs((top + firstTop) - (bottom + lastBottom)) > 1
+          ? [{ className: tokens.slice(0, 6).join(" "), top, bottom, firstTop, lastBottom }]
+          : [];
+      }));
+      violations.push(...found.map((item) => ({ route, ...item })));
+    };
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of ["/me", `/me/goal/${ownerGoal}`, "/me/achievements", `/wordmap/${ownerGoal}`, "/friends", `/friends/${ids.friend}`, `/friends/${ids.friend}/wordmap`, "/invite", "/my", "/cashout", "/cashout/history", "/cashout/status"])
+      await inspect(page, route);
+    await context.close();
+
+    const adminContext = await authContext(browser, emails.admin);
+    const adminPage = await adminContext.newPage();
+    await adminPage.setViewportSize({ width: 390, height: 844 });
+    await inspect(adminPage, "/admin");
+    await adminContext.close();
+
+    const guest = await newRemotePage(browser, { viewport: { width: 390, height: 844 } });
+    for (const route of ["/", "/how", "/onboarding", "/child-safety", "/payment/fail", `/g/${publicSlug}`, `/invite/${smokeInviteToken}`])
+      await inspect(guest, route);
+    await guest.close();
+    expect(violations).toEqual([]);
+  });
+
+  test("QA-TC-SP-04 제품 화면 전수 표본의 가로 넘침과 28px 미만 고아 줄바꿈이 0건이다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const findings: Array<Record<string, unknown>> = [];
+    for (const route of ["/me", `/me/goal/${ownerGoal}`, "/friends", `/friends/${ids.friend}`, "/invite", "/my", "/cashout", "/cashout/history"]) {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      const result = await page.evaluate(() => {
+        const visible = (element: HTMLElement) => element.offsetParent !== null
+          && getComputedStyle(element).visibility !== "hidden"
+          && !element.classList.contains("sr-only")
+          && element.closest(".sr-only") === null;
+        const clippedRect = (source: { left: number; right: number; top: number; bottom: number }, start: HTMLElement) => {
+          let { left, right, top, bottom } = source;
+          for (let clipper: HTMLElement | null = start; clipper; clipper = clipper.parentElement) {
+            const clipStyle = getComputedStyle(clipper);
+            const clipsX = ["hidden", "clip", "auto", "scroll"].includes(clipStyle.overflowX);
+            const clipsY = ["hidden", "clip", "auto", "scroll"].includes(clipStyle.overflowY);
+            if (!clipsX && !clipsY) continue;
+            const clipRect = clipper.getBoundingClientRect();
+            if (clipsX) {
+              left = Math.max(left, clipRect.left + clipper.clientLeft);
+              right = Math.min(right, clipRect.left + clipper.clientLeft + clipper.clientWidth);
+            }
+            if (clipsY) {
+              top = Math.max(top, clipRect.top + clipper.clientTop);
+              bottom = Math.min(bottom, clipRect.top + clipper.clientTop + clipper.clientHeight);
+            }
+            if (right <= left || bottom <= top) return null;
+          }
+          return { left, right, top, bottom };
+        };
+        const contentBounds = (element: HTMLElement) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            left: rect.left + element.clientLeft,
+            right: rect.left + element.clientLeft + element.clientWidth,
+            top: rect.top + element.clientTop,
+            bottom: rect.top + element.clientTop + element.clientHeight,
+          };
+        };
+        const escapesHorizontally = (rect: { left: number; right: number }, bounds: { left: number; right: number }) => rect.left < bounds.left - 1 || rect.right > bounds.right + 1;
+        const hasVisibleHorizontalOverflow = (element: HTMLElement) => {
+          const ownBounds = contentBounds(element);
+          const directText = Array.from(element.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
+          if (directText.some((node) => {
+            const textRange = document.createRange();
+            textRange.selectNode(node);
+            return Array.from(textRange.getClientRects())
+              .map((rect) => clippedRect(rect, element))
+              .some((rect) => rect !== null && escapesHorizontally(rect, ownBounds));
+          })) return true;
+          return Array.from(element.querySelectorAll<HTMLElement>("*")).some((child) => {
+            if (!visible(child)) return false;
+            const rect = clippedRect(child.getBoundingClientRect(), child);
+            if (!rect) return false;
+            let hasOutOfFlowAncestor = false;
+            for (let ancestor: HTMLElement | null = child; ancestor && ancestor !== element; ancestor = ancestor.parentElement) {
+              if (["absolute", "fixed"].includes(getComputedStyle(ancestor).position)) {
+                hasOutOfFlowAncestor = true;
+                break;
+              }
+            }
+            const bounds = hasOutOfFlowAncestor && element.parentElement
+              ? contentBounds(element.parentElement)
+              : ownBounds;
+            return escapesHorizontally(rect, bounds);
+          });
+        };
+        const overflow = Array.from(document.querySelectorAll<HTMLElement>("main, main *")).flatMap((element) => {
+          if (!visible(element)) return [];
+          const style = getComputedStyle(element);
+          if (["auto", "scroll"].includes(style.overflowX)) return [];
+          const hasOwnText = Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
+          if (["hidden", "clip"].includes(style.overflowX) && !hasOwnText) return [];
+          return element.clientWidth > 0 && element.scrollWidth > element.clientWidth + 1 && hasVisibleHorizontalOverflow(element)
+            ? [{ kind: "overflow", tag: element.tagName, className: element.className, text: element.textContent?.replace(/\s+/g, " ").trim().slice(0, 80), scrollWidth: element.scrollWidth, clientWidth: element.clientWidth }]
+            : [];
+        });
+        const orphan = Array.from(document.querySelectorAll<HTMLElement>("main *")).flatMap((element) => {
+          if (!visible(element)) return [];
+          const style = getComputedStyle(element);
+          if (["nowrap", "pre"].includes(style.whiteSpace)) return [];
+          const children = Array.from(element.childNodes);
+          if (!children.some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())) return [];
+          if (children.some((node) => node.nodeType === Node.ELEMENT_NODE && getComputedStyle(node as Element).display !== "inline" && visible(node as HTMLElement))) return [];
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          // Range 는 line-clamp 뒤에 실제로 그려졌지만 overflow 로 완전히 가려진 줄도 반환한다.
+          // 그 rect 를 마지막 줄로 세면 2줄 clamp 의 숨은 3~N줄 끝 글자가 고아 줄로 오인된다.
+          // 자신과 조상 scrollport/clip box 를 모두 교차해 실제로 보이는 조각만 줄 기하에 남긴다.
+          const rects = Array.from(range.getClientRects()).flatMap((rangeRect) => {
+            let left = rangeRect.left;
+            let right = rangeRect.right;
+            let top = rangeRect.top;
+            let bottom = rangeRect.bottom;
+            for (let clipper: HTMLElement | null = element; clipper; clipper = clipper.parentElement) {
+              const clipStyle = getComputedStyle(clipper);
+              const clipsX = ["hidden", "clip", "auto", "scroll"].includes(clipStyle.overflowX);
+              const clipsY = ["hidden", "clip", "auto", "scroll"].includes(clipStyle.overflowY);
+              if (!clipsX && !clipsY) continue;
+              const clipRect = clipper.getBoundingClientRect();
+              if (clipsX) {
+                left = Math.max(left, clipRect.left + clipper.clientLeft);
+                right = Math.min(right, clipRect.left + clipper.clientLeft + clipper.clientWidth);
+              }
+              if (clipsY) {
+                top = Math.max(top, clipRect.top + clipper.clientTop);
+                bottom = Math.min(bottom, clipRect.top + clipper.clientTop + clipper.clientHeight);
+              }
+              if (right <= left || bottom <= top) return [];
+            }
+            return right > left && bottom > top ? [{ left, right, top, bottom }] : [];
+          });
+          if (rects.length < 2) return [];
+          const lines: Array<{ top: number; bottom: number; left: number; right: number }> = [];
+          for (const rect of rects) {
+            const line = lines.find((candidate) => {
+              const overlap = Math.min(candidate.bottom, rect.bottom) - Math.max(candidate.top, rect.top);
+              return overlap > 0.5 * Math.min(candidate.bottom - candidate.top, rect.bottom - rect.top);
+            });
+            if (line) {
+              line.left = Math.min(line.left, rect.left);
+              line.right = Math.max(line.right, rect.right);
+              line.top = Math.min(line.top, rect.top);
+              line.bottom = Math.max(line.bottom, rect.bottom);
+            } else {
+              lines.push({ top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right });
+            }
+          }
+          if (lines.length < 2) return [];
+          const last = lines.at(-1)!;
+          const lastWidth = last.right - last.left;
+          return lastWidth < 28
+            ? [{ kind: "orphan", tag: element.tagName, className: element.className, text: element.textContent?.replace(/\s+/g, " ").trim().slice(0, 80), lines: lines.length, lastWidth }]
+            : [];
+        });
+        return [...overflow, ...orphan];
+      });
+      findings.push(...result.map((item) => ({ route, ...item })));
+    }
+    expect(findings).toEqual([]);
+    await context.close();
+  });
+
+  test("QA-TC-CV-01 커버 업로드 버튼은 프리셋 스크롤 위치와 무관하게 파일 선택을 연다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
+    await page.locator(".goal-cover-picker-toggle").click();
+    const grid = page.locator(".cover-preset-grid");
+    const upload = page.locator(".cover-picker-upload-entry");
+    const max = await grid.evaluate((element) => element.scrollWidth - element.clientWidth);
+    for (const target of [0, Math.round(max / 2), max]) {
+      await grid.evaluate((element, left) => element.scrollTo({ left, behavior: "instant" }), target);
+      const before = await grid.evaluate((element) => element.scrollLeft);
+      const chooserPromise = page.waitForEvent("filechooser");
+      await upload.click();
+      const chooser = await chooserPromise;
+      await chooser.setFiles([]);
+      await page.waitForTimeout(50);
+      const after = await grid.evaluate((element) => element.scrollLeft);
+      expect(Math.abs(after - before), `scroll ${target}`).toBeLessThanOrEqual(1);
+    }
+    await context.close();
+  });
+
+  test("QA-TC-CV-02 커버 선택 체크 글리프는 선택을 바꿔도 정확히 하나다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
+    await page.locator(".goal-cover-picker-toggle").click();
+    const options = page.locator(".cover-preset-grid button");
+    for (const index of [1, 4, 2]) {
+      await options.nth(index).click();
+      await expect(options.nth(index)).toHaveAttribute("aria-pressed", "true");
+      await expect(page.locator('.cover-preset-grid button[aria-pressed="true"]')).toHaveCount(1);
+      await expect(page.locator(".cover-preset-grid button.is-selected")).toHaveCount(1);
+      const selected = page.locator('.cover-preset-grid button[aria-pressed="true"]');
+      await expect(selected.locator("svg, [data-testid='selection-check'], .selection-check")).toHaveCount(1);
+    }
+    await context.close();
+  });
+
+  test("QA-TC-CV-06 타인 회원은 소유자 UPLOADING 자산을 확정할 수 없다", async () => {
+    const assetId = crypto.randomUUID();
+    const hash = "9".repeat(64);
+    const { error: insertError } = await admin.from("goal_cover_asset").insert({
+      id: assetId,
+      goal_id: ownerGoal,
+      owner_member_id: ids.owner,
+      quarantine_path: `${ids.owner}/${ownerGoal}/${assetId}.webp`,
+      status: "UPLOADING",
+      content_sha256: hash,
+      mime_type: "image/webp",
+      byte_size: 10,
+    });
+    expect(insertError).toBeNull();
+    const other = createClient(SUPABASE_URL, ANON_KEY);
+    const { data: auth, error: authError } = await other.auth.signInWithPassword({
+      email: emails.friend,
+      password,
+    });
+    expect(authError).toBeNull();
+    expect(auth.session).not.toBeNull();
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/goal-cover-finalize`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${auth.session!.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ asset_id: assetId, content_sha256: hash }),
+    });
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: { code: "asset_not_found" } });
+    const { data: persisted, error: persistedError } = await admin.from("goal_cover_asset")
+      .select("status,owner_member_id")
+      .eq("id", assetId)
+      .single();
+    expect(persistedError).toBeNull();
+    expect(persisted).toEqual({ status: "UPLOADING", owner_member_id: ids.owner });
+  });
+
+  test("QA-TC-AU-05 쿠키 없는 Server Action 직접 POST는 인증 실패하고 상태를 바꾸지 않는다", async ({ browser }) => {
+    const { data: before, error: beforeError } = await admin.from("goal")
+      .select("cover_preset_key")
+      .eq("id", ownerGoal)
+      .single();
+    expect(beforeError).toBeNull();
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
+    await page.locator(".goal-cover-picker-toggle").click();
+    let captured: { url: string; headers: Record<string, string>; body: string } | null = null;
+    page.on("request", (request) => {
+      if (request.method() === "POST" && request.headers()["next-action"] && !captured) {
+        captured = { url: request.url(), headers: request.headers(), body: request.postData() ?? "" };
+      }
+    });
+    await page.locator(".cover-preset-grid button").nth(1).click();
+    await expect.poll(() => captured).not.toBeNull();
+    await context.close();
+
+    const owner = createClient(SUPABASE_URL, ANON_KEY);
+    const { error: ownerAuthError } = await owner.auth.signInWithPassword({ email: emails.owner, password });
+    expect(ownerAuthError).toBeNull();
+    const { error: restoreError } = await owner.rpc("set_goal_cover_preset", {
+      goal_id: ownerGoal,
+      preset_key: before!.cover_preset_key,
+    });
+    expect(restoreError).toBeNull();
+
+    const replayHeaders = { ...captured!.headers };
+    delete replayHeaders.cookie;
+    delete replayHeaders.authorization;
+    delete replayHeaders["content-length"];
+    delete replayHeaders.host;
+    const replay = await fetch(captured!.url, {
+      method: "POST",
+      headers: replayHeaders,
+      body: captured!.body,
+      redirect: "manual",
+    });
+    const replayBody = await replay.text();
+    expect(replayBody).toContain('"ok":false');
+    expect(replayBody).toMatch(/auth_required|social_request_failed/);
+    expect(replayBody).not.toContain(ids.owner);
+    const { data: after, error: afterError } = await admin.from("goal")
+      .select("cover_preset_key")
+      .eq("id", ownerGoal)
+      .single();
+    expect(afterError).toBeNull();
+    expect(after?.cover_preset_key).toBe(before!.cover_preset_key);
+  });
+
   test("PW-05 admin 승인 후 owner와 public 화면에 승인 커버만 보인다", async ({ browser }) => {
     test.setTimeout(IS_STAGING ? 120_000 : 60_000);
     const s2CaptureDir = process.env.S2_DEMO_CAPTURE_DIR;
@@ -3552,6 +4448,42 @@ test.describe("V2 web-first social slice", () => {
     expect(acceptedInviteError).toBeNull();
     expect(acceptedInvite?.accepted_by).toBe(winnerId);
     expect(acceptedInvite?.accepted_at).toBeTruthy();
+  });
+
+  test("QA-TC-FD-03 소급 친구의 방향이 보이고 해제 뒤 양쪽 FRIENDS 조회가 닫힌다", async ({ browser }) => {
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/friends", { waitUntil: "domcontentloaded" });
+    const friendCard = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+    await expect(friendCard.getByTestId("friend-relationship-direction")).toHaveText("서로 응원");
+    await page.goto(`/friends/${ids.friend}?goal=${friendFriendsGoal}`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("friend-relationship-direction")).toHaveText("서로 응원");
+    await context.close();
+
+    const owner = createClient(SUPABASE_URL, ANON_KEY);
+    const friend = createClient(SUPABASE_URL, ANON_KEY);
+    const [{ error: ownerAuthError }, { error: friendAuthError }] = await Promise.all([
+      owner.auth.signInWithPassword({ email: emails.owner, password }),
+      friend.auth.signInWithPassword({ email: emails.friend, password }),
+    ]);
+    expect(ownerAuthError).toBeNull();
+    expect(friendAuthError).toBeNull();
+    const { error: removeError } = await owner.rpc("remove_friend", { friend_member_id: ids.friend });
+    expect(removeError).toBeNull();
+    const { data: ownerSecond, error: ownerSecondError } = await admin.from("goal")
+      .select("id")
+      .eq("slug", `owner-second-${runId}`)
+      .single();
+    expect(ownerSecondError).toBeNull();
+    const [ownerView, friendView] = await Promise.all([
+      owner.rpc("friend_goal_detail", { goal_id: friendFriendsGoal }),
+      friend.rpc("friend_goal_detail", { goal_id: ownerSecond!.id }),
+    ]);
+    expect(ownerView.data).toBeNull();
+    expect(friendView.data).toBeNull();
+    expect(ownerView.error?.message).toMatch(/goal_not_found|friend_goal_forbidden/);
+    expect(friendView.error?.message).toMatch(/goal_not_found|friend_goal_forbidden/);
   });
 
   test("ORDER-ATTR-01 replay는 최초 회원 응원 귀속을 다른 사용자로 바꾸지 않는다", async () => {

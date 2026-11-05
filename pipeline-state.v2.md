@@ -9,7 +9,15 @@ repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: codex
 current_stage: qa
-approved_stages: [plan, design, eng-design, build]
+latest_preview_deployment:
+  version: 2.1.0
+  source_sha: b875db8f05c75289793a9ca27f81e825c43d0151
+  url: https://haenael-ge-v2-staging-100-b.vercel.app
+  immutable_url: https://haenael-kg4c3whk2-100-b.vercel.app
+  supabase_project_ref: ezzklgotgydwxqebfoys
+  smoke_evidence: .goal/runs/root-qa-sp04-b875db8-20261105.log
+  qa_approved: false
+  production_deployed: false
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.
@@ -49,7 +57,7 @@ approved_artifacts:
     - { path: docs/eng-design/api-contract-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "API 계약(비회원 3필드·오류 형태·엔드포인트별 허용 목록)", sha256: c3799cc792b5881cf8d8c9e14570c17e5687144acb17a75aadb41f6ced700662 }
     - { path: docs/eng-design/architecture-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "아키텍처(공개범위 경계·인증 흐름·정리 파이프라인)", sha256: 24eac9d60ebb3e4cc482d42bba9c963b8ee2a949c0f9e2ece57a32898b60d890 }
     - { path: docs/eng-design/test-plan-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "테스트 전략", sha256: 1a5badbf8be03aae6c9ee498f1fa15a6a9e3a3788b1e9863f31408d37b80e5e2 }
-    - { path: docs/eng-design/test-cases-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "테스트 케이스 56종(CV·EA·GT·AU 계열)", sha256: a0c10444ebda2b44fbf29c24c420790831697168fe136a44b4e8f021f94102f1 }
+    - { path: docs/eng-design/test-cases-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "테스트 케이스 57종(CV·EA·GT·AU 계열)", sha256: a0c10444ebda2b44fbf29c24c420790831697168fe136a44b4e8f021f94102f1 }
     - { path: docs/eng-design/folder-structure-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "폴더 구조와 신설 파일", sha256: 9a6e3383f7b7319d0e986f94b262a614e700cbadd753a0bb1dbf5a2917978bfe }
     - { path: docs/eng-design/design-patterns-social-viral-loop-web-first-v1.2.5.md, version: 1.2.5, status: approved, label: "설계 패턴과 쓰기 경로 규칙", sha256: 2d1db109fa08eecbd017d191e494e0404cad78a683d4632020ac801f47ffb4f6 }
     - { path: docs/eng-design/fdd-social-viral-loop-web-first-v1.1.0.md, version: 1.1.0, status: superseded, label: "[v1.2.5 로 대체] V2 웹 우선 기능설계", sha256: 13d9b717e839020198b2a1d4f9abda6ad0d021c8a980efa804df08e9c06acc8f }
@@ -84,6 +92,20 @@ critic_cycles:
   build:
     - { cycle: 1, critic: code-reviewer, major_findings: 0, resolved: true, chairman_qs: "asked=4 answered=4, D-049로 세 구현 선택과 무료 staging 조건 확정", evidence: docs/build-log.md }
 external_integration_pending: [kakao-oauth, toss-sandbox]
+latest_controller_verification:
+  observed_at: "2026-11-03 01:45 KST"
+  source_sha: 28b483f13a46e2af34f41b216410c8149dad88e2
+  browser_e2e: {file: web/e2e/social-web-first.spec.ts, passed: 17, failed: 0, exit: 0}
+  ci_run: 41474029952
+  fixture_remaining: 0
+  payments_enabled_after_restore: false
+  restore_succeeded: true
+  disabled_runtime_http: 503
+  evidence: .goal/runs/final-controller-verification-20261103.json
+  qa_approved: false
+  production_deployed: false
+  production_migrations_pending: 6
+  live_toss_key_rotation_required: true
 override: false
 override_reason: ""
 override_expires: ""

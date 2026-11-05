@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(12);
+SELECT plan(13);
 
 INSERT INTO auth.users(
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -106,6 +106,14 @@ SELECT is(
   (public.my_social_dashboard()->'achievements'->>'connected_friend_count')::integer,
   1,
   'PG-MY-05 연결 친구 업적은 ACTIVE 관계 집계와 일치'
+);
+SELECT is(
+  (
+    SELECT array_agg(key ORDER BY key)
+    FROM jsonb_object_keys(public.my_social_dashboard()->'achievements') AS key
+  ),
+  ARRAY['completed_goal_count', 'connected_friend_count', 'received_cheer_count']::text[],
+  'AC-02 achievements key 집합은 DB 집계 3종과 정확히 같다'
 );
 SELECT ok(
   public.my_social_dashboard()::text LIKE '%아직 응원 안 한 목표%'
