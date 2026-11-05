@@ -15,9 +15,25 @@ type Props = {
 };
 
 const TOSS_CONFIRM_ERROR_COPY: Record<string, string> = {
+  method_not_allowed: PRODUCT_COPY.ERROR_GENERIC,
   payments_disabled: PRODUCT_COPY.ERROR_PAYMENTS_DISABLED,
+  unauthorized: PRODUCT_COPY.ERROR_GENERIC,
+  invalid_json: PRODUCT_COPY.ERROR_GENERIC,
+  validation_error: PRODUCT_COPY.ERROR_GENERIC,
+  missing_supabase_env: PRODUCT_COPY.ERROR_GENERIC,
+  missing_toss_secret: PRODUCT_COPY.ERROR_GENERIC,
   payment_not_found: PRODUCT_COPY.ERROR_PAYMENT_NOT_FOUND,
   amount_mismatch: PRODUCT_COPY.ERROR_AMOUNT_MISMATCH,
+  invalid_payment_status: PRODUCT_COPY.ERROR_GENERIC,
+  invalid_payment_key: PRODUCT_COPY.ERROR_GENERIC,
+  payment_key_mismatch: PRODUCT_COPY.ERROR_GENERIC,
+  payment_already_done: PRODUCT_COPY.ERROR_GENERIC,
+  cheer_not_found: PRODUCT_COPY.ERROR_GENERIC,
+  internal_error: PRODUCT_COPY.ERROR_GENERIC,
+  toss_confirm_failed: PRODUCT_COPY.ERROR_TOSS_CONFIRM_FAILED,
+  invalid_toss_status: PRODUCT_COPY.ERROR_INVALID_TOSS_STATUS,
+  unsupported_payment_method: PRODUCT_COPY.ERROR_UNSUPPORTED_PAYMENT_METHOD,
+  non_card_compensation_failed: PRODUCT_COPY.ERROR_NON_CARD_COMPENSATION_FAILED,
 };
 
 async function confirmPayment(params: {
