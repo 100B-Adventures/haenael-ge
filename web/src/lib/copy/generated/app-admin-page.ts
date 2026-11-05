@@ -26,6 +26,10 @@ export const PRODUCT_COPY = {
   TEXT_023: "최근 가입순 · 현재 클로버 잔액 포함", // component description
   TEXT_024: "적립·환전·환불·웰컴 기록 · 최근순", // component description
   TEXT_025: "Storage cleanup 정체와 스케줄 실패를 표시합니다.", // component description
+  TEXT_026: "환전 요청 큐", // section title
+  TEXT_027: "회원", // section title
+  TEXT_028: "클로버 원장", // section title
+  TEXT_029: "운영 경보", // section title
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/app/admin/page.tsx";

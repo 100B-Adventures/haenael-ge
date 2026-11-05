@@ -37,8 +37,6 @@ export const VOICE_EXCEPTIONS = Object.freeze({
       "aria-labelledby",
       "aria-describedby",
       "alt",
-      "placeholder",
-      "title",
     ],
     testPathMarkers: [
       "/__tests__/",

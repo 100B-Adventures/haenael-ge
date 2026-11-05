@@ -308,7 +308,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
               type="text"
               value={values.title}
               onChange={(e) => handleChange("title", e.target.value)}
-              placeholder="편입 평점 4.0"
+              placeholder={PRODUCT_COPY.TEXT_014}
               className="flex-1 min-w-0 outline-none text-[14px] font-bold bg-transparent [color:var(--foreground)]!"
               maxLength={60}
               data-testid="goal-title-input"
@@ -364,7 +364,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             id="goal-reason"
             value={values.reason}
             onChange={(e) => handleChange("reason", e.target.value)}
-            placeholder="휴학하고 8개월째 새벽 도서관. 이번엔 진짜 끝을 보려고요."
+            placeholder={PRODUCT_COPY.TEXT_015}
             rows={3}
             className="w-full rounded-[12px] px-4 py-3 text-[14px] outline-none resize-none [border:1px_solid_var(--border)]! [background-color:var(--card)]! [color:var(--foreground)]! [font-family:inherit]!"
             maxLength={200}

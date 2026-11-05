@@ -267,7 +267,7 @@ export default async function AdminPage() {
             data-testid="admin-cashout-section"
           >
             <SectionHeader
-              title="환전 요청 큐"
+              title={PRODUCT_COPY.TEXT_026}
               description={PRODUCT_COPY.TEXT_022}
               countLabel={`${formatNumber(cashouts.filter((item) => item.status === "REQUESTED").length)}건 대기`}
             />
@@ -278,7 +278,7 @@ export default async function AdminPage() {
             data-testid="admin-members-section"
           >
             <SectionHeader
-              title="회원"
+              title={PRODUCT_COPY.TEXT_027}
               description={PRODUCT_COPY.TEXT_023}
               countLabel={`최근 ${formatNumber(members.length)}명`}
             />
@@ -298,7 +298,7 @@ export default async function AdminPage() {
             data-testid="admin-ledger-section"
           >
             <SectionHeader
-              title="클로버 원장"
+              title={PRODUCT_COPY.TEXT_028}
               description={PRODUCT_COPY.TEXT_024}
               countLabel={`최근 ${formatNumber(ledger.length)}건`}
             />
@@ -321,7 +321,7 @@ export default async function AdminPage() {
           >
             <div className="min-h-11">
               <SectionHeader
-                title="운영 경보"
+                title={PRODUCT_COPY.TEXT_029}
                 description={PRODUCT_COPY.TEXT_025}
                 countLabel={`${formatNumber(alerts.length)}건`}
               />

@@ -409,7 +409,7 @@ export function MyPageOverview({
         <div className="my-menu-card my-settings-group">
           <PreferenceRow
             icon={<BellRing aria-hidden="true" />}
-            title="응원 도착 알림"
+            title={PRODUCT_COPY.TEXT_049}
             description={PRODUCT_COPY.TEXT_045}
             checked={preferences.notifyCheer}
             disabled={saving}
@@ -417,7 +417,7 @@ export function MyPageOverview({
           />
           <PreferenceRow
             icon={<Megaphone aria-hidden="true" />}
-            title="마케팅 소식 받기"
+            title={PRODUCT_COPY.TEXT_050}
             description={PRODUCT_COPY.TEXT_046}
             checked={preferences.notifyMarketing}
             disabled={saving}

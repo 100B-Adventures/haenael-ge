@@ -14,6 +14,8 @@ export const PRODUCT_COPY = {
   TEXT_011: "저장하고 내 링크 받기", // source line 412
   TEXT_012: "바로 저장돼요.", // source line 418
   TEXT_013: "저장하면 로그인 화면이 잠깐 뜨고, 작성 중인 목표는 안전하게 보관 중이에요.", // source line 419
+  TEXT_014: "편입 평점 4.0", // goal title placeholder
+  TEXT_015: "휴학하고 8개월째 새벽 도서관. 이번엔 진짜 끝을 보려고요.", // goal reason placeholder
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/receiver/OnboardingGoalForm.tsx";
