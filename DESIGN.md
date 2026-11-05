@@ -278,6 +278,7 @@ motion:
 | 브랜드 주 채움 | `bg-primary` 또는 `bg-[#1B8A4F]` | `#1B8A4F` [실측 `web/src/app/globals.css`:62, `web/src/app/(receiver)/me/page.tsx`:319-326] | 주 CTA, 진행 막대, 포커스 링 |
 | 브랜드 밝은 점 | `var(--clover-bright)` 또는 inline `#1F9E5A` | `#1F9E5A` [실측 `web/src/app/globals.css`:86, `web/src/app/(receiver)/me/page.tsx`:234-239] | 워드마크 마침표, 제한적 아이콘 |
 | 브랜드 옅은 면 | `bg-accent` 또는 `bg-[#E7F4EC]` | `#E7F4EC` [실측 `web/src/app/globals.css`:70, `web/src/app/(receiver)/me/page.tsx`:352-356] | 워드맵, 성공·강조 배경 |
+| 워드맵 저빈도 단어 | `var(--wordmap-tier-s1)` + `.wordmap-tier-s1` | `#467A60`, `font-weight: 600` [승인 시안 `docs/design/prototypes/social-viral-loop-v3-opus5.html`:547, 실측 `web/src/app/globals.css`] | 워드맵 빈도 s1. 회색 보조글자가 아니라 읽을 수 있는 낮은 가중치의 초록 단어 |
 | 브랜드 글자 | `text-accent-foreground` 또는 `text-[#14613A]` | `#14613A` [실측 `web/src/app/globals.css`:71, `web/src/components/goal/SplitBalanceCard.tsx`:36-44] | 클로버 수, 성공 강조, 링크 |
 | 웜 보조면 | `bg-muted`, `bg-secondary`, inline `#F4EFE6` | `#F4EFE6` [실측 `web/src/app/globals.css`:66-69, `web/src/components/goal/SplitBalanceCard.tsx`:54-59] | 보조 카드, 비활성·안내 배경 |
 | 보조 글자 | `text-muted-foreground` 또는 `text-[#6F6A60]` | `#6F6A60` [실측 `web/src/app/globals.css`:69, `web/src/components/goal/SplitBalanceCard.tsx`:42-44,112-114] | 설명, 메타, 긴 안내 |
