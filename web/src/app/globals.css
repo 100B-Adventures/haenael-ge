@@ -346,10 +346,10 @@
   }
 
   .receiver-public-action {
-    position: static;
-    bottom: auto;
+    /* SP-03: 공개 목표 CTA는 긴 워드맵과 무관하게 항상 하단탭 바로 위에 남는다. */
+    position: fixed;
+    bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
     height: var(--cta-h);
-    margin-bottom: calc(-1 * var(--cta-h));
     padding-top: 0.375rem;
     padding-bottom: 0.375rem;
     border-top: 1px solid var(--line);
@@ -1723,7 +1723,10 @@
     padding-top: 1.8125rem !important;
   }
   .goal-public-approved {
-    padding-bottom: var(--cta-h);
+    /* 본문 끝도 fixed CTA와 fixed 하단탭 아래로 들어가지 않게 token으로 예약한다. */
+    padding-bottom: calc(
+      var(--cta-h) + var(--tabbar-height) + env(safe-area-inset-bottom, 0px)
+    );
   }
   .goal-public-intro {
     position: relative;

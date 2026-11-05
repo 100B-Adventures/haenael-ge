@@ -184,10 +184,13 @@ describe("/g/[slug] owner bar 노출 스코프", () => {
   });
 });
 
-it("SP-03 공개 목표 CTA는 118px 토큰을 쓰고 본문과 같은 흐름에 배치된다", () => {
+it("SP-03 공개 목표 CTA는 하단탭 위에 fixed로 보이고 토큰만큼 본문 끝을 예약한다", () => {
   const css = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
 
   expect(css).toMatch(/--cta-h:\s*118px/);
-  expect(css).toMatch(/\.receiver-public-action\s*\{[\s\S]*?position:\s*static/);
-  expect(css).toMatch(/\.goal-public-approved\s*\{[\s\S]*?padding-bottom:\s*var\(--cta-h\)/);
+  expect(css).toMatch(/\.receiver-public-action\s*\{[\s\S]*?position:\s*fixed/);
+  expect(css).toMatch(/\.receiver-public-action\s*\{[\s\S]*?bottom:\s*calc\(var\(--tabbar-height\)/);
+  expect(css).toMatch(/\.receiver-public-action\s*\{[\s\S]*?background:\s*var\(--background\)/);
+  expect(css).toMatch(/\.goal-public-approved\s*\{[\s\S]*?padding-bottom:\s*calc\([\s\S]*?var\(--cta-h\)[\s\S]*?var\(--tabbar-height\)/);
+  expect(css).not.toMatch(/\.receiver-public-action\s*\{[\s\S]*?margin-bottom:\s*calc\(-1 \* var\(--cta-h\)\)/);
 });

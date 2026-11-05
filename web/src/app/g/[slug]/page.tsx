@@ -154,6 +154,7 @@ export default async function GoalPublicPage({ params }: Props) {
       <main
         className="goal-public-approved [background-color:var(--background)]!"
         data-testid="goal-public-page"
+        data-cta
       >
         {/* 스크롤 영역 */}
         <div className="goal-public-content px-[22px] pb-4">
@@ -222,7 +223,7 @@ export default async function GoalPublicPage({ params }: Props) {
         </div>
 
         {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}
-        <div className="receiver-fixed-action receiver-public-action receiver-bottom-fade">
+        <div className="receiver-fixed-action receiver-public-action">
           <CheerPaymentButton
             goalId={goal.id!}
             goalTitle={rawTitle}
