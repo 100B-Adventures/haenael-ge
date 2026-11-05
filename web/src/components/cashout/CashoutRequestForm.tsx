@@ -526,7 +526,7 @@ export function CashoutRequestForm({
               ? PRODUCT_COPY.TEXT_050
               : reachedThreshold
                 ? PRODUCT_COPY.TEXT_051
-                : `환전 기준은 모인 클로버 ${minCashoutClover}개 이상이에요. 지금 모인 클로버는 그대로 보관됩니다.`}
+                : `환전 기준은 모인 클로버 ${minCashoutClover}개 이상이에요. 지금 모인 클로버는 그대로 보관돼요.`}
           </p>
         </div>
       )}

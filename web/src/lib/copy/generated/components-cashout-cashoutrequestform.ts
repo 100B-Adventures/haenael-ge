@@ -26,7 +26,7 @@ export const PRODUCT_COPY = {
   TEXT_024: "받으실 금액", // source line 439
   TEXT_025: "환전 신청 제출 중", // source line 447
   TEXT_026: "신청을 안전하게 보내고 있어요", // source line 450
-  TEXT_027: "계좌와 금액을 다시 확인해 접수하고 있어요. 이 화면을 닫아도 같은 신청이 두 번 들어가지 않습니다.", // source line 453
+  TEXT_027: "계좌와 금액을 다시 확인해 접수하고 있어요. 이 화면을 닫아도 같은 신청이 두 번 들어가지 않아요.", // source line 453
   TEXT_028: "신청을 보내는 중이에요", // source line 465
   TEXT_029: "🔒 제출이 끝날 때까지 이전 화면과 재신청 버튼은 잠겨요. 성공 또는 오류 결과가 나오면 다음 행동을 바로 보여줍니다.", // source line 469
   TEXT_030: "보내는 곳", // source line 479
@@ -49,7 +49,7 @@ export const PRODUCT_COPY = {
   TEXT_047: "환전 기능을 준비하고 있어요", // source line 577
   TEXT_048: "친구 응원이 들어오면 신청할 수 있어요", // source line 579
   TEXT_049: "조금만 더 모으면 환전할 수 있어요", // source line 580
-  TEXT_050: "쌓인 클로버는 그대로 보관됩니다.", // source line 584
+  TEXT_050: "쌓인 클로버는 그대로 보관돼요.", // source line 584
   TEXT_051: "웰컴 클로버는 환전되지 않아요. 친구 응원이 들어오면 지급 가능한 만큼 신청할 수 있어요.", // source line 586
   TEXT_052: "환전 내역", // source line 598
   TEXT_053: "전체 보기 ›", // source line 604
