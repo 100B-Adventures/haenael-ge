@@ -95,13 +95,6 @@ export function FriendGoalDetail(
           <strong>{detail.cheer_count}{PRODUCT_COPY.TEXT_004}{displayName}{objectParticle(displayName)}{PRODUCT_COPY.TEXT_005}</strong>
         </div>
       </section>
-      {recentMessage && (
-        <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
-          <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>
-            {recentMessage}
-          </ClampText>
-        </section>
-      )}
       <section className="friend-wordmap-card">
         <div className="friend-wordmap-heading">
           <h2>{displayName}{PRODUCT_COPY.TEXT_007}</h2>
@@ -117,6 +110,13 @@ export function FriendGoalDetail(
         />
         <p className="social-muted">{PRODUCT_COPY.TEXT_009}</p>
       </section>
+      {recentMessage && (
+        <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
+          <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>
+            {recentMessage}
+          </ClampText>
+        </section>
+      )}
       <Link href="/invite" className="friend-reinvite">
         <span><Plus aria-hidden="true" /></span>
         <div><strong>{PRODUCT_COPY.TEXT_010}</strong><small>{PRODUCT_COPY.TEXT_011}</small></div>

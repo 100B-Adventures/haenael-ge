@@ -53,7 +53,10 @@ it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-onl
   expect(screen.getByRole("link", { name: /매일 스무 쪽 읽을게/ }))
     .toHaveAttribute("href", "/friends/friend-a?goal=2");
   const wordmap = screen.getByTestId("wordmap");
+  const recentCheer = screen.getByLabelText("최근 응원 메시지");
   const reinvite = screen.getByRole("link", { name: /다른 친구도 초대할까요/ });
+  expect(wordmap.compareDocumentPosition(recentCheer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(recentCheer.compareDocumentPosition(reinvite) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   expect(wordmap.compareDocumentPosition(reinvite) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   expect(reinvite)
     .toHaveAttribute("href", "/invite");
