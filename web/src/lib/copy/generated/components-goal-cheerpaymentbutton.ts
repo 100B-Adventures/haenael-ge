@@ -22,9 +22,9 @@ export const PRODUCT_COPY = {
   TEXT_019: "말은 짧게, 응원은 진짜로.", // source line 479
   TEXT_020: "결제창 여는 중...", // source line 501
   TEXT_021: "결제하고 응원하기", // source line 501
-  ERROR_PAYMENTS_DISABLED: "응원 결제를 준비하고 있습니다.",
+  ERROR_PAYMENTS_DISABLED: "응원 결제를 준비하고 있어요.",
   ERROR_INVALID_AMOUNT: "응원 금액을 다시 확인해 주세요.",
-  ERROR_GENERIC: "응원 주문을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.",
+  ERROR_GENERIC: "응원 주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.",
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/goal/CheerPaymentButton.tsx";
