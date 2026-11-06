@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-06 G4-QA 독립 코드리뷰 반려 보정
+
+- 법적 링크가 화면에는 있었지만 `LEGAL_EXPOSURE.my="none"`을 우회해 직접 렌더링되던 P1을 수정했다. 승인 prototype 계약대로 정본을 `link`로 바꾸고, `MyPageOverview`가 그 모드일 때만 `LegalLinkList`를 렌더링한다.
+- 환전 계약 lint가 소비 컴포넌트와 생성 카피를 합친 문자열만 검색하던 P2를 수정했다. 최초 실패 9건의 생성 카피 key와 실제 `PRODUCT_COPY` binding을 소스별·JSX 위치별로 검증하고, baseline·binding 제거 6건·유효 key 교환 1건·생성 카피 훼손 6건을 각각 기대한 FAIL id까지 대조한다.
+- G4-QA-02 exact verify exit 0, Vitest 82파일·484건, mutation 22/22, staging 환경 production build exit 0이다. staging DB를 연결한 로컬 production Chromium에서 계약이 충돌하던 `QA-TC-LG-02|QA-TC-LG-03`을 함께 통과시키고 fixture cleanup 0을 확인했다.
+- production/main 배포, 운영 DB 변경, CI 실행은 없다.
+
+> STAMP: 2026-11-06 17:30 KST · model=gpt-codex/gpt-5 · agent=code-builder · skills=haenael-supabase-build, verify, review · 근거=독립 code-reviewer P1/P2, 승인 prototype v3, current HEAD Vitest·mutation·Next build·Playwright · 고민=정본 값과 소비 binding을 각각 끊어도 계약 위반이 검출되게 했다.
+
 ## 2026-11-06 G4-QA first sweep batch fix
 
 - `test:qa-contracts`의 카피 9건은 제품 문구 누락이 아니라 `f79a7e3` 카피 중앙화 이후 검사기가 생성 카피 모듈을 읽지 않은 것이 원인이었다. 검사 입력과 status template binding을 보정했고, 뒤이어 드러난 `selection-check` prefix 레지스트리 누락도 정본에 등록했다.

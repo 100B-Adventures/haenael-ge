@@ -16,6 +16,10 @@ import { ClampText } from "@/components/common/ClampText";
 import { LegalLinkList } from "@/components/common/LegalFooter";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { AccountWithdrawalButton } from "@/components/social/AccountWithdrawalButton";
+import {
+  LEGAL_EXPOSURE,
+  type LegalExposureMode,
+} from "@/lib/legal/exposure";
 import type { MySocialDashboard } from "@/lib/social/contracts";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-mypageoverview";
 
@@ -32,6 +36,10 @@ const PROFILE_PRESETS = [
 ] as const;
 const MAX_PROFILE_BYTES = 5 * 1024 * 1024;
 
+function MyPageLegalLinks({ mode }: { mode: LegalExposureMode }) {
+  return mode === "link" ? <LegalLinkList /> : null;
+}
+
 async function sha256Hex(file: File) {
   const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
   return Array.from(new Uint8Array(digest)).map((value) =>
@@ -43,6 +51,7 @@ export function MyPageOverview({
   dashboard,
   receivedCheers = [],
   initialPreferences,
+  legalExposureMode = LEGAL_EXPOSURE.my,
 }: {
   dashboard: MySocialDashboard;
   receivedCheers?: Array<{
@@ -54,6 +63,7 @@ export function MyPageOverview({
     isAnonymous?: boolean;
   }>;
   initialPreferences: Preferences;
+  legalExposureMode?: LegalExposureMode;
 }) {
   const [cheerTab, setCheerTab] = useState<"received" | "sent">("received");
   const [preferences, setPreferences] = useState(initialPreferences);
@@ -432,7 +442,7 @@ export function MyPageOverview({
       <section aria-labelledby="my-account-heading">
         <h2 className="my-section-title" id="my-account-heading">{PRODUCT_COPY.TEXT_044}</h2>
         <div className="my-account-card">
-          <LegalLinkList />
+          <MyPageLegalLinks mode={legalExposureMode} />
           <LogoutButton />
           <AccountWithdrawalButton />
         </div>

@@ -33,22 +33,123 @@ const cases = [
     expected: 1,
   },
   {
+    id: "CASHOUT-BASELINE",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: [],
+    expected: 0,
+    expectedOutput: "CASHOUT_CONTRACT_PASS",
+  },
+  {
     id: "MUTATION-LAYER-UI-THRESHOLD",
     script: "scripts/qa/check-cashout-layer-contract.mjs",
     args: ["--mutation", "ui-payable-threshold"],
     expected: 1,
+    expectedOutput: "FAIL minimum.web-total-threshold",
   },
   {
     id: "MUTATION-LAYER-DB-THRESHOLD",
     script: "scripts/qa/check-cashout-layer-contract.mjs",
     args: ["--mutation", "db-request-threshold"],
     expected: 1,
+    expectedOutput: "FAIL minimum.db-request-lower-bound",
   },
   {
     id: "MUTATION-LAYER-FEE-RATE",
     script: "scripts/qa/check-cashout-layer-contract.mjs",
     args: ["--mutation", "db-fee-rate"],
     expected: 1,
+    expectedOutput: "FAIL amount.db-fee",
+  },
+  {
+    id: "MUTATION-COPY-FORM-BINDING",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "drop-form-copy-binding"],
+    expected: 1,
+    expectedOutput: "FAIL copy.web-zero-payable-binding",
+  },
+  {
+    id: "MUTATION-COPY-STATUS-BINDING",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "drop-status-copy-binding"],
+    expected: 1,
+    expectedOutput: "FAIL copy.status-threshold-template-binding",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-CASHOUT-BINDING",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "drop-terms-cashout-binding"],
+    expected: 1,
+    expectedOutput: "FAIL terms.cashout-active-binding",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-ELIGIBILITY-BINDING",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "drop-terms-eligibility-binding"],
+    expected: 1,
+    expectedOutput: "FAIL terms.kyc-absence-allowed-binding",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-PAYOUT-BINDING",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "drop-terms-payout-binding"],
+    expected: 1,
+    expectedOutput: "FAIL terms.manual-account-payout-binding",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-TAX-BINDING",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "drop-terms-tax-binding"],
+    expected: 1,
+    expectedOutput: "FAIL terms.tax-boundary-binding",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-SWAPPED-BINDINGS",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "swap-terms-copy-bindings"],
+    expected: 1,
+    expectedOutput: "FAIL terms.cashout-active-binding",
+  },
+  {
+    id: "MUTATION-COPY-FORM-CONTENT",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "corrupt-form-copy"],
+    expected: 1,
+    expectedOutput: "FAIL copy.web-zero-payable-explains-welcome",
+  },
+  {
+    id: "MUTATION-COPY-STATUS-CONTENT",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "corrupt-status-copy"],
+    expected: 1,
+    expectedOutput: "FAIL copy.status-total-threshold",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-CASHOUT-CONTENT",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "corrupt-terms-cashout-copy"],
+    expected: 1,
+    expectedOutput: "FAIL terms.cashout-active",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-ELIGIBILITY-CONTENT",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "corrupt-terms-eligibility-copy"],
+    expected: 1,
+    expectedOutput: "FAIL terms.kyc-absence-allowed",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-PAYOUT-CONTENT",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "corrupt-terms-payout-copy"],
+    expected: 1,
+    expectedOutput: "FAIL terms.manual-account-payout",
+  },
+  {
+    id: "MUTATION-COPY-TERMS-TAX-CONTENT",
+    script: "scripts/qa/check-cashout-layer-contract.mjs",
+    args: ["--mutation", "corrupt-terms-tax-copy"],
+    expected: 1,
+    expectedOutput: "FAIL terms.tax-boundary",
   },
   {
     id: "MUTATION-NOTIFY-SWALLOWED-FAILURE",
@@ -65,8 +166,10 @@ for (const testCase of cases) {
     encoding: "utf8",
   });
   const actual = result.status ?? 2;
-  const passed = actual === testCase.expected;
-  console.log(`${passed ? "PASS" : "FAIL"} ${testCase.id} expected_rc=${testCase.expected} actual_rc=${actual}`);
+  const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+  const outputMatched = !testCase.expectedOutput || output.includes(testCase.expectedOutput);
+  const passed = actual === testCase.expected && outputMatched;
+  console.log(`${passed ? "PASS" : "FAIL"} ${testCase.id} expected_rc=${testCase.expected} actual_rc=${actual} expected_output=${testCase.expectedOutput ?? "n/a"} output_matched=${outputMatched}`);
   if (!passed) failed += 1;
 }
 

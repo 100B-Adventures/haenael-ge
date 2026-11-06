@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MyPageOverview } from "../MyPageOverview";
+import { LEGAL_EXPOSURE } from "@/lib/legal/exposure";
 import type { MySocialDashboard } from "@/lib/social/contracts";
 
 const updatePreferences = vi.fn(
@@ -61,6 +62,17 @@ describe("MyPageOverview", () => {
     vi.stubGlobal("fetch", vi.fn());
   });
 
+  it("MY-UI-01B 법적 링크는 SSOT 노출 모드가 link일 때만 렌더한다", () => {
+    render(
+      <MyPageOverview
+        dashboard={dashboard}
+        initialPreferences={preferences}
+        legalExposureMode="none"
+      />,
+    );
+    expect(screen.queryByRole("navigation", { name: "법적 고지" })).not.toBeInTheDocument();
+  });
+
   it("MY-UI-01 마이페이지는 중복 목표 목록 없이 활동, 응원, 알림, 계정 순서로 렌더한다", () => {
     render(
       <MyPageOverview
@@ -92,6 +104,7 @@ describe("MyPageOverview", () => {
     expect(text.indexOf("나의 활동")).toBeLessThan(text.indexOf("응원 내역"));
     expect(text.indexOf("응원 내역")).toBeLessThan(text.indexOf("알림"));
     expect(text.indexOf("알림")).toBeLessThan(text.indexOf("계정"));
+    expect(LEGAL_EXPOSURE.my).toBe("link");
     const legalLinks = screen.getByRole("navigation", { name: "법적 고지" });
     expect(within(legalLinks).getAllByRole("link")).toHaveLength(3);
     expect(within(legalLinks).getByRole("link", { name: "이용약관" })).toHaveAttribute("href", "/terms");

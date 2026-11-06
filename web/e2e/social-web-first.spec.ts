@@ -3427,7 +3427,7 @@ test.describe("V2 web-first social slice", () => {
     await guestPage.close();
   });
 
-  test("QA-TC-LG-02 하단탭 화면 전수에 법적 고지 블록과 링크 나열이 0개다", async ({ browser }) => {
+  test("QA-TC-LG-02 마이페이지를 제외한 하단탭 화면에 법적 고지 블록과 링크 나열이 0개다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
@@ -3440,7 +3440,6 @@ test.describe("V2 web-first social slice", () => {
       `/friends/${ids.friend}/wordmap`,
       "/invite",
       `/wordmap/${ownerGoal}`,
-      "/my",
     ]) {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       await expect(page.getByTestId("receiver-bottom-nav"), route).toBeVisible();
