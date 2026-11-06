@@ -118,6 +118,13 @@ async function startSandboxPayment(
   responses: TossResponseEvidence[] = [],
 ) {
   await page.goto(`${BASE_URL}/g/${goalSlug}`, { waitUntil: "networkidle" });
+  const analyticsConsentBanner = page.getByTestId("analytics-consent-banner");
+  if (await analyticsConsentBanner.isVisible()) {
+    await analyticsConsentBanner.getByRole("button", {
+      name: "국외 이전에 동의하지 않음",
+    }).click();
+    await expect(analyticsConsentBanner).toBeHidden();
+  }
   const cta = page.getByTestId("cheer-cta");
   await expect(cta).toBeVisible();
   await expect(cta).toBeEnabled();
