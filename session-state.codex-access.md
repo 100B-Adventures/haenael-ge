@@ -2,6 +2,15 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 열린 항목
+- G4-AUTH-01: 카카오 Redirect URI 등록과 실로그인. 114 크롬은 로그인 화면, 맥 메인 크롬은 [Product] haenael ge 에 요청, 회신 없음.
+- G4-PAY-01·02: 토스 테스트 키 IP 정책 403. 같은 요청에 포함.
+- G4-QA-01: CI. Codex 가 수동 staging E2E 를 onprem-114 runner 로 옮기는 중(1fd7d41), 실행 증거 미확보.
+- 온프렘 세션 1개로 줄이기: 회장 결정 대기. 11-07 02:10 기준 해낼게 sessionId 중복은 프로세스 1개로 사라짐 관찰.
+
+## 2026-11-07 02:13 KST
+- 재개 확인: 업타임 4시간 36분이라 이번은 머신 재시작이 아니라 세션 재기동. Codex Goal 은 %53 에서 진행 중, 죽은 위임 없음(qa-verifier·code-builder 프로세스 관찰). 맥 세션에 답장 주소를 고쳐 카카오·토스 재요청.
+
 ## 2026-11-07 01:30 KST
 - staging SHA `9b1e0332fffae811da446877cba05370c089c0bf` 배포 완료. health `status=ok`, `database=ok`, `sourceSha` exact 관찰.
 - CI 디자인 토큰 literal 5건을 기존 토큰으로 교정해 commit/push했다. 로컬 design-token lint, 관련 unit 20/20, typecheck, build, 컴포넌트 smoke PASS.
