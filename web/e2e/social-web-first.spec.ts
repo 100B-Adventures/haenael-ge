@@ -3664,7 +3664,7 @@ test.describe("V2 web-first social slice", () => {
       "supporter_ci", "provider_id", "token_hash", "quarantine_path",
       "amount_krw", "clover_amount", "member_id", "goal_id",
     ];
-    for (const route of [`/invite/${smokeInviteToken}`, `/g/${publicSlug}`]) {
+    for (const route of [`/invite/${smokeInviteToken}`, `/g/friend2-public-${runId}`]) {
       const response = await page.goto(route, { waitUntil: "domcontentloaded" });
       expect(response?.status(), route).toBe(200);
       await expect(page.locator("main"), route).not.toBeEmpty();
