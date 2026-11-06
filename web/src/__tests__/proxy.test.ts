@@ -6,7 +6,7 @@
 import { describe, it, expect } from "vitest";
 import { NextRequest } from "next/server";
 import { isProtectedRoute, proxy } from "../proxy";
-import protectedRoutes from "../../../qa/contracts/protected-routes.json";
+import protectedRoutes from "../../qa/contracts/protected-routes.json";
 
 function req(host: string, path: string) {
   return new NextRequest(new URL(path, `https://${host}`));

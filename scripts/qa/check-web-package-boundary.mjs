@@ -1,0 +1,1 @@
+../../web/scripts/qa/check-web-package-boundary.mjs

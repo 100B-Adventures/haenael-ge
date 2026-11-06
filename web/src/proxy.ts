@@ -19,7 +19,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import protectedRoutes from "../../qa/contracts/protected-routes.json";
+import protectedRoutes from "../qa/contracts/protected-routes.json";
 
 const CANONICAL_HOST = "haenael-ge.vercel.app";
 
