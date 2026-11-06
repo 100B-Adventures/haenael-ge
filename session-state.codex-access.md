@@ -2,6 +2,10 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 2026-11-07 01:02 KST
+- 회장 지적: 이름 규칙은 맥=[Product] X, 온프렘=온프렘 X. 중복 원인 관찰: 사업체별 rc 창구 + work 세션, work.tsv 의 --continue 로 sessionId 중복 3건(haenael-ge·romeo·haejo-danta). 이름 수정은 romeo 세션이 진행 중(harness dev-rc staged, work.tsv 00:59)이라 손대지 않음.
+- 표에서 빠졌던 것: `/usr/local/bin/dev-rc` 는 아직 옛 이름, root 소유. 중복 프로세스 정리는 회장 결정 대기.
+
 ## 2026-11-06 23:35 KST
 - staging a6d68a3 반영(health 관찰). c42e21c 재QA 41 PASS 2 FAIL. 초대 위치 복원 후 QA-REVERIFY-VIEWPORT-01 표적 1/1(card y=60). 표현 편차 초대 건은 회장 "너가 다 해라" 와 헌법 §4.3 로 추천안 자동 채택.
 - 남음: ORDER-ATTR-01(payments_disabled), G4-PAY(토스 테스트 키 IP 정책), G4-AUTH(카카오 redirect), G4-QA-01(CI 미실행). 터널 크롬 미로그인, 맥 세션 회신 없음.
