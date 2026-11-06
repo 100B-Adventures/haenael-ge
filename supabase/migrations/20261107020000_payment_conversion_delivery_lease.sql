@@ -1,5 +1,5 @@
--- 브라우저 광고 전환 전달은 영구 claim이 아니라 만료 가능한 lease 후 provider enqueue 성공 ack로 닫는다.
--- event_id는 lease 재발급에도 고정해 Meta eventID와 GA4 transaction_id 중복 제거에 사용한다.
+-- 브라우저 광고 전환 전달은 만료 가능한 lease로 재시도한다. 브라우저 로컬 큐 적재는 sent로 ack하지 않는다.
+-- event_id는 lease 재발급에도 고정해 at-least-once transport의 provider dedupe에 사용한다.
 BEGIN;
 
 REVOKE ALL ON FUNCTION public.claim_payment_conversion(text, text)
@@ -174,6 +174,6 @@ GRANT EXECUTE ON FUNCTION public.ack_payment_conversion(text, text, text, text)
 COMMENT ON FUNCTION public.lease_payment_conversion(text, text, integer) IS
   'DONE 결제의 브라우저 전환 전달 lease를 발급한다. SELECT FOR UPDATE, service_role 전용.';
 COMMENT ON FUNCTION public.ack_payment_conversion(text, text, text, text) IS
-  'provider enqueue가 끝난 동일 lease와 event id를 sent로 전환한다. service_role 전용.';
+  'provider transport receipt를 검증한 신뢰 가능한 서버 전송자만 동일 lease와 event id를 sent로 전환한다. service_role 전용이며 브라우저 호출 금지.';
 
 COMMIT;

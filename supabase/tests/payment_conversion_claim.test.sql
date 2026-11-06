@@ -5,7 +5,7 @@ SELECT plan(18);
 SELECT has_function('public', 'lease_payment_conversion', ARRAY['text', 'text', 'integer'],
   'PAY-CONV-01: 브라우저 전환 delivery lease RPC가 존재한다');
 SELECT has_function('public', 'ack_payment_conversion', ARRAY['text', 'text', 'text', 'text'],
-  'PAY-CONV-02: provider enqueue ack RPC가 존재한다');
+  'PAY-CONV-02: 신뢰 가능한 서버 전송자 전용 ack RPC가 존재한다');
 
 INSERT INTO public.payment(
   order_id, payment_key, amount_krw, status, pg_customer_key, raw_response
@@ -41,7 +41,7 @@ SELECT * FROM public.lease_payment_conversion(
 SELECT is((SELECT eligible FROM first_lease), true,
   'PAY-CONV-03: 웹훅 선확정 뒤 첫 브라우저 callback은 lease를 받는다');
 SELECT is((SELECT delivery_state FROM first_lease), 'pending',
-  'PAY-CONV-04: provider enqueue 전 상태는 pending이다');
+  'PAY-CONV-04: provider transport receipt 전 상태는 pending이다');
 SELECT is((SELECT event_id FROM first_lease), 'haenael-purchase:payment-conversion-lease-1',
   'PAY-CONV-05: provider dedupe event id가 발급된다');
 SELECT ok((SELECT lease_token IS NOT NULL AND expires_at > clock_timestamp() FROM first_lease),
@@ -91,7 +91,7 @@ SELECT is(
     'payment-conversion-lease-1', 'payment_key_conversion_lease_1',
     (SELECT lease_token FROM retry_lease), (SELECT event_id FROM retry_lease)
   ), true,
-  'PAY-CONV-10: 현재 lease의 provider enqueue ack는 sent로 전환한다'
+  'PAY-CONV-10: 현재 lease의 신뢰 가능한 서버 ack는 sent로 전환한다'
 );
 SELECT is(
   (SELECT raw_response #>> '{browserConversionDelivery,state}'

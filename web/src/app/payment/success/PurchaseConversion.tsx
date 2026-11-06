@@ -15,16 +15,20 @@ async function conversionAction(body: Record<string, unknown>) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !anonKey) return null;
-  const response = await fetch(`${supabaseUrl}/functions/v1/toss-confirm`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${anonKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) return null;
-  return response.json().catch(() => null);
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/toss-confirm`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${anonKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) return null;
+    return await response.json().catch(() => null);
+  } catch {
+    return null;
+  }
 }
 
 type ConversionDelivery =
@@ -39,28 +43,10 @@ async function renewLease(orderId: string, paymentKey: string): Promise<Conversi
   return delivery ?? { state: "unavailable" };
 }
 
-async function acknowledgeLease(
-  orderId: string,
-  paymentKey: string,
-  lease: ConversionLease,
-): Promise<boolean> {
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const body = await conversionAction({
-      action: "ack_conversion",
-      orderId,
-      paymentKey,
-      leaseToken: lease.leaseToken,
-      eventId: lease.eventId,
-    });
-    if (body?.acknowledged === true) return true;
-    if (attempt < 2) {
-      await new Promise((resolve) => window.setTimeout(resolve, 250 * (attempt + 1)));
-    }
-  }
-  return false;
-}
-
-/** 안전한 URL 교체 후 동의 상태에서 provider enqueue → durable ack 순서로 Purchase를 보낸다. */
+/**
+ * 브라우저 provider 호출은 전송 receipt를 제공하지 않는다. 따라서 로컬 큐 적재 뒤 DB를 ack하지 않고,
+ * lease 만료 뒤 같은 eventId로 재시도한다(at-least-once transport + provider dedupe).
+ */
 export function PurchaseConversion({
   orderId,
   paymentKey,
@@ -87,6 +73,11 @@ export function PurchaseConversion({
     }, delayMs);
   }, []);
 
+  const scheduleAfterLease = useCallback((lease: ConversionLease) => {
+    const retryAfterLease = Math.max(1_000, Date.parse(lease.expiresAt) - Date.now() + 250);
+    scheduleRetry(Math.min(retryAfterLease, 300_000));
+  }, [scheduleRetry]);
+
   useEffect(() => {
     window.history.replaceState(window.history.state, "", cleanPath);
   }, [cleanPath]);
@@ -103,43 +94,44 @@ export function PurchaseConversion({
 
     const deliver = async () => {
       let lease = initialLease;
-      if (Date.parse(lease.expiresAt) <= Date.now()) {
-        const renewed = await renewLease(orderId, paymentKey);
-        if (renewed.state === "sent") return;
-        if (renewed.state !== "leased") {
-          const retryAt = renewed.state === "pending" ? Date.parse(renewed.retryAt ?? "") : NaN;
-          const delay = Number.isFinite(retryAt)
-            ? Math.max(1_000, retryAt - Date.now() + 250)
-            : 5_000;
-          scheduleRetry(Math.min(delay, 300_000));
+      try {
+        if (Date.parse(lease.expiresAt) <= Date.now()) {
+          const renewed = await renewLease(orderId, paymentKey);
+          if (renewed.state === "sent") return;
+          if (renewed.state !== "leased") {
+            const retryAt = renewed.state === "pending" ? Date.parse(renewed.retryAt ?? "") : NaN;
+            const delay = Number.isFinite(retryAt)
+              ? Math.max(1_000, retryAt - Date.now() + 250)
+              : 5_000;
+            scheduleRetry(Math.min(delay, 300_000));
+            return;
+          }
+          lease = renewed.lease;
+        }
+        if (attemptedTokens.current.has(lease.leaseToken)) {
+          scheduleAfterLease(lease);
           return;
         }
-        lease = renewed.lease;
-      }
-      if (attemptedTokens.current.has(lease.leaseToken)) return;
-      attemptedTokens.current.add(lease.leaseToken);
+        attemptedTokens.current.add(lease.leaseToken);
 
-      trackEvent("payment_success", {
-        event_id: lease.eventId,
-        value,
-        currency: "KRW",
-      });
-      const queued = await trackPurchaseConversion(orderId, value, lease.eventId);
-      if (!queued) {
+        trackEvent("payment_success", {
+          event_id: lease.eventId,
+          value,
+          currency: "KRW",
+        });
+        const acceptedByLocalQueues = await trackPurchaseConversion(orderId, value, lease.eventId);
+        if (!acceptedByLocalQueues) attemptedTokens.current.delete(lease.leaseToken);
+
+        // gtag/fbq 호출 성공은 provider transport receipt가 아니다. 브라우저에서는 sent ack를 금지한다.
+        scheduleAfterLease(lease);
+      } catch {
         attemptedTokens.current.delete(lease.leaseToken);
-        scheduleRetry(5_000);
-        return;
-      }
-      const acknowledged = await acknowledgeLease(orderId, paymentKey, lease);
-      if (!acknowledged) {
-        attemptedTokens.current.delete(lease.leaseToken);
-        const retryAfterLease = Math.max(1_000, Date.parse(lease.expiresAt) - Date.now() + 250);
-        scheduleRetry(Math.min(retryAfterLease, 300_000));
+        scheduleAfterLease(lease);
       }
     };
 
     void deliver();
-  }, [consent, initialLease, orderId, paymentKey, retryVersion, scheduleRetry, value]);
+  }, [consent, initialLease, orderId, paymentKey, retryVersion, scheduleAfterLease, scheduleRetry, value]);
 
   return null;
 }

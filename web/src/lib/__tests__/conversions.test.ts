@@ -73,12 +73,12 @@ describe("광고 전환 이벤트", () => {
     window.history.replaceState(window.history.state, "", "/");
   });
 
-  it("Meta 스크립트가 늦어도 동의 후 stub queue에 전환을 보존한다", async () => {
+  it("Meta 스크립트가 늦어도 동의 후 로컬 큐에 전환을 보존한다", async () => {
     delete window.fbq;
     vi.stubEnv("NODE_ENV", "production");
-    const sent = await trackPurchaseConversion("order-2", 1000, "event-order-2");
+    const queued = await trackPurchaseConversion("order-2", 1000, "event-order-2");
 
-    expect(sent).toBe(true);
+    expect(queued).toBe(true);
     const initializedFbq = Reflect.get(window, "fbq") as { queue?: unknown[][] };
     expect(initializedFbq.queue).toEqual([
       ["init", META_PIXEL_ID],
@@ -104,9 +104,9 @@ describe("광고 전환 이벤트", () => {
   it("명시적 동의 전에는 GA4·Meta를 초기화하거나 전송하지 않는다", async () => {
     window.localStorage.removeItem(ANALYTICS_CONSENT_KEY);
     delete window.fbq;
-    const sent = await trackPurchaseConversion("order-no-consent", 3000, "event-no-consent");
+    const queued = await trackPurchaseConversion("order-no-consent", 3000, "event-no-consent");
 
-    expect(sent).toBe(false);
+    expect(queued).toBe(false);
     expect(gtag).not.toHaveBeenCalled();
     expect(document.querySelector(
       'script[src="https://connect.facebook.net/en_US/fbevents.js"]',

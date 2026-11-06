@@ -103,7 +103,11 @@ export async function trackSignUpConversion(userId: string): Promise<boolean> {
   return true;
 }
 
-/** value 는 toss-confirm 이 서버 주문 금액·토스 승인 금액과 대조해 통과시킨 값만 넘긴다. */
+/**
+ * value 는 toss-confirm 이 서버 주문 금액·토스 승인 금액과 대조해 통과시킨 값만 넘긴다.
+ * true는 gtag/fbq 로컬 큐가 호출을 수락했다는 뜻이며 provider transport 성공을 뜻하지 않는다.
+ * 호출자는 주문별 transaction_id와 eventID를 고정해 at-least-once 재시도를 provider dedupe에 맡긴다.
+ */
 export async function trackPurchaseConversion(
   orderId: string,
   value: number,

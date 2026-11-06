@@ -100,26 +100,6 @@ async function leaseBrowserConversion(
   };
 }
 
-async function ackBrowserConversion(
-  supabase: SupabaseClient,
-  orderId: string,
-  paymentKey: string,
-  leaseToken: string,
-  eventId: string,
-): Promise<boolean> {
-  const { data, error } = await supabase.rpc("ack_payment_conversion", {
-    p_order_id: orderId,
-    p_payment_key: paymentKey,
-    p_lease_token: leaseToken,
-    p_event_id: eventId,
-  });
-  if (error) {
-    console.error("[toss-confirm] browser conversion ack failed:", error);
-    return false;
-  }
-  return data === true;
-}
-
 export async function handleTossConfirm(req: Request) {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -190,26 +170,6 @@ export async function handleTossConfirm(req: Request) {
   const supabase = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
-
-  if (action === "ack_conversion") {
-    const leaseToken = typeof body.leaseToken === "string"
-      ? body.leaseToken.trim()
-      : "";
-    const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
-    if (!leaseToken || !eventId) {
-      return json(400, { error: { code: "validation_error" } });
-    }
-    const acknowledged = await ackBrowserConversion(
-      supabase,
-      orderId,
-      paymentKey,
-      leaseToken,
-      eventId,
-    );
-    return acknowledged
-      ? json(200, { acknowledged: true })
-      : json(409, { error: { code: "conversion_lease_mismatch" } });
-  }
 
   if (action === "lease_conversion") {
     const conversionDelivery = await leaseBrowserConversion(

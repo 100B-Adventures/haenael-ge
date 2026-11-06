@@ -89,7 +89,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   } else {
     try {
       const result = await confirmPayment({ paymentKey, orderId, amount });
-      // provider enqueue 전에는 pending lease만 받고, 성공한 브라우저가 별도 ack로 sent를 확정한다.
+      // 브라우저는 provider receipt를 관찰할 수 없어 ack하지 않는다. pending은 만료 뒤 재예약된다.
       conversionLease = result.conversionLease ?? null;
       if (result.goalTitle) {
         message = `${result.goalTitle.replace(/\s*해낼게\s*$/, "")} 목표에 응원이 전달됐습니다.`;

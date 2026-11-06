@@ -63,7 +63,7 @@ server_assets:
     - toss-webhook
   deployment_order:
     - apply all eight database migrations
-    - deploy Edge Functions; toss-confirm requires lease_payment_conversion and ack_payment_conversion from 20261107020000
+    - deploy Edge Functions; toss-confirm requires lease_payment_conversion from 20261107020000, while ack_payment_conversion remains reserved for a trusted server sender with a provider transport receipt
     - deploy web
     - run QA smoke; no production promotion before approval
 ```
@@ -79,7 +79,7 @@ CI 실행 `41474029952`는 성공했으며, staging 브라우저 E2E는 17/17, �
 - production의 현재 관찰 릴리스는 `2.0.1`이다. `2.1.0`을 production runtime으로 기록하지 않는다.
 - 배포 시에는 QA 승인 뒤 runtime identity를 같은 최종 버전으로 조립하고
   production smoke를 기록한다.
-- `toss-confirm`은 delivery lease·ack RPC가 먼저 적용돼야 한다. 순서가 뒤집히면 결제 승인은
+- `toss-confirm`은 delivery lease RPC가 먼저 적용돼야 한다. `ack_payment_conversion`은 provider transport receipt를 검증하는 신뢰 가능한 서버 전송자 전용이며 브라우저가 호출하지 않는다. 순서가 뒤집히면 결제 승인은
   유지되지만 전환 lease를 발급하지 못하므로, 위 배포 순서를 바꾸지 않는다.
 
 ---

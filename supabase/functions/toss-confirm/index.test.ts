@@ -118,7 +118,7 @@ Deno.test(
 );
 
 Deno.test(
-  "provider enqueue ack → 동일 lease·event id를 service-role RPC로 sent 전환",
+  "브라우저 ack action은 거부하고 service-role RPC를 호출하지 않는다",
   async () => {
     setPaymentTestEnv();
     const realFetch = globalThis.fetch;
@@ -131,12 +131,6 @@ Deno.test(
         : input.url;
       if (url.includes("/rest/v1/rpc/ack_payment_conversion")) {
         rpcBodies.push(JSON.parse(String(init?.body)));
-        return Promise.resolve(
-          new Response("true", {
-            status: 200,
-            headers: { "content-type": "application/json" },
-          }),
-        );
       }
       return Promise.resolve(new Response("{}", { status: 404 }));
     }) as typeof fetch;
@@ -158,14 +152,9 @@ Deno.test(
           }),
         }),
       );
-      assertEquals(response.status, 200);
-      assertEquals(await response.json(), { acknowledged: true });
-      assertEquals(rpcBodies[0], {
-        p_order_id: "order-ack",
-        p_payment_key: "payment-key-ack",
-        p_lease_token: "lease-ack",
-        p_event_id: "haenael-purchase:order-ack",
-      });
+      assertEquals(response.status, 400);
+      assertEquals(await response.json(), { error: { code: "validation_error" } });
+      assertEquals(rpcBodies.length, 0);
     } finally {
       globalThis.fetch = realFetch;
     }
