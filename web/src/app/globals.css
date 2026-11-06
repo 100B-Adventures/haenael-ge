@@ -3091,7 +3091,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 0;
+    margin-top: -2.5625rem;
+    padding-top: calc(var(--sp-2) + var(--sp-0));
     padding-bottom: 0.46875rem;
     text-align: center;
     transform: translateY(0.0625rem);
