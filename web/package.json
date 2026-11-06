@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node ../scripts/qa/check-deploy-env.mjs --target vercel-production --source runtime --only-if-vercel",
+    "prebuild": "node scripts/qa/check-deploy-env.mjs --target vercel-production --source runtime --only-if-vercel",
     "build": "next build",
     "lint": "oxlint .",
     "qa:predeploy-production": "node ../scripts/qa/check-deploy-env.mjs --target vercel-production --source provider && node ../scripts/qa/check-deploy-env.mjs --target supabase-production --source provider --vault-source provider",

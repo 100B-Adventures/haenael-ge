@@ -1,11 +1,52 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
+import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const node = process.execPath;
+
+function verifyVercelPackageBoundary() {
+  const packageRoot = mkdtempSync(join(tmpdir(), "haenael-vercel-package-"));
+  try {
+    cpSync(join(repoRoot, "web/package.json"), join(packageRoot, "package.json"));
+    cpSync(join(repoRoot, "web/scripts"), join(packageRoot, "scripts"), { recursive: true });
+    cpSync(join(repoRoot, "web/qa"), join(packageRoot, "qa"), { recursive: true });
+    cpSync(join(repoRoot, "web/src"), join(packageRoot, "src"), { recursive: true });
+
+    const names = readFileSync(join(repoRoot, "qa/fixtures/vercel-production-env.names"), "utf8")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const env = { ...process.env, VERCEL: "1", VERCEL_ENV: "production" };
+    for (const name of names) env[name] = "contract-test-value";
+
+    const baseline = spawnSync("npm", ["run", "prebuild"], { cwd: packageRoot, env, encoding: "utf8" });
+    const missingEnv = { ...env };
+    delete missingEnv.SUPABASE_SERVICE_ROLE_KEY;
+    const mutation = spawnSync("npm", ["run", "prebuild"], { cwd: packageRoot, env: missingEnv, encoding: "utf8" });
+    const baselineOutput = `${baseline.stdout ?? ""}\n${baseline.stderr ?? ""}`;
+    const mutationOutput = `${mutation.stdout ?? ""}\n${mutation.stderr ?? ""}`;
+
+    return [
+      {
+        id: "VERCEL-PACKAGE-BASELINE",
+        passed: baseline.status === 0 && baselineOutput.includes("ENV_TARGET_PASS missing=0"),
+        detail: `expected_rc=0 actual_rc=${baseline.status ?? 2}`,
+      },
+      {
+        id: "VERCEL-PACKAGE-MISSING-ENV",
+        passed: mutation.status === 1 && mutationOutput.includes("ENV_TARGET_FAIL missing_names=SUPABASE_SERVICE_ROLE_KEY"),
+        detail: `expected_rc=1 actual_rc=${mutation.status ?? 2}`,
+      },
+    ];
+  } finally {
+    rmSync(packageRoot, { recursive: true, force: true });
+  }
+}
 
 const cases = [
   {
@@ -160,6 +201,11 @@ const cases = [
 ];
 
 let failed = 0;
+const packageBoundaryResults = verifyVercelPackageBoundary();
+for (const result of packageBoundaryResults) {
+  console.log(`${result.passed ? "PASS" : "FAIL"} ${result.id} ${result.detail}`);
+  if (!result.passed) failed += 1;
+}
 for (const testCase of cases) {
   const result = spawnSync(node, [join(repoRoot, testCase.script), ...testCase.args], {
     cwd: repoRoot,
@@ -173,5 +219,5 @@ for (const testCase of cases) {
   if (!passed) failed += 1;
 }
 
-console.log(`MUTATION_SUMMARY cases=${cases.length} failures=${failed}`);
+console.log(`MUTATION_SUMMARY cases=${cases.length + packageBoundaryResults.length} failures=${failed}`);
 process.exit(failed ? 1 : 0);
