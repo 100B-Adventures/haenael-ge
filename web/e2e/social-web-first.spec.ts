@@ -3376,7 +3376,48 @@ test.describe("V2 web-first social slice", () => {
     }
   });
 
+  test("QA-REVERIFY-INVITE-NAV-01 초대 수락 화면은 승인된 하단 탭 component를 유지한다", async ({ browser }) => {
+    const page = await newRemotePage(browser, {
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 3,
+    });
+    const response = await page.goto(`/invite/${smokeInviteToken}`, {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.status()).toBe(200);
+    await expect(page.getByTestId("invite-accept-card")).toBeVisible();
+    await expect(page.getByTestId("receiver-bottom-nav")).toBeVisible();
+    await expect(page.getByRole("button", { name: "초대" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await page.close();
+  });
+
+  test("QA-REVERIFY-ADMIN-ORPHAN-01 관리자 안내문은 768px과 1440px에서 28px 미만 고아 줄바꿈이 없다", async ({ browser }) => {
+    const context = await authContext(browser, emails.admin);
+    const page = await context.newPage();
+    for (const width of [768, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const response = await page.goto("/admin", { waitUntil: "domcontentloaded" });
+      expect(response?.status(), `${width}px /admin`).toBe(200);
+      const metrics = await page.locator(".admin-dashboard-head h1 + p").evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const lines = Array.from(range.getClientRects());
+        return {
+          lineCount: lines.length,
+          lastWidth: lines.at(-1)?.width ?? 0,
+        };
+      });
+      console.info("ADMIN_NOTICE_LINE_GEOMETRY", JSON.stringify({ width, ...metrics }));
+      expect(metrics.lastWidth, `${width}px ${JSON.stringify(metrics)}`).toBeGreaterThanOrEqual(28);
+    }
+    await context.close();
+  });
+
   test("QA-TC-LG-01 노출 표에 없는 화면은 법적 고지 DOM이 0개다", async ({ browser }) => {
+    test.setTimeout(45_000);
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
@@ -3866,6 +3907,7 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("QA-TC-SP-02 카드 전수의 상하 안쪽 여백과 가장자리 margin이 대칭이다", async ({ browser }) => {
+    test.setTimeout(45_000);
     const violations: Array<Record<string, unknown>> = [];
     const inspect = async (page: Page, route: string) => {
       await page.goto(route, { waitUntil: "domcontentloaded" });

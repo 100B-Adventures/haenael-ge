@@ -3775,6 +3775,7 @@
     color: var(--muted-color);
     font-size: var(--text-label-small);
     line-height: 1.55;
+    text-wrap: balance;
   }
   .admin-dashboard-stack {
     display: grid;
