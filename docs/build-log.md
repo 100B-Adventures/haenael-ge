@@ -1,5 +1,13 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-07 G4 social Playwright 분석 동의 상태 격리
+
+- `social-web-first.spec.ts`만 현재 분석 동의 저장 키와 타입을 재사용해 테스트 시작 전 `denied`를 설정한다. Playwright 기본 context, 인증용 context, 비회원 page 생성 경계를 중앙 initializer로 연결했다. 분석 동의 자체를 검증하는 `analytics-consent.spec.ts`와 제품 코드는 변경하지 않았다.
+- staging 표적 실행은 `MY-01`, `QA-TC-LG-03`, `QA-REVERIFY-FLOW-01A` 3/3, retries 0이다. 종료 로그에서 fixture DB/Auth/Storage/cleanup queue 전 범주 0을 관찰했고 TypeScript 검사도 종료코드 0이다.
+- staging 재배포·push·전체 social 43건 재실행은 하지 않았다.
+
+> STAMP: 2026-11-07 07:09 KST · model=gpt-5 · agent=code-builder · skills=haenael-supabase-build · 근거=G4 staging 재QA 40/43 보고, 제품 consent 저장 계약, staging Playwright 표적 3건·fixture cleanup · 고민=분석 동의 기능 검증은 그대로 두고 관계없는 social suite만 결정된 동의 상태로 격리했다.
+
 ## 2026-11-07 G4 staging QA 결함 3종 로컬 보정
 
 - 분석 동의 배너의 개인정보 상세 링크를 44px 이상 touch target으로 만들고, 배너가 receiver 하단 탭의 높이·safe-area·16px 간격만큼 위에 위치하도록 실제 레이아웃을 수정했다. 배너를 닫거나 강제 클릭하지 않은 상태에서도 하단 탭과 상세 링크를 함께 조작할 수 있다.

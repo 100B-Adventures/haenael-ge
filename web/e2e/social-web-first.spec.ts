@@ -7,6 +7,10 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import sharp from "sharp";
 import {
+  ANALYTICS_CONSENT_KEY,
+  type AnalyticsConsent,
+} from "../src/lib/analytics/consent";
+import {
   runStagingFixtureSql,
   STAGING_PROJECT_REF,
 } from "./support/staging-fixture-sql";
@@ -695,11 +699,19 @@ async function routeStagingOriginWithoutToolbar(target: BrowserContext | Page) {
   });
 }
 
+async function initializeSocialAnalyticsConsent(target: BrowserContext | Page) {
+  const consent: AnalyticsConsent = "denied";
+  await target.addInitScript(({ key, value }) => {
+    window.localStorage.setItem(key, value);
+  }, { key: ANALYTICS_CONSENT_KEY, value: consent });
+}
+
 async function newRemotePage(
   browser: Browser,
   options: Parameters<Browser["newPage"]>[0] = {},
 ) {
   const page = await browser.newPage(options);
+  await initializeSocialAnalyticsConsent(page);
   await routeStagingOriginWithoutToolbar(page);
   return page;
 }
@@ -814,6 +826,7 @@ async function authContext(
   const context = await browser.newContext({
     ...(deviceScaleFactor ? { deviceScaleFactor } : {}),
   });
+  await initializeSocialAnalyticsConsent(context);
   await routeStagingOriginWithoutToolbar(context);
   const now = Math.floor(Date.now() / 1000);
   await context.addCookies(
@@ -834,6 +847,9 @@ test.describe("V2 web-first social slice", () => {
   // Playwright config keeps this file on one worker. Individual failures must not
   // suppress the remaining security cases, so do not use serial skip semantics.
   test.describe.configure({ mode: "default" });
+  test.beforeEach(async ({ context }) => {
+    await initializeSocialAnalyticsConsent(context);
+  });
   test.skip(
     IS_STAGING ? process.env.RUN_STAGING_SUPABASE_E2E !== "1" : !process.env.RUN_LOCAL_SUPABASE_E2E,
     "RUN_LOCAL_SUPABASE_E2E 또는 staging 실행 플래그가 필요",
