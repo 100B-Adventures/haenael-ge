@@ -33,7 +33,10 @@ export async function GET() {
     {
       status,
       version: process.env.NEXT_PUBLIC_APP_VERSION ?? "dev",
-      sourceSha: process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.DEPLOY_SOURCE_SHA ?? null,
+      sourceSha:
+        process.env.VERCEL_GIT_COMMIT_SHA?.trim()
+        || process.env.DEPLOY_SOURCE_SHA?.trim()
+        || null,
       database,
       supabaseProjectRef,
       responseTimeMs: Date.now() - startedAt,
