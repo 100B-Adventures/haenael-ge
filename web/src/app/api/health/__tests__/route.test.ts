@@ -41,7 +41,7 @@ describe("GET /api/health", () => {
     }));
   });
 
-  it("HEALTH-03 Vercel Git SHA가 주입 SHA보다 우선한다", async () => {
+  it("HEALTH-03 명시적으로 주입한 SHA가 오래된 Vercel Git SHA보다 우선한다", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project-ref.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "public-anon-key";
     process.env.VERCEL_GIT_COMMIT_SHA = "0123456789abcdef";
@@ -51,21 +51,21 @@ describe("GET /api/health", () => {
     const response = await GET();
 
     expect(await response.json()).toEqual(expect.objectContaining({
-      sourceSha: "0123456789abcdef",
+      sourceSha: "fedcba9876543210",
     }));
   });
 
-  it("HEALTH-04 Vercel Git SHA가 없으면 명시적으로 주입한 SHA를 반환한다", async () => {
+  it("HEALTH-04 주입 SHA가 없으면 Vercel Git SHA를 반환한다", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project-ref.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "public-anon-key";
-    delete process.env.VERCEL_GIT_COMMIT_SHA;
-    process.env.DEPLOY_SOURCE_SHA = "fedcba9876543210";
+    process.env.VERCEL_GIT_COMMIT_SHA = "0123456789abcdef";
+    delete process.env.DEPLOY_SOURCE_SHA;
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("[]", { status: 200 })));
 
     const response = await GET();
 
     expect(await response.json()).toEqual(expect.objectContaining({
-      sourceSha: "fedcba9876543210",
+      sourceSha: "0123456789abcdef",
     }));
   });
 
@@ -81,24 +81,24 @@ describe("GET /api/health", () => {
     expect(await response.json()).toEqual(expect.objectContaining({ sourceSha: null }));
   });
 
-  it("HEALTH-06 Vercel Git SHA가 빈 문자열이면 주입 SHA로 대체한다", async () => {
+  it("HEALTH-06 주입 SHA가 공백뿐이면 공백을 제거한 Vercel Git SHA를 반환한다", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project-ref.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "public-anon-key";
-    process.env.VERCEL_GIT_COMMIT_SHA = "";
-    process.env.DEPLOY_SOURCE_SHA = "fedcba9876543210";
+    process.env.VERCEL_GIT_COMMIT_SHA = "  0123456789abcdef\n";
+    process.env.DEPLOY_SOURCE_SHA = " \t ";
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("[]", { status: 200 })));
 
     const response = await GET();
 
     expect(await response.json()).toEqual(expect.objectContaining({
-      sourceSha: "fedcba9876543210",
+      sourceSha: "0123456789abcdef",
     }));
   });
 
-  it("HEALTH-07 공백뿐인 Vercel Git SHA를 건너뛰고 주입 SHA의 공백을 제거한다", async () => {
+  it("HEALTH-07 주입 SHA의 바깥 공백을 제거하고 Vercel Git SHA보다 우선한다", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project-ref.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "public-anon-key";
-    process.env.VERCEL_GIT_COMMIT_SHA = " \t ";
+    process.env.VERCEL_GIT_COMMIT_SHA = " 0123456789abcdef ";
     process.env.DEPLOY_SOURCE_SHA = "  fedcba9876543210\n";
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("[]", { status: 200 })));
 
