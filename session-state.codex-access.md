@@ -2,6 +2,9 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 2026-11-06 22:18 KST
+- Vercel CLI 복구: 내 18:02 설치 symlink 가 wrapper 와 충돌. 재설치 후 wrapper 실파일화, 토큰(`vercel-tokens.env`)으로 whoami·project ls 관찰. 다른 세션이 띄운 `vercel login` 프로세스는 남아 있음(건드리지 않음). Codex MCP 목록에 brain 등록 관찰.
+
 ## 2026-11-06 21:46 KST
 - 114 재시작 뒤 확인: Codex goal(tmux goal-haenael-ge %25) 복귀. 교차 리뷰 에이전트 g4_auth_cross_review 는 재시작으로 사망(rollout 2줄). Claude 가 5b552ce 교차 리뷰, MAJOR 0. anon RPC 401 42501 관찰.
 - 막힘: Vercel CLI AUTH_DEAD(auth.json 소실, 원인 미규명). device 승인 대기 https://vercel.com/oauth/device?user_code=SSSM-DWWR . staging 은 아직 4c6b7b2. 토큰은 114 에 없음(이름 검색 0건).
@@ -9,6 +12,11 @@
 - 실수: Esc 로 Goal paused 유발(Codex 가 active 복귀, 화면 관찰). live_sk 키로 없는 주문 GET 1회(HTTP 404, 부작용 없음).
 - codex-pane.sh 가 재시작 뒤 NO_PANE(pane_current_command 가 bash). .goal/pane 은 %20 로 낡음. CODEX_PANE=%25 로 우회.
 - 다음: 승인 뒤 Codex 가 배포, 재QA. Claude 는 회수 검증.
+
+## 2026-11-06 22:20 KST
+- 회장 지시: 카카오는 메인 크롬 세션으로 알아서, 토스 테스트 키·운영 결제 키는 필요하면 진행. 운영 결제 키는 불필요, 사용 안 함.
+- 정정: Codex Goal 은 진행 중(tmux %25, codex-pane.sh 는 NO_PANE 오판, 22:17 G4-PAY 검증 워커 실행 관찰). 카카오 원인 KOE006, 등록할 URI `https://haenael-ge-v2-staging-100-b.vercel.app/auth/kakao/callback`(staging 리다이렉트에서 관찰).
+- 터널 5개(9342·9333·9345·9444·9445) 모두 카카오·토스 미로그인 관찰. 맥 세션 sj-b9 에 회장 원문과 함께 URI 등록·로그인 왕복·토스 정책 요청, 회신 대기.
 
 ## 2026-11-06 19:30 KST
 - 9342 복구(맥 launchd 상시 터널 com.sj.onprem-chrome-tunnel). 토큰 이름 goal-haenael-staging, 만료 2027-02-04 관찰, 발급 주체 미확인. 9342 에 카카오 로그인 탭을 띄움. CDP 스크립트는 browser.close 제거.
