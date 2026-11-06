@@ -2,6 +2,9 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 2026-11-06 19:30 KST
+- 9342 복구(맥 launchd 상시 터널 com.sj.onprem-chrome-tunnel). 토큰 이름 goal-haenael-staging, 만료 2027-02-04 관찰, 발급 주체 미확인. 9342 에 카카오 로그인 탭을 띄움. CDP 스크립트는 browser.close 제거.
+
 ## 2026-11-06 19:26 KST
 - `haenael-ge-qa-staging.env` 가 19:24 다른 주체에 의해 교체됨(발급 주체 미확인, 나는 발급 안 함). 스테이징 secrets·functions 200, 운영 secrets 403, 프로젝트 목록은 스테이징 1개 관찰. 추가 발급 중단.
 - 9342 응답 없음, 토스 테스트 키 403, gh 정상.
