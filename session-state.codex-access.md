@@ -2,6 +2,11 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 2026-11-06 23:35 KST
+- staging a6d68a3 반영(health 관찰). c42e21c 재QA 41 PASS 2 FAIL. 초대 위치 복원 후 QA-REVERIFY-VIEWPORT-01 표적 1/1(card y=60). 표현 편차 초대 건은 회장 "너가 다 해라" 와 헌법 §4.3 로 추천안 자동 채택.
+- 남음: ORDER-ATTR-01(payments_disabled), G4-PAY(토스 테스트 키 IP 정책), G4-AUTH(카카오 redirect), G4-QA-01(CI 미실행). 터널 크롬 미로그인, 맥 세션 회신 없음.
+- 실수: npx vercel 만 보고 승인 대기 약 50분. PATH vercel 은 정상이었다.
+
 ## 2026-11-06 22:18 KST
 - Vercel CLI 복구: 내 18:02 설치 symlink 가 wrapper 와 충돌. 재설치 후 wrapper 실파일화, 토큰(`vercel-tokens.env`)으로 whoami·project ls 관찰. 다른 세션이 띄운 `vercel login` 프로세스는 남아 있음(건드리지 않음). Codex MCP 목록에 brain 등록 관찰.
 
