@@ -29,6 +29,9 @@ export interface TossWidgetPaymentRequest {
   failUrl: string;
   customerName?: string;
   metadata?: Record<string, string>;
+  sandbox?: {
+    paymentResult: "SUCCESS" | "FAIL";
+  };
 }
 
 export interface TossPaymentMethod {

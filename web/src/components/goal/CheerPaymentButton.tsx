@@ -279,8 +279,19 @@ export function CheerPaymentButton({
             return;
           }
           const { amount: _amount, ...paymentRequest } = commonRequest;
+          const sandboxPaymentResult =
+            clientKey.startsWith("test_gck_") &&
+            (process.env.NEXT_PUBLIC_TOSS_SANDBOX_RESULT === "SUCCESS" ||
+              process.env.NEXT_PUBLIC_TOSS_SANDBOX_RESULT === "FAIL")
+              ? process.env.NEXT_PUBLIC_TOSS_SANDBOX_RESULT
+              : undefined;
           void widgets
-            .requestPayment(paymentRequest)
+            .requestPayment({
+              ...paymentRequest,
+              ...(sandboxPaymentResult
+                ? { sandbox: { paymentResult: sandboxPaymentResult } }
+                : {}),
+            })
             .catch(async (paymentError: unknown) => {
               if (paymentWindowRef.current === paymentWindow) {
                 paymentWindowRef.current = null;

@@ -26,6 +26,7 @@
     "NEXT_PUBLIC_GA_MEASUREMENT_ID": { "targets": ["vercel-production"], "features": ["analytics"] },
     "NEXT_PUBLIC_PAYMENTS_ENABLED": { "targets": ["vercel-production"], "features": ["payments"] },
     "NEXT_PUBLIC_TOSS_CLIENT_KEY": { "targets": ["vercel-production"], "features": ["payments"] },
+    "NEXT_PUBLIC_TOSS_SANDBOX_RESULT": { "targets": [], "features": ["payments-sandbox"], "optional": true },
 
     "SUPABASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
     "SUPABASE_ANON_KEY": { "targets": ["supabase-production"], "features": ["wordmap"] },
