@@ -33,7 +33,7 @@ qa_gate:
     - actual Kakao OAuth callback and product session unverified
     - actual Toss sandbox callback and persistence unverified
     - production TOSS_SECRET_KEY rotation pending account-owner action
-    - production migrations seven and Edge Function deployment pending QA approval
+    - production migrations eight and Edge Function deployment pending QA approval
 carried_forward:
   - approved plan 1.0.0, prototype 3.0.0, and eng-design 1.2.5 remain their own artifact revision lines
 upstream_unchanged_reason: candidate assembly records approved upstream revisions without changing their meaning
@@ -53,6 +53,7 @@ server_assets:
     - 20261030040000_reconcile_failed_cancel_webhook.sql
     - 20261030050000_resolve_payment_reconcile_risk.sql
     - 20261107010000_payment_conversion_claim.sql
+    - 20261107020000_payment_conversion_delivery_lease.sql
   edge_functions:
     - auth-kakao
     - cheer-order
@@ -61,8 +62,8 @@ server_assets:
     - toss-confirm
     - toss-webhook
   deployment_order:
-    - apply all seven database migrations
-    - deploy Edge Functions; toss-confirm requires claim_payment_conversion from 20261107010000
+    - apply all eight database migrations
+    - deploy Edge Functions; toss-confirm requires lease_payment_conversion and ack_payment_conversion from 20261107020000
     - deploy web
     - run QA smoke; no production promotion before approval
 ```
@@ -78,8 +79,8 @@ CI 실행 `41474029952`는 성공했으며, staging 브라우저 E2E는 17/17, �
 - production의 현재 관찰 릴리스는 `2.0.1`이다. `2.1.0`을 production runtime으로 기록하지 않는다.
 - 배포 시에는 QA 승인 뒤 runtime identity를 같은 최종 버전으로 조립하고
   production smoke를 기록한다.
-- `toss-confirm`은 `claim_payment_conversion` RPC가 먼저 적용돼야 한다. 순서가 뒤집히면 결제 승인은
-  유지되지만 `conversionEligible=false`로 처리되어 Purchase 전환이 누락되므로, 위 배포 순서를 바꾸지 않는다.
+- `toss-confirm`은 delivery lease·ack RPC가 먼저 적용돼야 한다. 순서가 뒤집히면 결제 승인은
+  유지되지만 전환 lease를 발급하지 못하므로, 위 배포 순서를 바꾸지 않는다.
 
 ---
 

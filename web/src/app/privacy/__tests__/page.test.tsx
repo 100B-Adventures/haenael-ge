@@ -18,4 +18,18 @@ describe("개인정보처리방침", () => {
       screen.getByText("(주)넥스모어시스템즈(솔라피)").closest("li"),
     ).not.toHaveTextContent("비활성");
   });
+
+  it("GA4·Clarity·Meta의 동의, 국외 이전, 보유기간과 철회 경로를 고지한다", () => {
+    render(<PrivacyPage />);
+    const page = screen.getByTestId("privacy-page");
+
+    expect(page).toHaveTextContent("transaction_id: 주문번호");
+    expect(page).toHaveTextContent("clarityMS@microsoft.com");
+    expect(page).toHaveTextContent("최대 14개월");
+    expect(page).toHaveTextContent("재생 데이터 30일");
+    expect(page).toHaveTextContent("Event Data 최대 2년");
+    expect(page).toHaveTextContent("국외 이전 별도 동의");
+    expect(page).toHaveTextContent("동의 철회");
+    expect(screen.getByTestId("analytics-consent-controls")).toBeInTheDocument();
+  });
 });

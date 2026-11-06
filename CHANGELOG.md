@@ -14,8 +14,10 @@
 - 따라서 `2.0.1` 운영 기록을 유지한다. QA 승인과 운영 배포 후에만 이 후보를 정식 릴리스 섹션으로 승격한다.
 
 ### 보안
-- 결제 성공의 공개 `confirmed=1` 우회를 제거했다. `toss-confirm`이 결제 행의 `claim_payment_conversion` RPC로 브라우저 전환 권한을 원자적으로 최초 1회 획득한 요청만 `conversionEligible=true`를 반환한다. webhook 선승인 뒤 첫 브라우저 복귀는 전환을 보내고, 다른 브라우저의 재수신은 성공 UI만 복구한다.
-- `/payment`·`/invite`에서는 GA4·Clarity·Meta를 초기화하거나 page view를 보내지 않는다. 초대 URL로 OAuth 복귀한 가입 전환 표식도 안전한 URL까지 보존해 결제 키와 초대 토큰을 외부 분석 도구에 전달하지 않는다.
+- 결제 성공의 공개 `confirmed=1` 우회를 제거했다. `toss-confirm`은 DONE·`paymentKey` 검증 뒤 만료 가능한 delivery lease를 발급하고, GA4·Meta enqueue 성공 뒤 같은 token을 ack해 `sent`로 닫는다. 실패한 pending은 만료 후 재시도하며, 주문별 고정 `transaction_id`·Meta `eventID`로 ack 유실 뒤 중복 송신도 provider가 억제할 수 있다.
+- GA4·Microsoft Clarity·Meta 픽셀은 명시적 분석 동의 전에는 로드하거나 전송하지 않는다. 동의 상태는 브라우저에 저장하며 개인정보처리방침에서 철회할 수 있고, 철회 시 관련 쿠키 삭제·페이지 재로드로 추가 수집을 막는다.
+- `/payment`·`/invite` 민감 경로 차단을 유지한다. 초대 URL로 OAuth 복귀한 가입 전환 표식도 안전한 URL까지 보존해 결제 키와 초대 토큰을 외부 분석 도구에 전달하지 않는다.
+- 개인정보처리방침에 도구별 전송 항목(`transaction_id` 포함), 수령자 연락처, 국가·시기·방법, 목적, 보유기간, 거부·철회 방법을 현재 구현과 공급자 공개 정책 범위로 고지한다.
 
 ## 2.0.1 (2026-11-05)
 

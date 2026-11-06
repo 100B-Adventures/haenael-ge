@@ -9,6 +9,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-common-reportbutton";
+import { trackEvent } from "@/lib/analytics";
 
 const REASON_PRESETS = [
   "스팸 또는 광고",
@@ -119,18 +120,10 @@ function ReportSheet({ targetType, targetId, onClose }: ReportSheetProps) {
         return;
       }
 
-      // GA4
-      if (typeof window !== "undefined" && "gtag" in window) {
-        (window as typeof window & { gtag: Function }).gtag(
-          "event",
-          "report_submitted",
-          {
-            // eslint-disable-line @typescript-eslint/ban-types
-            target_type: targetType,
-            target_id: targetId,
-          },
-        );
-      }
+      trackEvent("report_submitted", {
+        target_type: targetType,
+        target_id: targetId,
+      });
 
       setDone(true);
     } catch {

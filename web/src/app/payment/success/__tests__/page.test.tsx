@@ -6,6 +6,12 @@ const { purchaseConversionMock } = vi.hoisted(() => ({
   purchaseConversionMock: vi.fn(),
 }));
 
+const conversionLease = {
+  leaseToken: "lease-token",
+  eventId: "haenael-purchase:order-new",
+  expiresAt: "2099-01-01T00:00:00.000Z",
+};
+
 vi.mock("../PurchaseConversion", () => ({
   PurchaseConversion: (props: unknown) => {
     purchaseConversionMock(props);
@@ -44,12 +50,12 @@ it("VO-04 비카드 보상 실패는 server message 없이 client copy로 표시
   expect(screen.getByText("허용되지 않은 결제수단을 안전하게 정리하지 못했어요.")).toBeInTheDocument();
 });
 
-it("최초 서버 승인만 Purchase 전환을 보내고 주소 기록을 목표 페이지로 바꾼다", async () => {
+it("최초 서버 승인은 pending lease를 브라우저 전달 컴포넌트에 넘긴다", async () => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
     ok: true,
-    json: () => Promise.resolve({ goalTitle: "편입 합격 해낼게", conversionEligible: true }),
+    json: () => Promise.resolve({ goalTitle: "편입 합격 해낼게", conversionLease }),
   }));
 
   render(await PaymentSuccessPage({
@@ -64,12 +70,14 @@ it("최초 서버 승인만 Purchase 전환을 보내고 주소 기록을 목표
   expect(screen.getByText("편입 합격 목표에 응원이 전달됐습니다.")).toBeInTheDocument();
   expect(purchaseConversionMock).toHaveBeenCalledWith({
     orderId: "order-new",
+    paymentKey: "pk",
     value: 3000,
     cleanPath: "/g/friend-goal",
+    initialLease: conversionLease,
   });
 });
 
-it("서버의 전환 claim을 이미 쓴 재수신은 성공 UI만 복구하고 전환은 보내지 않는다", async () => {
+it("sent 또는 활성 lease 재수신은 성공 UI만 복구하고 전환은 보내지 않는다", async () => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
@@ -77,7 +85,7 @@ it("서버의 전환 claim을 이미 쓴 재수신은 성공 UI만 복구하고 
     json: () => Promise.resolve({
       goalTitle: "편입 합격 해낼게",
       idempotent: true,
-      conversionEligible: false,
+      conversionLease: null,
     }),
   }));
 
@@ -89,7 +97,7 @@ it("서버의 전환 claim을 이미 쓴 재수신은 성공 UI만 복구하고 
   expect(purchaseConversionMock).not.toHaveBeenCalled();
 });
 
-it("웹훅 선확정이어도 서버의 첫 브라우저 전환 claim이면 전환을 보낸다", async () => {
+it("웹훅 선확정이어도 첫 브라우저 delivery lease면 전환을 보낸다", async () => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
@@ -97,7 +105,7 @@ it("웹훅 선확정이어도 서버의 첫 브라우저 전환 claim이면 전�
     json: () => Promise.resolve({
       goalTitle: "편입 합격 해낼게",
       idempotent: true,
-      conversionEligible: true,
+      conversionLease: { ...conversionLease, eventId: "haenael-purchase:order-webhook-first" },
     }),
   }));
 
@@ -111,8 +119,10 @@ it("웹훅 선확정이어도 서버의 첫 브라우저 전환 claim이면 전�
 
   expect(purchaseConversionMock).toHaveBeenCalledWith({
     orderId: "order-webhook-first",
+    paymentKey: "pk",
     value: 3000,
     cleanPath: "/",
+    initialLease: { ...conversionLease, eventId: "haenael-purchase:order-webhook-first" },
   });
 });
 

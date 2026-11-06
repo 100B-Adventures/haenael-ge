@@ -1410,6 +1410,15 @@ export type Database = {
         Args: { p_account_keys: Json; p_actor_id: string; p_request_id: number }
         Returns: string
       }
+      ack_payment_conversion: {
+        Args: {
+          p_event_id: string
+          p_lease_token: string
+          p_order_id: string
+          p_payment_key: string
+        }
+        Returns: boolean
+      }
       capture_lead: {
         Args: {
           p_campaign: string
@@ -1429,9 +1438,19 @@ export type Database = {
         }[]
       }
       cashout_require_kyc: { Args: never; Returns: boolean }
-      claim_payment_conversion: {
-        Args: { p_order_id: string; p_payment_key: string }
-        Returns: boolean
+      lease_payment_conversion: {
+        Args: {
+          p_lease_seconds?: number
+          p_order_id: string
+          p_payment_key: string
+        }
+        Returns: {
+          delivery_state: string
+          eligible: boolean
+          event_id: string
+          expires_at: string
+          lease_token: string
+        }[]
       }
       claim_storage_cleanup_batch: {
         Args: { p_lease?: string; p_limit?: number }

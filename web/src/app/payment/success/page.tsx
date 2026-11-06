@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { CircleAlert, Clover } from "lucide-react";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-payment-success-page";
-import { PurchaseConversion } from "./PurchaseConversion";
+import { PurchaseConversion, type ConversionLease } from "./PurchaseConversion";
 
 type Props = {
   searchParams: Promise<{
@@ -62,7 +62,7 @@ async function confirmPayment(params: {
     const code = typeof body?.error?.code === "string" ? body.error.code : "unknown";
     throw new Error(`toss_confirm:${code}`);
   }
-  return body as { goalTitle?: string; conversionEligible?: boolean };
+  return body as { goalTitle?: string; conversionLease?: ConversionLease | null };
 }
 
 export default async function PaymentSuccessPage({ searchParams }: Props) {
@@ -80,7 +80,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   let status: "success" | "error" = "success";
   let title = "응원이 전달됐어요";
   let message = "친구의 워드맵에 조용한 응원이 쌓였습니다.";
-  let shouldTrackPurchase = false;
+  let conversionLease: ConversionLease | null = null;
 
   if (!paymentKey || !orderId || !Number.isInteger(amount)) {
     status = "error";
@@ -89,8 +89,8 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   } else {
     try {
       const result = await confirmPayment({ paymentKey, orderId, amount });
-      // DB 행 잠금으로 브라우저 전환을 처음 claim한 callback만 전환을 보낸다.
-      shouldTrackPurchase = result.conversionEligible === true;
+      // provider enqueue 전에는 pending lease만 받고, 성공한 브라우저가 별도 ack로 sent를 확정한다.
+      conversionLease = result.conversionLease ?? null;
       if (result.goalTitle) {
         message = `${result.goalTitle.replace(/\s*해낼게\s*$/, "")} 목표에 응원이 전달됐습니다.`;
       }
@@ -111,11 +111,13 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
       data-testid="payment-success-page"
     >
       <div className="w-full max-w-[390px] rounded-[24px] p-7 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
-        {status === "success" && shouldTrackPurchase && (
+        {status === "success" && conversionLease && (
           <PurchaseConversion
             orderId={orderId}
+            paymentKey={paymentKey}
             value={amount}
             cleanPath={backHref}
+            initialLease={conversionLease}
           />
         )}
         <div

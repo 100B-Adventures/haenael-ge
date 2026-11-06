@@ -18,12 +18,11 @@ Deno.test(
     const opsBodies: Record<string, unknown>[] = [];
     const realFetch = globalThis.fetch;
     globalThis.fetch = ((input: Request | URL | string, init?: RequestInit) => {
-      const url =
-        typeof input === "string"
-          ? input
-          : input instanceof URL
-            ? input.href
-            : input.url;
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
       if (
         url.startsWith(
           "https://ops-external-watchdog.rosemallow95.workers.dev/",
@@ -59,12 +58,21 @@ Deno.test(
           ),
         );
       }
-      if (url.includes("/rest/v1/rpc/claim_payment_conversion")) {
+      if (url.includes("/rest/v1/rpc/lease_payment_conversion")) {
         return Promise.resolve(
-          new Response("true", {
-            status: 200,
-            headers: { "content-type": "application/json" },
-          }),
+          new Response(
+            JSON.stringify([{
+              eligible: true,
+              lease_token: "lease-order-77",
+              event_id: "haenael-purchase:order-77",
+              expires_at: "2099-01-01T00:00:00.000Z",
+              delivery_state: "pending",
+            }]),
+            {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            },
+          ),
         );
       }
       return Promise.resolve(new Response("{}", { status: 404 }));
@@ -92,7 +100,11 @@ Deno.test(
       assertEquals(res.status, 200);
       const body = await res.json();
       assertEquals(body.idempotent, true);
-      assertEquals(body.conversionEligible, true);
+      assertEquals(body.conversionLease, {
+        leaseToken: "lease-order-77",
+        eventId: "haenael-purchase:order-77",
+        expiresAt: "2099-01-01T00:00:00.000Z",
+      });
       await Promise.all(waits);
       assertEquals(waits.length, 1);
       assertEquals(opsBodies.length, 1);
@@ -104,6 +116,115 @@ Deno.test(
     }
   },
 );
+
+Deno.test(
+  "provider enqueue ack → 동일 lease·event id를 service-role RPC로 sent 전환",
+  async () => {
+    setPaymentTestEnv();
+    const realFetch = globalThis.fetch;
+    const rpcBodies: Record<string, unknown>[] = [];
+    globalThis.fetch = ((input: Request | URL | string, init?: RequestInit) => {
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
+      if (url.includes("/rest/v1/rpc/ack_payment_conversion")) {
+        rpcBodies.push(JSON.parse(String(init?.body)));
+        return Promise.resolve(
+          new Response("true", {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        );
+      }
+      return Promise.resolve(new Response("{}", { status: 404 }));
+    }) as typeof fetch;
+
+    try {
+      const response = await handleTossConfirm(
+        new Request("https://f.test/toss-confirm", {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer test",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "ack_conversion",
+            orderId: "order-ack",
+            paymentKey: "payment-key-ack",
+            leaseToken: "lease-ack",
+            eventId: "haenael-purchase:order-ack",
+          }),
+        }),
+      );
+      assertEquals(response.status, 200);
+      assertEquals(await response.json(), { acknowledged: true });
+      assertEquals(rpcBodies[0], {
+        p_order_id: "order-ack",
+        p_payment_key: "payment-key-ack",
+        p_lease_token: "lease-ack",
+        p_event_id: "haenael-purchase:order-ack",
+      });
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  },
+);
+
+Deno.test("ack 응답 유실 뒤 lease 조회는 sent terminal 상태를 반환", async () => {
+  setPaymentTestEnv();
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = ((input: Request | URL | string) => {
+    const url = typeof input === "string"
+      ? input
+      : input instanceof URL
+      ? input.href
+      : input.url;
+    if (url.includes("/rest/v1/rpc/lease_payment_conversion")) {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify([{
+            eligible: false,
+            lease_token: null,
+            event_id: "haenael-purchase:order-sent",
+            expires_at: null,
+            delivery_state: "sent",
+          }]),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        ),
+      );
+    }
+    return Promise.resolve(new Response("{}", { status: 404 }));
+  }) as typeof fetch;
+
+  try {
+    const response = await handleTossConfirm(
+      new Request("https://f.test/toss-confirm", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer test",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "lease_conversion",
+          orderId: "order-sent",
+          paymentKey: "payment-key-sent",
+        }),
+      }),
+    );
+    assertEquals(response.status, 200);
+    assertEquals(await response.json(), {
+      conversionLease: null,
+      conversionDelivery: { state: "sent" },
+    });
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
 
 function setPaymentTestEnv() {
   Deno.env.set("PAYMENTS_ENABLED", "true");
@@ -134,12 +255,11 @@ Deno.test(
     const paymentKey = "payment_key_non_card_2000";
 
     globalThis.fetch = ((input: Request | URL | string, init?: RequestInit) => {
-      const url =
-        typeof input === "string"
-          ? input
-          : input instanceof URL
-            ? input.href
-            : input.url;
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
       if (url.includes("/rest/v1/payment?")) {
         return Promise.resolve(
           new Response(
@@ -217,12 +337,11 @@ Deno.test(
     const paymentKey = "payment_key_non_card_failed";
 
     globalThis.fetch = ((input: Request | URL | string, init?: RequestInit) => {
-      const url =
-        typeof input === "string"
-          ? input
-          : input instanceof URL
-            ? input.href
-            : input.url;
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
       if (url.includes("/rest/v1/payment?")) {
         return Promise.resolve(
           new Response(

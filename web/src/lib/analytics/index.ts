@@ -2,10 +2,12 @@
 // architecture §6: 수집=앱(web), 분석=MARKETING 중앙 테넌트.
 // 슬라이스 #1 scaffold: GA_MEASUREMENT_ID env 기반 초기화 + 이벤트 타입 정의.
 
+import { hasAnalyticsConsent } from "@/lib/analytics/consent";
+
 declare global {
   interface Window {
     gtag?: (
-      command: "config" | "event" | "js",
+      command: "config" | "consent" | "event" | "js",
       targetIdOrEvent: string | Date,
       params?: Record<string, unknown>,
     ) => void;
@@ -48,11 +50,11 @@ function callGtag(
   command: "config" | "event" | "js",
   targetIdOrEvent: string | Date,
   params?: Record<string, unknown>,
-): void {
-  if (typeof window === "undefined") return;
+): boolean {
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return false;
   if (window.gtag) {
     window.gtag(command, targetIdOrEvent, params);
-    return;
+    return true;
   }
   window.dataLayer = window.dataLayer ?? [];
   const args: unknown[] =
@@ -60,22 +62,23 @@ function callGtag(
   (function (..._args: unknown[]) {
     window.dataLayer!.push(arguments);
   })(...args);
+  return true;
 }
 
-export function trackPageView(pagePath: string): void {
-  if (isSensitiveAnalyticsPath(pagePath)) return;
-  callGtag("event", "page_view", { page_path: sanitizePagePath(pagePath) });
+export function trackPageView(pagePath: string): boolean {
+  if (isSensitiveAnalyticsPath(pagePath)) return false;
+  return callGtag("event", "page_view", { page_path: sanitizePagePath(pagePath) });
 }
 
 export function trackEvent(
   event: HaenaelEvent,
   params?: Record<string, unknown>,
-): void {
-  callGtag("event", event, params);
+): boolean {
+  return callGtag("event", event, params);
 }
 
 export function initGA(measurementId: string): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
   window.dataLayer = window.dataLayer ?? [];
   // eslint-disable-next-line prefer-rest-params
   function gtag(..._args: unknown[]) {

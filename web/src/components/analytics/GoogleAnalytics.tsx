@@ -4,6 +4,7 @@ import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import { isSensitiveAnalyticsPath, trackPageView } from "@/lib/analytics";
+import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
 
 function RouteTracker() {
   const pathname = usePathname();
@@ -15,9 +16,11 @@ function RouteTracker() {
 
 export function GoogleAnalytics() {
   const pathname = usePathname();
+  const consent = useAnalyticsConsent();
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   if (
     process.env.NODE_ENV !== "production" ||
+    consent !== "granted" ||
     !measurementId ||
     measurementId === "G-XXXXXXXXXX" ||
     isSensitiveAnalyticsPath(pathname)
@@ -35,6 +38,7 @@ window.dataLayer = window.dataLayer || [];
 function gtag(){window.dataLayer.push(arguments);}
 window.gtag = gtag;
 gtag('js', new Date());
+gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted' });
 gtag('config', '${measurementId}', { send_page_view: false, cookie_domain: window.location.hostname });
 `,
         }}

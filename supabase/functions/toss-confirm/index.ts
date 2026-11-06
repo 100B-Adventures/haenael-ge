@@ -51,18 +51,70 @@ function sanitizedConfirmResponse(confirm: {
   };
 }
 
-async function claimBrowserConversion(
+type ConversionLease = {
+  leaseToken: string;
+  eventId: string;
+  expiresAt: string;
+};
+
+type ConversionDelivery =
+  | { state: "leased"; lease: ConversionLease }
+  | { state: "pending"; retryAt: string | null }
+  | { state: "sent" }
+  | { state: "unavailable" };
+
+async function leaseBrowserConversion(
   supabase: SupabaseClient,
   orderId: string,
   paymentKey: string,
-): Promise<boolean> {
-  const { data, error } = await supabase.rpc("claim_payment_conversion", {
+): Promise<ConversionDelivery> {
+  const { data, error } = await supabase.rpc("lease_payment_conversion", {
     p_order_id: orderId,
     p_payment_key: paymentKey,
+    p_lease_seconds: 300,
   });
   if (error) {
-    // 분석 이벤트 claim 실패는 결제 성공을 뒤집지 않는다. 전환은 안전하게 생략한다.
-    console.error("[toss-confirm] browser conversion claim failed:", error);
+    // 분석 이벤트 lease 실패는 결제 성공을 뒤집지 않는다. 전환은 안전하게 생략한다.
+    console.error("[toss-confirm] browser conversion lease failed:", error);
+    return { state: "unavailable" };
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (row?.delivery_state === "sent") return { state: "sent" };
+  if (row?.delivery_state === "pending" && row?.eligible !== true) {
+    return {
+      state: "pending",
+      retryAt: typeof row.expires_at === "string" ? row.expires_at : null,
+    };
+  }
+  if (
+    row?.eligible !== true || typeof row.lease_token !== "string" ||
+    typeof row.event_id !== "string" || typeof row.expires_at !== "string"
+  ) return { state: "unavailable" };
+  return {
+    state: "leased",
+    lease: {
+      leaseToken: row.lease_token,
+      eventId: row.event_id,
+      expiresAt: row.expires_at,
+    },
+  };
+}
+
+async function ackBrowserConversion(
+  supabase: SupabaseClient,
+  orderId: string,
+  paymentKey: string,
+  leaseToken: string,
+  eventId: string,
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc("ack_payment_conversion", {
+    p_order_id: orderId,
+    p_payment_key: paymentKey,
+    p_lease_token: leaseToken,
+    p_event_id: eventId,
+  });
+  if (error) {
+    console.error("[toss-confirm] browser conversion ack failed:", error);
     return false;
   }
   return data === true;
@@ -106,12 +158,14 @@ export async function handleTossConfirm(req: Request) {
     });
   }
 
-  const paymentKey =
-    typeof body.paymentKey === "string" ? body.paymentKey.trim() : "";
+  const paymentKey = typeof body.paymentKey === "string"
+    ? body.paymentKey.trim()
+    : "";
   const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
+  const action = typeof body.action === "string" ? body.action : "confirm";
   const amount = Number(body.amount);
 
-  if (!paymentKey || !orderId || !Number.isInteger(amount) || amount < 1000) {
+  if (!paymentKey || !orderId) {
     return json(400, {
       error: {
         code: "validation_error",
@@ -121,7 +175,6 @@ export async function handleTossConfirm(req: Request) {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const tossSecretKey = Deno.env.get("TOSS_SECRET_KEY");
   if (!supabaseUrl || !serviceKey) {
     await sendSlackAlert({
       event: "toss_confirm_missing_env",
@@ -134,6 +187,49 @@ export async function handleTossConfirm(req: Request) {
       },
     });
   }
+  const supabase = createClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  if (action === "ack_conversion") {
+    const leaseToken = typeof body.leaseToken === "string"
+      ? body.leaseToken.trim()
+      : "";
+    const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
+    if (!leaseToken || !eventId) {
+      return json(400, { error: { code: "validation_error" } });
+    }
+    const acknowledged = await ackBrowserConversion(
+      supabase,
+      orderId,
+      paymentKey,
+      leaseToken,
+      eventId,
+    );
+    return acknowledged
+      ? json(200, { acknowledged: true })
+      : json(409, { error: { code: "conversion_lease_mismatch" } });
+  }
+
+  if (action === "lease_conversion") {
+    const conversionDelivery = await leaseBrowserConversion(
+      supabase,
+      orderId,
+      paymentKey,
+    );
+    return json(200, {
+      conversionLease: conversionDelivery.state === "leased"
+        ? conversionDelivery.lease
+        : null,
+      conversionDelivery,
+    });
+  }
+
+  if (action !== "confirm" || !Number.isInteger(amount) || amount < 1000) {
+    return json(400, { error: { code: "validation_error" } });
+  }
+
+  const tossSecretKey = Deno.env.get("TOSS_SECRET_KEY");
   if (!tossSecretKey) {
     await sendSlackAlert({
       event: "toss_confirm_missing_env",
@@ -146,10 +242,6 @@ export async function handleTossConfirm(req: Request) {
       },
     });
   }
-
-  const supabase = createClient(supabaseUrl, serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
 
   const { data: existingPayment, error: paymentLookupErr } = await supabase
     .from("payment")
@@ -193,7 +285,7 @@ export async function handleTossConfirm(req: Request) {
 
     // 웹훅이 먼저 확정했거나 최초 송신이 유실된 경우의 복구 경로. 키가 같아 수신 측에서 한 건이 된다.
     firePay(orderId, amount);
-    const conversionEligible = await claimBrowserConversion(
+    const conversionDelivery = await leaseBrowserConversion(
       supabase,
       orderId,
       paymentKey,
@@ -205,7 +297,10 @@ export async function handleTossConfirm(req: Request) {
       goalTitle: data[0].goal_title,
       displayName: data[0].display_name,
       idempotent: true,
-      conversionEligible,
+      conversionLease: conversionDelivery.state === "leased"
+        ? conversionDelivery.lease
+        : null,
+      conversionDelivery,
     });
   }
 
@@ -246,8 +341,9 @@ export async function handleTossConfirm(req: Request) {
       );
       canceled = true;
     } catch (error) {
-      const cancelErrorMessage =
-        error instanceof Error ? error.message : "cancel_failed";
+      const cancelErrorMessage = error instanceof Error
+        ? error.message
+        : "cancel_failed";
       cancelError = cancelErrorMessage;
       console.error("[toss-confirm] non-card compensation failed:", error);
     }
@@ -332,8 +428,9 @@ export async function handleTossConfirm(req: Request) {
       );
       compensated = true;
     } catch (cancelErr) {
-      compensationError =
-        cancelErr instanceof Error ? cancelErr.message : "Toss cancel failed";
+      compensationError = cancelErr instanceof Error
+        ? cancelErr.message
+        : "Toss cancel failed";
       console.error(
         "[toss-confirm] Toss cancel compensation failed:",
         cancelErr,
@@ -390,8 +487,8 @@ export async function handleTossConfirm(req: Request) {
       },
       invokeNotify: async (payload) => {
         const notifyInternalToken = Deno.env.get("NOTIFY_INTERNAL_TOKEN") ?? "";
-        const { data: notifyData, error: notifyError } =
-          await supabase.functions.invoke("notify", {
+        const { data: notifyData, error: notifyError } = await supabase
+          .functions.invoke("notify", {
             headers: { "x-notify-internal-token": notifyInternalToken },
             body: payload,
           });
@@ -405,7 +502,7 @@ export async function handleTossConfirm(req: Request) {
     },
   );
 
-  const conversionEligible = await claimBrowserConversion(
+  const conversionDelivery = await leaseBrowserConversion(
     supabase,
     orderId,
     confirm.paymentKey,
@@ -417,7 +514,10 @@ export async function handleTossConfirm(req: Request) {
     memberId: confirmed.member_id,
     goalTitle: confirmed.goal_title,
     displayName: confirmed.display_name,
-    conversionEligible,
+    conversionLease: conversionDelivery.state === "leased"
+      ? conversionDelivery.lease
+      : null,
+    conversionDelivery,
   });
 }
 

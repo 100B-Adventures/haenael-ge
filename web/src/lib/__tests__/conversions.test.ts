@@ -8,6 +8,7 @@ import {
   trackSignUpConversion,
 } from "@/lib/analytics/conversions";
 import { markIfNewAccount } from "@/lib/auth/signup-mark";
+import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics/consent";
 
 describe("광고 전환 이벤트", () => {
   const fbq = vi.fn();
@@ -15,6 +16,7 @@ describe("광고 전환 이벤트", () => {
 
   beforeEach(() => {
     window.localStorage.clear();
+    window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
     vi.clearAllMocks();
     window.fbq = fbq;
     window.gtag = gtag as typeof window.gtag;
@@ -28,25 +30,35 @@ describe("광고 전환 이벤트", () => {
       .forEach((script) => script.remove());
   });
 
-  it("Purchase 는 주문번호별로 한 번만, 금액과 KRW 를 함께 보낸다", () => {
-    trackPurchaseConversion("order-1", 3000);
-    trackPurchaseConversion("order-1", 3000);
+  it("Purchase 는 provider dedupe key, 주문번호, 금액과 KRW 를 함께 보낸다", async () => {
+    await trackPurchaseConversion("order-1", 3000, "event-order-1");
 
     expect(fbq).toHaveBeenCalledTimes(1);
-    expect(fbq).toHaveBeenCalledWith("track", "Purchase", { value: 3000, currency: "KRW" });
+    expect(fbq).toHaveBeenCalledWith(
+      "track",
+      "Purchase",
+      { value: 3000, currency: "KRW" },
+      { eventID: "event-order-1" },
+    );
     expect(gtag).toHaveBeenCalledWith("event", "purchase", {
       transaction_id: "order-1",
+      event_id: "event-order-1",
       value: 3000,
       currency: "KRW",
     });
   });
 
-  it("가입 전환은 계정별로 한 번만 보낸다", () => {
-    trackSignUpConversion("user-1");
-    trackSignUpConversion("user-1");
+  it("가입 전환은 provider enqueue 성공 뒤 계정별 완료 표식을 남긴다", async () => {
+    await trackSignUpConversion("user-1");
+    await trackSignUpConversion("user-1");
 
     expect(fbq).toHaveBeenCalledTimes(1);
-    expect(fbq).toHaveBeenCalledWith("track", "CompleteRegistration");
+    expect(fbq).toHaveBeenCalledWith(
+      "track",
+      "CompleteRegistration",
+      {},
+      { eventID: "haenael-signup:user-1" },
+    );
     expect(gtag).toHaveBeenCalledTimes(1);
   });
 
@@ -61,15 +73,19 @@ describe("광고 전환 이벤트", () => {
     window.history.replaceState(window.history.state, "", "/");
   });
 
-  it("fbq 가 늦게 생겨도 전환을 보낸다", () => {
-    vi.useFakeTimers();
+  it("Meta 스크립트가 늦어도 동의 후 stub queue에 전환을 보존한다", async () => {
     delete window.fbq;
-    trackPurchaseConversion("order-2", 1000);
-    window.fbq = fbq;
-    vi.advanceTimersByTime(200);
-    vi.useRealTimers();
+    vi.stubEnv("NODE_ENV", "production");
+    const sent = await trackPurchaseConversion("order-2", 1000, "event-order-2");
 
-    expect(fbq).toHaveBeenCalledWith("track", "Purchase", { value: 1000, currency: "KRW" });
+    expect(sent).toBe(true);
+    const initializedFbq = Reflect.get(window, "fbq") as { queue?: unknown[][] };
+    expect(initializedFbq.queue).toEqual([
+      ["init", META_PIXEL_ID],
+      ["track", "Purchase", { value: 1000, currency: "KRW" }, {
+        eventID: "event-order-2",
+      }],
+    ]);
   });
 
   it("민감 경로에서 주소를 정리한 뒤에도 Meta Pixel을 지연 초기화할 수 있다", () => {
@@ -83,6 +99,18 @@ describe("광고 전환 이벤트", () => {
     )).not.toBeNull();
     const initializedFbq = Reflect.get(window, "fbq") as { queue?: unknown[][] };
     expect(initializedFbq.queue?.[0]).toEqual(["init", META_PIXEL_ID]);
+  });
+
+  it("명시적 동의 전에는 GA4·Meta를 초기화하거나 전송하지 않는다", async () => {
+    window.localStorage.removeItem(ANALYTICS_CONSENT_KEY);
+    delete window.fbq;
+    const sent = await trackPurchaseConversion("order-no-consent", 3000, "event-no-consent");
+
+    expect(sent).toBe(false);
+    expect(gtag).not.toHaveBeenCalled();
+    expect(document.querySelector(
+      'script[src="https://connect.facebook.net/en_US/fbevents.js"]',
+    )).toBeNull();
   });
 });
 

@@ -1,10 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   isSensitiveAnalyticsPath,
   sanitizePagePath,
   trackPageView,
   trackEvent,
 } from "@/lib/analytics";
+import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics/consent";
+
+beforeEach(() => {
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
+});
 
 describe("GA4 page path privacy", () => {
   it("removes query parameters and fragments", () => {
@@ -18,6 +23,15 @@ describe("GA4 page path privacy", () => {
     trackPageView("/payment/success?paymentKey=secret");
     trackPageView("/invite/private-token");
     expect(gtag).not.toHaveBeenCalled();
+  });
+
+  it("분석 동의 전에는 일반 경로 event도 보내거나 queue하지 않는다", () => {
+    window.localStorage.removeItem(ANALYTICS_CONSENT_KEY);
+    window.gtag = undefined;
+    window.dataLayer = undefined;
+
+    expect(trackEvent("goal_created")).toBe(false);
+    expect(window.dataLayer).toBeUndefined();
   });
 
   it("민감 경로 판정은 하위 경로만 막고 유사 접두어는 허용한다", () => {
