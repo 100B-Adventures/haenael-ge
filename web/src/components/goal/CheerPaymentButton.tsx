@@ -407,7 +407,7 @@ export function CheerPaymentButton({
             </div>
 
             {/* 직접 입력 — 상한 없음(서버 상한 100,000클로버=1억원까지) */}
-            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">{PRODUCT_COPY.TEXT_008}<div
+            <label className="mt-3 block text-[13px] font-bold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_008}<div
                 className="mt-1 flex items-center gap-2 rounded-[13px] border px-3 py-2.5"
                 style={{
                   borderColor:
@@ -446,7 +446,7 @@ export function CheerPaymentButton({
               🍀 {cloverAmount.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_012}{" "}
               {amountKrw.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_013}</p>
 
-            <label className="mt-4 block text-[13px] font-bold [color:#4a4640]!">{PRODUCT_COPY.TEXT_014}<input
+            <label className="mt-4 block text-[13px] font-bold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_014}<input
                 className="mt-1 w-full rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
                 maxLength={30}
                 value={displayName}
@@ -465,7 +465,7 @@ export function CheerPaymentButton({
                 onChange={(e) => setIsAnonymous(e.target.checked)}
               />{PRODUCT_COPY.TEXT_017}</label>
 
-            <label className="mt-3 block text-[13px] font-bold [color:#4a4640]!">{PRODUCT_COPY.TEXT_018}<textarea
+            <label className="mt-3 block text-[13px] font-bold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_018}<textarea
                 className="mt-1 w-full resize-none rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
                 maxLength={140}
                 rows={3}

@@ -40,7 +40,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
         data-testid="phone-consent-notice"
         role="status"
       >
-        <p className="text-[13.5px] font-extrabold text-[#8A6218]">{PRODUCT_COPY.TEXT_001}</p>
+        <p className="text-[13.5px] font-extrabold text-amber-ink">{PRODUCT_COPY.TEXT_001}</p>
         <p className="mt-1 text-[11.5px] leading-relaxed text-[#8A6218]">
           {context === "cashout"
             ? PRODUCT_COPY.TEXT_002

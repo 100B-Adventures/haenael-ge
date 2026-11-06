@@ -66,7 +66,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
         <p className="text-[12.5px] leading-snug [color:var(--accent-foreground)]!">
           <strong>{PRODUCT_COPY.TEXT_003}</strong>
           <br />
-          <span className="[color:#3d7a5a]!">{PRODUCT_COPY.TEXT_004}</span>
+          <span className="[color:var(--accent-foreground)]!">{PRODUCT_COPY.TEXT_004}</span>
         </p>
       </div>
 
