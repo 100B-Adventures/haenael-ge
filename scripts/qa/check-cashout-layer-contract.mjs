@@ -14,6 +14,10 @@ function source(path) {
   return readFileSync(join(repoRoot, path), "utf8");
 }
 
+function sources(...paths) {
+  return paths.map(source).join("\n");
+}
+
 const latestMigration = readdirSync(migrationsDir)
   .filter((name) => name.endsWith(".sql"))
   .sort()
@@ -27,11 +31,21 @@ if (!latestMigration) {
 
 let db = readFileSync(join(migrationsDir, latestMigration), "utf8");
 let eligibility = source("supabase/migrations/20260822000000_cashout_clover_lock_a1.sql");
-let form = source("web/src/components/cashout/CashoutRequestForm.tsx");
+let form = sources(
+  "web/src/components/cashout/CashoutRequestForm.tsx",
+  "web/src/lib/copy/generated/components-cashout-cashoutrequestform.ts",
+);
 let page = source("web/src/app/(receiver)/cashout/page.tsx");
-let statusPage = source("web/src/app/(receiver)/cashout/status/page.tsx");
+let statusPageView = source("web/src/app/(receiver)/cashout/status/page.tsx");
+let statusPage = sources(
+  "web/src/app/(receiver)/cashout/status/page.tsx",
+  "web/src/lib/copy/generated/app-receiver-cashout-status-page.ts",
+);
 let errors = source("web/src/lib/cashout-errors.ts");
-let terms = source("web/src/app/terms/page.tsx");
+let terms = sources(
+  "web/src/app/terms/page.tsx",
+  "web/src/lib/copy/generated/app-terms-page.ts",
+);
 let fee = source("web/src/lib/cashout-fee.ts");
 
 if (mutation === "ui-payable-threshold") {
@@ -59,7 +73,8 @@ const checks = [
   ["copy.web-zero-payable-explains-welcome", form, /웰컴 클로버는 환전되지 않아요\. 친구 응원이 들어오면 지급 가능한 만큼 신청할 수 있어요\./],
   ["copy.error-total-threshold", errors, /cashout_below_minimum:\s*\n?\s*"모인 클로버가 30개 이상이면/],
   ["copy.error-request-lower-bound", errors, /cashout_below_minimum:\s*\n?\s*"[^"]*지급 가능한 클로버를 1개 이상 신청할 수 있어요\."/],
-  ["copy.status-total-threshold", statusPage, /모인 클로버가 \{minCashoutClover\}개 이상이면 환전 자격을 채워요\./],
+  ["copy.status-total-threshold", statusPage, /TEXT_004:\s*"모인 클로버가 "[\s\S]*TEXT_005:\s*"개 이상이면 환전 자격을 채워요\./],
+  ["copy.status-threshold-template-binding", statusPageView, /PRODUCT_COPY\.TEXT_004\}\{minCashoutClover\}\{PRODUCT_COPY\.TEXT_005/],
   ["copy.status-request-lower-bound", statusPage, /신청량은 지금 지급 가능한 클로버 안에서 1개 이상 선택할 수/],
   ["terms.cashout-active", terms, /환전하는\s+기능은 현재 운영 중입니다/],
   ["terms.total-threshold-and-request-range", terms, /모인 클로버가\s+30개 이상이면 환전 자격[\s\S]*지급 가능한 클로버 안에서 1개 이상/],

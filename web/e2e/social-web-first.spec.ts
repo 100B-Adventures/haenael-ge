@@ -863,7 +863,7 @@ test.describe("V2 web-first social slice", () => {
   const paymentIds: number[] = [];
   const delayedProfileCleanups: Array<{ queueId: number; assetId: string; objectPath: string; availableAt: string }> = [];
   const ownerLongMessage = "익명으로 남기지만 매일 꾸준히 공부하는 모습을 보고 있어요. 오늘도 한 걸음씩 나아가면 분명히 목표를 해낼 수 있으니 끝까지 함께 응원할게요.";
-  const friendLongMessage = "중간고사 두 과목에서 좋은 결과를 만든 흐름을 그대로 이어가면 이번 학기 평점 목표도 충분히 해낼 수 있어요. 지치지 않게 끝까지 응원할게요.";
+  const friendLongMessage = "중간고사 두 과목에서 좋은 결과를 만든 흐름을 꾸준히 이어가면 이번 학기 평점 목표도 충분히 해낼 수 있어요. 지치지 않게 끝까지 응원할게요.";
 
   test.beforeAll(async () => {
     test.setTimeout(120_000);
@@ -1552,15 +1552,15 @@ test.describe("V2 web-first social slice", () => {
     await captureStep("04-saved-reloaded-title-390.png");
     await expect(page.getByTestId("goal-management-wordmap")).toBeVisible();
     await expect(page.getByTestId("goal-management-wordmap")).toContainText(
-      /지금까지\s*18명이 이 단어들로 응원했어요/,
+      /지금까지\s*23명이 이 단어들로 응원했어요/,
     );
     await expect(page.getByTestId("goal-supporter-item")).toHaveCount(8);
     await page.getByTestId("goal-supporter-list").scrollIntoViewIfNeeded();
     await captureStep("05-supporters-preview-8-390.png");
     await page.getByRole("button", { name: "응원 목록 펼치기" }).click();
-    await expect(page.getByTestId("goal-supporter-item")).toHaveCount(18);
+    await expect(page.getByTestId("goal-supporter-item")).toHaveCount(20);
     const supporterPills = page.getByTestId("goal-supporter-cheer-count");
-    await expect(supporterPills).toHaveCount(18);
+    await expect(supporterPills).toHaveCount(20);
     // Grid item의 inline-flex는 CSS blockification으로 computed display가 flex가 된다.
     await expect(supporterPills.first()).toHaveCSS("display", "flex");
     await expect(supporterPills.first()).toHaveCSS("background-color", "rgb(231, 244, 236)");
@@ -1570,7 +1570,7 @@ test.describe("V2 web-first social slice", () => {
       scrollTo({ top: element.getBoundingClientRect().top + scrollY - 72 });
     });
     await page.waitForTimeout(50);
-    await captureStep("06-supporters-expanded-18-390.png");
+    await captureStep("06-supporters-expanded-20-390.png");
     expect(await page.getByTestId("goal-details-card").evaluate((node, wordmap) =>
       Boolean(node.compareDocumentPosition(wordmap as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
     await page.getByTestId("goal-management-wordmap").elementHandle())).toBe(true);
@@ -1589,7 +1589,7 @@ test.describe("V2 web-first social slice", () => {
     for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
       await page.setViewportSize({ width, height: width <= 412 ? 844 : 900 });
       await expect(page.getByTestId("goal-management-page")).toBeVisible();
-      await expect(page.getByTestId("goal-supporter-item")).toHaveCount(18);
+      await expect(page.getByTestId("goal-supporter-item")).toHaveCount(20);
       const metrics = await measureCanonicalErgonomics(page);
       console.info("S1_GOAL_ERGONOMICS", JSON.stringify({ width, ...metrics }));
       expect(metrics.route).toBe(`/me/goal/${ownerGoal}`);
@@ -1634,7 +1634,7 @@ test.describe("V2 web-first social slice", () => {
     }
     console.info("S1_DEMO", JSON.stringify({
       url: page.url(),
-      flow: "owner login -> goal top -> edit input -> save -> reload persisted -> supporters 8 -> supporters 18",
+      flow: "owner login -> goal top -> edit input -> save -> reload persisted -> supporters 8 -> supporters 20",
       supporterCount: await supporterPills.count(),
       screenshotPath: screenshotPath ?? null,
       captureDir: captureDir ?? null,
@@ -3463,6 +3463,10 @@ test.describe("V2 web-first social slice", () => {
   test("QA-TC-LG-03 마이페이지 한 단계 아래가 사업자 정보 전문을 소유한다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
+    const consoleErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/my", { waitUntil: "domcontentloaded" });
     const legalLinks = page.locator(".my-policy-links");
@@ -3484,6 +3488,7 @@ test.describe("V2 web-first social slice", () => {
     await page.goto("/how", { waitUntil: "domcontentloaded" });
     await expect(page.getByTestId("business-information")).toHaveCount(0);
     await expect(page.locator(".my-policy-links")).toHaveCount(0);
+    expect(consoleErrors).toEqual([]);
     await context.close();
   });
 

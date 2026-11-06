@@ -31,10 +31,9 @@ export default function ReceiverHomeLoading() {
                 aria-hidden="true"
               />
             </div>
-            <span
-              className="receiver-spinner text-primary"
-              aria-hidden="true"
-            />
+            <span className="grid size-8 shrink-0 place-items-center" aria-hidden="true">
+              <span className="receiver-spinner text-primary" />
+            </span>
           </div>
           <p className="mt-3 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_003}</p>
         </div>
