@@ -2,6 +2,13 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 2026-11-07 01:30 KST
+- staging SHA `9b1e0332fffae811da446877cba05370c089c0bf` 배포 완료. health `status=ok`, `database=ok`, `sourceSha` exact 관찰.
+- CI 디자인 토큰 literal 5건을 기존 토큰으로 교정해 commit/push했다. 로컬 design-token lint, 관련 unit 20/20, typecheck, build, 컴포넌트 smoke PASS.
+- staging 표적 QA: PhoneConsentNotice·ShareLinkCard 2/5 실렌더 PASS. CheerPaymentButton 3/5는 `PAYMENTS_ENABLED=false` 상태의 시험 환경 보정이 두 번 실패해 미검증. 제품 결함으로 확대하지 않음. fixture 잔존 0.
+- G4-QA-01 CI run `42242973230`은 unit/build의 옛 디자인 토큰 위반과 e2e 시작 전 invalid `QA_STAGING_SUPABASE_ACCESS_TOKEN`으로 FAIL. 제품 literal은 수정됐지만 GitHub secret 갱신 API는 현재 gh 권한으로 HTTP 403이라 재실행 안 함.
+- 남은 항목은 Kakao Redirect URI·실로그인, Toss 테스트 키 IP 정책, GitHub Actions secret 갱신 권한뿐이다. 회장 지시대로 건너뛰고 Goal BLOCKED 유지.
+
 ## 2026-11-07 01:02 KST
 - 회장 지적: 이름 규칙은 맥=[Product] X, 온프렘=온프렘 X. 중복 원인 관찰: 사업체별 rc 창구 + work 세션, work.tsv 의 --continue 로 sessionId 중복 3건(haenael-ge·romeo·haejo-danta). 이름 수정은 romeo 세션이 진행 중(harness dev-rc staged, work.tsv 00:59)이라 손대지 않음.
 - 표에서 빠졌던 것: `/usr/local/bin/dev-rc` 는 아직 옛 이름, root 소유. 중복 프로세스 정리는 회장 결정 대기.
