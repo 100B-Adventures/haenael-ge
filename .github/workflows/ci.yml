@@ -284,7 +284,7 @@ jobs:
         working-directory: .
         run: |
           /Users/sj/.claude/harness/bin/with-local-secret-env.sh bash -lc '
-            supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=true
+            supabase secrets set --yes --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=true
           '
 
       - name: V2 social staging E2E
@@ -308,7 +308,7 @@ jobs:
             set -euo pipefail
             response_file="$(mktemp)"
             trap "rm -f \"$response_file\"" EXIT
-            supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=false
+            supabase secrets set --yes --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=false
             status="$(curl -sS -o "$response_file" -w "%{http_code}" \
               -X POST "$NEXT_PUBLIC_SUPABASE_URL/functions/v1/cheer-order" \
               -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
