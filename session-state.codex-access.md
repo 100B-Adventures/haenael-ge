@@ -2,6 +2,19 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 2026-11-06 19:30 KST
+- 9342 복구(맥 launchd 상시 터널 com.sj.onprem-chrome-tunnel). 토큰 이름 goal-haenael-staging, 만료 2027-02-04 관찰, 발급 주체 미확인. 9342 에 카카오 로그인 탭을 띄움. CDP 스크립트는 browser.close 제거.
+
+## 2026-11-06 19:26 KST
+- `haenael-ge-qa-staging.env` 가 19:24 다른 주체에 의해 교체됨(발급 주체 미확인, 나는 발급 안 함). 스테이징 secrets·functions 200, 운영 secrets 403, 프로젝트 목록은 스테이징 1개 관찰. 추가 발급 중단.
+- 9342 응답 없음, 토스 테스트 키 403, gh 정상.
+
+## 2026-11-06 19:25 KST
+- 복구 완료: 이 세션 worktree 복원, `.cwd-placeholder` 삭제, `.gitignore`·`.env.local` 되돌림, `.claude/worktrees/` 를 info/exclude 에 추가.
+- gh 로그인 완료(`gh run list` 관찰). 맥 세션 sj-b9 는 PAT·운영 키·토스 설정·메인 크롬 노출을 회장 결정 없이는 안 한다고 답함.
+- PAT: 범위 화면 확인(codex-114-haenael-staging, 30일, 프로젝트 1개, Project Settings·Logs 읽기, Edge Functions·Secrets 읽기쓰기). 미발급. 저장 예정 파일 `haenael-ge-staging-mgmt.env`(맥 동기화가 qa-staging.env 를 덮을 수 있어 별도 파일).
+- 9342 가 18:16, 19:24 두 번 꺼짐. 내 CDP 스크립트 직후라 원인일 가능성, 미확정. 맥 재기동·원인 회신 대기.
+
 ## 2026-11-06 18:05 KST
 - 회장 지시: "코덱스가 작업을 할 때 뭐 연결이 없다, 키 없다, 그래서 못했다 이런 소리 안 나오게끔 다 세팅해놔."
 - 완료(관찰됨): `~/Documents/SJ_BRAIN_wiki` 심링크로 brain MCP 복구. `~/.local/bin` 에 supabase 3.0.0, vercel 설치. 저장소 루트 `.vercel` 을 프로젝트 `haenael-ge` 로 연결. Vercel·스테이징 DB·서비스 키·웹 health·push·Playwright 정상.
