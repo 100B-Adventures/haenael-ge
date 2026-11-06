@@ -1,6 +1,6 @@
 # 회귀 테스트 CI
 #
-# 트리거: main 푸시 + 모든 PR + 수동 실행
+# 트리거: main 푸시 + 모든 PR + 수동 일반 검사 + trusted staging repository dispatch
 #
 # 커버리지 경계 (숨기지 않고 명시한다):
 #   포함  = 웹 단위 테스트 전량, 결제·인증 Edge Function 보안 Vitest,
@@ -20,11 +20,13 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  repository_dispatch:
+    types: [trusted-staging-e2e]
 
 concurrency:
-  # workflow_dispatch는 staging 결제 설정을 쓰므로 브랜치가 달라도 한 번에 하나만 실행한다.
+  # trusted repository_dispatch는 staging 결제 설정을 쓰므로 한 번에 하나만 실행한다.
   # 로컬 수동 결제 진단은 이 workflow가 끝난 뒤에만 실행한다.
-  group: ${{ github.event_name == 'workflow_dispatch' && 'haenael-staging-write' || format('ci-{0}', github.ref) }}
+  group: ${{ github.event_name == 'repository_dispatch' && github.event.action == 'trusted-staging-e2e' && 'haenael-staging-write' || format('ci-{0}', github.ref) }}
   cancel-in-progress: false
 
 permissions:
@@ -244,24 +246,31 @@ jobs:
 
   e2e-v2-social:
     name: e2e-v2-social
-    if: github.event_name == 'workflow_dispatch'
+    if: >-
+      github.event_name == 'repository_dispatch' &&
+      github.event.action == 'trusted-staging-e2e' &&
+      github.ref == 'refs/heads/main' &&
+      github.repository == '100B-Adventures/haenael-ge'
     runs-on: [self-hosted, onprem-114]
     timeout-minutes: 30
     defaults:
       run:
         working-directory: web
     env:
+      # Same-account local secret은 위에서 고정한 trusted default-main 코드만 읽는다.
       SJ_LOCAL_SECRET_FILE: /Users/sj/.sj-agent-harness/secrets/haenael-ge-qa-staging.env
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: refs/heads/main
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: web/package-lock.json
 
-      - uses: supabase/setup-cli@v3
+      - uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
         with:
           version: 2.109.0
 
@@ -314,7 +323,7 @@ jobs:
 
       - name: V2 social 실행 증거 보관
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: e2e-v2-social-${{ github.run_id }}
           path: |
