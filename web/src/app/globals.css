@@ -424,6 +424,14 @@
     stroke-width: 1.9;
   }
 
+  .receiver-analytics-consent-banner {
+    bottom: var(--sp-4);
+  }
+
+  body:has(.receiver-tabbar) .receiver-analytics-consent-banner {
+    bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px) + var(--sp-4));
+  }
+
   .social-stack {
     display: grid;
     min-width: 0;

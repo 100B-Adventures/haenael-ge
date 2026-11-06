@@ -10,7 +10,7 @@ export function AnalyticsConsentBanner() {
 
   return (
     <section
-      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-[640px] rounded-[16px] border border-border bg-card p-4 shadow-lg"
+      className="receiver-analytics-consent-banner fixed inset-x-4 z-50 mx-auto max-w-[640px] rounded-[16px] border border-border bg-card p-4 shadow-lg"
       role="dialog"
       aria-label="분석 도구 동의"
       data-testid="analytics-consent-banner"
@@ -23,20 +23,23 @@ export function AnalyticsConsentBanner() {
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
-          className="min-h-11 rounded-[12px] border border-border bg-background px-3 text-[14px] font-bold text-foreground"
+          className="min-h-11 rounded-[12px] border border-border bg-background px-3 text-[14px] font-bold text-foreground transition-transform active:translate-y-px"
           onClick={() => setAnalyticsConsent("denied")}
         >
           국외 이전에 동의하지 않음
         </button>
         <button
           type="button"
-          className="min-h-11 rounded-[12px] bg-primary px-3 text-[14px] font-bold text-primary-foreground"
+          className="min-h-11 rounded-[12px] bg-primary px-3 text-[14px] font-bold text-primary-foreground transition-transform active:translate-y-px"
           onClick={() => setAnalyticsConsent("granted")}
         >
           분석·국외 이전에 동의
         </button>
       </div>
-      <Link className="mt-3 block text-center text-[13px] underline" href="/privacy">
+      <Link
+        className="mt-3 flex min-h-11 w-full items-center justify-center rounded-[12px] text-center text-[13px] underline transition-transform active:translate-y-px"
+        href="/privacy"
+      >
         전송 항목과 국외 이전 상세 보기
       </Link>
     </section>

@@ -66,3 +66,28 @@ test("AN-CONSENT-02 동의 상태여도 민감 경로에서는 분석 도구를 
   await page.waitForTimeout(700);
   expect(analyticsRequests).toHaveLength(0);
 });
+
+test("AN-CONSENT-03 모바일 배너와 하단 탭을 동시에 조작할 수 있다", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.goto("/");
+
+  const banner = page.getByTestId("analytics-consent-banner");
+  const detailLink = banner.getByRole("link", { name: "전송 항목과 국외 이전 상세 보기" });
+  const bottomNav = page.getByTestId("receiver-bottom-nav");
+  await expect(banner).toBeVisible();
+  await expect(bottomNav).toBeVisible();
+
+  const detailBox = await detailLink.boundingBox();
+  expect(detailBox).not.toBeNull();
+  expect(detailBox!.width).toBeGreaterThanOrEqual(44);
+  expect(detailBox!.height).toBeGreaterThanOrEqual(44);
+
+  const [bannerBox, navBox] = await Promise.all([banner.boundingBox(), bottomNav.boundingBox()]);
+  expect(bannerBox).not.toBeNull();
+  expect(navBox).not.toBeNull();
+  expect(bannerBox!.y + bannerBox!.height).toBeLessThanOrEqual(navBox!.y);
+
+  await bottomNav.getByRole("button", { name: "친구" }).click();
+  await expect(page.getByTestId("guest-teaser-sheet")).toBeVisible();
+  await expect(banner).toBeVisible();
+});

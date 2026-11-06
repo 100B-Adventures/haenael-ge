@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-07 G4 staging QA 결함 3종 로컬 보정
+
+- 분석 동의 배너의 개인정보 상세 링크를 44px 이상 touch target으로 만들고, 배너가 receiver 하단 탭의 높이·safe-area·16px 간격만큼 위에 위치하도록 실제 레이아웃을 수정했다. 배너를 닫거나 강제 클릭하지 않은 상태에서도 하단 탭과 상세 링크를 함께 조작할 수 있다.
+- GA4 로더는 `NEXT_PUBLIC_GA_MEASUREMENT_ID`가 없으면 fail-closed하는 기존 구현을 유지했다. Vercel Production에는 키가 있고 Preview에는 없음을 값 출력 없이 확인했으며 `.env.example`에 public 환경변수 이름을 추가했다. Meta·Microsoft Clarity의 기존 동의 후 로드와 민감 경로 차단은 변경하지 않았다.
+- 검증은 전체 단위·타입 검사 87파일·517건, 표적 단위 2파일·12건, QA mutation 51/51, headless Chromium 분석 동의 E2E 3/3, 360·390·412·600·700·780·820·900·1000px ergonomics 9/9, Next production build 종료코드 0이다. 9개 폭에서 44px 미만 누름 0, 가로 overflow 0, active coverage 100%, fixed overlap 0을 관찰했다.
+- staging 배포·재QA·push·운영 변경은 실행하지 않았다. staging의 `NEXT_PUBLIC_GA_MEASUREMENT_ID` 설정과 재배포 뒤 정식 회차 재검증이 남아 있다.
+
+> STAMP: 2026-11-07 06:37 KST · model=gpt-5 · agent=code-builder · skills=haenael-supabase-build · 근거=staging QA first failures, Vercel 환경변수 이름 대조, Vitest·QA contracts·Next build·headless Chromium·mobile ergonomics · 고민=분석 기대값을 낮추지 않고 제품 레이아웃 결함과 Preview public 설정 누락을 분리했다.
+
 ## 2026-11-07 G4 로컬 통합
 
 - `integration/g4-release`에서 G4 기준선 `ab0cedd2beece83672f2bc6d51bc2b1404c089d2`와 `origin/main` `e0a9f30c0cd991bdd53fab97b15d8b7c54573b83`을 `--no-ff`로 통합했다. 충돌은 CHANGELOG, RELEASE, package manifest·lockfile, 결제 성공 화면, 개인정보처리방침 6곳이었다.
