@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MyPageOverview } from "../MyPageOverview";
@@ -92,8 +92,11 @@ describe("MyPageOverview", () => {
     expect(text.indexOf("나의 활동")).toBeLessThan(text.indexOf("응원 내역"));
     expect(text.indexOf("응원 내역")).toBeLessThan(text.indexOf("알림"));
     expect(text.indexOf("알림")).toBeLessThan(text.indexOf("계정"));
-    expect(screen.getByRole("link", { name: /법적 고지/ })).toHaveAttribute("href", "/my/legal");
-    expect(document.querySelector(".my-policy-links")).not.toBeInTheDocument();
+    const legalLinks = screen.getByRole("navigation", { name: "법적 고지" });
+    expect(within(legalLinks).getAllByRole("link")).toHaveLength(3);
+    expect(within(legalLinks).getByRole("link", { name: "이용약관" })).toHaveAttribute("href", "/terms");
+    expect(within(legalLinks).getByRole("link", { name: "개인정보처리방침" })).toHaveAttribute("href", "/privacy");
+    expect(within(legalLinks).getByRole("link", { name: "사업자 정보" })).toHaveAttribute("href", "/my/legal");
     expect(screen.queryByTestId("legal-footer")).not.toBeInTheDocument();
     expect(text).not.toMatch(/\d[\d,]*원|₩/);
   });

@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-06 G4-QA first sweep batch fix
+
+- `test:qa-contracts`의 카피 9건은 제품 문구 누락이 아니라 `f79a7e3` 카피 중앙화 이후 검사기가 생성 카피 모듈을 읽지 않은 것이 원인이었다. 검사 입력과 status template binding을 보정했고, 뒤이어 드러난 `selection-check` prefix 레지스트리 누락도 정본에 등록했다.
+- PW-02는 fixture 23명과 승인 계약의 8/20 접기 정책에 맞췄다. MY-01은 기대 문구가 fixture에 없던 데이터를 보정했다. LG-03은 제품 누락이어서 마이페이지에 법적 링크 3개를 복구했다. SP-04는 로딩 스피너의 회전 경계를 32px wrapper로 containment했다.
+- `cd web && npm run test:qa-contracts && npm test` exit 0, 82파일·483건 통과. staging env production build exit 0. staging DB 연결 로컬 production Playwright `PW-02|MY-01|QA-TC-LG-03|QA-TC-SP-04` 4/4 통과, cleanup 0. dev landing smoke는 HTTP 200, CTA visible, horizontal overflow 0, console error 0이다.
+- 승인 캡처와 current HEAD의 landing·goal management·my page를 대조했다. 기능·상태 누락은 보정했고, 배치·간격·색·형태·폰트 차이는 `.goal/demos.md`에 추천과 캡처 쌍을 남겨 회장 판정 대기로 분리했다. 전역 13px 확대와 baseline 재작성은 하지 않았다.
+- production/main 배포, 운영 DB 변경, CI 실행은 없다. G4-AUTH/G4-PAY 상태도 건드리지 않았다.
+
+> STAMP: 2026-11-06 16:50 KST · model=gpt-codex/gpt-5 · agent=code-builder · skills=haenael-supabase-build, verify · 근거=승인 prototype v3, current HEAD 로컬 Playwright·Vitest·Next build, first sweep summary · 고민=제품 누락과 stale fixture·검사기 누락을 분리해 승인 표현을 자동 복구하지 않았다.
+
 ## 2026-10-28 S3 독립 코드검토 P1 보완, 독립 QA 대기
 
 - 친구 목표 상세 UI 클릭 직전의 인증 HTTP 사전 요청을 제거했다. 01A는 친구 목록 DOM, 실제 Link 클릭, 최종 URL, 상세 DOM과 목표 제목으로 cold UI navigation을 검증한다.
