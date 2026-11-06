@@ -1,4 +1,5 @@
-- **현재 Goal 상태 2026-11-07 02:35 KST · ACTIVE:** G4-AUTH-02는 staging 실제 엣지 경로 1/1·EXIT 0이다. G4-AUTH-01은 CDP 9342의 Kakao 쿠키 23개를 격리 컨텍스트에 주입해 OAuth 로그인 폼까지 도달했으나 계정 입력 화면에서 60초 timeout, 제품 세션은 미생성이다. 전용 Chrome 9342·9333의 Password Manager Kakao 저장 항목은 각 0건이고 로컬 Claude 브리지에도 Chrome 도구가 없어 실제 계정 인증만 외부 경계로 남겼다. CI는 `13f2397`에서 trusted `repository_dispatch`·default `main`·`onprem-114`·로컬 secret wrapper로 교정했고 독립 재리뷰 MAJOR 0이다. 실제 CI 실행은 이 workflow가 default branch에 반영된 뒤 검증한다. Goal은 G4-PAY와 G4-QA의 회장 없이 가능한 항목으로 계속 진행한다.
+- **현재 Goal 상태 2026-11-07 03:00 KST · ACTIVE:** G4-AUTH-02는 staging 실제 엣지 경로 1/1·EXIT 0이다. G4-AUTH-01은 CDP 9342의 Kakao 쿠키 23개를 격리 컨텍스트에 주입해 OAuth 로그인 폼까지 도달했으나 계정 입력 화면에서 60초 timeout, 제품 세션은 미생성이다. G4-PAY는 test key로 Toss sandbox session HTTP 200과 신한카드 외부 인증 화면까지 도달했고 PAY-01 0/1·PAY-02 0/3으로 카드 소유자 인증 이후 callback은 미검증이다. staging은 결제 비활성, `TOSS_SECRET_KEY` 부재, fixture 0, health `sourceSha=6ca6837`로 원복했다. CI는 `13f2397`에서 trusted default `main`의 `repository_dispatch`, `[self-hosted,onprem-114]`, 로컬 secret wrapper로 교정했고 독립 재리뷰 MAJOR 0이다. runner service는 `onprem-114-android`로 실행 중이다. 이 workflow는 아직 default branch에 없어 실제 dispatch는 main 반영 뒤에만 가능하다.
+- **G4-PAY staging lifecycle 2026-11-07 02:58 KST ❌ BLOCKED(외부 카드 인증):** G4-PAY-01은 test client key가 빠진 첫 enabled 배포에서 Toss 호출 전 timeout으로 0/1·EXIT 1이었다. 배포 환경을 교정한 뒤 정확히 1회 실행한 G4-PAY-02는 Toss sandbox session API HTTP 200과 신한카드 인증 화면까지 도달했지만 0/3·EXIT 1이다. 기존 114 직접 API probe의 HTTP 403은 이번 브라우저 lifecycle에서 재현되지 않았다. 운영키·실결제·송금은 0회다. 종료 후 `PAYMENTS_ENABLED=false`, `TOSS_SECRET_KEY` 부재, fixture 0, authenticated `cheer-order` HTTP 503 `payments_disabled`, staging health sourceSha `6ca683799a44044832e9569610b4176eced3cf63`를 확인했다. 근거 `.goal/g4-pay-resume.summary.md`, `.goal/runs/g4-pay-resume-20261107-024138/`.
 - **QA-REVERIFY-DESIGN-TOKEN-02 2026-11-07 01:21 KST ❌ FAIL(시험 결함):** staging SHA `9b1e0332fffae811da446877cba05370c089c0bf`, 390px headless Chromium 재실행 1회는 EXIT 1이다. 지시대로 먼저 실행한 `PhoneConsentNotice`와 `ShareLinkCard`는 token/computed color 2/2·HTTP 200·console/page error 0·캡처를 충족했다. 결제 번들 환경 보정 selector가 실제 `"data-testid":"cheer-cta"`가 아니라 `data-testid:"cheer-cta"`를 찾아 patch 0건으로 중단되어 `CheerPaymentButton` 3개는 미검증이고 전체 2/5다. fixture 잔존 0, 제품 결함으로 확대하지 않으며 추가 재실행하지 않았다. `.goal/runs/g4-design-token-staging-qa-20261107-011631/qa-report.md`.
 - **QA-REVERIFY-DESIGN-TOKEN-01 2026-11-07 01:04 KST ❌ FAIL(시험 결함):** staging SHA `9b1e0332fffae811da446877cba05370c089c0bf`, 390px headless Chromium 1회에서 `PhoneConsentNotice` token/computed color·HTTP·console/page error는 PASS. disabled CTA의 DOM property 해제로 React 결제 시트가 열리지 않아 `CheerPaymentButton` 3개와 뒤의 `ShareLinkCard` 1개는 미검증, EXIT 1. fixture 최종 잔존 0. `.goal/runs/g4-design-token-staging-qa-20261107-010010/qa-report.md`.
 
@@ -29,10 +30,7 @@
 
 # 회장께 물을 것
 
-- 이번 턴에는 없음. 아래 3건은 회장 지시대로 로그인·권한 구간으로 건너뛰며 별도 요청하지 않는다.
-- G4-QA-01: GitHub Actions repository secret `QA_STAGING_SUPABASE_ACCESS_TOKEN`이 invalid이고 현재 `gh` 인증은 secret 갱신 API에서 HTTP 403이다. 갱신 권한이 생기기 전 CI를 재실행하지 않는다.
-- G4-PAY-01·02: staging 관리 권한은 복구됐지만 `toss.env` 테스트 키가 114 IP에서 HTTP 403 `API_KEY_ACCESS_DENIED`다. 하면 해당 테스트 키의 IP/접근 정책을 114에서 허용한 뒤 동일 verify 두 건을 실행한다. 안 하면 실제 sandbox 승인과 callback은 계속 미검증이다. 추천은 운영키를 쓰지 않고 테스트 키 접근 정책만 허용하는 것이다.
-- G4-AUTH-01: Kakao 개발자 콘솔에 staging callback redirect URI를 등록하고 실제 로그인 동의를 완료한다. 안 하면 OAuth callback과 제품 세션 생성은 미검증이다. 추천은 staging URI만 등록하고 운영 설정은 건드리지 않는 것이다.
+- 이번 턴에는 없음. GitHub Actions는 기존 `onprem-114` self-hosted runner와 로컬 secret wrapper를 사용하도록 교정했다. Kakao와 Toss의 외부 계정 인증 경계는 별도 질문으로 Goal을 멈추지 않고, 회장 없이 가능한 항목을 끝까지 진행한다.
 
 # 슬라이스 기록
 
