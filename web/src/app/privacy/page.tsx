@@ -1,5 +1,8 @@
 
-import { PRODUCT_COPY } from "@/lib/copy/generated/app-privacy-page";// privacy/page.tsx — 개인정보처리방침 (법정 고지)
+// privacy/page.tsx — 개인정보처리방침 (법정 고지)
+
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-privacy-page";
+
 export default function PrivacyPage() {
   return (
     <main className="max-w-2xl mx-auto px-6 py-16" data-testid="privacy-page">
@@ -90,9 +93,36 @@ export default function PrivacyPage() {
         <li>
           <strong>{PRODUCT_COPY.TEXT_073}</strong>{PRODUCT_COPY.TEXT_074}<strong>{PRODUCT_COPY.TEXT_075}</strong>{PRODUCT_COPY.TEXT_076}</li>
         <li>
-          <strong>Google Analytics(GA4)</strong>{PRODUCT_COPY.TEXT_077}<strong>{PRODUCT_COPY.TEXT_078}</strong>{PRODUCT_COPY.TEXT_079}</li>
+          <strong>Google Analytics(GA4)</strong>{PRODUCT_COPY.TEXT_077}</li>
+        <li>
+          <strong>Microsoft Clarity</strong>{PRODUCT_COPY.TEXT_104}</li>
+        <li>
+          <strong>Meta 픽셀</strong>{PRODUCT_COPY.TEXT_105}</li>
       </ul>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_080}</p>
+
+      <h3 className="font-semibold mt-6 mb-2">{PRODUCT_COPY.TEXT_106}</h3>
+      <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_107}</p>
+      <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
+        <li>
+          <strong>Google Analytics(GA4)</strong>{PRODUCT_COPY.TEXT_108}{" "}
+          <a className="underline" href="https://tools.google.com/dlpage/gaoptout">
+            {PRODUCT_COPY.TEXT_109}
+          </a>{" "}
+          {PRODUCT_COPY.TEXT_110}
+        </li>
+        <li>
+          <strong>Microsoft Clarity</strong>{PRODUCT_COPY.TEXT_111}
+        </li>
+        <li>
+          <strong>Meta 픽셀</strong>{PRODUCT_COPY.TEXT_112}{" "}
+          <a className="underline" href="https://www.facebook.com/adpreferences">
+            {PRODUCT_COPY.TEXT_113}
+          </a>{" "}
+          {PRODUCT_COPY.TEXT_114}
+        </li>
+      </ul>
+      <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_115}</p>
 
       <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_081}</h2>
       <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_082}</p>

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { CircleAlert, Clover } from "lucide-react";
-import { AnalyticsEvent } from "@/components/analytics/AnalyticsEvent";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-payment-success-page";
+import { PurchaseConversion } from "./PurchaseConversion";
 
 type Props = {
   searchParams: Promise<{
@@ -62,7 +62,7 @@ async function confirmPayment(params: {
     const code = typeof body?.error?.code === "string" ? body.error.code : "unknown";
     throw new Error(`toss_confirm:${code}`);
   }
-  return body as { goalTitle?: string };
+  return body as { goalTitle?: string; conversionEligible?: boolean };
 }
 
 export default async function PaymentSuccessPage({ searchParams }: Props) {
@@ -80,6 +80,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   let status: "success" | "error" = "success";
   let title = "응원이 전달됐어요";
   let message = "친구의 워드맵에 조용한 응원이 쌓였습니다.";
+  let shouldTrackPurchase = false;
 
   if (!paymentKey || !orderId || !Number.isInteger(amount)) {
     status = "error";
@@ -88,6 +89,8 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   } else {
     try {
       const result = await confirmPayment({ paymentKey, orderId, amount });
+      // DB 행 잠금으로 브라우저 전환을 처음 claim한 callback만 전환을 보낸다.
+      shouldTrackPurchase = result.conversionEligible === true;
       if (result.goalTitle) {
         message = `${result.goalTitle.replace(/\s*해낼게\s*$/, "")} 목표에 응원이 전달됐습니다.`;
       }
@@ -108,10 +111,11 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
       data-testid="payment-success-page"
     >
       <div className="w-full max-w-[390px] rounded-[24px] p-7 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
-        {status === "success" && (
-          <AnalyticsEvent
-            event="payment_success"
-            params={{ value: amount, currency: "KRW" }}
+        {status === "success" && shouldTrackPurchase && (
+          <PurchaseConversion
+            orderId={orderId}
+            value={amount}
+            cleanPath={backHref}
           />
         )}
         <div

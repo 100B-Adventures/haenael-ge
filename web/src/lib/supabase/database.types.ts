@@ -1429,6 +1429,10 @@ export type Database = {
         }[]
       }
       cashout_require_kyc: { Args: never; Returns: boolean }
+      claim_payment_conversion: {
+        Args: { p_order_id: string; p_payment_key: string }
+        Returns: boolean
+      }
       claim_storage_cleanup_batch: {
         Args: { p_lease?: string; p_limit?: number }
         Returns: {

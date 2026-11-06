@@ -1,7 +1,7 @@
 # 릴리스 후보 매니페스트: 해낼게 2.1.0
 
-> 상태: **제안, QA 미승인, 운영 미배포.** 이 후보는 현재 운영 릴리스 `2.0.0`을 대체하거나
-> 현재 운영 릴리스 신원은 `2.0.0`으로 유지한다. 후보 버전 파일은 배포 선언이 아니며, QA 승인과 운영 배포 전에는 runtime 관찰값을 바꾸지 않는다.
+> 상태: **제안, QA 미승인, 운영 미배포.** 이 후보는 현재 운영 릴리스 `2.0.1`을 대체하지 않는다.
+> 현재 운영 릴리스 신원은 `2.0.1`로 유지한다. 후보 버전 파일은 배포 선언이 아니며, QA 승인과 운영 배포 전에는 runtime 관찰값을 바꾸지 않는다.
 
 ```yaml
 release: 2.1.0
@@ -33,7 +33,7 @@ qa_gate:
     - actual Kakao OAuth callback and product session unverified
     - actual Toss sandbox callback and persistence unverified
     - production TOSS_SECRET_KEY rotation pending account-owner action
-    - production migrations six and Edge Function deployment pending QA approval
+    - production migrations seven and Edge Function deployment pending QA approval
 carried_forward:
   - approved plan 1.0.0, prototype 3.0.0, and eng-design 1.2.5 remain their own artifact revision lines
 upstream_unchanged_reason: candidate assembly records approved upstream revisions without changing their meaning
@@ -44,6 +44,27 @@ artifact_to_release:
   docs/eng-design/fdd-social-viral-loop-web-first-v1.2.5.md: { release: 2.1.0, tag: target }
   docs/build-log.md: { release: 2.1.0, tag: target }
   docs/qa/qa-tracker-v2-social-viral-loop.md: { release: 2.1.0, tag: blocked-qa }
+server_assets:
+  db_migrations:
+    - 20261025010000_v2_prototype_contract_completion.sql
+    - 20261030010000_payment_compensation_amount_contract.sql
+    - 20261030020000_payment_compensation_idempotency.sql
+    - 20261030030000_payment_compensation_replay_guard.sql
+    - 20261030040000_reconcile_failed_cancel_webhook.sql
+    - 20261030050000_resolve_payment_reconcile_risk.sql
+    - 20261107010000_payment_conversion_claim.sql
+  edge_functions:
+    - auth-kakao
+    - cheer-order
+    - lead-capture
+    - profile-update
+    - toss-confirm
+    - toss-webhook
+  deployment_order:
+    - apply all seven database migrations
+    - deploy Edge Functions; toss-confirm requires claim_payment_conversion from 20261107010000
+    - deploy web
+    - run QA smoke; no production promotion before approval
 ```
 
 후보의 실제 staging 증거는 `.goal/runs/final-controller-verification-20261103.json`에 고정한다.
@@ -54,11 +75,17 @@ CI 실행 `41474029952`는 성공했으며, staging 브라우저 E2E는 17/17, �
 
 - 후보 `2.1.0`의 `VERSION`, 패키지 버전, RELEASE 매니페스트는 정합한다. `status: proposed-not-approved`가
   운영 릴리스 선언과 구분한다.
-- production의 현재 관찰 릴리스는 `2.0.0`이다. `2.1.0`을 production runtime으로 기록하지 않는다.
+- production의 현재 관찰 릴리스는 `2.0.1`이다. `2.1.0`을 production runtime으로 기록하지 않는다.
 - 배포 시에는 QA 승인 뒤 runtime identity를 같은 최종 버전으로 조립하고
   production smoke를 기록한다.
+- `toss-confirm`은 `claim_payment_conversion` RPC가 먼저 적용돼야 한다. 순서가 뒤집히면 결제 승인은
+  유지되지만 `conversionEligible=false`로 처리되어 Purchase 전환이 누락되므로, 위 배포 순서를 바꾸지 않는다.
 
 ---
+
+# 릴리스 매니페스트: 해낼게 2.0.1
+
+2.0.0 위 광고 전환 측정 패치. 산출물 버전 변화 없음, DB·엣지 함수 변경 없음, 웹만 배포한다. 회장 2026-10-27 "알아서 다 연결하고 진행해". 변경 내역은 `CHANGELOG.md` 2.0.1.
 
 # 릴리스 매니페스트: 해낼게 2.0.0
 

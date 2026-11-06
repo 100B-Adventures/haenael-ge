@@ -1,5 +1,18 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-07 G4 로컬 통합
+
+- `integration/g4-release`에서 G4 기준선 `ab0cedd2beece83672f2bc6d51bc2b1404c089d2`와 `origin/main` `e0a9f30c0cd991bdd53fab97b15d8b7c54573b83`을 `--no-ff`로 통합했다. 충돌은 CHANGELOG, RELEASE, package manifest·lockfile, 결제 성공 화면, 개인정보처리방침 6곳이었다.
+- 릴리스 문서는 미승인 `2.1.0` 후보와 운영 `2.0.1` 광고 전환 패치를 시간순으로 모두 보존했다. package version은 상위 후보인 `2.1.0`을 유지했다.
+- 결제 성공 화면은 G4의 오류 코드 매핑과 main의 `PurchaseConversion`을 결합했다. 개인정보처리방침은 중앙 카피 모듈을 유지하면서 GA4·Clarity·Meta의 수집 항목, 목적, 거부 방법, 국외 처리를 추가했다.
+- 독립 코드리뷰가 찾은 결제·분석 경계를 보정했다. `claim_payment_conversion` RPC가 결제 행을 잠그고 브라우저 전환 권한을 원자적으로 최초 1회만 부여한다. webhook이 먼저 승인해도 첫 브라우저 복귀는 `conversionEligible=true`, 다른 브라우저의 반복 복귀는 false다. 공개 `confirmed=1` 쿼리는 성공 화면을 만들지 못한다.
+- `/payment`·`/invite` 경로에서는 GA4 page view와 GA4·Clarity·Meta 초기화를 차단한다. 민감 내부 링크는 새 document navigation을 사용하고, 초대 URL로 OAuth 복귀한 가입 표식은 24시간 안의 다음 안전 경로까지 보존한다. 생산 모드 Chromium에서 두 민감 경로의 외부 분석 요청은 0건이었다.
+- DB 계약은 pgTAP 23파일·450건, 동시 호출 10건에서 claim true 1·false 9·error 0, `toss-confirm` Deno 3/3, Storage cleanup·cheer summary 4개 서버 계약이 통과했다. QA 계약의 mutation 51건, 프론트 회귀 86파일·506건, Next production build도 통과했다.
+- 로컬 Supabase를 연결한 `npm run dev`에서 headless Chromium으로 `/privacy`, 위조 결제 성공 URL, `/invite/private-token`을 열었다. 모두 HTTP 200, console error 0, page error 0, 외부 분석 요청 0이고 각각 개인정보방침·결제 오류·무효 초대 UI를 렌더했다. 개발 서버와 로컬 Supabase는 종료했고 DB backup은 보존했다.
+- GitHub Actions, 운영 배포, 운영 DB 쓰기, Kakao·Toss 외부 callback은 실행하지 않았다.
+
+> STAMP: 2026-11-07 04:43 KST · model=gpt-codex/gpt-5 · agent=code-builder · skills=haenael-supabase-build · 근거=D-049·D-044, delegate-g4-integration, 독립 코드리뷰, pgTAP·동시성·QA contracts·Vitest·Next build·headless Chromium · 고민=양쪽 릴리스 신원을 보존하면서 결제 전환의 원자 claim과 민감 URL 비수집 경계를 배포 계약까지 일치시켰다.
+
 ## 2026-11-06 G4-QA 독립 코드리뷰 반려 보정
 
 - 법적 링크가 화면에는 있었지만 `LEGAL_EXPOSURE.my="none"`을 우회해 직접 렌더링되던 P1을 수정했다. 승인 prototype 계약대로 정본을 `link`로 바꾸고, `MyPageOverview`가 그 모드일 때만 `LegalLinkList`를 렌더링한다.

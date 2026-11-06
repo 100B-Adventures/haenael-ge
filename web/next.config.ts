@@ -9,6 +9,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
  * - Supabase REST/Auth/Storage/Edge Functions and optional Realtime websocket
  * - Toss Payments v2 SDK and its hosted payment UI
  * - Google Analytics 4 (gtag.js)
+ * - Microsoft Clarity, Meta Pixel (fbevents.js, /tr beacon)
  * - Arbitrary HTTPS profile images stored by connected identity providers
  *
  * Kakao OAuth is a top-level redirect, not an embedded resource. Vercel Analytics
@@ -43,6 +44,8 @@ export function buildContentSecurityPolicy(
     development ? "'unsafe-eval'" : "",
     "https://js.tosspayments.com",
     "https://www.googletagmanager.com",
+    "https://*.clarity.ms",
+    "https://connect.facebook.net",
   ]
     .filter(Boolean)
     .join(" "),
@@ -62,6 +65,9 @@ export function buildContentSecurityPolicy(
     "https://*.google-analytics.com",
     "https://*.analytics.google.com",
     "https://www.googletagmanager.com",
+    "https://*.clarity.ms",
+    "https://connect.facebook.net",
+    "https://www.facebook.com",
   ].filter(Boolean).join(" "),
   "frame-src https://*.tosspayments.com https://*.toss.im",
   "worker-src 'self' blob:",

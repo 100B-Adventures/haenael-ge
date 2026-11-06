@@ -11,7 +11,24 @@
 - 이 항목은 운영 변경 기록이 아니다. 실제 Kakao OAuth와 Toss sandbox callback은 미검증이고,
   QA artifact는 `changes-requested`다. 노출 이력이 있는 운영 Toss secret 교체와 운영 migration·Function
   적용도 승인 대기다.
-- 따라서 `2.0.0` 운영 기록을 유지한다. QA 승인과 운영 배포 후에만 이 후보를 정식 릴리스 섹션으로 승격한다.
+- 따라서 `2.0.1` 운영 기록을 유지한다. QA 승인과 운영 배포 후에만 이 후보를 정식 릴리스 섹션으로 승격한다.
+
+### 보안
+- 결제 성공의 공개 `confirmed=1` 우회를 제거했다. `toss-confirm`이 결제 행의 `claim_payment_conversion` RPC로 브라우저 전환 권한을 원자적으로 최초 1회 획득한 요청만 `conversionEligible=true`를 반환한다. webhook 선승인 뒤 첫 브라우저 복귀는 전환을 보내고, 다른 브라우저의 재수신은 성공 UI만 복구한다.
+- `/payment`·`/invite`에서는 GA4·Clarity·Meta를 초기화하거나 page view를 보내지 않는다. 초대 URL로 OAuth 복귀한 가입 전환 표식도 안전한 URL까지 보존해 결제 키와 초대 토큰을 외부 분석 도구에 전달하지 않는다.
+
+## 2.0.1 (2026-11-05)
+
+광고 전환 측정 준비. 화면·결제 동작은 그대로다.
+
+### 추가
+- Meta 픽셀 1678305073814051 기본 코드(운영 빌드, 모든 페이지)
+- 전환 이벤트: 신규 계정 첫 로그인 CompleteRegistration·sign_up, 결제 승인 Purchase·purchase(서버 대조를 통과한 금액, 주문번호별 1회)
+- 개인정보처리방침에 GA4·Clarity·Meta 픽셀 항목과 거부 방법
+
+### 보안
+- CSP 에 connect.facebook.net, www.facebook.com 허용
+- 결제 완료 화면은 픽셀 호출 전에 주소에서 paymentKey 를 지운다
 
 ## 2.0.0 (2026-10-14)
 

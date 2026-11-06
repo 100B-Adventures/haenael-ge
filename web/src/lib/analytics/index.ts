@@ -25,7 +25,17 @@ export type HaenaelEvent =
   | "cheer_completed"
   | "wordmap_viewed"
   | "wordmap_shared"
-  | "cashout_initiated";
+  | "cashout_initiated"
+  | "sign_up"
+  | "purchase";
+
+/** 결제 키와 초대 토큰이 URL에 포함될 수 있어 외부 분석 도구가 읽으면 안 되는 경로. */
+export const SENSITIVE_ANALYTICS_PATH_SOURCE = "^/(?:payment|invite)(?:/|$)";
+const SENSITIVE_ANALYTICS_PATH = new RegExp(SENSITIVE_ANALYTICS_PATH_SOURCE);
+
+export function isSensitiveAnalyticsPath(pagePath: string): boolean {
+  return SENSITIVE_ANALYTICS_PATH.test(sanitizePagePath(pagePath));
+}
 
 export function sanitizePagePath(pagePath: string): string {
   const pathOnly = pagePath.split(/[?#]/, 1)[0] || "/";
@@ -53,6 +63,7 @@ function callGtag(
 }
 
 export function trackPageView(pagePath: string): void {
+  if (isSensitiveAnalyticsPath(pagePath)) return;
   callGtag("event", "page_view", { page_path: sanitizePagePath(pagePath) });
 }
 

@@ -16,6 +16,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@/lib/supabase/route-handler";
+import { markIfNewAccount } from "@/lib/auth/signup-mark";
 import {
   KAKAO_OAUTH_NONCE_COOKIE,
   parseOAuthState,
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = createRouteHandlerClient(request, successResponse);
 
-  const { error: verifyError } = await supabase.auth.verifyOtp({
+  const { data: verified, error: verifyError } = await supabase.auth.verifyOtp({
     token_hash: efData.hashed_token,
     type: efData.type as "email",
   });
@@ -143,6 +144,8 @@ export async function GET(request: NextRequest) {
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     return response;
   }
+
+  markIfNewAccount(successResponse, verified?.user);
 
   // nonce는 1회용 — 성공 경로에서도 삭제(재사용 방지)
   successResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);

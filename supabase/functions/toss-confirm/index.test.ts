@@ -59,6 +59,14 @@ Deno.test(
           ),
         );
       }
+      if (url.includes("/rest/v1/rpc/claim_payment_conversion")) {
+        return Promise.resolve(
+          new Response("true", {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        );
+      }
       return Promise.resolve(new Response("{}", { status: 404 }));
     }) as typeof fetch;
 
@@ -82,7 +90,9 @@ Deno.test(
         }),
       );
       assertEquals(res.status, 200);
-      assertEquals((await res.json()).idempotent, true);
+      const body = await res.json();
+      assertEquals(body.idempotent, true);
+      assertEquals(body.conversionEligible, true);
       await Promise.all(waits);
       assertEquals(waits.length, 1);
       assertEquals(opsBodies.length, 1);

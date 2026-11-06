@@ -19,6 +19,7 @@
 | `20260714090000_lead_capture.sql` | 출시 리드 저장 테이블·RLS·service_role 권한 |
 | `20260714110000_payment_webhook_reconciliation.sql` | Toss 승인·전액취소 웹훅 재조정과 원장 반전 |
 | `20260714130000_release_review_fixes.sql` | 리드 IP 해시 제한·부분취소 검토 마커·멱등 리스크 이벤트 |
+| `20261107010000_payment_conversion_claim.sql` | 결제 브라우저 전환 원자 claim. 웹훅 선확정 첫 callback 허용·이후 replay 차단 |
 
 ## 명령어
 

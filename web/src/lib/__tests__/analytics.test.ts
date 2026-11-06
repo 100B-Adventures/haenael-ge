@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { sanitizePagePath, trackPageView, trackEvent } from "@/lib/analytics";
+import {
+  isSensitiveAnalyticsPath,
+  sanitizePagePath,
+  trackPageView,
+  trackEvent,
+} from "@/lib/analytics";
 
 describe("GA4 page path privacy", () => {
   it("removes query parameters and fragments", () => {
@@ -7,13 +12,18 @@ describe("GA4 page path privacy", () => {
       .toBe("/payment/success");
   });
 
-  it("never sends query parameters to gtag", () => {
+  it("결제·초대 경로는 page_view 자체를 보내지 않는다", () => {
     const gtag = vi.fn();
     window.gtag = gtag;
     trackPageView("/payment/success?paymentKey=secret");
-    expect(gtag).toHaveBeenCalledWith("event", "page_view", {
-      page_path: "/payment/success",
-    });
+    trackPageView("/invite/private-token");
+    expect(gtag).not.toHaveBeenCalled();
+  });
+
+  it("민감 경로 판정은 하위 경로만 막고 유사 접두어는 허용한다", () => {
+    expect(isSensitiveAnalyticsPath("/payment/success?paymentKey=secret")).toBe(true);
+    expect(isSensitiveAnalyticsPath("/invite/private-token")).toBe(true);
+    expect(isSensitiveAnalyticsPath("/payments-guide")).toBe(false);
   });
 });
 

@@ -5,7 +5,7 @@
 // 먼저 생성한다. RPC 커밋 성공 뒤 member.phone이 있을 때만 notify EF를 호출하며,
 // 전화번호/환경변수/발송 오류는 기존 INAPP 알림으로 강등해 결제를 깨뜨리지 않는다.
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { withRegionHeader } from "../_shared/region.ts";
 import { isCardPaymentMethod, TossClient } from "../_shared/toss.ts";
 import { toPublicError } from "../_shared/errors.ts";
@@ -49,6 +49,23 @@ function sanitizedConfirmResponse(confirm: {
     approvedAt: confirm.approvedAt,
     receiptUrl: confirm.receiptUrl ?? null,
   };
+}
+
+async function claimBrowserConversion(
+  supabase: SupabaseClient,
+  orderId: string,
+  paymentKey: string,
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc("claim_payment_conversion", {
+    p_order_id: orderId,
+    p_payment_key: paymentKey,
+  });
+  if (error) {
+    // 분석 이벤트 claim 실패는 결제 성공을 뒤집지 않는다. 전환은 안전하게 생략한다.
+    console.error("[toss-confirm] browser conversion claim failed:", error);
+    return false;
+  }
+  return data === true;
 }
 
 export async function handleTossConfirm(req: Request) {
@@ -176,6 +193,11 @@ export async function handleTossConfirm(req: Request) {
 
     // 웹훅이 먼저 확정했거나 최초 송신이 유실된 경우의 복구 경로. 키가 같아 수신 측에서 한 건이 된다.
     firePay(orderId, amount);
+    const conversionEligible = await claimBrowserConversion(
+      supabase,
+      orderId,
+      paymentKey,
+    );
     return json(200, {
       paymentId: data[0].payment_id,
       cheerId: data[0].cheer_id,
@@ -183,6 +205,7 @@ export async function handleTossConfirm(req: Request) {
       goalTitle: data[0].goal_title,
       displayName: data[0].display_name,
       idempotent: true,
+      conversionEligible,
     });
   }
 
@@ -382,12 +405,19 @@ export async function handleTossConfirm(req: Request) {
     },
   );
 
+  const conversionEligible = await claimBrowserConversion(
+    supabase,
+    orderId,
+    confirm.paymentKey,
+  );
+
   return json(200, {
     paymentId: confirmed.payment_id,
     cheerId: confirmed.cheer_id,
     memberId: confirmed.member_id,
     goalTitle: confirmed.goal_title,
     displayName: confirmed.display_name,
+    conversionEligible,
   });
 }
 
