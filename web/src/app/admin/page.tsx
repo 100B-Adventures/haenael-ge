@@ -95,6 +95,15 @@ function formatNumber(value: number) {
   return numberFormatter.format(value);
 }
 
+function OpsEventType({ value }: { value: string }) {
+  return value.split("_").map((part, index) => (
+    <span key={`${part}-${index}`}>
+      {index > 0 && <>_<wbr /></>}
+      {part}
+    </span>
+  ));
+}
+
 function shortId(value: string) {
   return `${value.slice(0, 8)}…${value.slice(-4)}`;
 }
@@ -316,7 +325,7 @@ export default async function AdminPage() {
           <GoalCoverReviewQueue initialItems={covers} />
 
           <section
-            className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
+            className="admin-ops-alerts rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
             data-testid="admin-ops-alerts"
           >
             <div className="min-h-11">
@@ -332,14 +341,14 @@ export default async function AdminPage() {
               <ul className="divide-y" aria-label={PRODUCT_COPY.TEXT_021}>
                 {alerts.map((alert) => (
                   <li
-                    className="grid min-w-0 gap-1 py-3 text-sm sm:grid-cols-[10rem_1fr_auto] sm:items-center sm:gap-4"
+                    className="grid min-w-0 gap-1 py-3 text-sm lg:grid-cols-[10rem_minmax(0,1fr)_auto] lg:items-center lg:gap-4"
                     key={alert.id}
                   >
                     <strong className="text-destructive">
                       {alert.severity}
                     </strong>
-                    <span className="min-w-0 break-words font-semibold">
-                      {alert.event_type}
+                    <span className="min-w-0 font-semibold [overflow-wrap:normal] [word-break:normal]">
+                      <OpsEventType value={alert.event_type} />
                     </span>
                     <time
                       className="min-w-0 break-words text-muted-foreground"
@@ -347,7 +356,7 @@ export default async function AdminPage() {
                     >
                       {formatDateTime(alert.created_at)}
                     </time>
-                    <code className="min-w-0 break-all text-xs text-muted-foreground sm:col-span-3">
+                    <code className="min-w-0 break-all text-xs text-muted-foreground lg:col-span-3">
                       {JSON.stringify(alert.details)}
                     </code>
                   </li>

@@ -3991,6 +3991,9 @@
     .admin-dashboard-stack > section:first-child {
       grid-column: 1 / -1;
     }
+    .admin-dashboard-stack > .admin-ops-alerts {
+      grid-column: 1 / -1;
+    }
   }
 }
 

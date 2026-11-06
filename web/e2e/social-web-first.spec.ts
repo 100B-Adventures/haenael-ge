@@ -1469,18 +1469,66 @@ test.describe("V2 web-first social slice", () => {
     try {
       const page = await context.newPage();
       const consoleErrors: string[] = [];
+      const responsiveGeometry: Array<Record<string, number>> = [];
+      const captureDir = process.env.G4_QA_SECOND_BULK_CAPTURE_DIR;
+      if (captureDir) mkdirSync(captureDir, { recursive: true });
       page.on("console", (message) => {
         if (message.type() === "error") consoleErrors.push(message.text());
       });
-      await page.goto("/admin");
-      const alerts = page.getByTestId("admin-ops-alerts");
-      const coverQueue = page.getByTestId("goal-cover-review-queue");
-      expect(await coverQueue.evaluate((node, alertNode) =>
-        Boolean(node.compareDocumentPosition(alertNode as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
-      await alerts.elementHandle())).toBe(true);
-      const currentRunAlert = alerts.locator("li").filter({ hasText: `playwright-${runId}` });
-      await expect(currentRunAlert).toHaveCount(1);
-      await expect(currentRunAlert).toContainText("STORAGE_CLEANUP_DRAIN_STALLED");
+      for (const width of [390, 768, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto("/admin", { waitUntil: "domcontentloaded" });
+        const alerts = page.getByTestId("admin-ops-alerts");
+        const coverQueue = page.getByTestId("goal-cover-review-queue");
+        expect(await coverQueue.evaluate((node, alertNode) =>
+          Boolean(node.compareDocumentPosition(alertNode as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
+        await alerts.elementHandle())).toBe(true);
+        const currentRunAlert = alerts.locator("li").filter({ hasText: `playwright-${runId}` });
+        await expect(currentRunAlert).toHaveCount(1);
+        await expect(currentRunAlert).toContainText("STORAGE_CLEANUP_DRAIN_STALLED");
+        const eventType = currentRunAlert.getByText("STORAGE_CLEANUP_DRAIN_STALLED", { exact: true });
+        const geometry = await eventType.evaluate((element) => {
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          const lineRects = Array.from(range.getClientRects());
+          const lineTops = Array.from(new Set(lineRects.map((rect) => Math.round(rect.top))));
+          const lastTop = lineTops.at(-1);
+          const lastLineRects = lineRects.filter((rect) => Math.round(rect.top) === lastTop);
+          const lastWidth = lastLineRects.length
+            ? Math.max(...lastLineRects.map((rect) => rect.right)) -
+              Math.min(...lastLineRects.map((rect) => rect.left))
+            : 0;
+          return {
+            width: window.innerWidth,
+            lines: lineTops.length,
+            lastWidth,
+            eventWidth: element.getBoundingClientRect().width,
+            alertHeight: element.closest("li")?.getBoundingClientRect().height ?? 0,
+            pageHeight: document.documentElement.scrollHeight,
+            horizontalOverflow: Math.max(
+              0,
+              document.documentElement.scrollWidth - window.innerWidth,
+            ),
+          };
+        });
+        expect(geometry.horizontalOverflow).toBe(0);
+        expect(geometry.lines).toBeLessThanOrEqual(3);
+        expect(geometry.lines === 1 || geometry.lastWidth >= 28).toBe(true);
+        expect(geometry.alertHeight).toBeLessThan(200);
+        responsiveGeometry.push(geometry);
+        if (captureDir) {
+          await page.screenshot({
+            path: resolve(captureDir, `admin-${width}.png`),
+            fullPage: true,
+          });
+        }
+      }
+      if (captureDir) {
+        writeFileSync(
+          resolve(captureDir, "admin-responsive-geometry.json"),
+          `${JSON.stringify(responsiveGeometry, null, 2)}\n`,
+        );
+      }
       expect(consoleErrors).toEqual([]);
     } catch (error) {
       bodyError = error;
@@ -4192,14 +4240,27 @@ test.describe("V2 web-first social slice", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
     await page.locator(".goal-cover-picker-toggle").click();
-    let captured: { url: string; headers: Record<string, string>; body: string } | null = null;
-    page.on("request", (request) => {
-      if (request.method() === "POST" && request.headers()["next-action"] && !captured) {
-        captured = { url: request.url(), headers: request.headers(), body: request.postData() ?? "" };
-      }
-    });
+    const authenticatedAction = page.waitForResponse((response) =>
+      response.request().method() === "POST" &&
+      Boolean(response.request().headers()["next-action"])
+    );
     await page.locator(".cover-preset-grid button").nth(1).click();
-    await expect.poll(() => captured).not.toBeNull();
+    const authenticatedResponse = await authenticatedAction;
+    expect(authenticatedResponse.status()).toBe(200);
+    const authenticatedRequest = authenticatedResponse.request();
+    const captured = {
+      url: authenticatedRequest.url(),
+      headers: authenticatedRequest.headers(),
+      body: authenticatedRequest.postData() ?? "",
+    };
+    await expect.poll(async () => {
+      const { data, error } = await admin.from("goal")
+        .select("cover_preset_key")
+        .eq("id", ownerGoal)
+        .single();
+      if (error) throw error;
+      return data?.cover_preset_key;
+    }).toBe("run");
     await context.close();
 
     const owner = createClient(SUPABASE_URL, ANON_KEY);
@@ -4211,15 +4272,15 @@ test.describe("V2 web-first social slice", () => {
     });
     expect(restoreError).toBeNull();
 
-    const replayHeaders = { ...captured!.headers };
+    const replayHeaders = { ...captured.headers };
     delete replayHeaders.cookie;
     delete replayHeaders.authorization;
     delete replayHeaders["content-length"];
     delete replayHeaders.host;
-    const replay = await fetch(captured!.url, {
+    const replay = await fetch(captured.url, {
       method: "POST",
       headers: replayHeaders,
-      body: captured!.body,
+      body: captured.body,
       redirect: "manual",
     });
     const replayBody = await replay.text();

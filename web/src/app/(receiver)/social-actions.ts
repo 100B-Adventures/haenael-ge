@@ -29,12 +29,23 @@ function safeCode(message: string | undefined) {
     "social_request_failed";
 }
 
+async function createAuthenticatedSocialClient() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  return error || !user ? null : supabase;
+}
+
 export async function createFriendInviteAction(
   goalId: number,
 ): Promise<
   SocialActionResult<NonNullable<ReturnType<typeof asInviteCreated>>>
 > {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createAuthenticatedSocialClient();
+  if (!supabase) return { ok: false, code: "auth_required" };
   const { data, error } = await supabase.rpc("create_friend_invite", {
     goal_id: goalId,
     channel: "WEB",
@@ -48,7 +59,8 @@ export async function createFriendInviteAction(
 export async function acceptFriendInviteAction(
   token: string,
 ): Promise<SocialActionResult<Record<string, unknown>>> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createAuthenticatedSocialClient();
+  if (!supabase) return { ok: false, code: "auth_required" };
   const { data, error } = await supabase.rpc("accept_friend_invite", { token });
   if (error) return { ok: false, code: safeCode(error.message) };
   revalidatePath("/friends");
@@ -59,7 +71,8 @@ export async function setGoalCoverPresetAction(
   goalId: number,
   presetKey: string,
 ): Promise<SocialActionResult> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createAuthenticatedSocialClient();
+  if (!supabase) return { ok: false, code: "auth_required" };
   const { error } = await supabase.rpc("set_goal_cover_preset", {
     goal_id: goalId,
     preset_key: presetKey,
@@ -74,7 +87,8 @@ export async function setGoalVisibilityAction(
   goalId: number,
   visibility: string,
 ): Promise<SocialActionResult> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createAuthenticatedSocialClient();
+  if (!supabase) return { ok: false, code: "auth_required" };
   const { error } = await supabase.rpc("set_goal_visibility", {
     goal_id: goalId,
     visibility,
@@ -88,7 +102,8 @@ export async function setGoalVisibilityAction(
 export async function removeFriendAction(
   friendId: string,
 ): Promise<SocialActionResult> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createAuthenticatedSocialClient();
+  if (!supabase) return { ok: false, code: "auth_required" };
   const { error } = await supabase.rpc("remove_friend", {
     friend_member_id: friendId,
   });
@@ -101,7 +116,8 @@ export async function updateMemberPreferencesAction(
   notifyCheer: boolean,
   notifyMarketing: boolean,
 ): Promise<SocialActionResult> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createAuthenticatedSocialClient();
+  if (!supabase) return { ok: false, code: "auth_required" };
   const { error } = await supabase.rpc("update_member_preferences", {
     notify_cheer: notifyCheer,
     notify_marketing: notifyMarketing,
