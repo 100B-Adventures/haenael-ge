@@ -1,5 +1,12 @@
 # 세션 인계: staging Kakao OAuth 왕복 확인 (2026-11-07)
 
+## 최신 (qa-verifier, AUTH-01 재시도)
+- 한 일: `tabs_context_mcp` 와 `list_connected_browsers` 를 각 2회 호출했다. 결과는 "Browser extension is not connected", 연결 브라우저 `[]`, 이어서 "Claude in Chrome requires permission".
+- 블로커: 이 세션에 Claude in Chrome 이 연결·승인되지 않았다. OAuth 는 한 단계도 실행하지 않았다(미검증). 로그아웃이 아니라 도구 연결 문제다.
+- 안 한 것: 헤드리스·전용 Chrome·쿠키 복제 대체, 파이프라인 단계 전환, 코드 수정, 배포.
+- 다음에 칠 명령: 연결 복구 후 `tabs_context_mcp` → 새 탭 → staging `/auth/kakao/start?redirect=/my` → 최종 URL·로그인 상태 캡처 → 탭 닫기.
+- 검증했나: 연결 실패 사실만 관찰됨. Kakao 로그인 동작은 미검증.
+
 ## 무엇을 어디까지 했나
 - 요청: 메인 Chrome 기존 세션으로 `https://haenael-ge-v2-staging-100-b.vercel.app/auth/kakao/start?redirect=/my` 를 열어 Kakao 동의 후 `/my` 왕복 확인.
 - 진행: 연결된 Chrome 도구가 있는지 ToolSearch 로 확인했다. 결과는 Claude Docs 도구 3종뿐이었고 Chrome 브라우저 도구는 없었다.
