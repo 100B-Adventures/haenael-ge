@@ -12,6 +12,7 @@
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": { "targets": ["vercel-production"], "features": ["core"] },
     "NEXT_PUBLIC_APP_URL": { "targets": ["vercel-production"], "features": ["core"] },
     "NEXT_PUBLIC_APP_VERSION": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
+    "DEPLOY_SOURCE_SHA": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "SUPABASE_SERVICE_ROLE_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout", "core"] },
     "SERVICE_ROLE_KEY": { "targets": [], "features": ["local-supabase-cli"], "optional": true },
     "CASHOUT_ENABLED": { "targets": ["vercel-production"], "features": ["cashout"] },
