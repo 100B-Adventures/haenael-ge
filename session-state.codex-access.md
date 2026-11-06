@@ -2,6 +2,9 @@
 
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
 
+## 2026-11-06 22:18 KST
+- Vercel CLI 복구: 내 18:02 설치 symlink 가 wrapper 와 충돌. 재설치 후 wrapper 실파일화, 토큰(`vercel-tokens.env`)으로 whoami·project ls 관찰. 다른 세션이 띄운 `vercel login` 프로세스는 남아 있음(건드리지 않음). Codex MCP 목록에 brain 등록 관찰.
+
 ## 2026-11-06 21:46 KST
 - 114 재시작 뒤 확인: Codex goal(tmux goal-haenael-ge %25) 복귀. 교차 리뷰 에이전트 g4_auth_cross_review 는 재시작으로 사망(rollout 2줄). Claude 가 5b552ce 교차 리뷰, MAJOR 0. anon RPC 401 42501 관찰.
 - 막힘: Vercel CLI AUTH_DEAD(auth.json 소실, 원인 미규명). device 승인 대기 https://vercel.com/oauth/device?user_code=SSSM-DWWR . staging 은 아직 4c6b7b2. 토큰은 114 에 없음(이름 검색 0건).
