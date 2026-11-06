@@ -10,6 +10,11 @@
 - codex-pane.sh 가 재시작 뒤 NO_PANE(pane_current_command 가 bash). .goal/pane 은 %20 로 낡음. CODEX_PANE=%25 로 우회.
 - 다음: 승인 뒤 Codex 가 배포, 재QA. Claude 는 회수 검증.
 
+## 2026-11-06 22:20 KST
+- 회장 지시: 카카오는 메인 크롬 세션으로 알아서, 토스 테스트 키·운영 결제 키는 필요하면 진행. 운영 결제 키는 불필요, 사용 안 함.
+- 정정: Codex Goal 은 진행 중(tmux %25, codex-pane.sh 는 NO_PANE 오판, 22:17 G4-PAY 검증 워커 실행 관찰). 카카오 원인 KOE006, 등록할 URI `https://haenael-ge-v2-staging-100-b.vercel.app/auth/kakao/callback`(staging 리다이렉트에서 관찰).
+- 터널 5개(9342·9333·9345·9444·9445) 모두 카카오·토스 미로그인 관찰. 맥 세션 sj-b9 에 회장 원문과 함께 URI 등록·로그인 왕복·토스 정책 요청, 회신 대기.
+
 ## 2026-11-06 19:30 KST
 - 9342 복구(맥 launchd 상시 터널 com.sj.onprem-chrome-tunnel). 토큰 이름 goal-haenael-staging, 만료 2027-02-04 관찰, 발급 주체 미확인. 9342 에 카카오 로그인 탭을 띄움. CDP 스크립트는 browser.close 제거.
 
