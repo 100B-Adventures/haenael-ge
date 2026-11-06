@@ -131,7 +131,7 @@ jobs:
 
   qa-contracts:
     name: 배포 환경·환전 층간 계약
-    runs-on: ubuntu-latest  # 공개 저장소는 GitHub 호스팅 분이 무료다. 온프렘 러너 그룹은 공개 저장소를 허용하지 않으므로(allows_public_repositories=false) 호스팅 러너를 쓴다(2026-10-12).
+    runs-on: ubuntu-latest  # 공개 PR·push의 untrusted 코드는 persistent self-hosted runner에 보내지 않는다.
     steps:
       - uses: actions/checkout@v4
 
@@ -149,7 +149,7 @@ jobs:
 
   unit-and-build:
     name: 단위 테스트 + 빌드
-    runs-on: ubuntu-latest  # 공개 저장소는 GitHub 호스팅 분이 무료다. 온프렘 러너 그룹은 공개 저장소를 허용하지 않으므로(allows_public_repositories=false) 호스팅 러너를 쓴다(2026-10-12).
+    runs-on: ubuntu-latest  # 공개 PR·push의 untrusted 코드는 persistent self-hosted runner에 보내지 않는다.
     defaults:
       run:
         working-directory: web
@@ -179,7 +179,7 @@ jobs:
 
   e2e-cashout:
     name: 환전 브라우저 E2E
-    runs-on: ubuntu-latest  # 공개 저장소는 GitHub 호스팅 분이 무료다. 온프렘 러너 그룹은 공개 저장소를 허용하지 않으므로(allows_public_repositories=false) 호스팅 러너를 쓴다(2026-10-12).
+    runs-on: ubuntu-latest  # 공개 PR·push의 untrusted 코드는 persistent self-hosted runner에 보내지 않는다.
     defaults:
       run:
         working-directory: web
@@ -245,21 +245,13 @@ jobs:
   e2e-v2-social:
     name: e2e-v2-social
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, onprem-114]
     timeout-minutes: 30
     defaults:
       run:
         working-directory: web
     env:
-      E2E_ENVIRONMENT: staging
-      RUN_STAGING_SUPABASE_E2E: "1"
-      E2E_BASE_URL: https://haenael-ge-v2-staging-100-b.vercel.app
-      STAGING_WEB_BASE_URL: https://haenael-ge-v2-staging-100-b.vercel.app
-      SUPABASE_STAGING_PROJECT_REF: ezzklgotgydwxqebfoys
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.QA_STAGING_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.QA_STAGING_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.QA_STAGING_SUPABASE_SERVICE_ROLE_KEY }}
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.QA_STAGING_SUPABASE_ACCESS_TOKEN }}
+      SJ_LOCAL_SECRET_FILE: /Users/sj/.sj-agent-harness/secrets/haenael-ge-qa-staging.env
     steps:
       - uses: actions/checkout@v4
 
@@ -281,36 +273,44 @@ jobs:
 
       - name: staging 결제 기능 활성화
         working-directory: .
-        run: supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=true
+        run: |
+          /Users/sj/.claude/harness/bin/with-local-secret-env.sh bash -lc '
+            supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=true
+          '
 
       - name: V2 social staging E2E
         run: |
-          mkdir -p ../.goal/runs
-          set +e
-          npx playwright test e2e/social-web-first.spec.ts --project=chromium --reporter=line \
-            > ../.goal/runs/e2e-v2-social.log 2>&1
-          test_exit=$?
-          printf 'E2E_V2_SOCIAL_EXIT=%s\n' "$test_exit" \
-            > ../.goal/runs/e2e-v2-social.exit
-          exit "$test_exit"
+          /Users/sj/.claude/harness/bin/with-local-secret-env.sh bash -lc '
+            mkdir -p ../.goal/runs
+            set +e
+            npx playwright test e2e/social-web-first.spec.ts --project=chromium --reporter=line \
+              > ../.goal/runs/e2e-v2-social.log 2>&1
+            test_exit=$?
+            printf "E2E_V2_SOCIAL_EXIT=%s\n" "$test_exit" \
+              > ../.goal/runs/e2e-v2-social.exit
+            exit "$test_exit"
+          '
 
       - name: staging 결제 기능 비활성화 복구
         if: always()
         working-directory: .
         run: |
-          supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=false
-          response_file="$(mktemp)"
-          status="$(curl -sS -o "$response_file" -w '%{http_code}' \
-            -X POST "$NEXT_PUBLIC_SUPABASE_URL/functions/v1/cheer-order" \
-            -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-            -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-            -H 'Content-Type: application/json' \
-            --data '{}')"
-          mkdir -p .goal/runs
-          printf 'RESTORE_PAYMENTS_EXIT=0 HTTP_STATUS=%s\n' "$status" \
-            > .goal/runs/e2e-v2-social-restore.txt
-          rm -f "$response_file"
-          test "$status" = "503"
+          /Users/sj/.claude/harness/bin/with-local-secret-env.sh bash -lc '
+            set -euo pipefail
+            response_file="$(mktemp)"
+            trap "rm -f \"$response_file\"" EXIT
+            supabase secrets set --project-ref "$SUPABASE_STAGING_PROJECT_REF" PAYMENTS_ENABLED=false
+            status="$(curl -sS -o "$response_file" -w "%{http_code}" \
+              -X POST "$NEXT_PUBLIC_SUPABASE_URL/functions/v1/cheer-order" \
+              -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+              -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+              -H "Content-Type: application/json" \
+              --data "{}")"
+            mkdir -p .goal/runs
+            printf "RESTORE_PAYMENTS_EXIT=0 HTTP_STATUS=%s\n" "$status" \
+              > .goal/runs/e2e-v2-social-restore.txt
+            test "$status" = "503"
+          '
 
       - name: V2 social 실행 증거 보관
         if: always()
