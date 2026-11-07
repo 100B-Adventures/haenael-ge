@@ -11,6 +11,10 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import path from "node:path";
 import { createBrowserClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+import {
+  ANALYTICS_CONSENT_KEY,
+  type AnalyticsConsent,
+} from "../src/lib/analytics/consent";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
 const APP_PORT = 3461;
@@ -439,6 +443,10 @@ async function waitForApp(url: string) {
 async function authenticate(context: BrowserContext, userId: string) {
   const cookies = authCookiesByUser.get(userId);
   if (!cookies?.length) throw new Error(`cashout QA 세션 없음: ${userId}`);
+  const consent: AnalyticsConsent = "denied";
+  await context.addInitScript(({ key, value }) => {
+    window.localStorage.setItem(key, value);
+  }, { key: ANALYTICS_CONSENT_KEY, value: consent });
   const nowSeconds = Math.floor(Date.now() / 1000);
   await context.addCookies(cookies.map(({ name, value, options }) => ({
     name,

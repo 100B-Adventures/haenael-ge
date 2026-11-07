@@ -253,7 +253,7 @@ jobs:
       github.event.action == 'trusted-staging-e2e' &&
       github.ref == 'refs/heads/main' &&
       github.repository == '100B-Adventures/haenael-ge'
-    runs-on: [self-hosted, onprem-114]
+    runs-on: self-hosted
     timeout-minutes: 30
     defaults:
       run:
