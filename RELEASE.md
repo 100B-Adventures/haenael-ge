@@ -1,3 +1,32 @@
+# 릴리스 매니페스트: 해낼게 2.1.1
+
+```yaml
+release: 2.1.1
+date: 2026-11-08
+status: staging-verification
+line: v2
+delivery: vercel
+canonical_url: https://haenael-ge.vercel.app
+source_commit: pending-staging-verification
+ships:
+  code: WHY edit alignment, unlinked cheer history, server waterfall reduction
+  migration: 20261108030000_unlinked_cheer_history.sql
+qa_gate:
+  approved: false
+  required:
+    - staging health sourceSha identity
+    - staging 390px, 768px, 1440px prototype comparison
+    - staging unlinked cheer history write-fixture E2E
+    - staging before/after navigation and RPC timings
+    - production three-path direct observation
+forbidden:
+  - live payment key
+  - actual payment
+  - destructive production database change
+```
+
+---
+
 # 릴리스 후보 매니페스트: 해낼게 2.1.0
 
 > 상태: **제안, QA 미승인, 운영 미배포.** 이 후보는 현재 운영 릴리스 `2.0.1`을 대체하지 않는다.

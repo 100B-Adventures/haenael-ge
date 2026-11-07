@@ -5,6 +5,7 @@ import {
   asInviteCreated,
   asInvitePreview,
   asMySocialDashboard,
+  asUnlinkedCheerHistory,
   observeInvitePreview,
   FORBIDDEN_SOCIAL_KEYS,
 } from "../contracts";
@@ -46,6 +47,22 @@ describe("V2 social contracts", () => {
       reason: "꾸준히",
       cheer_count: 3,
       wordmap: [{ word: "꾸준함", weight: 2 }],
+    });
+  });
+  it("G4-FRIEND-HISTORY 회원 미귀속 응원 기록 계약을 읽는다", () => {
+    expect(asUnlinkedCheerHistory({
+      items: [{
+        record_key: "record-a",
+        display_name: "과거 응원자",
+        message: "힘내",
+        created_at: "2026-08-25T12:00:00Z",
+        is_anonymous: false,
+        direction: "CHEERED_ME",
+      }],
+    }).items[0]).toMatchObject({
+      record_key: "record-a",
+      display_name: "과거 응원자",
+      direction: "CHEERED_ME",
     });
   });
   it("CT-03 create invite token intoss_path expires_at을 읽는다", () => {

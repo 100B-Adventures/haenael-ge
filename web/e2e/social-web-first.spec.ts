@@ -2899,13 +2899,13 @@ test.describe("V2 web-first social slice", () => {
     }));
   });
 
-  test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px과 1280px에서 console error와 가로 overflow가 없다", async ({ browser }) => {
+  test("QA-REVERIFY-VIEWPORT-01 운영 모드 신규 화면은 390px·768px·1440px에서 시안 위치와 overflow를 검증한다", async ({ browser }) => {
     test.setTimeout(process.env.RUN_MOBILE_ERGONOMICS === "1" ? 420_000 : 300_000);
     const evidenceDir = process.env.E2E_CAPTURE_DIR ??
       "../docs/qa/evidence/v2-goal-20261024/captures";
     const captureWidths = process.env.APPROVED_CAPTURE_WIDTHS === "390"
       ? [390]
-      : [390, 1024, 1280];
+      : [390, 768, 1440];
     const requestedLabels = new Set(
       (process.env.VISUAL_CAPTURE_LABELS ?? "")
         .split(",")
@@ -2976,13 +2976,20 @@ test.describe("V2 web-first social slice", () => {
         expect(response?.status(), `${width}px ${route}`).toBe(200);
         await expect(page.locator("body")).not.toContainText("Application error");
         await waitForVisualReady(page, [...readySelectors]);
-        if (width === 390 && label === "goal-detail") {
+        if (label === "goal-detail") {
           const sectionGeometry = await page.evaluate(() => {
             const rect = (selector: string) => {
               const element = document.querySelector<HTMLElement>(selector);
               if (!element) return null;
               const value = element.getBoundingClientRect();
-              return { top: value.top, bottom: value.bottom, height: value.height };
+              return {
+                top: value.top,
+                right: value.right,
+                bottom: value.bottom,
+                left: value.left,
+                width: value.width,
+                height: value.height,
+              };
             };
             const titleRow = document.querySelector<HTMLElement>(".goal-inline-title");
             const whyRow = document.querySelector<HTMLElement>(".goal-inline-why");
@@ -3046,6 +3053,13 @@ test.describe("V2 web-first social slice", () => {
           expect.soft(sectionGeometry.whyRow?.height).toBeLessThanOrEqual(24);
           expect.soft(sectionGeometry.titleButton?.height).toBeGreaterThanOrEqual(44);
           expect.soft(sectionGeometry.whyButton?.height).toBeGreaterThanOrEqual(44);
+          expect.soft(
+            Math.abs(
+              ((sectionGeometry.whyButton?.top ?? 0) + (sectionGeometry.whyButton?.height ?? 0) / 2) -
+              ((sectionGeometry.whyRow?.top ?? 0) + (sectionGeometry.whyRow?.height ?? 0) / 2),
+            ),
+            `${width}px WHY 편집 버튼은 승인본처럼 WHY 본문 수직 중앙에 붙는다`,
+          ).toBeLessThanOrEqual(1);
           expect.soft(sectionGeometry.pencilIntersection).toBe(0);
           expect.soft(sectionGeometry.titleOwnsCenter).toBe(true);
           expect.soft(sectionGeometry.whyOwnsCenter).toBe(true);
@@ -4657,5 +4671,98 @@ test.describe("V2 web-first social slice", () => {
       .single();
     expect(attributionError).toBeNull();
     expect(attribution?.supporter_member_id).toBe(ids.acceptA);
+  });
+
+  test("G4-FRIEND-HISTORY-01 회원 귀속이 없는 과거 응원은 계정을 추정하지 않고 기록으로 보인다", async ({ browser }) => {
+    const owner = createClient(SUPABASE_URL, ANON_KEY);
+    const { error: authError } = await owner.auth.signInWithPassword({
+      email: emails.owner,
+      password,
+    });
+    expect(authError).toBeNull();
+    const { data, error } = await owner.rpc("my_unlinked_cheer_history" as never);
+    expect(error).toBeNull();
+    const payload = data as unknown as { items: Array<Record<string, unknown>> };
+    expect(payload.items.length).toBeGreaterThan(0);
+    expect(JSON.stringify(payload)).not.toContain("supporter_member_id");
+    expect(JSON.stringify(payload)).not.toContain("friend_member_id");
+
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const response = await page.goto("/friends", { waitUntil: "domcontentloaded" });
+    expect(response?.status()).toBe(200);
+    await expect(page.getByTestId("unlinked-cheer-history")).toBeVisible();
+    await expect(page.getByTestId("unlinked-cheer-record")).toHaveCount(
+      payload.items.length,
+    );
+    await expect(page.getByTestId("unlinked-cheer-history"))
+      .toContainText("친구 프로필과는 분리");
+    await context.close();
+  });
+
+  test("G4-PERF-01 주요 화면 TTFB와 Supabase RPC 시간을 cold 후보·warm 반복으로 기록한다", async ({ browser }) => {
+    const routes = ["/me", "/friends", `/me/goal/${ownerGoal}`];
+    const navigationSamples: Array<Record<string, unknown>> = [];
+    for (const route of routes) {
+      const context = await authContext(browser, emails.owner);
+      const page = await context.newPage();
+      await page.setViewportSize({ width: 390, height: 844 });
+      for (const pass of ["first", "warm"] as const) {
+        const wallStart = performance.now();
+        const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+        const wallMs = performance.now() - wallStart;
+        expect(response?.status(), `${route} ${pass}`).toBe(200);
+        const timing = await page.evaluate(() => {
+          const entry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
+          return {
+            ttfb_ms: entry.responseStart,
+            dom_content_loaded_ms: entry.domContentLoadedEventEnd,
+          };
+        });
+        navigationSamples.push({
+          route,
+          pass,
+          wall_ms: Math.round(wallMs),
+          ttfb_ms: Math.round(timing.ttfb_ms),
+          dom_content_loaded_ms: Math.round(timing.dom_content_loaded_ms),
+          vercel_cache: response?.headers()["x-vercel-cache"] ?? null,
+        });
+      }
+      await context.close();
+    }
+
+    const owner = createClient(SUPABASE_URL, ANON_KEY);
+    const { error: authError } = await owner.auth.signInWithPassword({
+      email: emails.owner,
+      password,
+    });
+    expect(authError).toBeNull();
+    const rpcSamples: Array<Record<string, unknown>> = [];
+    for (const rpc of ["my_social_dashboard", "my_friend_goals"] as const) {
+      for (let pass = 1; pass <= 3; pass += 1) {
+        const started = performance.now();
+        const { error } = await owner.rpc(rpc);
+        rpcSamples.push({ rpc, pass, duration_ms: Math.round(performance.now() - started) });
+        expect(error, `${rpc} ${pass}`).toBeNull();
+      }
+    }
+    for (let pass = 1; pass <= 3; pass += 1) {
+      const started = performance.now();
+      const { error } = await owner.rpc("get_wordmap", { p_goal_id: ownerGoal });
+      rpcSamples.push({
+        rpc: "get_wordmap",
+        pass,
+        duration_ms: Math.round(performance.now() - started),
+      });
+      expect(error, `get_wordmap ${pass}`).toBeNull();
+    }
+
+    console.info("G4_PERF_NAVIGATION", JSON.stringify(navigationSamples));
+    console.info("G4_PERF_RPC", JSON.stringify(rpcSamples));
+    expect(Math.max(...navigationSamples.map((sample) => Number(sample.ttfb_ms))))
+      .toBeLessThan(8_000);
+    expect(Math.max(...rpcSamples.map((sample) => Number(sample.duration_ms))))
+      .toBeLessThan(3_000);
   });
 });

@@ -1258,7 +1258,9 @@
     transform: translate(-0.4375rem, calc(-50% - 0.4375rem));
   }
   .goal-inline-why .goal-inline-pencil-button {
-    transform: translate(-0.4375rem, calc(-50% + 0.4375rem));
+    /* 승인 prototype의 inline 연필은 WHY 본문 baseline에 붙는다. WHY에만
+       아래 보정을 더하면 glyph가 한 줄 아래로 처지므로 수직 중앙을 유지한다. */
+    transform: translate(-0.4375rem, -50%);
   }
   .goal-inline-pencil-button:active {
     background: var(--clover-soft);
@@ -3210,6 +3212,41 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
     background: var(--card);
+  }
+  .friends-history {
+    margin-top: var(--sp-5);
+  }
+  .friends-history-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0.125rem 0.375rem;
+    color: var(--foreground);
+    font-size: 0.875rem;
+  }
+  .friends-history-head span {
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+    font-weight: 700;
+  }
+  .friends-history > p {
+    margin: 0 0.125rem 0.75rem;
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+    line-height: 1.5;
+  }
+  .friend-history-main {
+    align-items: center;
+  }
+  .friend-history-badge {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.25rem 0.5625rem;
+    color: var(--amber-ink);
+    background: var(--amber-soft);
+    line-height: 1;
   }
 
   .friends-sparse-next {

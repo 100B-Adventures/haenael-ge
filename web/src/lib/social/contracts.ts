@@ -40,6 +40,19 @@ export type SocialFriend = {
 
 export type FriendGoalsResponse = { friends: SocialFriend[] };
 
+export type UnlinkedCheerHistoryItem = {
+  record_key: string;
+  display_name: string | null;
+  message: string | null;
+  created_at: string;
+  is_anonymous: boolean;
+  direction: "CHEERED_ME";
+};
+
+export type UnlinkedCheerHistoryResponse = {
+  items: UnlinkedCheerHistoryItem[];
+};
+
 export type FriendGoalDetail = SocialGoal & {
   reason: string | null;
   supporter_avatars: Array<{
@@ -146,6 +159,16 @@ export function asFriendGoals(value: unknown): FriendGoalsResponse {
   if (!value || typeof value !== "object") return { friends: [] };
   const friends = (value as { friends?: unknown }).friends;
   return { friends: Array.isArray(friends) ? friends as SocialFriend[] : [] };
+}
+
+export function asUnlinkedCheerHistory(
+  value: unknown,
+): UnlinkedCheerHistoryResponse {
+  if (!value || typeof value !== "object") return { items: [] };
+  const items = (value as { items?: unknown }).items;
+  return {
+    items: Array.isArray(items) ? items as UnlinkedCheerHistoryItem[] : [],
+  };
 }
 
 export function asFriendGoalDetail(value: unknown): FriendGoalDetail | null {

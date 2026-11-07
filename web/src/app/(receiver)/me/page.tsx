@@ -68,13 +68,31 @@ export default async function ReceiverHomePage({
   // 목표는 소프트삭제되지 않고 그대로 남으므로 상한과 무관하게 여러 개일 수
   // 있다. 진행 중/지난을 한 번에 가져와 화면에서 나눈다.
   const todayIso = new Date().toISOString().slice(0, 10);
-  const { data: allGoals } = await supabase
-    .from("goal")
-    .select("id, slug, title, reason, due_date, status, created_at, cover_preset_key")
-    .eq("member_id", user.id)
-    .neq("status", "DELETED")
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false });
+  // 이 다섯 조회는 모두 user.id만 필요하다. 직렬 await로 두면 Supabase RTT가
+  // 그대로 누적되므로 인증 경계 뒤에서 한 batch로 시작한다.
+  const [
+    { data: allGoals },
+    { data: socialDashboardRaw },
+    { data: member },
+    { data: eligibilityRaw, error: eligibilityError },
+    { data: cashoutStatusRaw },
+  ] = await Promise.all([
+    supabase
+      .from("goal")
+      .select("id, slug, title, reason, due_date, status, created_at, cover_preset_key")
+      .eq("member_id", user.id)
+      .neq("status", "DELETED")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
+    supabase.rpc("my_social_dashboard"),
+    supabase
+      .from("member")
+      .select("phone")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase.rpc("clover_eligibility", { p_member_id: user.id }),
+    supabase.rpc("my_cashout_status" as never),
+  ]);
 
   // 목표가 하나도 없으면 온보딩으로(설계 §4.6 "목표 0개" 경계).
   if (!allGoals || allGoals.length === 0) {
@@ -88,7 +106,6 @@ export default async function ReceiverHomePage({
   // "지난 목표"만 보여준다(설계 §4.6 "목표 전부 마감" 경계) — 이 경우 primary는 없음.
   // R6: 목표별 응원 수·아바타·최근 응원은 my_social_dashboard 단일 호출에서 받는다.
   // 금액과 순위는 이 응답에 포함하지 않는다.
-  const { data: socialDashboardRaw } = await supabase.rpc("my_social_dashboard");
   const socialDashboard = asMySocialDashboard(socialDashboardRaw);
   const cheerSummaryByGoal = new Map<number, MySocialGoal>(
     (socialDashboard?.goals ?? []).map((socialGoal) => [socialGoal.goal_id, socialGoal]),
@@ -125,18 +142,8 @@ export default async function ReceiverHomePage({
   const goal = inProgressGoals[0] ?? pastGoals[0];
   const otherInProgressGoals = inProgressGoals.slice(1);
 
-  const { data: member } = await supabase
-    .from("member")
-    .select("phone")
-    .eq("id", user.id)
-    .maybeSingle();
-
   // K1: 클로버 잔액 (개수 — 주표기) + 환전 잠금(A안, FDD §9.1): total/locked/available을
   // clover_eligibility 한 함수 한 스냅샷에서 받는다(clover_balance 직접 조회 폐기 — I1 보장).
-  const { data: eligibilityRaw, error: eligibilityError } = await supabase.rpc(
-    "clover_eligibility",
-    { p_member_id: user.id },
-  );
   const eligibility = Array.isArray(eligibilityRaw)
     ? eligibilityRaw[0]
     : eligibilityRaw;
@@ -151,9 +158,6 @@ export default async function ReceiverHomePage({
 
   // 수동환전 계약 §0-1-7: 홈은 진행 중 1건 또는 최근 종결 1건을 상태 RPC로 읽는다.
   // account_no_enc는 RPC 반환형에 없어 브라우저/RSC 경계로 넘어오지 않는다.
-  const { data: cashoutStatusRaw } = await supabase.rpc(
-    "my_cashout_status" as never,
-  );
   const cashoutStatus =
     ((cashoutStatusRaw ?? []) as unknown as CashoutRecord[])[0] ?? null;
   const pendingCashout =
@@ -173,9 +177,12 @@ export default async function ReceiverHomePage({
       .eq("status", "CONFIRMED")
       .is("deleted_at", null);
 
-  const recentCheerResult = await ownerCheerQuery()
-    .order("created_at", { ascending: false }) // 🔒 시간순 고정, 금액순 정렬/랭킹 금지
-    .limit(CHEER_RESULT_LIMIT);
+  const [recentCheerResult, { data: wordmapRaw }] = await Promise.all([
+    ownerCheerQuery()
+      .order("created_at", { ascending: false }) // 🔒 시간순 고정, 금액순 정렬/랭킹 금지
+      .limit(CHEER_RESULT_LIMIT),
+    supabase.rpc("get_wordmap", { p_goal_id: goal.id }),
+  ]);
   const cheerCount =
     recentCheerResult.count ?? recentCheerResult.data?.length ?? 0;
 
@@ -210,10 +217,6 @@ export default async function ReceiverHomePage({
   }
 
   // DESIGN.md v2.0.0 오버플로 계약: 홈 미니맵은 6개, 전체 워드맵은 12개다.
-  const { data: wordmapRaw } = await supabase.rpc("get_wordmap", {
-    p_goal_id: goal.id,
-  });
-
   const previewWords: Array<{ word: string; word_count: number }> = (
     wordmapRaw ?? []
   )
