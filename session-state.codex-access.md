@@ -1,6 +1,22 @@
 # 해낼게 온프렘 114 Codex 접근 세팅
 
+## [2026-11-07 03:14 KST] compact 마크 (auto)
+- 세션 3ff961b8 · 라인 codex-access · 브랜치 session/core-20261015
+- 직전 커밋: 3f61862 docs: pin final staging verification
+- compact 직전 컨텍스트: 386483 토큰
+- 마지막 회장 요청: 114 가 재시작됐습니다. 끊긴 위임과 작업 상태를 확인하고 목표 작업을 이어가세요.
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 목적: 해낼게 Codex 가 온프렘 114 에서 연결·키 부족으로 멈추지 않도록 필요한 접근을 세팅하고 실측한다.
+
+## 열린 항목
+- G4-AUTH-01: 카카오 Redirect URI 등록과 실로그인. 114 크롬은 로그인 화면, 맥 메인 크롬은 [Product] haenael ge 에 요청, 회신 없음.
+- G4-PAY-01·02: 토스 테스트 키 IP 정책 403. 같은 요청에 포함.
+- G4-QA-01: CI. Codex 가 수동 staging E2E 를 onprem-114 runner 로 옮기는 중(1fd7d41), 실행 증거 미확보.
+- 온프렘 세션 1개로 줄이기: 회장 결정 대기. 11-07 02:10 기준 해낼게 sessionId 중복은 프로세스 1개로 사라짐 관찰.
+
+## 2026-11-07 02:13 KST
+- 재개 확인: 업타임 4시간 36분이라 이번은 머신 재시작이 아니라 세션 재기동. Codex Goal 은 %53 에서 진행 중, 죽은 위임 없음(qa-verifier·code-builder 프로세스 관찰). 맥 세션에 답장 주소를 고쳐 카카오·토스 재요청.
 
 ## 2026-11-07 01:30 KST
 - staging SHA `9b1e0332fffae811da446877cba05370c089c0bf` 배포 완료. health `status=ok`, `database=ok`, `sourceSha` exact 관찰.
@@ -54,3 +70,26 @@
 - 진행 중: 맥 세션 `[Product] haenael ge` 에 4건 요청(읽음 미확인). 18:19 scheduled task `trig_01RB1znaJnDX3fF6aa3x1CBy` 로 회신 확인 후 114 재시험.
 - 남은 일: `wiki/ops/인프라.md` 기록, 임시 파일 `.cwd-placeholder` 삭제, Codex 재시도는 회장 지시 후.
 - 주의: 이 세션 worktree 내용이 사라진 상태이고 원인 미규명. 임시 폴더로 작업 중.
+## 2026-11-07 11:50 KST · G4 Goal 종결 인계
+
+### 무엇을 어디까지 했나
+
+- Goal API를 `complete`로 전환했다. `.goal/feature-list.json`의 모든 item은 pass 또는 external blocked, 모든 slice는 blocked terminal 상태다. 세부 증거와 다음 명령은 `session-state.v2-goal-slices.md` 2026-11-07 11:45 KST 절이 정본이다.
+- `origin/main`과 canonical staging source SHA는 `a738543dc307d764c0244723d865a9d7dc97d899`로 일치한다. staging social E2E 43/43 PASS, fixture 0, 결제 비활성 복구 HTTP 503을 관찰했다.
+- AUTH·PAY·QA 데모 3건을 390px Chromium으로 렌더해 console error 0, overflow 0, local missing link 0, image load PASS를 확인했다.
+
+### 남은 이슈·블로커
+
+- Kakao 실제 로그인·callback·제품 세션, Toss test key 접근 정책 뒤 성공·중복 callback, GitHub self-hosted social job 실제 실행은 external blocked다.
+- GitHub job `128267072651`은 labels=`self-hosted`로 queued이고 runner listener는 online이다. 현재 gh token과 로컬 GitHub token 4종의 runner 관리 API는 모두 `HTTP 403 Resource not accessible by personal access token`이다. 이 출력은 관리 권한 부재 증거이지 job queue의 원인 확정 증거가 아니다. runner group의 public repository 접근은 미확인 후보로만 남긴다.
+
+### 다음에 칠 명령
+
+- `gh run view 42324947776 --repo 100B-Adventures/haenael-ge --json status,conclusion,jobs`
+- 외부 세션·권한이 실제로 바뀐 경우에만 `session-state.v2-goal-slices.md`의 Kakao·Toss 재개 명령을 따른다. 같은 로그인폼·403 조건을 반복 실행하지 않는다.
+
+### 검증했나
+
+- 검증됨: staging health SHA exact, social E2E 43/43, fixture 0, 결제 비활성 503, 데모 렌더, Goal terminal JSON.
+- 미검증: GitHub queue의 정확한 서버측 원인, Kakao 실제 성공, Toss 실제 성공·중복 callback, production 배포.
+
