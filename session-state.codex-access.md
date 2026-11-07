@@ -1,5 +1,14 @@
 # 해낼게 온프렘 114 Codex 접근 세팅
 
+## 2026-11-07 15:47 KST · 로컬 세션·설정 기반 외부 항목 재개
+
+- 로컬 정본 `browser-automation.md`, `setup-browser-cookies`, `browser-inventory.sh`, `cdp-lib.mjs`, `chrome-cookie-export.mjs`, `onprem-chrome.sh`를 대조했다. 현재 호스트는 LXC 114라 Aside와 메인 Chrome을 직접 사용할 수 없고, Tailscale의 맥북은 1시간 이상 offline이다.
+- 온프렘 CDP 9333·9342·9345·9444·9445를 실제 GitHub runner group, Kakao 앱1516450, Toss API 키 URL로 확인했다. 전부 로그인 벽이고 세 서비스 저장 비밀번호는 전 프로필 0건이다.
+- Chrome 9342에 Kakao QR 로그인 화면, Toss 로그인 화면, GitHub runner group 로그인 화면을 준비했다. noVNC는 `http://100.117.68.81:6342/vnc.html?autoconnect=1&resize=scale`다.
+- runner `onprem-114-android`는 `android-kvm,onprem-114` 라벨로 조직 Default group에 등록되어 listener가 broker session을 유지한다. workflow 요구 라벨과 일치한다. trusted run `42324947776`은 queued다. public repository를 허용하지 않는 runner group 정책이 가장 유력한 후보지만, 현재 PAT의 runner 관리 API가 HTTP 403이라 정확한 설정값은 미확인이다.
+- Supabase staging에 local `toss.env`의 test secret만 `TOSS_SECRET_KEY`로 등록했다. live 키 사용 0회. 원격 secret 이름 확인 뒤 `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503 `payments_disabled`, health HTTP 200·DB ok·sourceSha `a738543dc307d764c0244723d865a9d7dc97d899`를 관찰했다.
+- 실제 Kakao callback, Toss 카드사 본인인증 뒤 success callback, GitHub runner group 설정 변경은 로그인 세션이 열린 뒤 같은 탭에서 이어간다. 기존 제품 QA 43/43 PASS와 이 외부 항목은 구분한다.
+
 ## [2026-11-07 03:14 KST] compact 마크 (auto)
 - 세션 3ff961b8 · 라인 codex-access · 브랜치 session/core-20261015
 - 직전 커밋: 3f61862 docs: pin final staging verification
