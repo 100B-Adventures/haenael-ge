@@ -70,3 +70,26 @@
 - 진행 중: 맥 세션 `[Product] haenael ge` 에 4건 요청(읽음 미확인). 18:19 scheduled task `trig_01RB1znaJnDX3fF6aa3x1CBy` 로 회신 확인 후 114 재시험.
 - 남은 일: `wiki/ops/인프라.md` 기록, 임시 파일 `.cwd-placeholder` 삭제, Codex 재시도는 회장 지시 후.
 - 주의: 이 세션 worktree 내용이 사라진 상태이고 원인 미규명. 임시 폴더로 작업 중.
+## 2026-11-07 11:50 KST · G4 Goal 종결 인계
+
+### 무엇을 어디까지 했나
+
+- Goal API를 `complete`로 전환했다. `.goal/feature-list.json`의 모든 item은 pass 또는 external blocked, 모든 slice는 blocked terminal 상태다. 세부 증거와 다음 명령은 `session-state.v2-goal-slices.md` 2026-11-07 11:45 KST 절이 정본이다.
+- `origin/main`과 canonical staging source SHA는 `a738543dc307d764c0244723d865a9d7dc97d899`로 일치한다. staging social E2E 43/43 PASS, fixture 0, 결제 비활성 복구 HTTP 503을 관찰했다.
+- AUTH·PAY·QA 데모 3건을 390px Chromium으로 렌더해 console error 0, overflow 0, local missing link 0, image load PASS를 확인했다.
+
+### 남은 이슈·블로커
+
+- Kakao 실제 로그인·callback·제품 세션, Toss test key 접근 정책 뒤 성공·중복 callback, GitHub self-hosted social job 실제 실행은 external blocked다.
+- GitHub job `128267072651`은 labels=`self-hosted`로 queued이고 runner listener는 online이다. 현재 gh token과 로컬 GitHub token 4종의 runner 관리 API는 모두 `HTTP 403 Resource not accessible by personal access token`이다. 이 출력은 관리 권한 부재 증거이지 job queue의 원인 확정 증거가 아니다. runner group의 public repository 접근은 미확인 후보로만 남긴다.
+
+### 다음에 칠 명령
+
+- `gh run view 42324947776 --repo 100B-Adventures/haenael-ge --json status,conclusion,jobs`
+- 외부 세션·권한이 실제로 바뀐 경우에만 `session-state.v2-goal-slices.md`의 Kakao·Toss 재개 명령을 따른다. 같은 로그인폼·403 조건을 반복 실행하지 않는다.
+
+### 검증했나
+
+- 검증됨: staging health SHA exact, social E2E 43/43, fixture 0, 결제 비활성 503, 데모 렌더, Goal terminal JSON.
+- 미검증: GitHub queue의 정확한 서버측 원인, Kakao 실제 성공, Toss 실제 성공·중복 callback, production 배포.
+
