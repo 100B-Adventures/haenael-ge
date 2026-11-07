@@ -1,5 +1,39 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-08 04:35 KST · current staging QA 산출물 changes-requested
+
+### 무엇을 어디까지 했나
+
+- 회장 지시에 따라 pipeline line `v2`의 current stage `qa`에서 canonical `qa-tracker`와 `design-conformance-matrix`를 갱신했다.
+- staging health는 version `2.1.1`, database `ok`, source SHA `62585130ceaa56a4677e67cea597a0ac0b12697f` 일치다.
+- 기능 경로는 full run 37 PASS와 최초 실패 8건 표적 재실행 8/8 PASS로 모두 관찰했다.
+- 승인 시안과 staging 9개 화면을 390·1024·1440px 같은 viewport로 직접 이미지 대조했다.
+
+### 남은 이슈·블로커
+
+- `regression-full` 단일 실행은 37/45, exit 1이다. 표적 재실행 PASS를 full green으로 승격하지 않는다.
+- 디자인 정합은 일치 0·불일치 9·미확인 0이다. desktop max-width, 친구 목록의 `과거 응원 기록`, 마이페이지 소개 문구가 승인 시안과 다르다.
+- QA는 `changes-requested`다. `/approve`, pipeline-state 변경, 운영 배포를 수행하지 않았다.
+
+### 다음에 칠 명령
+
+```bash
+cd /Users/sj/sj_code_master/haenael-ge
+sed -n '1,90p' docs/qa/qa-tracker.md
+sed -n '1,120p' docs/qa/design-conformance-matrix.md
+git diff --check -- docs/qa/qa-tracker.md docs/qa/design-conformance-matrix.md session-state.v2.md
+```
+
+Claude 컨트롤러가 두 QA 산출물과 evidence root를 다시 읽고 build/design 재개 여부를 결정한다.
+
+### 검증했나
+
+- 관찰됨: health source identity, 27 same-width 승인·staging 이미지 쌍 직접 Read.
+- 테스트됨: 1024 viewport 1/1 PASS, 최초 실패 8건 표적 재실행 8/8 PASS, fixture cleanup 0.
+- 실패 관찰됨: full regression 37/45, exit 1. 디자인 화면 9/9 불일치.
+- 증거 무결성 재실행: `.goal/events.log`의 `v2 QA artifacts integrity rerun (exit 0)`.
+- evidence root: `/Users/sj/sj_code_master/haenael-ge-v2-hotfix/.goal/runs/v2-qa-artifacts-20261108/`.
+
 ## 2026-11-05 23:50 KST · 완료 여부 질의와 실행 상태 확인
 
 - 사용자 요청: 개발 완료 여부, QA 환경과 실제 검사 대상을 설명하라. 최신 AGENTS는 Claude만 오케스트레이터, Codex는 단위 실행/교차리뷰로 변경됨. 추가 배차·단계승인 없이 현재 결과를 기록한다.
