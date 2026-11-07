@@ -18,17 +18,16 @@ export default async function FriendsPage() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/");
-  const [friendResult, historyResult] = await Promise.all([
-    supabase.rpc("my_friend_goals"),
-    supabase.rpc("my_unlinked_cheer_history" as never),
-  ]);
-  if (friendResult.error || historyResult.error) {
+  const { data, error } = await supabase.rpc("my_friend_page" as never);
+  if (error) {
     throw new Error("친구 목록을 불러오지 못했습니다.");
   }
   // 친구 목록은 목표 커버를 렌더하지 않는다. 여기서 service-role로 관계·목표·
   // asset을 다시 조회하고 signed URL까지 만드는 것은 불필요한 server waterfall이다.
-  const response = asFriendGoals(friendResult.data);
-  const history = asUnlinkedCheerHistory(historyResult.data);
+  const response = asFriendGoals(data);
+  const history = asUnlinkedCheerHistory({
+    items: (data as unknown as { history?: unknown } | null)?.history,
+  });
   return (
     <ReceiverPageShell testId="friends-page" bottomSafe>
       <header className="friends-page-head">

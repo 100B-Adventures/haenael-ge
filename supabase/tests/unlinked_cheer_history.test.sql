@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(7);
+SELECT plan(9);
 
 INSERT INTO auth.users(
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -64,6 +64,10 @@ SELECT ok(
   has_function_privilege('authenticated', 'public.my_unlinked_cheer_history()', 'EXECUTE'),
   'G4-HISTORY-02 authenticated만 호출 가능하다'
 );
+SELECT ok(
+  NOT has_function_privilege('anon', 'public.my_friend_page()', 'EXECUTE'),
+  'G4-HISTORY-02A anon은 통합 친구 read model을 호출할 수 없다'
+);
 
 SET LOCAL ROLE authenticated;
 SELECT set_config(
@@ -88,6 +92,11 @@ SELECT ok(
 SELECT ok(
   public.my_unlinked_cheer_history()::text !~ 'supporter_member_id|friend_member_id|clover_amount|amount_krw',
   'G4-HISTORY-06 계정 추정값과 금액 필드는 응답에 없다'
+);
+SELECT is(
+  jsonb_array_length(public.my_friend_page()->'history'),
+  2,
+  'G4-HISTORY-06A 통합 친구 read model이 과거 기록을 한 RPC에 포함한다'
 );
 
 SELECT set_config(

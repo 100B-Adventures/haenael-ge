@@ -10,7 +10,9 @@ canonical_url: https://haenael-ge.vercel.app
 source_commit: pending-staging-verification
 ships:
   code: WHY edit alignment, unlinked cheer history, server waterfall reduction
-  migration: 20261108030000_unlinked_cheer_history.sql
+  migrations:
+    - 20261108030000_unlinked_cheer_history.sql
+    - 20261108040000_friend_page_single_rpc.sql
 qa_gate:
   approved: false
   required:

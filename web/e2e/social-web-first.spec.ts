@@ -4739,10 +4739,10 @@ test.describe("V2 web-first social slice", () => {
     });
     expect(authError).toBeNull();
     const rpcSamples: Array<Record<string, unknown>> = [];
-    for (const rpc of ["my_social_dashboard", "my_friend_goals"] as const) {
+    for (const rpc of ["my_social_dashboard", "my_friend_page"] as const) {
       for (let pass = 1; pass <= 3; pass += 1) {
         const started = performance.now();
-        const { error } = await owner.rpc(rpc);
+        const { error } = await owner.rpc(rpc as never);
         rpcSamples.push({ rpc, pass, duration_ms: Math.round(performance.now() - started) });
         expect(error, `${rpc} ${pass}`).toBeNull();
       }
