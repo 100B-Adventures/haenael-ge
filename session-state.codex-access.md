@@ -1,5 +1,31 @@
 # 해낼게 온프렘 114 Codex 접근 세팅
 
+## 2026-11-07 19:08 KST · Kakao 반복 로그인 제거 조사·세팅
+
+### 무엇을 어디까지 했나
+
+- 등록된 온프렘 Chrome 프로필 10개(9333·9337·9341·9342·9345·9346·9347·9348·9444·9445)를 staging 제품 OAuth 진입점으로 직접 시험했다. 전부 `accounts.kakao.com/login`으로 끝났다. 로컬 프로필 폴더는 옮겨졌지만 메인 Mac Chrome의 복호화된 Kakao 세션 export 파일은 없었다.
+- 로컬 Kakao 앱 키·Client Secret·staging service-role key는 존재한다. 앱 키는 사용자 인가 뒤 code 교환용이며 사용자 인증을 대신하지 못한다. 일반 제품 QA는 기존 service-role fixture로 43개 경로를 무인 실행할 수 있다.
+- 9342 QR 화면에서 `로그인 상태 유지`를 켜고 QR을 새로고침했다. 1회 인증 뒤 이 영구 프로필을 재사용하는 구조다.
+- `chrome-cookie-export.mjs`에 반복 `--domain` 필터를 추가했다. Kakao 도메인만 export/import하는 시험에서 mode 600, 외부 도메인 0, 쿠키 23/23 import, 생성 탭 1개 회수를 관찰했다. 하네스 커밋 `16c9486`, 평가 `ev-20261107-17`로 연결했다.
+
+### 남은 이슈·블로커
+
+- MacBook은 Tailscale offline이라 메인 Chrome의 현재 Kakao 세션을 CDP export할 수 없다. 온라인이 되면 도메인 한정 export로 9342에 이관한다.
+- 현재 로컬 10개 프로필에는 인증된 Kakao Account session이 없다. 공식 OAuth 계약상 앱 키·Client Secret만으로 사용자 인가 코드를 만들 수 없다.
+
+### 다음에 칠 명령
+
+- 맥 온라인 확인: `tailscale status --json | jq -r '.Peer[] | select(.HostName=="macbookpro") | [.TailscaleIPs[0],.Online,.LastSeen] | @tsv'`
+- 맥의 CDP 가능한 Chrome에서: `node ~/.claude/harness/bin/chrome-cookie-export.mjs <메인Chrome포트> /tmp/haenael-kakao.json --domain kakao.com --domain kakaocdn.net`
+- 114의 9342에서: `node ~/.claude/harness/bin/chrome-cookie-export.mjs --import 9342 /tmp/haenael-kakao.json --domain kakao.com --domain kakaocdn.net`
+- 실제 제품 검증: 9342에서 `https://haenael-ge-v2-staging-100-b.vercel.app/auth/kakao/start?redirect=/my`를 열어 callback 뒤 `/my`와 Supabase 제품 세션을 관찰한다.
+
+### 검증했나
+
+- 테스트됨: 프로필 10개 OAuth 실측, Kakao 도메인 한정 export/import 23/23, QR `로그인 상태 유지` checked, 기존 social E2E 43/43.
+- 미검증: Mac 메인 Chrome Kakao 세션 이관, 실제 Kakao callback·제품 세션. Mac이 offline이고 로컬 인증 세션이 없어 아직 실행할 수 없다.
+
 ## 2026-11-07 16:05 KST · 외부 계정 로그인 준비 인계
 
 ### 무엇을 어디까지 했나
