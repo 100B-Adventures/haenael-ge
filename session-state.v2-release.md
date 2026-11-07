@@ -1,5 +1,29 @@
 # 해낼게 V2.1.0 release handoff
 
+## 2026-11-08 02:26 KST · 최종 확인
+
+### 무엇을 어디까지 했나
+
+- V2.1.0 production deployment `haenael-9ukeg0ztc-100-b.vercel.app`을 대표 주소에 연결했다. health는 HTTP 200, version 2.1.0, sourceSha `a738543dc307d764c0244723d865a9d7dc97d899`, database ok다.
+- 운영 migration 8/8, 필수 schema 5/5, release Edge Function 6/6 ACTIVE다. 웹·서버 결제 플래그는 false이고 주문·승인 함수는 HTTP 503 `payments_disabled`다.
+
+### 남은 이슈·블로커
+
+- 릴리스 문서 commit `9fce9be52054309fb799f1441ac228e1d475fd0d`의 push만 실행 정책에서 차단됐다. 운영 제품 배포와 QA는 완료됐다.
+- Toss 실제 카드 callback은 회장 금지조건 때문에 `accepted_unverified`이며 결제 비활성 상태가 출시 조건이다.
+
+### 다음에 칠 명령
+
+```bash
+git push -u origin release/v2.1.0-final-docs-20261108
+```
+
+### 검증했나
+
+- 관찰됨: production exact source health, migration 8/8, schema 5/5, Edge Function 6/6, 결제 503, 보안 헤더 6/6.
+- 테스트됨: staging 43/43, main CI success, production 공개 3/3, 인증 read-only 1/1, 제품 데이터 변화 0.
+- 미검증: 실제 카드 callback. 회장 지시로 accepted_unverified.
+
 ## 2026-11-08 02:24 KST
 
 ### 무엇을 어디까지 했나
