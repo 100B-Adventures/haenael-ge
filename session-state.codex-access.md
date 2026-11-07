@@ -1,5 +1,31 @@
 # 해낼게 온프렘 114 Codex 접근 세팅
 
+## 2026-11-07 16:05 KST · 외부 계정 로그인 준비 인계
+
+### 무엇을 어디까지 했나
+
+- 로컬 브라우저 자동화 정본과 Chrome 프로필 5개를 확인했다. Chrome 9342에 Kakao QR, Toss Payments, GitHub 조직 runner group 로그인 화면을 열어 두었다. noVNC 주소는 `http://100.117.68.81:6342/vnc.html?autoconnect=1&resize=scale`이다.
+- Supabase staging에 로컬 Toss test secret만 `TOSS_SECRET_KEY`로 등록했다. live key는 사용하지 않았다.
+- self-hosted runner는 `self-hosted`, `onprem-114`, `android-kvm` 라벨과 `Listening for Jobs` 상태를 확인했다. run `42324947776`의 `e2e-v2-social`은 queued다.
+
+### 남은 이슈·블로커
+
+- 세 서비스 모두 저장 로그인 0건이다. Kakao QR 승인, Toss Payments 로그인, GitHub 로그인이 필요하다.
+- GitHub Default runner group의 public repository 허용 여부는 유력 후보지만 관리 API가 HTTP 403이라 현재 설정값은 미확인이다.
+- Kakao 실제 callback, Toss sandbox success callback, GitHub self-hosted job 실행은 미검증이다. 이번 작업에서는 디자인 픽셀 QA를 수행하거나 통과 판정하지 않았다.
+
+### 다음에 칠 명령
+
+- 로그인 상태 확인: `curl -fsS http://127.0.0.1:9342/json/list | jq -r '.[] | select(.type=="page") | [.id[0:8], .title, .url] | @tsv'`
+- GitHub 상태 확인: `gh run view 42324947776 --repo 100B-Adventures/haenael-ge --json status,conclusion,jobs`
+- 로그인 완료 뒤 같은 9342 탭에서 Kakao Redirect URI, Toss test-key access policy, GitHub Default runner group 설정을 확인하고 각각 실제 OAuth, sandbox callback, self-hosted CI를 재실행한다.
+
+### 검증했나
+
+- 관찰됨: staging health HTTP 200, DB ok, sourceSha `a738543dc307d764c0244723d865a9d7dc97d899`, `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503 `payments_disabled`, runner listener online, 세 로그인 화면 유지.
+- 테스트됨: 기존 staging social E2E 43/43 PASS와 fixture 0. 이는 디자인 픽셀 QA 증거가 아니다.
+- 미검증: Kakao 제품 세션, Toss 성공·중복 callback, GitHub queued job EXIT 0, 디자인 픽셀 정합성, production 배포.
+
 ## 2026-11-07 15:47 KST · 로컬 세션·설정 기반 외부 항목 재개
 
 - 로컬 정본 `browser-automation.md`, `setup-browser-cookies`, `browser-inventory.sh`, `cdp-lib.mjs`, `chrome-cookie-export.mjs`, `onprem-chrome.sh`를 대조했다. 현재 호스트는 LXC 114라 Aside와 메인 Chrome을 직접 사용할 수 없고, Tailscale의 맥북은 1시간 이상 offline이다.
