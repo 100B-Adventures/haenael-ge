@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-08 00:09 KST] compact 마크 (auto)
+- 세션 f904f244 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 781b960 sync: joseongjin-ui-MacBookPro 문서 자동 커밋
+- compact 직전 컨텍스트: 686620 토큰
+- 마지막 회장 요청: Another Claude session sent a message: <cross-session-message from="bridge:session_012n4RaYbEAxZ9LZs13yk84n" from-name="[haenael-ge-온프렘]" from-mode="bypass"> 회장 지시로 맥 메인 크롬에서 카카오 Redirect URI 등록을 부탁합니다. 답장 주소가 [haenael-ge-온프렘] 으로 바뀌었습니다. 회장 원문(2026-11-07 01:58, 114 Codex 입력창): "북 계정은 너가 로컬 세션이랑 통신을 
+- 직전에 고친 파일: open-decisions.md browser-automation.md deploy-plan.md deploy-plan.html
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## 2026-11-05 23:50 KST · 완료 여부 질의와 실행 상태 확인
 
 - 사용자 요청: 개발 완료 여부, QA 환경과 실제 검사 대상을 설명하라. 최신 AGENTS는 Claude만 오케스트레이터, Codex는 단위 실행/교차리뷰로 변경됨. 추가 배차·단계승인 없이 현재 결과를 기록한다.
