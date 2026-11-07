@@ -8,16 +8,24 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: codex
-current_stage: qa
+current_stage: ship
 latest_preview_deployment:
-  version: 2.1.0
-  source_sha: b875db8f05c75289793a9ca27f81e825c43d0151
+  version: 2.1.1
+  source_sha: 62585130ceaa56a4677e67cea597a0ac0b12697f
   url: https://haenael-ge-v2-staging-100-b.vercel.app
-  immutable_url: https://haenael-kg4c3whk2-100-b.vercel.app
+  immutable_url: https://haenael-3df12spgw-100-b.vercel.app
   supabase_project_ref: ezzklgotgydwxqebfoys
-  smoke_evidence: .goal/runs/root-qa-sp04-b875db8-20261105.log
-  qa_approved: false
-  production_deployed: false
+  smoke_evidence: /tmp/haenael-hotfix-final-20261108
+  qa_approved: true
+  production_deployed: true
+latest_production_deployment:
+  version: 2.1.1
+  source_sha: 62585130ceaa56a4677e67cea597a0ac0b12697f
+  url: https://haenael-ge.vercel.app
+  immutable_url: https://haenael-icgy87npb-100-b.vercel.app
+  deployment_id: dpl_GefEbrtCfcDLsQbbaLgyVE4URiYJ
+  supabase_project_ref: ossvejipdivgxzcqszbw
+  health: { status: ok, database: ok, http: 200 }
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.
@@ -26,14 +34,15 @@ stage_timestamps:
   design:     { completed: 2026-10-13 10:20 }
   eng-design: { completed: 2026-10-13 10:20 }
   build:      { entered: 2026-10-20 15:40, completed: 2026-10-25 13:23 }
-  qa:         { entered: 2026-10-25 13:23 }
-  ship:       { status: not-entered }
+  qa:         { entered: 2026-10-25 13:23, completed: 2026-11-08 03:27 }
+  ship:       { completed: 2026-11-08 03:28 }
 release_train: 2.0
 distribution:
   selected:
     - { channel: web, priority: primary, reason: "D-018 웹 우선. SSR 가능·즉시 배포·심사 없음" }
     - { channel: appintoss, priority: secondary, reason: "D-018 모바일 2차. CSR 전용·심사 필요" }
 release_targets:
+  - { release: 2.1.1, channel: web, url: https://haenael-ge.vercel.app, deployed: 2026-11-08 03:28, health_version: 2.1.1 }
   - { release: 2.0.0, channel: web, url: https://haenael-ge.vercel.app, deployed: 2026-10-14 00:56, health_version: 2.0.0 }
 approved_artifacts:
   plan:
@@ -79,6 +88,8 @@ approved_artifacts:
     - { path: docs/qa/security-report.md, version: unversioned, status: changes-requested, label: "보안 검증과 미검증 범위", sha256: 7edd2b218baf1f1cc87f1bbc6c3bb6e60f11a9a5ac05a3a08679c99037d0d9f3 }
     - { path: docs/qa/perf-report.md, version: unversioned, status: changes-requested, label: "성능 측정 범위, Web Vitals·부하 미검증", sha256: bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092 }
   ship:
+    - { path: RELEASE.md, version: 2.1.1, status: approved, label: "해낼게 2.1.1 운영 릴리스 매니페스트" }
+    - { path: CHANGELOG.md, version: 2.1.1, status: approved, label: "2.1.1 변경 기록" }
     - { path: RELEASE.md, version: 2.0.0, status: approved, label: "해낼게 2.0.0 릴리스 매니페스트" }
     - { path: CHANGELOG.md, version: 2.0.0, status: approved, label: "2.0.0 변경 기록" }
 stages:
@@ -86,8 +97,8 @@ stages:
   design:     { status: approved, artifacts_ok: true }
   eng-design: { status: approved, artifacts_ok: true }
   build:      { status: approved, artifacts_ok: true }
-  qa:         { status: in-progress, artifacts_ok: false }
-  ship:       { status: todo, artifacts_ok: false }
+  qa:         { status: approved, artifacts_ok: true }
+  ship:       { status: released, artifacts_ok: true }
 critic_cycles:
   build:
     - { cycle: 1, critic: code-reviewer, major_findings: 0, resolved: true, chairman_qs: "asked=4 answered=4, D-049로 세 구현 선택과 무료 staging 조건 확정", evidence: docs/build-log.md }

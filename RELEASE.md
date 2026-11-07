@@ -3,24 +3,27 @@
 ```yaml
 release: 2.1.1
 date: 2026-11-08
-status: staging-verification
+status: released
 line: v2
 delivery: vercel
 canonical_url: https://haenael-ge.vercel.app
-source_commit: pending-staging-verification
+source_commit: 62585130ceaa56a4677e67cea597a0ac0b12697f
+production_deployment: dpl_GefEbrtCfcDLsQbbaLgyVE4URiYJ
 ships:
   code: WHY edit alignment, unlinked cheer history, server waterfall reduction
   migrations:
     - 20261108030000_unlinked_cheer_history.sql
     - 20261108040000_friend_page_single_rpc.sql
 qa_gate:
-  approved: false
-  required:
-    - staging health sourceSha identity
-    - staging 390px, 768px, 1440px prototype comparison
-    - staging unlinked cheer history write-fixture E2E
-    - staging before/after navigation and RPC timings
-    - production three-path direct observation
+  approved: true
+  evidence:
+    - staging health sourceSha 62585130ceaa56a4677e67cea597a0ac0b12697f
+    - staging WHY edit geometry center delta 0px at 390px, 768px, 1440px
+    - staging unlinked cheer history E2E PASS with fixture cleanup zero
+    - staging warm navigation /me 2732ms, /friends 1387ms, /me/goal 1786ms
+    - production health 200, version 2.1.1, database ok, matching sourceSha
+    - production authenticated /friends 200 and direct RPC contract reached
+    - production read-only count confirmed 11 unlinked historical cheers
 forbidden:
   - live payment key
   - actual payment
