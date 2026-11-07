@@ -1,5 +1,66 @@
 # 해낼게 온프렘 114 Codex 접근 세팅
 
+## 2026-11-07 19:08 KST · Kakao 반복 로그인 제거 조사·세팅
+
+### 무엇을 어디까지 했나
+
+- 등록된 온프렘 Chrome 프로필 10개(9333·9337·9341·9342·9345·9346·9347·9348·9444·9445)를 staging 제품 OAuth 진입점으로 직접 시험했다. 전부 `accounts.kakao.com/login`으로 끝났다. 로컬 프로필 폴더는 옮겨졌지만 메인 Mac Chrome의 복호화된 Kakao 세션 export 파일은 없었다.
+- 로컬 Kakao 앱 키·Client Secret·staging service-role key는 존재한다. 앱 키는 사용자 인가 뒤 code 교환용이며 사용자 인증을 대신하지 못한다. 일반 제품 QA는 기존 service-role fixture로 43개 경로를 무인 실행할 수 있다.
+- 9342 QR 화면에서 `로그인 상태 유지`를 켜고 QR을 새로고침했다. 1회 인증 뒤 이 영구 프로필을 재사용하는 구조다.
+- `chrome-cookie-export.mjs`에 반복 `--domain` 필터를 추가했다. Kakao 도메인만 export/import하는 시험에서 mode 600, 외부 도메인 0, 쿠키 23/23 import, 생성 탭 1개 회수를 관찰했다. 하네스 커밋 `16c9486`, 평가 `ev-20261107-17`로 연결했다.
+
+### 남은 이슈·블로커
+
+- MacBook은 Tailscale offline이라 메인 Chrome의 현재 Kakao 세션을 CDP export할 수 없다. 온라인이 되면 도메인 한정 export로 9342에 이관한다.
+- 현재 로컬 10개 프로필에는 인증된 Kakao Account session이 없다. 공식 OAuth 계약상 앱 키·Client Secret만으로 사용자 인가 코드를 만들 수 없다.
+
+### 다음에 칠 명령
+
+- 맥 온라인 확인: `tailscale status --json | jq -r '.Peer[] | select(.HostName=="macbookpro") | [.TailscaleIPs[0],.Online,.LastSeen] | @tsv'`
+- 맥의 CDP 가능한 Chrome에서: `node ~/.claude/harness/bin/chrome-cookie-export.mjs <메인Chrome포트> /tmp/haenael-kakao.json --domain kakao.com --domain kakaocdn.net`
+- 114의 9342에서: `node ~/.claude/harness/bin/chrome-cookie-export.mjs --import 9342 /tmp/haenael-kakao.json --domain kakao.com --domain kakaocdn.net`
+- 실제 제품 검증: 9342에서 `https://haenael-ge-v2-staging-100-b.vercel.app/auth/kakao/start?redirect=/my`를 열어 callback 뒤 `/my`와 Supabase 제품 세션을 관찰한다.
+
+### 검증했나
+
+- 테스트됨: 프로필 10개 OAuth 실측, Kakao 도메인 한정 export/import 23/23, QR `로그인 상태 유지` checked, 기존 social E2E 43/43.
+- 미검증: Mac 메인 Chrome Kakao 세션 이관, 실제 Kakao callback·제품 세션. Mac이 offline이고 로컬 인증 세션이 없어 아직 실행할 수 없다.
+
+## 2026-11-07 16:05 KST · 외부 계정 로그인 준비 인계
+
+### 무엇을 어디까지 했나
+
+- 로컬 브라우저 자동화 정본과 Chrome 프로필 5개를 확인했다. Chrome 9342에 Kakao QR, Toss Payments, GitHub 조직 runner group 로그인 화면을 열어 두었다. noVNC 주소는 `http://100.117.68.81:6342/vnc.html?autoconnect=1&resize=scale`이다.
+- Supabase staging에 로컬 Toss test secret만 `TOSS_SECRET_KEY`로 등록했다. live key는 사용하지 않았다.
+- self-hosted runner는 `self-hosted`, `onprem-114`, `android-kvm` 라벨과 `Listening for Jobs` 상태를 확인했다. run `42324947776`의 `e2e-v2-social`은 queued다.
+
+### 남은 이슈·블로커
+
+- 세 서비스 모두 저장 로그인 0건이다. Kakao QR 승인, Toss Payments 로그인, GitHub 로그인이 필요하다.
+- GitHub Default runner group의 public repository 허용 여부는 유력 후보지만 관리 API가 HTTP 403이라 현재 설정값은 미확인이다.
+- Kakao 실제 callback, Toss sandbox success callback, GitHub self-hosted job 실행은 미검증이다. 이번 작업에서는 디자인 픽셀 QA를 수행하거나 통과 판정하지 않았다.
+
+### 다음에 칠 명령
+
+- 로그인 상태 확인: `curl -fsS http://127.0.0.1:9342/json/list | jq -r '.[] | select(.type=="page") | [.id[0:8], .title, .url] | @tsv'`
+- GitHub 상태 확인: `gh run view 42324947776 --repo 100B-Adventures/haenael-ge --json status,conclusion,jobs`
+- 로그인 완료 뒤 같은 9342 탭에서 Kakao Redirect URI, Toss test-key access policy, GitHub Default runner group 설정을 확인하고 각각 실제 OAuth, sandbox callback, self-hosted CI를 재실행한다.
+
+### 검증했나
+
+- 관찰됨: staging health HTTP 200, DB ok, sourceSha `a738543dc307d764c0244723d865a9d7dc97d899`, `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503 `payments_disabled`, runner listener online, 세 로그인 화면 유지.
+- 테스트됨: 기존 staging social E2E 43/43 PASS와 fixture 0. 이는 디자인 픽셀 QA 증거가 아니다.
+- 미검증: Kakao 제품 세션, Toss 성공·중복 callback, GitHub queued job EXIT 0, 디자인 픽셀 정합성, production 배포.
+
+## 2026-11-07 15:47 KST · 로컬 세션·설정 기반 외부 항목 재개
+
+- 로컬 정본 `browser-automation.md`, `setup-browser-cookies`, `browser-inventory.sh`, `cdp-lib.mjs`, `chrome-cookie-export.mjs`, `onprem-chrome.sh`를 대조했다. 현재 호스트는 LXC 114라 Aside와 메인 Chrome을 직접 사용할 수 없고, Tailscale의 맥북은 1시간 이상 offline이다.
+- 온프렘 CDP 9333·9342·9345·9444·9445를 실제 GitHub runner group, Kakao 앱1516450, Toss API 키 URL로 확인했다. 전부 로그인 벽이고 세 서비스 저장 비밀번호는 전 프로필 0건이다.
+- Chrome 9342에 Kakao QR 로그인 화면, Toss 로그인 화면, GitHub runner group 로그인 화면을 준비했다. noVNC는 `http://100.117.68.81:6342/vnc.html?autoconnect=1&resize=scale`다.
+- runner `onprem-114-android`는 `android-kvm,onprem-114` 라벨로 조직 Default group에 등록되어 listener가 broker session을 유지한다. workflow 요구 라벨과 일치한다. trusted run `42324947776`은 queued다. public repository를 허용하지 않는 runner group 정책이 가장 유력한 후보지만, 현재 PAT의 runner 관리 API가 HTTP 403이라 정확한 설정값은 미확인이다.
+- Supabase staging에 local `toss.env`의 test secret만 `TOSS_SECRET_KEY`로 등록했다. live 키 사용 0회. 원격 secret 이름 확인 뒤 `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503 `payments_disabled`, health HTTP 200·DB ok·sourceSha `a738543dc307d764c0244723d865a9d7dc97d899`를 관찰했다.
+- 실제 Kakao callback, Toss 카드사 본인인증 뒤 success callback, GitHub runner group 설정 변경은 로그인 세션이 열린 뒤 같은 탭에서 이어간다. 기존 제품 QA 43/43 PASS와 이 외부 항목은 구분한다.
+
 ## [2026-11-07 03:14 KST] compact 마크 (auto)
 - 세션 3ff961b8 · 라인 codex-access · 브랜치 session/core-20261015
 - 직전 커밋: 3f61862 docs: pin final staging verification
@@ -70,3 +131,26 @@
 - 진행 중: 맥 세션 `[Product] haenael ge` 에 4건 요청(읽음 미확인). 18:19 scheduled task `trig_01RB1znaJnDX3fF6aa3x1CBy` 로 회신 확인 후 114 재시험.
 - 남은 일: `wiki/ops/인프라.md` 기록, 임시 파일 `.cwd-placeholder` 삭제, Codex 재시도는 회장 지시 후.
 - 주의: 이 세션 worktree 내용이 사라진 상태이고 원인 미규명. 임시 폴더로 작업 중.
+## 2026-11-07 11:50 KST · G4 Goal 종결 인계
+
+### 무엇을 어디까지 했나
+
+- Goal API를 `complete`로 전환했다. `.goal/feature-list.json`의 모든 item은 pass 또는 external blocked, 모든 slice는 blocked terminal 상태다. 세부 증거와 다음 명령은 `session-state.v2-goal-slices.md` 2026-11-07 11:45 KST 절이 정본이다.
+- `origin/main`과 canonical staging source SHA는 `a738543dc307d764c0244723d865a9d7dc97d899`로 일치한다. staging social E2E 43/43 PASS, fixture 0, 결제 비활성 복구 HTTP 503을 관찰했다.
+- AUTH·PAY·QA 데모 3건을 390px Chromium으로 렌더해 console error 0, overflow 0, local missing link 0, image load PASS를 확인했다.
+
+### 남은 이슈·블로커
+
+- Kakao 실제 로그인·callback·제품 세션, Toss test key 접근 정책 뒤 성공·중복 callback, GitHub self-hosted social job 실제 실행은 external blocked다.
+- GitHub job `128267072651`은 labels=`self-hosted`로 queued이고 runner listener는 online이다. 현재 gh token과 로컬 GitHub token 4종의 runner 관리 API는 모두 `HTTP 403 Resource not accessible by personal access token`이다. 이 출력은 관리 권한 부재 증거이지 job queue의 원인 확정 증거가 아니다. runner group의 public repository 접근은 미확인 후보로만 남긴다.
+
+### 다음에 칠 명령
+
+- `gh run view 42324947776 --repo 100B-Adventures/haenael-ge --json status,conclusion,jobs`
+- 외부 세션·권한이 실제로 바뀐 경우에만 `session-state.v2-goal-slices.md`의 Kakao·Toss 재개 명령을 따른다. 같은 로그인폼·403 조건을 반복 실행하지 않는다.
+
+### 검증했나
+
+- 검증됨: staging health SHA exact, social E2E 43/43, fixture 0, 결제 비활성 503, 데모 렌더, Goal terminal JSON.
+- 미검증: GitHub queue의 정확한 서버측 원인, Kakao 실제 성공, Toss 실제 성공·중복 callback, production 배포.
+
