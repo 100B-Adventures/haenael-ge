@@ -59,7 +59,8 @@ describe("GoalCoverPicker 단계별 실패", () => {
     openPicker();
     expect(screen.getByTestId("goal-cover-options")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "선택 닫기" })).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("배너 고르기")).toBeInTheDocument();
+    expect(screen.getByText("내 사진으로 배너 만들기")).toBeInTheDocument();
+    expect(screen.getByText("어떤 사진을 쓸까요")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "기기에서 사진 찾기" })).toBeInTheDocument();
     expect(screen.getByText("자동")).toBeInTheDocument();
   });

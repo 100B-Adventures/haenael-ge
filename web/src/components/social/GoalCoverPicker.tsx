@@ -92,15 +92,25 @@ export function GoalCoverPicker(
         </button>
       </div>
       {pickerOpen && (
-        <div id={`goal-cover-options-${goalId}`} data-testid="goal-cover-options">
+        <div
+          id={`goal-cover-options-${goalId}`}
+          className="goal-cover-options-panel"
+          data-testid="goal-cover-options"
+        >
+          <header className="social-detail-head goal-cover-options-head">
+            <button type="button" aria-label="배너 편집 닫기" onClick={() => setPickerOpen(false)}>‹</button>
+            <strong>내 사진으로 배너 만들기</strong>
+            <span aria-hidden="true" />
+          </header>
           <div className="cover-picker-heading">
-            <strong>{PRODUCT_COPY.TEXT_003}</strong><span>{PRODUCT_COPY.TEXT_004}</span>
+            <strong>어떤 사진을 쓸까요</strong><span>가로로 넓은 사진이 배너에 잘 맞아요.</span>
           </div>
           <GoalCoverUploadEditor
             busy={state === "uploading" || state === "saving"}
             inputTestId="goal-cover-file-input"
             onPrepared={upload}
           />
+          <p className="cover-preset-label">기본 배너</p>
           <div
             className="cover-preset-grid"
             role="group"

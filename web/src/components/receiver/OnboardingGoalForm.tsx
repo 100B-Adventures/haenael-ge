@@ -391,7 +391,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
   return (
     <>
       <div
-        className="w-full max-w-sm mx-auto px-[22px] py-10 flex flex-col gap-6"
+        className="w-full max-w-sm mx-auto px-[22px] py-6 flex flex-col gap-4"
         data-testid="onboarding-form"
       >
         {/* 헤더 */}
@@ -406,9 +406,9 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
 
         <div className="grid gap-2" aria-label="온보딩 진행 3단계" data-testid="onboarding-progress">
           <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
-            <span>목표 작성</span><span>2 / 3</span>
+            <span>목표 작성</span><span>3 중 2</span>
           </div>
-          <progress className="w-full accent-primary" max="3" value="2">2 / 3</progress>
+          <progress className="w-full" max="3" value="2">3 중 2</progress>
         </div>
 
         {/* 목표 입력 */}
@@ -510,6 +510,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             />
           </div>
           <GoalCoverUploadEditor
+            compact
             inputTestId="onboarding-cover-file-input"
             onPrepared={prepareCoverFile}
           />

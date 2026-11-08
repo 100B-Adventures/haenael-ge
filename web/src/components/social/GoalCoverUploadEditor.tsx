@@ -10,10 +10,12 @@ type LocalPhoto = { file: File; url: string };
 
 export function GoalCoverUploadEditor({
   busy = false,
+  compact = false,
   inputTestId,
   onPrepared,
 }: {
   busy?: boolean;
+  compact?: boolean;
   inputTestId?: string;
   onPrepared: (file: File) => void | Promise<void>;
 }) {
@@ -64,11 +66,13 @@ export function GoalCoverUploadEditor({
   }
 
   return (
-    <section className="cover-upload-editor" data-testid="goal-cover-upload-editor">
-      <div className="cover-picker-heading">
-        <strong>내 사진</strong>
-        <span>선택한 사진만 기기 안에서 미리 보여요.</span>
-      </div>
+    <section className={`cover-upload-editor${compact ? " is-compact" : ""}`} data-testid="goal-cover-upload-editor">
+      {!compact && (
+        <div className="cover-picker-heading">
+          <strong>내 사진</strong>
+          <span>선택한 사진만 기기 안에서 미리 보여요.</span>
+        </div>
+      )}
       <input
         ref={inputRef}
         type="file"
@@ -81,12 +85,12 @@ export function GoalCoverUploadEditor({
           event.currentTarget.value = "";
         }}
       />
-      {photos.length === 0 ? (
+      {photos.length === 0 && !compact ? (
         <div className="cover-upload-empty">
           <strong>아직 고른 사진이 없어요</strong>
           <span>사진을 고르면 배너에서 어떻게 보이는지 바로 확인해요.</span>
         </div>
-      ) : (
+      ) : photos.length > 0 ? (
         <>
           <div className="cover-local-library" aria-label="선택한 내 사진">
             {photos.map((photo, index) => (
@@ -137,7 +141,7 @@ export function GoalCoverUploadEditor({
             </button>
           </div>
         </>
-      )}
+      ) : null}
       <button
         type="button"
         className="cover-picker-upload-entry"
@@ -146,7 +150,7 @@ export function GoalCoverUploadEditor({
       >
         <span aria-hidden="true">↑</span>기기에서 사진 찾기
       </button>
-      <p className="social-muted">10MB 이하 사진을 고르면 배너 비율로 잘라 기존 5MB 업로드 계약에 맞춰요.</p>
+      {!compact && <p className="social-muted">10MB 이하 사진을 고르면 배너 비율로 잘라 기존 5MB 업로드 계약에 맞춰요.</p>}
       {error && <p className="social-error" role="alert">{error}</p>}
     </section>
   );

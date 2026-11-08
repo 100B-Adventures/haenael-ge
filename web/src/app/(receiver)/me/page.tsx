@@ -325,18 +325,7 @@ export default async function ReceiverHomePage({
           >{pendingCashout ? "환전 진행 보기" : "클로버 환전하기"}</Link>
         </div>
 
-        <Collapsible
-          className="mb-5 rounded-md border border-border bg-card p-4"
-          policy={{ auxiliary: true, exceedsLimit: true, hasCollapsedContext: true }}
-          controlsId="primary-goal-detail-content"
-          toggleLabel="대표 목표 상세 관리"
-          collapsedContent={(
-            <p className="text-sm font-extrabold text-foreground">대표 목표 상세 관리</p>
-          )}
-          expandedContent={(
-            <>
-              <p className="text-sm font-extrabold text-foreground">대표 목표 상세 관리</p>
-              <div id="primary-goal-detail-content" className="mt-4" data-testid="primary-goal-details">
+        <section className="mb-5" data-testid="primary-goal-details">
 
         {/* 목표 제목 */}
         <p className="receiver-goal-title mb-2" data-testid="goal-title">
@@ -446,10 +435,7 @@ export default async function ReceiverHomePage({
           className="block w-full rounded-md border border-border bg-card p-4 text-center text-[15px] font-extrabold tracking-[-0.2px] text-foreground"
           data-testid="wordmap-view-cta"
         >{PRODUCT_COPY.TEXT_013}</Link>
-              </div>
-            </>
-          )}
-        />
+        </section>
 
         {/* 지난 목표 — 마감(due_date < 오늘) 목표를 접어서 둔다(설계 §4.5). */}
         {pastGoals.length > 0 && (

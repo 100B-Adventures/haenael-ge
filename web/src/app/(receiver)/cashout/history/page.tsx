@@ -40,7 +40,7 @@ export default async function CashoutHistoryPage() {
 
       <div className="mt-5 grid grid-cols-3 gap-2" data-testid="cashout-history-summary">
         <div className="rounded-md border border-border bg-card p-3 text-center">
-          <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_002}</p>
+          <p className="whitespace-nowrap text-[11px] text-[var(--muted-color)]">누적 입금</p>
           <p className="mt-1 text-base font-extrabold text-accent-foreground sm:text-xl">
             {formatCashoutKrw(paidTotal)}
           </p>

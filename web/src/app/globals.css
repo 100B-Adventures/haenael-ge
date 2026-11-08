@@ -697,17 +697,22 @@
   }
 
   .business-info {
-    display: grid;
-    gap: var(--sp-3);
+    display: block;
     margin-top: var(--sp-4);
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
     background: var(--card);
-    padding: var(--sp-4);
+    overflow: hidden;
   }
   .business-info div {
     display: grid;
-    gap: var(--sp-1);
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: var(--sp-2);
+    padding: var(--sp-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .business-info div:last-child {
+    border-bottom: 0;
   }
   .business-info dt {
     color: var(--muted-color);
@@ -716,8 +721,10 @@
   }
   .business-info dd {
     color: var(--foreground);
-    font-size: 1rem;
-    line-height: 1.5;
+    min-width: 0;
+    font-size: var(--text-label-small);
+    font-weight: 700;
+    line-height: 1.6;
     overflow-wrap: anywhere;
   }
   .business-registration-status {
@@ -1095,6 +1102,51 @@
 
   .goal-cover-picker {
     min-width: 0;
+  }
+  .goal-cover-options-panel {
+    position: fixed;
+    z-index: 40;
+    inset: 0;
+    overflow-y: auto;
+    width: 100%;
+    max-width: var(--receiver-native-width);
+    margin-inline: auto;
+    background: var(--background);
+    padding: var(--space-mobile-gutter);
+  }
+  .goal-cover-options-head {
+    margin-bottom: var(--sp-4);
+  }
+  .goal-cover-options-head button {
+    display: inline-flex;
+    min-width: var(--tap-min-size);
+    min-height: var(--tap-min-size);
+    align-items: center;
+    justify-content: center;
+    color: var(--foreground);
+    font-size: 1.75rem;
+  }
+  .cover-preset-label {
+    margin-top: var(--sp-4);
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+    font-weight: 800;
+  }
+  [data-testid="onboarding-progress"] progress {
+    height: var(--sp-2);
+    overflow: hidden;
+    border-radius: 9999px;
+    color: var(--primary);
+    background: var(--muted);
+  }
+  [data-testid="onboarding-progress"] progress::-webkit-progress-bar {
+    background: var(--muted);
+  }
+  [data-testid="onboarding-progress"] progress::-webkit-progress-value {
+    background: var(--primary);
+  }
+  [data-testid="onboarding-progress"] progress::-moz-progress-bar {
+    background: var(--primary);
   }
   .goal-cover-picker-preview {
     position: relative;

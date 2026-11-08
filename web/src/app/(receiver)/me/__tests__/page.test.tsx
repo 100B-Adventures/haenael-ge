@@ -1,7 +1,7 @@
 // (receiver)/me/page.test.tsx — 개별 클로버 개수(🍀 N) 노출 + 익명도 노출 검증.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: vi.fn(),
@@ -25,10 +25,6 @@ vi.mock("next/navigation", () => ({
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const cheerIlike = vi.fn();
-
-function expandPrimaryGoalDetails() {
-  fireEvent.click(screen.getByRole("button", { name: "대표 목표 상세 관리 펼치기" }));
-}
 
 function chainable<T>(result: T) {
   const obj: Record<string, unknown> & PromiseLike<T> = {
@@ -155,8 +151,6 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
       const { default: ReceiverHomePage } = await import("../page");
       const element = await ReceiverHomePage();
       render(element);
-      expandPrimaryGoalDetails();
-
       expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 5");
       expect(
         screen.getByRole("group", { name: "클로버 5개, 1번째 응원, 나만 보임" }),
@@ -183,8 +177,6 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     const { default: ReceiverHomePage } = await import("../page");
     const element = await ReceiverHomePage();
     render(element);
-    expandPrimaryGoalDetails();
-
     expect(screen.getByText("익명의 누군가")).toBeInTheDocument();
     expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 3");
     expect(
@@ -225,8 +217,6 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
-    expandPrimaryGoalDetails();
-
     expect(screen.getByTestId("goal-reason")).toHaveTextContent("건강해지려고");
     expect(screen.getByTestId("open-goal-edit-sheet")).toBeInTheDocument();
   });
@@ -275,12 +265,24 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage({ searchParams: Promise.resolve({ q: "121번째" }) }));
-    expandPrimaryGoalDetails();
-
     expect(cheerIlike).toHaveBeenCalledWith("display_name", "%121번째%");
     expect(cheerIlike).toHaveBeenCalledWith("message", "%121번째%");
     expect(screen.getByTestId("receiver-cheer-list")).toHaveTextContent("121번째 응원 메시지");
     expect(screen.getByTestId("cheer-overflow-summary")).toHaveTextContent("1개 찾았어요");
+  });
+
+  it("TC-OV-02 빈 결과: GET 검색 뒤 0건 안내와 검색 초기화를 접기 없이 바로 노출한다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678", { reached_threshold: false }, 121) as never,
+    );
+
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage({ searchParams: Promise.resolve({ q: "없는응원" }) }));
+
+    expect(screen.getByTestId("primary-goal-details")).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent("검색 결과가 없어요");
+    expect(screen.getByRole("link", { name: "전체 목록" })).toHaveAttribute("href", "/me");
+    expect(screen.queryByRole("button", { name: /대표 목표 상세 관리/ })).not.toBeInTheDocument();
   });
 
   it("TC-OV-03 거절 경로: 검색 필터 메타문자만 들어오면 서버 검색을 실행하지 않는다", async () => {
@@ -306,8 +308,6 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
-    expandPrimaryGoalDetails();
-
     expect(screen.getByTestId("wordmap-mini-preview").querySelectorAll("span")).toHaveLength(6);
     expect(screen.getByTestId("wordmap-overflow-summary")).toHaveTextContent(
       "6개 표시 · 94개는 전체 워드맵에서 확인",

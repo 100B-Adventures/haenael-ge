@@ -135,8 +135,8 @@ export default async function CashoutStatusPage() {
           body: cashout.processing_note ?? "계좌 정보를 다시 확인해 주세요.",
         }
       : {
-          box: "border-amber-line bg-amber-soft",
-          title: "text-amber-ink",
+          box: "border-primary/30 bg-accent",
+          title: "text-accent-foreground",
           heading: checking ? "계좌를 확인하고 있어요" : "신청이 접수됐어요",
           body: checking
             ? "담당자가 입금 계좌를 확인 중이에요."
@@ -163,6 +163,13 @@ export default async function CashoutStatusPage() {
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               {banner.body}
             </p>
+            {!isPaid && !isRejected && (
+              <p className="mt-3 text-xs leading-relaxed text-foreground" data-testid="cashout-hero-payment">
+                {cashoutBankName(cashout.bank_code)} {cashout.account_masked} ({cashout.account_holder})<br />
+                <strong className="text-lg text-accent-foreground">{formatCashoutKrw(cashout.net_krw)}</strong>
+                {!isPaid && "을 1~3영업일 안에 보내드릴게요."}
+              </p>
+            )}
           </div>
 
           <div className="mt-3 rounded-md border border-border bg-card p-4">

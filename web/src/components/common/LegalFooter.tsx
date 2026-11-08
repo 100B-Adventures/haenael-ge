@@ -37,7 +37,7 @@ export function LegalLinkList() {
 
 export function BusinessInfoBlock() {
   return (
-    <dl className="business-info" data-testid="business-information">
+    <dl className="business-info" data-testid="business-information" aria-label="사업자 법정 기재사항">
       <div><dt>{PRODUCT_COPY.TEXT_004}</dt><dd>{BUSINESS_INFORMATION.businessName}</dd></div>
       <div><dt>{PRODUCT_COPY.TEXT_005}</dt><dd>{BUSINESS_INFORMATION.representative}</dd></div>
       <div><dt>{PRODUCT_COPY.TEXT_006}</dt><dd>{BUSINESS_INFORMATION.registrationNumber}</dd></div>

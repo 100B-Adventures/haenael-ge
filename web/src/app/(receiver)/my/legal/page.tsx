@@ -1,6 +1,6 @@
 import Link from "next/link";
 // D-040 route implementation token: my/legal
-import { BusinessInfoBlock, LegalLinkList } from "@/components/common/LegalFooter";
+import { BusinessInfoBlock } from "@/components/common/LegalFooter";
 import { ReceiverPageShell } from "@/components/receiver/ReceiverShell";
 import { COMMERCE_REGISTRATION } from "@/lib/legal/exposure";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-my-legal-page";
@@ -14,7 +14,6 @@ export default function BusinessInformationPage() {
         <span aria-hidden="true" />
       </header>
       <p className="social-description">{PRODUCT_COPY.TEXT_002}</p>
-      <LegalLinkList />
       <BusinessInfoBlock />
       <section
         className="business-registration-status"
