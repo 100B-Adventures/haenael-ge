@@ -1,3 +1,9 @@
+## 2026-11-08 19:4x KST 인계 (회장 결정 전달)
+
+- 회장 11-08 19:3x(OD-haenael-20261108-cheer-history): 과거 응원 기록 섹션 없앰, 응원 주고받은 회원은 모두 친구, 친구 상세에서 주고받은 과거 응원을 보여 줌. 원문과 정본 경로를 Codex Goal 창(pane %82)에 전달, 대기열 진입 관찰.
+- 손님 응원 계정 연결: 확실한 방법 없음(attribution 은 로그인 신규 주문만, supporter_ci 를 쓰는 코드 0, staging supporter_ci 0/0·member.ci 0/5). 약한 경로는 payment.pg_customer_key(브라우저 localStorage 임의 키) 추정 연결뿐. 처리안 (가)마이페이지 받은 응원에만 / (나)화면 제외 / (다)기기 키 추정 연결을 컨트롤러(claude-31)에 올림, 추천 (가).
+- 다음: 컨트롤러가 회장 판정을 받아 Goal 에 전달. 이 세션은 개발하지 않는다.
+
 ## 2026-11-08 19:2x KST 인계 (루트 저장소 정리)
 
 - 무엇을 했나: 하네스 감사 요청으로 루트 저장소 미커밋 3건 정리. docs/qa/qa-tracker.md·design-conformance-matrix.md 는 커밋 9f0855a(origin/main 포함)와 바이트 동일해 버림. .goal/demos.md(Goal 4회차 복구 기록)는 사본이 없어 커밋 09560b2 로 보존. staging 별칭 변경 이력을 이 브랜치 wiki/ops/인프라.md 에도 기록.
