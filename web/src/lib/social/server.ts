@@ -1,6 +1,7 @@
 import "server-only";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import type {
+  FriendCheerHistoryItem,
   FriendGoalDetail,
   FriendGoalsResponse,
   SocialGoal,
@@ -165,4 +166,80 @@ export async function resolveFriendDetailCover(
     viewerMemberId,
   );
   return { ...detail, cover_url: covers.get(detail.goal_id) ?? null };
+}
+
+export async function resolveFriendCheerHistory(
+  viewerMemberId: string,
+  friendMemberId: string,
+): Promise<FriendCheerHistoryItem[]> {
+  const service = createServiceRoleClient();
+  const { data: relations, error: relationError } = await service
+    .from("friend_connection")
+    .select("member_low_id,member_high_id,status")
+    .eq("status", "ACTIVE")
+    .or(
+      `member_low_id.eq.${viewerMemberId},member_high_id.eq.${viewerMemberId}`,
+    );
+  if (relationError) throw new Error("friend_history_access_check_failed");
+  const activeFriend = (relations ?? []).some((relation) =>
+    otherMemberId(relation, viewerMemberId) === friendMemberId
+  );
+  if (!activeFriend) throw new Error("friend_goal_not_found");
+
+  const { data: goals, error: goalError } = await service
+    .from("goal")
+    .select("id,member_id")
+    .in("member_id", [viewerMemberId, friendMemberId])
+    .in("visibility", ["PUBLIC", "FRIENDS"])
+    .is("deleted_at", null)
+    .neq("status", "DELETED");
+  if (goalError) throw new Error("friend_history_lookup_failed");
+  const goalOwnerById = new Map((goals ?? []).map((goal) => [goal.id, goal.member_id]));
+  if (goalOwnerById.size === 0) return [];
+
+  const { data: attributions, error: attributionError } = await service
+    .from("social_cheer_member_attribution")
+    .select("cheer_id,supporter_member_id")
+    .in("supporter_member_id", [viewerMemberId, friendMemberId]);
+  if (attributionError) throw new Error("friend_history_lookup_failed");
+  const supporterByCheerId = new Map(
+    (attributions ?? []).map((row) => [row.cheer_id, row.supporter_member_id]),
+  );
+  if (supporterByCheerId.size === 0) return [];
+
+  const { data: cheers, error: cheerError } = await service
+    .from("cheer")
+    .select("id,goal_id,message,created_at,is_anonymous")
+    .in("id", [...supporterByCheerId.keys()])
+    .in("goal_id", [...goalOwnerById.keys()])
+    .eq("status", "CONFIRMED")
+    .is("deleted_at", null)
+    .eq("is_welcome", false)
+    .eq("is_anonymous", false)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(20);
+  if (cheerError) throw new Error("friend_history_lookup_failed");
+
+  return (cheers ?? []).flatMap((cheer): FriendCheerHistoryItem[] => {
+    const supporterId = supporterByCheerId.get(cheer.id);
+    const ownerId = goalOwnerById.get(cheer.goal_id);
+    if (supporterId === viewerMemberId && ownerId === friendMemberId) {
+      return [{
+        cheer_id: cheer.id,
+        message: cheer.message,
+        created_at: cheer.created_at,
+        direction: "SENT",
+      }];
+    }
+    if (supporterId === friendMemberId && ownerId === viewerMemberId) {
+      return [{
+        cheer_id: cheer.id,
+        message: cheer.message,
+        created_at: cheer.created_at,
+        direction: "RECEIVED",
+      }];
+    }
+    return [];
+  });
 }

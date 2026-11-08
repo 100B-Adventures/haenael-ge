@@ -8,7 +8,10 @@ const { createServiceRoleClient } = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/supabase/service", () => ({ createServiceRoleClient }));
 
-import { resolveFriendDetailCover } from "../server";
+import {
+  resolveFriendCheerHistory,
+  resolveFriendDetailCover,
+} from "../server";
 
 const VIEWER_ID = "51000000-0000-0000-0000-000000000001";
 const FRIEND_ID = "51000000-0000-0000-0000-000000000002";
@@ -165,5 +168,121 @@ describe("친구 커버 서버 경계", () => {
 
     await expect(resolveFriendDetailCover(detail, VIEWER_ID, FRIEND_ID))
       .rejects.toThrow("friend_cover_signing_failed");
+  });
+});
+
+function historyServiceFixture({ active = true }: { active?: boolean } = {}) {
+  const cheerEq = vi.fn();
+  const goalIn = vi.fn();
+  const from = vi.fn((table: string) => {
+    if (table === "friend_connection") {
+      return {
+        select: () => ({
+          eq: () => ({
+            or: async () => ({
+              data: active ? [{
+                member_low_id: VIEWER_ID,
+                member_high_id: FRIEND_ID,
+                status: "ACTIVE",
+              }] : [],
+              error: null,
+            }),
+          }),
+        }),
+      };
+    }
+    if (table === "goal") {
+      const result = {
+        data: [
+          { id: 17, member_id: FRIEND_ID },
+          { id: 18, member_id: VIEWER_ID },
+        ],
+        error: null,
+      };
+      const builder = {
+        in: goalIn,
+        is: vi.fn(),
+        neq: vi.fn(async () => result),
+      };
+      goalIn.mockReturnValue(builder);
+      builder.is.mockReturnValue(builder);
+      return {
+        select: () => builder,
+      };
+    }
+    if (table === "social_cheer_member_attribution") {
+      return {
+        select: () => ({
+          in: async () => ({
+            data: [
+              { cheer_id: 101, supporter_member_id: VIEWER_ID },
+              { cheer_id: 102, supporter_member_id: FRIEND_ID },
+            ],
+            error: null,
+          }),
+        }),
+      };
+    }
+    if (table === "cheer") {
+      const result = {
+        data: [
+          { id: 102, goal_id: 18, message: "받은 응원", created_at: "2026-11-08T12:00:00Z", is_anonymous: false },
+          { id: 101, goal_id: 17, message: "보낸 응원", created_at: "2026-11-07T12:00:00Z", is_anonymous: false },
+        ],
+        error: null,
+      };
+      const builder = {
+        in: vi.fn(),
+        eq: cheerEq,
+        is: vi.fn(),
+        order: vi.fn(),
+        limit: vi.fn(async () => result),
+      };
+      builder.in.mockReturnValue(builder);
+      builder.eq.mockReturnValue(builder);
+      builder.is.mockReturnValue(builder);
+      builder.order.mockReturnValue(builder);
+      return { select: () => builder };
+    }
+    throw new Error(`unexpected table: ${table}`);
+  });
+  return { client: { from }, from, cheerEq, goalIn };
+}
+
+describe("친구 응원 이력 서버 경계", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("D050 정상: 활성 친구의 회원 귀속 양방향 응원만 방향과 함께 반환한다", async () => {
+    const fixture = historyServiceFixture();
+    createServiceRoleClient.mockReturnValue(fixture.client);
+
+    const result = await resolveFriendCheerHistory(VIEWER_ID, FRIEND_ID);
+
+    expect(result).toEqual([
+      {
+        cheer_id: 102,
+        message: "받은 응원",
+        created_at: "2026-11-08T12:00:00Z",
+        direction: "RECEIVED",
+      },
+      {
+        cheer_id: 101,
+        message: "보낸 응원",
+        created_at: "2026-11-07T12:00:00Z",
+        direction: "SENT",
+      },
+    ]);
+    expect(fixture.goalIn).toHaveBeenCalledWith("visibility", ["PUBLIC", "FRIENDS"]);
+    expect(fixture.cheerEq).toHaveBeenCalledWith("is_anonymous", false);
+    expect(JSON.stringify(result)).not.toMatch(/supporter_member_id|clover_amount|payment/);
+  });
+
+  it("D050 거절: 활성 친구 관계가 아니면 응원과 계정 존재를 숨긴다", async () => {
+    const fixture = historyServiceFixture({ active: false });
+    createServiceRoleClient.mockReturnValue(fixture.client);
+
+    await expect(resolveFriendCheerHistory(VIEWER_ID, FRIEND_ID))
+      .rejects.toThrow("friend_goal_not_found");
+    expect(fixture.from).not.toHaveBeenCalledWith("social_cheer_member_attribution");
   });
 });

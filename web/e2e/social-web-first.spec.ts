@@ -4737,7 +4737,7 @@ test.describe("V2 web-first social slice", () => {
     expect(attribution?.supporter_member_id).toBe(ids.acceptA);
   });
 
-  test("G4-FRIEND-HISTORY-01 회원 귀속이 없는 과거 응원은 계정을 추정하지 않고 기록으로 보인다", async ({ browser }) => {
+  test("G4-FRIEND-HISTORY-01 친구 상세은 회원 이력만, 손님 응원은 마이·홈에만 표시한다", async ({ browser }) => {
     const owner = createClient(SUPABASE_URL, ANON_KEY);
     const { error: authError } = await owner.auth.signInWithPassword({
       email: emails.owner,
@@ -4756,15 +4756,50 @@ test.describe("V2 web-first social slice", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     const response = await page.goto("/friends", { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);
-    await expect(page.getByTestId("unlinked-cheer-history")).toBeVisible();
-    await expect(page.getByTestId("unlinked-cheer-record")).toHaveCount(
-      payload.items.length,
+    await expect.poll(() => page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      ANALYTICS_CONSENT_KEY,
+    )).toBe("denied");
+    const consentDialog = page.getByRole("dialog", { name: "분석 도구 동의" });
+    await expect(consentDialog).toHaveCount(0);
+    await expect(page.getByTestId("friend-card")).toHaveCount(3);
+    await expect(page.getByTestId("unlinked-cheer-history")).toHaveCount(0);
+    await expect(page.getByTestId("unlinked-cheer-record")).toHaveCount(0);
+    await expect(page.getByTestId("friends-page")).not.toContainText("과거 응원 기록");
+    await expect(page.getByTestId("friends-page")).not.toContainText(ownerLongMessage);
+
+    const friendDetailPath = `/friends/${ids.friend}?goal=${friendPublicGoal}`;
+    const friendLink = page.locator(
+      `[data-testid="friend-goal-link"][href="${friendDetailPath}"]`,
     );
-    await expect(page.getByTestId("unlinked-cheer-history"))
-      .toContainText("친구 프로필과는 분리");
-    // 한국어 안내문은 어절 중간에서 줄을 바꾸지 않는다(독립 검증 D2: "추정하지 않" / "아").
-    const historyNote = page.getByTestId("unlinked-cheer-history").locator(":scope > p").first();
-    await expect(historyNote).toHaveCSS("word-break", "keep-all");
+    await expect(friendLink).toHaveCount(1);
+    await page.waitForLoadState("networkidle");
+    await friendLink.click();
+    await expect(page).toHaveURL(new RegExp(`${ids.friend}\\?goal=${friendPublicGoal}$`));
+    await expect(page.getByTestId("friend-detail-page")).toBeVisible();
+    const friendHistory = page.getByTestId("friend-cheer-history");
+    await expect(friendHistory).toBeVisible();
+    await expect(friendHistory.getByTestId("friend-cheer-history-item")).toHaveCount(2);
+    await expect(friendHistory.locator('[data-direction="SENT"]')).toHaveCount(1);
+    await expect(friendHistory.locator('[data-direction="RECEIVED"]')).toHaveCount(1);
+    await expect(friendHistory.locator('[data-direction="SENT"]')).toContainText(friendLongMessage);
+    await expect(friendHistory.locator('[data-direction="RECEIVED"]')).toContainText(friendLongMessage);
+    await expect(friendHistory).not.toContainText(ownerLongMessage);
+    await expect(friendHistory).not.toContainText("응원자1");
+
+    await page.goto("/my", { waitUntil: "domcontentloaded" });
+    const received = page.locator(".my-cheer-list");
+    await expect(received).toContainText("익명의 누군가");
+    await expect(received).toContainText(ownerLongMessage);
+
+    await page.goto("/me", { waitUntil: "domcontentloaded" });
+    const ownerSummary = page.getByTestId("home-goal-list")
+      .getByTestId("cheer-summary-bar")
+      .filter({ hasText: "23명이 응원했어요" });
+    await expect(ownerSummary).toBeVisible();
+    await expect(ownerSummary).toContainText(ownerLongMessage);
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("goal-management-wordmap")).toContainText("남기지만");
     await context.close();
   });
 
@@ -4806,7 +4841,7 @@ test.describe("V2 web-first social slice", () => {
     });
     expect(authError).toBeNull();
     const rpcSamples: Array<Record<string, unknown>> = [];
-    for (const rpc of ["my_social_dashboard", "my_friend_page"] as const) {
+    for (const rpc of ["my_social_dashboard", "my_friend_goals"] as const) {
       for (let pass = 1; pass <= 3; pass += 1) {
         const started = performance.now();
         const { error } = await owner.rpc(rpc as never);

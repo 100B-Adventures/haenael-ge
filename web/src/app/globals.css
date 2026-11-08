@@ -3516,43 +3516,6 @@
     border-radius: var(--radius-card);
     background: var(--card);
   }
-  .friends-history {
-    margin-top: var(--sp-5);
-  }
-  .friends-history-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 0 0.125rem 0.375rem;
-    color: var(--foreground);
-    font-size: 0.875rem;
-  }
-  .friends-history-head span {
-    color: var(--muted-color);
-    font-size: var(--text-label-small);
-    font-weight: 700;
-  }
-  .friends-history > p {
-    margin: 0 0.125rem 0.75rem;
-    color: var(--muted-color);
-    font-size: var(--text-label-small);
-    line-height: 1.5;
-    word-break: keep-all;
-  }
-  .friend-history-main {
-    align-items: center;
-  }
-  .friend-history-badge {
-    display: inline-flex;
-    min-height: 1.75rem;
-    align-items: center;
-    border-radius: 9999px;
-    padding: 0.25rem 0.5625rem;
-    color: var(--amber-ink);
-    background: var(--amber-soft);
-    line-height: 1;
-  }
-
   .friends-sparse-next {
     display: grid;
     min-height: 13rem;
@@ -3698,6 +3661,9 @@
     padding: var(--sp-4);
     border-radius: var(--radius-card);
     background: var(--card);
+  }
+  .friend-cheer-history {
+    margin-top: var(--sp-4);
   }
   .friend-list-progress {
     display: block;

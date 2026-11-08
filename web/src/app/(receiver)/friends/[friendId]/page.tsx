@@ -8,7 +8,10 @@ import {
 } from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { asFriendGoalDetail, asFriendGoals } from "@/lib/social/contracts";
-import { resolveFriendDetailCover } from "@/lib/social/server";
+import {
+  resolveFriendCheerHistory,
+  resolveFriendDetailCover,
+} from "@/lib/social/server";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-friends-friendid-page";
 
 export const dynamic = "force-dynamic";
@@ -37,8 +40,12 @@ export default async function FriendDetailPage(
   );
   if (!friend) notFound();
   let detail;
+  let cheerHistory;
   try {
-    detail = await resolveFriendDetailCover(parsed, user.id, friendId);
+    [detail, cheerHistory] = await Promise.all([
+      resolveFriendDetailCover(parsed, user.id, friendId),
+      resolveFriendCheerHistory(user.id, friendId),
+    ]);
   } catch (coverError) {
     if (
       coverError instanceof Error &&
@@ -61,6 +68,7 @@ export default async function FriendDetailPage(
         recentMessage={friend.recent_message}
         detail={detail}
         friendGoals={friend.goals}
+        cheerHistory={cheerHistory}
       />
       <BackHomeLink label={PRODUCT_COPY.TEXT_003} href="/friends" />
     </ReceiverPageShell>

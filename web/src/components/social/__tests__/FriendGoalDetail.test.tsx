@@ -62,6 +62,44 @@ it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-onl
     .toHaveAttribute("href", "/invite");
 });
 
+it("G4-FRIEND-HISTORY 친구 상세는 회원끼리 주고받은 문구·날짜·방향을 표시한다", () => {
+  render(
+    <FriendGoalDetail
+      friendId="friend-a"
+      nickname="서연"
+      relationshipDirection="MUTUAL"
+      detail={primary}
+      friendGoals={[primary]}
+      cheerHistory={[
+        {
+          cheer_id: 11,
+          message: "끝까지 같이 해내자",
+          created_at: "2026-11-08T12:00:00Z",
+          direction: "RECEIVED",
+        },
+        {
+          cheer_id: 10,
+          message: "오늘도 한 걸음 가자",
+          created_at: "2026-11-07T12:00:00Z",
+          direction: "SENT",
+        },
+      ]}
+    />,
+  );
+
+  const history = screen.getByTestId("friend-cheer-history");
+  expect(history).toHaveTextContent("주고받은 응원");
+  expect(screen.getAllByTestId("friend-cheer-history-item")).toHaveLength(2);
+  expect(history).toHaveTextContent("서연에게 받은 응원");
+  expect(history).toHaveTextContent("끝까지 같이 해내자");
+  expect(history).toHaveTextContent("2026년 11월 8일");
+  expect(history).toHaveTextContent("서연에게 보낸 응원");
+  expect(history).toHaveTextContent("오늘도 한 걸음 가자");
+  expect(history).toHaveTextContent("2026년 11월 7일");
+  expect(history.querySelectorAll('[data-direction="RECEIVED"]')).toHaveLength(1);
+  expect(history.querySelectorAll('[data-direction="SENT"]')).toHaveLength(1);
+});
+
 describe("친구 상세 응원자 익명 집계", () => {
   it.each([
     { count: 0, icons: 0, overflow: null },

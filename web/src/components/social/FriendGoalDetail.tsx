@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Clover, Plus } from "lucide-react";
 import { useState } from "react";
 import type {
+  FriendCheerHistoryItem,
   FriendGoalDetail as FriendGoalDetailData,
   RelationshipDirection,
   SocialGoal,
@@ -16,6 +17,7 @@ import { Wordmap } from "@/components/goal/Wordmap";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { ClampText } from "@/components/common/ClampText";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoaldetail";
+import { formatDate } from "@/lib/utils/format";
 
 function objectParticle(name: string) {
   const code = name.codePointAt(name.length - 1) ?? 0;
@@ -25,7 +27,7 @@ function objectParticle(name: string) {
 }
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, relationshipDirection, recentMessage, detail, friendGoals }: {
+  { friendId, nickname, profileImage, relationshipDirection, recentMessage, detail, friendGoals, cheerHistory = [] }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
@@ -33,6 +35,7 @@ export function FriendGoalDetail(
     recentMessage?: string | null;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
+    cheerHistory?: FriendCheerHistoryItem[];
   },
 ) {
   const router = useRouter();
@@ -115,6 +118,41 @@ export function FriendGoalDetail(
           <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>
             {recentMessage}
           </ClampText>
+        </section>
+      )}
+      {cheerHistory.length > 0 && (
+        <section className="friend-cheer-history" data-testid="friend-cheer-history">
+          <h2 className="my-section-title">{PRODUCT_COPY.TEXT_017}</h2>
+          <div className="my-cheer-list">
+            {cheerHistory.map((cheer) => {
+              const sent = cheer.direction === "SENT";
+              return (
+                <article
+                  key={cheer.cheer_id}
+                  data-direction={cheer.direction}
+                  data-testid="friend-cheer-history-item"
+                >
+                  <span className="my-cheer-avatar" aria-hidden="true">
+                    {sent ? "↑" : "↓"}
+                  </span>
+                  <div>
+                    <strong>
+                      {sent
+                        ? `${displayName}${PRODUCT_COPY.TEXT_018}`
+                        : `${displayName}${PRODUCT_COPY.TEXT_019}`}
+                    </strong>
+                    <ClampText className="my-cheer-message">
+                      {`💬 ${cheer.message || PRODUCT_COPY.TEXT_020}`}
+                    </ClampText>
+                  </div>
+                  <div className="my-cheer-status">
+                    <strong>{sent ? PRODUCT_COPY.TEXT_021 : PRODUCT_COPY.TEXT_022}</strong>
+                    <small>{formatDate(cheer.created_at)}</small>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
       )}
       <Link href="/invite" className="friend-reinvite">

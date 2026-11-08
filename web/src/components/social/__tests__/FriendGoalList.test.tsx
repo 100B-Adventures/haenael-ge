@@ -37,7 +37,6 @@ it("CL-03 친구 목록의 최근 응원은 ClampText의 2줄 정책을 쓰고 �
           goals,
         },
       ]}
-      history={[]}
     />,
   );
 
@@ -91,7 +90,7 @@ it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전
     recent_message: null,
     goals,
   }));
-  render(<FriendGoalList friends={friends} history={[]} />);
+  render(<FriendGoalList friends={friends} />);
   expect(
     screen.getByText((_, element) =>
       Boolean(
@@ -111,7 +110,7 @@ it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전
 });
 
 it("CT-FRIEND-02 친구 0명은 실제 초대 절차와 CTA를 표시한다", () => {
-  render(<FriendGoalList friends={[]} history={[]} />);
+  render(<FriendGoalList friends={[]} />);
   expect(screen.getByText("아직 친구가 없어요")).toBeInTheDocument();
   expect(screen.getAllByRole("listitem")).toHaveLength(3);
   expect(screen.getByRole("link", { name: "친구 초대하기" })).toHaveAttribute(
@@ -120,30 +119,22 @@ it("CT-FRIEND-02 친구 0명은 실제 초대 절차와 CTA를 표시한다", ()
   );
 });
 
-it("G4-FRIEND-HISTORY 회원 귀속이 없는 과거 응원은 친구 계정과 분리해 표시한다", () => {
+it("G4-FRIEND-HISTORY 친구 목록에는 별도 과거 응원 섹션이 없다", () => {
   render(
     <FriendGoalList
-      friends={[]}
-      history={[{
-        record_key: "record-a",
-        display_name: "과거 응원자",
-        message: "끝까지 응원할게",
-        created_at: "2026-08-25T12:00:00Z",
-        is_anonymous: false,
-        direction: "CHEERED_ME",
+      friends={[{
+        friend_member_id: "friend-a",
+        nickname: "서연",
+        profile_image: null,
+        relationship_direction: "MUTUAL",
+        recent_message: "끝까지 응원할게",
+        goals,
       }]}
     />,
   );
 
-  expect(screen.getByTestId("unlinked-cheer-history")).toHaveTextContent(
-    "과거 응원 기록",
-  );
-  expect(screen.getByTestId("unlinked-cheer-record")).toHaveTextContent(
-    "과거 응원자",
-  );
-  expect(screen.getByTestId("unlinked-cheer-record")).toHaveTextContent(
-    "끝까지 응원할게",
-  );
+  expect(screen.queryByTestId("unlinked-cheer-history")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("unlinked-cheer-record")).not.toBeInTheDocument();
   expect(screen.queryByTestId("friends-empty")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("friend-card")).not.toBeInTheDocument();
+  expect(screen.getByTestId("friend-card")).toBeInTheDocument();
 });

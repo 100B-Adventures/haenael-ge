@@ -2,21 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, UserPlus } from "lucide-react";
 import { ClampText } from "@/components/common/ClampText";
-import type {
-  SocialFriend,
-  UnlinkedCheerHistoryItem,
-} from "@/lib/social/contracts";
+import type { SocialFriend } from "@/lib/social/contracts";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoallist";
 
 export function FriendGoalList({
   friends,
-  history = [],
 }: {
   friends: SocialFriend[];
-  history?: UnlinkedCheerHistoryItem[];
 }) {
-  if (friends.length === 0 && history.length === 0) {
+  if (friends.length === 0) {
     return (
       <section className="friends-cold-start" data-testid="friends-empty">
         <span className="friends-cold-icon" aria-hidden="true">
@@ -150,44 +145,6 @@ export function FriendGoalList({
           );
         })}
       </div>}
-      {history.length > 0 && (
-        <section className="friends-history" data-testid="unlinked-cheer-history">
-          <div className="friends-history-head">
-            <strong>{PRODUCT_COPY.TEXT_018}</strong>
-            <span>{history.length}{PRODUCT_COPY.TEXT_019}</span>
-          </div>
-          <p>{PRODUCT_COPY.TEXT_020}</p>
-          <div className="friends-list-card">
-            {history.map((item) => {
-              const nickname = item.is_anonymous || !item.display_name
-                ? PRODUCT_COPY.TEXT_021
-                : item.display_name;
-              return (
-                <article
-                  key={item.record_key}
-                  className="friend-list-item"
-                  data-testid="unlinked-cheer-record"
-                >
-                  <div className="friend-list-main friend-history-main">
-                    <span className="friend-list-avatar" aria-hidden="true">
-                      {item.is_anonymous ? "?" : Array.from(nickname)[0]}
-                    </span>
-                    <span className="friend-list-copy">
-                      <span className="friend-list-name" title={nickname}>
-                        {nickname}
-                      </span>
-                      <strong>{item.message || PRODUCT_COPY.TEXT_022}</strong>
-                    </span>
-                    <span className="friend-list-relation">
-                      <span className="friend-history-badge">{PRODUCT_COPY.TEXT_023}</span>
-                    </span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      )}
       {friends.length <= 1 && (
         <aside
           className="friends-sparse-next"

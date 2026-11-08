@@ -18,12 +18,6 @@ export const PRODUCT_COPY = {
   TEXT_015: "한 명 더 함께 응원해볼까요?", // source line 157
   TEXT_016: "친구를 초대하거나 응원을 주고받으면 이 목록에 바로 이어져요.", // source line 158
   TEXT_017: "친구 초대하기", // source line 160
-  TEXT_018: "과거 응원 기록",
-  TEXT_019: "건",
-  TEXT_020: "로그인 연결 전에 받은 응원이에요. 표시명만으로 계정을 추정하지 않아 친구 프로필과는 분리해 보여드려요.",
-  TEXT_021: "익명의 누군가",
-  TEXT_022: "응원을 보냈어요.",
-  TEXT_023: "응원받음",
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/social/FriendGoalList.tsx";

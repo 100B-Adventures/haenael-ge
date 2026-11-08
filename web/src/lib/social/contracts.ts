@@ -62,6 +62,13 @@ export type FriendGoalDetail = SocialGoal & {
   wordmap: Array<{ word: string; weight: number }>;
 };
 
+export type FriendCheerHistoryItem = {
+  cheer_id: number;
+  message: string | null;
+  created_at: string;
+  direction: "SENT" | "RECEIVED";
+};
+
 export type InvitePreview = {
   inviter_nickname: string | null;
   goal_title: string | null;

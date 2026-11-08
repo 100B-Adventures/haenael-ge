@@ -17,6 +17,12 @@ export const PRODUCT_COPY = {
   TEXT_014: "개", // source line 129
   TEXT_015: "해제 중", // source line 140
   TEXT_016: "친구 관계 해제", // source line 140
+  TEXT_017: "주고받은 응원",
+  TEXT_018: "에게 보낸 응원",
+  TEXT_019: "에게 받은 응원",
+  TEXT_020: "응원했어요.",
+  TEXT_021: "보냄",
+  TEXT_022: "받음",
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/social/FriendGoalDetail.tsx";
