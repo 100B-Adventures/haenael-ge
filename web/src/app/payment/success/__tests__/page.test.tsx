@@ -2,8 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import PaymentSuccessPage from "../page";
 
-const { purchaseConversionMock } = vi.hoisted(() => ({
+const { createServerSupabaseClientMock, purchaseConversionMock } = vi.hoisted(() => ({
+  createServerSupabaseClientMock: vi.fn(),
   purchaseConversionMock: vi.fn(),
+}));
+
+vi.mock("@/lib/supabase/server", () => ({
+  createServerSupabaseClient: createServerSupabaseClientMock,
 }));
 
 const conversionLease = {
@@ -20,6 +25,7 @@ vi.mock("../PurchaseConversion", () => ({
 }));
 
 beforeEach(() => {
+  createServerSupabaseClientMock.mockReset();
   purchaseConversionMock.mockClear();
 });
 
@@ -75,6 +81,67 @@ it("최초 서버 승인은 pending lease를 브라우저 전달 컴포넌트에
     cleanPath: "/g/friend-goal",
     initialLease: conversionLease,
   });
+});
+
+it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결과를 보여준다", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({
+      cheerId: 91,
+      goalTitle: "편입 합격 해낼게",
+      conversionLease,
+    }),
+  }));
+
+  const cheerQuery = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: { goal_id: 11, message: "끝까지 응원할게" },
+      error: null,
+    }),
+  };
+  const goalQuery = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: {
+        id: 11,
+        slug: "friend-goal",
+        title: "편입 합격 해낼게",
+        cheer_count: 24,
+      },
+      error: null,
+    }),
+  };
+  const rpc = vi.fn().mockResolvedValue({
+    data: [
+      { word: "끝까지", word_count: 3 },
+      { word: "응원", word_count: 2 },
+    ],
+    error: null,
+  });
+  createServerSupabaseClientMock.mockResolvedValue({
+    from: vi.fn((table: string) => table === "cheer_public" ? cheerQuery : goalQuery),
+    rpc,
+  });
+
+  render(await PaymentSuccessPage({
+    searchParams: Promise.resolve({
+      paymentKey: "pk",
+      orderId: "order-growth",
+      amount: "3000",
+      goalSlug: "friend-goal",
+    }),
+  }));
+
+  expect(screen.getByTestId("payment-dopamine-overlay")).toBeInTheDocument();
+  expect(screen.getByTestId("payment-growth-count")).toHaveTextContent("24명이");
+  expect(screen.getByTestId("payment-growth-message")).toHaveTextContent("끝까지 응원할게");
+  expect(screen.getByTestId("payment-growth-wordmap")).toHaveTextContent("끝까지");
+  expect(rpc).toHaveBeenCalledWith("get_wordmap", { p_goal_id: 11 });
 });
 
 it("sent 또는 활성 lease 재수신은 성공 UI만 복구하고 전환은 보내지 않는다", async () => {

@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { CircleAlert, Clover } from "lucide-react";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-payment-success-page";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import type { WordmapWord } from "@/components/goal/Wordmap";
+import { DopamineGrowthOverlay } from "./DopamineGrowthOverlay";
 import { PurchaseConversion, type ConversionLease } from "./PurchaseConversion";
 
 type Props = {
@@ -62,7 +65,55 @@ async function confirmPayment(params: {
     const code = typeof body?.error?.code === "string" ? body.error.code : "unknown";
     throw new Error(`toss_confirm:${code}`);
   }
-  return body as { goalTitle?: string; conversionLease?: ConversionLease | null };
+  return body as {
+    cheerId?: number;
+    goalTitle?: string;
+    conversionLease?: ConversionLease | null;
+  };
+}
+
+type GrowthState = {
+  goalTitle: string;
+  cheerCount: number;
+  message: string | null;
+  words: WordmapWord[];
+};
+
+async function loadGrowthState(cheerId: number, goalSlug: string): Promise<GrowthState | null> {
+  const supabase = await createServerSupabaseClient();
+  const { data: cheer, error: cheerError } = await supabase
+    .from("cheer_public")
+    .select("goal_id, message")
+    .eq("id", cheerId)
+    .maybeSingle();
+
+  if (cheerError || !cheer?.goal_id) return null;
+
+  const [{ data: goal, error: goalError }, { data: wordmapRaw, error: wordmapError }] =
+    await Promise.all([
+      supabase
+        .from("goal_public")
+        .select("id, slug, title, cheer_count")
+        .eq("id", cheer.goal_id)
+        .maybeSingle(),
+      supabase.rpc("get_wordmap", { p_goal_id: cheer.goal_id }),
+    ]);
+
+  if (goalError || wordmapError || !goal || goal.slug !== goalSlug) return null;
+
+  const words: WordmapWord[] = (wordmapRaw ?? []).map(
+    (word: { word: string; word_count: number }) => ({
+      word: word.word,
+      word_count: Number(word.word_count),
+    }),
+  );
+
+  return {
+    goalTitle: goal.title ?? "친구의 목표",
+    cheerCount: goal.cheer_count ?? 0,
+    message: cheer.message?.trim() || null,
+    words,
+  };
 }
 
 export default async function PaymentSuccessPage({ searchParams }: Props) {
@@ -81,6 +132,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   let title = "응원이 전달됐어요";
   let message = "친구의 워드맵에 조용한 응원이 쌓였습니다.";
   let conversionLease: ConversionLease | null = null;
+  let growthState: GrowthState | null = null;
 
   if (!paymentKey || !orderId || !Number.isInteger(amount)) {
     status = "error";
@@ -91,6 +143,9 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
       const result = await confirmPayment({ paymentKey, orderId, amount });
       // 브라우저는 provider receipt를 관찰할 수 없어 ack하지 않는다. pending은 만료 뒤 재예약된다.
       conversionLease = result.conversionLease ?? null;
+      if (goalSlug && Number.isSafeInteger(result.cheerId) && Number(result.cheerId) > 0) {
+        growthState = await loadGrowthState(Number(result.cheerId), goalSlug);
+      }
       if (result.goalTitle) {
         message = `${result.goalTitle.replace(/\s*해낼게\s*$/, "")} 목표에 응원이 전달됐습니다.`;
       }
@@ -140,6 +195,9 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
         <p className="mt-3 text-[14px] leading-relaxed [color:var(--muted-foreground)]!">
           {message}
         </p>
+        {status === "success" && growthState && (
+          <DopamineGrowthOverlay {...growthState} />
+        )}
         <Link
           href={status === "success" ? backHref : "/"}
           className="mt-6 block rounded-[16px] py-4 text-[15px] font-extrabold [background-color:var(--primary)]! [color:var(--card)]!"
