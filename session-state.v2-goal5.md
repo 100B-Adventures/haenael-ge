@@ -1,3 +1,10 @@
+## 2026-11-08 19:2x KST 인계 (루트 저장소 정리)
+
+- 무엇을 했나: 하네스 감사 요청으로 루트 저장소 미커밋 3건 정리. docs/qa/qa-tracker.md·design-conformance-matrix.md 는 커밋 9f0855a(origin/main 포함)와 바이트 동일해 버림. .goal/demos.md(Goal 4회차 복구 기록)는 사본이 없어 커밋 09560b2 로 보존. staging 별칭 변경 이력을 이 브랜치 wiki/ops/인프라.md 에도 기록.
+- 남은 이슈: 친구 목록 「과거 응원 기록」 회장 판정(OD-haenael-20261108-cheer-history). 판정 전 독립 검증 재호출 금지. 개발·QA 루프 주인은 hotfix worktree 의 Codex Goal(G7).
+- 다음에 칠 명령: 없음(이 세션 몫 종료).
+- 검증했나: 루트 작업트리 clean 관찰. 정리 전 diff -q 로 동일성 확인.
+
 # session-state.v2-goal5 — 해낼게 V2 Goal 5회차 (Claude 세션 대행)
 
 ## 2026-11-08 15:3x KST 인계 (최신)
