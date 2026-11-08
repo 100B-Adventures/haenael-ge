@@ -2941,6 +2941,26 @@ test.describe("V2 web-first social slice", () => {
         ], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
         console.log(`MOBILE_ERGONOMICS ${result.trim()}`);
       }
+      // 로그인 받는사람 화면도 같은 9폭으로 잰다(독립 검증 D5: 공개 목표 1개 경로만 재고 있었다).
+      const ergoContext = await authContext(browser, emails.owner);
+      for (const [label, route] of [
+        ["friends", "/friends"],
+        ["mypage", "/my"],
+        ["connect", "/invite"],
+        ["goal-detail", `/me/goal/${ownerGoal}`],
+      ] as const) {
+        for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
+          const ergoPage = await ergoContext.newPage();
+          await ergoPage.setViewportSize({ width, height: 844 });
+          const ergoResponse = await ergoPage.goto(route, { waitUntil: "domcontentloaded" });
+          expect(ergoResponse?.status(), `${width}px ${route}`).toBe(200);
+          await ergoPage.waitForLoadState("networkidle").catch(() => {});
+          const metrics = await measureCanonicalErgonomics(ergoPage);
+          console.log(`RECEIVER_ERGONOMICS ${JSON.stringify({ label, width, ...metrics, route })}`);
+          await ergoPage.close();
+        }
+      }
+      await ergoContext.close();
     }
     const routes = [
       ["friends", "/friends", ["[data-testid=friends-page]", "[data-testid=friend-goal-list]"]],
@@ -4698,6 +4718,9 @@ test.describe("V2 web-first social slice", () => {
     );
     await expect(page.getByTestId("unlinked-cheer-history"))
       .toContainText("친구 프로필과는 분리");
+    // 한국어 안내문은 어절 중간에서 줄을 바꾸지 않는다(독립 검증 D2: "추정하지 않" / "아").
+    const historyNote = page.getByTestId("unlinked-cheer-history").locator(":scope > p").first();
+    await expect(historyNote).toHaveCSS("word-break", "keep-all");
     await context.close();
   });
 

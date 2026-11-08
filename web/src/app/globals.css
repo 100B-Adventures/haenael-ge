@@ -3230,6 +3230,7 @@
     color: var(--muted-color);
     font-size: var(--text-label-small);
     line-height: 1.5;
+    word-break: keep-all;
   }
   .friend-history-main {
     align-items: center;
