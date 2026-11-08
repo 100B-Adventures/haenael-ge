@@ -97,6 +97,7 @@ export function GoalCoverPicker(
           className="goal-cover-options-panel"
           data-testid="goal-cover-options"
         >
+          <div className="goal-cover-options-inner">
           <header className="social-detail-head goal-cover-options-head">
             <button type="button" aria-label="배너 편집 닫기" onClick={() => setPickerOpen(false)}>‹</button>
             <strong>내 사진으로 배너 만들기</strong>
@@ -142,6 +143,7 @@ export function GoalCoverPicker(
               {FAILURE_COPY[failureStage ?? "format"]}
             </p>
           )}
+          </div>
         </div>
       )}
     </section>

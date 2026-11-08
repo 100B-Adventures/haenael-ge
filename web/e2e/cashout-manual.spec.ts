@@ -207,6 +207,7 @@ function json(response: ServerResponse, status: number, body: unknown, headers: 
   response.writeHead(status, {
     "content-type": "application/json; charset=utf-8",
     "cache-control": "no-store",
+    "access-control-allow-origin": "*",
     ...headers,
   });
   response.end(JSON.stringify(body));
@@ -288,6 +289,63 @@ async function handleMockSupabase(request: IncomingMessage, response: ServerResp
     return json(response, 200, current ? [current] : []);
   }
 
+  if (url.pathname === "/rest/v1/rpc/my_social_dashboard") {
+    return json(response, 200, {
+      profile: { nickname: "도경", bio: null, profile_image: null },
+      goals: [{
+        goal_id: 9001,
+        slug: "e2e-overflow",
+        title: "토익 900점과 영어 인터뷰 자신감을 함께 만들고 올해 안에 해외 고객 앞에서 당당하게 발표하는 목표를 반드시 해낼게",
+        due_date: "2026-12-05",
+        status: "ACTIVE",
+        cover_preset_key: "c1",
+        cheer_count: cheerFixtureCount,
+        supporter_avatars: [],
+        recent_cheer: {
+          supporter_name: "응원자 1",
+          profile_image: null,
+          message: "매일 쌓아 온 시간이 결국 도경님 편이 될 거예요.",
+          created_at: "2026-08-24T00:00:00.000Z",
+          is_anonymous: false,
+        },
+      }],
+      received_cheers: [],
+      sent_cheers: [],
+      friend_count: 0,
+      achievements: {
+        completed_goal_count: 0,
+        received_cheer_count: cheerFixtureCount,
+        connected_friend_count: 0,
+      },
+      belonging_queue: [],
+    });
+  }
+
+  if (url.pathname === "/rest/v1/rpc/my_goal_cheer_summary") {
+    const body = await requestJson(request);
+    const query = typeof body.p_search === "string" ? body.p_search.toLocaleLowerCase("ko-KR") : "";
+    const limit = typeof body.p_limit === "number" ? body.p_limit : 20;
+    let rows = Array.from({ length: cheerFixtureCount }, (_, index) => ({
+      supporter_key: `supporter-${index + 1}`,
+      display_name: `응원자 ${index + 1}`,
+      is_anonymous: index % 3 === 0,
+      profile_image: null,
+      message: index === 0
+        ? "매일 쌓아 온 시간이 결국 도경님 편이 될 거예요. 점수가 잠깐 흔들려도 끝까지 응원할게요."
+        : `${index + 1}번째 응원 메시지예요`,
+      cheer_count: (index % 10) + 1,
+      latest_at: new Date(Date.UTC(2026, 7, 24, 0, 0, 0) - index * 60_000).toISOString(),
+    }));
+    if (query) {
+      cheerSearchRequests.push(`message:${query}`);
+      rows = rows.filter((row) =>
+        row.message.toLocaleLowerCase("ko-KR").includes(query) ||
+        (!row.is_anonymous && row.display_name.toLocaleLowerCase("ko-KR").includes(query))
+      );
+    }
+    return json(response, 200, { total_count: rows.length, items: rows.slice(0, limit) });
+  }
+
   if (url.pathname === "/rest/v1/rpc/create_cashout_request") {
     if (cashoutDelayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, cashoutDelayMs));
@@ -366,8 +424,10 @@ async function handleMockSupabase(request: IncomingMessage, response: ServerResp
       slug: "e2e-overflow",
       title: "토익 900점과 영어 인터뷰 자신감을 함께 만들고 올해 안에 해외 고객 앞에서 당당하게 발표하는 목표를 반드시 해낼게",
       reason: "해외 고객 앞에서 직접 발표하기 위해",
-      due_date: "2026-09-05",
+      due_date: "2026-12-05",
       status: "ACTIVE",
+      created_at: "2026-08-04T00:00:00.000Z",
+      cover_preset_key: "c1",
     }]);
   }
 
@@ -696,7 +756,7 @@ test.describe("수동 환전: happy + edge", () => {
     const statusResponse = await page.goto(`${APP_URL}/cashout/status`);
     const statusDocument = await statusResponse?.text();
     await expect(page.getByTestId("cashout-status-page")).toBeVisible();
-    await expect(page.getByTestId("cashout-status-page")).toContainText("접수됨");
+    await expect(page.getByTestId("cashout-status-page")).toContainText("확인중");
     await expect(page.getByTestId("cashout-status-page")).toContainText(PERSISTED_MASKED_ACCOUNT);
     await expect(page.getByTestId("cashout-status-page")).not.toContainText(FULL_ACCOUNT);
     expect(statusDocument).not.toContain(FULL_ACCOUNT);
@@ -704,7 +764,7 @@ test.describe("수동 환전: happy + edge", () => {
     const historyResponse = await page.goto(`${APP_URL}/cashout/history`);
     const historyDocument = await historyResponse?.text();
     await expect(page.getByTestId("cashout-history-page")).toBeVisible();
-    await expect(page.getByTestId("cashout-history-page")).toContainText("지급 대기");
+    await expect(page.getByTestId("cashout-history-page")).toContainText("확인중");
     await expect(page.getByTestId("cashout-history-page")).toContainText(PERSISTED_MASKED_ACCOUNT);
     await expect(page.getByTestId("cashout-history-page")).not.toContainText(FULL_ACCOUNT);
     expect(historyDocument).not.toContain(FULL_ACCOUNT);
@@ -735,33 +795,52 @@ test.describe("수동 환전: happy + edge", () => {
     await page.screenshot({ path: path.join(CAPTURE_DIR, "me-balance-loading-390.png"), fullPage: true });
     await expect(page.getByTestId("receiver-home-page")).toBeVisible();
     eligibilityDelayMs = 0;
-    await expect(page.getByTestId("receiver-cheer-list").getByTestId("cheer-item")).toHaveCount(8);
-    await expect(page.getByTestId("wordmap-mini-preview").locator("span")).toHaveCount(6);
-    await expect(page.getByTestId("wordmap-overflow-summary")).toHaveText("6개 표시 · 94개는 전체 워드맵에서 확인");
     await page.screenshot({ path: path.join(CAPTURE_DIR, "me-390.png"), fullPage: true });
 
+    await page.getByTestId("my-goal-list-card-manage-link").click();
+    await expect(page).toHaveURL(`${APP_URL}/me/goal/9001`);
+    await page.setViewportSize({ width: 1024, height: 844 });
+    await page.getByRole("button", { name: "배너 바꾸기" }).click();
+    const coverOptions = page.getByTestId("goal-cover-options");
+    await expect(coverOptions).toBeVisible();
+    const coverPanelMetrics = await coverOptions.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        x: rect.x,
+        width: rect.width,
+        backgroundColor: getComputedStyle(element).backgroundColor,
+      };
+    });
+    expect(coverPanelMetrics.x).toBe(0);
+    expect(coverPanelMetrics.width).toBe(1024);
+    expect(coverPanelMetrics.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+    await page.screenshot({ path: path.join(CAPTURE_DIR, "banner-upload-1024.png"), fullPage: true });
+    await page.getByRole("button", { name: "배너 편집 닫기" }).click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByTestId("goal-management-wordmap").locator("[data-wordmap-item]")).toHaveCount(13);
+    await expect(page.getByTestId("goal-supporter-list").getByTestId("goal-supporter-item")).toHaveCount(8);
     await page.getByRole("button", { name: "응원 목록 펼치기" }).click();
-    await expect(page.getByTestId("receiver-cheer-list").getByTestId("cheer-item")).toHaveCount(20);
-    await expect(page.getByTestId("receiver-cheer-card")).toContainText("80개는 검색으로 찾기");
-    const cheerCardBox = await page.getByTestId("receiver-cheer-card").boundingBox();
-    const wordmapCtaBox = await page.getByTestId("wordmap-view-cta").boundingBox();
+    await expect(page.getByTestId("goal-supporter-list").getByTestId("goal-supporter-item")).toHaveCount(20);
+    await expect(page.getByTestId("goal-management-wordmap")).toContainText("100명이 이 단어들로 응원했어요");
+    await expect(page.getByRole("button", { name: "지난 응원 찾기" })).toBeVisible();
+    const cheerCardBox = await page.getByTestId("goal-supporter-card").boundingBox();
+    const wordmapBox = await page.getByTestId("goal-management-wordmap").boundingBox();
     expect(cheerCardBox).not.toBeNull();
-    expect(wordmapCtaBox).not.toBeNull();
-    expect(wordmapCtaBox!.y).toBeGreaterThanOrEqual(cheerCardBox!.y + cheerCardBox!.height);
+    expect(wordmapBox).not.toBeNull();
+    expect(wordmapBox!.y + wordmapBox!.height).toBeLessThanOrEqual(cheerCardBox!.y);
     await page.screenshot({ path: path.join(CAPTURE_DIR, "me-overflow-100-390.png"), fullPage: true });
 
-    await page.getByTestId("cheer-search-trigger").click();
+    await page.getByRole("button", { name: "지난 응원 찾기" }).click();
     cheerFixtureCount = 121;
-    await page.getByTestId("cheer-search-input").fill("121번째");
+    await page.getByRole("searchbox", { name: "지난 응원 찾기" }).fill("121번째");
     await Promise.all([
-      page.waitForURL(`${APP_URL}/me?q=121%EB%B2%88%EC%A7%B8`),
+      page.waitForURL(`${APP_URL}/me/goal/9001?q=121%EB%B2%88%EC%A7%B8`),
       page.getByRole("button", { name: "찾기", exact: true }).click(),
     ]);
-    await expect(page.getByTestId("receiver-cheer-list")).toContainText("121번째 응원 메시지예요");
-    await expect(page.getByTestId("cheer-overflow-summary")).toHaveText("1개 찾았어요");
+    await expect(page.getByTestId("goal-supporter-list")).toContainText("121번째 응원 메시지예요");
+    await expect(page.getByTestId("goal-supporter-list").getByTestId("goal-supporter-item")).toHaveCount(1);
     await expect(page.getByRole("link", { name: "전체 목록" })).toBeVisible();
     expect(cheerSearchRequests).toContain("message:121번째");
-    await expect(page.getByTestId("receiver-home-loading")).toHaveCount(0);
     await page.waitForLoadState("networkidle");
     await page.screenshot({ path: path.join(CAPTURE_DIR, "me-search-121-of-121-390.png"), fullPage: true });
 
@@ -801,6 +880,6 @@ test.describe("수동 환전: happy + edge", () => {
     await page.goto(`${APP_URL}/cashout/status`);
     await expect(page.getByTestId("cashout-status-page")).toBeVisible();
     await page.screenshot({ path: path.join(CAPTURE_DIR, "cashout-status-390.png"), fullPage: true });
-    expect(consoleErrors.filter((message) => /hydration|server rendered text didn't match/i.test(message))).toEqual([]);
+    expect(consoleErrors).toEqual([]);
   });
 });

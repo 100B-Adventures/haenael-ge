@@ -199,6 +199,20 @@ function LedgerRow({ entry }: { entry: AdminLedgerEntry }) {
   );
 }
 
+function OpsAlertSummary({ alert }: { alert: AdminOpsAlert }) {
+  return (
+    <div className="grid min-w-0 gap-1 pr-12 lg:grid-cols-[10rem_minmax(0,1fr)_auto] lg:items-center lg:gap-4">
+      <strong className="text-destructive">{alert.severity}</strong>
+      <span className="min-w-0 font-semibold [overflow-wrap:normal] [word-break:normal]">
+        <OpsEventType value={alert.event_type} />
+      </span>
+      <time className="min-w-0 break-words text-muted-foreground" dateTime={alert.created_at}>
+        {formatDateTime(alert.created_at)}
+      </time>
+    </div>
+  );
+}
+
 export default async function AdminPage() {
   const supabase = await createServerSupabaseClient();
   const {
@@ -341,24 +355,27 @@ export default async function AdminPage() {
               <ul className="divide-y" aria-label={PRODUCT_COPY.TEXT_021}>
                 {alerts.map((alert) => (
                   <li
-                    className="grid min-w-0 gap-1 py-3 text-sm lg:grid-cols-[10rem_minmax(0,1fr)_auto] lg:items-center lg:gap-4"
+                    className="relative min-w-0 py-3 text-sm"
                     key={alert.id}
                   >
-                    <strong className="text-destructive">
-                      {alert.severity}
-                    </strong>
-                    <span className="min-w-0 font-semibold [overflow-wrap:normal] [word-break:normal]">
-                      <OpsEventType value={alert.event_type} />
-                    </span>
-                    <time
-                      className="min-w-0 break-words text-muted-foreground"
-                      dateTime={alert.created_at}
-                    >
-                      {formatDateTime(alert.created_at)}
-                    </time>
-                    <code className="min-w-0 break-all text-xs text-muted-foreground lg:col-span-3">
-                      {JSON.stringify(alert.details)}
-                    </code>
+                    <Collapsible
+                      className="admin-alert-disclosure"
+                      policy={adminMemberDetailCollapsePolicy}
+                      controlsId={`admin-alert-details-${alert.id}`}
+                      toggleLabel={`${alert.event_type} 경보 상세`}
+                      collapsedContent={<OpsAlertSummary alert={alert} />}
+                      expandedContent={
+                        <>
+                          <OpsAlertSummary alert={alert} />
+                          <code
+                            id={`admin-alert-details-${alert.id}`}
+                            className="mt-2 block min-w-0 break-all text-xs text-muted-foreground"
+                          >
+                            {JSON.stringify(alert.details)}
+                          </code>
+                        </>
+                      }
+                    />
                   </li>
                 ))}
               </ul>

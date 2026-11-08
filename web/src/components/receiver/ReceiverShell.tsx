@@ -58,9 +58,10 @@ export function ReceiverBrandMark() {
 
 type ReceiverTopBarProps = {
   variant: "home" | "detail";
+  title?: string;
 };
 
-export function ReceiverTopBar({ variant }: ReceiverTopBarProps) {
+export function ReceiverTopBar({ variant, title }: ReceiverTopBarProps) {
   if (variant === "detail") {
     return (
       <header data-testid="receiver-top-bar-detail">
@@ -71,8 +72,11 @@ export function ReceiverTopBar({ variant }: ReceiverTopBarProps) {
 
   return (
     <header className="mb-5 flex items-center justify-between" data-testid="receiver-top-bar-home">
-      <ReceiverBrandMark />
+      {title
+        ? <h1 className="receiver-page-title">{title}</h1>
+        : <ReceiverBrandMark />}
       <div className="flex items-center gap-3">
+        {title && <ReceiverBrandMark />}
         <NotificationBadge />
         <LogoutButton />
       </div>

@@ -43,25 +43,24 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
         {goal.reason && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{goal.reason}</p>}
       </div>
 
-      {goal.cheerSummary.cheer_count > 0
-        ? <CheerSummaryBar goal={goal.cheerSummary} />
-        : <p className="social-muted" data-testid="cheer-summary-empty">{PRODUCT_COPY.TEXT_004}</p>}
-
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-2 items-center gap-2">
         <Link
           href={`/me/goal/${goal.id}`}
-          className="shrink-0 rounded-sm bg-accent px-3 py-2 text-[12.5px] font-bold text-accent-foreground"
+          className="flex min-h-11 items-center justify-center rounded-sm border border-primary px-3 text-[12.5px] font-bold text-accent-foreground"
           data-testid="my-goal-list-card-manage-link"
         >{PRODUCT_COPY.TEXT_002}</Link>
-        <div className="flex-1">
-          <MyLinkCard slug={goal.slug} />
-        </div>
-        <Link
-          href={`/wordmap/${goal.id}`}
-          className="shrink-0 rounded-sm border border-border px-3 py-2 text-[12.5px] font-bold text-foreground"
-          data-testid="my-goal-list-card-detail-link"
-        >{PRODUCT_COPY.TEXT_003}</Link>
+        <MyLinkCard slug={goal.slug} variant="button" />
       </div>
+
+      <Link
+        href={`/me/goal/${goal.id}`}
+        className="mt-3 block rounded-sm bg-accent p-3 text-accent-foreground"
+        data-testid="my-goal-list-card-detail-link"
+      >
+        {goal.cheerSummary.cheer_count > 0
+          ? <CheerSummaryBar goal={goal.cheerSummary} />
+          : <p className="social-muted" data-testid="cheer-summary-empty">{PRODUCT_COPY.TEXT_004}</p>}
+      </Link>
     </div>
   );
 }

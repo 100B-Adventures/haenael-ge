@@ -28,7 +28,7 @@ export function shouldShowBottomNav(pathname: string) {
   if (!usesReceiverShell) return false;
   return !(
     pathname === "/cashout" ||
-    pathname.startsWith("/cashout/") ||
+    (pathname.startsWith("/cashout/") && pathname !== "/cashout/history") ||
     pathname === "/payment/success" ||
     pathname === "/payment/fail" ||
     pathname === "/onboarding"
@@ -55,8 +55,10 @@ export function ReceiverBottomNavView({
       <nav className="receiver-tabbar" aria-label="주요 메뉴" data-testid="receiver-bottom-nav">
       {tabs.map(({ href, label, Icon }, index) => {
         const active = label === PRODUCT_COPY.TEXT_001
-          ? pathname === "/" || pathname === "/me" || pathname.startsWith("/me/")
-          : pathname === href || pathname.startsWith(`${href}/`);
+          ? pathname === "/" || pathname === "/me" || (pathname.startsWith("/me/") && pathname !== "/me/achievements")
+          : label === "마이"
+            ? pathname === href || pathname.startsWith(`${href}/`) || pathname === "/me/achievements" || pathname === "/cashout/history"
+            : pathname === href || pathname.startsWith(`${href}/`);
         return locked && index > 0 ? (
           <button
             type="button"

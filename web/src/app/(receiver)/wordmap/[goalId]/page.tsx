@@ -5,11 +5,13 @@
 
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { WordmapShareIcons } from "@/components/goal/WordmapShareIcons";
 import { WordmapViewTracker } from "@/components/goal/WordmapViewTracker";
 import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
+import { ReceiverPageShell } from "@/components/receiver/ReceiverShell";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-wordmap-goalid-page";
 
 type Props = { params: Promise<{ goalId: string }> };
@@ -69,29 +71,16 @@ export default async function WordmapFullViewPage({ params }: Props) {
   const displayTitle = cleanTitle ? `${cleanTitle} 해낼게` : "해낼게";
 
   return (
-    <main
-      className="flex flex-col min-h-svh [background-color:var(--background)]!"
-      data-testid="wordmap-fullview-page"
-    >
+    <ReceiverPageShell testId="wordmap-fullview-page" bottomSafe className="flex min-h-svh flex-col">
       <WordmapViewTracker goalId={goalIdNum} />
-      {/* 헤더 */}
-      <div className="flex items-center justify-between px-[22px] pt-10 pb-3">
-        <Link
-          href="/me"
-          aria-label="뒤로"
-          data-testid="back-button"
-          className="flex items-center justify-center w-10 h-10 -ml-2 [color:var(--muted-foreground)]! [font-size:22px]!"
-        >
-          ‹
-        </Link>
-        <p className="font-extrabold [font-size:12.5px]! [letter-spacing:-0.2px]! [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_001}<span className="[color:var(--clover-bright)]!">.</span>
-        </p>
-        {/* 균형 spacer */}
-        <div className="[width:40px]!" />
-      </div>
+      <header className="social-detail-head">
+        <Link href={`/me/goal/${goalIdNum}`} aria-label="목표 관리로 돌아가기" data-testid="back-button"><ChevronLeft aria-hidden="true" /></Link>
+        <strong>응원 워드맵</strong>
+        <span aria-hidden="true" />
+      </header>
 
       {/* 워드맵 풀뷰 카드 */}
-      <div className="flex-1 flex flex-col px-[22px] pb-4">
+      <div className="flex flex-1 flex-col pb-4">
         <section className="rounded-[20px] border border-border bg-card px-5 py-4" data-testid="wordmap-goal-summary">
           <div className="flex flex-wrap gap-2">
             {goal.status === "ACTIVE" && goal.due_date && <DdayChip dueDate={goal.due_date} />}
@@ -120,7 +109,7 @@ export default async function WordmapFullViewPage({ params }: Props) {
       </div>
 
       {/* 공유 아이콘 바 */}
-      <div className="px-[22px] pb-[max(28px,env(safe-area-inset-bottom,28px))] pb-[max(28px,_env(safe-area-inset-bottom,_28px))]!">
+      <div className="pb-[max(28px,env(safe-area-inset-bottom,28px))] pb-[max(28px,_env(safe-area-inset-bottom,_28px))]!">
         <h2 className="mb-2 text-xs font-bold text-muted-foreground">워드맵 내보내기</h2>
         <WordmapShareIcons
           goalId={goalIdNum}
@@ -128,6 +117,6 @@ export default async function WordmapFullViewPage({ params }: Props) {
           goalTitle={goal.title ?? PRODUCT_COPY.TEXT_004}
         />
       </div>
-    </main>
+    </ReceiverPageShell>
   );
 }

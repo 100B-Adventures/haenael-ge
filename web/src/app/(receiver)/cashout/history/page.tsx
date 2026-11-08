@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import {
   CASHOUT_STATUS_LABELS,
   type CashoutRecord,
@@ -9,7 +10,6 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   ReceiverPageShell,
-  ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-cashout-history-page";
 
@@ -34,23 +34,26 @@ export default async function CashoutHistoryPage() {
   ).length;
 
   return (
-    <ReceiverPageShell testId="cashout-history-page">
-      <ReceiverTopBar variant="detail" />
-      <h1 className="receiver-page-title mt-2 sm:text-[length:var(--text-page-title-desktop)]!">{PRODUCT_COPY.TEXT_001}</h1>
+    <ReceiverPageShell testId="cashout-history-page" bottomSafe>
+      <header className="social-detail-head">
+        <Link href="/my" aria-label="마이페이지로 돌아가기"><ChevronLeft aria-hidden="true" /></Link>
+        <strong>{PRODUCT_COPY.TEXT_001}</strong>
+        <span aria-hidden="true" />
+      </header>
 
-      <div className="mt-5 grid grid-cols-3 gap-2" data-testid="cashout-history-summary">
-        <div className="rounded-md border border-border bg-card p-3 text-center">
+      <div className="grid grid-cols-3 gap-2" data-testid="cashout-history-summary">
+        <div className="rounded-md border border-border bg-card p-3 text-left">
           <p className="whitespace-nowrap text-[11px] text-[var(--muted-color)]">누적 입금</p>
           <p className="mt-1 text-base font-extrabold text-accent-foreground sm:text-xl">
             {formatCashoutKrw(paidTotal)}
           </p>
         </div>
-        <div className="rounded-md border border-border bg-card p-3 text-center">
+        <div className="rounded-md border border-border bg-card p-3 text-left">
           <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_003}</p>
           <p className="mt-1 text-base font-extrabold text-accent-foreground sm:text-xl">
             {paid.length}{PRODUCT_COPY.TEXT_004}</p>
         </div>
-        <div className="rounded-md border border-border bg-card p-3 text-center">
+        <div className="rounded-md border border-border bg-card p-3 text-left">
           <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_005}</p>
           <p className="mt-1 text-base font-extrabold text-amber-ink sm:text-xl">
             {pendingCount}{PRODUCT_COPY.TEXT_006}</p>
@@ -97,7 +100,11 @@ export default async function CashoutHistoryPage() {
               <span
                 className={`rounded-full px-2.5 py-1 text-[length:var(--text-meta-micro)]! font-extrabold ${item.status === "REQUESTED" ? "bg-amber-soft text-amber-ink" : item.status === "REJECTED" ? "bg-danger-soft text-danger-ink" : "bg-accent text-accent-foreground"}`}
               >
-                {CASHOUT_STATUS_LABELS[item.status]}
+                {item.status === "REQUESTED"
+                  ? "확인중"
+                  : item.status === "PAID"
+                    ? "입금완료"
+                    : CASHOUT_STATUS_LABELS[item.status]}
                 {item.status === "REQUESTED" ? " ›" : ""}
               </span>
             </Link>

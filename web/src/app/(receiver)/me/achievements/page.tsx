@@ -3,8 +3,8 @@ import Image from "next/image";
 import { Flag, HandHeart, UsersRound } from "lucide-react";
 import {
   BackHomeLink,
+  ReceiverBrandMark,
   ReceiverPageShell,
-  ReceiverTopBar,
 } from "@/components/receiver/ReceiverShell";
 import { asMySocialDashboard } from "@/lib/social/contracts";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -56,7 +56,10 @@ export default async function AchievementsPage() {
 
   return (
     <ReceiverPageShell testId="achievements-page" bottomSafe>
-      <ReceiverTopBar variant="detail" />
+      <header className="mb-5 flex items-center justify-between">
+        <h1 className="receiver-page-title">업적</h1>
+        <ReceiverBrandMark />
+      </header>
       <div className="achievement-hero">
         <div className="achievement-visual">
           <Image
@@ -91,7 +94,7 @@ export default async function AchievementsPage() {
             <span>다음 메달 <strong>{nextMedal.title}</strong></span>
             <span>{counts[nextMedal.count]} / {nextMedal.target}</span>
           </div>
-          <progress max={nextMedal.target} value={counts[nextMedal.count]}>
+          <progress className="split-balance-progress" max={nextMedal.target} value={counts[nextMedal.count]}>
             {counts[nextMedal.count]} / {nextMedal.target}
           </progress>
           <p>업적은 완료 목표, 받은 확정 응원, 친구 수로 계산해요.</p>

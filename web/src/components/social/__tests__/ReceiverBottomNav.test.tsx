@@ -40,7 +40,7 @@ it("GT-03 비회원은 자물쇠 없이 예시 미리보기 시트를 연다", a
   expect(screen.getByRole("dialog")).not.toHaveTextContent("친구 3명");
 });
 
-it.each(["/cashout", "/cashout/status", "/cashout/history"])(
+it.each(["/cashout", "/cashout/status"])(
   "CT-NAV-04 단일 거래 화면 %s에서는 하단탭을 숨긴다",
   (path) => {
     pathname = path;
@@ -48,6 +48,20 @@ it.each(["/cashout", "/cashout/status", "/cashout/history"])(
     expect(container).toBeEmptyDOMElement();
   },
 );
+
+it("CT-NAV-04b 환전 내역은 하단탭을 보이고 마이를 활성화한다", () => {
+  pathname = "/cashout/history";
+  render(<ReceiverBottomNav />);
+  expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /마이/ })).toHaveAttribute("aria-current", "page");
+});
+
+it("CT-NAV-04c 업적은 하단탭의 마이를 활성화한다", () => {
+  pathname = "/me/achievements";
+  render(<ReceiverBottomNav />);
+  expect(screen.getByRole("link", { name: /마이/ })).toHaveAttribute("aria-current", "page");
+  expect(screen.getByRole("link", { name: /^홈$/ })).not.toHaveAttribute("aria-current");
+});
 
 it("CT-NAV-05 응원 워드맵 전체보기에서도 하단탭을 유지한다", () => {
   pathname = "/wordmap/42";

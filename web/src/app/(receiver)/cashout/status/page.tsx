@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import {
   type CashoutRecord,
   cashoutBankName,
@@ -145,18 +146,19 @@ export default async function CashoutStatusPage() {
 
   return (
     <ReceiverPageShell testId="cashout-status-page">
-      <ReceiverTopBar variant="detail" />
-      <h1 className="receiver-page-title mt-2 sm:text-[length:var(--text-page-title-desktop)]!">{PRODUCT_COPY.TEXT_007}</h1>
-      <p className="mt-1 text-[length:var(--text-label-small)]! text-[var(--muted-color)]">
-        {dateTime.format(new Date(cashout.requested_at))}{PRODUCT_COPY.TEXT_008}{cashout.id}
-      </p>
+      <header className="social-detail-head">
+        <Link href="/me" aria-label="홈으로 돌아가기"><ChevronLeft aria-hidden="true" /></Link>
+        <strong>{PRODUCT_COPY.TEXT_007}</strong>
+        <span aria-hidden="true" />
+      </header>
 
-      <div className="mx-auto mt-6 grid w-full max-w-xl gap-4">
+      <div className="mx-auto grid w-full max-w-xl gap-4">
         <section>
           <div
-            className={`rounded-[14px] border p-4 ${banner.box}`}
+            className={`social-cash-status-hero rounded-[14px] border p-4 ${banner.box}`}
             role="status"
           >
+            <span className="social-cash-status-clover" aria-hidden="true">🍀</span>
             <h2 className={`text-[15px] font-extrabold ${banner.title}`}>
               {banner.heading}
             </h2>
@@ -172,12 +174,12 @@ export default async function CashoutStatusPage() {
             )}
           </div>
 
-          <div className="mt-3 rounded-md border border-border bg-card p-4">
+          <div className="social-cash-status-steps mt-4">
             <ol className="grid gap-0 text-[13px] font-bold" data-testid="cashout-vertical-steps">
               <li className="relative flex gap-3 pb-5 text-accent-foreground after:absolute after:left-[13px] after:top-7 after:h-[calc(100%-1.75rem)] after:w-px after:bg-border">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   1
-                </span><div>{PRODUCT_COPY.TEXT_009}<p className="mt-1 font-normal text-muted-foreground">
+                </span><div>신청 접수<p className="mt-1 font-normal text-muted-foreground">
                   {formatStepDateTime(cashout.requested_at)}
                 </p></div>
               </li>
@@ -188,7 +190,7 @@ export default async function CashoutStatusPage() {
                   className={`flex size-7 shrink-0 items-center justify-center rounded-full ${cashout.status === "REQUESTED" ? "border-2 border-amber bg-card" : "bg-primary text-primary-foreground"}`}
                 >
                   2
-                </span><div>{PRODUCT_COPY.TEXT_010}<p className="mt-1 font-normal text-muted-foreground">
+                </span><div>지급 준비 중<p className="mt-1 font-normal text-muted-foreground">
                   {cashout.status === "REQUESTED" ? PRODUCT_COPY.TEXT_011 : PRODUCT_COPY.TEXT_012}
                 </p></div>
               </li>
@@ -200,7 +202,7 @@ export default async function CashoutStatusPage() {
                 >
                   3
                 </span>
-                <div>{isRejected ? PRODUCT_COPY.TEXT_013 : PRODUCT_COPY.TEXT_014}
+                <div>{isRejected ? PRODUCT_COPY.TEXT_013 : "지급 완료"}
                 <p className="mt-1 font-normal text-muted-foreground">
                   {cashout.paid_at
                     ? formatStepDateTime(cashout.paid_at)

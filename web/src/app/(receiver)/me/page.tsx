@@ -8,17 +8,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
-import { CheerCount } from "@/components/goal/CheerCount";
 import { PhoneConsentNotice } from "@/components/auth/PhoneConsentNotice";
 import { HomeSeenTracker } from "@/components/goal/HomeSeenTracker";
-import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
 import { MyGoalListCard } from "@/components/goal/MyGoalListCard";
 import { SplitBalanceCard } from "@/components/goal/SplitBalanceCard";
 import { type CashoutRecord } from "@/lib/cashout";
-import { CheerList, type ReceiverCheer } from "@/components/receiver/CheerList";
 import { Collapsible } from "@/components/common/Collapsible";
-import { CheerSummaryBar } from "@/components/social/CheerSummaryBar";
 import { asMySocialDashboard, type MySocialGoal } from "@/lib/social/contracts";
 import {
   ReceiverPageShell,
@@ -31,11 +26,6 @@ import { PRODUCT_COPY } from "@/lib/copy/generated/app-receiver-me-page";
 type ReceiverHomePageProps = {
   searchParams?: Promise<{ q?: string | string[] }>;
 };
-
-const CHEER_SELECT =
-  "id, display_name, is_anonymous, message, clover_amount, created_at";
-const CHEER_RESULT_LIMIT = 20;
-const WORDMAP_PREVIEW_LIMIT = 6;
 
 function normalizeCheerSearch(rawQuery: string | string[] | undefined) {
   const query = Array.isArray(rawQuery) ? rawQuery[0] : rawQuery;
@@ -135,9 +125,8 @@ export default async function ReceiverHomePage({
     return a.created_at > b.created_at ? -1 : a.created_at < b.created_at ? 1 : 0;
   });
 
-  // 목록 최상단 카드(primary) — 기존 단일 목표 화면의 상세 UI(응원 검색·워드맵
-  // 미리보기·수정·친구뷰 미리보기)를 그대로 유지한다. 나머지 진행 중 목표와
-  // 지난 목표는 설계 §4.5 표대로 간단 카드(제목·D-day·응원수·링크복사)로만 둔다.
+  // 대표 목표도 목록 카드로만 표시하고, 검색·워드맵·수정·친구뷰 미리보기는
+  // 승인된 목표 관리 경로(`/me/goal/{id}`)에서 제공한다. 지난 목표도 같은 카드 계약을 쓴다.
   const goal = inProgressGoals[0] ?? pastGoals[0];
 
   // K1: 클로버 잔액 (개수 — 주표기) + 환전 잠금(A안, FDD §9.1): total/locked/available을
@@ -160,76 +149,9 @@ export default async function ReceiverHomePage({
   const pendingCashout =
     cashoutStatus?.status === "REQUESTED" ? cashoutStatus : null;
 
-  // cheer_select_goal_owner: 응원 목록 (CONFIRMED + not deleted, 최근 20개).
-  // DESIGN.md v2.0.0 §6.1: 첫 8개 뒤 같은 자리에서 20개까지 펼치고,
-  // 나머지는 서버 검색으로 접근한다. 브라우저 배열 상한과 검색 범위를 결합하지 않는다.
-  // DESIGN.md §6-(b′): 본인 한정 clover_amount 노출. goal.id는 위에서 member_id=user.id로
-  // 스코프된 본인 목표이고, RLS cheer_select_goal_owner도 goal.member_id=auth.uid()만 허용 —
-  // 이중 스코프로 남의 목표 cheer 금액이 섞일 수 없다.
-  const ownerCheerQuery = () =>
-    supabase
-      .from("cheer")
-      .select(CHEER_SELECT, { count: "exact" })
-      .eq("goal_id", goal.id)
-      .eq("status", "CONFIRMED")
-      .is("deleted_at", null);
-
-  const [recentCheerResult, { data: wordmapRaw }] = await Promise.all([
-    ownerCheerQuery()
-      .order("created_at", { ascending: false }) // 🔒 시간순 고정, 금액순 정렬/랭킹 금지
-      .limit(CHEER_RESULT_LIMIT),
-    supabase.rpc("get_wordmap", { p_goal_id: goal.id }),
-  ]);
-  const cheerCount =
-    recentCheerResult.count ?? recentCheerResult.data?.length ?? 0;
-
-  let cheers = (recentCheerResult.data ?? []) as ReceiverCheer[];
   if (cheerSearchQuery) {
-    // PostgREST의 raw `or()` 문자열에 사용자 입력을 넣지 않는다. 이름과 메시지를
-    // 각각 파라미터화된 ilike로 조회한 뒤 id로 합쳐 필터 구문 주입과 중복을 함께 막는다.
-    const searchPattern = `%${cheerSearchQuery}%`;
-    const [nameMatches, messageMatches] = await Promise.all([
-      ownerCheerQuery()
-        .eq("is_anonymous", false)
-        .ilike("display_name", searchPattern)
-        .order("created_at", { ascending: false })
-        .limit(CHEER_RESULT_LIMIT),
-      ownerCheerQuery()
-        .ilike("message", searchPattern)
-        .order("created_at", { ascending: false })
-        .limit(CHEER_RESULT_LIMIT),
-    ]);
-    const uniqueMatches = new Map<number, ReceiverCheer>();
-    [...(nameMatches.data ?? []), ...(messageMatches.data ?? [])].forEach(
-      (cheer) => {
-        uniqueMatches.set(cheer.id, cheer as ReceiverCheer);
-      },
-    );
-    cheers = Array.from(uniqueMatches.values())
-      .sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      )
-      .slice(0, CHEER_RESULT_LIMIT);
+    redirect(`/me/goal/${goal.id}?q=${encodeURIComponent(cheerSearchQuery)}`);
   }
-
-  // DESIGN.md v2.0.0 오버플로 계약: 홈 미니맵은 6개, 전체 워드맵은 12개다.
-  const previewWords: Array<{ word: string; word_count: number }> = (
-    wordmapRaw ?? []
-  )
-    .slice(0, WORDMAP_PREVIEW_LIMIT)
-    .map((w: { word: string; word_count: number }) => ({
-      word: w.word,
-      word_count: Number(w.word_count),
-    }));
-  const wordmapTotal = wordmapRaw?.length ?? previewWords.length;
-
-  const maxCount =
-    previewWords.length > 0
-      ? Math.max(...previewWords.map((w) => w.word_count))
-      : 1;
-
-  const cleanTitle = (goal.title ?? "").replace(/\s*해낼게\s*$/, "").trim();
   const renderPastGoals = (limit?: number) => (
     <div className="mt-2">
       {pastGoals
@@ -257,7 +179,7 @@ export default async function ReceiverHomePage({
     <>
       <HomeSeenTracker />
       <ReceiverPageShell testId="receiver-home-page">
-        <ReceiverTopBar variant="home" />
+        <ReceiverTopBar variant="home" title="내 목표" />
 
         {member && (
           <PhoneConsentNotice
@@ -295,9 +217,6 @@ export default async function ReceiverHomePage({
 
         {inProgressGoals.length > 0 && (
           <section className="mb-6" data-testid="home-goal-list">
-            <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">
-              진행 중인 목표 {inProgressGoals.length}개
-            </p>
             {inProgressGoals.map((listedGoal) => (
               <MyGoalListCard
                 key={listedGoal.id}
@@ -316,126 +235,14 @@ export default async function ReceiverHomePage({
           </section>
         )}
 
-        <div className="mb-5 grid grid-cols-2 gap-2">
-          <Link href="/onboarding" className="rounded-md bg-primary px-3 py-3 text-center text-sm font-extrabold text-primary-foreground">＋ 새 목표 만들기</Link>
+        <div className="mb-5 grid gap-2">
+          <Link href="/onboarding" className="w-full rounded-md bg-primary px-3 py-3 text-center text-sm font-extrabold text-primary-foreground">＋ 새 목표 만들기</Link>
           <Link
             href={pendingCashout ? "/cashout/status" : "/cashout"}
-            className="rounded-md border border-border bg-card px-3 py-3 text-center text-sm font-extrabold text-foreground"
+            className="flex w-full items-center justify-between rounded-md border border-border bg-card px-4 py-3 text-sm font-extrabold text-foreground"
             data-testid={pendingCashout ? "cashout-button-pending" : eligibility?.reached_threshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
-          >{pendingCashout ? "환전 진행 보기" : "클로버 환전하기"}</Link>
+          ><span>🍀 모은 클로버로 환전하기</span><span>{pendingCashout ? "환전 진행 보기 ›" : `${availableAmount}개 지급 가능 ›`}</span></Link>
         </div>
-
-        <section className="mb-5" data-testid="primary-goal-details">
-
-        {/* 목표 제목 */}
-        <p className="receiver-goal-title mb-2" data-testid="goal-title">
-          {cleanTitle}
-          <br />{PRODUCT_COPY.TEXT_001}</p>
-
-        {/* D-day 칩 */}
-        {goal.due_date && (
-          <div className="flex gap-2 mb-4">
-            <DdayChip dueDate={goal.due_date} />
-            {goal.status !== "ACTIVE" && (
-              <StatusChip
-                status={goal.status as "ACTIVE" | "CLOSED" | "DELETED"}
-              />
-            )}
-          </div>
-        )}
-
-        <GoalEditSheet
-          goalId={goal.id}
-          initialTitle={cleanTitle}
-          initialReason={goal.reason}
-          initialDueDate={goal.due_date}
-          status={goal.status as "ACTIVE" | "CLOSED" | "DELETED"}
-          editable={goal.status === "ACTIVE"}
-        />
-
-        <CheerSummaryBar goal={cheerSummaryByGoal.get(goal.id) ?? emptyCheerSummary} />
-
-        <Link
-          href={`/me/goal/${goal.id}`}
-          className="mb-3 flex min-h-11 items-center justify-center rounded-sm bg-accent px-4 text-[13px] font-bold text-accent-foreground"
-          data-testid="primary-goal-manage-link"
-        >{PRODUCT_COPY.TEXT_002}</Link>
-
-        {/* 친구에게 보이는 화면 미리보기 (본인 방문 시 OwnerBar 표시) */}
-        <Link
-          href={`/g/${goal.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mb-4 block rounded-sm bg-muted px-4 py-3 text-center text-[13px] font-semibold text-accent-foreground"
-          data-testid="friend-view-preview-link"
-        >{PRODUCT_COPY.TEXT_003}</Link>
-
-        {cashoutStatus && (
-          <Link
-            href="/cashout/history"
-            className="mb-3 flex items-center justify-between rounded-md border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground"
-            data-testid="cashout-history-link"
-          >
-            <span>{PRODUCT_COPY.TEXT_008}</span>
-            <span className="text-[length:var(--text-label-small)]! font-medium text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_009}{cashoutStatus.id} ›
-            </span>
-          </Link>
-        )}
-
-        {/* 응원자 수 */}
-        <div className="mb-3">
-          <CheerCount count={cheerCount} />
-        </div>
-
-        {/* 응원자 목록 (이름/익명 + 본인 한정 클로버 개수, ₩ 환산 X) */}
-        <CheerList
-          cheers={cheers}
-          totalCount={cheerCount}
-          searchQuery={cheerSearchQuery}
-        />
-
-        {/* 워드맵 미니 상한. 승인 v3.7처럼 응원 목록 다음에 6개와 초과 수를 함께 둔다. */}
-        {previewWords.length > 0 && (
-          <div
-            className="mb-4 overflow-hidden rounded-md border border-border bg-card leading-relaxed"
-            data-testid="wordmap-mini-preview"
-          >
-            <div className="px-4 py-4">
-              <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">{PRODUCT_COPY.TEXT_010}</p>
-              <div className="flex flex-wrap gap-2">
-                {previewWords.map((w) => {
-                  const emphasized = maxCount > 0 && w.word_count === maxCount;
-                  return (
-                    <span
-                      key={w.word}
-                      className={`inline-block max-w-full truncate rounded-lg border border-primary bg-accent px-3 py-2 text-[length:var(--text-label-small)]! text-accent-foreground ${emphasized ? "font-extrabold" : "font-bold"}`}
-                      title={w.word}
-                    >
-                      {w.word}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-            {wordmapTotal > WORDMAP_PREVIEW_LIMIT && (
-              <p
-                className="border-t border-border px-4 py-3 text-[length:var(--text-label-small)]! text-muted-foreground"
-                data-testid="wordmap-overflow-summary"
-              >
-                <strong className="text-accent-foreground">
-                  {WORDMAP_PREVIEW_LIMIT}{PRODUCT_COPY.TEXT_011}</strong>{" "}
-                · {wordmapTotal - WORDMAP_PREVIEW_LIMIT}{PRODUCT_COPY.TEXT_012}</p>
-            )}
-          </div>
-        )}
-
-        {/* 목록을 가리지 않는 문서 흐름 CTA. 긴 응원에서도 검색 카드 아래에만 나타난다. */}
-        <Link
-          href={`/wordmap/${goal.id}`}
-          className="block w-full rounded-md border border-border bg-card p-4 text-center text-[15px] font-extrabold tracking-[-0.2px] text-foreground"
-          data-testid="wordmap-view-cta"
-        >{PRODUCT_COPY.TEXT_013}</Link>
-        </section>
 
         {/* 지난 목표 — 마감(due_date < 오늘) 목표를 접어서 둔다(설계 §4.5). */}
         {pastGoals.length > 0 && (

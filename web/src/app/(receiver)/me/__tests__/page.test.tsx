@@ -23,6 +23,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 const cheerIlike = vi.fn();
 
@@ -132,13 +133,14 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
   });
 
   it(
-    "응원마다 clover_amount(🍀 N)와 '나만 보임'을 인접해 노출한다",
+    "홈 카드에는 금액 없이 응원 인원과 최근 메시지를 노출하고 관리로 연결한다",
     async () => {
       // 전체 스위트 병렬 실행에서는 첫 Next.js 서버 컴포넌트 import가 5초를 넘길 수 있다.
       vi.mocked(createServerSupabaseClient).mockResolvedValue(
         buildSupabase([
           {
             id: 1,
+            goal_id: 1,
             display_name: "민지",
             is_anonymous: false,
             message: "화이팅",
@@ -151,20 +153,20 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
       const { default: ReceiverHomePage } = await import("../page");
       const element = await ReceiverHomePage();
       render(element);
-      expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 5");
-      expect(
-        screen.getByRole("group", { name: "클로버 5개, 1번째 응원, 나만 보임" }),
-      ).toBeInTheDocument();
-      expect(screen.getByTestId("cheer-item-ordinal")).toHaveTextContent("1번째");
+      expect(screen.getByTestId("cheer-summary-bar")).toHaveTextContent("1명이 응원했어요");
+      expect(screen.getByTestId("cheer-summary-bar")).toHaveTextContent("민지: 화이팅");
+      expect(screen.getByTestId("my-goal-list-card-detail-link")).toHaveAttribute("href", "/me/goal/1");
+      expect(document.body).not.toHaveTextContent("🍀 5");
     },
     15000,
   );
 
-  it("익명 응원도 개수와 '나만 보임'은 표시한다(익명=신원 은닉, 수입 은닉 아님)", async () => {
+  it("익명 응원도 홈 요약에는 신원·금액 없이 인원수만 표시한다", async () => {
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase([
         {
           id: 2,
+          goal_id: 1,
           display_name: null,
           is_anonymous: true,
           message: null,
@@ -177,11 +179,8 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     const { default: ReceiverHomePage } = await import("../page");
     const element = await ReceiverHomePage();
     render(element);
-    expect(screen.getByText("익명의 누군가")).toBeInTheDocument();
-    expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 3");
-    expect(
-      screen.getByRole("group", { name: "클로버 3개, 1번째 응원, 나만 보임" }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("cheer-summary-bar")).toHaveTextContent("1명이 응원했어요");
+    expect(screen.queryByText("🍀 3")).not.toBeInTheDocument();
   });
 
   it("응원이 없으면 개별 프라이버시 라벨을 만들지 않는다", async () => {
@@ -196,7 +195,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     expect(screen.queryByTestId("cheer-item-ordinal")).not.toBeInTheDocument();
   });
 
-  it("갭C(2026-07-20): 내 응원 링크 복사 카드가 /me에 항상 렌더된다", async () => {
+  it("갭C(2026-07-20): 내 응원 링크 공유 동작이 /me 카드에 항상 렌더된다", async () => {
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase([]) as never,
     );
@@ -205,20 +204,19 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     const element = await ReceiverHomePage();
     render(element);
 
-    expect(screen.getByTestId("my-link-card")).toBeInTheDocument();
-    expect(screen.getByTestId("my-link-url")).toHaveTextContent("/g/dogyeong");
     expect(screen.getByTestId("my-link-copy-button")).toBeInTheDocument();
+    expect(screen.getByTestId("my-link-copy-button")).toHaveTextContent("응원 링크 공유");
   });
 
-  it("목표의 why를 내 페이지에서 조회하고 편집 시트를 열 수 있다", async () => {
+  it("목표의 why를 홈 카드에서 읽고 목표 관리 편집 화면으로 이동할 수 있다", async () => {
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase([]) as never,
     );
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
-    expect(screen.getByTestId("goal-reason")).toHaveTextContent("건강해지려고");
-    expect(screen.getByTestId("open-goal-edit-sheet")).toBeInTheDocument();
+    expect(screen.getByText("건강해지려고")).toBeInTheDocument();
+    expect(screen.getByTestId("my-goal-list-card-manage-link")).toHaveAttribute("href", "/me/goal/1");
   });
 
   it("전화번호가 없는 회원에게만 카카오 재동의 안내를 보여준다", async () => {
@@ -249,7 +247,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     expect(screen.queryByTestId("phone-consent-notice")).not.toBeInTheDocument();
   });
 
-  it("TC-OV-02 정상 경로: 121번째 응원 검색을 이름과 메시지 서버 쿼리로 실행한다", async () => {
+  it("TC-OV-02 정상 경로: /me 검색은 대표 목표의 서버 검색 경로로 전달한다", async () => {
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase([
         {
@@ -264,25 +262,20 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     );
 
     const { default: ReceiverHomePage } = await import("../page");
-    render(await ReceiverHomePage({ searchParams: Promise.resolve({ q: "121번째" }) }));
-    expect(cheerIlike).toHaveBeenCalledWith("display_name", "%121번째%");
-    expect(cheerIlike).toHaveBeenCalledWith("message", "%121번째%");
-    expect(screen.getByTestId("receiver-cheer-list")).toHaveTextContent("121번째 응원 메시지");
-    expect(screen.getByTestId("cheer-overflow-summary")).toHaveTextContent("1개 찾았어요");
+    await expect(ReceiverHomePage({ searchParams: Promise.resolve({ q: "121번째" }) }))
+      .rejects.toThrow("NEXT_REDIRECT");
+    expect(redirect).toHaveBeenCalledWith("/me/goal/1?q=121%EB%B2%88%EC%A7%B8");
   });
 
-  it("TC-OV-02 빈 결과: GET 검색 뒤 0건 안내와 검색 초기화를 접기 없이 바로 노출한다", async () => {
+  it("TC-OV-02 빈 결과도 같은 목표 관리 검색 경로에서 판정하도록 전달한다", async () => {
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase([], "01012345678", { reached_threshold: false }, 121) as never,
     );
 
     const { default: ReceiverHomePage } = await import("../page");
-    render(await ReceiverHomePage({ searchParams: Promise.resolve({ q: "없는응원" }) }));
-
-    expect(screen.getByTestId("primary-goal-details")).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent("검색 결과가 없어요");
-    expect(screen.getByRole("link", { name: "전체 목록" })).toHaveAttribute("href", "/me");
-    expect(screen.queryByRole("button", { name: /대표 목표 상세 관리/ })).not.toBeInTheDocument();
+    await expect(ReceiverHomePage({ searchParams: Promise.resolve({ q: "없는응원" }) }))
+      .rejects.toThrow("NEXT_REDIRECT");
+    expect(redirect).toHaveBeenCalledWith("/me/goal/1?q=%EC%97%86%EB%8A%94%EC%9D%91%EC%9B%90");
   });
 
   it("TC-OV-03 거절 경로: 검색 필터 메타문자만 들어오면 서버 검색을 실행하지 않는다", async () => {
@@ -297,7 +290,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     expect(screen.queryByRole("search")).not.toBeInTheDocument();
   });
 
-  it("TC-V37-03 정상 경로: 워드 100개 중 미리보기는 승인 시안대로 6개만 표시한다", async () => {
+  it("TC-V37-03 정상 경로: 워드맵은 홈에 중복하지 않고 목표 관리 경로로 연결한다", async () => {
     const words = Array.from({ length: 100 }, (_, index) => ({
       word: `응원 ${index + 1}`,
       word_count: 100 - index,
@@ -308,10 +301,8 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
-    expect(screen.getByTestId("wordmap-mini-preview").querySelectorAll("span")).toHaveLength(6);
-    expect(screen.getByTestId("wordmap-overflow-summary")).toHaveTextContent(
-      "6개 표시 · 94개는 전체 워드맵에서 확인",
-    );
+    expect(screen.queryByTestId("wordmap-mini-preview")).not.toBeInTheDocument();
+    expect(screen.getByTestId("my-goal-list-card-detail-link")).toHaveAttribute("href", "/me/goal/1");
   });
 
   it("TC-V37-03 거절 경로: 워드가 없으면 빈 미리보기 카드를 만들지 않는다", async () => {
@@ -378,7 +369,7 @@ describe("/me 다중 목표 목록", () => {
 
     // 승인 계약의 홈 목표 목록에 최근 응원 도착순으로 목표가 모두 렌더됨.
     const goalList = screen.getByTestId("home-goal-list");
-    expect(screen.getByText("진행 중인 목표 2개")).toBeInTheDocument();
+    expect(screen.getByTestId("home-progress-summary")).toHaveTextContent("2개의 목표를 향해 가는 중이에요");
     expect(within(goalList).getByText(/목표A/)).toBeInTheDocument();
     expect(within(goalList).getByText(/목표B/)).toBeInTheDocument();
     const cards = within(goalList).getAllByTestId("my-goal-list-card");
@@ -416,7 +407,7 @@ describe("/me 다중 목표 목록", () => {
     render(await ReceiverHomePage());
 
     expect(screen.getByTestId("home-goal-list")).toBeInTheDocument();
-    expect(screen.getByText("진행 중인 목표 1개")).toBeInTheDocument();
+    expect(screen.getByTestId("home-progress-summary")).toHaveTextContent("1개의 목표를 향해 가는 중이에요");
     expect(screen.queryByTestId("past-goals-section")).not.toBeInTheDocument();
   });
 });

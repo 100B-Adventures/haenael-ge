@@ -7,6 +7,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/components/receiver/ReceiverShell", () => ({
   ReceiverPageShell: ({ children }: { children: React.ReactNode }) => <main>{children}</main>,
   ReceiverTopBar: () => <header>업적</header>,
+  ReceiverBrandMark: () => <span>해낼게.</span>,
   BackHomeLink: ({ label }: { label: string }) => <a href="/my">{label}</a>,
 }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));

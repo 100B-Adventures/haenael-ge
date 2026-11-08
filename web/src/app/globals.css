@@ -1109,10 +1109,15 @@
     inset: 0;
     overflow-y: auto;
     width: 100%;
+    background: var(--background);
+  }
+  .goal-cover-options-inner {
+    width: 100%;
+    min-height: 100%;
     max-width: var(--receiver-native-width);
     margin-inline: auto;
-    background: var(--background);
     padding: var(--space-mobile-gutter);
+    background: var(--background);
   }
   .goal-cover-options-head {
     margin-bottom: var(--sp-4);
@@ -1157,6 +1162,22 @@
   }
   .goal-cover-picker-preview .goal-cover-mark {
     display: none;
+  }
+  .cover-preset-grid .goal-cover-mark {
+    display: none;
+  }
+
+  .social-cash-status-hero {
+    text-align: center;
+  }
+  .social-cash-status-clover {
+    display: block;
+    margin-bottom: var(--sp-2);
+    font-size: 2rem;
+  }
+  .social-cash-status-steps {
+    padding-inline: 0;
+    background: transparent;
   }
   .goal-cover-picker-toggle {
     position: absolute;
@@ -4162,6 +4183,11 @@
   .admin-member-disclosure > .collapse-chevron {
     position: absolute;
     top: 0;
+    right: 0;
+  }
+  .admin-alert-disclosure > .collapse-chevron {
+    position: absolute;
+    top: var(--sp-2);
     right: 0;
   }
   .admin-cashout-card {

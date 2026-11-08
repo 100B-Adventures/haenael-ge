@@ -148,7 +148,7 @@ export function GoalCoverUploadEditor({
         disabled={busy || preparing}
         onClick={() => inputRef.current?.click()}
       >
-        <span aria-hidden="true">↑</span>기기에서 사진 찾기
+        <span aria-hidden="true">↑</span>{compact ? "내 사진 올리기" : "기기에서 사진 찾기"}
       </button>
       {!compact && <p className="social-muted">10MB 이하 사진을 고르면 배너 비율로 잘라 기존 5MB 업로드 계약에 맞춰요.</p>}
       {error && <p className="social-error" role="alert">{error}</p>}

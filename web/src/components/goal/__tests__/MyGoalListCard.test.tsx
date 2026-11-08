@@ -34,6 +34,21 @@ it("CS-UI-01 내 목표 카드에 금액·순위 없이 응원 요약을 표시�
   expect(screen.getByTestId("cheer-summary-bar")).toHaveTextContent("+3");
   expect(screen.getByText(/익명의 누군가: 꾸준히 가요/)).toBeInTheDocument();
   expect(document.body).not.toHaveTextContent(/₩|\d[\d,]*원|순위/);
+  expect(screen.getByTestId("my-goal-list-card-manage-link")).toHaveAttribute(
+    "href",
+    "/me/goal/7",
+  );
+  expect(screen.getByTestId("my-goal-list-card-detail-link")).toHaveAttribute(
+    "href",
+    "/me/goal/7",
+  );
+  expect(screen.getByRole("button", { name: /링크 복사/ })).toBeInTheDocument();
+
+  const card = screen.getByTestId("my-goal-list-card");
+  const manage = screen.getByTestId("my-goal-list-card-manage-link");
+  const summary = screen.getByTestId("my-goal-list-card-detail-link");
+  expect(card.compareDocumentPosition(manage) & Node.DOCUMENT_POSITION_CONTAINED_BY).toBeTruthy();
+  expect(manage.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 });
 
 it("CS-03 응원 0명 목표는 요약 바 대신 빈 상태를 표시한다", () => {

@@ -237,7 +237,7 @@ export function CheerPaymentButton({
         orderName: order.orderName,
         customerName: isAnonymous ? "익명 응원자" : displayName || "응원자",
         successUrl: `${appUrl}/payment/success?goalSlug=${encodeURIComponent(goalSlug)}`,
-        failUrl: `${appUrl}/payment/fail`,
+        failUrl: `${appUrl}/payment/fail?goalSlug=${encodeURIComponent(goalSlug)}`,
         metadata: {
           goalId: String(goalId),
           goalTitle: goalTitle.slice(0, 80),

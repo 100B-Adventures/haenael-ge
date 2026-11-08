@@ -12,9 +12,10 @@ import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-mylinkcard";
 
 export interface MyLinkCardProps {
   slug: string;
+  variant?: "card" | "button";
 }
 
-export function MyLinkCard({ slug }: MyLinkCardProps) {
+export function MyLinkCard({ slug, variant = "card" }: MyLinkCardProps) {
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const [appUrl, setAppUrl] = useState(
@@ -73,6 +74,27 @@ export function MyLinkCard({ slug }: MyLinkCardProps) {
     : copyFailed
       ? "내 응원 링크 복사 다시 시도"
       : "내 응원 링크 복사";
+
+  if (variant === "button") {
+    return (
+      <button
+        type="button"
+        onClick={handleCopy}
+        className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-sm px-3 text-[12.5px] font-bold transition-colors ${
+          copied
+            ? "bg-primary text-primary-foreground"
+            : copyFailed
+              ? "bg-danger-soft text-danger-ink"
+              : "bg-primary text-primary-foreground"
+        }`}
+        data-testid="my-link-copy-button"
+        aria-label={copyLabel}
+      >
+        {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+        {copied ? "응원 링크 복사됨" : copyFailed ? "다시 복사하기" : "응원 링크 공유"}
+      </button>
+    );
+  }
 
   return (
     <div

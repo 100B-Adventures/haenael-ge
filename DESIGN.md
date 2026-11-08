@@ -499,7 +499,7 @@ motion:
 
 **규칙 (신규 화면은 이걸 상속한다).**
 - 받는사람 라인의 모든 화면은 ②를 그대로 상속하고 본문만 채운다. 배경색·좌우 여백·상하 여백을 화면에서 새로 정하지 않는다.
-- 홈(`/me`) = ③ `home` 상단 바. 홈에서 진입하는 하위 화면(`/cashout`, `/cashout/status`, `/wordmap/*`) = ③ `detail` 상단 바 + ④ 하단 회수 링크. detail 상단 바는 현재 위치를, 하단 링크는 다음 경로를 담당하므로 함께 쓴다. 어느 쪽도 없는 하위 화면은 dead-end이므로 §6 "dead-end 0" 위반이다.
+- 홈(`/me`) = ③ `home` 상단 바. 홈에서 진입하는 하위 화면(`/cashout`, `/cashout/status`, `/wordmap/*`) = ③ `detail` 상단 바 + ④ 하단 회수 링크. 단, D-049 승인 프로토타입이 화면명을 중앙에 둔 `/cashout/status`와 `/cashout/history`는 `.social-detail-head`를 사용하고, 내역 화면만 마이 활성 하단 탭을 유지한다. detail 상단 바는 현재 위치를, 하단 링크는 다음 경로를 담당하므로 함께 쓴다. 어느 쪽도 없는 하위 화면은 dead-end이므로 §6 "dead-end 0" 위반이다.
 - 친구가 보는 목표 페이지(`/g/[slug]`)는 ③·④ 둘 다 없다. 로그인한 주인이 자기 목표를 볼 때만 owner bar가 뜬다(§6-(b′)). 이건 shell 이탈이 아니라 §0이 정한 화면 분리다.
 
 ✅ **운영 1.2.0에서 shell 공유 완료.** route layout을 추가하지 않고 `web/src/components/receiver/ReceiverShell.tsx`의 세 컴포넌트와 `globals.css`의 `.receiver-page-frame`으로 수렴했다. 이 방식은 로딩 화면까지 같은 셸을 재사용하며, 페이지별 본문 상태만 달라진다.

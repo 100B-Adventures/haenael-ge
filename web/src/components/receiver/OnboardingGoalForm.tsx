@@ -435,10 +435,6 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
               autoComplete="off"
               autoFocus
             />
-            <span
-              className="flex-shrink-0 text-[13px] font-bold [color:var(--accent-foreground)]!"
-              // --clover-ink
-            >{PRODUCT_COPY.TEXT_007}</span>
           </div>
           {errors.title && (
             <p className="text-[12px] [color:var(--destructive)]!" role="alert">
@@ -452,10 +448,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           <label
             htmlFor="goal-reason"
             className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
-          >
-            WHY{" "}
-            <span className="text-[10px] font-normal normal-case [color:var(--muted-color)]!">{PRODUCT_COPY.TEXT_009}</span>
-          </label>
+          >{PRODUCT_COPY.TEXT_009}</label>
           <textarea
             id="goal-reason"
             value={values.reason}
@@ -498,8 +491,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         {/* D-028-A: 목표를 쓰는 흐름 안에서 커버 프리셋과 직접 업로드를 선택한다. */}
         <section className="goal-cover-picker" data-testid="onboarding-cover-picker">
           <div className="cover-picker-heading">
-            <strong>목표 커버</strong>
-            <span>목표에 어울리는 사진을 골라 주세요.</span>
+            <strong>목표 배너</strong>
           </div>
           <div className="goal-cover-picker-preview">
             <GoalCover
@@ -507,7 +499,12 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
               imageUrl={coverPreviewUrl}
               title={values.title || "내 목표"}
               size="hero"
+              priority
             />
+          </div>
+          <div className="cover-picker-heading">
+            <strong>배너 고르기</strong>
+            <span>자동 = 목표에 맞춰 고른 사진</span>
           </div>
           <GoalCoverUploadEditor
             compact

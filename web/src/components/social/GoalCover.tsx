@@ -5,12 +5,13 @@ import {
 } from "./goal-cover-presets";
 
 export function GoalCover(
-  { presetKey, imageUrl, title, size = "card", caption }: {
+  { presetKey, imageUrl, title, size = "card", caption, priority = false }: {
     presetKey?: string | null;
     imageUrl?: string | null;
     title: string;
     size?: "card" | "hero" | "banner";
     caption?: string;
+    priority?: boolean;
   },
 ) {
   const resolvedPreset = resolveGoalCoverPreset(presetKey, title);
@@ -28,6 +29,7 @@ export function GoalCover(
         sizes="(max-width: 1023px) 100vw, 640px"
         className="goal-cover-image"
         unoptimized={Boolean(imageUrl)}
+        priority={priority}
       />
       <span className="goal-cover-shade" aria-hidden="true" />
       {caption && <span className="goal-cover-caption">{caption}</span>}
