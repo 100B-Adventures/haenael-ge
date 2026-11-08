@@ -32,4 +32,12 @@ describe("/terms 운영 정합", () => {
     expect(page).toHaveTextContent("확정된 세무 판단이 아닙니다");
     expect(page).toHaveTextContent("관계 법령과 전문가 검토 결과에 따라 달라질 수");
   });
+
+  it("TC-TERMS-04 HTML entity 문자열을 사용자 화면에 그대로 노출하지 않는다", () => {
+    render(<TermsPage />);
+
+    const page = screen.getByTestId("terms-page");
+    expect(page).toHaveTextContent("“해낼게”");
+    expect(page.textContent).not.toMatch(/&(ldquo|rdquo|lt|gt|amp|quot);/);
+  });
 });

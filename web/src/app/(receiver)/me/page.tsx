@@ -12,7 +12,6 @@ import { DdayChip, StatusChip } from "@/components/goal/DdayChip";
 import { CheerCount } from "@/components/goal/CheerCount";
 import { PhoneConsentNotice } from "@/components/auth/PhoneConsentNotice";
 import { HomeSeenTracker } from "@/components/goal/HomeSeenTracker";
-import { MyLinkCard } from "@/components/goal/MyLinkCard";
 import { GoalEditSheet } from "@/components/goal/GoalEditSheet";
 import { MyGoalListCard } from "@/components/goal/MyGoalListCard";
 import { SplitBalanceCard } from "@/components/goal/SplitBalanceCard";
@@ -140,7 +139,6 @@ export default async function ReceiverHomePage({
   // 미리보기·수정·친구뷰 미리보기)를 그대로 유지한다. 나머지 진행 중 목표와
   // 지난 목표는 설계 §4.5 표대로 간단 카드(제목·D-day·응원수·링크복사)로만 둔다.
   const goal = inProgressGoals[0] ?? pastGoals[0];
-  const otherInProgressGoals = inProgressGoals.slice(1);
 
   // K1: 클로버 잔액 (개수 — 주표기) + 환전 잠금(A안, FDD §9.1): total/locked/available을
   // clover_eligibility 한 함수 한 스냅샷에서 받는다(clover_balance 직접 조회 폐기 — I1 보장).
@@ -269,6 +267,28 @@ export default async function ReceiverHomePage({
           />
         )}
 
+        {inProgressGoals.length > 0 && (
+          <section className="mb-6" data-testid="home-goal-list">
+            <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">
+              진행 중인 목표 {inProgressGoals.length}개
+            </p>
+            {inProgressGoals.map((listedGoal) => (
+              <MyGoalListCard
+                key={listedGoal.id}
+                goal={{
+                  id: listedGoal.id,
+                  slug: listedGoal.slug,
+                  title: stripSuffix(listedGoal.title),
+                  due_date: listedGoal.due_date,
+                  status: listedGoal.status as "ACTIVE" | "CLOSED" | "DELETED",
+                  cheerSummary: cheerSummaryByGoal.get(listedGoal.id) ?? emptyCheerSummary,
+                  coverPresetKey: listedGoal.cover_preset_key,
+                }}
+              />
+            ))}
+          </section>
+        )}
+
         {/* 목표 제목 */}
         <p className="receiver-goal-title mb-2" data-testid="goal-title">
           {cleanTitle}
@@ -302,9 +322,6 @@ export default async function ReceiverHomePage({
           className="mb-3 flex min-h-11 items-center justify-center rounded-sm bg-accent px-4 text-[13px] font-bold text-accent-foreground"
           data-testid="primary-goal-manage-link"
         >{PRODUCT_COPY.TEXT_002}</Link>
-
-        {/* 내 응원 링크 재접근 (user-flow.md §1.3 갭3, 2026-07-20) */}
-        <MyLinkCard slug={goal.slug} />
 
         {/* 친구에게 보이는 화면 미리보기 (본인 방문 시 OwnerBar 표시) */}
         <Link
@@ -425,27 +442,6 @@ export default async function ReceiverHomePage({
           className="block w-full rounded-md border border-border bg-card p-4 text-center text-[15px] font-extrabold tracking-[-0.2px] text-foreground"
           data-testid="wordmap-view-cta"
         >{PRODUCT_COPY.TEXT_013}</Link>
-
-        {/* 다중 목표(설계 §4.5): 진행 중인 다른 목표들 — 세로 스택, 간단 카드 */}
-        {otherInProgressGoals.length > 0 && (
-          <div className="mt-6" data-testid="other-goals-section">
-            <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">{PRODUCT_COPY.TEXT_014}</p>
-            {otherInProgressGoals.map((g) => (
-              <MyGoalListCard
-                key={g.id}
-                goal={{
-                  id: g.id,
-                  slug: g.slug,
-                  title: stripSuffix(g.title),
-                  due_date: g.due_date,
-                  status: g.status as "ACTIVE" | "CLOSED" | "DELETED",
-                  cheerSummary: cheerSummaryByGoal.get(g.id) ?? emptyCheerSummary,
-                  coverPresetKey: g.cover_preset_key,
-                }}
-              />
-            ))}
-          </div>
-        )}
 
         {/* 지난 목표 — 마감(due_date < 오늘) 목표를 접어서 둔다(설계 §4.5). */}
         {pastGoals.length > 0 && (

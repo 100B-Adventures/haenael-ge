@@ -8,10 +8,17 @@
 //  idle → filling (사용자 입력) → login-required (미인증) → saving (DB insert) → done (SlinkCard)
 //  로그인 후 복귀: 마운트 시 user 있고 draft 있으면 → auto-save
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { User } from "@supabase/supabase-js";
+import { Check } from "lucide-react";
 import { LoginSheet } from "@/components/auth";
 import { ShareLinkCard } from "@/components/goal/ShareLinkCard";
+import { GoalCover } from "@/components/social/GoalCover";
+import {
+  automaticGoalCoverKey,
+  GOAL_COVER_PRESETS,
+  type GoalCoverPresetKey,
+} from "@/components/social/goal-cover-presets";
 import {
   saveDraft,
   loadDraft,
@@ -22,7 +29,14 @@ import {
   saveSaveIntent,
   hasSaveIntent,
   clearSaveIntent,
+  saveDraftCoverFile,
+  loadDraftCoverFile,
+  clearDraftCoverFile,
 } from "@/lib/utils/draft";
+import {
+  isValidGoalCoverFile,
+  uploadGoalCoverFile,
+} from "@/lib/goal-cover/upload";
 import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-receiver-onboardinggoalform";
@@ -36,6 +50,17 @@ interface FormValues {
   title: string;
   reason: string;
   due_date: string;
+}
+
+type SaveGoalResult =
+  | { slug: string; coverUploadWarning?: string }
+  | { error: string }
+  | { goalLimitReached: true };
+
+const COVER_KEYS = new Set<string>(GOAL_COVER_PRESETS.map((preset) => preset.key));
+
+function coverKeyOrNull(value: string | null | undefined): GoalCoverPresetKey | null {
+  return value && COVER_KEYS.has(value) ? value as GoalCoverPresetKey : null;
 }
 
 // ─── 유효성 검사 ──────────────────────────────────────────────────────────────
@@ -78,17 +103,24 @@ function defaultDueDate(): string {
 
 async function saveGoalToDB(
   values: FormValues,
-): Promise<{ slug: string } | { error: string } | { goalLimitReached: true }> {
+  coverPresetKey: GoalCoverPresetKey | null,
+  coverFile: File | null,
+): Promise<SaveGoalResult> {
   const supabase = createClient();
-
-  const { data, error } = await supabase.rpc("create_goal", {
+  const baseArgs = {
     p_title: values.title.trim(),
     // DB가 NULLIF(btrim(p_reason), '')로 빈 문자열을 NULL로 정규화한다.
     // gen types가 p_reason을 string(non-null)으로 좁혀 null 리터럴은 타입 에러 —
     // GoalEditSheet(update_goal)와 동일하게 빈 문자열로 맞춘다.
     p_reason: values.reason.trim() || "",
     p_due_date: values.due_date,
-  });
+  };
+  const { data, error } = coverPresetKey
+    ? await supabase.rpc("create_goal", {
+        ...baseArgs,
+        p_cover_preset_key: coverPresetKey,
+      })
+    : await supabase.rpc("create_goal", baseArgs);
 
   if (error) {
     // goal_limit_reached: create_goal이 진행 중 목표 3개 초과 시 명시 코드로 던짐.
@@ -104,12 +136,41 @@ async function saveGoalToDB(
     console.error("[OnboardingGoalForm] create_goal returned no slug:", data);
     return { error: "목표 생성에 실패했습니다." };
   }
+
+  if (!coverFile) return { slug: row.slug };
+
+  const { data: createdGoal, error: goalLookupError } = await supabase
+    .from("goal")
+    .select("id")
+    .eq("slug", row.slug)
+    .single();
+  if (goalLookupError || !createdGoal?.id) {
+    console.error("[OnboardingGoalForm] created goal lookup failed", goalLookupError);
+    return {
+      slug: row.slug,
+      coverUploadWarning: "목표는 저장됐지만 사진 업로드를 시작하지 못했어요. 목표 관리에서 다시 올려 주세요.",
+    };
+  }
+
+  const uploadResult = await uploadGoalCoverFile(
+    supabase,
+    createdGoal.id,
+    coverFile,
+  );
+  if (!uploadResult.ok) {
+    console.error("[OnboardingGoalForm] cover upload failed", uploadResult);
+    return {
+      slug: row.slug,
+      coverUploadWarning: "목표는 저장됐지만 사진 검수를 마치지 못했어요. 목표 관리에서 다시 올려 주세요.",
+    };
+  }
   return { slug: row.slug };
 }
 
 // ─── 컴포넌트 ─────────────────────────────────────────────────────────────────
 
 export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<User | null>(initialUser);
   const [values, setValues] = useState<FormValues>({
     title: "",
@@ -124,6 +185,16 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
   const [autoSaveDone, setAutoSaveDone] = useState(false);
+  const [coverPreset, setCoverPreset] = useState<GoalCoverPresetKey | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const [coverError, setCoverError] = useState<string | null>(null);
+  const [coverUploadWarning, setCoverUploadWarning] = useState<string | null>(null);
+  const effectiveCoverPreset = coverPreset ?? automaticGoalCoverKey(values.title);
+
+  useEffect(() => () => {
+    if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl);
+  }, [coverPreviewUrl]);
 
   // ── 마운트: draft 복원 + 로그인 후 자동저장 ─────────────────────────────────
   useEffect(() => {
@@ -136,7 +207,15 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     }
 
     const draft = loadDraft();
-    if (draft) {
+    void (async () => {
+      const restoredCoverFile = await loadDraftCoverFile().catch(() => null);
+      if (restoredCoverFile) {
+        setCoverFile(restoredCoverFile);
+        setCoverPreviewUrl(URL.createObjectURL(restoredCoverFile));
+      }
+      if (!draft) return;
+      const restoredPreset = coverKeyOrNull(draft.cover_preset_key);
+      setCoverPreset(restoredPreset);
       setValues({
         title: draft.title,
         reason: draft.reason ?? "",
@@ -144,35 +223,37 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
       });
 
       // 링크는 로그인 이후에만 발급(회장 2026-07-19): 세션(user)만으로는 자동
-      // 커밋하지 않는다 — "저장하고 내 링크 받기" 버튼을 실제로 눌렀던 draft
-      // (hasSaveIntent)만, 로그인 후 복귀 시 1회 자동 커밋한다.
+      // 커밋하지 않는다. 저장 의도가 있는 draft만 OAuth 복귀 뒤 한 번 저장한다.
       if (user && !autoSaveDone && hasSaveIntent()) {
         setAutoSaveDone(true);
         setIsSaving(true);
-        saveGoalToDB({
-          title: draft.title,
-          reason: draft.reason ?? "",
-          due_date: draft.due_date || defaultDueDate(),
-        }).then((result) => {
-          setIsSaving(false);
-          clearSaveIntent();
-          if ("goalLimitReached" in result) {
-            // 상한 도달(설계 §4.6): 쓴 글을 날리지 않는다 — draft를 지우지 않고
-            // 폼으로 돌아가 안내만 한다.
-            setSaveError(
-              "진행 중인 목표가 이미 3개예요. 하나를 마무리한 뒤 새로 만들어 주세요.",
-            );
-          } else if ("error" in result) {
-            setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
-          } else {
-            clearDraft();
-            savePendingSlug(result.slug);
-            setSavedSlug(result.slug);
-            trackEvent("goal_created", { source: "oauth_return" });
-          }
-        });
+        const result = await saveGoalToDB(
+          {
+            title: draft.title,
+            reason: draft.reason ?? "",
+            due_date: draft.due_date || defaultDueDate(),
+          },
+          restoredPreset,
+          restoredCoverFile,
+        );
+        setIsSaving(false);
+        clearSaveIntent();
+        if ("goalLimitReached" in result) {
+          setSaveError(
+            "진행 중인 목표가 이미 3개예요. 하나를 마무리한 뒤 새로 만들어 주세요.",
+          );
+        } else if ("error" in result) {
+          setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
+        } else {
+          clearDraft();
+          await clearDraftCoverFile().catch(() => undefined);
+          savePendingSlug(result.slug);
+          setCoverUploadWarning(result.coverUploadWarning ?? null);
+          setSavedSlug(result.slug);
+          trackEvent("goal_created", { source: "oauth_return" });
+        }
       }
-    }
+    })();
     // user 상태 변화도 감지 (Supabase 세션 변화)
     const supabase = createClient();
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -196,6 +277,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           title: next.title,
           reason: next.reason,
           due_date: next.due_date,
+          cover_preset_key: coverPreset ?? undefined,
         });
         return next;
       });
@@ -204,8 +286,35 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         setErrors((prev) => ({ ...prev, [field]: undefined }));
       }
     },
-    [errors],
+    [coverPreset, errors],
   );
+
+  const selectCoverPreset = (preset: GoalCoverPresetKey) => {
+    setCoverPreset(preset);
+    setCoverFile(null);
+    setCoverPreviewUrl(null);
+    setCoverError(null);
+    void clearDraftCoverFile().catch(() => undefined);
+    saveDraft({
+      title: values.title,
+      reason: values.reason,
+      due_date: values.due_date,
+      cover_preset_key: preset,
+    });
+  };
+
+  const prepareCoverFile = (file: File) => {
+    if (!isValidGoalCoverFile(file)) {
+      setCoverError("JPG, PNG, WEBP 형식의 5MB 이하 사진을 선택해 주세요.");
+      return;
+    }
+    setCoverError(null);
+    setCoverFile(file);
+    setCoverPreviewUrl(URL.createObjectURL(file));
+    void saveDraftCoverFile(file).catch(() => {
+      setCoverError("사진을 임시 보관하지 못했어요. 다시 선택해 주세요.");
+    });
+  };
 
   // ── 저장 버튼 ────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
@@ -223,6 +332,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         title: values.title,
         reason: values.reason,
         due_date: values.due_date,
+        cover_preset_key: coverPreset ?? undefined,
       });
       setShowLoginSheet(true);
       return;
@@ -231,7 +341,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     // 인증 상태 → 버튼 클릭 = 명시적 저장 의도. 즉시 DB 저장(정상 플로우).
     setIsSaving(true);
     setSaveError(null);
-    const result = await saveGoalToDB(values);
+    const result = await saveGoalToDB(values, coverPreset, coverFile);
     setIsSaving(false);
 
     if ("goalLimitReached" in result) {
@@ -244,6 +354,8 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     } else {
       clearDraft();
       clearSaveIntent();
+      await clearDraftCoverFile().catch(() => undefined);
+      setCoverUploadWarning(result.coverUploadWarning ?? null);
       setSavedSlug(result.slug);
       trackEvent("goal_created", { source: "onboarding" });
     }
@@ -254,6 +366,11 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     return (
       <div className="w-full max-w-sm mx-auto px-[22px] py-10">
         <ShareLinkCard slug={savedSlug} goalTitle={values.title || PRODUCT_COPY.TEXT_001} />
+        {coverUploadWarning && (
+          <p className="mt-3 rounded-md bg-amber-soft p-3 text-sm text-amber-ink" role="status">
+            {coverUploadWarning}
+          </p>
+        )}
       </div>
     );
   }
@@ -374,6 +491,67 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             {values.reason.length}/200
           </p>
         </div>
+
+        {/* D-028-A: 목표를 쓰는 흐름 안에서 커버 프리셋과 직접 업로드를 선택한다. */}
+        <section className="goal-cover-picker" data-testid="onboarding-cover-picker">
+          <div className="cover-picker-heading">
+            <strong>목표 커버</strong>
+            <span>목표에 어울리는 사진을 골라 주세요.</span>
+          </div>
+          <div className="goal-cover-picker-preview">
+            <GoalCover
+              presetKey={effectiveCoverPreset}
+              imageUrl={coverPreviewUrl}
+              title={values.title || "내 목표"}
+              size="hero"
+            />
+          </div>
+          <input
+            ref={coverInputRef}
+            type="file"
+            className="sr-only"
+            accept="image/jpeg,image/png,image/webp"
+            data-testid="onboarding-cover-file-input"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.currentTarget.value = "";
+              if (file) prepareCoverFile(file);
+            }}
+          />
+          <button
+            type="button"
+            className="cover-picker-upload-entry"
+            onClick={() => coverInputRef.current?.click()}
+          >
+            <span aria-hidden="true">↑</span>
+            {coverFile ? "다른 사진 고르기" : "내 사진 올리기"}
+          </button>
+          <div className="cover-preset-grid" role="group" aria-label="목표 커버 선택">
+            {GOAL_COVER_PRESETS.map((preset) => (
+              <button
+                key={preset.key}
+                type="button"
+                onClick={() => selectCoverPreset(preset.key)}
+                className={coverPreset === preset.key ? "is-selected" : undefined}
+                aria-pressed={coverPreset === preset.key}
+                data-testid={`onboarding-cover-${preset.key}`}
+              >
+                <GoalCover presetKey={preset.key} title={preset.label} />
+                {coverPreset === preset.key && (
+                  <Check className="selection-check" data-testid="selection-check" aria-hidden="true" />
+                )}
+                <span>
+                  {preset.label}
+                  {!coverPreset && preset.key === effectiveCoverPreset && <small>자동</small>}
+                </span>
+              </button>
+            ))}
+          </div>
+          {coverError && <p className="social-error" role="alert">{coverError}</p>}
+          {coverFile && !coverError && (
+            <p className="social-success" role="status">저장하면 사진 검수를 바로 시작해요.</p>
+          )}
+        </section>
 
         {/* 저장 에러 */}
         {saveError && (

@@ -75,6 +75,14 @@ async function routeStagingOriginWithoutToolbar(context: BrowserContext) {
   });
 }
 
+async function dismissAnalyticsConsent(page: import("@playwright/test").Page) {
+  const banner = page.getByTestId("analytics-consent-banner");
+  if (await banner.isVisible()) {
+    await banner.getByRole("button", { name: "국외 이전에 동의하지 않음" }).click();
+    await expect(banner).toBeHidden();
+  }
+}
+
 async function runFixtureSql(sql: string) {
   if (!IS_STAGING) {
     return execFileSync("docker", [
@@ -215,10 +223,20 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
 
     // ── 목표 1 ──────────────────────────────────────────────────────────────
     await page.goto("/onboarding");
+    await dismissAnalyticsConsent(page);
     await page.getByTestId("goal-title-input").fill("편입 평점 4.0");
     await page.getByTestId("goal-due-date-input").fill("2030-01-01");
+    await page.getByTestId("onboarding-cover-run").click();
     await page.getByTestId("save-goal-button").click();
     await expect(page.getByTestId("share-link-card")).toBeVisible();
+    const { data: firstGoal, error: firstGoalError } = await admin
+      .from("goal")
+      .select("cover_preset_key")
+      .eq("member_id", userId)
+      .eq("title", "편입 평점 4.0 해낼게")
+      .single();
+    expect(firstGoalError).toBeNull();
+    expect(firstGoal?.cover_preset_key).toBe("run");
 
     // ── 목표 2: 온보딩은 항상 열려 있어야 한다(설계 §4.5 — /me로 쫓아내지 않음) ──
     await page.goto("/onboarding");
@@ -234,8 +252,10 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
     // 최근 응원 도착순 정렬(§4.3-1)에서 응원이 둘 다 없으면 생성 역순 —
     // 나중에 만든 "토익 900"이 primary(goal-title)로 온다.
     await expect(page.getByTestId("goal-title")).toContainText("토익 900");
-    await expect(page.getByTestId("other-goals-section")).toBeVisible();
-    await expect(page.getByText(/편입 평점 4\.0/)).toBeVisible();
+    const goalList = page.getByTestId("home-goal-list");
+    await expect(goalList).toBeVisible();
+    await expect(goalList.getByText(/편입 평점 4\.0/)).toBeVisible();
+    await expect(goalList.getByText(/토익 900/)).toBeVisible();
 
     await context.close();
   });
@@ -288,6 +308,7 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
     const page = await context.newPage();
 
     await page.goto("/onboarding");
+    await dismissAnalyticsConsent(page);
     await page.getByTestId("goal-title-input").fill("네번째 목표");
     await page.getByTestId("goal-due-date-input").fill("2030-04-01");
     await page.getByTestId("save-goal-button").click();

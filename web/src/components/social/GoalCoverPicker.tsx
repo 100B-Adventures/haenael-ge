@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { setGoalCoverPresetAction } from "@/app/(receiver)/social-actions";
 import { createClient } from "@/lib/supabase/client";
+import {
+  isValidGoalCoverFile,
+  uploadGoalCoverFile,
+  type GoalCoverUploadFailureStage,
+} from "@/lib/goal-cover/upload";
 import { GoalCover } from "./GoalCover";
 import { automaticGoalCoverKey, GOAL_COVER_PRESETS, resolveGoalCoverPreset } from "./goal-cover-presets";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-goalcoverpicker";
 
-const MAX_BYTES = 5 * 1024 * 1024;
-type FailureStage = "format" | "preset" | "sign" | "put" | "finalize";
+type FailureStage = GoalCoverUploadFailureStage | "preset";
 
 const FAILURE_COPY: Record<FailureStage, string> = {
   format: "JPG, PNG, WEBP 형식의 5MB 이하 사진을 선택해 주세요.",
@@ -19,21 +23,6 @@ const FAILURE_COPY: Record<FailureStage, string> = {
   put: "사진 전송이 끊겼어요. 네트워크를 확인하고 다시 시도해 주세요.",
   finalize: "사진은 전송됐지만 검수 요청을 마치지 못했어요. 다시 시도해 주세요.",
 };
-
-function functionStatus(error: unknown) {
-  const context = (error as { context?: unknown } | null)?.context;
-  return context instanceof Response ? context.status : null;
-}
-
-async function sha256Hex(file: File) {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    await file.arrayBuffer(),
-  );
-  return Array.from(new Uint8Array(digest)).map((value) =>
-    value.toString(16).padStart(2, "0")
-  ).join("");
-}
 
 export function GoalCoverPicker(
   { goalId, title, initialPreset, imageUrl }: {
@@ -75,7 +64,7 @@ export function GoalCoverPicker(
     router.refresh();
   }
   function prepareUpload(file: File) {
-    if (!file.type.match(/^image\/(jpeg|png|webp)$/) || file.size < 1 || file.size > MAX_BYTES) {
+    if (!isValidGoalCoverFile(file)) {
       fail("format", "invalid_file");
       return;
     }
@@ -85,39 +74,15 @@ export function GoalCoverPicker(
     setPreviewUrl(URL.createObjectURL(file));
   }
   async function upload(file: File) {
-    if (
-      !file.type.match(/^image\/(jpeg|png|webp)$/) || file.size < 1 ||
-      file.size > MAX_BYTES
-    ) return fail("format", "invalid_file");
+    if (!isValidGoalCoverFile(file)) return fail("format", "invalid_file");
     setFailureStage(null);
     setState("uploading");
     try {
-      const contentSha256 = await sha256Hex(file);
       const supabase = createClient();
-      const { data: signData, error: signError } = await supabase.functions
-        .invoke("goal-cover-sign-upload", {
-          body: {
-            goal_id: goalId,
-            file_name: file.name,
-            mime_type: file.type,
-            byte_size: file.size,
-            content_sha256: contentSha256,
-          },
-        });
-      if (signError || !signData?.upload_url || !signData?.asset_id) {
-        return fail("sign", signError ? "edge_function_error" : "invalid_sign_response", functionStatus(signError));
+      const result = await uploadGoalCoverFile(supabase, goalId, file);
+      if (!result.ok) {
+        return fail(result.stage, result.code, result.status);
       }
-      const uploadResponse = await fetch(signData.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type, "x-upsert": "false" },
-        body: file,
-      });
-      if (!uploadResponse.ok) return fail("put", "storage_put_failed", uploadResponse.status);
-      const { error: finalizeError } = await supabase.functions.invoke(
-        "goal-cover-finalize",
-        { body: { asset_id: signData.asset_id, content_sha256: contentSha256 } },
-      );
-      if (finalizeError) return fail("finalize", "edge_function_error", functionStatus(finalizeError));
       setPendingFile(null);
       setPreviewUrl(null);
       setState("review");

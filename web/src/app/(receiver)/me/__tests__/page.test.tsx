@@ -1,7 +1,7 @@
 // (receiver)/me/page.test.tsx — 개별 클로버 개수(🍀 N) 노출 + 익명도 노출 검증.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: vi.fn(),
@@ -369,9 +369,14 @@ describe("/me 다중 목표 목록", () => {
 
     // primary = 목표A(최근 응원 도착)
     expect(screen.getByTestId("goal-title")).toHaveTextContent("목표A");
-    // 목표B는 "다른 진행 중 목표" 섹션의 간단 카드로 렌더됨
-    expect(screen.getByTestId("other-goals-section")).toBeInTheDocument();
-    expect(screen.getByText(/목표B/)).toBeInTheDocument();
+    // 승인 계약의 홈 목표 목록에 primary와 나머지 진행 목표가 모두 렌더됨.
+    const goalList = screen.getByTestId("home-goal-list");
+    expect(screen.getByText("진행 중인 목표 2개")).toBeInTheDocument();
+    expect(within(goalList).getByText(/목표A/)).toBeInTheDocument();
+    expect(within(goalList).getByText(/목표B/)).toBeInTheDocument();
+    const cards = within(goalList).getAllByTestId("my-goal-list-card");
+    expect(cards[0]).toHaveTextContent("목표A");
+    expect(cards[1]).toHaveTextContent("목표B");
   });
 
   it("마감 지난 목표는 '지난 목표' 접힘 구역에 들어가고 기본은 닫혀 있다", async () => {
@@ -395,7 +400,7 @@ describe("/me 다중 목표 목록", () => {
     expect(screen.getByText(/지난목표/)).toBeInTheDocument();
   });
 
-  it("목표가 하나뿐이면 다른 목표·지난 목표 섹션을 렌더하지 않는다(회귀 방지)", async () => {
+  it("목표가 하나뿐이어도 홈 목표 목록을 렌더하고 지난 목표 섹션은 만들지 않는다", async () => {
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase([]) as never,
     );
@@ -403,7 +408,8 @@ describe("/me 다중 목표 목록", () => {
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
 
-    expect(screen.queryByTestId("other-goals-section")).not.toBeInTheDocument();
+    expect(screen.getByTestId("home-goal-list")).toBeInTheDocument();
+    expect(screen.getByText("진행 중인 목표 1개")).toBeInTheDocument();
     expect(screen.queryByTestId("past-goals-section")).not.toBeInTheDocument();
   });
 });

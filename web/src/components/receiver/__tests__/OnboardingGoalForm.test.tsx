@@ -20,6 +20,9 @@ import { OnboardingGoalForm } from "../OnboardingGoalForm";
 import { loadDraft, hasSaveIntent, clearDraft, clearSaveIntent } from "@/lib/utils/draft";
 
 const mockRpc = vi.fn();
+const mockInvoke = vi.fn();
+const mockGoalLookup = vi.fn();
+const mockFetch = vi.fn();
 const mockTrackEvent = vi.fn();
 const mockOnAuthStateChange = vi.fn(() => ({
   data: { subscription: { unsubscribe: vi.fn() } },
@@ -38,6 +41,12 @@ vi.mock("@/lib/analytics", () => ({
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     auth: { onAuthStateChange: mockOnAuthStateChange },
+    from: () => ({
+      select: () => ({
+        eq: () => ({ single: () => mockGoalLookup() }),
+      }),
+    }),
+    functions: { invoke: (...args: unknown[]) => mockInvoke(...args) },
     rpc: (...args: unknown[]) => {
       mockRpc(...args);
       return Promise.resolve(mockRpcResult);
@@ -61,6 +70,25 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     vi.clearAllMocks();
     localStorage.clear();
     mockRpcResult = { data: [{ slug: "test-slug" }], error: null };
+    mockGoalLookup.mockResolvedValue({ data: { id: 101 }, error: null });
+    mockInvoke.mockImplementation((name: string) => Promise.resolve(
+      name === "goal-cover-sign-upload"
+        ? { data: { upload_url: "https://upload.test/cover", asset_id: "asset-1" }, error: null }
+        : { data: { ok: true }, error: null },
+    ));
+    mockFetch.mockResolvedValue(new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", mockFetch);
+    vi.stubGlobal("crypto", {
+      subtle: { digest: vi.fn(async () => new Uint8Array([1, 2]).buffer) },
+    });
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: vi.fn(() => "blob:goal-cover"),
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: vi.fn(),
+    });
   });
 
   it("① 미인증 상태에서 저장 클릭 → LoginSheet만 뜨고 DB 저장은 안 함", async () => {
@@ -147,6 +175,62 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
       expect(mockRpc).toHaveBeenCalledTimes(1);
     });
     expect(hasSaveIntent()).toBe(false);
+  });
+
+  it("⑤ 선택한 커버 프리셋을 create_goal 계약에 함께 저장한다", async () => {
+    render(<OnboardingGoalForm initialUser={fakeUser} />);
+    fillForm();
+    fireEvent.click(screen.getByTestId("onboarding-cover-run"));
+    fireEvent.click(screen.getByTestId("save-goal-button"));
+
+    await waitFor(() => {
+      expect(mockRpc).toHaveBeenCalledWith(
+        "create_goal",
+        expect.objectContaining({ p_cover_preset_key: "run" }),
+      );
+    });
+  });
+
+  it("⑥ 직접 고른 사진은 목표 생성 뒤 sign → PUT → finalize 순서로 업로드한다", async () => {
+    render(<OnboardingGoalForm initialUser={fakeUser} />);
+    fillForm();
+    const file = new File(["image-bytes"], "goal.webp", { type: "image/webp" });
+    Object.defineProperty(file, "arrayBuffer", {
+      value: async () => new TextEncoder().encode("image-bytes").buffer,
+    });
+    fireEvent.change(screen.getByTestId("onboarding-cover-file-input"), {
+      target: { files: [file] },
+    });
+    fireEvent.click(screen.getByTestId("save-goal-button"));
+
+    await waitFor(() => expect(mockInvoke).toHaveBeenCalledTimes(2));
+    expect(mockInvoke).toHaveBeenNthCalledWith(
+      1,
+      "goal-cover-sign-upload",
+      expect.objectContaining({ body: expect.objectContaining({ goal_id: 101 }) }),
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://upload.test/cover",
+      expect.objectContaining({ method: "PUT", body: file }),
+    );
+    expect(mockInvoke).toHaveBeenNthCalledWith(
+      2,
+      "goal-cover-finalize",
+      expect.objectContaining({ body: expect.objectContaining({ asset_id: "asset-1" }) }),
+    );
+  });
+
+  it("⑦ 허용하지 않는 사진 형식은 목표 저장 전에 거절한다", async () => {
+    render(<OnboardingGoalForm initialUser={fakeUser} />);
+    const file = new File(["not-an-image"], "goal.gif", { type: "image/gif" });
+    fireEvent.change(screen.getByTestId("onboarding-cover-file-input"), {
+      target: { files: [file] },
+    });
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "JPG, PNG, WEBP 형식의 5MB 이하 사진",
+    );
+    expect(mockInvoke).not.toHaveBeenCalled();
   });
 
   it("④ [다중 목표 설계 §4.6] 상한(3개) 도달 시 /me로 쫓아내지 않고 draft를 보존한 채 인라인 안내", async () => {
