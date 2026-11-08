@@ -1,3 +1,22 @@
+# 릴리스 매니페스트: 해낼게 2.1.2
+
+```yaml
+release: 2.1.2
+date: 2026-11-08
+status: releasing
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.1.1 (62585130)
+approval: 회장 2026-11-08 13:4x "일단 수정을 했으면은 메인 한번 올려봐봐" (staging 회장 확인 전 main 반영 지시)
+ships:
+  code: 데스크톱 1024px 수신자 프레임(my·invite·friend detail), 과거 응원 줄바꿈 단어 보존, 친구·초대 공유 버튼 눌림 상태
+  migrations: none
+qa_gate:
+  approved: false
+  note: 10:19 독립 검증 FAIL 지적분 수정. 수정본 독립 재검증은 배포 뒤 진행. staging 회귀 기록 = ed6c310
+```
+
 # 릴리스 매니페스트: 해낼게 2.1.1
 
 ```yaml
