@@ -1,5 +1,20 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-08 11:4x KST: 독립 검증 FAIL(D1~D5) 반영 재QA, source `14c991d`
+
+| QA 축 | 판정 | 관찰 결과 | 증거 |
+|---|---|---|---|
+| 배포 신원 | PASS | staging sourceSha `14c991dfcc2be1b8798fb9c0da5292033a7f59bd` | `/api/health` |
+| regression-full 단일 실행 | PASS | 45 passed, retries 0, EXIT 0, 결제 원복 HTTP 503 | `.goal/runs/g5-reg-full-20261108-r6.log` |
+| 모바일 크기(D5) | PASS | 받는사람 4화면 × 9폭 = 36행 위반 0. 첫 측정(7a6760e)에서 친구 목록 눌림 비율 0.5, 초대 생성 0.71 → `14c991d` 에서 초대 아이콘·친구 행·공유 2버튼 `:active` 추가 | `.goal/runs/g5-cap3.log`(전), `.goal/runs/g5-cap4.log`(후) |
+| 안내문 어절 줄바꿈(D2) | PASS | `.friends-history > p` 에 `word-break: keep-all`, `G4-FRIEND-HISTORY-01` 에 단언 추가 | 커밋 `7a6760e` |
+| 디자인 대조표(D3·D4) | 친구 목록 1건 불일치 | 8열로 재작성, 근거를 현재 배포본 캡처 `g5-cap4` 로 교체 | `design-conformance-matrix.md` 11:4x |
+| 친구 목록 섹션(D1) | 불일치(판정 기록 대기) | 시안에 없는 섹션. 귀속 없는 게스트 응원이라 D-024 친구 연결 대상 아님 | 위 대조표 |
+
+- r5(7a6760e) 는 43/45 였다: `QA-TC-SP-02` 브라우저 닫힘, `QA-TC-CV-02` 커버 버튼이 저장 중 비활성 상태에서 단언. 같은 두 테스트는 14c991d 표적 실행과 r6 전체에서 PASS. 114 자원 부하로 본다(재현 0).
+
+STAMP: 2026-11-08 11:4x KST | line v2 | source `14c991d` | agent Claude 세션(claude-opus-5-5) | 상태 독립 검증 재호출 전
+
 ## 2026-11-08 10:40 KST: V2 2.1.1 + 5d1f7cd staging 재QA (Claude 세션, Goal 5회차 대행)
 
 **판정: 회귀 PASS, 디자인 정합은 친구 목록 1건 미확인으로 독립 검증에 넘김.** staging sourceSha `5d1f7cdc35589701350cbfaa2a38147393d2134f`.
