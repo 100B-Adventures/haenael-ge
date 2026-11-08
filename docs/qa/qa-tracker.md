@@ -1,5 +1,23 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-08 10:40 KST: V2 2.1.1 + 5d1f7cd staging 재QA (Claude 세션, Goal 5회차 대행)
+
+**판정: 회귀 PASS, 디자인 정합은 친구 목록 1건 미확인으로 독립 검증에 넘김.** staging sourceSha `5d1f7cdc35589701350cbfaa2a38147393d2134f`.
+
+| QA 축 | 판정 | 관찰 결과 | 증거 |
+|---|---|---|---|
+| 배포 신원·health | PASS | sourceSha 브랜치 HEAD 일치, database ok | `/api/health` |
+| regression-full 단일 실행 | PASS | 45 passed, retries 0, EXIT 0, 결제 비활성 원복 HTTP 503 | `.goal/runs/g5-reg-full-20261108-r4.log` |
+| 데스크톱 폭(DESIGN.md §3.7) | PASS | 받는사람 화면 6개가 1440px에서 정렬선 x=230, 1024px에서 x=22, 본문 폭 980px 1단 | `.goal/runs/g5-cap2-1440/`, `.goal/runs/g5-cap2-1024/` |
+| 단위 테스트 | PASS | 519/519 | `.goal/runs/g5-unit.log` |
+
+- 수정: `web/src/app/globals.css` 에서 마이·업적·초대 생성·친구 상세의 390px 상한 제거(커밋 `5d1f7cd`). 기준은 프로토타입 390 프레임이 아니라 DESIGN.md §3.7 레이아웃 표(데스크톱 1024px 상한, 받는사람 1단, 환전 신청만 2단, 페이지별 max-w 금지)다.
+- 앞선 단일 실행 r1~r3 은 각 1건 실패였다. r1 은 `GITHUB_SHA` 미주입(QA-TC-GT-02), r2·r3 은 `ERR_NETWORK_CHANGED`. 114 에서 다른 프로젝트의 Testcontainers 가 Docker veth 장치를 수시로 만들고 지워 Chrome 이 네트워크 변경으로 페이지 로드를 끊는다. 제품 결함 아님. 회귀 명령에 SHA 주입을 넣었다.
+- 배포 사고: 첫 staging 배포(`haenael-gf11m4m4g`)는 worktree 에 남은 03:24 의 `web/.next` 빌드 결과물이 업로드돼 예전 CSS 로 나갔다. 결과물을 치우고 `--force` 로 재배포해 해결. delivery.staging_deploy 는 저장소 루트에서 실행한다(Vercel Root Directory=web).
+- 남은 것: 친구 목록 「과거 응원 기록」. 결정 D-024 대로 계정 귀속이 있는 응원 쌍은 이미 친구다(trigger·backfill). 섹션은 귀속 없는 확정 응원만 보인다. 귀속은 없지만 `cheer.supporter_ci` 가 `member.ci` 와 맞아 계정을 특정할 수 있는 행이 운영에 있는지는 이 세션에 운영 DB 읽기 권한이 없어 미확인이다(staging 0건).
+
+STAMP: 2026-11-08 10:40 KST | line v2 | source `5d1f7cd` | agent Claude 세션(claude-opus-5-5) | 상태 독립 검증 대기
+
 ## 2026-11-08 04:30 KST: V2 v2.1.1 current staging QA
 
 **판정: ❌ changes-requested.** staging source SHA는 의도한 `62585130ceaa56a4677e67cea597a0ac0b12697f`와 일치한다. 개별 기능 경로는 full run 37건과 실패 8건 표적 재실행을 합쳐 모두 통과했지만, 단일 전체 회귀 실행은 **37/45 FAIL**이고 디자인 정합은 **9/9 불일치**다. 따라서 QA `/approve`와 운영 배포가 가능하다고 판정하지 않는다.
