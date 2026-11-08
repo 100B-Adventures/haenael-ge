@@ -2225,9 +2225,25 @@ test.describe("V2 web-first social slice", () => {
     if (s2CaptureDir) {
       await captureS2Step(page, `${s2CaptureDir}/09-cover-preset-saved-reloaded-390.png`);
     }
+    const waitForStableCoverImage = async () => {
+      const coverImage = page.getByTestId("goal-cover-picker")
+        .getByTestId("goal-cover").first().locator("img");
+      await expect.poll(() => coverImage.evaluate(async (element) => {
+        const image = element as HTMLImageElement;
+        const source = image.currentSrc;
+        if (!source || !image.complete || image.naturalWidth <= 0) return false;
+        try {
+          await image.decode();
+        } catch {
+          return false;
+        }
+        return image.currentSrc === source && image.complete && image.naturalWidth > 0;
+      }), { timeout: 15_000 }).toBe(true);
+    };
     const coverViewportMetrics: Array<Record<string, unknown>> = [];
     for (const width of [360, 390, 412, 600, 700, 780, 820, 900, 1000]) {
       await page.setViewportSize({ width, height: 844 });
+      await waitForStableCoverImage();
       await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
       const metrics = await measureCanonicalErgonomics(page);
       console.info("S2_COVER_ERGONOMICS", JSON.stringify({ width, ...metrics }));
@@ -2243,6 +2259,7 @@ test.describe("V2 web-first social slice", () => {
       coverViewportMetrics.push({ width, ...metrics });
     }
     await page.setViewportSize({ width: 390, height: 844 });
+    await waitForStableCoverImage();
     await waitForVisualReady(page, ["[data-testid=goal-cover-picker]"]);
     await expect(page.locator(".goal-cover-picker-preview .goal-cover-mark")).toBeHidden();
     await expect(page.getByTestId("wordmap").locator(".wordmap-heart")).toHaveCount(0);
