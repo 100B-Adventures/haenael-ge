@@ -139,6 +139,8 @@
   --sp-6: 32px;
   --cta-h: 118px;
   --cheer-clamp-lines: 2;
+  /* 받는사람 셸 화면(마이·업적·초대 생성·친구 상세)은 DESIGN.md §3.7 대로 .receiver-page-frame 1024px 1단을 쓴다.
+     이 값은 셸 밖 공개 화면(랜딩·법적 고지·공개 목표 본문·초대 수락 카드)에만 쓴다. */
   --receiver-native-width: 390px;
   --profile-avatar-size: 52px;
   --wordmap-text-small: 1rem;
@@ -1996,11 +1998,6 @@
     margin-top: 0.625rem;
   }
 
-  [data-testid="my-page"],
-  [data-testid="achievements-page"] {
-    max-width: var(--receiver-native-width);
-  }
-
   .my-page-stack {
     display: grid;
     gap: 1.125rem;
@@ -2866,7 +2863,6 @@
 
   .invite-flow {
     display: grid;
-    max-width: var(--receiver-native-width);
     gap: 0;
     margin-top: -0.375rem;
   }
@@ -3554,9 +3550,6 @@
     line-height: 1.4;
   }
 
-  .friend-detail {
-    max-width: var(--receiver-native-width);
-  }
   .friend-detail .goal-cover--hero {
     height: 6rem;
   }
