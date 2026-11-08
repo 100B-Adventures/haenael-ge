@@ -3923,7 +3923,10 @@ test.describe("V2 web-first social slice", () => {
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/me", { waitUntil: "domcontentloaded" });
-    const summary = page.getByTestId("cheer-summary-bar").filter({ hasText: "23명이 응원했어요" });
+    const summary = page
+      .getByTestId("home-goal-list")
+      .getByTestId("cheer-summary-bar")
+      .filter({ hasText: "23명이 응원했어요" });
     await expect(summary).toBeVisible();
     await expect(summary.locator(".cheer-summary-avatars > span")).toHaveCount(3);
     await expect(summary.locator(".cheer-summary-avatars > strong")).toHaveText("+20");

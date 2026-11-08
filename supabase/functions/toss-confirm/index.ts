@@ -1,4 +1,4 @@
-// toss-confirm — POST: 서버승인 + payment DONE + cheer CONFIRMED + ledger EARN
+// toss-confirm — POST: 확정 영수증 재조회 또는 서버승인 + payment DONE + cheer CONFIRMED + ledger EARN
 // architecture: 토스 서버승인(paymentKey+orderId+amount) → 원장 EARN → cheer CONFIRMED 원자적.
 //
 // 알림(N1/N2): 받는사람 인앱 알림은 confirm_cheer_payment RPC 트랜잭션 안에서
@@ -114,13 +114,7 @@ export async function handleTossConfirm(req: Request) {
     });
   }
 
-  if (Deno.env.get("PAYMENTS_ENABLED") !== "true") {
-    return json(503, {
-      error: {
-        code: "payments_disabled",
-      },
-    });
-  }
+  const paymentsEnabled = Deno.env.get("PAYMENTS_ENABLED") === "true";
 
   const authHeader = req.headers.get("Authorization") ?? "";
   if (!authHeader.startsWith("Bearer ")) {
@@ -172,6 +166,9 @@ export async function handleTossConfirm(req: Request) {
   });
 
   if (action === "lease_conversion") {
+    if (!paymentsEnabled) {
+      return json(503, { error: { code: "payments_disabled" } });
+    }
     const conversionDelivery = await leaseBrowserConversion(
       supabase,
       orderId,
@@ -189,25 +186,26 @@ export async function handleTossConfirm(req: Request) {
     return json(400, { error: { code: "validation_error" } });
   }
 
-  const tossSecretKey = Deno.env.get("TOSS_SECRET_KEY");
-  if (!tossSecretKey) {
-    await sendSlackAlert({
-      event: "toss_confirm_missing_env",
-      severity: "critical",
-      summary: "toss-confirm missing TOSS_SECRET_KEY",
-    });
-    return json(503, {
-      error: {
-        code: "missing_toss_secret",
-      },
-    });
-  }
-
   const { data: existingPayment, error: paymentLookupErr } = await supabase
     .from("payment")
-    .select("id,amount_krw,status")
+    .select("id,amount_krw,status,payment_key")
     .eq("order_id", orderId)
     .single();
+
+  // 결제가 꺼진 Preview에서도 이미 확정된 영수증만 읽을 수 있다. 신규 처리와
+  // 주문 존재 여부는 계속 숨기며, paymentKey·amount가 정확한 DONE 행만 아래의
+  // 기존 RPC 검증으로 보낸다.
+  if (
+    !paymentsEnabled && (
+      paymentLookupErr || !existingPayment ||
+      existingPayment.status !== "DONE" ||
+      existingPayment.amount_krw !== amount ||
+      typeof existingPayment.payment_key !== "string" ||
+      existingPayment.payment_key !== paymentKey
+    )
+  ) {
+    return json(503, { error: { code: "payments_disabled" } });
+  }
 
   if (paymentLookupErr || !existingPayment) {
     return json(404, {
@@ -243,13 +241,12 @@ export async function handleTossConfirm(req: Request) {
       return json(409, { error: { code: toPublicError(error?.message).code } });
     }
 
-    // 웹훅이 먼저 확정했거나 최초 송신이 유실된 경우의 복구 경로. 키가 같아 수신 측에서 한 건이 된다.
-    firePay(orderId, amount);
-    const conversionDelivery = await leaseBrowserConversion(
-      supabase,
-      orderId,
-      paymentKey,
-    );
+    // 결제 기능이 켜진 환경에서만 전환 송신을 복구한다. 비활성 Preview의 DONE
+    // 경로는 영수증 읽기 전용이며 외부 송신이나 새 lease를 만들지 않는다.
+    if (paymentsEnabled) firePay(orderId, amount);
+    const conversionDelivery = paymentsEnabled
+      ? await leaseBrowserConversion(supabase, orderId, paymentKey)
+      : { state: "unavailable" as const };
     return json(200, {
       paymentId: data[0].payment_id,
       cheerId: data[0].cheer_id,
@@ -261,6 +258,24 @@ export async function handleTossConfirm(req: Request) {
         ? conversionDelivery.lease
         : null,
       conversionDelivery,
+    });
+  }
+
+  if (!paymentsEnabled) {
+    return json(503, { error: { code: "payments_disabled" } });
+  }
+
+  const tossSecretKey = Deno.env.get("TOSS_SECRET_KEY");
+  if (!tossSecretKey) {
+    await sendSlackAlert({
+      event: "toss_confirm_missing_env",
+      severity: "critical",
+      summary: "toss-confirm missing TOSS_SECRET_KEY",
+    });
+    return json(503, {
+      error: {
+        code: "missing_toss_secret",
+      },
     });
   }
 

@@ -3,6 +3,212 @@ import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { handleTossConfirm } from "./index.ts";
 
 Deno.test(
+  "결제 비활성 + 이미 DONE인 정확한 영수증은 외부 처리 없이 200으로 읽는다",
+  async () => {
+    Deno.env.set("PAYMENTS_ENABLED", "false");
+    Deno.env.set("SUPABASE_URL", "https://sb.test");
+    Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "svc");
+    Deno.env.delete("TOSS_SECRET_KEY");
+    Deno.env.delete("OPS_EVENT_URL");
+    Deno.env.delete("OPS_EVENT_TOKEN");
+
+    const calledUrls: string[] = [];
+    const realFetch = globalThis.fetch;
+    const realEdgeRuntime = (globalThis as unknown as { EdgeRuntime?: unknown })
+      .EdgeRuntime;
+    globalThis.fetch = ((input: Request | URL | string) => {
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
+      calledUrls.push(url);
+      if (url.includes("/rest/v1/payment?")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              id: 1,
+              amount_krw: 1000,
+              status: "DONE",
+              payment_key: "payment-key-done",
+            }),
+            { status: 200, headers: { "content-type": "application/json" } },
+          ),
+        );
+      }
+      if (url.includes("/rest/v1/rpc/confirm_cheer_payment")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify([{
+              payment_id: 1,
+              cheer_id: 2,
+              member_id: "member-1",
+              goal_title: "목표 해낼게",
+              display_name: "응원자",
+            }]),
+            { status: 200, headers: { "content-type": "application/json" } },
+          ),
+        );
+      }
+      return Promise.resolve(new Response("{}", { status: 404 }));
+    }) as typeof fetch;
+
+    try {
+      const rejected = await handleTossConfirm(paymentRequest(
+        "order-done-disabled",
+        "payment-key-wrong",
+        1000,
+      ));
+      assertEquals(rejected.status, 503);
+      assertEquals(await rejected.json(), {
+        error: { code: "payments_disabled" },
+      });
+      assertEquals(
+        calledUrls.some((url) => url.includes("confirm_cheer_payment")),
+        false,
+      );
+
+      const response = await handleTossConfirm(paymentRequest(
+        "order-done-disabled",
+        "payment-key-done",
+        1000,
+      ));
+      assertEquals(response.status, 200);
+      assertEquals(await response.json(), {
+        paymentId: 1,
+        cheerId: 2,
+        memberId: "member-1",
+        goalTitle: "목표 해낼게",
+        displayName: "응원자",
+        idempotent: true,
+        conversionLease: null,
+        conversionDelivery: { state: "unavailable" },
+      });
+      assertEquals(
+        calledUrls.some((url) => url.includes("/v1/payments/confirm")),
+        false,
+      );
+      assertEquals(
+        calledUrls.some((url) => url.includes("lease_payment_conversion")),
+        false,
+      );
+
+      // 외부 송신 환경이 실제로 갖춰져 있어도 비활성 DONE 재조회는 pay 이벤트를
+      // 예약하지 않는다. TOSS_SECRET_KEY가 없어 firePay가 조용히 끝나는 경우와 구분한다.
+      Deno.env.set("TOSS_SECRET_KEY", "live_sk_contract");
+      Deno.env.set(
+        "OPS_EVENT_URL",
+        "https://ops-external-watchdog.rosemallow95.workers.dev/v1/event",
+      );
+      Deno.env.set("OPS_EVENT_TOKEN", "ops-contract-token");
+      const waits: Promise<unknown>[] = [];
+      (globalThis as unknown as { EdgeRuntime: unknown }).EdgeRuntime = {
+        waitUntil: (promise: Promise<unknown>) => waits.push(promise),
+      };
+      const replay = await handleTossConfirm(paymentRequest(
+        "order-done-disabled",
+        "payment-key-done",
+        1000,
+      ));
+      assertEquals(replay.status, 200);
+      await Promise.all(waits);
+      assertEquals(waits.length, 0);
+      assertEquals(
+        calledUrls.some((url) => url.includes("ops-external-watchdog")),
+        false,
+      );
+    } finally {
+      globalThis.fetch = realFetch;
+      (globalThis as unknown as { EdgeRuntime?: unknown }).EdgeRuntime =
+        realEdgeRuntime;
+      Deno.env.delete("TOSS_SECRET_KEY");
+      Deno.env.delete("OPS_EVENT_URL");
+      Deno.env.delete("OPS_EVENT_TOKEN");
+    }
+  },
+);
+
+Deno.test(
+  "결제 비활성 + READY 주문은 존재 여부를 숨기고 503을 유지한다",
+  async () => {
+    Deno.env.set("PAYMENTS_ENABLED", "false");
+    Deno.env.set("SUPABASE_URL", "https://sb.test");
+    Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "svc");
+    Deno.env.delete("TOSS_SECRET_KEY");
+
+    const calledUrls: string[] = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = ((input: Request | URL | string) => {
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
+      calledUrls.push(url);
+      if (url.includes("/rest/v1/payment?")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              id: 3,
+              amount_krw: 1000,
+              status: "READY",
+              payment_key: null,
+            }),
+            { status: 200, headers: { "content-type": "application/json" } },
+          ),
+        );
+      }
+      return Promise.resolve(new Response("{}", { status: 404 }));
+    }) as typeof fetch;
+
+    try {
+      const response = await handleTossConfirm(paymentRequest(
+        "order-ready-disabled",
+        "payment-key-ready",
+        1000,
+      ));
+      assertEquals(response.status, 503);
+      assertEquals(await response.json(), {
+        error: { code: "payments_disabled" },
+      });
+      assertEquals(
+        calledUrls.some((url) => url.includes("/v1/payments/confirm")),
+        false,
+      );
+      assertEquals(
+        calledUrls.some((url) => url.includes("confirm_cheer_payment")),
+        false,
+      );
+
+      const leaseResponse = await handleTossConfirm(
+        new Request("https://f.test/toss-confirm", {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer test",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "lease_conversion",
+            orderId: "order-ready-disabled",
+            paymentKey: "payment-key-ready",
+          }),
+        }),
+      );
+      assertEquals(leaseResponse.status, 503);
+      assertEquals(await leaseResponse.json(), {
+        error: { code: "payments_disabled" },
+      });
+      assertEquals(
+        calledUrls.some((url) => url.includes("lease_payment_conversion")),
+        false,
+      );
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  },
+);
+
+Deno.test(
   "이미 DONE 인 주문 재호출 → 200 idempotent + pay 이벤트(같은 키) 송신",
   async () => {
     Deno.env.set("PAYMENTS_ENABLED", "true");
@@ -153,7 +359,9 @@ Deno.test(
         }),
       );
       assertEquals(response.status, 400);
-      assertEquals(await response.json(), { error: { code: "validation_error" } });
+      assertEquals(await response.json(), {
+        error: { code: "validation_error" },
+      });
       assertEquals(rpcBodies.length, 0);
     } finally {
       globalThis.fetch = realFetch;
