@@ -19,17 +19,18 @@ type AchievementCounts = {
 };
 
 const MEDALS = [
-  { title: "첫 목표 완료", detail: "완료 목표 1개", count: "completed_goal_count", target: 1 },
-  { title: "두 목표 완료", detail: "완료 목표 2개", count: "completed_goal_count", target: 2 },
-  { title: "세 친구 연결", detail: "친구 3명", count: "connected_friend_count", target: 3 },
-  { title: "응원 열 개", detail: "확정 응원 10개", count: "received_cheer_count", target: 10 },
-  { title: "세 목표 완료", detail: "완료 목표 3개", count: "completed_goal_count", target: 3 },
-  { title: "응원 스무 개", detail: "확정 응원 20개", count: "received_cheer_count", target: 20 },
+  { title: "첫 목표 완료", detail: "완료 목표 1개", count: "completed_goal_count", target: 1, image: "badge-first-goal.jpg" },
+  { title: "두 목표 완료", detail: "완료 목표 2개", count: "completed_goal_count", target: 2, image: "badge-two-goals.jpg" },
+  { title: "세 친구 연결", detail: "친구 3명", count: "connected_friend_count", target: 3, image: "badge-friends.jpg" },
+  { title: "응원 열 개", detail: "확정 응원 10개", count: "received_cheer_count", target: 10, image: "badge-cheers10.jpg" },
+  { title: "세 목표 완료", detail: "완료 목표 3개", count: "completed_goal_count", target: 3, image: "badge-three-goals.jpg" },
+  { title: "응원 스무 개", detail: "확정 응원 20개", count: "received_cheer_count", target: 20, image: "badge-cheers20.jpg" },
 ] as const satisfies ReadonlyArray<{
   title: string;
   detail: string;
   count: keyof AchievementCounts;
   target: number;
+  image: string;
 }>;
 
 export default async function AchievementsPage() {
@@ -59,8 +60,8 @@ export default async function AchievementsPage() {
       <div className="achievement-hero">
         <div className="achievement-visual">
           <Image
-            src="/images/social-viral/achievement-higgsfield-v1.png"
-            alt="초록 클로버 모양의 세라믹 업적 트로피"
+            src="/images/v2-design-revision-v2/achievement-hero-medal.jpg"
+            alt="크림색 리본이 달린 초록 클로버 메달"
             fill
             sizes="346px"
             priority
@@ -99,6 +100,14 @@ export default async function AchievementsPage() {
         <p className="achievement-complete" role="status">현재 메달을 모두 모았어요.</p>
       )}
       <section className="achievement-shelf" data-testid="achievement-medal-shelf">
+        <div className="achievement-shelf-visual">
+          <Image
+            src="/images/v2-design-revision-v2/achievement-shelf-alt.jpg"
+            alt="수집한 메달을 올려 두는 초록색 진열대"
+            fill
+            sizes="346px"
+          />
+        </div>
         <div className="achievement-shelf-heading">
           <h2>모은 메달</h2>
           <span>{collectedCount} / {MEDALS.length}</span>
@@ -111,7 +120,7 @@ export default async function AchievementsPage() {
               <article key={medal.title} className={earned ? undefined : "is-locked"}>
                 <div className="achievement-medal-image">
                   <Image
-                    src="/images/social-viral/achievement-higgsfield-v1.png"
+                    src={`/images/v2-design-revision-v2/${medal.image}`}
                     alt=""
                     fill
                     sizes="96px"

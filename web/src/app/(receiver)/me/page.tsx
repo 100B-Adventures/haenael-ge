@@ -152,7 +152,6 @@ export default async function ReceiverHomePage({
   const cloverCount = eligibility?.total_balance ?? 0;
   const lockedAmount = eligibility?.locked_amount ?? 0;
   const availableAmount = eligibility?.available_amount ?? cloverCount;
-  const reachedThreshold = eligibility?.reached_threshold ?? false;
 
   // 수동환전 계약 §0-1-7: 홈은 진행 중 1건 또는 최근 종결 1건을 상태 RPC로 읽는다.
   // account_no_enc는 RPC 반환형에 없어 브라우저/RSC 경계로 넘어오지 않는다.
@@ -243,6 +242,7 @@ export default async function ReceiverHomePage({
               id: pastGoal.id,
               slug: pastGoal.slug,
               title: stripSuffix(pastGoal.title),
+              reason: pastGoal.reason,
               due_date: pastGoal.due_date,
               status: pastGoal.status as "ACTIVE" | "CLOSED" | "DELETED",
               cheerSummary: cheerSummaryByGoal.get(pastGoal.id) ?? emptyCheerSummary,
@@ -267,6 +267,32 @@ export default async function ReceiverHomePage({
           />
         )}
 
+        <p className="mb-3 text-sm text-muted-foreground" data-testid="home-progress-summary">
+          {socialDashboard?.profile.nickname ? `${socialDashboard.profile.nickname}님, ` : ""}
+          <strong className="text-foreground">{inProgressGoals.length}개</strong>의 목표를 향해 가는 중이에요.
+        </p>
+
+        <div
+          className="mb-4 overflow-hidden rounded-md border border-border bg-card p-4"
+          data-testid="clover-balance-card"
+        >
+          {balanceLoadFailed ? (
+            <p className="text-xs text-danger-ink" data-testid="clover-balance-error">{PRODUCT_COPY.TEXT_004}</p>
+          ) : (
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <SplitBalanceCard
+                  total={cloverCount}
+                  locked={lockedAmount}
+                  available={availableAmount}
+                  pendingNetKrw={pendingCashout?.net_krw ?? null}
+                />
+              </div>
+              <Link href="/me/achievements" className="shrink-0 text-xs font-extrabold text-accent-foreground">내 업적 보기 ›</Link>
+            </div>
+          )}
+        </div>
+
         {inProgressGoals.length > 0 && (
           <section className="mb-6" data-testid="home-goal-list">
             <p className="mb-2 text-[length:var(--text-label-small)]! font-bold text-muted-foreground">
@@ -279,6 +305,7 @@ export default async function ReceiverHomePage({
                   id: listedGoal.id,
                   slug: listedGoal.slug,
                   title: stripSuffix(listedGoal.title),
+                  reason: listedGoal.reason,
                   due_date: listedGoal.due_date,
                   status: listedGoal.status as "ACTIVE" | "CLOSED" | "DELETED",
                   cheerSummary: cheerSummaryByGoal.get(listedGoal.id) ?? emptyCheerSummary,
@@ -288,6 +315,28 @@ export default async function ReceiverHomePage({
             ))}
           </section>
         )}
+
+        <div className="mb-5 grid grid-cols-2 gap-2">
+          <Link href="/onboarding" className="rounded-md bg-primary px-3 py-3 text-center text-sm font-extrabold text-primary-foreground">＋ 새 목표 만들기</Link>
+          <Link
+            href={pendingCashout ? "/cashout/status" : "/cashout"}
+            className="rounded-md border border-border bg-card px-3 py-3 text-center text-sm font-extrabold text-foreground"
+            data-testid={pendingCashout ? "cashout-button-pending" : eligibility?.reached_threshold ? "cashout-button-enabled" : "cashout-button-belowthreshold"}
+          >{pendingCashout ? "환전 진행 보기" : "클로버 환전하기"}</Link>
+        </div>
+
+        <Collapsible
+          className="mb-5 rounded-md border border-border bg-card p-4"
+          policy={{ auxiliary: true, exceedsLimit: true, hasCollapsedContext: true }}
+          controlsId="primary-goal-detail-content"
+          toggleLabel="대표 목표 상세 관리"
+          collapsedContent={(
+            <p className="text-sm font-extrabold text-foreground">대표 목표 상세 관리</p>
+          )}
+          expandedContent={(
+            <>
+              <p className="text-sm font-extrabold text-foreground">대표 목표 상세 관리</p>
+              <div id="primary-goal-detail-content" className="mt-4" data-testid="primary-goal-details">
 
         {/* 목표 제목 */}
         <p className="receiver-goal-title mb-2" data-testid="goal-title">
@@ -331,51 +380,6 @@ export default async function ReceiverHomePage({
           className="mb-4 block rounded-sm bg-muted px-4 py-3 text-center text-[13px] font-semibold text-accent-foreground"
           data-testid="friend-view-preview-link"
         >{PRODUCT_COPY.TEXT_003}</Link>
-
-        {/* 클로버 잔액 — 환전 잠금(A안) 분할 표시. DESIGN.md §6-(d) · §4 SplitBalanceCard */}
-        <div
-          className="mb-3 overflow-hidden rounded-md border border-border bg-card p-4"
-          data-testid="clover-balance-card"
-        >
-          {balanceLoadFailed ? (
-            <p
-              className="text-xs text-danger-ink"
-              data-testid="clover-balance-error"
-            >{PRODUCT_COPY.TEXT_004}</p>
-          ) : (
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <SplitBalanceCard
-                  total={cloverCount}
-                  locked={lockedAmount}
-                  available={availableAmount}
-                  pendingNetKrw={pendingCashout?.net_krw ?? null}
-                />
-              </div>
-              {/* 환전 페이지 진입은 미달이어도 항상 허용. 실제 신청은 Server Action의 서버측 CASHOUT_ENABLED와 DB 계약으로 게이트한다. */}
-              <Link
-                href={pendingCashout ? "/cashout/status" : "/cashout"}
-                className={`ml-3 flex shrink-0 flex-col items-center gap-0.5 rounded-sm px-3 py-2 text-center text-xs font-bold ${
-                  pendingCashout
-                    ? "bg-amber-soft text-amber-ink"
-                    : "bg-primary text-primary-foreground"
-                } ${pendingCashout || reachedThreshold ? "opacity-100" : "opacity-60"}`}
-                data-testid={
-                  pendingCashout
-                    ? "cashout-button-pending"
-                    : reachedThreshold
-                      ? "cashout-button-enabled"
-                      : "cashout-button-belowthreshold"
-                }
-              >
-                <span>{pendingCashout ? PRODUCT_COPY.TEXT_005 : PRODUCT_COPY.TEXT_006}</span>
-                {pendingCashout && (
-                  <small className="text-[length:var(--text-meta-micro)]! font-bold opacity-85">{PRODUCT_COPY.TEXT_007}</small>
-                )}
-              </Link>
-            </div>
-          )}
-        </div>
 
         {cashoutStatus && (
           <Link
@@ -442,6 +446,10 @@ export default async function ReceiverHomePage({
           className="block w-full rounded-md border border-border bg-card p-4 text-center text-[15px] font-extrabold tracking-[-0.2px] text-foreground"
           data-testid="wordmap-view-cta"
         >{PRODUCT_COPY.TEXT_013}</Link>
+              </div>
+            </>
+          )}
+        />
 
         {/* 지난 목표 — 마감(due_date < 오늘) 목표를 접어서 둔다(설계 §4.5). */}
         {pastGoals.length > 0 && (

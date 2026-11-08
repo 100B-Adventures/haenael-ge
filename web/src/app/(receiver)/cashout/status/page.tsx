@@ -151,7 +151,7 @@ export default async function CashoutStatusPage() {
         {dateTime.format(new Date(cashout.requested_at))}{PRODUCT_COPY.TEXT_008}{cashout.id}
       </p>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
+      <div className="mx-auto mt-6 grid w-full max-w-xl gap-4">
         <section>
           <div
             className={`rounded-[14px] border p-4 ${banner.box}`}
@@ -166,53 +166,41 @@ export default async function CashoutStatusPage() {
           </div>
 
           <div className="mt-3 rounded-md border border-border bg-card p-4">
-            <ol className="grid grid-cols-3 gap-2 text-center text-[11px] font-bold">
-              <li className="text-accent-foreground">
-                <span className="mx-auto mb-2 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <ol className="grid gap-0 text-[13px] font-bold" data-testid="cashout-vertical-steps">
+              <li className="relative flex gap-3 pb-5 text-accent-foreground after:absolute after:left-[13px] after:top-7 after:h-[calc(100%-1.75rem)] after:w-px after:bg-border">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   1
-                </span>{PRODUCT_COPY.TEXT_009}<p className="mt-1 font-normal text-muted-foreground">
+                </span><div>{PRODUCT_COPY.TEXT_009}<p className="mt-1 font-normal text-muted-foreground">
                   {formatStepDateTime(cashout.requested_at)}
-                </p>
+                </p></div>
               </li>
               <li
-                className={
-                  isRejected
-                    ? "text-accent-foreground"
-                    : cashout.status === "REQUESTED"
-                      ? "text-amber-ink"
-                      : "text-accent-foreground"
-                }
+                className={`relative flex gap-3 pb-5 after:absolute after:left-[13px] after:top-7 after:h-[calc(100%-1.75rem)] after:w-px after:bg-border ${isRejected ? "text-accent-foreground" : cashout.status === "REQUESTED" ? "text-amber-ink" : "text-accent-foreground"}`}
               >
                 <span
-                  className={`mx-auto mb-2 flex size-7 items-center justify-center rounded-full ${cashout.status === "REQUESTED" ? "border-2 border-amber bg-card" : "bg-primary text-primary-foreground"}`}
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-full ${cashout.status === "REQUESTED" ? "border-2 border-amber bg-card" : "bg-primary text-primary-foreground"}`}
                 >
                   2
-                </span>{PRODUCT_COPY.TEXT_010}<p className="mt-1 font-normal text-muted-foreground">
+                </span><div>{PRODUCT_COPY.TEXT_010}<p className="mt-1 font-normal text-muted-foreground">
                   {cashout.status === "REQUESTED" ? PRODUCT_COPY.TEXT_011 : PRODUCT_COPY.TEXT_012}
-                </p>
+                </p></div>
               </li>
               <li
-                className={
-                  isRejected
-                    ? "text-danger-ink"
-                    : isPaid
-                      ? "text-accent-foreground"
-                      : "text-[var(--muted-color)]"
-                }
+                className={`flex gap-3 ${isRejected ? "text-danger-ink" : isPaid ? "text-accent-foreground" : "text-[var(--muted-color)]"}`}
               >
                 <span
-                  className={`mx-auto mb-2 flex size-7 items-center justify-center rounded-full ${isRejected ? "bg-destructive text-primary-foreground" : isPaid ? "bg-primary text-primary-foreground" : "border border-border bg-muted"}`}
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-full ${isRejected ? "bg-destructive text-primary-foreground" : isPaid ? "bg-primary text-primary-foreground" : "border border-border bg-muted"}`}
                 >
                   3
                 </span>
-                {isRejected ? PRODUCT_COPY.TEXT_013 : PRODUCT_COPY.TEXT_014}
+                <div>{isRejected ? PRODUCT_COPY.TEXT_013 : PRODUCT_COPY.TEXT_014}
                 <p className="mt-1 font-normal text-muted-foreground">
                   {cashout.paid_at
                     ? formatStepDateTime(cashout.paid_at)
                     : cashout.rejected_at
                       ? formatStepDateTime(cashout.rejected_at)
                       : PRODUCT_COPY.TEXT_015}
-                </p>
+                </p></div>
               </li>
             </ol>
             {cashout.status === "REQUESTED" && (

@@ -49,9 +49,16 @@ export async function uploadGoalCoverFile(
     return { ok: false, stage: "format", code: "invalid_file", status: null };
   }
 
+  let contentSha256: string;
   try {
-    const contentSha256 = await sha256Hex(file);
-    const { data: signData, error: signError } = await supabase.functions.invoke(
+    contentSha256 = await sha256Hex(file);
+  } catch {
+    return { ok: false, stage: "sign", code: "hash_failed", status: null };
+  }
+
+  let signData: { upload_url?: string; asset_id?: string } | null = null;
+  try {
+    const { data, error: signError } = await supabase.functions.invoke(
       "goal-cover-sign-upload",
       {
         body: {
@@ -63,7 +70,7 @@ export async function uploadGoalCoverFile(
         },
       },
     );
-    if (signError || !signData?.upload_url || !signData?.asset_id) {
+    if (signError || !data?.upload_url || !data?.asset_id) {
       return {
         ok: false,
         stage: "sign",
@@ -71,7 +78,16 @@ export async function uploadGoalCoverFile(
         status: functionStatus(signError),
       };
     }
+    signData = data;
+  } catch {
+    return { ok: false, stage: "sign", code: "network_error", status: null };
+  }
 
+  if (!signData?.upload_url || !signData.asset_id) {
+    return { ok: false, stage: "sign", code: "invalid_sign_response", status: null };
+  }
+
+  try {
     const uploadResponse = await fetch(signData.upload_url, {
       method: "PUT",
       headers: { "Content-Type": file.type, "x-upsert": "false" },
@@ -85,7 +101,11 @@ export async function uploadGoalCoverFile(
         status: uploadResponse.status,
       };
     }
+  } catch {
+    return { ok: false, stage: "put", code: "network_error", status: null };
+  }
 
+  try {
     const { error: finalizeError } = await supabase.functions.invoke(
       "goal-cover-finalize",
       { body: { asset_id: signData.asset_id, content_sha256: contentSha256 } },
@@ -100,6 +120,6 @@ export async function uploadGoalCoverFile(
     }
     return { ok: true };
   } catch {
-    return { ok: false, stage: "put", code: "network_error", status: null };
+    return { ok: false, stage: "finalize", code: "network_error", status: null };
   }
 }

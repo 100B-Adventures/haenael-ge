@@ -3,7 +3,7 @@
 status: ideation-prototype-inventory
 생성: 2026-10-01 KST · model: claude-opus-4-8 · agent: product-designer
 대상 프로토타입: `docs/design/prototypes/social-viral-loop-v2-opus48.html` (v3 in-place 재설계)
-정본 대조: 실배포 라우트 전수 = `find web/src/app -name page.tsx` 15개 + 공유 셸/컴포넌트.
+정본 대조: 현행 제품 라우트 전수 = `find web/src/app -name page.tsx` 24개 + 공유 셸/컴포넌트. 아래 최초 15개 표와 후속 구현 9개 대조를 합산한다.
 배포 버전: `web/package.json` 1.2.1 · `RELEASE.md` 1.2.1 (canonical `https://haenael-ge.vercel.app`, 실배포 버전 미육안확인 = 소스 기준).
 
 이 문서는 "배포에 실제로 있는 화면/컴포넌트"를 먼저 전수로 세우고, 그 위에 v2 소셜 루프가 얹은 신규 화면을 더한 완결 인벤토리다. 지난 판(v2.2)이 배포 셸(ReceiverShell·NotificationBadge)과 환전내역 실화면을 안 읽어 구조를 틀리게 지어낸 것을 시정했다.
@@ -75,7 +75,21 @@ status: ideation-prototype-inventory
 | S7 | 도파민 순간 | `/wordmap/[goalId]` 응원 오버레이 | 신규(위) | `dopamine` | 응원 클릭 → 워드맵 단어 +1 tier 실시간 성장·비회원 피드백(손실회피) | `Wordmap.tsx` normalizeWords/getSizeTier 계승 |
 | X1 | 카카오 로그인 시트 | `/auth/kakao/start` + `LoginSheet.tsx` | 배포(경계) | `login` | 카카오 단일(구글/애플 숨김 보존)·draft 안심 카피·약관/개인정보 링크 | `LoginSheet.tsx:84-256` |
 
-커버리지 요약: 배포 15라우트 = 계승 실프레임 13 · 연결 1(wordmap=도파민 오버레이) · 누락 사유명시 1(child-safety) · 누락 무사유 0. 신규 소셜 7화면 + 경계 1. 권한축 비회원 7·회원 6·관리자 1 전부 커버. 돈축 결제 2·환전 3 전부 커버.
+### 후속 구현 라우트 9개 대조
+
+| # | 현행 라우트 | 프로토 프레임 또는 연결 | 처리 |
+|---|---|---|---|
+| 16 | `/me/goal/[id]` | `goaldetail` | 실프레임 |
+| 17 | `/my` | `mypage` | 실프레임 |
+| 18 | `/my/legal` | `business` | 실프레임 |
+| 19 | `/friends` | `friends` | 실프레임 |
+| 20 | `/friends/[friendId]` | `belong` | 실프레임 |
+| 21 | `/friends/[friendId]/wordmap` | 친구 워드맵 읽기 연결 | 연결 |
+| 22 | `/invite` | `connect` | 실프레임 |
+| 23 | `/invite/[token]` | `inviteaccept` | 실프레임 |
+| 24 | `/me/achievements` | `status` | 실프레임 |
+
+커버리지 요약: 현행 24라우트 = 계승 실프레임 21 · 연결 2 · 누락 사유명시 1(child-safety) · 누락 무사유 0. 프로토타입의 화면 목록과 상태 조건은 축소하지 않았다. 권한축과 돈축 기준도 유지한다.
 
 ---
 

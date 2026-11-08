@@ -1,7 +1,7 @@
 // (receiver)/me/page.test.tsx — 개별 클로버 개수(🍀 N) 노출 + 익명도 노출 검증.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: vi.fn(),
@@ -25,6 +25,10 @@ vi.mock("next/navigation", () => ({
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const cheerIlike = vi.fn();
+
+function expandPrimaryGoalDetails() {
+  fireEvent.click(screen.getByRole("button", { name: "대표 목표 상세 관리 펼치기" }));
+}
 
 function chainable<T>(result: T) {
   const obj: Record<string, unknown> & PromiseLike<T> = {
@@ -151,6 +155,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
       const { default: ReceiverHomePage } = await import("../page");
       const element = await ReceiverHomePage();
       render(element);
+      expandPrimaryGoalDetails();
 
       expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 5");
       expect(
@@ -178,6 +183,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
     const { default: ReceiverHomePage } = await import("../page");
     const element = await ReceiverHomePage();
     render(element);
+    expandPrimaryGoalDetails();
 
     expect(screen.getByText("익명의 누군가")).toBeInTheDocument();
     expect(screen.getByTestId("cheer-item-amount")).toHaveTextContent("🍀 3");
@@ -219,6 +225,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
+    expandPrimaryGoalDetails();
 
     expect(screen.getByTestId("goal-reason")).toHaveTextContent("건강해지려고");
     expect(screen.getByTestId("open-goal-edit-sheet")).toBeInTheDocument();
@@ -268,6 +275,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage({ searchParams: Promise.resolve({ q: "121번째" }) }));
+    expandPrimaryGoalDetails();
 
     expect(cheerIlike).toHaveBeenCalledWith("display_name", "%121번째%");
     expect(cheerIlike).toHaveBeenCalledWith("message", "%121번째%");
@@ -298,6 +306,7 @@ describe("/me 응원 목록 — 개별 클로버 개수", () => {
 
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
+    expandPrimaryGoalDetails();
 
     expect(screen.getByTestId("wordmap-mini-preview").querySelectorAll("span")).toHaveLength(6);
     expect(screen.getByTestId("wordmap-overflow-summary")).toHaveTextContent(
@@ -367,9 +376,7 @@ describe("/me 다중 목표 목록", () => {
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
 
-    // primary = 목표A(최근 응원 도착)
-    expect(screen.getByTestId("goal-title")).toHaveTextContent("목표A");
-    // 승인 계약의 홈 목표 목록에 primary와 나머지 진행 목표가 모두 렌더됨.
+    // 승인 계약의 홈 목표 목록에 최근 응원 도착순으로 목표가 모두 렌더됨.
     const goalList = screen.getByTestId("home-goal-list");
     expect(screen.getByText("진행 중인 목표 2개")).toBeInTheDocument();
     expect(within(goalList).getByText(/목표A/)).toBeInTheDocument();
@@ -390,8 +397,8 @@ describe("/me 다중 목표 목록", () => {
     const { default: ReceiverHomePage } = await import("../page");
     render(await ReceiverHomePage());
 
-    // primary는 진행 중 목표.
-    expect(screen.getByTestId("goal-title")).toHaveTextContent("진행중");
+    // 첫 카드는 진행 중 목표다.
+    expect(screen.getByTestId("home-goal-list")).toHaveTextContent("진행중");
 
     const pastSection = screen.getByTestId("past-goals-section");
     expect(pastSection).toBeInTheDocument();

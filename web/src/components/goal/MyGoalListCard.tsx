@@ -16,6 +16,7 @@ export interface MyGoalListCardData {
   id: number;
   slug: string;
   title: string; // " 해낼게" suffix 제거된 순수 제목
+  reason?: string | null;
   due_date: string;
   status: "ACTIVE" | "CLOSED" | "DELETED";
   cheerSummary: Pick<MySocialGoal, "cheer_count" | "supporter_avatars" | "recent_cheer">;
@@ -30,15 +31,16 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
       data-goal-id={goal.id}
     >
       <GoalCover presetKey={goal.coverPresetKey} title={goal.title} size="banner" />
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="min-w-0 flex-1 truncate text-[15px] font-extrabold text-foreground">
+      <div className="mb-2 mt-3 flex flex-wrap gap-1.5">
+        <DdayChip dueDate={goal.due_date} />
+        <StatusChip status={goal.status} />
+      </div>
+      <div className="mb-2">
+        <p className="min-w-0 truncate text-[15px] font-extrabold text-foreground">
           {goal.title}
           <span className="ml-1 font-normal text-muted-foreground">{PRODUCT_COPY.TEXT_001}</span>
         </p>
-        <div className="flex shrink-0 gap-1.5">
-          <DdayChip dueDate={goal.due_date} />
-          {goal.status !== "ACTIVE" && <StatusChip status={goal.status} />}
-        </div>
+        {goal.reason && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{goal.reason}</p>}
       </div>
 
       {goal.cheerSummary.cheer_count > 0
@@ -46,14 +48,14 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
         : <p className="social-muted" data-testid="cheer-summary-empty">{PRODUCT_COPY.TEXT_004}</p>}
 
       <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <MyLinkCard slug={goal.slug} />
-        </div>
         <Link
           href={`/me/goal/${goal.id}`}
           className="shrink-0 rounded-sm bg-accent px-3 py-2 text-[12.5px] font-bold text-accent-foreground"
           data-testid="my-goal-list-card-manage-link"
         >{PRODUCT_COPY.TEXT_002}</Link>
+        <div className="flex-1">
+          <MyLinkCard slug={goal.slug} />
+        </div>
         <Link
           href={`/wordmap/${goal.id}`}
           className="shrink-0 rounded-sm border border-border px-3 py-2 text-[12.5px] font-bold text-foreground"

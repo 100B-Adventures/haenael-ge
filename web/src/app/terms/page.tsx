@@ -1,13 +1,23 @@
 
+import Link from "next/link";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-terms-page";// terms/page.tsx — 이용약관 (법정 고지)
 export default function TermsPage() {
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16" data-testid="terms-page">
+    <main className="legal-document-page max-w-2xl mx-auto px-6 py-10" data-testid="terms-page">
+      <header className="social-detail-head mb-8"><Link href="/my" aria-label="마이페이지로 돌아가기">‹</Link><strong>이용약관</strong><span aria-hidden="true" /></header>
       <h1 className="text-2xl font-bold mb-6">{PRODUCT_COPY.TEXT_001}</h1>
 
       <p className="text-sm text-muted-foreground mb-10">{PRODUCT_COPY.TEXT_002}</p>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_003}</h2>
+      <nav className="legal-document-toc" aria-label="이용약관 목차">
+        <strong>목차</strong>
+        <a href="#terms-purpose">목적과 정의</a>
+        <a href="#terms-service">서비스와 회원 의무</a>
+        <a href="#terms-payment">결제·환전·환불</a>
+        <a href="#terms-rights">권리·분쟁·부칙</a>
+      </nav>
+
+      <h2 id="terms-purpose" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_003}</h2>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_004}</p>
 
       <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_005}</h2>
@@ -34,7 +44,7 @@ export default function TermsPage() {
       </ul>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_022}</p>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_023}</h2>
+      <h2 id="terms-service" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_023}</h2>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_024}</p>
       <ul className="list-disc pl-5 space-y-1 leading-relaxed mb-4">
         <li>{PRODUCT_COPY.TEXT_025}</li>
@@ -59,7 +69,7 @@ export default function TermsPage() {
         <li>{PRODUCT_COPY.TEXT_038}</li>
       </ul>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_039}</h2>
+      <h2 id="terms-payment" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_039}</h2>
       <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_040}</p>
       <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
         <li>
@@ -99,7 +109,7 @@ export default function TermsPage() {
         <li>{PRODUCT_COPY.TEXT_071}</li>
       </ul>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_072}</h2>
+      <h2 id="terms-rights" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_072}</h2>
       <ul className="list-disc pl-5 space-y-1 leading-relaxed mb-4">
         <li>{PRODUCT_COPY.TEXT_073}</li>
         <li>{PRODUCT_COPY.TEXT_074}</li>

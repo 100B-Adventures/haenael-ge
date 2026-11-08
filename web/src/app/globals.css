@@ -734,6 +734,29 @@
     font-weight: 850;
     line-height: 1.5;
   }
+  .legal-document-page {
+    color: var(--foreground);
+    font-size: var(--text-body);
+    line-height: 1.75;
+  }
+  .legal-document-toc {
+    display: grid;
+    gap: var(--sp-2);
+    padding: var(--sp-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--card);
+  }
+  .legal-document-toc strong {
+    font-size: 1rem;
+  }
+  .legal-document-toc a {
+    color: var(--clover-ink);
+    font-size: var(--text-label-small);
+    font-weight: 750;
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+  }
   .business-registration-status p {
     color: var(--muted-color);
     font-size: 1rem;
@@ -1164,6 +1187,106 @@
     background: var(--clover);
     font-size: var(--text-label-small);
     font-weight: 850;
+  }
+  .cover-upload-editor {
+    display: grid;
+    gap: var(--sp-2);
+    margin-top: var(--sp-2);
+  }
+  .cover-upload-empty {
+    display: grid;
+    gap: var(--sp-1);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-card);
+    background: var(--muted);
+    padding: var(--sp-4);
+    text-align: center;
+  }
+  .cover-upload-empty strong {
+    font-size: var(--text-label-small);
+  }
+  .cover-upload-empty span {
+    color: var(--muted-color);
+    font-size: var(--text-meta-micro);
+  }
+  .cover-local-library {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-2);
+  }
+  .cover-local-library button {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1;
+    border: 0.125rem solid transparent;
+    border-radius: var(--radius-control);
+    background: var(--muted);
+  }
+  .cover-local-library button[aria-pressed="true"] {
+    border-color: var(--clover);
+    box-shadow: 0 0 0 0.125rem var(--clover-soft);
+  }
+  .cover-local-library img,
+  .cover-crop-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .cover-crop-preview {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-card);
+    background: var(--warm);
+  }
+  .cover-crop-preview::after {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(255 255 255 / 62%);
+    background: linear-gradient(transparent 49%, rgb(255 255 255 / 50%) 50%, transparent 51%);
+    content: "";
+    pointer-events: none;
+  }
+  .cover-crop-preview > span {
+    position: absolute;
+    z-index: 1;
+    right: var(--sp-2);
+    bottom: var(--sp-2);
+    border-radius: 9999px;
+    color: var(--card);
+    background: rgb(22 20 15 / 72%);
+    padding: var(--sp-1) var(--sp-2);
+    font-size: var(--text-meta-micro);
+    font-weight: 800;
+  }
+  .cover-position-control {
+    display: grid;
+    gap: var(--sp-1);
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+    font-weight: 800;
+  }
+  .cover-position-control input {
+    width: 100%;
+    accent-color: var(--primary);
+  }
+  .cover-upload-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-2);
+  }
+  .cover-upload-actions button {
+    min-height: var(--tap-min-size);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--card);
+    font-size: var(--text-label-small);
+    font-weight: 850;
+  }
+  .cover-upload-actions button:last-child {
+    border-color: var(--clover);
+    color: var(--primary-foreground);
+    background: var(--clover);
   }
   .cover-preset-grid button {
     position: relative;
@@ -2906,6 +3029,17 @@
   .achievement-shelf-heading h2 {
     font-size: 1rem;
     font-weight: 900;
+  }
+  .achievement-shelf-visual {
+    position: relative;
+    height: 7.5rem;
+    overflow: hidden;
+    margin: calc(var(--sp-4) * -1) calc(var(--sp-4) * -1) var(--sp-4);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+  .achievement-shelf-visual img {
+    object-fit: cover;
+    object-position: center;
   }
   .achievement-shelf-heading span {
     color: var(--clover-ink);

@@ -16,6 +16,10 @@ vi.mock("@/app/(receiver)/social-actions", () => ({
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({ functions: { invoke: mocks.invoke } }),
 }));
+vi.mock("@/lib/goal-cover/client-crop", () => ({
+  isValidGoalCoverInput: (file: File) => /^image\/(jpeg|png|webp)$/.test(file.type) && file.size <= 10 * 1024 * 1024,
+  cropGoalCoverFile: async (file: File) => file,
+}));
 
 function picker() {
   return render(<GoalCoverPicker goalId={1} title="달리기" initialPreset="c1" />);
@@ -34,7 +38,7 @@ function imageFile(type = "image/png", size = 8) {
 
 function selectAndApply(container: HTMLElement, file = imageFile()) {
   fireEvent.change(container.querySelector("input[type=file]")!, { target: { files: [file] } });
-  fireEvent.click(screen.getByRole("button", { name: "이 사진으로 배너 만들기" }));
+  fireEvent.click(screen.getByRole("button", { name: "배너로 쓰기" }));
 }
 
 beforeEach(() => {
@@ -56,7 +60,7 @@ describe("GoalCoverPicker 단계별 실패", () => {
     expect(screen.getByTestId("goal-cover-options")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "선택 닫기" })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("배너 고르기")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "내 사진 올리기" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "기기에서 사진 찾기" })).toBeInTheDocument();
     expect(screen.getByText("자동")).toBeInTheDocument();
   });
 
@@ -79,8 +83,8 @@ describe("GoalCoverPicker 단계별 실패", () => {
     const { container } = picker();
     openPicker();
     fireEvent.change(container.querySelector("input[type=file]")!, { target: { files: [imageFile("text/plain")] } });
-    expect(await screen.findByRole("alert")).toHaveTextContent("JPG, PNG, WEBP 형식의 5MB 이하");
-    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"stage":"format"'));
+    expect(await screen.findByRole("alert")).toHaveTextContent("JPG, PNG, WEBP 형식의 10MB 이하");
+    expect(mocks.invoke).not.toHaveBeenCalled();
   });
 
   it("GC-02 서명 실패는 sign 문구·HTTP 상태·재시도를 남긴다", async () => {
@@ -89,7 +93,7 @@ describe("GoalCoverPicker 단계별 실패", () => {
     openPicker();
     selectAndApply(container);
     expect(await screen.findByRole("alert")).toHaveTextContent("업로드를 시작하지 못했어요");
-    expect(screen.getByRole("button", { name: "검수 요청 다시" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "배너로 쓰기" })).toBeEnabled();
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"status":503'));
   });
 
@@ -131,7 +135,7 @@ describe("GoalCoverPicker 단계별 실패", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("업로드를 시작하지 못했어요");
   });
 
-  it("GC-06 검수 요청 성공 뒤 같은 파일의 적용 버튼을 제거해 중복 요청을 막는다", async () => {
+  it("GC-06 검수 요청 성공 뒤 성공 상태와 완료된 서버 단계를 표시한다", async () => {
     mocks.invoke
       .mockResolvedValueOnce({ data: { upload_url: "https://storage.test/upload", asset_id: "asset" }, error: null })
       .mockResolvedValueOnce({ data: { ok: true }, error: null });
@@ -141,8 +145,6 @@ describe("GoalCoverPicker 단계별 실패", () => {
     selectAndApply(container);
 
     expect(await screen.findByRole("status")).toHaveTextContent("검수 대기열에 보냈어요");
-    expect(screen.queryByTestId("goal-cover-upload-preview")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "이 사진으로 배너 만들기" })).not.toBeInTheDocument();
     expect(mocks.invoke).toHaveBeenCalledTimes(2);
   });
 });

@@ -250,8 +250,8 @@ test.describe("다중 목표: 목표 2개 생성 → /me에 둘 다 표시", () 
     await page.goto("/me");
     await expect(page.getByTestId("receiver-home-page")).toBeVisible();
     // 최근 응원 도착순 정렬(§4.3-1)에서 응원이 둘 다 없으면 생성 역순 —
-    // 나중에 만든 "토익 900"이 primary(goal-title)로 온다.
-    await expect(page.getByTestId("goal-title")).toContainText("토익 900");
+    // 나중에 만든 "토익 900"이 진행 중 목표 목록의 첫 카드로 온다.
+    await expect(page.getByTestId("my-goal-list-card").first()).toContainText("토익 900");
     const goalList = page.getByTestId("home-goal-list");
     await expect(goalList).toBeVisible();
     await expect(goalList.getByText(/편입 평점 4\.0/)).toBeVisible();

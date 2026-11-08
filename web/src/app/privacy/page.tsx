@@ -3,17 +3,27 @@
 
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-privacy-page";
 import { AnalyticsConsentControls } from "@/components/analytics/AnalyticsConsentControls";
+import Link from "next/link";
 
 export default function PrivacyPage() {
   return (
-    <main className="max-w-2xl mx-auto px-6 py-16" data-testid="privacy-page">
+    <main className="legal-document-page max-w-2xl mx-auto px-6 py-10" data-testid="privacy-page">
+      <header className="social-detail-head mb-8"><Link href="/my" aria-label="마이페이지로 돌아가기">‹</Link><strong>개인정보처리방침</strong><span aria-hidden="true" /></header>
       <h1 className="text-2xl font-bold mb-6">{PRODUCT_COPY.TEXT_001}</h1>
 
       <p className="text-sm text-muted-foreground mb-10">{PRODUCT_COPY.TEXT_002}</p>
 
       <p className="mb-8 leading-relaxed">{PRODUCT_COPY.TEXT_003}</p>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_004}</h2>
+      <nav className="legal-document-toc" aria-label="개인정보처리방침 목차">
+        <strong>목차</strong>
+        <a href="#privacy-collection">수집 항목</a>
+        <a href="#privacy-retention">보유 기간</a>
+        <a href="#privacy-processing">제3자 제공·처리위탁</a>
+        <a href="#privacy-rights">이용자 권리·안전조치</a>
+      </nav>
+
+      <h2 id="privacy-collection" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_004}</h2>
       <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_005}</p>
       <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
         <li>
@@ -52,7 +62,7 @@ export default function PrivacyPage() {
       </ul>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_039}</p>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_040}</h2>
+      <h2 id="privacy-retention" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_040}</h2>
       <ul className="list-disc pl-5 space-y-1 leading-relaxed mb-4">
         <li>{PRODUCT_COPY.TEXT_041}</li>
         <li>{PRODUCT_COPY.TEXT_042}</li>
@@ -78,7 +88,7 @@ export default function PrivacyPage() {
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_058}<strong>{PRODUCT_COPY.TEXT_059}</strong>{PRODUCT_COPY.TEXT_060}</p>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_061}</p>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_062}</h2>
+      <h2 id="privacy-processing" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_062}</h2>
       <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_063}</p>
       <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_064}{" "}
         <strong>{PRODUCT_COPY.TEXT_065}</strong>{PRODUCT_COPY.TEXT_066}</p>
@@ -130,7 +140,7 @@ export default function PrivacyPage() {
       <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_082}</p>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_083}</p>
 
-      <h2 className="text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_084}</h2>
+      <h2 id="privacy-rights" className="scroll-mt-6 text-lg font-semibold mt-10 mb-3">{PRODUCT_COPY.TEXT_084}</h2>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_085}</p>
       <ul className="list-disc pl-5 space-y-1 leading-relaxed mb-4">
         <li>{PRODUCT_COPY.TEXT_086}</li>

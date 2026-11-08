@@ -1446,7 +1446,8 @@
   .business-info-row:last-child{border-bottom:0;}
   .business-info-row dt,.business-info-row dd{margin:0;font-size:13px;line-height:1.6;word-break:keep-all;}
   .business-info-row dt{font-weight:800;color:var(--muted);}
-  .business-info-row dd{min-width:0;font-weight:700;color:var(--ink);overflow-wrap:anywhere;}
+  .business-info-row dd{min-width:0;font-weight:700;color:var(--ink);overflow-wrap:anywhere;word-break:break-all;}
+  .business-info-row dd.business-email{font-size:11px;white-space:nowrap;letter-spacing:-.2px;}
   .business-pending{display:flex;flex-direction:column;gap:8px;margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--warm);}
   .business-pending strong{display:block;font-size:13px;color:var(--ink);}
   .business-pending p{margin:0;font-size:13px;line-height:1.6;color:var(--muted);word-break:keep-all;}
@@ -3070,7 +3071,7 @@
   <section class="screen" id="coverage">
     <div class="covwrap">
       <h2>📋 실배포 라우트 커버리지 대조표 (standard-design.md 51항)</h2>
-      <div class="sub">실배포 라우트 전수 = <code>find web/src/app -name page.tsx</code> 15개(screen-inventory.md 정본). 각 라우트가 이 프로토타입에서 계승(실프레임)·연결(링크)·누락(+사유) 중 무엇인지. 권한축(비회원/회원/관리자)·돈축(결제/환전/환불) 한 칸도 안 빔.</div>
+      <div class="sub">현행 제품 라우트 전수 = <code>find web/src/app -name page.tsx</code> 24개(screen-inventory.md 정본). 각 라우트가 이 프로토타입에서 계승(실프레임)·연결(링크)·누락(+사유) 중 무엇인지. 권한축(비회원/회원/관리자)·돈축(결제/환전/환불) 한 칸도 안 빔.</div>
       <table class="covtable">
         <thead><tr><th>#</th><th>실배포 라우트</th><th>역할축</th><th>프로토타입 처리</th><th>실배포 근거(파일:라인)</th></tr></thead>
         <tbody>
@@ -3089,14 +3090,23 @@
           <tr><td>13</td><td><code>/privacy</code></td><td><span class="role r-guest">비회원</span></td><td class="h-frame">계승 실프레임 (privacy) · 로그인 시트 법적 링크 연결(v1 죽은 링크 해소)</td><td><code>privacy/page.tsx:1-318</code></td></tr>
           <tr><td>14</td><td><code>/child-safety</code></td><td><span class="role r-guest">비회원</span></td><td class="h-miss">누락+사유: 실배포가 "내용 준비 중" 1줄(감사 P1 미구현) · 계승할 실화면이 없어 재현 안 함</td><td><code>child-safety/page.tsx:1-9</code></td></tr>
           <tr><td>15</td><td><code>/admin</code></td><td><span class="role r-admin">관리자</span></td><td class="h-frame">계승 실프레임 (admin · 390 카드형, dev는 1440 테이블 병행)</td><td><code>admin/page.tsx:145-265</code> · <code>CashoutQueue.tsx</code></td></tr>
+          <tr><td>16</td><td><code>/me/goal/[id]</code></td><td><span class="role r-member">회원</span></td><td class="h-frame">실프레임 (goaldetail)</td><td><code>(receiver)/me/goal/[id]/page.tsx</code></td></tr>
+          <tr><td>17</td><td><code>/my</code></td><td><span class="role r-member">회원</span></td><td class="h-frame">실프레임 (mypage)</td><td><code>(receiver)/my/page.tsx</code></td></tr>
+          <tr><td>18</td><td><code>/my/legal</code></td><td><span class="role r-member">회원</span></td><td class="h-frame">실프레임 (business)</td><td><code>(receiver)/my/legal/page.tsx</code></td></tr>
+          <tr><td>19</td><td><code>/friends</code></td><td><span class="role r-member">회원</span></td><td class="h-frame">실프레임 (friends)</td><td><code>(receiver)/friends/page.tsx</code></td></tr>
+          <tr><td>20</td><td><code>/friends/[friendId]</code></td><td><span class="role r-member">회원</span></td><td class="h-frame">실프레임 (belong)</td><td><code>(receiver)/friends/[friendId]/page.tsx</code></td></tr>
+          <tr><td>21</td><td><code>/friends/[friendId]/wordmap</code></td><td><span class="role r-member">회원</span></td><td class="h-link">연결 (친구 워드맵 읽기)</td><td><code>(receiver)/friends/[friendId]/wordmap/page.tsx</code></td></tr>
+          <tr><td>22</td><td><code>/invite</code></td><td><span class="role r-member">회원</span></td><td class="h-frame">실프레임 (connect)</td><td><code>(receiver)/invite/page.tsx</code></td></tr>
+          <tr><td>23</td><td><code>/invite/[token]</code></td><td><span class="role r-guest">비회원→회원</span></td><td class="h-frame">실프레임 (inviteaccept)</td><td><code>invite/[token]/page.tsx</code></td></tr>
+          <tr><td>24</td><td><code>/me/achievements</code></td><td><span class="role r-member">회원</span></td><td class="h-frame">실프레임 (status)</td><td><code>(receiver)/me/achievements/page.tsx</code></td></tr>
         </tbody>
       </table>
       <div class="covsum">
-        <span>계승 실프레임 <b>13</b></span><span>연결 <b>1</b></span><span>누락(사유 명시) <b>1</b></span><span>누락(사유 없음) <b>0</b></span>
-        <span>권한축 비회원 <b>7</b>·회원 <b>6</b>·관리자 <b>1</b> · 전부 커버</span><span>돈축 결제 <b>2</b>·환전 <b>3</b> · 전부 커버</span>
+        <span>계승 실프레임 <b>21</b></span><span>연결 <b>2</b></span><span>누락(사유 명시) <b>1</b></span><span>누락(사유 없음) <b>0</b></span>
+        <span>현행 라우트 <b>24</b>개 전수 대조</span><span>돈축 결제 <b>2</b>·환전 <b>3</b> · 기준 유지</span>
       </div>
-      <div class="sub" style="margin-top:14px">v2 신규 소셜 4화면(친구목록·초대·소속감·업적)은 위 실배포 위에 얹힌 것. 홈 하단탭 신규 진입점에서 갈라지고, 도파민(워드맵 응원 순간)은 <code>/wordmap/[goalId]</code> 오버레이로 목표 카드·공개목표에서 진입한다(별도 탭 없음).</div>
-      <div class="sub" style="margin-top:8px"><b>v2.2 재설계(회장 9342 실사용 지적 3건):</b> ①<b>목표 관리</b>(<code>(receiver)/me/goal/[id]</code> 부여 예정): 홈 "관리" 칩의 목적지. 1급 목적을 편집폼 → "이 목표를 응원한 사람 명단(🍀 N번·시점, D-003 금액·순위 0) + 환전(SplitBalanceCard)"으로 재설계, 편집(GoalEditSheet)은 하단 접힘. 진입 워딩 "수정"→"관리". ②<b>"응원" 탭 폐지</b>: 친구 탭과 성격 중복(둘 다 친구별 목표·N번·연속) → 하단탭 5→4개(홈·친구·초대·업적). 내 응원 역할은 친구 탭이 흡수. ③<b>"스트릭" → "업적"</b> 전면 워딩 + status 히어로를 누적 성취·연속·마일스톤 축으로 재구성(트로피 엠블럼). 커버리지 대조표(실배포 15라우트) 불변.</div>
+      <div class="sub" style="margin-top:14px">후속 구현된 소셜 화면(친구목록·초대·초대수락·소속감·업적·마이·사업자 정보)은 현재 라우트로 승격됐다. 도파민(워드맵 응원 순간)은 <code>/wordmap/[goalId]</code> 오버레이로 목표 카드·공개목표에서 진입한다(별도 탭 없음).</div>
+      <div class="sub" style="margin-top:8px"><b>v2.2 재설계(회장 9342 실사용 지적 3건):</b> ①<b>목표 관리</b>(<code>(receiver)/me/goal/[id]</code>): 홈 "관리" 칩의 목적지. 1급 목적을 편집폼 → "이 목표를 응원한 사람 명단(🍀 N번·시점, D-003 금액·순위 0) + 환전(SplitBalanceCard)"으로 재설계, 편집(GoalEditSheet)은 하단 접힘. 진입 워딩 "수정"→"관리". ②<b>"응원" 탭 폐지</b>: 친구 탭과 성격 중복(둘 다 친구별 목표·N번·연속) → 하단탭 5→4개(홈·친구·초대·업적). 내 응원 역할은 친구 탭이 흡수. ③<b>"스트릭" → "업적"</b> 전면 워딩 + status 히어로를 누적 성취·연속·마일스톤 축으로 재구성(트로피 엠블럼). 현행 커버리지 대조표는 제품 라우트 24개를 전수 집계한다.</div>
     </div>
   </section>
 
@@ -4479,7 +4489,7 @@
     ).join('');
     const info=document.querySelector('[data-business-info]');
     if(info&&LEGAL_EXPOSURE.myLegal==='biz') info.innerHTML=BUSINESS_INFORMATION.map(([label,value])=>
-      '<div class="business-info-row" data-biz-item><dt>'+label+'</dt><dd>'+value+'</dd></div>'
+      '<div class="business-info-row" data-biz-item><dt>'+label+'</dt><dd class="'+(label==='이메일'?'business-email':'')+'">'+value+'</dd></div>'
     ).join('');
   }
   function assertD041Business(){

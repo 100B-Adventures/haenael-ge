@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { setGoalCoverPresetAction } from "@/app/(receiver)/social-actions";
@@ -11,6 +11,7 @@ import {
   type GoalCoverUploadFailureStage,
 } from "@/lib/goal-cover/upload";
 import { GoalCover } from "./GoalCover";
+import { GoalCoverUploadEditor } from "./GoalCoverUploadEditor";
 import { automaticGoalCoverKey, GOAL_COVER_PRESETS, resolveGoalCoverPreset } from "./goal-cover-presets";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-goalcoverpicker";
 
@@ -33,19 +34,13 @@ export function GoalCoverPicker(
   },
 ) {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [preset, setPreset] = useState(resolveGoalCoverPreset(initialPreset, title).key);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [state, setState] = useState<
     "idle" | "saving" | "uploading" | "review" | "error"
   >("idle");
   const [failureStage, setFailureStage] = useState<FailureStage | null>(null);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const automaticPreset = automaticGoalCoverKey(title);
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
   function fail(stage: FailureStage, code: string, status: number | null = null) {
     console.error(JSON.stringify({ event: "goal_cover_failed", stage, code, status }));
     setFailureStage(stage);
@@ -57,21 +52,9 @@ export function GoalCoverPicker(
     setState("saving");
     const result = await setGoalCoverPresetAction(goalId, next);
     if (!result.ok) return fail("preset", result.code);
-    setPendingFile(null);
-    setPreviewUrl(null);
     setPreset(next);
     setState("idle");
     router.refresh();
-  }
-  function prepareUpload(file: File) {
-    if (!isValidGoalCoverFile(file)) {
-      fail("format", "invalid_file");
-      return;
-    }
-    setFailureStage(null);
-    setState("idle");
-    setPendingFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
   }
   async function upload(file: File) {
     if (!isValidGoalCoverFile(file)) return fail("format", "invalid_file");
@@ -83,13 +66,9 @@ export function GoalCoverPicker(
       if (!result.ok) {
         return fail(result.stage, result.code, result.status);
       }
-      setPendingFile(null);
-      setPreviewUrl(null);
       setState("review");
     } catch {
       fail("put", "network_error");
-    } finally {
-      if (inputRef.current) inputRef.current.value = "";
     }
   }
   return (
@@ -117,28 +96,11 @@ export function GoalCoverPicker(
           <div className="cover-picker-heading">
             <strong>{PRODUCT_COPY.TEXT_003}</strong><span>{PRODUCT_COPY.TEXT_004}</span>
           </div>
-          <input
-            ref={inputRef}
-            type="file"
-            className="sr-only"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.currentTarget.value = "";
-              if (file) prepareUpload(file);
-            }}
+          <GoalCoverUploadEditor
+            busy={state === "uploading" || state === "saving"}
+            inputTestId="goal-cover-file-input"
+            onPrepared={upload}
           />
-          <button type="button" className="cover-picker-upload-entry" disabled={state === "uploading" || state === "saving"} onClick={() => inputRef.current?.click()}>
-            <span aria-hidden="true">↑</span>{pendingFile ? PRODUCT_COPY.TEXT_005 : PRODUCT_COPY.TEXT_006}
-          </button>
-          {pendingFile && previewUrl && (
-            <div className="cover-picker-upload-preview" data-testid="goal-cover-upload-preview">
-              <GoalCover presetKey={preset} imageUrl={previewUrl} title={PRODUCT_COPY.TEXT_007} size="hero" />
-              <button type="button" disabled={state === "uploading"} onClick={() => void upload(pendingFile)}>
-                {state === "uploading" ? PRODUCT_COPY.TEXT_008 : failureStage ? PRODUCT_COPY.TEXT_009 : PRODUCT_COPY.TEXT_010}
-              </button>
-            </div>
-          )}
           <div
             className="cover-preset-grid"
             role="group"

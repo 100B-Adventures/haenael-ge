@@ -8,12 +8,13 @@
 //  idle → filling (사용자 입력) → login-required (미인증) → saving (DB insert) → done (SlinkCard)
 //  로그인 후 복귀: 마운트 시 user 있고 draft 있으면 → auto-save
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Check } from "lucide-react";
 import { LoginSheet } from "@/components/auth";
 import { ShareLinkCard } from "@/components/goal/ShareLinkCard";
 import { GoalCover } from "@/components/social/GoalCover";
+import { GoalCoverUploadEditor } from "@/components/social/GoalCoverUploadEditor";
 import {
   automaticGoalCoverKey,
   GOAL_COVER_PRESETS,
@@ -33,10 +34,7 @@ import {
   loadDraftCoverFile,
   clearDraftCoverFile,
 } from "@/lib/utils/draft";
-import {
-  isValidGoalCoverFile,
-  uploadGoalCoverFile,
-} from "@/lib/goal-cover/upload";
+import { uploadGoalCoverFile } from "@/lib/goal-cover/upload";
 import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-receiver-onboardinggoalform";
@@ -170,7 +168,6 @@ async function saveGoalToDB(
 // ─── 컴포넌트 ─────────────────────────────────────────────────────────────────
 
 export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
-  const coverInputRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<User | null>(initialUser);
   const [values, setValues] = useState<FormValues>({
     title: "",
@@ -292,6 +289,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
   const selectCoverPreset = (preset: GoalCoverPresetKey) => {
     setCoverPreset(preset);
     setCoverFile(null);
+    if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl);
     setCoverPreviewUrl(null);
     setCoverError(null);
     void clearDraftCoverFile().catch(() => undefined);
@@ -304,12 +302,10 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
   };
 
   const prepareCoverFile = (file: File) => {
-    if (!isValidGoalCoverFile(file)) {
-      setCoverError("JPG, PNG, WEBP 형식의 5MB 이하 사진을 선택해 주세요.");
-      return;
-    }
     setCoverError(null);
+    setCoverPreset(null);
     setCoverFile(file);
+    if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl);
     setCoverPreviewUrl(URL.createObjectURL(file));
     void saveDraftCoverFile(file).catch(() => {
       setCoverError("사진을 임시 보관하지 못했어요. 다시 선택해 주세요.");
@@ -408,6 +404,13 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           <p className="text-[13px] mt-0.5 [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_005}</p>
         </div>
 
+        <div className="grid gap-2" aria-label="온보딩 진행 3단계" data-testid="onboarding-progress">
+          <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
+            <span>목표 작성</span><span>2 / 3</span>
+          </div>
+          <progress className="w-full accent-primary" max="3" value="2">2 / 3</progress>
+        </div>
+
         {/* 목표 입력 */}
         <div className="flex flex-col gap-1.5">
           <label
@@ -444,30 +447,6 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           )}
         </div>
 
-        {/* 마감일 */}
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="goal-due-date"
-            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
-          >{PRODUCT_COPY.TEXT_008}</label>
-          <input
-            id="goal-due-date"
-            type="date"
-            value={values.due_date}
-            onChange={(e) => handleChange("due_date", e.target.value)}
-            className="w-full rounded-[12px] px-4 py-3 text-[14px] outline-none [background-color:var(--card)]! [color:var(--foreground)]! [font-family:inherit]!"
-            style={{
-              border: `1px solid ${errors.due_date ? "var(--destructive)" : "var(--border)"}`,
-            }}
-            data-testid="goal-due-date-input"
-          />
-          {errors.due_date && (
-            <p className="text-[12px] [color:var(--destructive)]!" role="alert">
-              {errors.due_date}
-            </p>
-          )}
-        </div>
-
         {/* 이유 (선택) */}
         <div className="flex flex-col gap-1.5">
           <label
@@ -492,6 +471,30 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           </p>
         </div>
 
+        {/* 마감일 */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="goal-due-date"
+            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
+          >{PRODUCT_COPY.TEXT_008}</label>
+          <input
+            id="goal-due-date"
+            type="date"
+            value={values.due_date}
+            onChange={(e) => handleChange("due_date", e.target.value)}
+            className="w-full rounded-[12px] px-4 py-3 text-[14px] outline-none [background-color:var(--card)]! [color:var(--foreground)]! [font-family:inherit]!"
+            style={{
+              border: `1px solid ${errors.due_date ? "var(--destructive)" : "var(--border)"}`,
+            }}
+            data-testid="goal-due-date-input"
+          />
+          {errors.due_date && (
+            <p className="text-[12px] [color:var(--destructive)]!" role="alert">
+              {errors.due_date}
+            </p>
+          )}
+        </div>
+
         {/* D-028-A: 목표를 쓰는 흐름 안에서 커버 프리셋과 직접 업로드를 선택한다. */}
         <section className="goal-cover-picker" data-testid="onboarding-cover-picker">
           <div className="cover-picker-heading">
@@ -506,26 +509,10 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
               size="hero"
             />
           </div>
-          <input
-            ref={coverInputRef}
-            type="file"
-            className="sr-only"
-            accept="image/jpeg,image/png,image/webp"
-            data-testid="onboarding-cover-file-input"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.currentTarget.value = "";
-              if (file) prepareCoverFile(file);
-            }}
+          <GoalCoverUploadEditor
+            inputTestId="onboarding-cover-file-input"
+            onPrepared={prepareCoverFile}
           />
-          <button
-            type="button"
-            className="cover-picker-upload-entry"
-            onClick={() => coverInputRef.current?.click()}
-          >
-            <span aria-hidden="true">↑</span>
-            {coverFile ? "다른 사진 고르기" : "내 사진 올리기"}
-          </button>
           <div className="cover-preset-grid" role="group" aria-label="목표 커버 선택">
             {GOAL_COVER_PRESETS.map((preset) => (
               <button

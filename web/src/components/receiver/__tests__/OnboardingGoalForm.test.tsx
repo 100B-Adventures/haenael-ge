@@ -17,6 +17,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { User } from "@supabase/supabase-js";
 import { OnboardingGoalForm } from "../OnboardingGoalForm";
+
+vi.mock("@/lib/goal-cover/client-crop", () => ({
+  isValidGoalCoverInput: (file: File) => /^image\/(jpeg|png|webp)$/.test(file.type) && file.size <= 10 * 1024 * 1024,
+  cropGoalCoverFile: async (file: File) => file,
+}));
 import { loadDraft, hasSaveIntent, clearDraft, clearSaveIntent } from "@/lib/utils/draft";
 
 const mockRpc = vi.fn();
@@ -201,6 +206,8 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     fireEvent.change(screen.getByTestId("onboarding-cover-file-input"), {
       target: { files: [file] },
     });
+    fireEvent.click(screen.getByRole("button", { name: "배너로 쓰기" }));
+    await screen.findByText("저장하면 사진 검수를 바로 시작해요.");
     fireEvent.click(screen.getByTestId("save-goal-button"));
 
     await waitFor(() => expect(mockInvoke).toHaveBeenCalledTimes(2));
@@ -228,7 +235,7 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     });
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "JPG, PNG, WEBP 형식의 5MB 이하 사진",
+      "JPG, PNG, WEBP 형식의 10MB 이하 사진",
     );
     expect(mockInvoke).not.toHaveBeenCalled();
   });

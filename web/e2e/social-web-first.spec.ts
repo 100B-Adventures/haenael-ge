@@ -2362,7 +2362,7 @@ test.describe("V2 web-first social slice", () => {
       mimeType: "image/jpeg",
       buffer: uploadedCover,
     });
-    await expect(page.getByTestId("goal-cover-upload-preview")).toBeVisible();
+    await expect(page.getByTestId("goal-cover-crop-preview")).toBeVisible();
     if (s2CaptureDir) {
       await captureS2Step(page, `${s2CaptureDir}/13-cover-upload-preview-390.png`);
     }
@@ -2370,7 +2370,7 @@ test.describe("V2 web-first social slice", () => {
       response.url().includes("/functions/v1/goal-cover-finalize") &&
       response.request().method() === "POST"
     );
-    await page.getByRole("button", { name: "이 사진으로 배너 만들기" }).click();
+    await page.getByRole("button", { name: "배너로 쓰기" }).click();
     const signResponse = await signResponsePromise;
     const signBody = await signResponse.json() as { upload_url?: string };
     expect(
@@ -2406,7 +2406,8 @@ test.describe("V2 web-first social slice", () => {
       .from("goal-cover-quarantine")
       .download(reviewAsset.quarantine_path);
     expect(storedUploadError).toBeNull();
-    expect(storedUpload?.size).toBe(uploadedCover.length);
+    expect(storedUpload?.size).toBeGreaterThan(0);
+    expect(storedUpload?.size).toBeLessThanOrEqual(5 * 1024 * 1024);
     await expect(page.getByText(/검수 대기열/)).toBeVisible();
     await expect(currentCover).toHaveAttribute("data-preset", initialPreset!);
     if (s2CaptureDir) {
@@ -4393,12 +4394,12 @@ test.describe("V2 web-first social slice", () => {
           "public/images/v2-cover-presets/cover-health.jpg",
         )),
       });
-      await expect(ownerPage.getByTestId("goal-cover-upload-preview")).toBeVisible();
+      await expect(ownerPage.getByTestId("goal-cover-crop-preview")).toBeVisible();
       const finalizeResponse = ownerPage.waitForResponse((response) =>
         response.url().includes("/functions/v1/goal-cover-finalize") &&
         response.request().method() === "POST"
       );
-      await ownerPage.getByRole("button", { name: "이 사진으로 배너 만들기" }).click();
+      await ownerPage.getByRole("button", { name: "배너로 쓰기" }).click();
       const finalized = await finalizeResponse;
       expect(finalized.status()).toBe(200);
       await expect(ownerPage.getByRole("status")).toContainText("검수 대기열");
