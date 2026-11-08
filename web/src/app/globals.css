@@ -3186,6 +3186,13 @@
     background: var(--clover-soft);
   }
 
+  /* 눌림 상태: 받는사람 조작 요소는 모두 :active 피드백을 갖는다(DESIGN.md 상호작용 규칙, 독립 검증 측정 active_ratio). */
+  .friends-page-head a:active,
+  .friend-list-main:active,
+  .invite-share-row button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
   .friends-page-head svg {
     width: 1.25rem;
     height: 1.25rem;
