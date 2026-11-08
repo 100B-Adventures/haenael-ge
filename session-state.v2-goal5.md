@@ -1,6 +1,13 @@
 # session-state.v2-goal5 — 해낼게 V2 Goal 5회차 (Claude 세션 대행)
 
-## 2026-11-08 15:0x KST 인계 (최신)
+## 2026-11-08 15:3x KST 인계 (최신)
+
+- 독립 검증 2차(.goal/verify-20261108-1455.md) FAIL. D2~D5 해소, D1(친구 목록 「과거 응원 기록」) 미해소.
+- 맥 하네스 컨트롤러 처리: N1 기준 정렬(approve·qa-verifier·code-builder 의 "글자 중앙값 16" → "본문 토큰 렌더 16px, standard-design §17.3". 중앙값 13 은 불합격 사유 아님). D1 은 손님 응원이라 D-024 범위 밖으로 정정, OD-haenael-20261108-cheer-history 재등록, 390 비교판 https://claude.ai/artifact/1PkCrejBNY549fPHbdkqTo 로 회장 판정 요청. N2(운영 2.1.2)는 회장 13:4x 원문 근거로 기록만 유지.
+- 루프 주인: 이 worktree 는 Codex Goal(G7-SURF)이 소유한다. 이 Claude 세션은 개발을 멈췄고 qa-tracker·session-state.v2.md 등 Goal 상태 파일에 쓰지 않는다.
+- 다음: D1 회장 판정이 나오면 컨트롤러가 전달한다. 판정 전 독립 검증 재호출 금지.
+
+## 2026-11-08 15:0x KST 인계
 
 - 무엇을 했나: Codex 주간 한도 97%(리셋 11-13 03:00)로 Goal 을 못 띄워, 같은 규칙으로 이 세션이 개발·QA 루프를 돌았다. 커밋 5d1f7cd(데스크톱 1024px 받는사람 1단, DESIGN.md §3.7), 7a6760e(과거 응원 안내문 keep-all, 받는사람 모바일 크기 측정 확대), 14c991d(친구·초대 눌림 상태), 문서 9f0855a·ed6c310·bcfbd64.
 - 검증: staging 14c991d 전체 회귀 단일 실행 45/45(r6), 모바일 크기 36행 위반 0, 단위 519/519. 독립 검증 1차(10:19) FAIL D1~D5 → D2~D5 수정, D1 은 판정 대기. 독립 재검증 15:0x 진행 중(.goal/runs/independent-verify-*.log, 결과 .goal/verify-*.md).
