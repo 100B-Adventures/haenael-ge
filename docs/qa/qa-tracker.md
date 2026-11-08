@@ -1,5 +1,63 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-08 04:30 KST: V2 v2.1.1 current staging QA
+
+**판정: ❌ changes-requested.** staging source SHA는 의도한 `62585130ceaa56a4677e67cea597a0ac0b12697f`와 일치한다. 개별 기능 경로는 full run 37건과 실패 8건 표적 재실행을 합쳐 모두 통과했지만, 단일 전체 회귀 실행은 **37/45 FAIL**이고 디자인 정합은 **9/9 불일치**다. 따라서 QA `/approve`와 운영 배포가 가능하다고 판정하지 않는다.
+
+증거 root: `/Users/sj/sj_code_master/haenael-ge-v2-hotfix/.goal/runs/v2-qa-artifacts-20261108/`
+
+| QA 축 | 판정 | 관찰 결과 | 증거 |
+|---|---|---|---|
+| 배포 신원·health | ✅ PASS | version `2.1.1`, database `ok`, source SHA exact match | `.goal/runs/v2-qa-artifacts-20261108/health-before.json` |
+| happy·edge 기능 경로 | ✅ PASS | full에서 통과한 37건 + 실패 8건 표적 재실행 8/8 PASS. 표적 재실행 fixture cleanup 0 | `social-full-attempt2.log`, `social-failures-targeted.log` |
+| regression-full 단일 실행 | ❌ FAIL | 45건 중 37 PASS·8 FAIL. 실패는 표적 재실행에서 모두 통과했지만 단일 실행 green을 대체하지 않음 | `social-full-attempt2.exit`=`1` |
+| 브라우저 E2E 390·768·1440 | ✅ PASS | current source 캡처 9화면 × 3폭, overflow 0 | `captures/dev-*-390.png`, `dev-*-768.png`, `dev-*-1440.png` |
+| 1024 responsive 표적 | ✅ PASS | `QA-REVERIFY-VIEWPORT-01` 1/1 PASS, 46초, fixture cleanup 0 | `viewport-1024.log`, `viewport-1024.exit`=`0` |
+| 디자인 정합 | ❌ FAIL | same-width 390·1024·1440 대조. 화면 판정 일치 0·불일치 9·미확인 0 | [`design-conformance-matrix.md`](design-conformance-matrix.md) |
+| 결제 설정 원복 | ✅ PASS | 테스트 중 임시 payments enable 뒤 `payments_disabled` HTTP 503으로 원복 확인 | `payment-disabled-response.json` |
+
+### 전체 회귀 실패 8건과 재검증
+
+| 최초 실패 | full run 관찰 | 같은 source 표적 재실행 |
+|---|---|---|
+| SMOKE-01 | `goal-cover-review-queue` 120초 미발견 | PASS |
+| QA-REVERIFY-FLOW-01A | 증거 캡처 env의 `S3_EVIDENCE_STAMP` 미정의 | PASS |
+| QA-TC-LG-01 | network changed | PASS |
+| QA-TC-LG-02 | timeout | PASS |
+| QA-TC-CP-02-03 | Chromium insufficient resources | PASS |
+| QA-TC-CL-01 | page crashed | PASS |
+| QA-TC-CL-02 | target missing after timeout | PASS |
+| QA-TC-SP-02 | Chromium insufficient resources | PASS |
+
+표적 재실행 8/8 PASS는 제품 결함 재현 실패와 runner 자원 고갈 가능성을 뒷받침한다. 그러나 product-lane의 `regression-full` 필수 항목은 단일 실행 green이어야 하므로 현재 판정은 계속 FAIL이다. 첫 번째 실행의 secret wrapper 오선택으로 즉시 종료된 `social-full.log`는 제품 증거에서 제외했다.
+
+### 주요 성능 관찰
+
+| 경로·RPC | 실측 |
+|---|---|
+| `/me` navigation | first 3627ms, warm 2190ms |
+| `/friends` navigation | first 2138ms, warm 2070ms |
+| `/me/goal` navigation | first 2278ms, warm 2630ms |
+| warm TTFB | 10–11ms |
+| dashboard RPC | 45/72/42ms |
+| friend page RPC | 32/38/50ms |
+| wordmap RPC | 26/28/27ms |
+
+warm TTFB와 RPC는 짧지만 화면 navigation은 약 2.1–3.6초다. DB slow query보다 클라이언트 렌더·E2E 브라우저 부하 영향이 큰 것으로 보이며, 이번 QA 산출물에서는 원인 확정으로 승격하지 않는다.
+
+### 출고 판정
+
+- `happy/edge`: PASS
+- `regression-full`: FAIL
+- `design-conformance`: FAIL
+- `responsive`: PASS
+- 최종 QA: **changes-requested**
+- `/approve`, pipeline-state 수정, 운영 배포: **수행하지 않음**
+
+⛔ 검증실패 보고: **MAJOR / 전체 회귀 단일 실행 37/45 및 디자인 정합 9/9 불일치 / 출고 불가**
+
+STAMP: 2026-11-08 04:30 KST | line v2 | source `62585130ceaa56a4677e67cea597a0ac0b12697f` | agent Codex | skill qa | 상태 ❌ changes-requested
+
 ## 2026-10-15: D-023 적용 후 환전 제출 중 높이 재검증
 
 **판정: ✅ 해소. Chromium 환전 E2E 12/12가 통과했고 제출 중 화면 높이는 622.8125px로 재현됐다.**

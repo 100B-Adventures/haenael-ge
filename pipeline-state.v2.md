@@ -7,8 +7,8 @@ project: haenael-ge
 line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
-controller: codex
-current_stage: ship
+controller: claude  # 승인(qa 독립 검증) = Claude, 개발·QA 루프 = Codex Goal (회장 2026-11-08)
+current_stage: qa  # 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
 latest_preview_deployment:
   version: 2.1.1
   source_sha: 62585130ceaa56a4677e67cea597a0ac0b12697f
@@ -16,7 +16,7 @@ latest_preview_deployment:
   immutable_url: https://haenael-3df12spgw-100-b.vercel.app
   supabase_project_ref: ezzklgotgydwxqebfoys
   smoke_evidence: /tmp/haenael-hotfix-final-20261108
-  qa_approved: true
+  qa_approved: false  # 2026-11-08 정정: 독립 검증 없음
   production_deployed: true
 latest_production_deployment:
   version: 2.1.1
