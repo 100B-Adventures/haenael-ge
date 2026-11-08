@@ -3,7 +3,7 @@
 ```yaml
 release: 2.1.2
 date: 2026-11-08
-status: releasing
+status: released
 line: v2
 delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app
