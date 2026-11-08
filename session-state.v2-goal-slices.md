@@ -1,5 +1,34 @@
 # V2 슬라이스 구현·검증 인계
 
+## 2026-11-07 11:45 KST · G4 Goal 종결, 외부 인증 3종 blocked 유지
+
+### 무엇을 어디까지 했나
+
+- Goal 정본 `.goal/feature-list.json`의 G4-AUTH, G4-PAY, G4-QA를 모두 terminal 상태로 정리했다. 내부 검증 항목은 PASS, 실제 외부 계정·권한이 필요한 항목만 blocked다. Goal API status는 `complete`, 최종 사용량은 3,534,905 tokens, 71,938초다.
+- `origin/main`과 canonical staging `https://haenael-ge-v2-staging-100-b.vercel.app`의 source SHA는 `a738543dc307d764c0244723d865a9d7dc97d899`로 일치한다. health HTTP 200, status/database ok를 관찰했다.
+- onprem-114에서 staging social E2E를 단일 실행해 43/43 PASS, fixture DB/Auth/Storage/queue/object 0, 종료 후 `PAYMENTS_ENABLED=false`와 `cheer-order` HTTP 503 `payments_disabled`를 확인했다. 로그 `.goal/runs/g4-social-a738.log`.
+- trusted GitHub Actions run `42324947776`은 단위+빌드, 배포 환경 계약, Supabase 계약, cashout E2E가 PASS했다. `e2e-v2-social`만 `labels=[self-hosted]`로 queued다.
+- AUTH·PAY·QA 데모 HTML 3건을 390px Chromium에서 렌더해 console error 0, horizontal overflow 0, local missing link 0, image load PASS를 확인했다.
+- 인프라 기록 commit `c3f0769`, QA tracker 기록 commit `968134e`를 `integration/g4-release`에 남겼다. 이 두 문서 commit은 main에 push하지 않았다. staging source SHA는 계속 `a738543`다.
+
+### 남은 이슈·블로커
+
+- G4-AUTH-01: CDP 9333·9342·9345·9444·9445와 KakaoMoment 실제 주소까지 재확인했으나 모두 `accounts.kakao.com/login` password/QR 화면이다. 실제 Kakao 동의, callback, Supabase 제품 세션은 blocked다.
+- G4-PAY-01·02: 로컬 `test_gck`·`test_gsk` 한 쌍만 확인했고 test secret 비결제 조회도 HTTP 403 `API_KEY_ACCESS_DENIED`다. live key는 사용하지 않았다. Toss 성공 callback과 성공 중복 처리는 blocked다.
+- G4-QA-01: runner listener는 broker Session과 `Listening for Jobs`를 보이지만 GitHub 조직 Default runner group이 public repository를 허용하는지 확인할 권한이 없다. 현재 gh token과 로컬 정본 GitHub token 4종 모두 조직·repo runner API가 HTTP 403이다.
+- 위 세 항목은 Goal 계약이 허용한 external blocked다. 제품 출시 승인이나 production 배포 완료를 뜻하지 않는다.
+
+### 다음에 칠 명령
+
+- GitHub 조직 runner group 권한이 복구된 뒤: `gh run view 42324947776 --repo 100B-Adventures/haenael-ge --json status,conclusion,jobs`
+- Kakao 세션이 복구된 뒤: staging `/auth/kakao/start?redirect=/my`에서 실제 동의 후 `/my` 제품 세션을 검증한다. 기존 `.goal/runs/g4-auth-live-9333.log`를 반복 근거로 쓰지 않는다.
+- Toss 테스트 키 접근 정책이 복구된 뒤: live key 없이 PAY-01·PAY-02 성공 callback과 중복 callback만 재실행하고 `PAYMENTS_ENABLED=false` 및 HTTP 503으로 복구한다.
+
+### 검증했나
+
+- 검증됨: staging health SHA exact, social E2E 43/43, fixture 0, payments disabled 503, 데모 3건 렌더, feature-list JSON terminal 상태, qa-tracker 기록.
+- 미검증: Kakao 실제 로그인 성공, Toss 성공 승인·중복 callback, GitHub self-hosted job 실제 runner 실행, production 배포.
+
 ## 2026-11-03 01:57 KST · 스테이징17/17 통과, 실제외부인증·운영키교체대기
 
 - 최신HEAD/staging28b483f13a46e2af34f41b216410c8149dad88e2. 실제 social-web-first.spec.ts17/17 PASS7.6분,390/1024/1280검증. CI41474029952 네필수잡success. 자체DB/Auth/Storagefixture0. PAYMENTS_ENABLEDfalse복구EXIT0·실제cheer-order503. .goal/runs/final-qa-28b483f-all.{log,exit}.
