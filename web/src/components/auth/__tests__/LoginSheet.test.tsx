@@ -75,11 +75,15 @@ describe("LoginSheet", () => {
     expect(screen.getByTestId("login-sheet-goal-title")).toHaveTextContent(
       "올해 안에 책 10권 읽기",
     );
+    expect(screen.getByText("로그인하고 이어가기")).toBeInTheDocument();
+    expect(screen.getByText(/작성 중인/)).toBeInTheDocument();
+    expect(screen.getByText(/로그인 후에도 그대로 있어요/)).toBeInTheDocument();
   });
 
   it("goalTitle 없을 때 기본 안내 메시지 표시", () => {
     render(<LoginSheet open={true} onClose={vi.fn()} />);
-    expect(screen.getByText(/로그인하면 목표를 저장하고/)).toBeInTheDocument();
+    expect(screen.getByText("로그인하고 이어가기")).toBeInTheDocument();
+    expect(screen.getByText("카카오로 3초 만에 시작해요.")).toBeInTheDocument();
   });
 
   it("오버레이 클릭 시 onClose 호출", () => {

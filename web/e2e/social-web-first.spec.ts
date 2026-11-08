@@ -1499,9 +1499,31 @@ test.describe("V2 web-first social slice", () => {
         expect(await coverQueue.evaluate((node, alertNode) =>
           Boolean(node.compareDocumentPosition(alertNode as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
         await alerts.elementHandle())).toBe(true);
-        const currentRunAlert = alerts.locator("li").filter({ hasText: `playwright-${runId}` });
+        const currentRunAlert = alerts.locator("li").filter({
+          has: page.locator(`button[aria-controls='admin-alert-details-${opsEventId}']`),
+        });
         await expect(currentRunAlert).toHaveCount(1);
         await expect(currentRunAlert).toContainText("STORAGE_CLEANUP_DRAIN_STALLED");
+        await expect(currentRunAlert).toContainText("ERROR");
+        const disclosure = currentRunAlert.locator(
+          ".admin-alert-disclosure[data-collapsible='enabled']",
+        );
+        const disclosureToggle = disclosure.locator("button.collapse-chevron");
+        const details = disclosure.locator(`#admin-alert-details-${opsEventId}`);
+        await expect(disclosure).toHaveCount(1);
+        await expect(disclosureToggle).toHaveAttribute("aria-expanded", "false");
+        await expect(details).toHaveCount(0);
+        await disclosureToggle.click();
+        await expect(disclosureToggle).toHaveAttribute("aria-expanded", "true");
+        await expect(details).toContainText('"stalled_count":2');
+        await expect(details).toContainText(`"source":"playwright-${runId}"`);
+        const originalPayload = await details.textContent();
+        await disclosureToggle.click();
+        await expect(disclosureToggle).toHaveAttribute("aria-expanded", "false");
+        await expect(details).toHaveCount(0);
+        await disclosureToggle.click();
+        await expect(disclosureToggle).toHaveAttribute("aria-expanded", "true");
+        await expect(details).toHaveText(originalPayload ?? "");
         const eventType = currentRunAlert.getByText("STORAGE_CLEANUP_DRAIN_STALLED", { exact: true });
         const geometry = await eventType.evaluate((element) => {
           const range = document.createRange();
@@ -3973,6 +3995,7 @@ test.describe("V2 web-first social slice", () => {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       return page.locator("[data-collapsible='enabled']").evaluateAll((regions) => regions.flatMap((region) => {
         const declared = region.classList.contains("admin-member-disclosure")
+          || region.classList.contains("admin-alert-disclosure")
           || region.querySelector(".clamp-text, #receiver-cheer-list, #goal-supporter-list") !== null;
         return declared ? [] : [{ route: location.pathname, className: region.className }];
       }));
