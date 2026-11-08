@@ -2,18 +2,61 @@
 
 | 항목 | 값 |
 |---|---|
-| 버전 | v2.1.1 |
+| 버전 | v2.1.2 (최신 판정 11:4x, 아래 04:30 판은 이력) |
 | 작성일 | 2026-11-08 |
 | 파이프라인 라인 | `v2`, current stage `qa` |
 | 승인 시안 | `docs/design/prototypes/social-viral-loop-v3-opus5.html`, SHA-256 `afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a` |
-| staging 구현 | `https://haenael-ge-v2-staging-100-b.vercel.app`, source SHA `62585130ceaa56a4677e67cea597a0ac0b12697f` |
-| 캡처 증거 | `/Users/sj/sj_code_master/haenael-ge-v2-hotfix/.goal/runs/v2-qa-artifacts-20261108/captures/`, `captures-1024/` |
+| staging 구현 | `https://haenael-ge-v2-staging-100-b.vercel.app`, source SHA `14c991dfcc2be1b8798fb9c0da5292033a7f59bd` |
+| 캡처 증거 | `.goal/runs/g7-surf-20261108-150235/browser/screenshots/`, `.goal/runs/g7-surf-20261108-150235/e2e-captures/` |
+
+## 2026-11-08 15:xx KST G7-SURF 전회차
+
+**판정: 불일치.** 승인 시안의 26개 화면을 staging에서 390·1024·1440px로 전수 캡처했고, 필요한 핵심 화면은 768px도 기존 E2E로 조작했다. 화면 판정은 `일치 10 / 불일치 11 / 미확인 5`다. 제품 화면 가로 overflow는 0건이다. `미확인`은 통과가 아니다.
+
+대조 기준은 390px에서 승인 prototype 실프레임, 1024·1440px에서 `DESIGN.md` §3.7의 데스크톱 규칙이다. fixture 데이터의 이름·숫자·목표 문구·워드맵 단어 위치는 제외했다. 구조·요소 순서·크기/비율·타이포그래피·색/자산·컨트롤·상태/모션 중 하나라도 승인본과 다르면 `불일치`다.
+
+| 화면 ID | staging 경로·관찰 상태 | 390·1024·1440 대조 | 판정 | 증거·후속 파일 |
+|---|---|---|---|---|
+| `landing` | `/`, 비로그인 기본 | 구조·순서·비율·타이포·색·CTA·하단탭·워드맵 상태가 승인본과 같은 계열. 단어 위치는 모션 데이터 차이 | 일치 | `browser/compare/landing-390-pair.png`, `web/src/app/page.tsx` |
+| `how` | `/how` | 승인본은 평문 3단계, 구현은 카드형 3단계와 별도 하단 CTA·홈 링크. 구조·여백·컨트롤 위계가 다름 | 불일치 | `browser/compare/how-390-pair.png`, `web/src/app/how/page.tsx` |
+| `onboarding` | `/onboarding`, 비로그인 입력 | 승인본의 목표 배너·사진 업로드·프리셋 선택이 구현에 없음. 구조·자산·컨트롤 누락 | 불일치 | `browser/compare/onboarding-390-pair.png`, `web/src/components/receiver/OnboardingGoalForm.tsx`, `web/src/components/social/GoalCoverPicker.tsx` |
+| `goalpublic` | `/g/[slug]`, 결제 비활성 | 커버·WHY·응원 집계·워드맵·고정 CTA·하단탭 구조가 일치. 결제 비활성 문구는 환경 상태 | 일치 | `browser/compare/goalpublic-390-pair.png`, `web/src/app/g/[slug]/page.tsx` |
+| `paysuccess` | `/payment/success`, 무효 paymentKey | 구현의 준비/확인 필요 edge만 관찰. 승인 success 상태의 실제 결제 완료를 staging에서 만들지 못함 | 미확인 | `browser/compare/paysuccess-390-pair.png`, `web/e2e/v2-live-payment.spec.ts` |
+| `payfail` | `/payment/fail`, 실패 파라미터 | 실패 아이콘·제목·설명·재시도 CTA 위계가 승인본과 같은 계열 | 일치 | `browser/compare/payfail-390-pair.png`, `web/src/app/payment/fail/page.tsx` |
+| `home` | `/me`, 로그인·목표 1개 | 승인본의 목표 카드 목록·커버·목표별 양버튼·응원 요약과 구현의 단일 목표 관리 요약 구조가 다름 | 불일치 | `browser/compare/home-390-pair.png`, `web/src/app/(receiver)/me/page.tsx` |
+| `mywordmap` | `/wordmap/[goalId]`, 로그인 | 승인본은 워드맵 중심 읽기뷰, 구현은 공유용 포스터·내보내기 도구 중심. 구조·비율·컨트롤이 다름 | 불일치 | `browser/compare/mywordmap-390-pair.png`, `web/src/app/(receiver)/wordmap/[goalId]/page.tsx` |
+| `cashout` | `/cashout`, 전화번호 동의 미완 | 정산 breakdown과 전화번호 동의 edge는 관찰했으나 승인 신청 폼의 제출 가능 상태를 staging에서 끝까지 실행하지 못함 | 미확인 | `browser/compare/cashout-390-pair.png`, `web/e2e/cashout-manual.spec.ts` |
+| `cashstatus` | `/cashout/status`, 신청 0건 | 빈 상태만 관찰. 승인본의 접수·지급 준비 상태를 staging에서 만들지 못함 | 미확인 | `browser/compare/cashstatus-390-pair.png`, `web/e2e/cashout-manual.spec.ts` |
+| `cashhistory` | `/cashout/history`, 내역 0건 | empty edge만 관찰. 승인본의 완료·진행·반려 혼합 내역을 staging에서 만들지 못함 | 미확인 | `browser/compare/cashhistory-390-pair.png`, `web/e2e/cashout-manual.spec.ts` |
+| `terms` | `/terms` | 승인본의 요약형 조문과 구현의 HTML entity가 노출된 장문 템플릿이 다름. 타이포·문구·정보 구조 불일치 | 불일치 | `browser/compare/terms-390-pair.png`, `web/src/app/terms/page.tsx` |
+| `privacy` | `/privacy` | 승인본의 요약형 처리방침과 구현의 장문 템플릿·문단 구조가 다름 | 불일치 | `browser/compare/privacy-390-pair.png`, `web/src/app/privacy/page.tsx` |
+| `admin` | `/admin`, 관리자·대기 0건 | 환전 큐·회원·원장 섹션과 모바일 카드/데스크톱 확장 규칙이 승인본 계열. 데이터량 차이 제외 | 일치 | `browser/compare/admin-390-pair.png`, `web/src/app/admin/page.tsx` |
+| `goaldetail` | `/me/goal/[id]`, 로그인·응원 0건 | 커버·인라인 편집·워드맵·응원자·환전 순서와 컨트롤 위계가 승인본 계열 | 일치 | `browser/compare/goaldetail-390-pair.png`, `web/src/app/(receiver)/me/goal/[id]/page.tsx` |
+| `mypage` | `/my`, 로그인·빈 소개/응원 | 프로필·활동·환전·응원·알림 섹션 순서와 하단탭이 승인본 계열. empty 데이터 차이 제외 | 일치 | `browser/compare/mypage-390-pair.png`, `web/src/app/(receiver)/my/page.tsx` |
+| `connect` | `/invite`, 로그인 | 히어로·Kakao 미리보기·2개 공유 버튼·안내·하단탭 구조가 승인본과 일치 | 일치 | `browser/compare/connect-390-pair.png`, `web/src/app/(receiver)/invite/page.tsx` |
+| `friends` | `/friends`, 친구 1명 및 E2E 과거 응원 20건 | 구현에 승인 시안에 없는 `과거 응원 기록` 섹션이 존재. 빈 상태 초대 카드도 승인 구조에 없음 | 불일치 | `browser/compare/friends-390-pair.png`, `e2e-captures/dev-friends-390.png`, `web/src/app/(receiver)/friends/page.tsx` |
+| `belong` | `/friends/[friendId]?goal=[goalId]` | 유효 query로 실행한 E2E에서 커버·인물·응원 요약·워드맵·하단탭이 승인본 계열. 별도 probe의 query 누락 404는 판정에서 제외 | 일치 | `e2e-captures/dev-belong-{390,768,1440}.png`, `.goal/runs/g5-cap4/dev-belong-1024.png` |
+| `status` | `/me/achievements` | 승인본의 실사 메달 히어로·메달 진열대·다음 메달 진행률이 구현의 3개 집계 행으로 축소됨 | 불일치 | `browser/compare/status-390-pair.png`, `web/src/app/(receiver)/me/achievements/page.tsx` |
+| `dopamine` | `/wordmap/[goalId]` | 일반 워드맵 읽기뷰만 관찰. 승인본의 결제 직후 단어 적립·성장 오버레이를 staging에서 만들지 못함 | 미확인 | `browser/compare/dopamine-390-pair.png`, `web/e2e/cheer-payment.spec.ts` |
+| `login` | `/onboarding` 저장 시 LoginSheet | 작성값 보존 배경·하단시트·Kakao CTA·법적 링크·닫기 동작이 승인 흐름과 일치 | 일치 | `browser/compare/login-390-pair.png`, `web/src/components/auth/LoginSheet.tsx` |
+| `business` | `/my/legal` | 승인본은 사업자 정보를 단일 표로 제시, 구현은 약관 링크 목록과 별도 카드로 분할. 정보 구조·여백이 다름 | 불일치 | `browser/compare/business-390-pair.png`, `web/src/app/(receiver)/my/legal/page.tsx` |
+| `bannerupload` | 목표 관리 내 커버 선택기 | 승인본은 전용 사진 보관함·업로드 화면, 구현은 목표 상세 인라인 프리셋 선택기. 구조·진입·자산 배열이 다름 | 불일치 | `browser/compare/bannerupload-390-pair.png`, `web/src/components/social/GoalCoverPicker.tsx` |
+| `inviteaccept` | `/invite/[token]`, 비로그인 | 커버·아바타·초대 문구·로그인 후 수락 CTA·하단탭 구조가 승인본과 일치 | 일치 | `browser/compare/inviteaccept-390-pair.png`, `web/src/app/invite/[token]/page.tsx` |
+| `coverage` | prototype 검수 패널, 제품 route 아님 | 승인표는 실배포 route 15개를 주장하지만 현재 `page.tsx`는 23개다. v2 신규 route를 산문으로만 묶어 route별 전수성이 깨짐 | 불일치 | `browser/compare/coverage-390-pair.png`, `docs/design/prototypes/screen-inventory-v3.md` |
+
+### 실행 증거와 제한
+
+- staging 관련 자동화: `34 passed`, 종료코드 0, fixture DB·Auth·Storage 잔존 0건. 로그 `.goal/runs/g7-surf-20261108-150235/logs/g7-surf-playwright.log`.
+- 전수 브라우저: 26화면 × 3폭 = 78상태. 제품 화면 overflow 0건. 로그인 시트 dialog 1건 관찰. probe 종료코드 0, cleanup 0건.
+- `belong` 별도 probe는 필수 `?goal=`을 누락해 404가 났다. 제품 결함으로 세지 않고 같은 source의 정규 E2E 캡처와 34/34 PASS로 판정했다.
+- design lint는 종료코드 0이나 8pt 밖 10px, 인라인 style 8파일, 토큰 밖 hex 8파일을 경고했다. 이번 QA는 제품 수정 금지라 수정하지 않았다.
+- 관련 범위 회귀 34/34는 통과했지만 G7-REG 상태와 feature status는 변경하지 않았다.
 
 ## 2026-11-08 11:4x KST 재판정 (source `14c991d`, 독립 검증 FAIL D3·D4 반영)
 
 **기준.** 모바일 390 = 승인 시안 `docs/design/prototypes/social-viral-loop-v3-opus5.html`. 데스크톱 1024·1440 = DESIGN.md §3.7 레이아웃 표(데스크톱 1024px 상한, 받는사람 화면 1단, 환전 신청만 2단, 정렬선 22px, 페이지별 max-w 금지). 프로토타입 390 프레임은 데스크톱 기준이 아니다. 친구 관계 = 결정 D-024. **04:30 규칙 유지: 승인 시안에 없는 UI 는 디자인 정합에서 `불일치`다**(10:40 에 친구 목록을 `미확인`으로 낮춘 것은 기준 완화였으므로 철회).
 
-**근거 캡처(현재 배포본).** `.goal/runs/g5-cap4/` (staging sourceSha `14c991d`, 390·768·1440 은 `QA-REVERIFY-VIEWPORT-01`, 1024 는 같은 테스트의 1024 실행). 390 시안 대 staging 같은 폭 나란히 = 독립 검증 `.goal/runs/iv-1019-cap/sbs-*-390.png`(현재 배포본과 390 레이아웃 차이 없음: 5d1f7cd 이후 변경은 데스크톱 상한 제거·`word-break`·`:active` 뿐). 수치 = 아래 캡처의 본문 왼쪽 x / 본문 폭(px), 모바일 크기 = `.goal/runs/g5-cap4.log` `RECEIVER_ERGONOMICS` 36행.
+**근거 캡처(현재 배포본).** `.goal/runs/g5-cap4/` (staging sourceSha `14c991d`, 390·768·1440 은 `QA-REVERIFY-VIEWPORT-01`, 1024 는 같은 테스트의 1024 실행). 390 시안 대 staging = 독립 검증 2차의 14c991d 재캡처 `.goal/runs/iv-1455-cap/dev-*-390.png`(배치 차이 없음 확인). 수치 = 아래 캡처의 본문 왼쪽 x / 본문 폭(px), 모바일 크기 = `.goal/runs/g5-cap4.log` `RECEIVER_ERGONOMICS` 36행.
 
 | 화면 | 상태 | 행동 명세(시안·정본) | 행동 구현(관찰) | 수치 규격 | 수치 구현 | 판정 | 다른 점과 이유 |
 |---|---|---|---|---|---|---|---|
@@ -33,7 +76,7 @@
 
 **친구 목록 불일치 해소 조건.** 이 섹션은 2.1.1 운영 결함 수정(회원 귀속 전 응원이 사라짐)으로 들어왔다. 회장 결정 또는 회장이 위임한 컨트롤러 판정으로 (가) 승인 시안·화면 인벤토리에 섹션을 추가하고 핀을 갱신하거나 (나) 화면을 바꾼다. 운영에서 CI 로 계정을 특정할 수 있는 귀속 없는 응원 건수는 운영 DB 읽기 권한이 없어 미확인이다(staging 0건).
 
-## 한 줄 결론
+## 한 줄 결론 (04:30 판, 이력. 최신 결론은 위 11:4x 표: 일치 8 / 불일치 1)
 
 **불일치.** 승인 시안과 staging을 390·1024·1440px 같은 viewport에서 직접 대조한 결과, 가로 overflow는 0이지만 9개 화면 모두 1024·1440px에서 승인본의 390px 프레임보다 넓게 확장된다. 친구 목록에는 승인 시안에 없는 `과거 응원 기록` 섹션도 추가되어 있다. 따라서 QA 디자인 게이트를 승인할 수 없다.
 
