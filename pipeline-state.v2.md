@@ -7,7 +7,7 @@ project: haenael-ge
 line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
-controller: codex
+controller: claude  # 승인(qa 독립 검증) = Claude, 개발·QA 루프 = Codex Goal (회장 2026-11-08)
 current_stage: qa
 latest_preview_deployment:
   version: 2.1.0
