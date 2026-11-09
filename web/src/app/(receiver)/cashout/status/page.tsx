@@ -96,7 +96,7 @@ export default async function CashoutStatusPage() {
         <ReceiverTopBar variant="detail" />
         <div className="rounded-md border border-border bg-card p-6 text-center">
           <h1 className="text-xl font-black text-foreground">{PRODUCT_COPY.TEXT_003}</h1>
-          <p className="mt-2 text-xs text-muted-foreground">{PRODUCT_COPY.TEXT_004}{minCashoutClover}{PRODUCT_COPY.TEXT_005}</p>
+          <p className="mt-2 text-[length:var(--text-meta-micro)]! text-muted-foreground">{PRODUCT_COPY.TEXT_004}{minCashoutClover}{PRODUCT_COPY.TEXT_005}</p>
           <Link
             href="/cashout"
             className="mt-5 block rounded-md bg-primary py-3 text-[13px] font-extrabold text-primary-foreground"
@@ -162,11 +162,11 @@ export default async function CashoutStatusPage() {
             <h2 className={`text-[15px] font-extrabold ${banner.title}`}>
               {banner.heading}
             </h2>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">
               {banner.body}
             </p>
             {!isPaid && !isRejected && (
-              <p className="mt-3 text-xs leading-relaxed text-foreground" data-testid="cashout-hero-payment">
+              <p className="mt-3 text-[length:var(--text-meta-micro)]! leading-relaxed text-foreground" data-testid="cashout-hero-payment">
                 {cashoutBankName(cashout.bank_code)} {cashout.account_masked} ({cashout.account_holder})<br />
                 <strong className="text-lg text-accent-foreground">{formatCashoutKrw(cashout.net_krw)}</strong>
                 {!isPaid && "을 1~3영업일 안에 보내드릴게요."}
@@ -267,7 +267,7 @@ export default async function CashoutStatusPage() {
                   두 줄 라벨을 /me와 같은 SplitBalanceCard로 그린다(부품 이원화 금지). */}
             {balanceLoadFailed ? (
               <p
-                className="text-xs text-danger-ink"
+                className="text-[length:var(--text-meta-micro)]! text-danger-ink"
                 data-testid="status-balance-error"
               >{PRODUCT_COPY.TEXT_025}</p>
             ) : (
@@ -285,14 +285,14 @@ export default async function CashoutStatusPage() {
                       사실을 또 말하면 중복이다. REJECTED/PAID 분기는 잠김이 0이라 부품 노트가 사라지므로
                       중복이 아니어서 그대로 둔다. */}
                 {cashout.status === "REQUESTED" ? null : isRejected ? (
-                  <p className="mt-3 text-[11px] leading-relaxed text-accent-foreground">{PRODUCT_COPY.TEXT_026}{cashout.clover_amount}{PRODUCT_COPY.TEXT_027}</p>
+                  <p className="mt-3 text-[length:var(--text-meta-micro)]! leading-relaxed text-accent-foreground">{PRODUCT_COPY.TEXT_026}{cashout.clover_amount}{PRODUCT_COPY.TEXT_027}</p>
                 ) : (
-                  <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_028}{cashout.clover_amount}{PRODUCT_COPY.TEXT_029}</p>
+                  <p className="mt-3 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_028}{cashout.clover_amount}{PRODUCT_COPY.TEXT_029}</p>
                 )}
               </>
             )}
           </div>
-          <div className="mt-3 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_030}{cashout.id}{PRODUCT_COPY.TEXT_031}</div>
+          <div className="mt-3 rounded-sm bg-muted p-3 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_030}{cashout.id}{PRODUCT_COPY.TEXT_031}</div>
           {cashout.status === "REQUESTED" ? (
             <button
               type="button"

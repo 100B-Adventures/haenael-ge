@@ -94,7 +94,7 @@ export function BackHomeLink({
   return (
     <Link
       href={href}
-      className="mt-6 block text-center text-xs font-semibold text-[var(--muted-color)]"
+      className="mt-6 flex min-h-11 items-center justify-center text-[length:var(--text-meta-micro)]! font-semibold text-[var(--muted-color)]"
     >
       {label}
     </Link>

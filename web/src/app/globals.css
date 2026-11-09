@@ -4315,6 +4315,16 @@
   }
 }
 
+/* 환전 화면의 링크·버튼은 모두 눌림 피드백을 갖는다(DESIGN.md 상호작용 규칙, 독립 검증 F-2 측정 active_ratio). */
+[data-testid="cashout-page"] a:active,
+[data-testid="cashout-page"] button:active,
+[data-testid="cashout-status-page"] a:active,
+[data-testid="cashout-status-page"] button:active,
+[data-testid="cashout-history-page"] a:active,
+[data-testid="cashout-history-page"] button:active {
+  transform: scale(0.98);
+}
+
 .receiver-app-shell:has([data-testid="cashout-page"]),
 .receiver-app-shell:has([data-testid="cashout-history-page"]),
 .receiver-app-shell:has([data-testid="cashout-status-page"]) {

@@ -44,18 +44,18 @@ export default async function CashoutHistoryPage() {
 
       <div className="grid grid-cols-3 gap-2" data-testid="cashout-history-summary">
         <div className="rounded-md border border-border bg-card p-3 text-left">
-          <p className="whitespace-nowrap text-[11px] text-[var(--muted-color)]">누적 입금</p>
+          <p className="whitespace-nowrap text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">누적 입금</p>
           <p className="mt-1 text-base font-extrabold text-accent-foreground sm:text-xl">
             {formatCashoutKrw(paidTotal)}
           </p>
         </div>
         <div className="rounded-md border border-border bg-card p-3 text-left">
-          <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_003}</p>
+          <p className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_003}</p>
           <p className="mt-1 text-base font-extrabold text-accent-foreground sm:text-xl">
             {paid.length}{PRODUCT_COPY.TEXT_004}</p>
         </div>
         <div className="rounded-md border border-border bg-card p-3 text-left">
-          <p className="text-[11px] text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_005}</p>
+          <p className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_005}</p>
           <p className="mt-1 text-base font-extrabold text-amber-ink sm:text-xl">
             {pendingCount}{PRODUCT_COPY.TEXT_006}</p>
         </div>
@@ -92,7 +92,7 @@ export default async function CashoutHistoryPage() {
                 <p className="mt-1 text-sm font-bold text-foreground">
                   {formatCashoutKrw(item.net_krw)}
                 </p>
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[length:var(--text-meta-micro)]! text-muted-foreground">
                   {item.status === "REJECTED"
                     ? (item.processing_note ?? PRODUCT_COPY.TEXT_011)
                     : `${cashoutBankName(item.bank_code)} ${item.account_masked}`}
@@ -113,7 +113,7 @@ export default async function CashoutHistoryPage() {
         )}
       </section>
 
-      <div className="mt-4 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_012}</div>
+      <div className="mt-4 rounded-sm bg-muted p-3 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_012}</div>
       <div className="mt-5 flex gap-2">
         <Link
           href="/cashout"

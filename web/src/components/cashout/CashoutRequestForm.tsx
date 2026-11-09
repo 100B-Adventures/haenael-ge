@@ -222,7 +222,7 @@ export function CashoutRequestForm({
           data-testid="cashout-pending-block"
         >
           <p className="text-sm font-extrabold text-amber-ink">{PRODUCT_COPY.TEXT_001}</p>
-          <p className="mt-1 text-xs leading-relaxed text-amber-ink">
+          <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-amber-ink">
             {formatCashoutDate(currentCashout.requested_at)}{PRODUCT_COPY.TEXT_002}{" "}
             <strong>{formatCashoutKrw(currentCashout.net_krw)}</strong>{PRODUCT_COPY.TEXT_003}</p>
           <Link
@@ -266,7 +266,7 @@ export function CashoutRequestForm({
               />
               <span className="text-sm font-bold text-accent-foreground">{PRODUCT_COPY.TEXT_007}</span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">
+            <p className="mt-1 text-[length:var(--text-meta-micro)]! text-muted-foreground">
               {`환전 기준: 모인 클로버 ${minCashoutClover}개 이상 · 지금 지급 가능 ${payableAmount}개`}
             </p>
           </div>
@@ -353,14 +353,14 @@ export function CashoutRequestForm({
             className="rounded-sm bg-accent p-3"
             data-testid="cashout-live-preview"
           >
-            <p className="text-xs leading-6 text-accent-foreground">
+            <p className="text-[length:var(--text-meta-micro)]! leading-6 text-accent-foreground">
               {formatCashoutKrw(grossKrw)}{PRODUCT_COPY.TEXT_016}{" "}
               {formatCashoutKrw(feeTotalKrw)}{PRODUCT_COPY.TEXT_017}{" "}
               {formatCashoutKrw(withholdingKrw)} →{" "}
               <strong>{formatCashoutKrw(netKrw)}{PRODUCT_COPY.TEXT_018}</strong>
             </p>
           </div>
-          <div className="flex gap-2 rounded-sm bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
+          <div className="flex gap-2 rounded-sm bg-muted p-3 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">
             <ShieldCheck
               size={17}
               className="shrink-0 text-primary"
@@ -372,7 +372,7 @@ export function CashoutRequestForm({
           </div>
 
           {errorMessage && (
-            <p role="alert" className="text-xs font-semibold text-danger-ink">
+            <p role="alert" className="text-[length:var(--text-meta-micro)]! font-semibold text-danger-ink">
               {errorMessage}
             </p>
           )}
@@ -420,7 +420,7 @@ export function CashoutRequestForm({
               <div className="rounded-md border border-border bg-card p-4">
                 <p className="text-[length:var(--text-label-small)]! font-bold text-accent-foreground">{PRODUCT_COPY.TEXT_025}</p>
                 <p className="mt-2 text-[19px] font-black text-foreground">{PRODUCT_COPY.TEXT_026}</p>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_027}</p>
+                <p className="mt-2 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_027}</p>
                 <div
                   className="mt-5 flex min-h-14 items-center justify-center gap-2 rounded-md bg-primary text-[15px] font-extrabold text-primary-foreground"
                   aria-disabled="true"
@@ -466,7 +466,7 @@ export function CashoutRequestForm({
               {errorMessage && (
                 <p
                   role="alert"
-                  className="text-xs font-semibold text-danger-ink"
+                  className="text-[length:var(--text-meta-micro)]! font-semibold text-danger-ink"
                 >
                   {errorMessage}
                 </p>
@@ -494,7 +494,7 @@ export function CashoutRequestForm({
           <div className="rounded-md border border-primary/30 bg-accent p-6 text-center">
             <p className="text-[30px]">🍀</p>
             <h2 className="mt-2 text-[17px] font-black text-accent-foreground">{PRODUCT_COPY.TEXT_043}</h2>
-            <p className="mt-2 text-xs leading-relaxed text-accent-foreground">
+            <p className="mt-2 text-[length:var(--text-meta-micro)]! leading-relaxed text-accent-foreground">
               {cashoutBankName(success.bankCode)} {success.accountMasked} (
               {success.accountHolder})<br />
               <strong className="text-[15px]">
@@ -542,7 +542,7 @@ export function CashoutRequestForm({
             >{PRODUCT_COPY.TEXT_052}</h2>
             <Link
               href="/cashout/history"
-              className="text-[length:var(--text-label-small)]! font-bold text-primary"
+              className="inline-flex min-h-11 items-center text-[length:var(--text-label-small)]! font-bold text-primary"
             >{PRODUCT_COPY.TEXT_053}</Link>
           </div>
           <div className="space-y-2">
