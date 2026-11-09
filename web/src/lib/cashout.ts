@@ -45,6 +45,17 @@ export function cashoutBankName(code: string | null) {
   return CASHOUT_BANKS.find(([bankCode]) => bankCode === code)?.[1] ?? code ?? "은행";
 }
 
+// 환전 날짜는 서버(UTC)와 브라우저 어디서 렌더해도 한국 시간으로 보인다(독립 검증 F-4: 내역이 UTC 날짜로 하루 전 표시).
+const CASHOUT_TIME_ZONE = "Asia/Seoul";
+
+export function formatCashoutDate(value: string | Date) {
+  return new Date(value).toLocaleDateString("ko-KR", { timeZone: CASHOUT_TIME_ZONE });
+}
+
+export function formatCashoutDateTime(value: string | Date) {
+  return new Date(value).toLocaleString("ko-KR", { timeZone: CASHOUT_TIME_ZONE });
+}
+
 export function formatCashoutKrw(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
 }

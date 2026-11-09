@@ -13,6 +13,8 @@ import {
   CASHOUT_STATUS_LABELS,
   type CashoutRecord,
   cashoutBankName,
+  formatCashoutDate,
+  formatCashoutDateTime,
   formatCashoutKrw,
   maskAccountNumber,
 } from "@/lib/cashout";
@@ -221,7 +223,7 @@ export function CashoutRequestForm({
         >
           <p className="text-sm font-extrabold text-amber-ink">{PRODUCT_COPY.TEXT_001}</p>
           <p className="mt-1 text-xs leading-relaxed text-amber-ink">
-            {new Date(currentCashout.requested_at).toLocaleDateString("ko-KR")}{PRODUCT_COPY.TEXT_002}{" "}
+            {formatCashoutDate(currentCashout.requested_at)}{PRODUCT_COPY.TEXT_002}{" "}
             <strong>{formatCashoutKrw(currentCashout.net_krw)}</strong>{PRODUCT_COPY.TEXT_003}</p>
           <Link
             href="/cashout/status"
@@ -564,7 +566,7 @@ export function CashoutRequestForm({
                   </span>
                 </div>
                 <p className="mt-1 text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
-                  {new Date(item.requested_at).toLocaleString("ko-KR")}
+                  {formatCashoutDateTime(item.requested_at)}
                 </p>
               </Link>
             ))}

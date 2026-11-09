@@ -5,6 +5,7 @@ import {
   CASHOUT_STATUS_LABELS,
   type CashoutRecord,
   cashoutBankName,
+  formatCashoutDate,
   formatCashoutKrw,
 } from "@/lib/cashout";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -85,7 +86,7 @@ export default async function CashoutHistoryPage() {
             >
               <div>
                 <p className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
-                  {new Date(item.requested_at).toLocaleDateString("ko-KR")} · #
+                  {formatCashoutDate(item.requested_at)} · #
                   {item.id}
                 </p>
                 <p className="mt-1 text-sm font-bold text-foreground">
