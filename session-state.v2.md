@@ -1,5 +1,37 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-09 20:07 KST · 19:2x 요청 범위 검증 종결
+
+- 제품 커밋: `16e483d8bbae58612f69360ca7174469428aa27e`. stable staging https://haenael-ge-v2-staging-100-b.vercel.app . 이번회차제품수정·재배포·운영배포없음.
+- 스크립트전체회귀1회:45/45·EXIT0·retries0·skipped0·unexpected0·flaky0. 실행479.9초. source정확일치. fixture/Auth/Storage/avatar/cover 잔존0, 종료PAYMENTS_ENABLEDfalse·cheer-order503. .goal/runs/g7-regression-20261109-192x/summary.json·summary.md·run.exit.
+- 다른모델Claude독립판정: .goal/verify-20261109-192x.md 마지막 VERDICT: PASS. actualDONEfixture success→growth→기존응원CTA쓰기흐름390/1024/1440에서직접관찰·EXIT0·overflow0·console0·fixture0. 원본 .goal/runs/g7-independent-192x/observations.json·observe.exit·pair16e PNG.
+- 전달품질: QA skill실제호출·원본근거재검수·문서구조/추적표/공식보고형식참고보완뒤verify-agent-quality EXIT0·RUBRIC20/25. tracker와matrix각20/25. .goal/runs/g7-independent-delivery-quality.log 에 최종 EXIT0·RUBRIC20/25를보존한다.
+- 누락builder인계는5분문서전용작업으로EXIT0해소. .goal/g7-final-history-fix.summary.md. 제품시험은추가재실행하지않음.
+- W12는D052(컨트롤러19:2x명시지시)에따라이번범위제외·기존정책대기. 판정대조표26행중25일치/0불일치/1범위제외. 원래26개전체검사조건과실행결과를PASS로위장하지않는다. .goal/runs/g7-current-scope-audit.json 현재25행미충족0.
+- 전체qa단계승격·운영출고는미승인. pipeline-state의approved_stages와핀변경없음. 실제Toss실승인·운영·비Chromium은보장범위밖.
+- 문서의시안전체SHA불일치는원본핀변경없이별도기록. 두대상screen markup은핀7ecfb55와동일, CSSdiff는business-info뿐임을root직접확인(.goal/runs/g7-approved-pin-scope-audit.json). 표현차이후보·과거원본PNG추적보완은현재문서오픈이슈로남기고,독립판정과전면적픽셀동일주장을혼동하지않는다.
+- 보고서회수반복결함은ev-20261109-15에근본원인과해결을적립. 과거qa-tracker이력은별도archive로원문보존했고root가이전커밋본문이보관본에그대로포함됨을확인했다. owned /tmp/g7iv.fDd0 정리EXIT0. 소유실행세션모두종료.
+
+VERDICT: PASS
+판정범위: D052의19:2x요청(16e483d staging단일회귀·다른모델독립검증), W12제외. 전체qa승격·운영배포판정아님.
+
+
+## 2026-11-09 19:43 KST · G7 독립검증 QA skill 재검수 PASS
+
+- 요청: verify-agent-quality 가 Skill QA 호출 0으로 반려 → qa-only 실제 호출 후 원본 관찰·캡처 대조 재검수.
+- 한 것: Skill qa-only 호출, standard-qa-methodology.md Read(standard-qa.md 부재), observations.json·observe.exit·pair16e-390 2장·verify-20261109-192x.md 대조, staging health curl 200 sourceSha 16e483d.
+- 산출: .goal/g7-independent-quality-recheck.md(VERDICT PASS), summary 에 재검수 경로 1줄.
+- 검증 등급: 원본 파일·캡처·health 는 관찰됨. 클릭 상호작용·45건 회귀는 원 세션 기록 근거 확인(재실행 안 함).
+- 다음: /tmp/g7iv.fDd0 정리는 root 몫. W-12 정책 대기 유지.
+
+## 2026-11-09 19:30 KST · 19:2x 재개, 스크립트 단일 회귀 후 독립 판정
+
+- primary: 최신컨트롤러19:2x명시지시. 16e483d기준staging전체회귀1회를스크립트로실행하고요약만읽은뒤다른모델독립VERDICT. W12는범위제외·기존결정대기,운영배포금지. nativeGoal사용자active.
+- 실제실행 .goal/runs/g7-regression-20261109-192x/run.sh, PTY93608 진행중. JSON report→summary생성,정확source/필수키preflight,종료paymentsfalse/503트랩. 중간성공로그읽기없음.
+- builder인계는5분문서전용작업45194로분리해EXIT0회수. .goal/g7-final-history-fix.summary.md생성,결합원본실행로그품질검수EXIT0. 제품수정/재배포/추가테스트없음.
+- 독립지시준비 .goal/runs/g7-independent-192x-task.txt. W12제외를명시하고이번범위PASS와전체운영출고를혼동하지않는다.
+
+
 ## 2026-11-09 16:55 KST · 새 병목 발생으로 지시대로 실행 중지
 
 - 최신 제품 커밋: `16e483d8bbae58612f69360ca7174469428aa27e`. stable staging https://haenael-ge-v2-staging-100-b.vercel.app 의 health source·status/databaseok·stagingDB ezzklgotgydwxqebfoys 일치. Preview https://haenael-n4lcpr2of-100-b.vercel.app . 운영 배포 없음.
