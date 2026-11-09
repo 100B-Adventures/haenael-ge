@@ -223,7 +223,7 @@ export default async function GoalPublicPage({ params }: Props) {
         </div>
 
         {/* ─── 하단 고정 CTA (토스식) ─────────────────────────────────────────── */}
-        <div className="receiver-fixed-action receiver-public-action">
+        <div id="cheer" className="receiver-fixed-action receiver-public-action">
           <CheerPaymentButton
             goalId={goal.id!}
             goalTitle={rawTitle}

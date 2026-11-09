@@ -1,14 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
-## 2026-11-09 G7 최종 회귀 3건과 결제 성공·단어 성장 화면 보정
+## 2026-11-09 G7 친구 fixture 순서 독립성과 결제 성공·단어 성장 상태 분리
 
-- 친구 상세 날짜는 런타임 기본 시간대 대신 `Asia/Seoul`을 명시해 SSR과 브라우저의 날짜 문자열을 동일하게 만들었다. 2줄 접기 검사는 기존 locator·기대값·높이 단언을 유지하고 같은 요소의 `-webkit-line-clamp: 2` 적용 완료만 기다린다.
-- 친구 해제 검사는 원래 관계 행의 상태·차단자·초대·연결 시각·갱신 시각을 저장하고 `finally`에서 정확히 복원한다. 뒤의 친구 이력 검사는 ACTIVE 관계를 자체 준비해 실행 순서에 의존하지 않는다.
-- 결제 성공은 승인 시안의 제목·목표 문구·친구 목표 복귀·홈 복귀 계층을 복원했다. 단어 성장 영역은 승인 제목·설명·목표 커버·실제 워드맵·응원 단어 수·방금 보낸 문구·로그인 안내를 표시하며 기존 확정 응원 조회와 단어 적립을 유지한다.
-- 로컬 검증은 관련 Vitest 8/8, TypeScript, Next production build, 표적 Playwright 4/4를 종료코드 0으로 통과했다. 표적 Playwright는 `QA-REVERIFY-VIEWPORT-01`, `QA-TC-CL-04`, `QA-TC-FD-03`, `G4-FRIEND-HISTORY-01`을 소스 순서로 실행했고 fixture DB·Auth·Storage 잔존이 모두 0이었다.
-- 로컬 DONE 결제 fixture에서 `toss-confirm` HTTP 200, 결제 성공·단어 성장 DOM, 실제 워드맵 단어, 복귀 링크 2개, 가로 overflow 0, console error 0을 관찰했다. 별도 fixture의 goal·payment·cheer·member·Auth는 전부 0건으로 정리했고 결제 비활성 상태의 `cheer-order` HTTP 503을 확인했다. 전체 45건 회귀는 후속 동결 QA 범위라 실행하지 않았다.
+- 동시 친구 수락 검사는 실행 전 owner와 두 수락 계정 사이의 관계 행을 각각 저장한다. 성공 1건·사용 처리 1건·관계 1건·정확한 `accepted_by`와 `accepted_at` 단언은 유지하고, `finally`에서 이번 초대가 만든 관계만 삭제하거나 원래 필드를 정확히 복원한다. 제품의 자동 친구 연결은 변경하지 않았다.
+- 결제 성공과 단어 성장 화면을 한 페이지의 동시 카드에서 두 개의 실제 UI 상태로 분리했다. 성공 화면의 기존 친구 목표 링크를 누르면 단어 성장 상태로 전환하며, 새 route나 결제 처리는 추가하지 않았다.
+- 단어 성장 상태는 승인 prototype의 back header, 목표 커버, 실제 누적 워드맵과 수치, `조용히 응원하기` CTA, 피드백, 하단 4탭을 기존 목표·응원·탭 경로에 연결했다. 방금 보낸 실제 문구와 확정 응원의 단어 적립은 그대로 표시한다.
+- 로컬 관련 Vitest 7/7, TypeScript, Next.js production build가 모두 종료코드 0이다. 실제 Next.js·Supabase에서 `CC-01 → QA-TC-FD-03 → ORDER-ATTR-01 → G4-FRIEND-HISTORY-01`을 workers 1·retries 0으로 실행해 4/4 통과했고 DB·Auth·Storage fixture 잔존은 0이었다.
+- 로컬 DONE 결제 fixture의 390px 화면에서 성공 상태만 먼저 보이고 클릭 뒤 성장 상태만 보이는 전환을 관찰했다. 목표 커버 HTTP 200·`complete=true`·`naturalWidth=390`, 실제 워드맵·응원 문구·기존 CTA 링크·하단 탭, 가로 overflow 0, console error 0을 확인했다. Auth·member·goal·payment·cheer fixture는 전부 0건으로 정리했다. 전체 45건 회귀와 1024·1440px 판정은 후속 동결 QA 범위라 실행하지 않았다.
 
-> STAMP: 2026-11-09 13:45 KST · model=gpt-5-codex · agent=code-builder · skills=haenael-supabase-build · 근거=D-051, 승인 prototype paysuccess·dopamine, 회귀 실패 로그, 로컬 Vitest·TypeScript·Next build·Playwright·DONE fixture · 고민=결제 처리는 확장하지 않고 확정 영수증 읽기와 승인 UI만 보정했다.
+> STAMP: 2026-11-09 17:00 KST · model=gpt-5-codex · agent=code-builder · skills=haenael-supabase-build · 근거=D-051, 승인 prototype paysuccess·dopamine, G7 최종 QA 실패 로그, 로컬 Vitest·TypeScript·Next.js build·Playwright·DONE fixture·390px 동일폭 대조 · 고민=결제 계약과 자동 친구 연결은 그대로 두고 테스트 fixture와 승인된 UI 상태 전환만 보정했다.
 
 ## 2026-11-07 G4 social Playwright 분석 동의 상태 격리
 

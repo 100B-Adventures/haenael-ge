@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import PaymentSuccessPage from "../page";
 
@@ -130,6 +130,9 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
   createServerSupabaseClientMock.mockResolvedValue({
     from: vi.fn((table: string) => table === "cheer_public" ? cheerQuery : goalQuery),
     rpc,
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+    },
   });
 
   render(await PaymentSuccessPage({
@@ -141,12 +144,24 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
     }),
   }));
 
+  expect(screen.getByTestId("payment-success-state")).toBeInTheDocument();
+  expect(screen.queryByTestId("payment-dopamine-overlay")).not.toBeInTheDocument();
+  const backLink = screen.getByRole("link", { name: "친구 목표로 돌아가기" });
+  expect(backLink).toHaveAttribute("href", "/g/friend-goal");
+  fireEvent.click(backLink);
+
+  expect(screen.queryByTestId("payment-success-state")).not.toBeInTheDocument();
   expect(screen.getByTestId("payment-dopamine-overlay")).toBeInTheDocument();
   expect(screen.getByTestId("payment-growth-count")).toHaveTextContent("5개의 응원 단어");
   expect(screen.getByRole("heading", { name: "응원을 보내면 내가 쓴 단어가 바로 쌓여요" })).toBeInTheDocument();
   expect(screen.getByText(/로그인하지 않아도 응원할 수 있어요/)).toBeInTheDocument();
   expect(screen.getByTestId("payment-growth-message")).toHaveTextContent("끝까지 응원할게");
   expect(screen.getByTestId("payment-growth-wordmap")).toHaveTextContent("끝까지");
+  expect(screen.getByTestId("payment-growth-cheer-link")).toHaveAttribute(
+    "href",
+    "/g/friend-goal#cheer",
+  );
+  expect(screen.getByTestId("receiver-bottom-nav")).toBeInTheDocument();
   expect(rpc).toHaveBeenCalledWith("get_wordmap", { p_goal_id: 11 });
 });
 

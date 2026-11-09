@@ -4617,42 +4617,92 @@ test.describe("V2 web-first social slice", () => {
   test("CC-01 동일 token의 동시 accept는 성공 1, used 1, connection 1이다", async () => {
     const owner = createClient(SUPABASE_URL, ANON_KEY);
     await owner.auth.signInWithPassword({ email: emails.owner, password });
+    const candidatePairs = [ids.acceptA, ids.acceptB].map((memberId) => {
+      const [memberLowId, memberHighId] = [ids.owner, memberId].sort();
+      return { memberId, memberLowId, memberHighId };
+    });
+    const originalConnections = await Promise.all(candidatePairs.map(async (pair) => {
+      const { data, error } = await admin
+        .from("friend_connection")
+        .select("id,status,blocked_by_member_id,origin_invite_id,connected_at,updated_at")
+        .eq("member_low_id", pair.memberLowId)
+        .eq("member_high_id", pair.memberHighId)
+        .maybeSingle();
+      expect(error).toBeNull();
+      return { ...pair, original: data };
+    }));
     const { data: invite } = await owner.rpc("create_friend_invite", {
       goal_id: null,
       channel: "WEB",
     });
-    const token = (invite as { token: string }).token;
+    const { token, invite_id: inviteId } = invite as { token: string; invite_id: string };
     const actorA = createClient(SUPABASE_URL, ANON_KEY);
     const actorB = createClient(SUPABASE_URL, ANON_KEY);
-    await Promise.all([
-      actorA.auth.signInWithPassword({ email: emails.acceptA, password }),
-      actorB.auth.signInWithPassword({ email: emails.acceptB, password }),
-    ]);
-    const results = await Promise.all([
-      actorA.rpc("accept_friend_invite", { token }),
-      actorB.rpc("accept_friend_invite", { token }),
-    ]);
-    expect(results.filter((result) => !result.error)).toHaveLength(1);
-    expect(
-      results.filter((result) =>
-        result.error?.message.includes("invite_already_used")
-      ),
-    ).toHaveLength(1);
-    const winnerId = results[0].error ? ids.acceptB : ids.acceptA;
-    const [memberLowId, memberHighId] = [ids.owner, winnerId].sort();
-    const { count } = await admin.from("friend_connection").select("id", {
-      head: true,
-      count: "exact",
-    }).eq("member_low_id", memberLowId).eq("member_high_id", memberHighId);
-    expect(count).toBe(1);
-    const { data: acceptedInvite, error: acceptedInviteError } = await admin
-      .from("friend_invite")
-      .select("accepted_by,accepted_at")
-      .eq("accepted_by", winnerId)
-      .single();
-    expect(acceptedInviteError).toBeNull();
-    expect(acceptedInvite?.accepted_by).toBe(winnerId);
-    expect(acceptedInvite?.accepted_at).toBeTruthy();
+    try {
+      await Promise.all([
+        actorA.auth.signInWithPassword({ email: emails.acceptA, password }),
+        actorB.auth.signInWithPassword({ email: emails.acceptB, password }),
+      ]);
+      const results = await Promise.all([
+        actorA.rpc("accept_friend_invite", { token }),
+        actorB.rpc("accept_friend_invite", { token }),
+      ]);
+      expect(results.filter((result) => !result.error)).toHaveLength(1);
+      expect(
+        results.filter((result) =>
+          result.error?.message.includes("invite_already_used")
+        ),
+      ).toHaveLength(1);
+      const winnerId = results[0].error ? ids.acceptB : ids.acceptA;
+      const [memberLowId, memberHighId] = [ids.owner, winnerId].sort();
+      const { count } = await admin.from("friend_connection").select("id", {
+        head: true,
+        count: "exact",
+      }).eq("member_low_id", memberLowId).eq("member_high_id", memberHighId);
+      expect(count).toBe(1);
+      const { data: acceptedInvite, error: acceptedInviteError } = await admin
+        .from("friend_invite")
+        .select("accepted_by,accepted_at")
+        .eq("id", inviteId)
+        .single();
+      expect(acceptedInviteError).toBeNull();
+      expect(acceptedInvite?.accepted_by).toBe(winnerId);
+      expect(acceptedInvite?.accepted_at).toBeTruthy();
+    } finally {
+      for (const pair of originalConnections) {
+        if (pair.original) {
+          const { error: restoreError } = await admin.from("friend_connection").update({
+            status: pair.original.status,
+            blocked_by_member_id: pair.original.blocked_by_member_id,
+            origin_invite_id: pair.original.origin_invite_id,
+            connected_at: pair.original.connected_at,
+            updated_at: pair.original.updated_at,
+          }).eq("id", pair.original.id);
+          expect(restoreError).toBeNull();
+        } else {
+          const { error: cleanupError } = await admin.from("friend_connection").delete()
+            .eq("member_low_id", pair.memberLowId)
+            .eq("member_high_id", pair.memberHighId)
+            .eq("origin_invite_id", inviteId);
+          expect(cleanupError).toBeNull();
+        }
+      }
+      const { error: inviteCleanupError } = await admin.from("friend_invite")
+        .delete()
+        .eq("id", inviteId);
+      expect(inviteCleanupError).toBeNull();
+    }
+
+    for (const pair of originalConnections) {
+      const { data: restored, error: restoredError } = await admin
+        .from("friend_connection")
+        .select("id,status,blocked_by_member_id,origin_invite_id,connected_at,updated_at")
+        .eq("member_low_id", pair.memberLowId)
+        .eq("member_high_id", pair.memberHighId)
+        .maybeSingle();
+      expect(restoredError).toBeNull();
+      expect(restored).toEqual(pair.original);
+    }
   });
 
   test("QA-TC-FD-03 소급 친구의 방향이 보이고 해제 뒤 양쪽 FRIENDS 조회가 닫힌다", async ({ browser }) => {

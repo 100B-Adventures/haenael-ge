@@ -5,7 +5,7 @@ import { CircleAlert, Clover } from "lucide-react";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-payment-success-page";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { WordmapWord } from "@/components/goal/Wordmap";
-import { DopamineGrowthOverlay } from "./DopamineGrowthOverlay";
+import { PaymentSuccessFlow } from "./DopamineGrowthOverlay";
 import { PurchaseConversion, type ConversionLease } from "./PurchaseConversion";
 
 type Props = {
@@ -73,11 +73,14 @@ async function confirmPayment(params: {
 }
 
 type GrowthState = {
+  goalId: number;
+  goalSlug: string;
   goalTitle: string;
   message: string | null;
   words: WordmapWord[];
   coverPresetKey: string | null;
   coverUrl: string | null;
+  viewerAuthenticated: boolean;
 };
 
 async function loadGrowthState(cheerId: number, goalSlug: string): Promise<GrowthState | null> {
@@ -90,7 +93,11 @@ async function loadGrowthState(cheerId: number, goalSlug: string): Promise<Growt
 
   if (cheerError || !cheer?.goal_id) return null;
 
-  const [{ data: goal, error: goalError }, { data: wordmapRaw, error: wordmapError }] =
+  const [
+    { data: goal, error: goalError },
+    { data: wordmapRaw, error: wordmapError },
+    { data: authData },
+  ] =
     await Promise.all([
       supabase
         .from("goal_public")
@@ -98,9 +105,10 @@ async function loadGrowthState(cheerId: number, goalSlug: string): Promise<Growt
         .eq("id", cheer.goal_id)
         .maybeSingle(),
       supabase.rpc("get_wordmap", { p_goal_id: cheer.goal_id }),
+      supabase.auth.getUser(),
     ]);
 
-  if (goalError || wordmapError || !goal || goal.slug !== goalSlug) return null;
+  if (goalError || wordmapError || !goal?.id || goal.slug !== goalSlug) return null;
 
   const words: WordmapWord[] = (wordmapRaw ?? []).map(
     (word: { word: string; word_count: number }) => ({
@@ -110,6 +118,8 @@ async function loadGrowthState(cheerId: number, goalSlug: string): Promise<Growt
   );
 
   return {
+    goalId: goal.id,
+    goalSlug: goal.slug,
     goalTitle: goal.title ?? "친구의 목표",
     message: cheer.message?.trim() || null,
     words,
@@ -117,6 +127,7 @@ async function loadGrowthState(cheerId: number, goalSlug: string): Promise<Growt
     coverUrl: goal.cover_public_path
       ? supabase.storage.from("goal-cover-public").getPublicUrl(goal.cover_public_path).data.publicUrl
       : null,
+    viewerAuthenticated: Boolean(authData.user),
   };
 }
 
@@ -166,20 +177,26 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   }
 
   return (
-    <main
-      className={`payment-success-shell${growthState ? " payment-success-shell-growth" : ""}`}
-      data-testid="payment-success-page"
-    >
-      <section className="payment-success-card" data-status={status}>
-        {status === "success" && conversionLease && (
-          <PurchaseConversion
-            orderId={orderId}
-            paymentKey={paymentKey}
-            value={amount}
-            cleanPath={backHref}
-            initialLease={conversionLease}
-          />
-        )}
+    <main className="payment-success-shell" data-testid="payment-success-page">
+      {status === "success" && conversionLease && (
+        <PurchaseConversion
+          orderId={orderId}
+          paymentKey={paymentKey}
+          value={amount}
+          cleanPath={backHref}
+          initialLease={conversionLease}
+        />
+      )}
+      {status === "success" && growthState ? (
+        <PaymentSuccessFlow
+          confirmedGoalTitle={confirmedGoalTitle}
+          backHref={backHref}
+          backLabel={backLabel}
+          homeLabel={PRODUCT_COPY.TEXT_001}
+          growth={{ ...growthState, backHref }}
+        />
+      ) : (
+        <section className="payment-success-card" data-status={status}>
         <div className="payment-success-icon" aria-hidden="true">
           {status === "success" ? (
             <Clover size={28} strokeWidth={2.5} />
@@ -210,9 +227,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
             </Link>
           )}
         </div>
-      </section>
-      {status === "success" && growthState && (
-        <DopamineGrowthOverlay {...growthState} />
+        </section>
       )}
     </main>
   );
