@@ -1,5 +1,96 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-09 12:21 KST · 컨트롤러 감사 지시 반영
+
+결제 성공(paysuccess)·성장 피드백(dopamine)은 회장 결정 대상에서 회수했다. CLAUDE.md §4.3·D-049 승인 시안에 따라 두 화면 모두 추천안인 시안대로 수정하며 단어 적립 기능을 유지한다. 아래 과거 기록의 표현 선택 대기는 현재 유효하지 않다. 실제 구현 수정·재캡처 전에는 일치로 승격하지 않는다.
+
+기존 최신 제품 source a282435, 전체 회귀42/45·디자인23/26 및 독립검증 FAIL 상태는 유지한다. 미커밋 기록9건을 이번 지시로 커밋한다. Goal 재개에 앞서 실제 hook은 8,484,766/8,000,000 토큰으로 위임 경로를 차단했다. 한도 변경·우회는 하지 않았다. 운영 배포 금지.
+
+
+## 2026-11-09 01:58 KST · 홈 집계 직접 SQL 재검증
+
+- primary: my_social_dashboard·get_wordmap로 귀속 없는 응원 포함을 직접 확인하라는 최신 지시.
+- staging 실제 함수 조회·격리 트랜잭션 실행 EXIT0. 손님11+회원1에서 dashboard12, guest 단어11, member단어1, MY손님이력11. ROLLBACK 후 Auth/goal/cheer/payment 잔존0. 기존 운영 데이터11건 조회와 구분한다.
+- qa-tracker 두 파일 상단에 결과·실행위치·로그 기록. 실제 SQL 정의와 결과 JSON은 .goal/runs/guest-home-*에 보존. 제품·함수·배포 변경 없음. 기존 회귀42/45·qa-verifier FAIL·토큰 한도 병목은 유지.
+
+
+## 2026-11-09 01:56 KST · 손님 응원 위치 명시 결정 수신
+
+- primary: 최신 사용자 전달 OD-haenael-20261108-guest-cheer=(가). 손님 상세는 받은 사람 마이페이지만, 홈 워드맵·받은 응원수는 기존 집계 유지. 손님 11건 삭제 없음. 직전 판정 대기 기록은 이번 결정으로 해소.
+- D-050·데모 기록 갱신. 기존 a282435 QA 근거는 이 정책과 일치하며 이번 새 테스트·코드·DB·배포 실행은 없음.
+- 토큰 증액 미승인·실행 차단은 별개로 유지. 최신 전체 회귀42/45와 QA 품질검사 FAIL 미해소. 다음은 실패3건 일괄 수정·재QA이며 최종 독립PASS 전 출고 불가.
+
+
+## 2026-11-09 01:54 KST · 최신 컨트롤러 범위 지시 우선
+
+- primary: 이번 명시 범위 지시. 회원 응원 쌍 친구 연결·목록 과거 섹션 제거·친구 상세 회원 이력만 진행 범위다.
+- 손님 응원 11건은 현재 마이페이지 받은 응원에 보존한다. 최종 위치는 OD-haenael-20261108-guest-cheer 판정 대기다. 앞선 중앙 원장 21:4x 회수 기록을 최종 확정으로 취급했던 해석은 이번 지시로 정정했다. D-050과 demos에 반영했다.
+- 기존 source a282435·QA42/45·디자인23/26 유지. 이번 턴은 문서 정합만 수행했고 코드·DB·배포·OTP 실행 없음. 새 실행 검증이나 전체 PASS로 주장하지 않는다.
+- goal-guard 토큰 한도 초과와 증액 미승인 유지. 실제 회귀 실패3건 수정·재QA는 미실행이다. 이 지시를 토큰 증액 승인으로 해석하지 않는다.
+
+## 2026-11-09 01:43 KST · 친구 결정 전달 재대조 (읽기·기록만)
+
+- primary: 회장이 명시 전달한 D024·prototype·inventory·DESIGN§3.7·과거 독립검증D1. tmux pane을 임의 선택·capture하지 않았다. 같은작업경로의bash pane과본Codex pane은목록으로확인했고코드/DB/배포/OTP실행없음. nestedrepo추가0.
+- 현재코드a282435는친구목록별도과거섹션제거·친구상세회원쌍이력·손님MY기록및홈집계보존상태. 마지막QA는42/45,디자인23/26. 최종독립PASS는없다.
+- 손님위치는이번전달만으로새로정하지않음. 중앙OD-guest-cheer의21:4x후속회장원문이존재하는것을확인하고요청원장에대조기록. 추가정책변경없음.
+- 출력품질재검사EXIT2(배포접촉증거인식0)이며이에대한재산출은예산차단중. 제품/QA출고통과로보고하지않음. 실행예산증액미승인상태유지.
+
+## 2026-11-09 01:32 KST · Goal7 실행예산 차단과 최신 미완료 상태
+
+- source a282435 staging healthy. D050 기답 이행·권한 경계 독립리뷰 MAJOR0, 디자인23/26 일치.
+- 최신 회귀42/45·EXIT1. 남은3건: React418 hydration, lineClamp2, FD03이해제한공유관계에기댄FRIEND-HISTORY 순서의존. 이전45/45는최신소스통과가아니다.
+- goal-guard:8,304,824/8,000,000(캐시제외 지휘+워커)으로새수정위임차단. 실행예산/판정기/스킵/타임아웃변경없음. 소유위임0.
+- feature-list SURF/REG/VER 모두blocked. 원인은미해결회귀+예산,결제표현2·W12정책선택이다. goal전체는완료하지않았고최종독립PASS없음.
+- 종료근거 `.goal/g7-friend-d050-qa.summary.md`,현재요청·다음일괄수정안 `.goal/demos.md` 최상단. 예산증액은회장명시승인뒤에만처리한다.
+
+## 2026-11-09 00:53 KST · G7 D-050 친구 응원 이력 독립 코드리뷰 1/2회 (code-reviewer)
+
+- 요청: 7132cc4 web/src diff 가 친구 상세 응원 이력에서 현재 사용자↔친구 CONFIRMED 응원만 내보내는지, 손님 연결·비공개·익명·금액 노출 확대가 없는지 검수.
+- 한 것: `.goal/g7-friend-d050-cross-review.summary.md`. REVIEW_VERDICT PASS, MAJOR 0 / MINOR 4.
+- 남은 이슈: ①server.ts:199-210 attribution 상한 없는 조회와 URL `.in`, 1000건 초과 시 상세 500 위험 ②server.ts:217 limit 이 쌍 필터보다 먼저 걸림 ③RPC `my_friend_page` 가 아직 authenticated 에 열려 손님 이력 직접 호출 가능 ④경계별 거절 테스트 부족.
+- 검증 등급: 근거 확인(코드·마이그레이션 대조). 미검증: 테스트·브라우저 실행(지시로 금지), 자기 응원 가능 여부.
+- 다음: 컨트롤러가 MINOR ①③ 후속 백로그 등록.
+
+## 2026-11-08 22:00 KST · G7-SURF 26화면 시각 QA 독립 감사 (product-designer)
+
+- 요청: design-conformance-matrix 불일치 19·미확인 5 중 오대조(상태·fixture·데스크톱 전체 폭)를 걸러 진짜 결함과 재캡처 목록만 반환. 코드·브라우저·테스트·판정표 수정 금지.
+- 한 것: `.goal/g7-surf-full-visual-audit.summary.md`. 진짜 결함 9(home·cashstatus·cashhistory·onboarding·bannerupload 데스크톱 패널·status·mywordmap·payfail·admin 경보 접힘), 오대조→일치 9, 미확인 재캡처 4(connect·how·login·landing), 미확인 cashout 1(로컬 Supabase 부재), 회장 판정 대기 3(paysuccess·dopamine·friends).
+- 검증 등급: 근거 확인(PNG 26장 직접 열람, 코드·자산 경로). 미검증: 23화면의 1024·1440, 회색 배너 실원인, 모든 클릭·스크롤 상호작용(브라우저 실행 금지).
+- 다음: code-builder 일괄 수정 8항목 → QA 재캡처(동의 팝업 해제·상태 시드) → 판정표 재계수.
+
+## 2026-11-08 21:43 KST · G7-SURF 390 불일치 3건 시각 교정 지침 (product-designer)
+
+- 요청: fix2 QA의 390px 불일치 3건(home·cashhistory·cashstatus)이 실제 구현 실수인지 분류. 기능을 지우지 않는 수정 지침을 파일:줄로 낸다. 코드·브라우저·테스트 실행은 금지.
+- 한 것: `.goal/g7-surf-visual-remediation.summary.md`. 세 화면 모두 구현 실수로 분류했다. home은 중복된 목표 관리 블록을 `/me/goal/[id]`로 옮기고 `?q`는 redirect로 보존한다. cashstatus는 헤더·히어로·단계 위계만 고치고 계좌·잔액·알림·재신청은 보존한다. cashhistory는 헤더·정렬을 고치고 하단탭을 복원한다.
+- 미결 충돌: DESIGN.md 502줄(detail 상단 바)과 시안 2875줄(뒤로 ‹ 헤더). D-049에 따라 시안을 따르고 DESIGN.md 정정을 권고한다. 배지 문구 `lib/cashout.ts`:39-40과 시안 2527·2531줄도 충돌한다.
+- 검증 등급: 근거 확인(PNG 직접 열람과 시안·소스 대조). 시각 결과는 수정 전이라 미검증이다.
+- 다음: Codex가 지침대로 수정하고 QA 2/2에서 390·1024·1440을 같은 상태로 재대조한다. bannerupload는 사진 고르기 전 상태로 다시 찍는다.
+
+## 2026-11-08 18:56 KST · Goal 7 개발·QA 루프
+
+- staging `https://haenael-ge-v2-staging-100-b.vercel.app`, source `27d20ef2f6756543257f620a9764ce11408413bc`, health·DB 정상 관찰.
+- 제품 수정 `d73f0bf` 온보딩 커버·홈 목표 목록·업적·약관 entity, `c2eb2f6` 결제 후 성장 오버레이, `f51db42` 비활성 환경 확정 영수증 재조회. `27d20ef`는 반응형 이미지 decode 경쟁을 고친 테스트 수정이다.
+- G7-REG closed: staging 단일 회귀 45/45·failed 0·flaky 0·retries 0, 재배포 Ready·실제 preset 쓰기 demo·fixture 0·결제 비활성 HTTP 503. 근거 `.goal/g7-reg-final.summary.md`.
+- G7-SURF blocked: 현재 26행, 일치 10·표현 불일치 15·W-12 Preview 환전 enabled 미확인 1. 세 폭 및 핵심 768 증거 확보, 기능 차단 0. 비교·추천은 `.goal/demos.md`와 open-decisions에 등록. 근거 `.goal/g7-surf-final-qa.summary.md`.
+- G7-VER blocked: 선행 SURF 판정 대기. 코드 교차리뷰 2회 모두 MAJOR 0이나 단계 독립 승인과 혼동하지 않는다. approved_stages는 수정하지 않았다.
+- 운영 배포·운영 DB 변경·실결제 없음. 다음 실행은 회장 표현 판정과 W-12 테스트 정책을 회수한 뒤 필요한 수정·시안 핀 정합·QA 후 Claude 독립 검증이다.
+
+## 2026-11-08 18:03 KST · f51db42 결제 교차리뷰 2회차 (claude code-reviewer) · PASS MAJOR:0
+
+- 한 것: `supabase/functions/toss-confirm/index.ts` diff와 기존 RPC `confirm_cheer_payment`(migrations/20260721000000:241)를 추적함. 결제가 꺼진 환경에서 DONE 재조회만 허용되고, READY 처리·Toss 호출·lease·전환 이벤트 전송은 차단이 유지되는 것을 확인함(근거 확인). 요약 `.goal/g7-payment-cross-review.summary.md`.
+- MINOR 3건: 비활성 DONE 실패 시 Slack 경보, Bearer 접두어만 확인(기존), 키 누락 시 404/503 순서.
+- 미검증: 테스트 실행·브라우저 관찰(지시로 안 함).
+- 다음 명령: 컨트롤러가 테스트 실행 결과로 g7 결제 라인 이어감.
+
+## 2026-11-08 15:05 KST · qa 독립 검증 2차 (claude qa-verifier) · VERDICT FAIL
+
+- 한 것: staging 14c991d에서 다시 돌려 확인함. 쓰기 경로 4종(PW-04·FD-03·FRIEND-HISTORY-01·FLOW-01A) PASS, 받는사람 4화면×9폭 크기 36행 위반 0, 랜딩 하네스 측정기 9폭 통과, 390·768·1440 재캡처 `.goal/runs/iv-1455-cap/`. 판정 파일 `.goal/verify-20261108-1455.md`.
+- D1~D5: D1 미해소(친구 목록 「과거 응원 기록」, OD-haenael-20261108-cheer-history 회장 미선택). D2·D3·D4·D5 해소.
+- 새로 본 것: N1 approve 스킬의 "글자 중앙값 16"과 standard-design §17.3 "본문 토큰 16"이 서로 다름(36행 모두 중앙값 13). N2 운영 2.1.2(9fa18ff)가 qa 승인 없이 나가 있음.
+- 블로커: D1 회장 판정. pipeline-state·approved_stages는 건드리지 않음.
+- 다음 명령: 회장 판정 회수 → (가)면 시안 PATCH·핀 갱신, (나)면 코드 수정·배포·회귀 → `claude-delegate.sh qa-verifier` 독립 검증 재호출. 회귀 실행 시 `E2E_CAPTURE_DIR`를 반드시 지정할 것(미지정 시 추적 중인 증거 폴더를 덮어씀. 이번에 복구함).
+- 검증 등급: 쓰기 경로·크기·캡처는 관찰됨. 회귀 45/45는 r6 로그로 근거 확인(재실행 안 함).
+
 ## 2026-11-05 23:50 KST · 완료 여부 질의와 실행 상태 확인
 
 - 사용자 요청: 개발 완료 여부, QA 환경과 실제 검사 대상을 설명하라. 최신 AGENTS는 Claude만 오케스트레이터, Codex는 단위 실행/교차리뷰로 변경됨. 추가 배차·단계승인 없이 현재 결과를 기록한다.

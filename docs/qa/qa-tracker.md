@@ -1,5 +1,176 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-09 01:58 KST · 손님 응원 홈 집계 직접 SQL 확인
+
+| 항목 | 판정 | 종료코드 | 실행 위치·로그 |
+|---|---|---:|---|
+| my_social_dashboard·get_wordmap 귀속 없는 응원 포함 | 테스트됨 PASS | 0 | staging DB ezzklgotgydwxqebfoys, `.goal/runs/guest-home-rollback-query.log`, 결과 `.goal/runs/guest-home-rollback-query-result.json` |
+
+실제 배포된 두 SQL 함수의 정의를 `pg_get_functiondef`로 조회했다(`.goal/runs/guest-home-live-function-definitions.json`). dashboard의 cheer_counts는 CONFIRMED·미삭제·웰컴 제외 조건으로 집계하고 attribution 조인/필수 조건이 없다. get_wordmap도 CONFIRMED·미삭제 메시지를 분리·집계하며 attribution을 요구하지 않는다. 따라서 친구 목록의 과거 섹션 제거와 홈 집계는 별개다.
+
+현재 staging에는 조건에 맞는 기존 귀속 없는 응원이 0건이어서 기존 데이터만으로 런타임 판정을 내리지 않았다(최초 조회 로그 `.goal/runs/guest-home-live-query.log`). 격리 트랜잭션에 귀속 없는 확정 응원11건과 회원 귀속 확정 응원1건을 넣고, 소유자 JWT claim으로 실제 `my_social_dashboard()`·`get_wordmap(goal_id)`·`my_unlinked_cheer_history()`를 호출했다. dashboard cheer_count=12, guestproof word_count=11, memberproof word_count=1, 귀속 없는 비웰컴 확정 응원=11, 마이페이지 상세 RPC items=11을 관찰했다. 기존 운영의 실제11건을 조회한 증거는 아니며, staging 실제 함수에 동일 개수의 검증 데이터를 넣은 결과다.
+
+ROLLBACK 뒤 검증용 Auth·goal·cheer·payment 잔존은 모두0이다. 기존 데이터 수정·함수 변경·배포 없음. 최초 비교 SELECT는 웰컴 제외 조건이 없어12로 세었고, 실제 dashboard와 같은 CONFIRMED·미삭제·비웰컴 조건으로 바로잡아 재실행했다. 제품 쿼리·기대값은 변경하지 않았다. 이 국소 PASS는 기존 전체 회귀42/45나 qa-verifier FAIL을 해소하지 않는다.
+
+
+## 2026-11-08 G7-SURF 최종 확인 동결 QA, source `2784ba28f6bf796fe8cbfa446941898e4b3ddcd9`
+
+| 항목 | 판정 | 종료코드 | 증거 |
+|---|---|---:|---|
+| 승인 26화면 | ❌ 미충족, 일치 22 / 불일치 0 / 미확인 4 | surface verifier 결과는 최종 요약 참조 | 설명·로그인 3폭 신규 대조, 회장 판정 대기 3화면 3폭 신규 대조, UI 불변 22화면은 `4b15cd8..2784ba2` diff 근거로 재사용. [design-conformance-matrix](design-conformance-matrix.md) |
+| 전체 사회 회귀 45개 | PASS, 45 passed / 0 failed / 0 flaky, retries 0 | 0 | `.goal/runs/g7-surf-confirmation-qa-20261108/logs/social-web-first.log` |
+| 실제 fixture 화면 | 관찰됨, 기능 차단 0 | 0 | DB `DONE` 결제의 overlay·성장 워드맵, 친구 1명·과거 응원 3건, consent 닫힘·overflow 0. `.goal/runs/g7-surf-confirmation-qa-20261108/comparison-captures/` |
+| W-12 enabled 환전 신청 | staging 미확인, 격리 로컬 대체 증거만 성공 | 로컬 0 | localhost 390·1024·1440, POST 200, DB `REQUESTED`, 계좌 마스킹·상태·내역, namespace 0. `.goal/g7-cashout-local-final.summary.md` |
+| 결제 원복·fixture cleanup | PASS | 0 | `PAYMENTS_ENABLED=false`, 주문 API HTTP 503. 직접 캡처 fixture auth·member·goal·cheer 0 |
+
+제품·테스트 코드, feature/slice status, commit은 변경하지 않았다. 디자인 QA 미충족은 기능 결함이 아니라 환전 staging enabled 미확인 1건과 회장 표현 선택 3건 때문이다.
+
+## 2026-11-08 G7-SURF post-remediation 동결 QA, source `4b15cd88ec972b9ef81055dbbc1fc9eb2b4a42e0`
+
+| 항목 | 판정 | 종료코드 | 증거 |
+|---|---|---:|---|
+| 승인 26화면 | ❌ NG, 일치 20 / 불일치 2 / 미확인 4 | surface verifier 1 | 변경 9화면 4폭 36/36, 상태 재촬영 4화면 14/14. [design-conformance-matrix](design-conformance-matrix.md) |
+| 전체 사회 회귀 45개 | ❌ FAIL, 42 passed / 3 failed / 0 flaky, retries 0 | 1 | 관리자 접힘 시험 계약 결함 2건, `ERR_NETWORK_CHANGED` 조건 실패 1건. `.goal/runs/g7-surf-post-remediation-20261108/logs/social-web-first.log` |
+| W-12 enabled 환전 신청 | staging 미확인, 로컬 대체 증거만 성공 | 로컬 0 | localhost 3폭·POST 200·DB `REQUESTED`·마스킹·내역·namespace 0. `.goal/g7-cashout-local-final.summary.md` |
+| 결제 원복·fixture cleanup | PASS | 0 | `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503 `payments_disabled`; 직접 캡처 namespace 잔존 0 |
+
+제품·테스트 코드, feature/slice status, commit은 변경하지 않았다. 상세 결함과 다음 국소 과업은 `.goal/g7-surf-post-remediation-qa.summary.md`에 기록했다.
+
+## 2026-11-08 G7-SURF 동결 QA 1/2, source `78c401d5cc897a869b42bb91b0bcba8c951c7d07`
+
+| 항목 | 판정 | 종료코드 | 증거 |
+|---|---|---:|---|
+| 승인 26화면, 390·1024·1440과 핵심 768 | ❌ NG, 일치 2 / 불일치 16 / 미확인 8 | surface verifier 실행값은 아래 요약에 기록 | 불변 20화면 67폭 재사용 + 변경 화면 신규 5폭, 합계 72/87. [design-conformance-matrix](design-conformance-matrix.md) |
+| 홈 검색 GET | ⚠️ 일부 관찰 | capture 1 | 외부 접힘 버튼 0, 상세 DOM visible, `/me?q=기존응원자` 1건·검색 input 유지. 0건 안내는 다른 status locator를 읽어 미확인. `.goal/runs/g7-surf-fix2-qa-20261108/captures/observations.json` |
+| 사진 보관함·crop·업로드 | PASS, staging DB·Storage 실반영 | capture 1, 후속 화면에서 중단 | 6장 선택, 선택 변경, 위치 76%, 10MB 입력→3,498B JPEG, sign/PUT/finalize 200, `REVIEW`, cleanup 0. 동일 `observations.json` |
+| 환전 상태·내역 읽기 | PASS | capture 1, 후속 화면에서 중단 | 실제 `REQUESTED`·`PAID` fixture, 3단계 상태·내역 2건·`누적 입금` 관찰. 동일 `observations.json` |
+| 전체 사회 회귀 45개 | PASS, 45 passed / 0 failed / 0 flaky, retries 0 | 0 | `.goal/runs/g7-surf-fix2-qa-20261108/logs/social-web-first.log` |
+| 결제 원복·fixture cleanup | PASS | 0 | `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503. 전체 회귀와 직접 캡처 fixture 잔존 각각 0 |
+| W-12 enabled 환전 신청 화면 | 다음 QA 2/2로 이월 | 미실행 | 이번 회차 명시 제외. 상태 승격 없음 |
+
+G7-SURF·G7-REG 및 다른 feature status는 변경하지 않았다. 제품·테스트 코드와 기대값도 수정하지 않았다. 변경 6화면의 신규 캡처 누락 15폭과 온보딩은 통과로 세지 않았다.
+
+## 2026-11-08 G7-SURF 결정 재조정본 전수 QA, source `3142e9a13f114fa9e2956e28504df042ba07f268`
+
+| 항목 | 판정 | 종료코드 | 증거 |
+|---|---|---:|---|
+| 승인 26화면, 390·1024·1440과 핵심 768 | ❌ NG, 일치 2 / 불일치 19 / 미확인 5 | surface verifier 1 | corrected contact sheet 4장, 기존 일치 16개 좌우 합성본, clean 승인/dev 원본 직접 육안 대조. [design-conformance-matrix](design-conformance-matrix.md) |
+| 사진 보관함과 위치 조정·crop·업로드 | PASS, staging DB·Storage 실반영 | capture 0 | 6장 선택, 선택 변경, 위치 82%, 10MB 입력→55,674B JPEG, sign/finalize 200, REVIEW, cleanup 0. `captures/observations-banner-coverage.json` |
+| 내 워드맵 읽기 | PASS | capture 0 | D-day·진행 상태·목표 제목·실제 단어·응원 인원·내보내기. `captures/mywordmap-{390,768,1024,1440}-pair.png` |
+| 전체 사회 회귀 45개 | ❌ FAIL, 43 passed / 2 failed / 0 flaky, retries 0 | 1 | 홈의 미등록 접힘 영역, 환전 내역 390px 고아 줄바꿈. `.goal/runs/g7-surf-reconciled-qa-20261108/logs/social-web-first.log` |
+| 독립 코드리뷰 | ❌ BLOCK, MAJOR 1 | 해당 없음 | 홈 검색 GET 뒤 외부 접힘이 닫혀 검색 결과 DOM이 사라짐. `.goal/g7-reconciled-cross-review.summary.md` |
+| 결제 원복·fixture cleanup | PASS | 0 | `PAYMENTS_ENABLED=false`, authenticated `cheer-order` HTTP 503. 직접 조회 auth user·goal·payment·cashout 각각 0. `logs/final-restore-cleanup.log` |
+| W-12 enabled 환전 신청 화면 | 미확인 | local Supabase status 1 | staging 비활성은 안전계약 일치. 현재 source의 격리 로컬 픽셀은 로컬 Supabase 컨테이너 부재로 미확인. `logs/local-supabase-status.log` |
+
+G7-SURF·G7-REG 및 다른 feature status는 변경하지 않았다. 제품·테스트 코드와 기대값도 수정하지 않았다.
+
+## 2026-11-08 19:04 KST: G7-SURF 결정 재대조 수정 착수, source `27d20ef2f6756543257f620a9764ce11408413bc`
+
+| 항목 | 판정 | 종료코드 | 실행 위치 | 증거 |
+|---|---|---:|---|---|
+| G7-SURF-RECON 기존 승인 답 10건과 기능 누락 2건 | ❌ NG, D-049·D-040·D-041·D-026 이행 전 | 미실행 | 제품 수정 전 판정 | `.goal/g7-decision-reconciliation.summary.md`, `docs/qa/design-conformance-matrix.md` |
+
+제품 수정·검증·배포가 끝난 뒤 같은 항목을 직접 관찰 증거와 함께 갱신한다. `paysuccess`·`dopamine`·`friends`의 새 표현 판정은 이번 수정 범위에서 제외한다.
+
+## 2026-11-08 18:53 KST: G7-REG 최종 검증, source `27d20ef2f6756543257f620a9764ce11408413bc`
+
+| 항목 | 판정 | 종료코드 | 실행 위치 | 증거 |
+|---|---|---:|---|---|
+| G7-REG-01 `social-web-first.spec.ts` 45개 단일 실행 | PASS, 45 passed / 0 failed / 0 flaky, retries 0 | 0 | staging 고정 alias | `.goal/runs/g7-reg-final-20261108-184254/logs/social-web-first.log` |
+| 새 배포 후 PW-03 쓰기 smoke | PASS, 건강 preset→reload→public 반영, cleanup 전 범주 0. 전체 회귀와 별도 | 0 | `https://haenael-ge-v2-staging-100-b.vercel.app` | `.goal/runs/g7-reg-final-20261108-184254/logs/post-deploy-pw03.log` |
+
+배포 URL `https://haenael-ntg4kagv6-100-b.vercel.app`는 Vercel `Ready`, 고정 alias health exact SHA다. 최종 결제 비활성 HTTP 503을 관찰했다. 이 회차는 G7-REG만 닫았으며 G7-SURF·G7-VER와 다른 feature 항목은 변경하지 않았다.
+
+## 2026-11-08 18:25 KST: G7-SURF 최종 QA, source `f51db4255753c99b356abed4f2b2a74cd240351b`
+
+| 범위 | 판정 | 증거 | 최종확인일 | 상세 |
+|---|---|---|---|---|
+| G7-SURF 승인 26화면 | 불일치 | 390 재사용 26, 1024 재사용 22+신규 4, 1440 신규 26, 핵심 768 신규 9. 현재 `일치 10 / 불일치 15 / 미확인 1` | 2026-11-08 | [design-conformance-matrix](design-conformance-matrix.md) |
+| 결제 성공·도파민 | 관찰됨, 표현 불일치 | 실제 DB `DONE` fixture, staging Edge HTTP 200·`idempotent=true`, 390·768·1024·1440 overlay 1·growth wordmap 1 | 2026-11-08 | `.goal/runs/g7-surf-final-qa-20261108-180728/captures/` |
+| 기능 차단 결함 | 0건 | 온보딩 preset+업로드, 홈 목표 카드 4개, 업적 hero·진열대·진행률, 약관 entity 0, 결제 성공 기능 관찰 | 2026-11-08 | `.goal/runs/g7-surf-final-qa-20261108-180728/captures/observations.json` |
+| 전체 회귀 45개 | FAIL | 단일 실행 retries 0: 44 passed, 1 failed, 0 flaky. `PW-03` visible `/_next/image` broken 판정. 실패 캡처에서는 건강 커버가 렌더됨. 재시도하지 않음 | 2026-11-08 | `.goal/runs/g7-surf-final-qa-20261108-180728/logs/social-web-first.log` |
+| 결제 원복·fixture cleanup | PASS | `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503, 캡처 Auth·member·goal·payment 잔존 각 0, 전체 회귀 cleanup 0 | 2026-11-08 | 동일 run 로그와 `observations.json` |
+
+이 회차는 G7-SURF만 검증했다. G7-REG status와 feature status는 변경하지 않았다. W-12의 Preview 환전 비활성은 결함이 아니며 enabled 신청 화면은 `미확인`인 부정 판정이다. staging은 `VERCEL_ENV !== production`이면 코드가 환전 스위치·암호화 key·fingerprint key를 강제로 거부하므로 안전계약을 깨거나 운영 DB에 쓰지 않고는 상태 생성이 물리적으로 불가하다. 대체 검증은 현재 환전 단위 53/53과 과거 격리 로컬 Server Action 200·DB 상태전이·Playwright 45개 PASS다. 이용약관·개인정보처리방침 전문은 보존 대상이다.
+
+## 2026-11-08 17:26 KST: G7-SURF 재QA 종료 회수, source `c2eb2f6`
+
+**판정: ❌ changes-requested.** 전체 사회 회귀는 테스트 locator 결함 1회 교정 뒤 단일 실행 `45 passed / 0 failed / 0 flaky`, retries 0, EXIT 0이다. 디자인 QA는 실제 확보 증거 기준 `일치 0 / 불일치 15 / 미확인 11`로 출고 불가다. 캡처 재시도 금지에 따라 390px `26/26`, 1024px `22/26`, 1440px `0/26`, 핵심 768px `0/9`를 사실대로 고정했다. G7-REG status와 feature status는 변경하지 않았다.
+
+| 출고 필수 항목 | 충족 여부 | 실제 관찰 | 증거 |
+|---|---|---|---|
+| 이번 기능 happy + edge | 미충족 | 온보딩 프리셋 선택·파일 업로드, 홈 다중 목표, 업적 hero·진열대·다음 진행률, 약관 entity 해소는 관찰. 실제 결제 성공과 dopamine overlay는 오류 화면으로 미도달 | `browser/surface-observations.json`, `browser/{onboarding,home,status,terms,paysuccess,dopamine}-390-pair.png` |
+| 관련 범위 regression | 충족 | `social-web-first.spec.ts` 단일 실행 45/45 PASS, failed 0, flaky 0, retries 0, EXIT 0. 첫 불변 baseline은 44/45와 test-defect 1건을 그대로 보존 | `logs/social-web-first-full-r2.log`, `logs/social-web-first-full-r2.log.result`, `.goal/baseline.json` |
+| 디자인 QA | 미충족 | 화면 분모 26: 일치 0, 불일치 15, 미확인 11. 확보된 48상태는 HTTP 200·overflow 0·console error 0 | [`design-conformance-matrix.md`](design-conformance-matrix.md), `browser/` |
+
+### 출고 차단과 판정 대기
+
+| 구분 | 화면 | 관찰·근거 | 후속 위치 |
+|---|---|---|---|
+| 제품 디자인 불일치 | `onboarding` | 프리셋+업로드는 생겼지만 승인 필드 순서·프리셋/카피와 다름 | `web/src/components/receiver/OnboardingGoalForm.tsx` |
+| 제품 디자인 불일치 | `home` | 목표 2개는 보이나 승인 카드의 커버·관리/공유·응원 요약 위계와 다름 | `web/src/app/(receiver)/me/page.tsx` |
+| 제품 디자인 불일치 | `status` | hero·진열대·진행률은 존재하나 승인 실사 자산·8칸 진열과 staging gradient·6칸 구조가 다름 | `web/src/app/(receiver)/me/achievements/page.tsx` |
+| 제품 디자인 불일치 | `terms` | HTML entity 노출은 해소됐지만 승인 요약 조문과 staging 장문 전문 구조가 다름 | `web/src/app/terms/page.tsx` |
+| 기능·디자인 불일치 | `paysuccess`, `dopamine` | 이미 `DONE`인 안전 fixture URL도 `결제 확인이 필요해요`; overlay·growth wordmap DOM 0 | `web/src/app/payment/success/page.tsx:42`, `supabase/functions/toss-confirm/index.ts:223` |
+| 표현 판정 대기 | `how`, `mywordmap`, `cashstatus`, `cashhistory`, `friends` | 기존 OD와 비교 이미지를 보존하며 일치로 승격하지 않음 | `.goal/demos.md`, `~/.claude/harness/open-decisions.md` |
+| 안전 계약·미확인 | `cashout` | Preview 비활성은 W-12 계약이라 결함이 아님. production-enabled 승인 폼은 미확인 | `web/src/lib/supabase/service.ts` |
+
+### 테스트 결함 보정 1회
+
+`QA-TC-CS-03-04`는 다중 목표 구현 뒤 페이지 전체의 `cheer-summary-bar`가 2개가 되어 strict mode로 실패했다. 단정 대상은 홈 목표 목록 카드이므로 locator를 `home-goal-list` 아래로 한정했다. 기대 문구·아바타 3개·`+20` 단정은 유지했고 skip·retry·단정 약화는 없다. diff는 `web/e2e/social-web-first.spec.ts:3926`; 교정 전 불변 baseline은 44/45, 교정 후 같은 전체 suite는 45/45다. 커밋하지 않았다.
+
+### 복구와 잔존
+
+- `PAYMENTS_ENABLED=false`: 원복 명령 EXIT 0, 최종 `cheer-order` HTTP 503.
+- fixture 잔존: auth 0, member 0, goal 0, payment 0. 캡처 스크립트 cleanup도 member·goal·payment 0.
+- 환경 실패 원인: 임시 캡처 하네스의 과거 프리셋 키, 분석 동의 localStorage 키, 존재하지 않는 배너 locator 30초 대기, 원격 시크릿 비대화형 확인 누락. 제품 결함으로 세지 않았다. 재시도 금지 뒤 현재 증거만 회수했다.
+
+이 QA가 보장하는 것은 source `c2eb2f6`의 전체 사회 회귀 45개와 위 48개 실브라우저 상태다. 미확인 11화면의 필수 폭, 실제 결제 성공 callback, 다른 브라우저, 성능·부하·보안은 보장하지 않는다.
+
+STAMP: 2026-11-08 17:26 KST | line v2 | source `c2eb2f6` | agent Codex qa-verifier | skill qa-only | 제품 수정 0 · 테스트 locator 수정 1 · 커밋 0
+
+## 2026-11-08 16:48 KST: G7-SURF 재QA 전체 회귀 1차 NG, source `c2eb2f6`
+
+**판정: ❌ 테스트 결함 1건.** `.goal/feature-list.json`의 `social-web-first.spec.ts` 전체 단일 실행은 retries 0에서 44/45 PASS, 1 FAIL이었다. 다중 목표 홈 구현 뒤 같은 `23명이 응원했어요` 요약이 홈 목록과 기존 상세 영역에 각각 렌더되는데, `QA-TC-CS-03-04`가 페이지 전체에서 단일 요소를 가정해 Playwright strict mode로 실패했다. 제품 화면 결함으로 세지 않고 허용된 테스트 결함 1회 범위에서 locator를 `home-goal-list`로 한정했다. 결제 스위치는 원복됐고 `cheer-order` HTTP 503, fixture 잔존 0을 관찰했다.
+
+증거: `.goal/runs/g7-surf-reqa-20261108-1639/logs/social-web-first-full.log`, `.goal/baseline.json`, `web/e2e/social-web-first.spec.ts:3926`.
+
+
+## 2026-11-08 15:37 KST: G7-SURF 전회차, source `14c991d`
+
+**판정: ❌ changes-requested.** G7-SURF 관련 staging 자동화는 34/34 PASS이고 26개 화면 × 3폭 실캡처와 환전 3상태 직접 생성은 완료했지만, 디자인 정합은 `일치 10 / 불일치 15 / 미확인 1`이다. `미확인`은 통과로 세지 않는다. G7-REG status와 `.goal/feature-list.json`은 변경하지 않았다.
+
+| 출고 필수 항목 | 충족 여부 | 관찰 결과 | 증거 |
+|---|---|---|---|
+| 이번 기능 happy + edge | 미충족 | 로그인·초대·친구·목표·커버 업로드/승인·환전 `REQUESTED`·`PAID`·`REJECTED` 상태는 실행. 실제 결제 성공만 staging 상태 생성이 물리적으로 차단됨 | `.goal/runs/g7-surf-20261108-150235/logs/g7-surf-playwright.log`, `logs/g7-state-closure-r2.log`, `logs/g7-toss-confirm-disabled.json` |
+| 관련 범위 regression | 충족 | 34/34 PASS, 종료코드 0, retry 없음, fixture DB·Auth·Storage 잔존 0건. 전체 G7-REG 판정은 하지 않음 | `logs/g7-surf-playwright.log` |
+| 디자인 QA | 미충족 | 26개 전수: 일치 10, 불일치 15, 미확인 1. 390·1024·1440 대조, 핵심 9화면은 768 추가. 제품 화면 overflow 0 | `docs/qa/design-conformance-matrix.md`, `browser/screenshots/`, `browser/compare/` |
+
+### 결함·미확인 집계
+
+| ID | 판정 | 화면 | 요약 | 후속 구현·검증 위치 |
+|---|---|---|---|---|
+| G7-SURF-D01 | 불일치 | `how` | 평문 3단계 승인본이 카드형·하단 CTA 구조로 변경됨 | `web/src/app/how/page.tsx` |
+| G7-SURF-D02 | 불일치 | `onboarding` | 승인본의 목표 커버 선택·사진 업로드가 없음 | `web/src/components/receiver/OnboardingGoalForm.tsx` |
+| G7-SURF-D03 | 불일치 | `home` | 승인본 목표 카드 목록과 구현 단일 목표 요약 구조가 다름 | `web/src/app/(receiver)/me/page.tsx` |
+| G7-SURF-D04 | 불일치 | `mywordmap` | 승인 워드맵 읽기뷰 대신 공유 포스터·내보내기 도구 중심 | `web/src/app/(receiver)/wordmap/[goalId]/page.tsx` |
+| G7-SURF-D05 | 불일치 | `terms` | 승인 요약 조문과 구현 장문 템플릿·HTML entity 노출이 다름 | `web/src/app/terms/page.tsx` |
+| G7-SURF-D06 | 불일치 | `privacy` | 승인 요약 처리방침과 구현 장문 템플릿 구조가 다름 | `web/src/app/privacy/page.tsx` |
+| G7-SURF-D07 | 불일치 | `friends` | 승인본에 없는 `과거 응원 기록`·초대 empty 카드가 존재 | `web/src/app/(receiver)/friends/page.tsx` |
+| G7-SURF-D08 | 불일치 | `status` | 승인 메달 히어로·진열대·진행률이 3개 집계 행으로 축소됨 | `web/src/app/(receiver)/me/achievements/page.tsx` |
+| G7-SURF-D09 | 불일치 | `business` | 승인 단일 사업자 표가 링크 목록+카드로 분할됨 | `web/src/app/(receiver)/my/legal/page.tsx` |
+| G7-SURF-D10 | 불일치 | `bannerupload` | 승인 전용 사진 보관함 화면이 목표 상세 인라인 picker로 변경됨 | `web/src/components/social/GoalCoverPicker.tsx` |
+| G7-SURF-D11 | 불일치 | `coverage` | 승인 route 15개 주장과 현재 `page.tsx` 23개가 어긋남 | `docs/design/prototypes/screen-inventory-v3.md`, 승인 prototype |
+| G7-SURF-D12 | 불일치 | `cashout` | 전화번호·잔액 100 격리 회원도 3폭에서 신청 폼 0건, 비활성 안내 1건. 승인 신청 폼과 다름 | `web/src/lib/supabase/service.ts`, `web/src/app/(receiver)/cashout/page.tsx` |
+| G7-SURF-D13 | 불일치 | `cashstatus` | 직접 시딩한 `REQUESTED` 상태의 다중 카드·3열 확장 구조가 승인 compact hero·세로 단계와 다름 | `web/src/app/(receiver)/cashout/status/page.tsx` |
+| G7-SURF-D14 | 불일치 | `cashhistory` | 직접 시딩한 `REQUESTED`·`PAID`·`REJECTED` 혼합 목록 구조가 승인 compact 이력과 다름 | `web/src/app/(receiver)/cashout/history/page.tsx` |
+| G7-SURF-D15 | 불일치 | `dopamine` | 승인 결제 직후 단어 적립·성장 오버레이가 구현 DOM·상태 분기에 없음 | `web/src/app/(receiver)/wordmap/[goalId]/page.tsx` |
+| G7-SURF-U01 | 미확인 | `paysuccess` | 현재 API 503 `payments_disabled`; 이전 실제 callback도 Toss 테스트 키 IP 정책으로 502. UI 6건·route 5건은 대체 검증일 뿐 staging 성공 렌더 증거가 아님 | `logs/g7-toss-confirm-disabled.json`, `logs/g7-state-closure-vitest.log`, `logs/g7-state-closure-toss-confirm-r2.log`, `.goal/demos.md` |
+
+이 QA가 보장하는 것은 staging source `14c991d`에서 G7-SURF 관련 34개 자동화 흐름, 26개 화면의 390·1024·1440 렌더, 핵심 9화면의 768 렌더, 로그인·초대·친구·목표·커버 업로드와 승인 흐름, 직접 시딩한 환전 3상태가 실행됐다는 점이다. 실제 결제 성공 화면과 Preview에서 강제로 비활성화된 환전 제출, 타 브라우저, 성능·부하·보안은 보장하지 않는다.
+
+STAMP: 2026-11-08 15:37 KST | line v2 | source `14c991d` | agent Codex qa-verifier | skill qa-only | 제품 수정 0
+
 ## 2026-11-08 11:4x KST: 독립 검증 FAIL(D1~D5) 반영 재QA, source `14c991d`
 
 | QA 축 | 판정 | 관찰 결과 | 증거 |

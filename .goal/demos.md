@@ -1,7 +1,66 @@
-# 회장께 물을 것 · G7-SURF 제품수정 2026-11-08
+## 2026-11-09 12:21 KST · 컨트롤러 감사 지시 반영
 
-- **어떻게 쓰나요 화면 표현 선택:** 같은 390px 비교에서 승인본은 카드형 단계와 별도 홈 링크, 현행은 평문 3단계와 단일 CTA다. 추천은 승인본 카드형을 채택하는 것이다. 단계 경계와 정보 위계가 더 분명하고 승인 시안과도 일치한다. 비교: `.goal/runs/g7-surf-20261108-150235/browser/compare/how-390-pair.png`. 회장 결정 전에는 현행 제품을 바꾸지 않았다.
-- **내 워드맵 화면 표현 선택:** 같은 390px 비교에서 승인본은 포스터 내보내기 중심, 현행은 여러 응원 단어와 인원·D-day를 읽는 정보 중심이다. 추천은 현행 읽기뷰를 유지하되 승인본의 저장·공유 액션만 별도 디자인 승인 후 결합하는 것이다. 현행을 승인본으로 통째로 되돌리면 실제 응원 단어 정보가 사라진다. 비교: `.goal/runs/g7-surf-20261108-150235/browser/compare/mywordmap-390-pair.png`. 회장 결정 전에는 현행 제품을 바꾸지 않았다.
+결제 성공(paysuccess)·성장 피드백(dopamine)은 회장 결정 대상에서 회수했다. CLAUDE.md §4.3·D-049 승인 시안에 따라 두 화면 모두 추천안인 시안대로 수정하며 단어 적립 기능을 유지한다. 아래 과거 기록의 표현 선택 대기는 현재 유효하지 않다. 실제 구현 수정·재캡처 전에는 일치로 승격하지 않는다.
+
+기존 최신 제품 source a282435, 전체 회귀42/45·디자인23/26 및 독립검증 FAIL 상태는 유지한다. 미커밋 기록9건을 이번 지시로 커밋한다. Goal 재개에 앞서 실제 hook은 8,484,766/8,000,000 토큰으로 위임 경로를 차단했다. 한도 변경·우회는 하지 않았다. 운영 배포 금지.
+
+## 2026-11-09 01:56 KST · 손님 응원 위치 판정 완료
+
+OD-haenael-20261108-guest-cheer=(가) 명시 전달 수신. 손님 상세는 마이페이지에서만 보존(기존11건 삭제 없음), 홈 워드맵·받은 응원수는 손님 포함 집계를 유지한다. 직전 위치 판정 대기 표기는 해소되었다. 기존 a282435 QA 근거와 일치하며 이번 신규 실행 없음. 회귀42/45·토큰 한도 차단은 별개로 미해소.
+
+## 2026-11-09 01:54 KST · 컨트롤러 범위 정정
+
+회원 응원 관계·친구 목록·친구 상세만 현재 실행 범위다. 계정 없는 손님 응원 11건은 현재 마이페이지 받은 응원에 그대로 보존한다. 최종 위치는 OD-haenael-20261108-guest-cheer 회장 판정 대기로 유지하며, 과거 21:4x 원장 회수 기록으로 자가종결하지 않는다. 이번 턴 제품 변경·재QA 없음. 기존 최신 source a282435, 회귀42/45, 실행 토큰 한도 초과 차단 유지.
+
+# 최신 실행 상태 · 2026-11-09 01:32 KST · 목표 미완료
+
+- staging: https://haenael-ge-v2-staging-100-b.vercel.app · source `a282435f797b085ca51edbf5a2f7eaab31848d1d`.
+- D-050 회장 기답 이행: 친구 목록의 별도 과거 섹션 제거, 회원 간 이력은 친구 상세, 손님 상세는 받은 사람 마이페이지, 홈23명·워드맵 집계 보존. 세 폭 실제 DB 검증과 독립 코드리뷰 MAJOR0.
+- 디자인 현재 26행: 일치23·불일치0·미확인3. 남은 것은 결제 성공·성장 피드백 표현2개와 W-12 staging 환전 검증 정책. 격리 localhost390·1024·1440/POST200/REQUESTED 성공은 stage통과로 대체하지 않는다.
+- 최신 전체회귀: exact a282435, retries0, 42passed/3failed/0flaky, EXIT1. React418(hydration), lineClamp2 단정, 직전관계해제로 인한 FRIEND-HISTORY fixture 순서의존. 이 세 건은 아직 고치지 못했다. 과거45/45를 최신통과로 합산하지 않는다.
+- 새 수정 위임 차단: goal-guard가 캐시 제외 지휘+워커 누적8,304,824/8,000,000토큰으로 차단했다. 차단된 새 작업은 시작되지 않았다. 실행예산은 임의 변경하지 않았다. 현재 실행중인 소유 위임은 없고 직전 작업의 브라우저·임시서버는 정리됐다.
+- 최신 QA·실패 근거: `.goal/g7-friend-d050-qa.summary.md`, `.goal/runs/g7-friend-d050-qa-20261109/logs/regression-failures-first40.log`.
+- 다음 실행(예산 증액 후): 세 실패 원인별 최소수정 일괄커밋→staging재배포→전체45개 단일재QA. 그 뒤 미해결 회장결정만 회수하고 최종 Claude 독립검증. 최종PASS·approved_stages는 작성하지 않았다.
+- 회장 결정 자료: [결제 표현2개 선택·메모·복사 비교판](../docs/qa/g7-remaining-decisions-v1.0.0-gpt-codex-20261109.html). 친구는이미결정됐으므로다시묻지않는다.
+
+# 회장께 물을 것 · G7 최신 자료 (2026-11-09)
+
+- **결제 표현 2개**: [같은 폭 선택·메모·복사 비교판](../docs/qa/g7-remaining-decisions-v1.0.0-gpt-codex-20261109.html). 왼쪽은 승인 시안, 오른쪽은 source `2784ba2` staging이다. 390 CSS px·DPR 3 직접 촬영, 좌우 2340×2532. 추천은 승인 위계로 정리하면서 실제 단어 적립 기능은 보존하는 것이다. 중앙 `OD-haenael-20261108-payment-feedback-surface` 자료를 갱신했다.
+- **staging 환전 정책**: 운영과 분리된 staging DB·전용 테스트 키에서만 환전 신청 검증을 허용할지 요청했다. 추천은 허용이다. 허용 전에는 W-12를 유지한다. localhost 세 폭과 POST 200·REQUESTED·마스킹·상태·내역 검증은 완료했으며 이를 staging 통과로 대신하지 않는다. 중앙 `OD-haenael-20261109-staging-cashout-policy`.
+- **친구 항목은 D-050 기답 검증 완료:** source `a282435f` staging의 390·1024·1440px에서 친구 목록의 손님 과거 섹션 제거, 회원 간 응원 2건의 친구 상세 이동, 손님 응원의 `/my` 보존, 홈 23명·워드맵 단어 보존을 직접 확인했다. 친구 화면은 다시 판정 요청하지 않는다. 비교 근거 `.goal/runs/g7-friend-d050-qa-20261109/direct-captures/`.
+- **현재 QA 상태:** 디자인 26화면은 `일치 23 / 불일치 0 / 미확인 3`이다. 미확인은 위 결제 표현 2개와 staging 환전 활성 정책뿐이다. 누적 사회 회귀는 단일 실행 `42 passed / 3 failed / 0 flaky`, EXIT 1이므로 출고 통과가 아니다. 근거 `.goal/g7-friend-d050-qa.summary.md`.
+
+# 회장께 물을 것 · G7-SURF 최종 확인 2026-11-08
+
+- **현재 제품 상태:** source `2784ba28f6bf796fe8cbfa446941898e4b3ddcd9`에서 승인 26화면은 `일치 22 / 불일치 0 / 미확인 4`다. 설명 화면 CTA와 로그인 sheet copy는 390·1024·1440px에서 승인 정의와 일치했다. 전체 사회 회귀는 단일 실행·retries 0에서 `45 passed / 0 failed / 0 flaky`, EXIT 0이다. 기능 차단 결함은 0건이다. 근거 `.goal/g7-surf-confirmation-qa.summary.md`.
+- **결제 성공 화면 표현 선택:** 승인본은 성공 문구·목표 귀환을 먼저 보여주고, 현 제품은 같은 화면에 워드맵 성장 카드까지 크게 결합한다. 추천은 승인본처럼 성공 피드백을 1차로 두고 성장 카드는 다음 화면의 보조 정보로 이동하는 것이다. 390·1024·1440 비교: `.goal/runs/g7-surf-confirmation-qa-20261108/comparison-captures/paysuccess-{390,1024,1440}-pair-clean.png`.
+- **결제 직후 워드맵 성장 피드백 표현 선택:** 승인본은 목표 사진과 전체 워드맵 안에서 방금 보낸 단어가 쌓인 맥락을 먼저 보여주지만, 현 제품은 결제 성공 카드 안의 축약 워드맵으로 표시한다. 추천은 실제 단어 적립 기능은 유지하되 승인본의 목표 사진·전체 워드맵 위계를 채택하는 것이다. 390·1024·1440 비교: `.goal/runs/g7-surf-confirmation-qa-20261108/comparison-captures/dopamine-{390,1024,1440}-pair-clean.png`.
+- **친구 목록 표현 선택:** 승인본은 친구 목록 3행에 집중하고, 현 제품은 친구 목록과 과거 응원 기록 3건·초대 카드를 한 화면에 결합한다. 추천은 친구 목록은 승인 위계를 따르고 과거 응원 기록은 별도 활동 화면으로 분리하는 것이다. 390·1024·1440 비교: `.goal/runs/g7-surf-confirmation-qa-20261108/comparison-captures/friends-{390,1024,1440}-pair-clean.png`.
+- **W-12 환전 검증 경계:** staging에서는 안전계약에 따라 활성 신청 상태를 만들지 않아 `cashout`은 미확인이다. 격리 localhost에서는 390·1024·1440px, 신청 POST 200, DB `REQUESTED`, 계좌 마스킹, 상태·내역, fixture 0까지 관찰했다. 이 로컬 근거를 staging 일치로 승격하지 않았다. 근거 `.goal/g7-cashout-local-final.summary.md`.
+
+## 과거 회차 기록
+
+- **G7-SURF post-remediation 동결 QA 종료:** source `4b15cd88ec972b9ef81055dbbc1fc9eb2b4a42e0`에서 변경 9화면 390·768·1024·1440과 상태 재촬영 4화면을 직접 조작했다. 현재 26화면은 `일치 20 / 불일치 2 / 미확인 4`다. `how` CTA와 실제 `login` sheet 표현은 승인본과 달라 불일치이며, 결제 성공·결제 직후 워드맵 성장 피드백·친구 표현은 회장 판정 대기를 유지한다. W-12 환전은 격리 localhost 3폭·POST 200·DB `REQUESTED`·마스킹·내역까지 성공했지만 staging enabled는 미확인이다. 전체 45회귀는 `42 passed / 3 failed / 0 flaky`, EXIT 1로 관리자 접힘 시험 계약 결함 2건과 네트워크 조건 실패 1건이 남았다. 근거 `.goal/g7-surf-post-remediation-qa.summary.md`.
+- **현재 남은 새 표현 판정 3화면:** 결제 성공 화면과 결제 직후 워드맵 성장 피드백은 실제 DB `DONE` 상태에서 모두 동작한다. 승인본의 간결한 성공 피드백을 채택하고 성장 카드는 다음 화면의 보조 정보로 내리는 안을 추천한다. 친구 화면은 승인본에 없는 과거 응원 기록을 별도 활동 화면으로 이동하는 안을 추천한다. 비교판은 `.goal/runs/g7-surf-reconciled-qa-20261108/captures/{paysuccess,dopamine,friends}-{390,1024,1440}-pair.png`이고, 자동으로 일치 승격하지 않았다.
+- **기존 표현 판정 회수:** D-049·D-040·D-026이 이미 답한 항목은 다시 묻지 않는다. 직접 픽셀 대조에서 구현·시안 불일치 13개가 확인됐고, terms·privacy·status 3개는 구 prototype과 불일치하더라도 기존 결정이 우선이라 제품을 되돌리지 않는다.
+- **미확인 5개:** cashout은 W-12 enabled 상태 미생성, connect는 승인/실제 상태 불일치, coverage는 landing을 잘못 캡처, how는 분석 동의 팝업이 CTA를 가림, login은 온보딩 form을 잘못 캡처했다. 추가 캡처 금지에 따라 미확인으로 고정했다.
+- **이번 전수 QA:** source `3142e9a13f114fa9e2956e28504df042ba07f268`, 승인 26화면 `일치 2 / 불일치 19 / 미확인 5`. 전체 사회 회귀는 단일 실행·retries 0에서 `43 passed / 2 failed / 0 flaky`; 최종 결제 비활성 HTTP 503, fixture 잔존 0이다. 근거 `.goal/g7-surf-reconciled-qa.summary.md`, `.goal/runs/g7-surf-reconciled-qa-20261108/`.
+
+- **G7-REG 최종 검증·staging 배포 2026-11-08 18:53 KST:** 고정 주소 `https://haenael-ge-v2-staging-100-b.vercel.app`, 배포 URL `https://haenael-ntg4kagv6-100-b.vercel.app`, commit/sourceSha `27d20ef2f6756543257f620a9764ce11408413bc`. 메모리 available 11,684MB에서 `social-web-first.spec.ts` 45개를 단일 실행·retries 0으로 돌려 `45 passed / 0 failed / 0 flaky`, EXIT 0을 관찰했다. 새 배포는 Vercel `Ready`, 고정 alias health `status=ok`, `database=ok`, exact SHA다. 배포 후 독립 smoke 1/1에서 테스트 회원 건강 preset 선택→reload 유지→public 반영과 360·390·412·600·700·780·820·900·1000px 이미지 decode를 확인했고 fixture DB·Auth·Storage 전 범주 0이다. 이 1건은 전체 45개에 합산하지 않았다. 최종 `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503이다. 전체 로그·capture: `.goal/runs/g7-reg-final-20261108-184254/{logs/social-web-first.log,e2e-captures/}`. 배포 후 smoke: `.goal/runs/g7-reg-final-20261108-184254/logs/post-deploy-pw03.log`; source-identical 직접 캡처: `.goal/runs/g7-reg-staging-smoke-captures/{10-cover-owner-health-display-390.png,12-cover-public-health-reflected-390.png}`.
+
+- **G7-SURF 최종 QA 2026-11-08 18:25 KST:** staging source `f51db4255753c99b356abed4f2b2a74cd240351b`에서 승인 26화면을 현재 증거로 재판정했다. 390px 26개·1024px 22개는 UI 불변 diff 근거로 재사용했고, 1440px 26개·누락 1024px 4개·핵심 768px 9개·실제 `DONE` 결제 390/1024/1440은 신규 회수했다. 결과 `일치 10 / 불일치 15 / 미확인 1`, 기능 차단 결함 0건이며 출고 PASS가 아니다. 미확인은 W-12가 Vercel Preview에서 스위치와 두 key를 강제로 거부해 안전계약을 깨거나 운영 DB에 쓰지 않고는 만들 수 없는 환전 enabled 실화면이다. 현재 단위 53/53과 과거 격리 로컬 Server Action 200·DB 상태전이·Playwright 45개 PASS를 대체 증거로 붙였지만 실화면 일치로 승격하지 않았다. 전체 회귀는 단일 실행 retries 0에서 `44 passed / 1 failed / 0 flaky`; `PW-03`의 visible `/_next/image` broken 판정 1건을 재시도 없이 보존했다. 결제 false 복구·HTTP 503·fixture 0을 확인했다. 근거 `.goal/g7-surf-final-qa.summary.md`, `.goal/runs/g7-surf-final-qa-20261108-180728/`.
+- **이전 회차 표현 판정 목록, 현재 판정으로 대체됨:** 당시 14개 결정을 대기시켰으나 결정 재대조 뒤 기존 기답 항목은 회수했다. 현재 유효한 회장 판정은 위의 결제 성공·결제 직후 피드백·친구 3화면뿐이다.
+
+- **재QA 표현 편차 4건 추가:** 온보딩 입력 순서·커버 자산(`OD-haenael-20261108-onboarding-surface`), 홈 목표 카드 위계(`OD-haenael-20261108-home-surface`), 업적 메달 자산·진열대(`OD-haenael-20261108-status-surface`), 이용약관 정보 구조·타이포(`OD-haenael-20261108-terms-surface`)를 같은 폭 390·1024px 비교판과 함께 등록했다. 네 화면의 계약 기능은 실제 제품에 있어 임의 시안 원복은 하지 않았다. 이용약관 전문은 축약하지 않는 안을 추천했다. 비교판: `.goal/runs/g7-surf-reqa-20261108-1639/browser/{onboarding,home,status,terms}-{390,1024}-pair.png`.
+
+- **G7-SURF 후속 제품수정 최종 배포 2026-11-08 16:31 KST:** `https://haenael-ge-v2-staging-100-b.vercel.app`, commit/sourceSha `c2eb2f64d329fa7814dddca0d60fc4efc3fbdbf7`, preview `https://haenael-nywtq4gob-100-b.vercel.app`. health의 status·database `ok`, Supabase project ref와 sourceSha가 exact다. 같은 배포에서 테스트 회원 로그인, 목표 2건 생성, 홈 표시, 3건 상한 거절 쓰기 스모크 2/2를 통과했고 fixture를 정리했다. 로그: `.goal/runs/g7-surf-build-followup-20261108/{staging-health-final.log,staging-multi-goal-smoke-final.log}`.
+- **결제 직후 워드맵 성장 피드백:** 결제 확인으로 생성된 `cheerId`와 목표 slug를 다시 대조한 뒤 최신 워드맵·응원 수·방금 보낸 문구를 같은 성공 화면의 성장 오버레이에 표시하도록 구현했다. 로컬 실서버와 실제 staging DB fixture에서 HTTP 200, 오버레이 표시, 워드맵 렌더, console error 0, 가로 overflow 0을 관찰했다. staging은 결제가 비활성이고 Toss 테스트 키 IP 정책도 남아 실제 callback 기반 오버레이는 미검증이다. 근거 `.goal/runs/g7-surf-build-followup-20261108/{local-dopamine-smoke.log,local-dopamine-render.log,payment-dopamine-local-390.png}`.
+- **환전 상태·내역 표현 선택:** 기능 데이터는 바꾸지 않았다. 상태 화면은 DESIGN의 한 칼럼 계약과 승인 시안의 세로 진행 단계를 따르는 안을 추천해 `OD-haenael-20261108-cashstatus-surface`에 등록했다. 내역 화면은 승인 시안의 간결한 거래 행을 주 정보로 하고 현행 합계는 보조 요약으로 남기는 안을 추천해 `OD-haenael-20261108-cashhistory-surface`에 등록했다. 결정 전에는 둘 다 디자인 불일치로 유지한다.
+- **스테이징 제품수정본 2026-11-08 16:02 KST:** `https://haenael-ge-v2-staging-100-b.vercel.app`, commit/sourceSha `d73f0bfa9a969177431e96f0a45ada1efd862bf9`. 테스트 회원 로그인·목표 2개 쓰기·커버 프리셋·온보딩 사진 업로드(sign→PUT→finalize 200→DB `REVIEW`)·홈 목표 목록·3개 상한 거절은 headless Chromium에서 통과했고 fixture는 종료 시 정리했다. 캡처: `.goal/runs/g7-surf-build-20261108/captures/{onboarding-cover-picker-390,home-goal-list-390,achievement-medals-390}.png`. 로그: `.goal/runs/g7-surf-build-20261108/staging-onboarding-cover-smoke.log`, `.goal/runs/g7-surf-build-20261108/staging-capture-smoke.log`.
+- **어떻게 쓰나요 화면 표현 선택:** 같은 390px 비교와 승인 프로토타입 DOM을 다시 확인했다. 승인본은 평문 3단계와 `나도 시작하기` 단일 CTA이고, 현행은 카드형 3단계와 `시작하기`·`홈으로` 두 동작이다. 추천은 승인본의 짧은 평문 흐름으로 복원하는 것이다. 첫 사용 설명이 한 화면에 끝나고 승인 계약과도 일치한다. 비교: `.goal/runs/g7-surf-20261108-150235/browser/compare/how-390-pair.png`. 회장 결정 전에는 현행 제품을 바꾸지 않았다.
+- **내 워드맵 화면 표현 선택:** 같은 390px 비교와 승인 프로토타입 DOM을 다시 확인했다. 승인본은 D-day·진행 상태·실제 응원 단어·응원 인원을 읽는 owner 읽기뷰이고, 현행은 공유 포스터와 다운로드·Instagram·링크 복사 도구 중심이다. 추천은 승인 owner 읽기뷰를 복원하고, 현행 내보내기 도구는 읽기 정보를 대체하지 않는 별도 액션으로 재설계하는 것이다. 비교: `.goal/runs/g7-surf-20261108-150235/browser/compare/mywordmap-390-pair.png`. 회장 결정 전에는 현행 제품을 바꾸지 않았다.
+- **환전 신청 Preview 비활성:** `web/src/lib/supabase/service.ts`의 W-12 계약은 Vercel Preview에서 `CASHOUT_ENABLED`와 암호화·fingerprint 키 사용을 강제로 거부한다. 전화번호·잔액 100인 staging 테스트 회원에서 폼 0건·비활성 안내 1건이 나온 것은 이 안전 설정과 일치하므로 제품 코드를 바꾸지 않았다. 실제 신청 쓰기는 운영 DB·실송금 없이 로컬 전용 현행 E2E 경로에서 검증하는 구조를 유지한다.
+- **결제 성공 외부 키 정책:** 2026-11-07 실제 Toss sandbox 성공 callback은 제품 `/payment/success`까지 도달했지만 Supabase Edge 출구 IP `13.125.157.0`이 테스트 키 접근 정책에서 거부되어 `toss-confirm` HTTP 502였다. staging은 현재 `payments_disabled`다. 값은 기록하지 않았고 기존 `OD-haenael-ge-20261106-toss-test-ip`에 최신 실제 IP와 추천을 보강했다.
 - **친구 목록 과거 응원 기록:** 기존 `OD-haenael-20261108-cheer-history` 회장 대기를 그대로 유지한다. 이번 제품수정에서 삭제·이동·자가종결하지 않았다.
 - **법적 문서·사업자 정보·커버 보관함:** 이용약관·개인정보처리방침 전문은 축약하지 않았다. 사업자 정보 2단 구조와 기존 3단계 커버 업로드는 D-040을 따라 유지했다. 약관의 화면 노출 HTML entity만 실제 따옴표로 고쳤다.
 
