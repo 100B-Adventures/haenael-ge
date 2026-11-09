@@ -1,5 +1,26 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-09 16:55 KST · 새 병목 발생으로 지시대로 실행 중지
+
+- 최신 제품 커밋: `16e483d8bbae58612f69360ca7174469428aa27e`. stable staging https://haenael-ge-v2-staging-100-b.vercel.app 의 health source·status/databaseok·stagingDB ezzklgotgydwxqebfoys 일치. Preview https://haenael-n4lcpr2of-100-b.vercel.app . 운영 배포 없음.
+- 변경: CC01 추가 친구 관계의 정확한fixture정리, 성공/성장화면분리와기존header/CTA/tab복원. 새route·서버계약·환전정책변경없음.
+- 실제 로컬 검증: CC01→FD03→ORDERATTR→HISTORY 4/4·EXIT0, 관련단위7/7·EXIT0, 최종typecheck0, 결제상태전환/기존응원진입점클릭/console0/overflow0·EXIT0. payment fixture member/goal/payment/cheer/Auth0. 포트3462/54321/54322 listener0을root가확인했다.
+- 새 병목: builder가최종인계요약작성직전1800초제한으로종료(EXIT124). 필수 .goal/g7-final-history-fix.summary.md 없음. 16:2x 컨트롤러 원문 "다시 막히면 재작업을 돌지 말고 멈춰 병목을 events.log 에 적으세요"에따라같은역할재위임·추가QA·독립검증을시작하지않고중지한다. hand-patch로워커요약을만들지않는다.
+- 최신16e483d의전체45개회귀·staging3폭시안대조·다른모델독립VERDICT는미실행. 이전614c949의44/45·시안불일치결과를이번소스의통과/실패수치로재사용하지않는다.
+- W12확인: 기존service.test.ts5/5·EXIT0(.goal/runs/g7-w12-existing-tests.log), Preview환전거부유지. staging enabled쓰기는여전히미확인. 격리staging예외정책은중앙OD및async질문응답대기로추측변경하지않음.
+- 실제증거: .goal/runs/g7-final-history-fix-20261109/ 의targeted-e2e-final·payment-smoke-final3·unit-final·typecheck-final·staging-health와payment-captures/observations.json. 종료원문 .goal/runs/g7-final-history-fix-launch.log . builder품질도구EXIT0은실제인계산출물없음을대신하지않는다.
+
+VERDICT: NOT_RUN
+판정범위: 다른모델독립VERDICT미실행. 출고불가. 사용자조건부중지지시로Goal일시정지요청을반영한다.
+
+
+## 2026-11-09 16:30 KST · 1300만 상한 재개, 기존 미완 범위만 실행
+
+- 실제 .goal/budget tokens=13000000·weekly_cap=66 확인. 16:2x 컨트롤러 지시로 CC01순서의존·결제2화면시안구조·cashout W12 확인·타모델독립VERDICT만 대상이다. 새화면/리팩터/운영배포금지. 새병목이면재작업루프없이events기록후중지.
+- 동일builder67607 실행중, 아직제품커밋전. .goal/runs/g7-final-history-fix-task.txt 지시. 후속동결QA초안 .goal/runs/g7-final-qa-r2-task.txt.
+- W12 실물 service.ts는Preview계좌키/환전거부, 중앙OD-staging-cashout-policy는여전히응답대기. scope에포함됐다는이유만으로명시금지를해제하지않음. 격리staging만테스트허용할지async확인요청했고아직응답없음. 답을추정하지않는다. 기존로컬PASS를staging일치로올리지않음.
+
+
 ## 2026-11-09 14:25 KST · 1000만 토큰 상한 도달, 미완료 최종 상태
 
 - 제품 커밋: `614c9490ac6810cb3230da0b0287c863ef2d0d84`. 기록9건 커밋: `57f6414`.
