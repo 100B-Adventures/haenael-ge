@@ -1,3 +1,9 @@
+## 2026-11-10 03:4x KST 인계 (W12 로컬 재검증 r2)
+
+- 컨트롤러(claude-31) 지시로 W12 로컬 재검증. LOCAL_VERDICT: PASS(Server Action 응답 본문 1건 미검증). 요약 hotfix worktree `.goal/w12-local-r2.summary.md`, 증거 `.goal/runs/w12-local-r2-20261110/`.
+- 빌드본에서 동의 배너 첫 클릭 저장, hydration 경고 0. DB #42 REQUESTED ••••••8421, 상태·내역 마스킹, 원문 0. 정리 잔존 0, 포트 0, 로컬 Supabase stop, web/.next 는 scratchpad 로 이동.
+- 다음: staging 전용 키 등록·배포·cashout QA·독립 판정은 컨트롤러 지시 대기.
+
 ## 2026-11-08 22:0x KST 인계 (집계 확인 지시 추가)
 
 - 컨트롤러 판단: Goal 현재 단계는 끊지 않는다(.goal 산출물이 계속 갱신 중). 22:10 점검에서 대기열 미소비·3시간 초과면 컨트롤러가 재판단.
