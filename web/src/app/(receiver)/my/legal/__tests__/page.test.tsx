@@ -6,10 +6,9 @@ import { BUSINESS_INFORMATION } from "@/lib/legal/exposure";
 it("LG-04 사업자 정보 본문은 법정 기재 6항목과 미확정 신고번호 상태를 표시한다", () => {
   render(<BusinessInformationPage />);
 
-  const legalLinks = screen.getByRole("navigation", { name: "법적 고지" });
-  expect(within(legalLinks).getAllByRole("link")).toHaveLength(3);
-  expect(within(legalLinks).getByRole("link", { name: "이용약관" })).toHaveAttribute("href", "/terms");
-  expect(within(legalLinks).getByRole("link", { name: "개인정보처리방침" })).toHaveAttribute("href", "/privacy");
+  // DESIGN.md 「법적 고지 노출」(D-030-B·D-040): 이용약관·개인정보처리방침·사업자 정보 3행 목록은 해낼게 관리(/my)가 소유하고,
+  // 이 화면은 사업자 정보 전문만 소유한다. 목록이 여기 다시 생기면 같은 링크가 두 단계에 겹친다.
+  expect(screen.queryByRole("navigation", { name: "법적 고지" })).not.toBeInTheDocument();
   const information = screen.getByTestId("business-information");
   expect(within(information).getAllByRole("term")).toHaveLength(6);
   expect(within(information).getAllByRole("definition")).toHaveLength(6);
