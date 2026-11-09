@@ -1,5 +1,6 @@
 # QA Tracker — haenael-ge V2 소셜 바이럴 루프 (라인 v2)
 
+- **2026-11-09 · G7 최종 동결 QA ❌ NG:** exact source `614c9490ac6810cb3230da0b0287c863ef2d0d84` staging에서 전체 social 회귀 45개를 단일 실행·retries 0으로 검증해 `44 passed / 1 failed / 0 flaky`, EXIT 1을 관찰했다. `QA-REVERIFY-VIEWPORT-01`·`QA-TC-CL-04`는 통과했고, `G4-FRIEND-HISTORY-01`은 선행 `CC-01`이 실제 친구 1명을 추가한 뒤 친구 카드 4개를 fixture 초기값 3으로 고정 기대해 실패했다. 실제 `DONE` 결제로 `paysuccess`·`dopamine`을 390·1024·1440px에서 시안과 대조한 결과 CTA·워드맵·누적 25개·방금 보낸 단어는 보존됐지만, 테두리 카드·정보 순서·CTA·하단 탭 구조가 승인본과 달라 두 화면을 불일치로 판정했다. 현재 26화면은 `일치 23 / 불일치 2 / 미확인 1`; 미확인은 W-12에 따른 staging enabled `cashout`만이다. 친구 목록 손님 섹션 0·회원 상세 보냄 1/받음 1·MY 손님 응원·홈 합계 12는 최신 fixture에서 보존됨을 관찰했다. 최종 `cheer-order` HTTP 503 `payments_disabled`, 회귀·결제·친구 fixture cleanup 전 범주 0이다. 전체 QA 통과로 승격하지 않는다. 근거 `.goal/runs/g7-final-qa-20261109/`.
 ## 2026-11-09 01:58 KST · 손님 응원 홈 집계 직접 SQL 확인
 
 | 항목 | 판정 | 종료코드 | 실행 위치·로그 |

@@ -1,5 +1,35 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-09 14:25 KST · 1000만 토큰 상한 도달, 미완료 최종 상태
+
+- 제품 커밋: `614c9490ac6810cb3230da0b0287c863ef2d0d84`. 기록9건 커밋: `57f6414`.
+- staging: https://haenael-ge-v2-staging-100-b.vercel.app . root가 health source·status·database·staging ref 일치 EXIT0 확인(.goal/runs/g7-final-root-health.json).
+- 회귀: 최신동일source 단일45개·retries0, 44passed/1failed/0flaky, EXIT1. 실패는 G4-FRIEND-HISTORY-01 친구카드기대3실제4. CC01의추가친구관계잔여가원인이다. hydration·clamp는이회차PASS.
+- 결제2화면: 단어적립·실제워드맵·응원문구·복귀CTA는3폭보존됐으나 success/growth동시카드와dopamine header/CTA/tab누락으로둘다시안불일치. 디자인23일치/2불일치/1미확인(W12). 화면수정은미완이며회장표현선택대기로돌리지않는다.
+- 회원응원친구화·상세회원이력·손님MY상세전용·홈집계유지는실제stagingfixture에서보존확인. PAYMENTS_ENABLEDfalse/503와QAfixture잔존0.
+- 차단: 재수정위임을goal-guard가10,049,917/10,000,000토큰으로시작전에반려했다. 새수정·다른모델독립검증은미실행. 한도/weekly_cap우회없음. 소유builder·QA세션은모두종료. 운영배포없음.
+- 다음일괄수정안: .goal/runs/g7-final-history-fix-task.txt. 새기능없이CC01정확fixture정리와두승인상태구조복원후한커밋·한staging배포·동결전체QA·Claude독립검증이남았다.
+- QA요약: .goal/g7-final-qa.summary.md . 독립검증요청초안: .goal/runs/g7-final-independent-task.txt . 실제독립VERDICT파일은없으며PASS를주장하지않는다.
+
+VERDICT: FAIL
+판정범위: 현재동결QA결과이며다른모델독립VERDICT는미실행이다.
+
+
+## 2026-11-09 14:19 KST · 614c949 동결 QA 결함 수집, 재수정 대기
+
+- 제품614c949 staging health소스·DB일치 root직접확인. builder단위8/8·표적4/4·type/build0,검수도구보완후EXIT0.
+- 동결전체 social44/45 EXIT1,마지막HISTORY friend-card기대3실제4. 정확원인은CC01동시accept테스트가owner↔승자추가관계를남기는것. FD03복원만으로는불충분. 기대3/단언유지하며CC01정확fixture정리필요.
+- 결제2화면3폭기능보존·overflow0·console0이나시안구조불일치. success와growth동시카드, dopamine헤더/CTA/하단탭누락. 디자인23일치/2불일치/1미확인(W12).
+- QA세션61832가문서·정리를마무리중. 소유builder세션35204와보완84529는종료. QA종료후같은builder로 .goal/runs/g7-final-history-fix-task.txt 재수정,이후동결QA·Claude독립VERDICT. QA중제품커밋없음. 운영미배포.
+
+
+## 2026-11-09 13:32 KST · 상한 조정 후 제한 범위 재개
+
+- 컨트롤러가 .goal/budget tokens=10000000·weekly_cap=66으로 조정한 실물 확인. 이전 예산 대기는 해소되었다. 운영배포금지.
+- 범위: 회귀3건·결제2화면승인시안수정(단어적립유지)·최종QA와타모델독립VERDICT. 동일builder세션실행중, 이후동결QA한회차와Claude독립검증. 새기능/추가화면다듬기금지.
+- 57f6414문서9건커밋. 아직새제품커밋/QA결과없음. 실패·미확인을임의승격하지않는다.
+
+
 ## 2026-11-09 12:21 KST · 컨트롤러 감사 지시 반영
 
 결제 성공(paysuccess)·성장 피드백(dopamine)은 회장 결정 대상에서 회수했다. CLAUDE.md §4.3·D-049 승인 시안에 따라 두 화면 모두 추천안인 시안대로 수정하며 단어 적립 기능을 유지한다. 아래 과거 기록의 표현 선택 대기는 현재 유효하지 않다. 실제 구현 수정·재캡처 전에는 일치로 승격하지 않는다.

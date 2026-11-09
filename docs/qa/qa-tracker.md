@@ -1,5 +1,17 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-09 G7 최종 동결 QA, source `614c9490ac6810cb3230da0b0287c863ef2d0d84`
+
+| 항목 | 판정 | 종료코드 | 증거 |
+|---|---|---:|---|
+| 전체 사회 회귀 45개 | ❌ FAIL, 44 passed / 1 failed / 0 flaky, retries 0 | 1 | `G4-FRIEND-HISTORY-01` 순서 의존: 앞선 `CC-01`이 친구를 추가해 실제 4개인데 초기 fixture 3개를 고정 기대. `.goal/runs/g7-final-qa-20261109/logs/{social-web-first,failure-first40}.log` |
+| 승인 26화면 | ❌ 미충족, 일치 23 / 불일치 2 / 미확인 1 | 해당 없음 | `paysuccess`·`dopamine` 3폭 시안 불일치. `cashout` staging enabled 미확인. [design-conformance-matrix](design-conformance-matrix.md) |
+| 결제 성공·워드맵 성장 | 기능 보존, 디자인 불일치 | 0 | 실제 DB `DONE`, CTA·워드맵·누적 25개·방금 보낸 `한걸음`, 390·1024·1440 pair. `.goal/runs/g7-final-qa-20261109/payment-captures/` |
+| D-050 친구·손님 응원 보존 | PASS, 직접 조작 | 0 | 친구 목록 손님 섹션 0, 회원 상세 보냄 1·받음 1, MY 손님 응원, 홈 합계 12. `.goal/runs/g7-final-qa-20261109/friend-preservation/` |
+| 결제 원복·fixture cleanup | PASS | 0 | `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503 `payments_disabled`, 회귀·결제·친구 실행 namespace Auth/member/goal/payment/cheer 0 |
+
+제품·테스트 코드, feature/slice status, commit은 변경하지 않았다. 누적 회귀가 실패했고 디자인 불일치 2건이 남아 출고 통과로 승격하지 않는다.
+
 ## 2026-11-09 01:58 KST · 손님 응원 홈 집계 직접 SQL 확인
 
 | 항목 | 판정 | 종료코드 | 실행 위치·로그 |
