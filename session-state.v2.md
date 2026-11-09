@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-10 04:05 KST · W12 qa 독립 검증(Claude qa-verifier) VERDICT FAIL
+
+- 무엇을 어디까지: staging f9d9b99 직접 재확인. health 일치, 시험 회원 cashout·status·history 3폭 9/9 200·넘침 0, 원문 0·마스킹, allowlist 밖 회원 화면·Server Action 거부(cashout_disabled), 중복 신청 거부, DB #734 암호문 확인. 디자인 추가 5요소는 08-30 core 판정 승계로 차단 아님.
+- 남은 이슈·블로커: F-1 f9d9b99 누적 회귀 미실행, F-2 cashout 모바일 크기 실측 없음, F-3 tracker·매트릭스 표지·§1~§6 구판 모순(17/25), F-4 내역 날짜 UTC 표시, F-5 실수 Vercel 프로젝트 haenael-ge-v2-hotfix 잔존(삭제는 사람 승인). 승인 줄 안 씀.
+- 다음에 칠 명령: Goal 이 F-1~F-4 일괄 수정 후 독립 검증 재호출. 회귀 `.goal/runs/g7-regression-20261109-192x/run.sh` 를 GITHUB_SHA 갱신해 1회.
+- 검증했나: 관찰됨. `.goal/verify-20261110-0358.md`, `.goal/runs/w12-independent-verify-20261110/observations.json`. 임시 회원 정리 잔존 0.
+
 ## 2026-11-09 21:43 KST · W12 QA 문서 모순 보정(qa-verifier 위임)
 
 - 요청: 원본(NOT_MET/FAIL)·후속(tracker 14/25, matrix 15/25) 요약이 지적한 QA 문서 모순 보정. 제품·시험·승인 변경 금지.
