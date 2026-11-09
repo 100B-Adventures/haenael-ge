@@ -27,8 +27,9 @@
 
 ## 1. 요약 <a id="t-summary"></a>
 
-- **현재 판정(2026-11-09 21:3x KST, `.goal/w12-approval.summary.md`): W-12 미완료. APPROVE_REQUIREMENTS: NOT_MET, VERDICT: FAIL.** 로컬 통합 driver EXIT 1(동의 배너 클릭 후 visible=true·storage null, 확인 버튼 timeout, 신청 POST 0건, 원인 미분류). staging 은 `16e483d` 그대로라 W-12 소스 미반영(21:4x health GET 관찰). staging 회귀·cashout 3폭 캡처 미실행.
-- **현재 디자인 분모**: `25 일치 / 0 불일치 / 1 미확인(cashout)`. D-052 의 정책 대기는 D-053(21:12 KST)으로 해소됐고, `cashout` 은 이제 범위 제외가 아니라 미확인이다.
+- **현재 판정(2026-11-10 03:5x KST, W-12 source `f9d9b99`, Claude 세션)**: 격리 staging(D-053 전용 키를 배포 한 건 runtime env 로만 주입, 공용 Preview 미변경, health 200·sourceSha f9d9b99) 에서 3폭 HTTP 200·넘침 0, 실제 신청 POST 1회 200, 응답 본문 `REQUESTED`·마스킹 포함·계좌 원문 0, DB #734 `REQUESTED` `••••••8421`, 상태·내역 마스킹·원문 0(글자·HTML) 관찰. 로컬 r2(next build/start)도 PASS(`.goal/w12-local-r2.summary.md`, 지난 FAIL 은 next dev 하이드레이션 전 클릭인 시험환경 결함). 증거 `.goal/runs/w12-staging-20261110/`. 독립 판정 전이므로 qa 승격 판정은 아직 없다.
+- **현재 디자인 분모**: `25 일치 / 1 불일치(cashout) / 0 미확인`. cashout 은 승인 기준 `core-cashout-30-27-form-390` 과 구조·순서는 같고 시안에 없는 기존 요소 5개(이용료 설명, 예금주 안내, 전화번호 칸 D-010, 암호화 안내 D-012, 하단 링크)가 있다. 내역 날짜 UTC 표기 결함 후보 1(`history/page.tsx:88`).
+- **이전 판정(2026-11-09 21:3x KST, `.goal/w12-approval.summary.md`)**: W-12 미완료, NOT_MET/FAIL(로컬 통합 driver EXIT 1).
 - **과거 근거(source `16e483d`, 2026-11-09 19:2x~19:5x, W-12 판정에 재사용 불가)**: 누적 회귀 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0(`.goal/runs/g7-regression-20261109-192x/`). 독립 판정 `.goal/verify-20261109-192x.md` VERDICT PASS, 재검수 `.goal/g7-independent-quality-recheck.md` VERDICT PASS. 당시 `cashout` 은 D-052 범위 제외였다. 이 문서는 두 판정 원본을 바꾸지 않는다.
 - **qa 단계 승격**: 불가. 위 NOT_MET 이 해소되기 전 승인하지 않는다.
 
@@ -104,6 +105,8 @@ flowchart LR
 | 이전 | 2026-08-03~11-09 | 회차별 절, 현재는 [보관본](archive/v2-qa-tracker-history-v1.0.0-claude-opus-20261109-2008.md) |
 
 ## 8. 회차별 이력 (최신순, 판정 효력 없음) <a id="t-history"></a>
+
+- 2026-11-10 03:5x KST · W-12 격리 staging QA(Claude 세션): 쓰기 경로 PASS, cashout 디자인 불일치(기존 요소 5개). 사고: 첫 배포 때 worktree `.vercel/project.json` 부재로 `vercel deploy --yes` 가 새 Vercel 프로젝트 `haenael-ge-v2-hotfix` 를 만들고 시험 키를 넣음. 키 폐기·재발급, 연결을 `haenael-ge` 로 복구 후 재배포. 그 프로젝트 삭제는 CLI 가 사람 승인을 요구해 대기.
 
 > 2026-11-09 v2.1.14 에서 회차별 원문 59개 절(원본 줄 88~1465, 1,378줄)을 [archive/v2-qa-tracker-history-v1.0.0-claude-opus-20261109-2008.md](archive/v2-qa-tracker-history-v1.0.0-claude-opus-20261109-2008.md) 로 옮겼다. 원문은 한 글자도 고치지 않았다. 이 대장에서는 현재 보고만 평가한다.
 
