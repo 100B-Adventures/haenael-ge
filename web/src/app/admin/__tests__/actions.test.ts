@@ -31,6 +31,7 @@ vi.mock("@/lib/supabase/service", () => ({
   getCashoutAccountEncryptionConfig: vi.fn(() => ({
     keys: { "1": "k".repeat(40) },
   })),
+  isCashoutStagingTestMode: vi.fn(() => false),
 }));
 
 import { markCashoutPaid } from "../actions";

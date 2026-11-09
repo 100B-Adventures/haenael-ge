@@ -1,4 +1,7 @@
-import { createServiceRoleClient } from "@/lib/supabase/service";
+import {
+  createServiceRoleClient,
+  isCashoutStagingTestMode,
+} from "@/lib/supabase/service";
 
 type ServiceClient = ReturnType<typeof createServiceRoleClient>;
 
@@ -66,6 +69,10 @@ export async function deliverCashoutNotification(
   serviceClient: ServiceClient,
   input: CashoutNotification,
 ): Promise<void> {
+  // D-053 격리 staging은 DB REQUESTED 상태까지만 검증한다. 외부 SMS,
+  // Slack, email을 포함하는 notify Edge Function은 호출하지 않는다.
+  if (isCashoutStagingTestMode()) return;
+
   try {
     const token = getNotifyInternalToken();
     const { error } = await serviceClient.functions.invoke("notify", {

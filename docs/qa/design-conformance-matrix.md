@@ -2,7 +2,7 @@
 
 | 표지 | 값 |
 |---|---|
-| 문서 버전 | v2.1.13 (문서 구조 보완. 판정·행은 v2.1.12 와 동일) |
+| 문서 버전 | v2.1.16 (2026-11-09 21:5x KST 문서 보정. 현재: W-12 미완료·로컬 통합 FAIL·staging 미반영, `25 일치 / 0 불일치 / 1 미확인`. 16e483d 판정은 과거 근거로 불변) |
 | 작성 시각 | 2026-11-09 19:53 KST 보완. 판정 근거 관찰 시각 2026-11-09T10:37:31Z(19:37 KST, `observations.json`) |
 | 작성자·모델 | 문서 보완: qa-verifier / Claude Opus 5.5. 판정 원본: 독립 검증 Claude(제작 GPT-5 Codex 와 다른 모델) |
 | 파이프라인 | 라인 `v2`, `current_stage: qa`, qa 단계 승격 미실시 |
@@ -28,13 +28,15 @@
 
 ## 1. 요약 <a id="summary"></a>
 
-**판정: 이번 범위 디자인 `25 일치 / 0 불일치 / 1 범위 제외(W-12 cashout)`, 누적 회귀 `45/45`.** source `16e483d` staging 에서 결제 성공(`paysuccess`)과 워드맵 성장(`dopamine`)을 실제 `DONE` 결제 3건으로 390·1024·1440px 직접 관찰해 승인 시안과 나란히 대조했다. 16e483d 제품 diff 가 두 화면 범위로 한정돼 나머지 23화면은 직전 직접 PNG 판정을 재사용했다([§7](#trace)). `cashout` 은 D-052 에 따라 범위 제외이며 일치로 세지 않는다. 이것은 제품 QA 판정이고 qa 단계 승격은 W-12 미판정으로 하지 않았다.
+**현재 판정(2026-11-09 21:3x KST): `25 일치 / 0 불일치 / 1 미확인(cashout)`. W-12 미완료(로컬 통합 FAIL, staging 미반영), qa 승인 요건 NOT_MET / VERDICT FAIL(`.goal/w12-approval.summary.md`). D-052 정책 대기는 D-053 으로 해소.**
+
+**과거 근거(source `16e483d`, 2026-11-09 19:3x 관찰, W-12 증거 아님)**: 당시 분모 `25 일치 / 0 불일치 / 1 범위 제외(cashout, D-052)`, 누적 회귀 `45/45`. source `16e483d` staging 에서 결제 성공(`paysuccess`)과 워드맵 성장(`dopamine`)을 실제 `DONE` 결제 3건으로 390·1024·1440px 직접 관찰해 승인 시안과 나란히 대조했다. 16e483d 제품 diff 가 두 화면 범위로 한정돼 나머지 23화면은 직전 직접 PNG 판정을 재사용했다([§7](#trace)). `cashout` 은 D-052 에 따라 범위 제외이며 일치로 세지 않는다. 이것은 제품 QA 판정이고 qa 단계 승격은 W-12 미판정으로 하지 않았다. **W-12 갱신(2026-11-09 21:3x KST)**: D-053 으로 정책 대기는 해소됐다. `cashout` 분모 표기를 `범위 제외` 에서 `미확인(로컬 통합 실패로 staging 반영 보류)` 로 바꾼다. 현재 분모는 `25 일치 / 0 불일치 / 1 미확인` 이고 16e483d 의 25 일치 판정은 그대로다. W-12 미커밋 소스는 staging 에 반영되지 않았고(staging 은 여전히 16e483d), 새 staging 회귀·캡처는 미실행이다.
 
 ## 2. 목적·범위·참고 기준 <a id="scope"></a>
 
 - **목적**: 승인 시안 26화면과 source `16e483d` staging 화면의 정합을 화면 단위로 판정하고, 판정마다 원본 증거 경로를 남긴다.
 - **범위 안**: 26화면 판정표, 결제 2화면 3폭 직접 대조, 누적 회귀 45건 결과 인용.
-- **범위 밖**: W-12 `cashout` staging enabled 쓰기(D-052 정책 대기), 실제 Toss 결제 승인 호출, 운영 환경, 비 Chromium 브라우저, 성능·부하·보안(회장 미지정).
+- **범위 밖**: W-12 `cashout` staging enabled 쓰기(D-052 정책 대기는 D-053 으로 해소. 현재 미확인: W-12 로컬 통합 FAIL 로 staging 반영 보류), 실제 Toss 결제 승인 호출, 운영 환경, 비 Chromium 브라우저, 성능·부하·보안(회장 미지정).
 - **참고한 보고서 구성(2026-11-09 조회)**:
   - GitLab 단위 시험 보고서([docs.gitlab.com](https://docs.gitlab.com/ci/testing/unit_test_reports/)): 요약 건수를 먼저 보이고 실패 건마다 이름·파일·오류·스크린샷 첨부를 상세로 연결하는 방식, 기준 브랜치 대비 "새 실패·해소된 실패" 구분을 차용했다. 이 문서의 [§1](#summary) 건수 우선과 [§11](#history) 614c949 대비 해소 기록이 그것이다. JUnit XML 첨부 태그 방식은 채택하지 않았다(우리 증거는 파일 경로 표).
   - Playwright 보고자([playwright.dev](https://playwright.dev/docs/test-reporters)): 실행 하나를 객체 하나로 기술하는 JSON 보고와, 첨부 파일을 별도 디렉터리에 두고 기준 경로로 찾게 하는 구조를 차용해 [§9](#paths) 경로 root 표를 두었다. HTML 보고서·blob 병합은 이번 문서에 채택하지 않았다. 해당 페이지는 JSON 내부 필드 구조를 설명하지 않아 필드 이름은 인용하지 않는다.
@@ -56,7 +58,7 @@
 | AC-1 | Given source `16e483d` staging, When 누적 회귀를 retries 0 단일 실행, Then `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0 |
 | AC-2 | Given 실제 `DONE` 결제, When `paysuccess`·`dopamine` 을 390·1024·1440 에서 열고 CTA 를 누름, Then HTTP 200·overflow 0·console error 0·오류 문구 0, 성공과 성장이 분리되고 시안 구조와 같음 |
 | AC-3 | Given 16e483d diff 가 결제 성공 범위로 한정, When 나머지 23화면 판정, Then 직전 직접 PNG 근거 재사용을 경로와 함께 명시 |
-| AC-4 | Given W-12 결정 대기, When 분모 집계, Then `cashout` 은 범위 제외로 세고 일치에 넣지 않음 |
+| AC-4 | Given `cashout` staging 미관찰(과거 16e483d 회차는 D-052 결정 대기, 현재는 D-053 정책 해소 후 로컬 통합 FAIL), When 분모 집계, Then `cashout` 은 일치에 넣지 않음(16e483d 회차 범위 제외, W-12 현재 미확인) |
 | AC-5 | Given 실행 종료, When fixture 정리, Then 결제 플래그 복구(HTTP 503)와 fixture 잔존 0 |
 
 ## 5. 검증 결과 <a id="results"></a>
@@ -66,7 +68,7 @@
 | AC-1 | 충족, 45/45, EXIT 0, 479.9초 | 관찰됨(원 세션) | `.goal/runs/g7-regression-20261109-192x/summary.{json,md}`, `run.exit`=0 |
 | AC-2 | 충족, 2화면 × 3폭 = 6쌍 일치 | 관찰됨(원 세션) | `.goal/runs/g7-independent-192x/` PNG 12장 + `observations.json` |
 | AC-3 | 충족, 23화면 재사용 | 근거 확인 | `.goal/verify-20261109-192x.md:33` (diff 7파일 목록) |
-| AC-4 | 충족, `cashout` 범위 제외 1 | 근거 확인 | `wiki/거버넌스/결정.md` D-052 |
+| AC-4 | 16e483d 회차 충족(`cashout` 범위 제외 1). W-12 현재: 분모 규칙은 충족(일치로 세지 않음)이나 `cashout` 자체는 미확인 1 | 근거 확인 | `wiki/거버넌스/결정.md` D-052·D-053, `.goal/runs/w12-local-20261109/observations.json` |
 | AC-5 | 충족 | 관찰됨(원 세션) | `summary.json` `fixture_cleanup` |
 
 ## 6. 화면별 판정표 26행 <a id="screens"></a>
@@ -80,7 +82,7 @@
 | `belong` | 390·1024·1440. 관계 배지·아바타·수치는 fixture 차이이며 관계 해제는 D-026 기능이다. 방향·순서·위계는 승인본과 같음 | 일치 | 현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거 |
 | `business` | 390·1024·1440. 6행·순서·법적 고지 블록 유지. 데스크톱 전체 폭 확장은 DESIGN 데스크톱 가용 폭 100% 결정 | 일치 | 이전 3폭 좌우 대조와 UI 불변 diff 근거 |
 | `cashhistory` | 390·768·1024·1440. compact 요약 3칸, 거래 행, 세금 고지, 환전·홈 동작 순서가 승인본과 같고 fixture 금액·건수만 다름 | 일치 | `direct-captures/cashhistory-{390,768,1024,1440}.png` |
-| `cashout` | staging은 W-12 안전계약에 따라 비활성이다. 격리 localhost에서는 390·1024·1440 HTTP 200, 신청 POST 200, DB `REQUESTED`, 마스킹 계좌, 상태·내역과 namespace 0을 관찰했으나 staging 일치로 승격하지 않음 | 범위 제외(W-12 결정 대기, 미확인) | staging 비활성 증거 + 로컬 대체 증거 `.goal/g7-cashout-local-final.summary.md`; staging enabled는 미확인 |
+| `cashout` | **현재(W-12 미커밋 소스, 2026-11-09 21:3x 로컬): 신청 POST 0건**, 확인 버튼 클릭 timeout, `REQUESTED`·마스킹·상태·내역 미관찰. staging 은 16e483d 라 W-12 미반영. **과거(16e483d 이전 소스, `.goal/g7-cashout-local-final.summary.md`, W-12 증거 아님)**: staging 비활성, 격리 localhost 390·1024·1440 HTTP 200·신청 POST 200·DB `REQUESTED`·마스킹·상태·내역 관찰. 과거 POST 200 은 현재 판정에 쓰지 않는다 | 미확인(로컬 통합 FAIL 로 staging 반영 보류). 과거 16e483d 회차 판정: 범위 제외(D-052) | 과거: 로컬 대체 증거 `.goal/g7-cashout-local-final.summary.md`. 현재 W-12 미커밋 소스(2026-11-09 21:3x): 로컬 390·1024·1440 form·확인 버튼 visible, overflow 0(관찰됨). 동의 배너 `국외 이전에 동의하지 않음` 클릭 후에도 visible=true·localStorage null, `cashout-confirm-button` 클릭 30초 timeout, 신청 POST·`REQUESTED`·마스킹·상태·내역 미관찰, driver EXIT 1, hydration 경고 3. 원인 미규명(제품/환경 미분류). `.goal/runs/w12-local-20261109/{observations.json,driver.log,captures/cashout-form-390.png}`. staging enabled 미관찰, 새 staging 캡처 미실행. 참고 대조(판정 아님, 2장 Read): 시안 `docs/design/prototypes/clean-frames/social-viral-loop/cashout.png` 은 뒤로가기+`환전 신청` 제목·요약 4행·은행/계좌/예금주 3필드이고, 로컬 W-12 390 은 `환전 전에 정직하게…` 제목·서비스 이용료 행·전화번호 필드·안내 박스가 추가돼 있다. 이 차이가 승인된 core-cashout clean-frame 기준인지 미확인 |
 | `cashstatus` | 390·768·1024·1440. 상단 상세 헤더, 접수 hero, 세로 3단계, 금액·잔액·알림·홈 순서가 승인 계약과 같음 | 일치 | `direct-captures/cashstatus-{390,768,1024,1440}.png` |
 | `connect` | 390·1024·1440. 실제 초대 수락 fixture 뒤 `윤도경님이 초대를 받고 들어왔어요` 확인 상태를 촬영. 승인 수락 후 상태와 방향·순서·위계가 같음 | 일치 | `direct-captures/connect-{390,1024,1440}-accepted.png` |
 | `coverage` | 제품 `page.tsx` route 24개와 승인 시안 coverage 표 24행을 코드·문서로 확인. landing 캡처를 근거로 쓰지 않음 | 일치 | `find web/src/app -name page.tsx`=24, 승인 시안 표=24 |
@@ -108,7 +110,8 @@
 |---|---|---|---|
 | D-050 친구 상세 이력·손님 응원 위치 | `friends`(prototype:2210), `mypage`(prototype:2371) | 재사용: `.goal/runs/g7-final-qa-20261109/friend-preservation/{friends-390,friend-detail-history-390,my-received-390}.png`(source 614c949), 3폭 대조 `.goal/runs/g7-friend-d050-qa-20261109/direct-captures/friends-*` | `G4-FRIEND-HISTORY-01`, `QA-TC-FD-03`, `PW-06` expected (`summary.md:45,48,50`) |
 | D-051 결제 성공·성장 시안대로 | `paysuccess`(prototype:2810), `dopamine`(prototype:2631) | 이번 직접: `.goal/runs/g7-independent-192x/{paysuccess,dopamine}-{staging16e,pair16e}-{390,1024,1440}.png`, `observations.json` | `SMOKE-01`, `QA-TC-SP-03`(고정 CTA, `#cheer` 진입) expected (`summary.md:13,27`) |
-| D-052 16e483d 최종 범위·W-12 제외 | `cashout`(prototype:2844) 범위 제외 | 로컬 대체 근거 `.goal/g7-cashout-local-final.summary.md` (staging 일치로 승격 안 함) | 전체 45건 `summary.md`, 독립 판정 `.goal/verify-20261109-192x.md` |
+| D-052 16e483d 최종 범위·W-12 제외(과거) | `cashout`(prototype:2844) 범위 제외 | 로컬 대체 근거 `.goal/g7-cashout-local-final.summary.md` (staging 일치로 승격 안 함) | 전체 45건 `summary.md`, 독립 판정 `.goal/verify-20261109-192x.md` |
+| D-053 격리 staging 환전 신청 검증(현재) | `cashout`(prototype:2844) 미확인 | `.goal/runs/w12-local-20261109/{observations.json,driver.log,captures/cashout-form-390.png}`: driver EXIT 1, POST 0건. staging health `sourceSha=16e483d` | W-12 소스 회귀 미실행. 승인 판정 `.goal/w12-approval.summary.md` NOT_MET / FAIL |
 
 **증거 재사용 이유**: 16e483d diff 는 e2e spec, `payment/success` 3파일, 결제 범위 CSS 선택자, `/g/[slug]` 고정 CTA `id="cheer"` 1개다(`.goal/verify-20261109-192x.md:33`). 23화면 UI 코드는 바뀌지 않았으므로 직전 직접 캡처 판정을 재사용했다. 이는 사용자 승인된 영향 범위 판단이며 누락이 아니다. `/g/[slug]` 는 회귀 45건과 `#cheer` 이동 관찰로 확인했다.
 
@@ -116,9 +119,10 @@
 
 | 출고 필수 항목 | 충족 여부 | 실제 관찰 | 증거 |
 |---|---|---|---|
-| 이번 기능 happy + edge | 충족 | 홈 검색 일치·0건, 사진 선택·crop·업로드 `REVIEW`, 환전 읽기, 업적·워드맵·관리자 접힘을 staging에서 실제 조작 | [§6](#screens), `.goal/runs/g7-independent-192x/observations.json` |
-| 누적 regression | 충족 | source `16e483d` exact staging 단일 실행 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, retries 0, EXIT 0. 종료 후 결제 플래그 복구 HTTP 503, fixture 잔존 0 | `.goal/runs/g7-regression-20261109-192x/summary.{json,md}` |
-| 디자인 QA | 이번 범위 충족(W-12 제외) | `25 일치 / 0 불일치 / 1 범위 제외`. 범위 제외는 W-12 결정 대기인 `cashout`. 16e483d diff는 결제 성공 CSS 선택자와 `/g/[slug]` 고정 CTA `id="cheer"` 속성만 바꿔 나머지 23화면은 직전 근거 재사용 | [§6](#screens) |
+| W-12 환전 신청 happy + edge(현재) | 미충족 | 로컬 통합 driver EXIT 1, POST 0건, staging 미반영 | `.goal/w12-approval.summary.md` |
+| 이번 기능 happy + edge(과거 16e483d) | 충족 | 홈 검색 일치·0건, 사진 선택·crop·업로드 `REVIEW`, 환전 읽기, 업적·워드맵·관리자 접힘을 staging에서 실제 조작 | [§6](#screens), `.goal/runs/g7-independent-192x/observations.json` |
+| 누적 regression | 16e483d 과거 근거 충족. W-12 소스 미실행 | source `16e483d` exact staging 단일 실행 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, retries 0, EXIT 0. 종료 후 결제 플래그 복구 HTTP 503, fixture 잔존 0 | `.goal/runs/g7-regression-20261109-192x/summary.{json,md}` |
+| 디자인 QA | 16e483d 범위 충족. W-12 `cashout` 미확인 | `25 일치 / 0 불일치 / 1 미확인`(16e483d 당시 `1 범위 제외`). `cashout` 은 D-053 이후 정책 대기가 아니라 W-12 로컬 통합 FAIL 로 staging 반영 보류. 16e483d diff는 결제 성공 CSS 선택자와 `/g/[slug]` 고정 CTA `id="cheer"` 속성만 바꿔 나머지 23화면은 직전 근거 재사용 | [§6](#screens) |
 
 이 QA가 보장하는 것은 source `16e483d` exact staging에서 결제 성공과 성장 화면이 분리되고 그 구조(뒤로가기 header·목표 문맥·녹색 CTA·하단 4탭)가 승인 시안과 맞으며, 단어 적립·`#cheer` 진입이 3폭에서 동작하고, 누적 45건 회귀가 깨지지 않은 사실이다. UI 불변 23화면은 직전 픽셀 근거 재사용이다. 보장하지 않는 것은 W-12 `cashout` enabled staging 쓰기, 실제 Toss 결제 승인 호출, 운영 환경, 비 Chromium 브라우저, 그리고 W-12 판정 전의 qa 단계 승격이다.
 
@@ -142,7 +146,7 @@
 |---|---|---|---|
 | O-1 | 승인 시안 핀 SHA `afca1c03…`(커밋 `7ecfb55`) 와 작업트리 파일 SHA `5956191b…`(커밋 `3142e9a` "reconcile approved social surfaces" 에서 변경)가 다르다. 3142e9a 이후 대조는 변경된 파일 기준일 수 있다 | 판정 기준 시안 버전 불명확. 제품 판정을 바꾸지 않고 기록만 한다 | 컨트롤러: 핀 갱신 또는 재대조 결정 |
 | O-2 | 재사용 6행의 개별 PNG 경로 미기재 | 제3자가 해당 행 원본을 바로 열 수 없음 | 다음 QA 회차 |
-| O-3 | W-12 `cashout` staging enabled 쓰기 미확인 | qa 단계 승격 불가 | 회장 정책 결정(D-052) |
+| O-3 | W-12 `cashout` staging enabled 쓰기 미확인. 정책은 D-053 으로 해소. 병목은 로컬 통합 FAIL(동의 배너가 확인 버튼 클릭 차단, POST 없음, 원인 미분류) | qa 단계 승격 불가(`.goal/w12-approval.summary.md` NOT_MET) | 컨트롤러: 원인 분류 → 수정 → 로컬 POST 1회 → 격리 staging 반영·cashout 3폭 관찰 |
 | O-4 | 실제 Toss 승인 호출·운영·비 Chromium 미검증 | 보장 범위 밖 | 회장 지정 시 |
 | O-6 | 2026-11-09 19:5x 문서 보완 중 1024 pair 2장(`.goal/runs/g7-independent-192x/{paysuccess,dopamine}-pair16e-1024.png`)을 Read 로 직접 대조했다. `paysuccess`: 시안은 내용이 상단 정렬, staging 은 viewport 세로 중앙 정렬이고 아이콘 원 안 글리프 유무가 다르다. `dopamine`: 시안 CTA 아래 안내 박스("보낸 응원이 워드맵에 쌓였어요…")가 staging 1024 프레임에는 보이지 않는다(스크롤 밖인지 미확인). 독립 판정의 `일치`는 바꾸지 않았다 | 정렬 축·표시 요소 축 차이 후보. 표현 편차인지 계약 누락인지 판정 필요 | 컨트롤러: 재판정 또는 회장 수용 확인 |
 
@@ -159,6 +163,8 @@
 
 | 버전 | 시각(KST) | 변경 | 작성 |
 |---|---|---|---|
+| v2.1.16 | 2026-11-09 21:5x | 후속 재채점(15/25) 지적 보정: 표지·§1 에 현재(W-12 FAIL·25/0/1 미확인)와 과거 16e483d 근거 분리, `cashout` 행 과거 POST 200 과 현재 POST 0건 분리, §7 D-053 행, §8 W-12 행 추가, 자가채점 블록 버전 명시. 판정·시험 원본 변경 없음 | qa-verifier / Claude Opus 5.5 |
+| v2.1.15 | 2026-11-09 21:3x | W-12 승인 요건 판정 반영: `cashout` 행 미확인(로컬 통합 실패로 staging 반영 보류), §1 분모 `25/0/1 미확인`, 범위·AC-4·O-3 을 D-053 기준으로 갱신. 16e483d 판정·이력 보존 | qa-verifier / Claude Opus 5.5 |
 | v2.1.13 | 2026-11-09 19:53 | 표지·목차·범위·용어·수용 조건·추적성·경로 root·오픈 이슈(O-1 시안 SHA 불일치 발견)·개정 이력 추가. 판정·행 변경 없음 | qa-verifier / Claude Opus 5.5 |
 | v2.1.12 | 2026-11-09 19:5x | source 16e483d 독립 판정 반영, paysuccess·dopamine 일치, 25/0/1 | qa-verifier / Claude |
 | v2.1.11 이전 | 2026-11-08~09 | [§11](#history) 회차별 기록 | GPT-5 Codex |
@@ -169,7 +175,18 @@ SKILLS_USED: 없음(문서 보완, 새 QA 실행 없음)
 SKILLS_SKIPPED: qa·qa-only — 제품·브라우저 재실행 금지 과제라 미사용
 SOURCES/MODEL: Claude Opus 5.5 (claude-opus-5-5) | `~/.claude/standards/standard-doc-review.md` §1·§2·§5 | https://docs.gitlab.com/ci/testing/unit_test_reports/ | https://playwright.dev/docs/test-reporters | `.goal/verify-20261109-192x.md` | `wiki/거버넌스/결정.md` D-050~052 | `pipeline-state.v2.md:52`
 
-## 문서 품질 자가채점 (standard-doc-review.md §2, v2.1.13)
+## 문서 품질 채점 (standard-doc-review.md §2, v2.1.16 최신)
+
+- 완결성 4: 표지·목차·범위·용어·수용 조건·결과·추적성·오픈 이슈·개정 이력이 현재 상태와 맞다. 재사용 6행 PNG 경로 공백(O-2).
+- 정밀성 3: 현재·과거 POST 를 분리했으나 시각 `21:3x` 분 단위 아님, W-12 실패 원인 미분류, 용어 표에 `미확인` 정의 없음.
+- 벤치마크 반영 3: 공식 문서 2건 재인용, 동종 QA 보고서 실물 비교 없음.
+- 추적성 4: D-050~053 → 시안 id → 관찰 → 회귀/승인 판정. 시안 핀 SHA 불일치(O-1).
+- 전문성/톤 3: `cashout` 행이 한 칸에 과거·현재·참고 대조를 담아 길다. mermaid 0(§5.2 커버리지 맵은 tracker §4 에만).
+
+RUBRIC_SCORE: 완결성=4 정밀성=3 벤치마크=3 추적성=4 전문성=3 total=17/25 (합격선 20 미달, FAIL)
+WEAKEST_LINE: "`cashout` | **현재(W-12 미커밋 소스 …)**" (§6. 한 행에 과거 근거·현재 관찰·참고 대조가 함께 있어 길다)
+
+## 과거 자가채점 (v2.1.13 기준, 최신 평가 아님. 2026-11-09 21:4x 후속 재채점 15/25 로 대체됨)
 
 - 완결성 4: 표지·목차·목적·범위·용어·수용 조건·결과·오픈 이슈·개정 이력을 갖췄다. 재사용 6행 원본 PNG 경로가 비어 5점이 아니다.
 - 정밀성 4: 건수·폭·HTTP·SHA·EXIT 가 수치로 있다. 23화면은 이번 회차 수치가 아니라 재사용이다.
@@ -177,5 +194,5 @@ SOURCES/MODEL: Claude Opus 5.5 (claude-opus-5-5) | `~/.claude/standards/standard
 - 추적성 4: D-050~052 → 시안 id·줄 → 원본 캡처 → 회귀 시험 ID 로 연결했다. 시안 핀 SHA 불일치(O-1)가 남는다.
 - 전문성/톤 4: 표·용어 정의·명시 앵커로 제3자 탐색이 된다. 판정표 행 서술이 길고 영문 식별자가 섞인다.
 
-RUBRIC_SCORE: 완결성=4 정밀성=4 벤치마크=4 추적성=4 전문성=4 total=20/25
-WEAKEST_LINE: "현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거" (해당 6행 원본 PNG 경로 미기재, O-2)
+과거 점수(v2.1.13 자가신고, 무효): 완결성=4 정밀성=4 벤치마크=4 추적성=4 전문성=4 total=20/25
+과거 약점: "현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거" (해당 6행 원본 PNG 경로 미기재, O-2)

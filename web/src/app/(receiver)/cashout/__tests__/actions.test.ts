@@ -47,6 +47,7 @@ vi.mock("@/lib/supabase/service", () => ({
     keys: { "1": "o".repeat(40), "2": "k".repeat(40) },
   })),
   getCashoutAccountFingerprintKey: vi.fn(() => "f".repeat(40)),
+  isCashoutStagingTestMode: vi.fn(() => false),
   isCashoutAllowedMember,
 }));
 

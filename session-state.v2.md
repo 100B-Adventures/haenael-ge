@@ -1,5 +1,28 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-09 21:43 KST · W12 QA 문서 모순 보정(qa-verifier 위임)
+
+- 요청: 원본(NOT_MET/FAIL)·후속(tracker 14/25, matrix 15/25) 요약이 지적한 QA 문서 모순 보정. 제품·시험·승인 변경 금지.
+- 한 것: qa-tracker v2.1.15·design-conformance-matrix v2.1.16. 현재(W12 미완료·로컬 FAIL·staging 미반영·25/0/1 미확인·D053 해소)와 과거 16e483d 근거(45/45·독립 PASS·D052 제외) 분리, cashout 과거 POST200/현재 POST0건 분리, D053 추적 mermaid, 과거 20/25 자가채점 무효 표기. 요약 `.goal/w12-doc-correction.summary.md`.
+- 검증 등급: 문서 내 grep 재대조 관찰됨. 새 디자인 판정 없음(기존 판정 승계). 문서 채점 각 17/25 FAIL.
+- 다음: 컨트롤러가 W12 동의 배너 저장 실패 원인 분류(제품 판정 NOT_MET/FAIL 불변).
+
+## 2026-11-09 21:36 KST · W12 구현·독립 코드리뷰 확보, 실제 신청 검증 실패
+
+- 무엇을 어디까지: D053 격리 staging 예외 코드 구현. 일반 Preview 거부·전용 키/allowlist·외부 알림 차단. 관련 5파일47시험·tsc·환경계약 EXIT0, Claude 독립 코드리뷰 MAJOR0 PASS. 실제 품질검사 PASS(.goal/runs/w12-build-quality.log, w12-code-review-quality.log). 이전16e483d staging 회귀45/45는 과거 소스의 증거로만 보존.
+- 남은 이슈·블로커: 로컬 실제 UI 신청이 동의 배너 잔존·반복 이동으로 실패했다. 첫 실행 대기 조건 보정 뒤에도 LOCAL_VERDICT FAIL. POST0, REQUESTED·상태·내역·마스킹 미검증. 제품/시험환경 중 근본원인 미규명. .goal/w12-local.summary.md 및 .goal/runs/w12-local-20261109/observations.json. 무한 재작업하지 않고 중지하라는 기존 지시에 따라 세 번째 실행은 하지 않았다.
+- 판단: 코드리뷰 PASS는 런타임/출고 PASS가 아니다. 로컬 통합 미충족이므로 staging 전용 키 생성·등록·배포·전체 재회귀를 보류했다. 일반 Preview 설정/운영 DB·키/실송금/운영 배포 변경0. 정책 대기는 D053으로 해소됐으며 현재 병목을 정책 대기로 잘못 기록하지 않는다.
+- 검증했나: root가 실제 390px PNG를 열어 배너 잔존을 관찰했다. cleanup.log에서 member/goal/balance/request/Auth0·감사0, ports.log 3462/54321/54322/54329 FREE를 확인. 코드와 시험은 테스트됨, staging enabled 신청과 디자인행은 미검증. Claude 독립 판정 APPROVE_REQUIREMENTS NOT_MET/VERDICT FAIL(.goal/w12-approval.summary.md). 후속 문서 보정 후 전달품질검사도 EXIT2·RUBRIC17/25로 미달(.goal/runs/w12-approval-final-quality.log). 검증실패 라벨로만 보고하며 출고하지 않는다.
+- 다음에 칠 명령: `cat .goal/w12-approval.summary.md`, `cat .goal/w12-local.summary.md`, `git log -1 --oneline --grep="isolate staging cashout test mode"`. 재시작 전에는 같은 builder의 원인 진단 단위로 배너 상태·반복 이동/React hydration 관계를 먼저 규명한다. 런타임 반복 실행·staging 배포부터 하지 않는다. 원인이 해소된 실제 로컬 신청 증거와 독립 검증 이후 .goal/runs/w12-stage-task.txt의 선행 조건을 충족할 때만 staging 단위를 실행한다.
+
+## 2026-11-09 21:12 KST · W12 제한된 staging 검증 승인 수신
+
+- primary: 21:1x 명시지시, D053. 격리staging DB·전용테스트키만허용, 일반Preview차단·allowlist유지. 운영키/실송금/운영배포금지.
+- 순서: 로컬구현·자체관련시험→다른모델독립코드리뷰→검토통과후staging한배포·cashoutQA3폭/실제요청→qa/approve요건독립판정. 이전7회차Goal은완료상태그대로이며새Goal을임의생성하지않는다.
+- 이웃영향: 기존production/local키선택, 일반Preview거부, 서버allowlist, 계좌암호화/지문, 환전요청알림의외부발송, stageenv키경계. 이전16e483d 회귀45/45·독립PASS증거보존. 이번W12제품변경후에는이전결과를그대로최신회귀로세지않는다.
+- 토큰13M·weekly_cap66실물확인. 소유실행없고동일builder단위발주준비. 실제서버/DB/프로토타입행까지구동전에는미완료다.
+
+
 ## 2026-11-09 20:16 KST · 최종 보고 인계 인식 수정
 
 - 무엇을 어디까지: 19:2x 요청 범위는16e483d staging전체회귀45/45·다른모델Claude독립VERDICTPASS·전달문서20/25로종결했다. 기록c1b1162, nativeGoalcomplete. 제품추가변경/운영배포없음.

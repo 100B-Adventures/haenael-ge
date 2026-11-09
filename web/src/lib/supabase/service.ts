@@ -25,6 +25,27 @@ type CashoutAccountEncryptionConfig = {
   keys: Record<string, string>;
 };
 
+const CASHOUT_STAGING_TEST_ORIGIN = "https://ezzklgotgydwxqebfoys.supabase.co";
+
+type CashoutRuntimeMode = "standard" | "staging-test" | "disabled-preview";
+
+function cashoutRuntimeMode(): CashoutRuntimeMode {
+  if (!process.env.VERCEL_ENV || process.env.VERCEL_ENV === "production") {
+    return "standard";
+  }
+  if (process.env.VERCEL_ENV !== "preview") return "disabled-preview";
+
+  try {
+    const origin = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").origin;
+    return origin === CASHOUT_STAGING_TEST_ORIGIN &&
+      process.env.CASHOUT_STAGING_TEST_ENABLED === "true"
+      ? "staging-test"
+      : "disabled-preview";
+  } catch {
+    return "disabled-preview";
+  }
+}
+
 function assertCashoutSecret(value: string | undefined, errorCode: string) {
   if (!value || value.length < 32) {
     throw new Error(errorCode);
@@ -33,10 +54,18 @@ function assertCashoutSecret(value: string | undefined, errorCode: string) {
 }
 
 export function getCashoutAccountEncryptionConfig(): CashoutAccountEncryptionConfig {
-  // 계약 W-12: Vercel Preview/Development에는 이 키를 등록하지 않는다.
-  // 실수로 연결돼도 preview 런타임에서는 사용을 거부한다. 로컬 검증은 VERCEL_ENV가 없다.
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
+  const mode = cashoutRuntimeMode();
+  if (mode === "disabled-preview") {
     throw new Error("cashout_encryption_unavailable");
+  }
+
+  // D-053: 격리 staging은 운영 이름의 키를 읽거나 fallback하지 않는다.
+  if (mode === "staging-test") {
+    const activeKey = assertCashoutSecret(
+      process.env.CASHOUT_STAGING_TEST_ACCOUNT_ENCRYPTION_KEY,
+      "cashout_encryption_unavailable",
+    );
+    return { activeVersion: 1, activeKey, keys: { "1": activeKey } };
   }
 
   const serializedKeyring = process.env.CASHOUT_ACCOUNT_ENCRYPTION_KEYS;
@@ -78,8 +107,15 @@ export function getCashoutAccountEncryptionConfig(): CashoutAccountEncryptionCon
 }
 
 export function getCashoutAccountFingerprintKey() {
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
+  const mode = cashoutRuntimeMode();
+  if (mode === "disabled-preview") {
     throw new Error("cashout_fingerprint_unavailable");
+  }
+  if (mode === "staging-test") {
+    return assertCashoutSecret(
+      process.env.CASHOUT_STAGING_TEST_ACCOUNT_FINGERPRINT_KEY,
+      "cashout_fingerprint_unavailable",
+    );
   }
   return assertCashoutSecret(
     process.env.CASHOUT_ACCOUNT_FINGERPRINT_KEY,
@@ -88,10 +124,14 @@ export function getCashoutAccountFingerprintKey() {
 }
 
 export function isCashoutEnabled() {
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
-    return false;
-  }
+  const mode = cashoutRuntimeMode();
+  if (mode === "disabled-preview") return false;
+  if (mode === "staging-test") return true;
   return process.env.CASHOUT_ENABLED === "true";
+}
+
+export function isCashoutStagingTestMode() {
+  return cashoutRuntimeMode() === "staging-test";
 }
 
 const MEMBER_ID_PATTERN =
@@ -108,7 +148,20 @@ const MEMBER_ID_PATTERN =
 export function isCashoutAllowedMember(memberId: string) {
   if (!isCashoutEnabled() || !MEMBER_ID_PATTERN.test(memberId)) return false;
 
-  const rawEntries = (process.env.CASHOUT_ALLOWED_MEMBER_IDS ?? "")
+  const stagingTest = isCashoutStagingTestMode();
+  if (stagingTest) {
+    try {
+      getCashoutAccountEncryptionConfig();
+      getCashoutAccountFingerprintKey();
+    } catch {
+      return false;
+    }
+  }
+
+  const allowlistName = stagingTest
+    ? "CASHOUT_STAGING_TEST_ALLOWED_MEMBER_IDS"
+    : "CASHOUT_ALLOWED_MEMBER_IDS";
+  const rawEntries = (process.env[allowlistName] ?? "")
     .split(",")
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);

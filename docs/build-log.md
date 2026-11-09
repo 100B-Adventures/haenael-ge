@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-09 W-12 격리 staging 환전 환경 게이트
+
+- 일반 Vercel Preview는 계속 환전을 거부한다. 정확한 격리 Supabase origin, 서버 전용 opt-in, 전용 회원 allowlist, 전용 암호화 키와 지문 키가 모두 맞을 때만 신청 경로를 연다.
+- 격리 staging은 운영 이름의 키를 읽거나 fallback하지 않고, Production과 로컬은 기존 키 이름과 allowlist 동작을 유지한다. 운영 Supabase origin, 잘못된 protocol·host, 부분 설정, 빈 allowlist, 타 회원은 기본 거부다.
+- 격리 staging의 환전 요청은 기존 `create_cashout_request` RPC로 `REQUESTED`까지만 만들며 외부 notify Edge Function은 호출하지 않는다. 지급 승인·정산 동작과 DB schema·RPC는 변경하지 않았다.
+- 전용 값은 후속 staging 배포 한 건의 process environment에만 일회 주입하고 Vercel 프로젝트의 공용 Preview 환경에는 등록하지 않는다. 이 구현 단위에서는 키 생성·등록, 배포, 운영 DB 쓰기를 하지 않았다.
+
+> STAMP: 2026-11-09 KST · model=gpt-5-codex · agent=code-builder · skills=haenael-supabase-build·verify · 근거=D-053, W-12 기존 서버 환경 게이트, 환전 Server Action·알림 경계, 관련 단위시험·격리 로컬 Supabase 실패 관찰 · 고민=일반 Preview 차단과 Production 키 경계를 보존하면서 특정 staging 배포만 최소 예외로 분리했다. 실제 로컬 신청은 동의 배너 상태 전환 실패로 미검증이다.
+
 ## 2026-11-09 G7 친구 fixture 순서 독립성과 결제 성공·단어 성장 상태 분리
 
 - 동시 친구 수락 검사는 실행 전 owner와 두 수락 계정 사이의 관계 행을 각각 저장한다. 성공 1건·사용 처리 1건·관계 1건·정확한 `accepted_by`와 `accepted_at` 단언은 유지하고, `finally`에서 이번 초대가 만든 관계만 삭제하거나 원래 필드를 정확히 복원한다. 제품의 자동 친구 연결은 변경하지 않았다.
