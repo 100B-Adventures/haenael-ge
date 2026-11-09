@@ -22,5 +22,6 @@ export function formatDate(date: string | Date): string {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "Asia/Seoul",
   }).format(new Date(date));
 }

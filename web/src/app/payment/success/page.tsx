@@ -74,9 +74,10 @@ async function confirmPayment(params: {
 
 type GrowthState = {
   goalTitle: string;
-  cheerCount: number;
   message: string | null;
   words: WordmapWord[];
+  coverPresetKey: string | null;
+  coverUrl: string | null;
 };
 
 async function loadGrowthState(cheerId: number, goalSlug: string): Promise<GrowthState | null> {
@@ -93,7 +94,7 @@ async function loadGrowthState(cheerId: number, goalSlug: string): Promise<Growt
     await Promise.all([
       supabase
         .from("goal_public")
-        .select("id, slug, title, cheer_count")
+        .select("id, slug, title, cover_preset_key, cover_public_path")
         .eq("id", cheer.goal_id)
         .maybeSingle(),
       supabase.rpc("get_wordmap", { p_goal_id: cheer.goal_id }),
@@ -110,9 +111,12 @@ async function loadGrowthState(cheerId: number, goalSlug: string): Promise<Growt
 
   return {
     goalTitle: goal.title ?? "친구의 목표",
-    cheerCount: goal.cheer_count ?? 0,
     message: cheer.message?.trim() || null,
     words,
+    coverPresetKey: goal.cover_preset_key,
+    coverUrl: goal.cover_public_path
+      ? supabase.storage.from("goal-cover-public").getPublicUrl(goal.cover_public_path).data.publicUrl
+      : null,
   };
 }
 
@@ -126,11 +130,12 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   const rawSlug = params.goalSlug ?? "";
   const goalSlug = /^[a-z0-9-]{1,80}$/.test(rawSlug) ? rawSlug : "";
   const backHref = goalSlug ? `/g/${goalSlug}` : "/";
-  const backLabel = goalSlug ? "친구 목표로 돌아가기" : "해낼게 홈으로";
+  const backLabel = goalSlug ? PRODUCT_COPY.BACK_TO_GOAL : PRODUCT_COPY.TEXT_001;
 
   let status: "success" | "error" = "success";
-  let title = "응원이 전달됐어요";
+  let title: string = PRODUCT_COPY.SUCCESS_TITLE;
   let message = "친구의 워드맵에 조용한 응원이 쌓였습니다.";
+  let confirmedGoalTitle = "친구의 목표";
   let conversionLease: ConversionLease | null = null;
   let growthState: GrowthState | null = null;
 
@@ -147,7 +152,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
         growthState = await loadGrowthState(Number(result.cheerId), goalSlug);
       }
       if (result.goalTitle) {
-        message = `${result.goalTitle.replace(/\s*해낼게\s*$/, "")} 목표에 응원이 전달됐습니다.`;
+        confirmedGoalTitle = result.goalTitle.trim();
       }
     } catch (error) {
       console.error("[payment/success] confirmation failed", error);
@@ -162,10 +167,10 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
 
   return (
     <main
-      className="flex min-h-svh flex-col items-center justify-center px-6 text-center [background-color:var(--background)]!"
+      className={`payment-success-shell${growthState ? " payment-success-shell-growth" : ""}`}
       data-testid="payment-success-page"
     >
-      <div className="w-full max-w-[390px] rounded-[24px] p-7 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
+      <section className="payment-success-card" data-status={status}>
         {status === "success" && conversionLease && (
           <PurchaseConversion
             orderId={orderId}
@@ -175,37 +180,40 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
             initialLease={conversionLease}
           />
         )}
-        <div
-          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-[26px]"
-          style={{
-            background: status === "success" ? "var(--accent)" : "#FCEEEE",
-            color: status === "success" ? "var(--primary)" : "#B3261E",
-          }}
-          aria-hidden="true"
-        >
+        <div className="payment-success-icon" aria-hidden="true">
           {status === "success" ? (
             <Clover size={28} strokeWidth={2.5} />
           ) : (
             <CircleAlert size={28} strokeWidth={2.5} />
           )}
         </div>
-        <h1 className="text-[23px] font-black [color:var(--foreground)]!">
-          {title}
-        </h1>
-        <p className="mt-3 text-[14px] leading-relaxed [color:var(--muted-foreground)]!">
-          {message}
-        </p>
-        {status === "success" && growthState && (
-          <DopamineGrowthOverlay {...growthState} />
+        <h1>{title}</h1>
+        {status === "success" ? (
+          <p className="payment-success-message">
+            <span>&quot;{confirmedGoalTitle}&quot; 목표에 응원을 보냈어요.</span>
+            <span>{PRODUCT_COPY.SUCCESS_WORDMAP}</span>
+          </p>
+        ) : (
+          <p className="payment-success-message"><span>{message}</span></p>
         )}
-        <Link
-          href={status === "success" ? backHref : "/"}
-          className="mt-6 block rounded-[16px] py-4 text-[15px] font-extrabold [background-color:var(--primary)]! [color:var(--card)]!"
-          data-testid="payment-success-back"
-        >
-          {status === "success" ? backLabel : PRODUCT_COPY.TEXT_001}
-        </Link>
-      </div>
+        <div className="payment-success-actions">
+          <Link
+            href={status === "success" ? backHref : "/"}
+            className="payment-success-primary"
+            data-testid="payment-success-back"
+          >
+            {status === "success" ? backLabel : PRODUCT_COPY.TEXT_001}
+          </Link>
+          {status === "success" && goalSlug && (
+            <Link href="/" className="payment-success-secondary">
+              {PRODUCT_COPY.TEXT_001}
+            </Link>
+          )}
+        </div>
+      </section>
+      {status === "success" && growthState && (
+        <DopamineGrowthOverlay {...growthState} />
+      )}
     </main>
   );
 }

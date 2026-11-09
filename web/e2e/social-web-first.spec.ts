@@ -60,6 +60,10 @@ async function waitForVisualReady(page: Page, selectors: string[]) {
 
 async function expectTwoLineClamp(target: Locator) {
   await expect(target).toBeVisible();
+  await expect.poll(
+    () => target.evaluate((element) => getComputedStyle(element).webkitLineClamp),
+    { message: "같은 텍스트 요소에 2줄 clamp CSS가 적용될 때까지 기다린다" },
+  ).toBe("2");
   const collapsed = await target.evaluate((element) => ({
     lineClamp: getComputedStyle(element).webkitLineClamp,
     clientHeight: element.clientHeight,
@@ -4652,15 +4656,28 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("QA-TC-FD-03 소급 친구의 방향이 보이고 해제 뒤 양쪽 FRIENDS 조회가 닫힌다", async ({ browser }) => {
+    const [memberLowId, memberHighId] = [ids.owner, ids.friend].sort();
+    const { data: originalConnection, error: originalConnectionError } = await admin
+      .from("friend_connection")
+      .select("id,status,blocked_by_member_id,origin_invite_id,connected_at,updated_at")
+      .eq("member_low_id", memberLowId)
+      .eq("member_high_id", memberHighId)
+      .single();
+    expect(originalConnectionError).toBeNull();
+    expect(originalConnection?.status).toBe("ACTIVE");
+
     const context = await authContext(browser, emails.owner);
-    const page = await context.newPage();
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/friends", { waitUntil: "domcontentloaded" });
-    const friendCard = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
-    await expect(friendCard.getByTestId("friend-relationship-direction")).toHaveText("서로 응원");
-    await page.goto(`/friends/${ids.friend}?goal=${friendFriendsGoal}`, { waitUntil: "domcontentloaded" });
-    await expect(page.getByTestId("friend-relationship-direction")).toHaveText("서로 응원");
-    await context.close();
+    try {
+      const page = await context.newPage();
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto("/friends", { waitUntil: "domcontentloaded" });
+      const friendCard = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+      await expect(friendCard.getByTestId("friend-relationship-direction")).toHaveText("서로 응원");
+      await page.goto(`/friends/${ids.friend}?goal=${friendFriendsGoal}`, { waitUntil: "domcontentloaded" });
+      await expect(page.getByTestId("friend-relationship-direction")).toHaveText("서로 응원");
+    } finally {
+      await context.close();
+    }
 
     const owner = createClient(SUPABASE_URL, ANON_KEY);
     const friend = createClient(SUPABASE_URL, ANON_KEY);
@@ -4670,21 +4687,46 @@ test.describe("V2 web-first social slice", () => {
     ]);
     expect(ownerAuthError).toBeNull();
     expect(friendAuthError).toBeNull();
-    const { error: removeError } = await owner.rpc("remove_friend", { friend_member_id: ids.friend });
-    expect(removeError).toBeNull();
-    const { data: ownerSecond, error: ownerSecondError } = await admin.from("goal")
-      .select("id")
-      .eq("slug", `owner-second-${runId}`)
+    try {
+      const { error: removeError } = await owner.rpc("remove_friend", { friend_member_id: ids.friend });
+      expect(removeError).toBeNull();
+      const { data: ownerSecond, error: ownerSecondError } = await admin.from("goal")
+        .select("id")
+        .eq("slug", `owner-second-${runId}`)
+        .single();
+      expect(ownerSecondError).toBeNull();
+      const [ownerView, friendView] = await Promise.all([
+        owner.rpc("friend_goal_detail", { goal_id: friendFriendsGoal }),
+        friend.rpc("friend_goal_detail", { goal_id: ownerSecond!.id }),
+      ]);
+      expect(ownerView.data).toBeNull();
+      expect(friendView.data).toBeNull();
+      expect(ownerView.error?.message).toMatch(/goal_not_found|friend_goal_forbidden/);
+      expect(friendView.error?.message).toMatch(/goal_not_found|friend_goal_forbidden/);
+    } finally {
+      const { error: restoreError } = await admin.from("friend_connection").update({
+        status: originalConnection!.status,
+        blocked_by_member_id: originalConnection!.blocked_by_member_id,
+        origin_invite_id: originalConnection!.origin_invite_id,
+        connected_at: originalConnection!.connected_at,
+        updated_at: originalConnection!.updated_at,
+      }).eq("id", originalConnection!.id);
+      expect(restoreError).toBeNull();
+    }
+
+    const { data: restoredConnection, error: restoredConnectionError } = await admin
+      .from("friend_connection")
+      .select("status,blocked_by_member_id,origin_invite_id,connected_at,updated_at")
+      .eq("id", originalConnection!.id)
       .single();
-    expect(ownerSecondError).toBeNull();
-    const [ownerView, friendView] = await Promise.all([
-      owner.rpc("friend_goal_detail", { goal_id: friendFriendsGoal }),
-      friend.rpc("friend_goal_detail", { goal_id: ownerSecond!.id }),
-    ]);
-    expect(ownerView.data).toBeNull();
-    expect(friendView.data).toBeNull();
-    expect(ownerView.error?.message).toMatch(/goal_not_found|friend_goal_forbidden/);
-    expect(friendView.error?.message).toMatch(/goal_not_found|friend_goal_forbidden/);
+    expect(restoredConnectionError).toBeNull();
+    expect(restoredConnection).toEqual({
+      status: originalConnection!.status,
+      blocked_by_member_id: originalConnection!.blocked_by_member_id,
+      origin_invite_id: originalConnection!.origin_invite_id,
+      connected_at: originalConnection!.connected_at,
+      updated_at: originalConnection!.updated_at,
+    });
   });
 
   test("ORDER-ATTR-01 replay는 최초 회원 응원 귀속을 다른 사용자로 바꾸지 않는다", async () => {
@@ -4738,6 +4780,13 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("G4-FRIEND-HISTORY-01 친구 상세은 회원 이력만, 손님 응원은 마이·홈에만 표시한다", async ({ browser }) => {
+    const [memberLowId, memberHighId] = [ids.owner, ids.friend].sort();
+    const { error: connectionRestoreError } = await admin.from("friend_connection").update({
+      status: "ACTIVE",
+      blocked_by_member_id: null,
+    }).eq("member_low_id", memberLowId).eq("member_high_id", memberHighId);
+    expect(connectionRestoreError).toBeNull();
+
     const owner = createClient(SUPABASE_URL, ANON_KEY);
     const { error: authError } = await owner.auth.signInWithPassword({
       email: emails.owner,

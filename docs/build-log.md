@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-09 G7 최종 회귀 3건과 결제 성공·단어 성장 화면 보정
+
+- 친구 상세 날짜는 런타임 기본 시간대 대신 `Asia/Seoul`을 명시해 SSR과 브라우저의 날짜 문자열을 동일하게 만들었다. 2줄 접기 검사는 기존 locator·기대값·높이 단언을 유지하고 같은 요소의 `-webkit-line-clamp: 2` 적용 완료만 기다린다.
+- 친구 해제 검사는 원래 관계 행의 상태·차단자·초대·연결 시각·갱신 시각을 저장하고 `finally`에서 정확히 복원한다. 뒤의 친구 이력 검사는 ACTIVE 관계를 자체 준비해 실행 순서에 의존하지 않는다.
+- 결제 성공은 승인 시안의 제목·목표 문구·친구 목표 복귀·홈 복귀 계층을 복원했다. 단어 성장 영역은 승인 제목·설명·목표 커버·실제 워드맵·응원 단어 수·방금 보낸 문구·로그인 안내를 표시하며 기존 확정 응원 조회와 단어 적립을 유지한다.
+- 로컬 검증은 관련 Vitest 8/8, TypeScript, Next production build, 표적 Playwright 4/4를 종료코드 0으로 통과했다. 표적 Playwright는 `QA-REVERIFY-VIEWPORT-01`, `QA-TC-CL-04`, `QA-TC-FD-03`, `G4-FRIEND-HISTORY-01`을 소스 순서로 실행했고 fixture DB·Auth·Storage 잔존이 모두 0이었다.
+- 로컬 DONE 결제 fixture에서 `toss-confirm` HTTP 200, 결제 성공·단어 성장 DOM, 실제 워드맵 단어, 복귀 링크 2개, 가로 overflow 0, console error 0을 관찰했다. 별도 fixture의 goal·payment·cheer·member·Auth는 전부 0건으로 정리했고 결제 비활성 상태의 `cheer-order` HTTP 503을 확인했다. 전체 45건 회귀는 후속 동결 QA 범위라 실행하지 않았다.
+
+> STAMP: 2026-11-09 13:45 KST · model=gpt-5-codex · agent=code-builder · skills=haenael-supabase-build · 근거=D-051, 승인 prototype paysuccess·dopamine, 회귀 실패 로그, 로컬 Vitest·TypeScript·Next build·Playwright·DONE fixture · 고민=결제 처리는 확장하지 않고 확정 영수증 읽기와 승인 UI만 보정했다.
+
 ## 2026-11-07 G4 social Playwright 분석 동의 상태 격리
 
 - `social-web-first.spec.ts`만 현재 분석 동의 저장 키와 타입을 재사용해 테스트 시작 전 `denied`를 설정한다. Playwright 기본 context, 인증용 context, 비회원 page 생성 경계를 중앙 initializer로 연결했다. 분석 동의 자체를 검증하는 `analytics-consent.spec.ts`와 제품 코드는 변경하지 않았다.

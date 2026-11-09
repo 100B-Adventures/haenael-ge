@@ -2,6 +2,13 @@
 // Keep wording exact unless the approved UX-writing contract changes.
 export const PRODUCT_COPY = {
   TEXT_001: "해낼게 홈으로", // source line 115
+  SUCCESS_TITLE: "응원이 전달됐어요",
+  SUCCESS_WORDMAP: "친구의 워드맵에 응원 단어가 쌓였어요.",
+  BACK_TO_GOAL: "친구 목표로 돌아가기",
+  GROWTH_TITLE_LINE_1: "응원을 보내면",
+  GROWTH_TITLE_LINE_2: "내가 쓴 단어가 바로 쌓여요",
+  GROWTH_DESCRIPTION: "로그인하지 않아도 응원할 수 있어요. 보낸 단어는 이 워드맵에서 바로 보여요.",
+  GROWTH_FEEDBACK: "보낸 응원이 워드맵에 쌓였어요. 로그인하면 \"내가 응원한 목표\"에 기록이 남아요.",
   ERROR_PAYMENTS_DISABLED: "응원 결제를 준비하고 있어요.",
   ERROR_PAYMENT_NOT_FOUND: "결제 주문을 찾을 수 없어요.",
   ERROR_AMOUNT_MISMATCH: "결제 금액이 일치하지 않아요.",

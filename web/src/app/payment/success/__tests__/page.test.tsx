@@ -73,7 +73,10 @@ it("최초 서버 승인은 pending lease를 브라우저 전달 컴포넌트에
     }),
   }));
 
-  expect(screen.getByText("편입 합격 목표에 응원이 전달됐습니다.")).toBeInTheDocument();
+  expect(screen.getByText('"편입 합격 해낼게" 목표에 응원을 보냈어요.')).toBeInTheDocument();
+  expect(screen.getByText("친구의 워드맵에 응원 단어가 쌓였어요.")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "친구 목표로 돌아가기" })).toHaveAttribute("href", "/g/friend-goal");
+  expect(screen.getByRole("link", { name: "해낼게 홈으로" })).toHaveAttribute("href", "/");
   expect(purchaseConversionMock).toHaveBeenCalledWith({
     orderId: "order-new",
     paymentKey: "pk",
@@ -111,7 +114,8 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
         id: 11,
         slug: "friend-goal",
         title: "편입 합격 해낼게",
-        cheer_count: 24,
+        cover_preset_key: "c3",
+        cover_public_path: null,
       },
       error: null,
     }),
@@ -138,7 +142,9 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
   }));
 
   expect(screen.getByTestId("payment-dopamine-overlay")).toBeInTheDocument();
-  expect(screen.getByTestId("payment-growth-count")).toHaveTextContent("24명이");
+  expect(screen.getByTestId("payment-growth-count")).toHaveTextContent("5개의 응원 단어");
+  expect(screen.getByRole("heading", { name: "응원을 보내면 내가 쓴 단어가 바로 쌓여요" })).toBeInTheDocument();
+  expect(screen.getByText(/로그인하지 않아도 응원할 수 있어요/)).toBeInTheDocument();
   expect(screen.getByTestId("payment-growth-message")).toHaveTextContent("끝까지 응원할게");
   expect(screen.getByTestId("payment-growth-wordmap")).toHaveTextContent("끝까지");
   expect(rpc).toHaveBeenCalledWith("get_wordmap", { p_goal_id: 11 });
