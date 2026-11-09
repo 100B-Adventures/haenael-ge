@@ -1,3 +1,26 @@
+## 2026-11-10 03:45 KST 인계 (최신, 4칸 정리)
+
+### 무엇을 어디까지 했나
+- W12 로컬 재검증 r2 완료: LOCAL_VERDICT PASS. 빌드본에서 동의 배너 첫 클릭 저장(denied), UI 신청 POST 1회 HTTP 200, DB cashout_request #42 REQUESTED ••••••8421, 상태·내역 화면 마스킹·원문 0, 3폭 넘침 0. 요약 /Users/sj/sj_code_master/haenael-ge-v2-hotfix/.goal/w12-local-r2.summary.md
+- V2 Goal 5회차 대행분(데스크톱 폭·줄바꿈·눌림 상태, 회귀 45/45)은 main·운영 2.1.2 에 반영됨. 친구 섹션 회장 결정 2건은 Codex Goal 7회차가 처리하고 종결함.
+
+### 남은 이슈·블로커
+- Server Action 응답 본문(REQUESTED 포함·계좌 원문 부재) 미검증.
+- dev 모드 hydration mismatch(입력칸 style caret-color) 원인 미규명, 기록만.
+- staging 전용 키 등록·배포·cashout QA·독립 판정은 컨트롤러(claude-31) 지시 대기.
+
+### 다음에 칠 명령
+- 컨트롤러 지시가 오면: staging 전용 키를 CASHOUT_STAGING_TEST_* 이름으로 등록(D-053, 운영 키 금지) → 저장소 루트에서 `vercel deploy --force`(web/.next 없음 확인) → staging cashout QA 3폭과 실제 신청 → claude-delegate qa-verifier 독립 판정.
+
+### 검증했나
+- 관찰됨: 위 DB·화면·정리 결과(observations.json, cleanup.log, 포트 0). 미검증: 응답 본문 1건.
+
+## 2026-11-10 03:4x KST 인계 (W12 로컬 재검증 r2)
+
+- 컨트롤러(claude-31) 지시로 W12 로컬 재검증. LOCAL_VERDICT: PASS(Server Action 응답 본문 1건 미검증). 요약 hotfix worktree `.goal/w12-local-r2.summary.md`, 증거 `.goal/runs/w12-local-r2-20261110/`.
+- 빌드본에서 동의 배너 첫 클릭 저장, hydration 경고 0. DB #42 REQUESTED ••••••8421, 상태·내역 마스킹, 원문 0. 정리 잔존 0, 포트 0, 로컬 Supabase stop, web/.next 는 scratchpad 로 이동.
+- 다음: staging 전용 키 등록·배포·cashout QA·독립 판정은 컨트롤러 지시 대기.
+
 ## 2026-11-08 22:0x KST 인계 (집계 확인 지시 추가)
 
 - 컨트롤러 판단: Goal 현재 단계는 끊지 않는다(.goal 산출물이 계속 갱신 중). 22:10 점검에서 대기열 미소비·3시간 초과면 컨트롤러가 재판단.
