@@ -1,15 +1,5 @@
 # 해낼게 V2 개발·QA·배포 상태
 
-## 2026-11-10 10:26 KST · 온프렘 114 작업트리 이어받기 불가
-
-목적: 온프렘 서버(Tailscale 주소 100.117.68.81, 사용자 dev)의 세션이 요청한 잔여 작업을 이 맥 세션이 이어받을 수 있는지 판정한다.
-
-- 요청 내용: `web/src/components/goal/SplitBalanceCard.tsx` 의 글자 크기 13px 수정을 커밋하고, staging 배포, 회귀 테스트 45건 전수, 화면 9종의 지정 너비 실측, 독립 재검증까지 진행. 운영 배포 금지(회장 결정).
-- 판정: 불가. 대상 작업트리 `/Users/sj/sj_code_master/haenael-ge-v2-hotfix` 가 이 맥에 없고(홈 전체 find 0건), `git worktree list` 에도 없다. 온프렘 접근은 `ssh dev@100.117.68.81` 이 Tailscale 추가 인증(로그인 URL)을 요구해 막혔고 `tailscale` CLI 도 이 맥에 없다.
-- 이 턴 변경: 코드 0건, 커밋 0건, 운영 변경 0건. 맥에서 같은 수정을 재작업하면 두 기계로 커밋이 갈라지므로 하지 않았다.
-- 다음: 회장이 Tailscale 인증을 열면 이 세션이 원격으로 이어받고, 열지 않으면 그 작업트리를 가진 온프렘 세션이 커밋까지 끝낸다.
-
-
 ## 2026-11-08 04:35 KST · current staging QA 산출물 changes-requested
 
 ### 무엇을 어디까지 했나
