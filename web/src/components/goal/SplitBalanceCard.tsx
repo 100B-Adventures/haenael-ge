@@ -45,7 +45,7 @@ export function SplitBalanceCard({
         data-testid="split-balance-total"
       >
         🍀 {total}
-        <small className="ml-0.5 text-[11px] font-semibold text-muted-foreground">{PRODUCT_COPY.TEXT_002}</small>
+        <small className="ml-0.5 text-[length:var(--text-meta-micro)]! font-semibold text-muted-foreground">{PRODUCT_COPY.TEXT_002}</small>
       </p>
 
       {/* 잠김이 있을 때만 등가 은닉. 없을 때는 기존 원화 등가 보조표기 유지 */}
@@ -102,7 +102,7 @@ export function SplitBalanceCard({
           </div>
 
           <p
-            className="mt-2 text-[11px] leading-relaxed text-muted-foreground"
+            className="mt-2 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground"
             data-testid="split-balance-note"
           >{PRODUCT_COPY.TEXT_010}<b>{total}{PRODUCT_COPY.TEXT_011}</b>{PRODUCT_COPY.TEXT_012}{locked}{PRODUCT_COPY.TEXT_013}{locked}{PRODUCT_COPY.TEXT_014}</p>
         </div>
