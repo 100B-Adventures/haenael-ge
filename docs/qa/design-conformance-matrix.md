@@ -2,7 +2,7 @@
 
 | 표지 | 값 |
 |---|---|
-| 문서 버전 | v2.1.18 (2026-11-10, F-6 실제 신청 폼 증거 정합. `26 일치 / 0 불일치 / 0 미확인`) |
+| 문서 버전 | v2.1.19 (2026-11-10, F-6 실제 신청 폼 픽셀 대조 추가. `26 일치 / 0 불일치 / 0 미확인`) |
 | 작성 시각 | 2026-11-10 F-6 최종 staging 재관찰. 이전 판정 근거 시각은 이력에 보존 |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-3·F-6 정합: code-builder / GPT-5 Codex |
 | 파이프라인 | 라인 `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
@@ -84,7 +84,7 @@
 | `belong` | 390·1024·1440. 관계 배지·아바타·수치는 fixture 차이이며 관계 해제는 D-026 기능이다. 방향·순서·위계는 승인본과 같음 | 일치 | 현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거 |
 | `business` | 390·1024·1440. 6행·순서·법적 고지 블록 유지. 데스크톱 전체 폭 확장은 DESIGN 데스크톱 가용 폭 100% 결정 | 일치 | 이전 3폭 좌우 대조와 UI 불변 diff 근거 |
 | `cashhistory` | 390·768·1024·1440. compact 요약 3칸, 거래 행, 세금 고지, 환전·홈 동작 순서가 승인본과 같고 fixture 금액·건수만 다름 | 일치 | `direct-captures/cashhistory-{390,768,1024,1440}.png` |
-| `cashout` | 시험 키 4종을 넣어 source `73d08c7` 신청 폼을 실제로 열었을 때 44px 미만 누름 6개를 발견했다. 최종 source `e5b65f1`에서 form label 5개와 개인정보 링크의 touch target을 수정했다. 허용 회원 신청 1건은 `REQUESTED`, 마스킹 표시, 원문 계좌 0건, `CASHOUT_HOLD` 1건이며 중복은 `cashout_already_requested`, 허용 밖 회원은 화면과 Server Action에서 `cashout_disabled`로 거부됐다. 계좌 입력·은행 선택·신청 버튼이 보이는 360·390·412·600·700·780·820·900·1000px 폼에서 13px 미만 글자·44px 미만 누름·가로 넘침·콘솔 오류가 모두 0이다. 승인 시안의 구조·순서와 날짜 KST 판정은 유지된다 | **일치(구조·순서. 추가 5요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)** | `.goal/runs/w12-f6-deploy-{73d08c7,e5b65f1}/`, `.goal/runs/w12-f6-verify-e5b65f1/{observations.json,verify.log}`, `58316d8`, `e5b65f1` |
+| `cashout` | 시험 키 4종을 넣어 source `73d08c7` 신청 폼을 실제로 열었을 때 44px 미만 누름 6개를 발견했다. 최종 source `e5b65f1`에서 form label 5개와 개인정보 링크의 touch target을 수정했다. 허용 회원 신청 1건은 `REQUESTED`, 마스킹 표시, 원문 계좌 0건, `CASHOUT_HOLD` 1건이며 중복은 `cashout_already_requested`, 허용 밖 회원은 화면과 Server Action에서 `cashout_disabled`로 거부됐다. 계좌 입력·은행 선택·신청 버튼이 보이는 360·390·412·600·700·780·820·900·1000px 폼에서 13px 미만 글자·44px 미만 누름·가로 넘침·콘솔 오류가 모두 0이다. 390px 승인 시안과 최종 화면을 직접 대조했다. 제목, 금액 요약, 은행·계좌·예금주 폼, 신청 버튼의 핵심 순서는 유지되지만 픽셀 동일하지 않다. 최종 화면에는 새 헤더, 모인 클로버 분해, 수수료·세금 설명, 환전량, 전화번호, 암호화 안내가 추가돼 있다. 아래 판정은 이 차이를 포함한 기존 core 판정 승계이며 전체 픽셀 일치 판정이 아니다 | **일치(구조·순서. 추가 5요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)** | 시안 `docs/design/prototypes/clean-frames/social-viral-loop/cashout.png`, 최종 `.goal/runs/w12-f6-verify-e5b65f1/allowed-form-390.png`, `.goal/runs/w12-f6-deploy-{73d08c7,e5b65f1}/`, `.goal/runs/w12-f6-verify-e5b65f1/{observations.json,verify.log}`, `58316d8`, `e5b65f1` |
 | `cashstatus` | 390·768·1024·1440. 상단 상세 헤더, 접수 hero, 세로 3단계, 금액·잔액·알림·홈 순서가 승인 계약과 같음 | 일치 | `direct-captures/cashstatus-{390,768,1024,1440}.png` |
 | `connect` | 390·1024·1440. 실제 초대 수락 fixture 뒤 `윤도경님이 초대를 받고 들어왔어요` 확인 상태를 촬영. 승인 수락 후 상태와 방향·순서·위계가 같음 | 일치 | `direct-captures/connect-{390,1024,1440}-accepted.png` |
 | `coverage` | 제품 `page.tsx` route 24개와 승인 시안 coverage 표 24행을 코드·문서로 확인. landing 캡처를 근거로 쓰지 않음 | 일치 | `find web/src/app -name page.tsx`=24, 승인 시안 표=24 |
@@ -166,6 +166,7 @@
 
 | 버전 | 시각(KST) | 변경 | 작성 |
 |---|---|---|---|
+| v2.1.19 | 2026-11-10 | cashout 승인 시안 390px와 최종 staging 실제 폼 390px를 직접 대조. 핵심 구조·순서 승계와 픽셀 비동일, 추가 요소를 함께 기록. 기존 특수 판정과 분모는 변경하지 않음 | code-builder / GPT-5 Codex |
 | v2.1.18 | 2026-11-10 | F-6 실제 신청 폼 기준으로 표지·요약·범위·cashout 행·D-053 추적·§8을 정합. `73d08c7` 재배포에서 touch target 6개를 발견하고 `e5b65f1`로 수정·재배포했다. 신청·중복·허용 밖 거부, 폼 9폭 3축 위반 0, fixture 잔존 0. 독립 qa 승인 줄 미작성 | code-builder / GPT-5 Codex |
 | v2.1.17 | 2026-11-10 | 최종 source `73d08c7` 기준으로 표지·현재 요약·cashout 행·D-053 추적·§8을 정합. 회귀 45/45, ergonomics 27/27 PASS, 디자인 `26/0/0`. 독립 qa 승인 줄 미작성 | code-builder / GPT-5 Codex |
 | v2.1.16 | 2026-11-09 21:5x | 후속 재채점(15/25) 지적 보정: 표지·§1 에 현재(W-12 FAIL·25/0/1 미확인)와 과거 16e483d 근거 분리, `cashout` 행 과거 POST 200 과 현재 POST 0건 분리, §7 D-053 행, §8 W-12 행 추가, 자가채점 블록 버전 명시. 판정·시험 원본 변경 없음 | qa-verifier / Claude Opus 5.5 |
@@ -180,7 +181,7 @@ SKILLS_USED: haenael-supabase-build — 최종 source·staging·회귀·ergonomi
 SKILLS_SKIPPED: qa·qa-only — 제품·브라우저 재실행과 독립 승인 작성이 금지된 문서 정합 과제라 미사용
 SOURCES/MODEL: GPT-5 Codex | `.goal/runs/w12-f6-deploy-{73d08c7,e5b65f1}/` | `.goal/runs/w12-f6-verify-e5b65f1/{observations.json,verify.log}` | `.goal/runs/w12-regression-73d08c7/{health.json,report.json,run.exit}` | `.goal/verify-20261110-1147.md` | 기존 벤치마크 https://docs.gitlab.com/ci/testing/unit_test_reports/ · https://playwright.dev/docs/test-reporters
 
-## 문서 품질 채점 (standard-doc-review.md §2, v2.1.18 최신)
+## 문서 품질 채점 (standard-doc-review.md §2, v2.1.19 최신)
 
 - 완결성 4: 표지·범위·수용 조건·결과·추적성·출고 기준이 최종 source 상태와 맞는다. 재사용 6행 PNG 경로 공백(O-2)은 남는다.
 - 정밀성 4: 최종 SHA, deployment ID, 신청·중복·거부·DB 수치, 실제 폼 9폭 3축 수치와 `26/0/0` 분모를 원본 경로와 함께 명시했다.

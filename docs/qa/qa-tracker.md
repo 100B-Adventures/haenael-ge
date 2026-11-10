@@ -2,14 +2,14 @@
 
 | 표지 | 값 |
 |---|---|
-| 현재 보고 버전 | v2.1.17 (2026-11-10, F-6 실제 신청 폼 검증 정합) |
+| 현재 보고 버전 | v2.1.18 (2026-11-10, F-6 실제 신청 폼 검증·픽셀 대조 정합) |
 | 현재 상태 | **F-6 builder 재검증 완료, 독립 qa 재승인 대기.** 최종 staging source `e5b65f1`, 허용 회원 신청·중복 차단·허용 밖 거부 관찰, 계좌 입력이 보이는 폼 9폭 `9/9` ergonomics PASS. 디자인 분모 `26 일치 / 0 불일치 / 0 미확인` |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-3·F-6 정합: code-builder / GPT-5 Codex |
 | 라인·단계 | `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
 | 제품 source | `e5b65f163f1c47d6cf44afe0d456e2ea87309b69` |
 | staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_Hu9E4EFR5opQEzHQkrFL4qja86CL`, health `version=2.1.2`, `sourceSha=e5b65f163f1c47d6cf44afe0d456e2ea87309b69`(`.goal/runs/w12-f6-deploy-e5b65f1/{summary.json,health.json}`) |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
-| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.18 |
+| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.19 |
 
 ## 목차 <a id="t-toc"></a>
 
@@ -30,7 +30,7 @@
 - **최종 source 및 staging**: `e5b65f1`. 격리 staging health가 `version=2.1.2`, `sourceSha=e5b65f1`로 일치한다. 근거 `.goal/runs/w12-f6-deploy-e5b65f1/{summary.json,health.json}`.
 - **전체 회귀 기준선**: source `73d08c7`에서 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0. 이후 변경은 cashout form label과 개인정보 링크의 touch target, staging 배포 사전점검에 한정된다. 최종 source에서는 관련 단위 시험 17건, typecheck, production build를 통과했다. 근거 `.goal/runs/w12-regression-73d08c7/{report.json,run.exit}`, `/tmp/haenael-f6-{unit,typecheck,build}.log`.
 - **F-6 실제 폼 관찰**: 허용 회원 신청 1건은 `REQUESTED`, 마스킹 표시, 원문 계좌 0건, `CASHOUT_HOLD` 1건이다. 같은 회원의 중복 신청은 `cashout_already_requested`, 허용 목록 밖 회원은 화면과 Server Action에서 `cashout_disabled`로 거부됐다. 계좌 입력이 보이는 `/cashout` 신청 폼을 9폭에서 측정해 `font_below_13=0`, `tap_below_44=0`, `horizontal_overflow=0`, 위반 0, 콘솔 오류 0을 관찰했다. fixture 잔존은 회원·신청·ledger 모두 0이다. 근거 `.goal/runs/w12-f6-verify-e5b65f1/{observations.json,verify.log}`.
-- **현재 디자인 분모**: `26 일치 / 0 불일치 / 0 미확인`. `cashout`은 **일치(구조·순서. 추가 5요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)**. 내역 날짜 KST 표시는 `58316d8`에서 수정되고 경계 시각 단위 시험이 추가됐다.
+- **현재 디자인 분모**: 기존 독립 판정 `26 일치 / 0 불일치 / 0 미확인`을 승계한다. `cashout`은 **일치(구조·순서. 추가 5요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)**이며 픽셀 동일 판정이 아니다. 이번 턴에 시안 `cashout.png`와 최종 `allowed-form-390.png`를 직접 대조해 핵심 순서 유지와 추가 요소를 함께 기록했다. 내역 날짜 KST 표시는 `58316d8`에서 수정되고 경계 시각 단위 시험이 추가됐다.
 - **qa 단계**: F-6 builder 재검증 증거를 정합했으며 독립 qa 승인 줄은 작성하지 않았다.
 
 ## 2. 목적·범위·참고 기준 <a id="t-scope"></a>
@@ -100,6 +100,7 @@ flowchart LR
 
 | 버전 | 시각(KST) | 변경 |
 |---|---|---|
+| v2.1.18 | 2026-11-10 | cashout 승인 시안과 최종 staging 390px 폼을 직접 대조. 기존 구조·순서 특수 판정은 승계하되 픽셀 동일하지 않음과 추가 요소를 명시 |
 | v2.1.17 | 2026-11-10 | F-6 독립 FAIL을 보존하고 실제 폼 재검증으로 정정. `73d08c7` 시험 키 재배포에서 touch target 6개를 발견한 뒤 `e5b65f1`로 수정·재배포했다. 허용 신청·중복·허용 밖 거부, 계좌 입력 폼 9폭 위반 0, fixture 잔존 0을 연결. 독립 qa 승인 줄 미작성 |
 | v2.1.16 | 2026-11-10 | 최종 source `73d08c7` 기준으로 표지·§1~§6·mermaid를 정합. staging source 일치, 회귀 45/45, cashout ergonomics 27/27 PASS, 디자인 `26/0/0`, F-4 `58316d8` 근거를 연결. 독립 qa 승인 줄 미작성 |
 | v2.1.15 | 2026-11-09 21:5x | W-12 판정 반영 문서 보정: 표지 현재 상태·매트릭스 참조 v2.1.16, §1 현재(NOT_MET/FAIL)와 과거 16e483d 근거 분리, 범위·AC-4·O-3 을 D-053 기준으로, §4 D-053 행과 추적 mermaid 추가. 제품 판정·시험 원본 변경 없음 |
@@ -121,7 +122,7 @@ flowchart LR
 | 원문 동일성 | SHA-256 `82859841…3d3c305323` 일치 | 이관 전 추출본과 보관본 본문(`ARCHIVE-BODY-BEGIN` 이후)을 각각 `sha256sum` |
 | 가장 최근 이력 절 | `2026-11-09 19:5x KST · 16e483d 독립 판정 반영` | 보관본 첫 회차 절 |
 
-## 문서 품질 채점 (standard-doc-review.md §2, v2.1.17 최신)
+## 문서 품질 채점 (standard-doc-review.md §2, v2.1.18 최신)
 
 - 완결성 4: 표지·목적·범위·수용 조건·추적성·오픈 이슈·개정 이력이 최종 source 상태와 맞는다. 용어 절은 매트릭스 링크에 기댄다.
 - 정밀성 4: 최종 SHA, deployment ID, health version, 신청·중복·거부 수치, 실제 폼 9폭 3축 수치와 증거 root를 명시했다. 과거 이력에는 분 단위가 `x`인 기록이 남는다.
