@@ -1,3 +1,34 @@
+## 2026-11-10 13:4x KST 인계 (최신, 이 세션 종료)
+
+### 무엇을 어디까지 했나
+- W-12 에서 이 세션 몫(staging 전용 키 배포, staging QA, 독립 검증 1차 지적 F-1·F-4·F-2 일부 처리)을 마쳤다. 컨트롤러 결정으로 W-12 루프는 Codex 세션 1개가 맡고, 이 세션은 haenael-ge-v2-hotfix 브랜치에 더 커밋하지 않는다. 2a9590c·d7a15b4 는 유지.
+
+### 남은 이슈·블로커
+- F-8(카카오 로그인 콜백·토스 sandbox release blocker) Codex 실행 중. DESIGN.md 12.5→13px 토큰 갱신은 그다음 Codex 단위.
+- Vercel 프로젝트 haenael-ge-v2-hotfix 삭제는 회장 결정 대기.
+
+### 다음에 칠 명령
+- 이 세션 몫 없음.
+
+### 검증했나
+- 관찰됨: b665911 회귀 45/45, staging 시험 데이터·auth 고아 0. 미검증: 2a9590c 배포·측정(Codex 루프가 다음 배포에 포함).
+
+## 2026-11-10 13:1x KST 인계 (최신, W-12)
+
+### 무엇을 어디까지 했나
+- 04:4x 까지: staging 전용 키를 배포 한 건에만 주입(공용 Preview 미변경, 값은 ~/.sj-agent-harness/secrets/haenael-ge-cashout-staging-test.env). staging QA PASS(응답 원문 0). 독립 검증 1차 FAIL 지적 F-1(회귀 45/45 b665911)·F-4(날짜 KST 58316d8)·F-2 일부(e926d3e) 처리. 시험 데이터 잔존 0.
+- 13:1x 재개 시 다른 작업자가 같은 브랜치에서 10:30~12:58 커밋 9건으로 W-12 루프를 이어가 있었다(독립 검증 2·3차, staging 8cb7b41). 이 세션은 개발 중단. 얹은 커밋: 2a9590c(잔액 카드 11px→13px), d7a15b4(실수 기록).
+
+### 남은 이슈·블로커
+- 루프 주인 지정 대기(컨트롤러 claude-31). DESIGN.md 12.5→13px 토큰 갱신((가) 판정)과 최종 배포·회귀·측정·독립 검증·승인은 루프 주인 몫.
+- F-5 실수로 생긴 Vercel 프로젝트 haenael-ge-v2-hotfix 삭제: 회장 결정 대기(컨트롤러 등록).
+
+### 다음에 칠 명령
+- 컨트롤러가 이 세션을 지정하면: 다른 작업자 정지 확인 → DESIGN.md 토큰 갱신 → 저장소 루트에서 .vercel/project.json=haenael-ge·web/.next 없음 확인 후 `vercel deploy --env CASHOUT_STAGING_TEST_*` → 회귀 run.sh → 9폭 측정 → claude-delegate qa-verifier.
+
+### 검증했나
+- 관찰됨: b665911 회귀 45/45, e926d3e 측정(누름·눌림·넘침 0, 12.5px 잔존), staging 시험 데이터·auth 고아 0. 미검증: 2a9590c 는 배포·측정 전.
+
 ## 2026-11-10 03:45 KST 인계 (최신, 4칸 정리)
 
 ### 무엇을 어디까지 했나
