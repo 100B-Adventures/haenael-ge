@@ -240,7 +240,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-clover-amount"
-              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_005}</label>
             <div className="flex items-center gap-2">
               <input
@@ -274,7 +274,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-bank"
-              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_008}</label>
             <select
               id="cashout-bank"
@@ -295,7 +295,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-account"
-              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_010}</label>
             <input
               id="cashout-account"
@@ -313,7 +313,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-holder"
-              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_012}</label>
             <input
               id="cashout-holder"
@@ -331,7 +331,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-phone"
-              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_014}</label>
             <input
               id="cashout-phone"
@@ -367,7 +367,7 @@ export function CashoutRequestForm({
               aria-hidden="true"
             />
             <p>{PRODUCT_COPY.TEXT_019}{" "}
-              <PrivacyPolicyLink className="font-semibold underline" />
+              <PrivacyPolicyLink className="inline-flex min-h-11 items-center font-semibold underline" />
             </p>
           </div>
 
