@@ -70,6 +70,12 @@ describe("CashoutRequestForm", () => {
     fireEvent.change(screen.getByLabelText("예금주"), { target: { value: "홍길동" } });
   }
 
+  it("환전 화면의 기본 렌더 상태에는 13px 미만 arbitrary font class가 없다", () => {
+    const { container } = renderPage();
+
+    expect(container.innerHTML).not.toMatch(/text-\[(?:11\.5|12\.5)px\]/);
+  });
+
   it("최종 확인 뒤 신청하고 서버 재검증 후에도 접수 성공 화면을 유지한다", async () => {
     const view = renderForm();
     // 기본 입력값은 환전 가능액 전체(40)다. 이 검증은 30개 기준 금액을 보므로 30을 넣는다.

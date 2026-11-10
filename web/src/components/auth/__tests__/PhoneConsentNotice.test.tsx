@@ -8,7 +8,9 @@ describe("PhoneConsentNotice", () => {
   });
 
   it("전화번호가 없으면 재동의 안내와 현재 경로 CTA를 보여준다", () => {
-    render(<PhoneConsentNotice hasPhone={false} redirectPath="/me" context="me" />);
+    const { container } = render(
+      <PhoneConsentNotice hasPhone={false} redirectPath="/me" context="me" />,
+    );
 
     expect(screen.getByTestId("phone-consent-notice")).toHaveTextContent(
       "알림 받으려면 전화번호 동의가 필요해요",
@@ -17,6 +19,7 @@ describe("PhoneConsentNotice", () => {
       "href",
       "/auth/kakao/start?redirect=%2Fme",
     );
+    expect(container.innerHTML).not.toMatch(/text-\[(?:11\.5|12\.5)px\]/);
   });
 
   it("전화번호가 있으면 안내를 보여주지 않는다", () => {

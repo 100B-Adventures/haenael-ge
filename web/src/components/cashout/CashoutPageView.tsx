@@ -117,17 +117,17 @@ export function CashoutPageView({
               className="mb-4 rounded-md bg-accent p-4 sm:p-6"
               data-testid="cashout-net-preview"
             >
-              <div className="flex items-center justify-between py-1.5 text-[12.5px] text-accent-foreground">
+              <div className="flex items-center justify-between py-1.5 text-[length:var(--text-meta-micro)]! text-accent-foreground">
                 <span>{PRODUCT_COPY.TEXT_017}</span>
                 <strong>{formatCashoutKrw(grossKrw)}</strong>
               </div>
-              <div className="flex items-center justify-between py-1.5 text-[12.5px] text-accent-foreground">
+              <div className="flex items-center justify-between py-1.5 text-[length:var(--text-meta-micro)]! text-accent-foreground">
                 <span>{PRODUCT_COPY.TEXT_018}</span>
                 <strong data-testid="cashout-fee-amount">
                   − {formatCashoutKrw(feeTotalKrw)}
                 </strong>
               </div>
-              <div className="flex items-center justify-between py-1.5 text-[12.5px] text-accent-foreground">
+              <div className="flex items-center justify-between py-1.5 text-[length:var(--text-meta-micro)]! text-accent-foreground">
                 <span>{PRODUCT_COPY.TEXT_019}</span>
                 <strong data-testid="cashout-withholding-amount">
                   − {formatCashoutKrw(withholdingKrw)}

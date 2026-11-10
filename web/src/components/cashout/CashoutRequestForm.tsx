@@ -240,7 +240,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-clover-amount"
-              className="mb-1.5 block text-[12.5px] font-bold text-foreground"
+              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_005}</label>
             <div className="flex items-center gap-2">
               <input
@@ -274,7 +274,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-bank"
-              className="mb-1.5 block text-[12.5px] font-bold text-foreground"
+              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_008}</label>
             <select
               id="cashout-bank"
@@ -295,7 +295,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-account"
-              className="mb-1.5 block text-[12.5px] font-bold text-foreground"
+              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_010}</label>
             <input
               id="cashout-account"
@@ -313,7 +313,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-holder"
-              className="mb-1.5 block text-[12.5px] font-bold text-foreground"
+              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_012}</label>
             <input
               id="cashout-holder"
@@ -331,7 +331,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-phone"
-              className="mb-1.5 block text-[12.5px] font-bold text-foreground"
+              className="mb-1.5 block text-[length:var(--text-meta-micro)]! font-bold text-foreground"
             >{PRODUCT_COPY.TEXT_014}</label>
             <input
               id="cashout-phone"
@@ -397,7 +397,7 @@ export function CashoutRequestForm({
               data-testid="cashout-submitting-state"
             >
               <div className="rounded-md border border-border bg-card p-3">
-                <dl className="divide-y divide-border text-[12.5px]">
+                <dl className="divide-y divide-border text-[length:var(--text-meta-micro)]!">
                   <div className="flex justify-between gap-4 py-2">
                     <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_022}</dt>
                     <dd className="text-right font-bold">
@@ -436,7 +436,7 @@ export function CashoutRequestForm({
           ) : (
             <>
               <div className="rounded-md border border-border bg-card p-3">
-                <dl className="divide-y divide-border text-[12.5px]">
+                <dl className="divide-y divide-border text-[length:var(--text-meta-micro)]!">
                   <div className="flex justify-between gap-4 py-2">
                     <dt className="text-muted-foreground">{PRODUCT_COPY.TEXT_030}</dt>
                     <dd className="text-right font-bold">
@@ -558,7 +558,7 @@ export function CashoutRequestForm({
                 data-testid={`cashout-history-${item.id}`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-[12.5px] font-bold text-foreground">
+                  <p className="text-[length:var(--text-meta-micro)]! font-bold text-foreground">
                     {formatCashoutKrw(item.net_krw)}
                   </p>
                   <span className="rounded-full bg-accent px-2 py-1 text-[length:var(--text-meta-micro)]! font-bold text-accent-foreground">
