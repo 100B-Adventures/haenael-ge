@@ -2,14 +2,14 @@
 
 | 표지 | 값 |
 |---|---|
-| 문서 버전 | v2.1.21 (2026-11-10, F-7 눌림 상태와 최종 source 재검증. `26 일치 / 0 불일치 / 0 미확인`) |
-| 작성 시각 | 2026-11-10 F-7 최종 staging 재관찰. 이전 판정 근거 시각은 이력에 보존 |
+| 문서 버전 | v2.1.22 (2026-11-11, F-8 최종 source 재검증. `26 일치 / 0 불일치 / 0 미확인`) |
+| 작성 시각 | 2026-11-11 F-8 최종 staging 재관찰. 이전 판정 근거 시각은 이력에 보존 |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-7 수정·증거 정합: code-builder / GPT-5 Codex |
 | 파이프라인 | 라인 `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
-| 제품 source | `8cb7b4101aa4c4eec5cab26a3aff9d782d7034d6` (staging health `sourceSha` 일치) |
+| 제품 source | `07a0075018dfc95eacb192d6bda66154842f8a26` (staging health `sourceSha` 일치) |
 | staging | `https://haenael-ge-v2-staging-100-b.vercel.app` |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a` (`pipeline-state.v2.md:52`). 작업트리 파일 SHA 는 다르다. [O-1](#open) 참조 |
-| 독립 판정 | F-7 builder 재검증 완료, 독립 qa 재승인 대기. 기존 FAIL 판정 원본은 보존 |
+| 독립 판정 | F-8 builder 재검증 완료, 독립 qa 재승인 대기. 기존 FAIL 판정 원본은 보존 |
 
 ## 목차 <a id="toc"></a>
 
@@ -28,9 +28,9 @@
 
 ## 1. 요약 <a id="summary"></a>
 
-**현재 builder 판정(최종 source `8cb7b41`): `26 일치 / 0 불일치 / 0 미확인`. 시험 키가 주입된 W-12 staging에서 최종 source 전체 회귀 45/45와 신청 폼·상태·내역 27폭 ergonomics 4축 PASS를 관찰했다. 눌림 상태 커버는 세 경로 9폭 모두 100%다. 독립 qa 승인 줄은 작성하지 않았다.**
+**현재 builder 판정(최종 source `07a0075`): `26 일치 / 0 불일치 / 0 미확인`. W-12 staging에서 최종 source 전체 회귀 r3 45/45와 신청 폼·상태·내역 27폭 ergonomics 4축 PASS를 관찰했다. 눌림 상태 커버는 세 경로 9폭 모두 100%이고 staging·운영 결제 API는 HTTP 503이다. 독립 qa 승인 줄은 작성하지 않았다.**
 
-**최종 source 재검증(source `8cb7b41`)**: exact staging 전체 회귀는 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. 신청 폼은 계좌 입력 상태 9폭, `/cashout/status`는 `REQUESTED detail` 9폭, `/cashout/history`는 `REQUESTED history row` 9폭에서 각각 13px 미만 글자 0, 본문 토큰 16px, 44px 미만 누름 0, 눌림 상태 커버 100%, 가로 넘침 0이다. 폭별 캡처 27장을 저장했고 fixture 잔존은 0이다.
+**최종 source 재검증(source `07a0075`)**: exact staging 전체 회귀 r3는 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. r1·r2의 `ERR_NETWORK_CHANGED`·단일 timeout은 제품·시험 코드 변경 없이 재실행해 해소된 환경 결함이다. 신청 폼은 계좌 입력 상태 9폭, `/cashout/status`는 `REQUESTED detail` 9폭, `/cashout/history`는 `REQUESTED history row` 9폭에서 각각 13px 미만 글자 0, 본문 토큰 16px, 44px 미만 누름 0, 눌림 상태 커버 100%, 가로 넘침 0, 콘솔 오류 0이다. 폭별 캡처 27장을 저장했고 fixture 잔존은 0이다. 근거는 `.goal/runs/w12-regression-07a0075-r3/`, `.goal/runs/w12-ergonomics-07a0075/`, `.goal/runs/w12-f8-07a0075/`이다.
 
 ## 2. 목적·범위·참고 기준 <a id="scope"></a>
 
@@ -181,6 +181,7 @@
 
 | 버전 | 시각(KST) | 변경 | 작성 |
 |---|---|---|---|
+| v2.1.22 | 2026-11-11 | 최종 source `07a0075` 기준으로 표지·§1을 갱신. staging health SHA 일치, 회귀 r3 45/45, 환전 3경로 27폭 위반 0, staging·운영 결제 503을 연결. 독립 qa 승인 줄 미작성 | code-builder / GPT-5 Codex |
 | v2.1.21 | 2026-11-10 | F-7 눌림 상태를 최종 source `8cb7b41`에서 해소. 시험 키 포함 staging health SHA 일치, 회귀 45/45, 신청 폼·상태·내역 27폭 4축 위반 0과 눌림 100%, 폭별 캡처 27장, fixture 잔존 0을 연결. 현재 W-12 범위를 8열 양방향 판정표로 보강. 독립 qa 승인 줄 미작성 | code-builder / GPT-5 Codex |
 | v2.1.20 | 2026-11-10 | 최종 source `e5b65f1` exact staging 전체 회귀 45/45, 결제 플래그 HTTP 503 원복, `/cashout/status`·`/cashout/history` `REQUESTED` 화면 18/18 3축 위반 0, 390px 캡처와 fixture 정리 증거를 §1·§4·§5·§7·§8에 연결. 독립 qa 승인 줄 미작성 | code-builder / GPT-5 Codex |
 | v2.1.19 | 2026-11-10 | cashout 승인 시안 390px와 최종 staging 실제 폼 390px를 직접 대조. 핵심 구조·순서 승계와 픽셀 비동일, 추가 요소를 함께 기록. 기존 특수 판정과 분모는 변경하지 않음 | code-builder / GPT-5 Codex |

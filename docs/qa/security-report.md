@@ -2,12 +2,12 @@
 
 | 항목 | 값 |
 |---|---|
-| 버전 | v2.1.0 |
+| 버전 | v2.1.1 |
 | 작성일 | 2026-11-11 |
 | 작성자/모델 | qa-verifier / gpt-codex gpt-5.6-sol, reasoning high |
 | 상류 산출물(핀) | D-049, V2 server contract migration SHA-256 `131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999` |
 | 대상 환경 | Supabase staging `ezzklgotgydwxqebfoys`, Vercel preview |
-| 승인 상태 | QA 승인 전. SEC-PAY-01 성공 callback은 `accepted_unverified`, 취소·금액 변조와 결제 비활성 경계는 PASS |
+| 승인 상태 | QA 승인 전. SEC-EXT-01은 2026-11-07 실제 callback·제품 세션 관찰로 PASS. 오늘 재실행은 카카오 세션 만료로 환경 미완. SEC-PAY-01 성공 callback은 `accepted_unverified` |
 
 ## 목차
 
@@ -23,7 +23,7 @@
 
 ## TL;DR
 
-V2의 DB 권한, Storage 비공개 경로, IDOR, 프로필 사진 업로드·정상 TTL 삭제, 의존성 취약점은 실행 증거로 통과했다. SEC-PAY-01은 토스 테스트 키도 실제 카드 본인인증을 요구해 성공 callback만 `accepted_unverified`로 수용한다. 취소·금액 변조는 PASS이고 staging·운영은 `PAYMENTS_ENABLED=false`와 `cheer-order` HTTP 503으로 결제를 비활성화한다.
+V2의 DB 권한, Storage 비공개 경로, IDOR, 프로필 사진 업로드·정상 TTL 삭제, 의존성 취약점은 실행 증거로 통과했다. SEC-EXT-01은 2026-11-07 13:47 KST staging source `a738543`에서 실제 카카오 동의, `/my` 도달, `auth.users.last_sign_in_at` 갱신을 관찰해 PASS다. 이후 `a738543..07a0075` 인증 경로 diff는 0파일이다. 오늘 9342 재실행은 카카오 세션 만료로 `interactive_login_required`에서 멈춘 환경 미완이며 기존 PASS를 뒤집지 않는다. SEC-PAY-01은 토스 테스트 키도 실제 카드 본인인증을 요구해 성공 callback만 `accepted_unverified`로 수용한다. 취소·금액 변조는 PASS이고 staging·운영은 `PAYMENTS_ENABLED=false`와 `cheer-order` HTTP 503으로 결제를 비활성화한다.
 
 ## 1. 목적·범위·용어
 
@@ -68,7 +68,7 @@ flowchart LR
 | Toss sandbox 성공 callback | 테스트 결제창 진입 뒤 카드사 외부 본인인증 화면에서 중단. 테스트 키도 실제 카드 본인인증 필요 | 관찰됨 | `accepted_unverified` |
 | Toss 취소·금액 변조 | 실제 결제창 취소 뒤 주문 `PENDING` 불변, 변조 금액 confirm은 `amount_mismatch`로 거부 | 테스트됨 | PASS |
 | 관리자 환전 소스 | 계좌 전체 번호는 지급 모달에서만 표시, 닫으면 해제. 감사·10분 열람·잠금 RPC 유지. 독립 review NO_FINDINGS | 근거 확인 | PASS, 소스 한정 |
-| Kakao OAuth | authorize 화면과 staging callback 형식까지만 도달 | 미검증 | 실제 callback 미검증 |
+| Kakao OAuth | 2026-11-07 13:47 KST source `a738543`에서 실제 카카오 동의 뒤 `/my` 도달, staging `auth.users` Kakao 행의 `last_sign_in_at` 갱신 관찰. `git diff --stat a738543..07a0075 -- web/src/app/auth web/src/lib/auth web/src/proxy.ts supabase/functions/auth-kakao` 출력 0줄 | 관찰됨·근거 확인 | PASS. 오늘 재실행은 9342 카카오 세션 만료로 환경 미완 |
 | 실제 지급·반려 | 버튼·모달 소스 경계만 확인 | 미검증 | 금전 처리 미실행 |
 
 원격 36건 catalog assertion과 16개 Edge Function은 존재 수다. 이를 pgTAP 412건에 더하거나 실제 동작 수로 해석하지 않는다. 소개 저장·목표 종료·회원 탈퇴·프로필 사진 업로드와 삭제는 각 실행 증거를 별도로 사용한다.
@@ -82,10 +82,11 @@ flowchart LR
 | AC-FRIEND-01~02 | 친구 수락 동시성, 다른 사용자 정보 비노출 | 성공 1·used 1·connection 1, IDOR 404 | PASS | staging E2E |
 | 개인정보 변경 | 프로필 사진 원본을 비공개로 두고 안전하게 교체·정리 | Presigned URL, private path 비노출, TTL 삭제 | PASS | `staging-profile-avatar-cleanup-observation-20261025-1001.json` |
 | 결제·환전 | staging·운영 결제 차단, Toss 취소·금액 변조 거부, 관리자 계좌번호 최소 노출 | 503 경계·sandbox edge·독립 소스 리뷰 | PASS. 성공 callback은 `accepted_unverified` | `.goal/runs/w12-f8-8cb7b41/{toss-cancel.log,toss-success.log}` |
+| Kakao 로그인 | 실제 동의→callback→제품 세션 | `/my` 도달, `auth.users.last_sign_in_at`, 이후 인증 경로 diff | PASS. 오늘 재실행은 세션 만료로 환경 미완 | 루트 저장소 `.goal/feature-list.json` `G4-AUTH-01`, `.goal/runs/w12-f8-07a0075/kakao-probe.log` |
 
 ## 5. 안 한 것
 
-1. 실제 Kakao 계정 로그인 뒤 `/auth/kakao/callback` 세션 생성.
+1. 오늘 source `07a0075`에서 Kakao OAuth를 다시 끝까지 실행하는 일. 9342 크롬의 카카오 세션이 만료돼 `interactive_login_required`로 중단됐다. 2026-11-07 source `a738543`의 실제 callback·제품 세션 PASS와 이후 인증 경로 diff 0은 별도 유효 증거다.
 2. Toss sandbox 성공 callback. 테스트 키도 카드사 외부 본인인증을 요구해 자동화가 물리적으로 완료할 수 없다. 취소·금액 변조는 실행해 PASS했다.
 3. 실제 관리자 지급 완료·반려와 그 결과 감사로그 생성. 금전 상태를 바꾸므로 실행하지 않았다.
 4. 운영 환경 권한·헤더·Storage 검증. 이번 범위는 무료 staging이다.
@@ -103,15 +104,17 @@ flowchart LR
 | staging·운영 결제는 `PAYMENTS_ENABLED=false`와 `cheer-order` 503으로 차단 | 충족 |
 | Toss 취소와 금액 변조는 주문·원장을 승인하지 않음 | 충족 |
 | Toss sandbox 성공 callback | `accepted_unverified`: 테스트 키의 카드사 본인인증 필요. 결제 비활성 상태로 출시 |
-| 실제 Kakao OAuth와 실제 금전 처리는 실행 없이는 PASS 금지 | 미검증 유지 |
+| 실제 Kakao OAuth callback·제품 세션 | 충족. 2026-11-07 실제 동의→`/my`, `auth.users.last_sign_in_at` 관찰. 이후 인증 경로 diff 0 |
+| 오늘 Kakao 재실행 | 환경 미완. 9342 카카오 세션 만료로 `interactive_login_required`, callback·제품 세션 미관찰 |
+| 실제 금전 처리 | 미검증 유지 |
 
-**판정:** 확인한 V2 보안 통제 PASS. SEC-PAY-01 성공 callback은 외부 본인인증 제약으로 `accepted_unverified`이며, 2.1.0 출시는 staging·운영 결제 비활성 조건이다. Kakao callback과 실제 지급·반려는 별도 미검증으로 유지한다.
+**판정:** 확인한 V2 보안 통제 PASS. SEC-EXT-01은 실제 callback·제품 세션 관찰과 이후 인증 경로 diff 0을 근거로 PASS다. 오늘 재실행은 카카오 세션 만료에 따른 환경 미완으로 기록한다. SEC-PAY-01 성공 callback은 외부 본인인증 제약으로 `accepted_unverified`이며, 2.1.0 출시는 staging·운영 결제 비활성 조건이다. 실제 지급·반려는 미검증으로 유지한다.
 
 ## 7. 결함·잔여 리스크
 
 | ID | 심각도 | 상태 | 내용 |
 |---|---|---|---|
-| SEC-EXT-01 | release blocker | open | 실제 Kakao OAuth callback 세션 미검증 |
+| SEC-EXT-01 | release blocker | pass | 2026-11-07 실제 카카오 동의→`/my`, `auth.users.last_sign_in_at` 관찰. `a738543..07a0075` 인증 경로 diff 0. 오늘 9342 재실행은 세션 만료로 환경 미완 |
 | SEC-PAY-01 | accepted_unverified | accepted_unverified | 성공 callback은 카드사 본인인증 필요. 취소·금액 변조 PASS. staging·운영 `PAYMENTS_ENABLED=false`, `cheer-order` 503 조건으로 2.1.0 출시 |
 | SEC-ADMIN-01 | major | open | 실제 지급·반려·감사로그 브라우저 경로 미검증 |
 
@@ -127,6 +130,7 @@ ISO/IEC/IEEE 29119의 테스트 증거 분리와 Playwright의 web-first asserti
 
 | 버전 | 날짜 | 변경 | 작성자 |
 |---|---|---|---|
+| v2.1.1 | 2026-11-11 | SEC-EXT-01을 2026-11-07 실제 callback·제품 세션 증거와 이후 인증 경로 diff 0으로 PASS 판정. 오늘 9342 재실행은 카카오 세션 만료 환경 미완으로 분리 | code-builder |
 | v2.1.0 | 2026-11-11 | SEC-PAY-01 성공 callback을 외부 본인인증 사유의 `accepted_unverified`로 기록하고 취소·금액 변조 PASS, 결제 비활성 503 출시 조건을 고정 | code-builder |
 | v2.0.0 | 2026-10-25 | V2 staging 최신 증거로 전면 재작성 | qa-verifier |
 

@@ -2,18 +2,18 @@
 
 | 표지 | 값 |
 |---|---|
-| 현재 보고 버전 | v2.1.22 (2026-11-11, F-8 외부 인증 제약 수용과 13px 최소선 반영 착수) |
-| 현재 상태 | **F-8 SEC-PAY-01 성공 callback `accepted_unverified`, 독립 qa 재승인 대기.** 토스 취소·금액 변조 PASS. 2.1.0 출시는 staging·운영 `PAYMENTS_ENABLED=false`와 `cheer-order` HTTP 503 조건이다. 최종 staging source·회귀·9폭은 이번 source 배포 뒤 갱신한다. |
+| 현재 보고 버전 | v2.1.23 (2026-11-11, F-8 최종 builder 증거 정합) |
+| 현재 상태 | **source `07a0075` builder 증거 충족, 독립 qa 재승인 대기.** 회귀 45/45, 환전 3경로 27폭 위반 0, staging·운영 결제 HTTP 503. SEC-EXT-01은 실제 callback 증거로 PASS, 오늘 재실행은 카카오 세션 만료 환경 미완. SEC-PAY-01 성공 callback은 `accepted_unverified` |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-7 수정·증거 정합: code-builder / GPT-5 Codex |
 | 라인·단계 | `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
-| 제품 source | `8cb7b4101aa4c4eec5cab26a3aff9d782d7034d6` |
-| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_Bd19ueAC1xWp5hkbJ4kT9dp1spFy`, health `version=2.1.2`, `sourceSha=8cb7b4101aa4c4eec5cab26a3aff9d782d7034d6`(`.goal/runs/w12-f7-deploy-8cb7b41/{summary.json,health.json}`) |
+| 제품 source | `07a0075018dfc95eacb192d6bda66154842f8a26` |
+| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_Fsrr1nZ5gtzwKsQLV5Kwqc2kbsEx`, health `version=2.1.2`, `sourceSha=07a0075018dfc95eacb192d6bda66154842f8a26`(`.goal/runs/w12-f8-07a0075/{deploy.json,health.json}`) |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
-| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.21 |
+| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.22 |
 
 ## 목차 <a id="t-toc"></a>
 
-**현재 보고 (최종 source `8cb7b41` F-7 builder 증거 · 독립 qa 재승인 대기)**
+**현재 보고 (최종 source `07a0075` F-8 builder 증거 · 독립 qa 재승인 대기)**
 1. [요약](#t-summary)
 2. [목적·범위·참고 기준](#t-scope)
 3. [수용 조건과 결과](#t-results)
@@ -27,13 +27,14 @@
 
 ## 1. 요약 <a id="t-summary"></a>
 
-- **최종 source 및 staging**: `8cb7b41`. 시험 키 4종을 포함한 격리 staging health가 `version=2.1.2`, `sourceSha=8cb7b41`로 일치한다. 근거 `.goal/runs/w12-f7-deploy-8cb7b41/{summary.json,health.json}`.
-- **최종 source 전체 회귀**: source `8cb7b41` exact staging에서 45건을 retries 0으로 단일 실행해 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, Playwright EXIT 0, 전체 실행 EXIT 0, 466.8초를 기록했다. 종료 후 결제 플래그를 원복해 결제 API HTTP 503을 확인했고 회귀 fixture 잔존은 0이다. 근거 `.goal/runs/w12-regression-8cb7b41/{report.json,playwright.exit,run.exit,payment-restore.http,execution.log}`.
-- **F-7 실제 폼과 상태 화면 4축 관찰**: `/cashout`은 계좌 입력 신청 폼, `/cashout/status`는 `REQUESTED detail`, `/cashout/history`는 `REQUESTED history row` 상태에서 각각 9폭을 측정했다. 27/27 모두 `font_below_13=0`, `token_body_px=16`, `tap_below_44=0`, `active_ratio=100%`, `overflow_x=false`, 콘솔 오류 0이다. 폭마다 PNG 27장을 저장하고 3개 접촉판을 직접 열어 상태를 확인했다. 근거 `.goal/runs/w12-ergonomics-8cb7b41/{observations.json,measure.log,cashout-*-*.png,contact-*.png}`.
-- **fixture 정리**: 실측에 만든 폼 회원과 상태 회원, 환전 신청, ledger의 잔존은 각각 0이다. 근거 `.goal/runs/w12-ergonomics-8cb7b41/observations.json`의 `cleanup.remaining`.
+- **최종 source 및 staging**: `07a0075`. 격리 staging health가 `version=2.1.2`, `sourceSha=07a0075018dfc95eacb192d6bda66154842f8a26`로 일치한다. 근거 `.goal/runs/w12-f8-07a0075/{deploy.json,health.json}`.
+- **최종 source 전체 회귀**: source `07a0075` exact staging의 유효 실행 r3에서 45건을 retries 0으로 단일 실행해 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0, 492.6초를 기록했다. 종료 후 결제 API HTTP 503과 fixture 잔존 0을 확인했다. r1·r2의 `ERR_NETWORK_CHANGED`·단일 timeout은 제품·시험 코드 변경 없이 재실행해 해소된 환경 결함이다. 근거 `.goal/runs/w12-regression-07a0075-r3/{report.json,playwright.exit,run.exit,payment-restore.http,execution.log}`.
+- **환전 3경로 4축 관찰**: `/cashout`, `/cashout/status`, `/cashout/history`를 각각 360·390·412·600·700·780·820·900·1000px에서 측정했다. 27/27 모두 13px 미만 글자 0, 본문 토큰 16px, 44px 미만 누름 0, 눌림 상태 100%, 가로 넘침 0, 콘솔 오류 0이다. 근거 `.goal/runs/w12-ergonomics-07a0075/{observations.json,measure.log,*.png}`.
+- **fixture 정리**: 실측에 만든 폼 회원과 상태 회원, 환전 신청, ledger의 잔존은 각각 0이다. 정리는 `auth.admin.deleteUser` 경로를 사용했다. 근거 `.goal/runs/w12-ergonomics-07a0075/observations.json`의 `cleanup.remaining`.
 - **현재 디자인 분모**: 기존 독립 판정 `26 일치 / 0 불일치 / 0 미확인`을 승계한다. `cashout`은 **일치(구조·순서. 추가 5요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)**이며 픽셀 동일 판정이 아니다. 이번 턴에 시안 `cashout.png`와 최종 `allowed-form-390.png`를 직접 대조해 핵심 순서 유지와 추가 요소를 함께 기록했다. 내역 날짜 KST 표시는 `58316d8`에서 수정되고 경계 시각 단위 시험이 추가됐다.
-- **qa 단계**: F-7 builder 재검증 증거를 정합했으며 독립 qa 승인 줄은 작성하지 않았다.
-- **F-8 외부 인증 경계**: `.goal/runs/w12-f8-8cb7b41/toss-success.log`의 `TOSS_CARD_EXTERNAL_AUTH`에서 토스 테스트 키도 카드사 본인인증을 요구함을 관찰했다. 성공 callback은 `accepted_unverified`, 취소·금액 변조는 `.goal/runs/w12-f8-8cb7b41/toss-cancel.log` 1/1 PASS다. 결제는 staging·운영 모두 비활성 상태로 출시한다.
+- **qa 단계**: F-8 builder 재검증 증거를 정합했으며 독립 qa 승인 줄은 작성하지 않았다.
+- **SEC-EXT-01 카카오 로그인 callback**: **PASS.** 루트 저장소 `.goal/feature-list.json`의 `G4-AUTH-01`에 2026-11-07 13:47 KST source `a738543` staging에서 실제 카카오 동의 뒤 `/my` 도달과 `auth.users` Kakao 행 `last_sign_in_at` 갱신 관찰이 기록돼 있다. `git diff --stat a738543..07a0075 -- web/src/app/auth web/src/lib/auth web/src/proxy.ts supabase/functions/auth-kakao`는 출력 0줄이다. 오늘 `.goal/runs/w12-f8-07a0075/kakao-probe.log` 재실행은 9342 크롬의 카카오 세션 만료로 `interactive_login_required`, `callbackObserved=false`, `productSessionPresent=false`였으므로 환경 미완으로 기록하고 기존 PASS를 뒤집지 않는다.
+- **SEC-PAY-01 결제 callback**: `.goal/runs/w12-f8-8cb7b41/toss-success.log`의 `TOSS_CARD_EXTERNAL_AUTH`에서 토스 테스트 키도 카드사 본인인증을 요구함을 관찰했다. 성공 callback은 `accepted_unverified`, 취소·금액 변조는 PASS다. source `07a0075`에서 staging·운영 `cheer-order`가 각각 HTTP 503 `payments_disabled`임을 직접 확인했다. 근거 `.goal/runs/w12-f8-07a0075/{staging-cheer-order.http,staging-cheer-order.json,production-cheer-order.http,production-cheer-order.json}`.
 
 ## 2. 목적·범위·참고 기준 <a id="t-scope"></a>
 
@@ -106,6 +107,7 @@ flowchart LR
 
 | 버전 | 시각(KST) | 변경 |
 |---|---|---|
+| v2.1.23 | 2026-11-11 | source `07a0075` staging health 일치, 회귀 r3 45/45, 환전 3경로 27폭 위반 0, staging·운영 결제 503을 표지·§1에 연결. SEC-EXT-01은 2026-11-07 실제 callback·제품 세션과 이후 인증 경로 diff 0으로 PASS, 오늘 재실행은 카카오 세션 만료 환경 미완으로 분리. 독립 qa 승인 줄 미작성 |
 | v2.1.22 | 2026-11-11 | F-8 SEC-PAY-01 성공 callback을 외부 카드 본인인증 제약의 `accepted_unverified`로 기록. 취소·금액 변조 PASS와 staging·운영 결제 비활성 503 출시 조건을 고정. 최종 source 증거는 배포 뒤 갱신 예정 |
 | v2.1.21 | 2026-11-10 | F-7 눌림 상태를 최종 source `8cb7b41`에서 해소. 시험 키 포함 staging health SHA 일치, 전체 회귀 45/45, 신청 폼·상태·내역 27폭의 글자·본문 토큰·탭 크기·눌림 상태·넘침을 재측정해 위반 0과 눌림 100%, 폭별 캡처 27장, fixture 잔존 0을 연결. 독립 qa 승인 줄 미작성 |
 | v2.1.19 | 2026-11-10 | 최종 source `e5b65f1` exact staging 전체 회귀 45/45, 결제 플래그 HTTP 503 원복, `/cashout/status`·`/cashout/history` `REQUESTED` 화면 18/18 3축 위반 0, 390px 캡처와 fixture 정리 증거를 표지·§1~§6·mermaid에 연결. 독립 qa 승인 줄 미작성 |
