@@ -48,6 +48,8 @@ type Success = {
   accountHolder: string;
 };
 
+const TAP_FEEDBACK_CLASS = "transition-opacity active:opacity-80";
+
 function createRequestKey() {
   return `cashout_${crypto.randomUUID().replaceAll("-", "")}`;
 }
@@ -240,7 +242,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-clover-amount"
-              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className={`mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground ${TAP_FEEDBACK_CLASS}`}
             >{PRODUCT_COPY.TEXT_005}</label>
             <div className="flex items-center gap-2">
               <input
@@ -261,7 +263,7 @@ export function CashoutRequestForm({
                   event.currentTarget.setCustomValidity(browserMessage);
                   setCloverAmount(nextAmount);
                 }}
-                className="min-w-0 flex-1 rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
+                className={`min-w-0 flex-1 rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary ${TAP_FEEDBACK_CLASS}`}
                 required
               />
               <span className="text-sm font-bold text-accent-foreground">{PRODUCT_COPY.TEXT_007}</span>
@@ -274,13 +276,13 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-bank"
-              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className={`mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground ${TAP_FEEDBACK_CLASS}`}
             >{PRODUCT_COPY.TEXT_008}</label>
             <select
               id="cashout-bank"
               value={bankCode}
               onChange={(event) => setBankCode(event.target.value)}
-              className="w-full rounded-sm border border-border bg-card px-3 py-3 text-sm outline-none focus:border-primary"
+              className={`w-full rounded-sm border border-border bg-card px-3 py-3 text-sm outline-none focus:border-primary ${TAP_FEEDBACK_CLASS}`}
               required
             >
               <option value="">{PRODUCT_COPY.TEXT_009}</option>
@@ -295,7 +297,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-account"
-              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className={`mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground ${TAP_FEEDBACK_CLASS}`}
             >{PRODUCT_COPY.TEXT_010}</label>
             <input
               id="cashout-account"
@@ -304,7 +306,7 @@ export function CashoutRequestForm({
               autoComplete="off"
               value={accountNo}
               onChange={(event) => setAccountNo(event.target.value)}
-              className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
+              className={`w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary ${TAP_FEEDBACK_CLASS}`}
               placeholder={PRODUCT_COPY.TEXT_011}
               required
             />
@@ -313,7 +315,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-holder"
-              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className={`mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground ${TAP_FEEDBACK_CLASS}`}
             >{PRODUCT_COPY.TEXT_012}</label>
             <input
               id="cashout-holder"
@@ -322,7 +324,7 @@ export function CashoutRequestForm({
               maxLength={40}
               value={accountHolder}
               onChange={(event) => setAccountHolder(event.target.value)}
-              className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
+              className={`w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary ${TAP_FEEDBACK_CLASS}`}
               required
             />
             <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[var(--muted-color)]">{PRODUCT_COPY.TEXT_013}</p>
@@ -331,7 +333,7 @@ export function CashoutRequestForm({
           <div>
             <label
               htmlFor="cashout-phone"
-              className="mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground"
+              className={`mb-1.5 flex min-h-11 items-center text-[length:var(--text-meta-micro)]! font-bold text-foreground ${TAP_FEEDBACK_CLASS}`}
             >{PRODUCT_COPY.TEXT_014}</label>
             <input
               id="cashout-phone"
@@ -342,7 +344,7 @@ export function CashoutRequestForm({
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
               aria-required="true"
-              className="w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary"
+              className={`w-full rounded-sm border border-border px-3 py-3 text-sm outline-none focus:border-primary ${TAP_FEEDBACK_CLASS}`}
               placeholder="010-1234-5678"
               data-testid="cashout-phone"
             />
@@ -367,7 +369,7 @@ export function CashoutRequestForm({
               aria-hidden="true"
             />
             <p>{PRODUCT_COPY.TEXT_019}{" "}
-              <PrivacyPolicyLink className="inline-flex min-h-11 items-center font-semibold underline" />
+              <PrivacyPolicyLink className={`inline-flex min-h-11 items-center font-semibold underline ${TAP_FEEDBACK_CLASS}`} />
             </p>
           </div>
 
@@ -378,7 +380,7 @@ export function CashoutRequestForm({
           )}
           <button
             type="submit"
-            className="flex w-full items-center justify-center rounded-md bg-primary py-4 text-[15px] font-extrabold text-primary-foreground"
+            className={`flex w-full items-center justify-center rounded-md bg-primary py-4 text-[15px] font-extrabold text-primary-foreground ${TAP_FEEDBACK_CLASS}`}
             data-testid="cashout-confirm-button"
           >{PRODUCT_COPY.TEXT_021}</button>
         </form>

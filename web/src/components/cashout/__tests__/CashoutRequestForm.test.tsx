@@ -76,6 +76,18 @@ describe("CashoutRequestForm", () => {
     expect(container.innerHTML).not.toMatch(/text-\[(?:11\.5|12\.5)px\]/);
   });
 
+  it("F-7 신청 폼의 모든 탭 대상에 눌림 상태 토큰을 적용한다", () => {
+    const { container } = renderForm();
+    const tapTargets = container.querySelectorAll(
+      "form a[href], form button, form [role=button], form input:not([type=hidden]), form select, form textarea, form summary, form label[for]",
+    );
+
+    expect(tapTargets).toHaveLength(12);
+    for (const target of tapTargets) {
+      expect(target).toHaveClass("transition-opacity", "active:opacity-80");
+    }
+  });
+
   it("최종 확인 뒤 신청하고 서버 재검증 후에도 접수 성공 화면을 유지한다", async () => {
     const view = renderForm();
     // 기본 입력값은 환전 가능액 전체(40)다. 이 검증은 30개 기준 금액을 보므로 30을 넣는다.
