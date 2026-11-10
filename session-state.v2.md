@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-11 05:56 KST · W12 qa 독립 검증 5차(Claude qa-verifier) VERDICT FAIL
+
+- 무엇을 어디까지: staging 07a0075 직접 재확인. health 200, cheer-order staging·운영 503, 회귀 r3 45/0/0/0 원본 대조, a738543..07a0075 OAuth callback·middleware diff 0. F-8 해소(카카오 PASS, 토스는 결제 비활성 출고 조건 수용).
+- 남은 이슈·블로커: F-9 `/onboarding` 5폭 모두 13px 미만 7개(OnboardingGoalForm 11·12px, 신규 회원 전원 진입). 같은 패턴 리터럴 ShareLinkCard·MyLinkCard·WordmapShareIcons·CheerPaymentButton·PhoneConsentNotice·CashoutQueue. 승인 시 pipeline-state 에 kakao pending 제거·SEC-PAY-01 accepted_unverified 기록 필요. frontmatter 운영 버전 2.1.1 낡음(실제 2.1.2 9fa18ff). 승인 줄 안 씀.
+- 다음에 칠 명령: Goal 이 OnboardingGoalForm 외 리터럴을 13px 토큰으로 교체 → staging 배포 → 주요 경로(/onboarding·목표 있는 /me·/g/<slug>·/wordmap·/admin) 9폭 크기 실측 → 독립 검증 재호출.
+- 검증했나: 관찰됨. `.goal/verify-20261111-0547.md`, `.goal/runs/w12-independent-verify-20261111-07a0075/`. 임시 회원 잔존 0.
+
 ## 2026-11-10 04:05 KST · W12 qa 독립 검증(Claude qa-verifier) VERDICT FAIL
 
 - 무엇을 어디까지: staging f9d9b99 직접 재확인. health 일치, 시험 회원 cashout·status·history 3폭 9/9 200·넘침 0, 원문 0·마스킹, allowlist 밖 회원 화면·Server Action 거부(cashout_disabled), 중복 신청 거부, DB #734 암호문 확인. 디자인 추가 5요소는 08-30 core 판정 승계로 차단 아님.
