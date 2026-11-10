@@ -405,7 +405,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         </div>
 
         <div className="grid gap-2" aria-label="온보딩 진행 3단계" data-testid="onboarding-progress">
-          <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
+          <div className="flex items-center justify-between text-[length:var(--text-meta-micro)]! font-bold text-muted-foreground">
             <span>목표 작성</span><span>3 중 2</span>
           </div>
           <progress className="w-full" max="3" value="2">3 중 2</progress>
@@ -415,7 +415,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-title"
-            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
+            className="text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_006}</label>
           <div
             className="flex items-center rounded-[12px] px-4 py-3 gap-2 [background-color:var(--card)]!"
@@ -437,7 +437,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             />
           </div>
           {errors.title && (
-            <p className="text-[12px] [color:var(--destructive)]!" role="alert">
+            <p className="text-[length:var(--text-meta-micro)]! [color:var(--destructive)]!" role="alert">
               {errors.title}
             </p>
           )}
@@ -447,7 +447,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-reason"
-            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
+            className="text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_009}</label>
           <textarea
             id="goal-reason"
@@ -459,7 +459,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             maxLength={200}
             data-testid="goal-reason-input"
           />
-          <p className="text-right text-[11px] [color:var(--muted-color)]!">
+          <p className="text-right text-[length:var(--text-meta-micro)]! [color:var(--muted-color)]!">
             {values.reason.length}/200
           </p>
         </div>
@@ -468,7 +468,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-due-date"
-            className="text-[11px] font-bold tracking-wider uppercase [color:var(--muted-foreground)]!"
+            className="text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_008}</label>
           <input
             id="goal-due-date"
@@ -482,7 +482,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             data-testid="goal-due-date-input"
           />
           {errors.due_date && (
-            <p className="text-[12px] [color:var(--destructive)]!" role="alert">
+            <p className="text-[length:var(--text-meta-micro)]! [color:var(--destructive)]!" role="alert">
               {errors.due_date}
             </p>
           )}
@@ -561,7 +561,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         </button>
 
         {/* 안내 */}
-        <p className="text-center text-[12px] [color:var(--muted-color)]!">
+        <p className="text-center text-[length:var(--text-meta-micro)]! [color:var(--muted-color)]!">
           {user
             ? PRODUCT_COPY.TEXT_012
             : PRODUCT_COPY.TEXT_013}

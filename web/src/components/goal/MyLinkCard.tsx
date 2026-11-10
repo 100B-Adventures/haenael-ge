@@ -134,7 +134,7 @@ export function MyLinkCard({ slug, variant = "card" }: MyLinkCardProps) {
       </div>
       {copyFailed && (
         <p
-          className="mt-2 text-[11px] text-danger-ink"
+          className="mt-2 text-[length:var(--text-meta-micro)]! text-danger-ink"
           role="status"
           data-testid="my-link-copy-error"
         >{PRODUCT_COPY.TEXT_002}</p>

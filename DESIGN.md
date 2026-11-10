@@ -69,7 +69,7 @@ typography:
     fontWeight: 700
   body-description:
     fontFamily: Pretendard
-    fontSize: 12px
+    fontSize: 13px
     fontWeight: 400
     lineHeight: 1.625
   body:
@@ -79,11 +79,11 @@ typography:
     lineHeight: 1.5
   label-small:
     fontFamily: Pretendard
-    fontSize: 11.5px
+    fontSize: 13px
     fontWeight: 700
   meta-micro:
     fontFamily: Pretendard
-    fontSize: 10.5px
+    fontSize: 13px
     fontWeight: 400
   admin-title:
     fontFamily: Pretendard
@@ -325,7 +325,7 @@ motion:
 | body | 15 / 1.60 | 400 | -0.1 | 본문 | `[신설·미구현]` semantic class 없음 |
 | body-strong | 15 / 1.60 | 700 | -0.1 | 강조 본문·버튼 | `[신설·미구현]` 실제 주 CTA는 15/800, §3.8.2 |
 | caption | 13 / 1.50 | 400 | 0 | 메타·보조 | `[신설·미구현]` semantic class 없음 |
-| micro | 11.5 / 1.45 | 500 | 0.2 | 칩·라벨 | `[신설·미구현]` semantic class 없음 |
+| micro | 13 / 1.45 | 500 | 0.2 | 칩·라벨 | `--text-meta-micro` |
 
 한글 큰 제목은 letter-spacing 음수로 조인다. 줄바꿈은 의미 단위로(어절 끊김 금지).
 
@@ -334,7 +334,7 @@ motion:
 
 #### 3.8.2 Typography 역할 ↔ 코드
 
-> 2026-11-10 컨트롤러 (가) 판정: `standard-design.md` §17.3의 13px 미만 금지에 따라 `wordmark`와 `input-label`을 12.5px에서 13px로 승격했다. 예외는 두지 않는다.
+> 2026-11-10 컨트롤러 (가) 판정: `standard-design.md` §17.3의 13px 미만 금지에 따라 `wordmark`와 `input-label`을 12.5px에서 13px로 승격했다. 2026-11-11 F-9에서 같은 하한을 `body-description`·`label-small`·`meta-micro`와 앱 전역에 적용했다. 예외는 두지 않는다.
 
 | 역할 | 칠 값 또는 클래스 | 실제 값(코드 실측 파일:행) | 쓰는 곳 |
 |---|---|---|---|
@@ -347,10 +347,10 @@ motion:
 | 행 값 강조 | `block whitespace-nowrap` + inline size | 13px / 기본 `strong` 700 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:78-84,97-103] | 사용 가능·잠김 클로버 |
 | 주 CTA | `text-[15px] font-extrabold` | 15px / 800 [실측 `web/src/components/cashout/CashoutRequestForm.tsx`:317-323, `web/src/components/goal/GoalEditSheet.tsx`:310-315] | 환전 신청, 저장 |
 | 입력 라벨 | `--text-input-label` + `font-bold` | 13px / 700 [실측 `web/src/components/cashout/CashoutRequestForm.tsx`, `web/src/app/globals.css`] | 은행·계좌·예금주 라벨 |
-| 본문 설명 | `text-[12px] leading-relaxed` | 12px / 400 / 약 1.625 [실측 `web/src/app/(receiver)/cashout/status/page.tsx`:88-90] | 상태 이유, 다음 행동 |
+| 본문 설명 | `--text-body-description` + `leading-relaxed` | 13px / 400 / 약 1.625 [실측 `web/src/app/globals.css`] | 상태 이유, 다음 행동 |
 | 본문 링크 | `font-size: var(--text-body)` | 16px / 400 / 1.5 [실측 `web/src/app/globals.css`, `web/src/components/common/LegalFooter.tsx`] | 마이페이지 약관·개인정보처리방침 진입 |
-| 작은 라벨 | inline size·weight | 11.5px / 700 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:75-83,91-102] | 분할 잔액 양쪽 라벨 |
-| 마이크로 메타 | inline size | 10.5px / 400~600 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:34,42,49,85,105] | 등가 금액, 보조 메타 |
+| 작은 라벨 | `--text-label-small` + `font-bold` | 13px / 700 [실측 `web/src/app/globals.css`] | 분할 잔액 양쪽 라벨 |
+| 마이크로 메타 | `--text-meta-micro` | 13px / 400~600 [실측 `web/src/app/globals.css`] | 등가 금액, 보조 메타 |
 | 관리자 제목 | `text-3xl font-black tracking-[-0.04em]` | 30px / 900 / `-0.04em` [실측 `web/src/app/admin/page.tsx`:157-161] | 관리자 대시보드 H1 |
 
 ⛔ **타이포 이탈:** 코드에는 역할형 typography class가 없고 `text-[Npx]`, `fontSize`, `font-black`을 조합한다. §3.2의 `h1`, `body`, `caption`은 `[신설·미구현]` 역할명이다. 현재 화면을 맞출 때 위 실측 조합을 쓰되 새 조합을 늘리지 않는다.
@@ -497,7 +497,7 @@ motion:
 | **① 문서 셸** | `<html lang="ko">` + Pretendard 변수 + `bg-background` + Footer + Toaster(Sonner, `position="top-center"`, `richColors`) | ✅ 공유. `web/src/app/layout.tsx` |
 | **② 페이지 셸** | `<main className="min-h-svh">` + 배경 `#FBFAF7` + §3.7 좌우 여백 22px + 상하 여백 + 최대 폭 컨테이너 | ✅ `ReceiverPageShell` + `.receiver-page-frame` 공유 |
 | **③ 상단 바** | 좌 = "해낼게." 워드마크(닷 = `--clover-bright`, 13px/800), 우 = NotificationBadge + LogoutButton. 아래 여백 20px | ✅ `ReceiverTopBar`의 `home`·`detail` 변형 |
-| **④ 하단 회수 링크** | 하위 화면은 본문 끝에 "홈으로 돌아가기"(12px, `--muted`. D-029 로 --faint 에서 이관) 1개 | ✅ `BackHomeLink` 공유 |
+| **④ 하단 회수 링크** | 하위 화면은 본문 끝에 "홈으로 돌아가기"(13px, `--text-meta-micro`, `--muted`. D-029 로 --faint 에서 이관) 1개 | ✅ `BackHomeLink` 공유 |
 
 **규칙 (신규 화면은 이걸 상속한다).**
 - 받는사람 라인의 모든 화면은 ②를 그대로 상속하고 본문만 채운다. 배경색·좌우 여백·상하 여백을 화면에서 새로 정하지 않는다.
@@ -877,7 +877,7 @@ motion:
 | 크기 | 부모의 사용 가능 너비 100%, 고정 높이 없음. 내부 `SplitBalanceCard`는 block auto | §4 `SplitBalanceCard`, §3.8.3. [실측 `web/src/app/(receiver)/me/page.tsx`:298-317] |
 | 여백 | 카드 `p-4` = 16px. 분할 블록은 `mt-3` 12px, 행 사이 `mt-2` 8px | §3.8.3. [실측 `web/src/app/(receiver)/me/page.tsx`:299-302, `web/src/components/goal/SplitBalanceCard.tsx`:54-57,75-76] |
 | 모서리 | `rounded-[14px]` = 14px `md` | §3.4. [실측 `web/src/app/(receiver)/me/page.tsx`:299-302] |
-| 글꼴 | Pretendard. 총량 20px/800, 행 값 13px/700, 라벨 11.5px/700 | §3.2 + §3.8.2. [실측 `web/src/components/goal/SplitBalanceCard.tsx`:34-44,75-84,91-103] |
+| 글꼴 | Pretendard. 총량 20px/800, 행 값 13px/700, 라벨 13px/700 | §3.2 + §3.8.2. [실측 `web/src/components/goal/SplitBalanceCard.tsx`:34-44,75-84,91-103] |
 | 색 | 표면 `#FFFFFF`, 경계 `#E8E4DC`, 사용 가능 막대 `#1B8A4F`, 잠김 면 `#E8D3A6/#FBF1DD` | §3.8.1. [실측 `web/src/app/(receiver)/me/page.tsx`:299-302, `web/src/components/goal/SplitBalanceCard.tsx`:54-71] |
 | 텍스트색 | 총량·사용 가능 `#14613A`, 기본 라벨 `#16140F`, 잠김 `#8A5A12`, 설명 `#6F6A60` | §3.8.1. [실측 `web/src/components/goal/SplitBalanceCard.tsx`:36-44,75-83,91-113] |
 

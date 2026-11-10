@@ -34,7 +34,7 @@ function TokenGallery() {
           {colorTokens.map((token) => (
             <div key={token} className="overflow-hidden rounded-md border border-border bg-card">
               <div className="h-16" style={{ background: `var(${token})` }} />
-              <div className="p-3 text-xs"><strong>{token}</strong><p className="mt-1 text-muted-foreground">{values[token]}</p></div>
+              <div className="p-3 text-[length:var(--text-meta-micro)]"><strong>{token}</strong><p className="mt-1 text-muted-foreground">{values[token]}</p></div>
             </div>
           ))}
         </div>

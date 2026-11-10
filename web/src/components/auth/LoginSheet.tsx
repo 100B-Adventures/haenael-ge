@@ -205,7 +205,7 @@ export function LoginSheet({
                   // --faint
                 >
                   <div className="flex-1 h-px [background-color:var(--border)]!" />
-                  <span className="text-xs">{PRODUCT_COPY.TEXT_006}</span>
+                  <span className="text-[length:var(--text-meta-micro)]!">{PRODUCT_COPY.TEXT_006}</span>
                   <div className="flex-1 h-px [background-color:var(--border)]!" />
                 </div>
 
@@ -220,7 +220,7 @@ export function LoginSheet({
 
           {/* 약관 고지 */}
           <p
-            className="text-center text-xs leading-relaxed [color:var(--muted-color)]!"
+            className="text-center text-[length:var(--text-meta-micro)]! leading-relaxed [color:var(--muted-color)]!"
             // --faint
           >{PRODUCT_COPY.TEXT_007}{" "}
             <a

@@ -40,7 +40,7 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
           {goal.title}
           <span className="ml-1 font-normal text-muted-foreground">{PRODUCT_COPY.TEXT_001}</span>
         </p>
-        {goal.reason && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{goal.reason}</p>}
+        {goal.reason && <p className="mt-1 line-clamp-2 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">{goal.reason}</p>}
       </div>
 
       <div className="grid grid-cols-2 items-center gap-2">

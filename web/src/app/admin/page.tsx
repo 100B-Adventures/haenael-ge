@@ -369,7 +369,7 @@ export default async function AdminPage() {
                           <OpsAlertSummary alert={alert} />
                           <code
                             id={`admin-alert-details-${alert.id}`}
-                            className="mt-2 block min-w-0 break-all text-xs text-muted-foreground"
+                            className="mt-2 block min-w-0 break-all text-[length:var(--text-meta-micro)]! text-muted-foreground"
                           >
                             {JSON.stringify(alert.details)}
                           </code>

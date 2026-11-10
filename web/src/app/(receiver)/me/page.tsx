@@ -199,7 +199,7 @@ export default async function ReceiverHomePage({
           data-testid="clover-balance-card"
         >
           {balanceLoadFailed ? (
-            <p className="text-xs text-danger-ink" data-testid="clover-balance-error">{PRODUCT_COPY.TEXT_004}</p>
+            <p className="text-[length:var(--text-meta-micro)]! text-danger-ink" data-testid="clover-balance-error">{PRODUCT_COPY.TEXT_004}</p>
           ) : (
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -210,7 +210,7 @@ export default async function ReceiverHomePage({
                   pendingNetKrw={pendingCashout?.net_krw ?? null}
                 />
               </div>
-              <Link href="/me/achievements" className="shrink-0 text-xs font-extrabold text-accent-foreground">내 업적 보기 ›</Link>
+              <Link href="/me/achievements" className="shrink-0 text-[length:var(--text-meta-micro)]! font-extrabold text-accent-foreground">내 업적 보기 ›</Link>
             </div>
           )}
         </div>

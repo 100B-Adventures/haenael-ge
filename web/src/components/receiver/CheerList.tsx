@@ -38,7 +38,7 @@ function CheerItem({
       data-testid="cheer-item"
     >
       <div
-        className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+        className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[length:var(--text-meta-micro)]! font-semibold ${
           cheer.is_anonymous || !cheer.display_name
             ? "bg-muted text-[var(--muted-color)]"
             : "bg-accent text-accent-foreground"

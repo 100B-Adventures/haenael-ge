@@ -234,7 +234,7 @@ export function WordmapShareIcons({
           <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center [background-color:var(--primary)]!">
             {loading === "image" ? <SpinnerIcon /> : <DownloadIcon />}
           </div>
-          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_001}</span>
+          <span className="text-[length:var(--text-meta-micro)]! font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_001}</span>
         </button>
 
         {/* 인스타 공유 */}
@@ -249,7 +249,7 @@ export function WordmapShareIcons({
           <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center border [background-color:var(--card)]! [border-color:var(--border)]!">
             {loading === "instagram" ? <SpinnerIcon dark /> : <InstagramIcon />}
           </div>
-          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</span>
+          <span className="text-[length:var(--text-meta-micro)]! font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_002}</span>
         </button>
 
         {/* 링크 복사 */}
@@ -263,7 +263,7 @@ export function WordmapShareIcons({
           <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center border [background-color:var(--card)]! [border-color:var(--border)]!">
             <LinkIcon />
           </div>
-          <span className="text-[10.5px] font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_003}</span>
+          <span className="text-[length:var(--text-meta-micro)]! font-semibold [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_003}</span>
         </button>
       </div>
 
@@ -275,10 +275,10 @@ export function WordmapShareIcons({
           aria-live="polite"
           data-testid="share-toast"
         >
-          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold [background-color:var(--clover-bright)]!">
+          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[length:var(--text-meta-micro)]! font-bold [background-color:var(--clover-bright)]!">
             ✓
           </div>
-          <span className="text-[12px] leading-snug">{toast}</span>
+          <span className="text-[length:var(--text-meta-micro)]! leading-snug">{toast}</span>
         </div>
       )}
     </div>

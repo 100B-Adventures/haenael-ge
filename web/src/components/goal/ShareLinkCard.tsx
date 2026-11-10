@@ -99,7 +99,7 @@ export function ShareLinkCard({ slug, goalTitle }: ShareLinkCardProps) {
         className="rounded-[12px] p-4 mb-5 [background-color:var(--muted)]!"
         // --warm
       >
-        <p className="text-[12px] leading-relaxed [color:var(--muted-foreground)]!">
+        <p className="text-[length:var(--text-body-description)]! leading-relaxed [color:var(--muted-foreground)]!">
           <strong className="[color:var(--foreground)]!">{PRODUCT_COPY.TEXT_007}</strong>
           <br />{PRODUCT_COPY.TEXT_008}<br />{PRODUCT_COPY.TEXT_009}</p>
       </div>

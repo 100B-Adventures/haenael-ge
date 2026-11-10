@@ -366,7 +366,7 @@ export function CheerPaymentButton({
           <div className="w-full max-w-[430px] rounded-[22px] p-5 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[12px] font-extrabold [color:var(--accent-foreground)]!">{PRODUCT_COPY.TEXT_003}</p>
+                <p className="text-[length:var(--text-meta-micro)]! font-extrabold [color:var(--accent-foreground)]!">{PRODUCT_COPY.TEXT_003}</p>
                 <h2 className="mt-1 text-[19px] font-black [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_004}</h2>
               </div>
               <button
@@ -404,7 +404,7 @@ export function CheerPaymentButton({
                       <Clover aria-hidden="true" size={16} strokeWidth={2.5} />
                       {value}{PRODUCT_COPY.TEXT_006}</span>
                     <span
-                      className="text-[11px] font-semibold"
+                      className="text-[length:var(--text-meta-micro)]! font-semibold"
                       style={{
                         color: selected
                           ? "var(--accent-foreground)"

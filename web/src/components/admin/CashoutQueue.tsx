@@ -134,7 +134,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
   function processingControls(cashout: AdminCashout) {
     if (cashout.status !== "REQUESTED") {
       return (
-        <p className="text-xs leading-5 text-muted-foreground">
+        <p className="text-[length:var(--text-meta-micro)]! leading-5 text-muted-foreground">
           {cashout.processing_note || PRODUCT_COPY.TEXT_001}
         </p>
       );
@@ -146,19 +146,19 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
             type="button"
             onClick={() => openModal(cashout, "paid")}
             disabled={pending}
-            className="flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
+            className="flex-1 rounded-lg bg-primary px-3 py-2 text-[length:var(--text-meta-micro)]! font-bold text-primary-foreground disabled:opacity-50"
           >{PRODUCT_COPY.TEXT_002}</button>
           <button
             type="button"
             onClick={() => openModal(cashout, "rejected")}
             disabled={pending}
-            className="flex-1 rounded-lg bg-danger-soft px-3 py-2 text-xs font-bold text-danger-ink disabled:opacity-50"
+            className="flex-1 rounded-lg bg-danger-soft px-3 py-2 text-[length:var(--text-meta-micro)]! font-bold text-danger-ink disabled:opacity-50"
           >{PRODUCT_COPY.TEXT_003}</button>
         </div>
         {errors[cashout.id] && (
           <p
             role="alert"
-            className="mt-2 text-xs font-semibold text-destructive"
+            className="mt-2 text-[length:var(--text-meta-micro)]! font-semibold text-destructive"
           >
             {errors[cashout.id]}
           </p>
@@ -285,13 +285,13 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
               <div className="mt-4">
                 {/* 정본 = 프로토 v3.7 관리자 반려 확인 모달. A안에서 반려는 잠금 해제일 뿐이다. */}
                 <p
-                  className="rounded-sm bg-danger-soft p-3 text-[11.5px] leading-relaxed text-danger-ink"
+                  className="rounded-sm bg-danger-soft p-3 text-[length:var(--text-meta-micro)]! leading-relaxed text-danger-ink"
                   data-testid="cashout-reject-warning"
                 >{PRODUCT_COPY.TEXT_021}{modal.cashout.clover_amount}{PRODUCT_COPY.TEXT_022}{" "}
                   <strong>{PRODUCT_COPY.TEXT_023}</strong>{PRODUCT_COPY.TEXT_024}</p>
                 <label
                   htmlFor="cashout-reject-note"
-                  className="mt-3 block text-[11.5px] font-bold text-muted-foreground"
+                  className="mt-3 block text-[length:var(--text-input-label)]! font-bold text-muted-foreground"
                 >{PRODUCT_COPY.TEXT_025}<span className="text-danger-ink">{PRODUCT_COPY.TEXT_026}</span>
                 </label>
                 <textarea
@@ -312,7 +312,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
             {errors[modal.cashout.id] && (
               <p
                 role="alert"
-                className="mt-2 text-xs font-semibold text-destructive"
+                className="mt-2 text-[length:var(--text-meta-micro)]! font-semibold text-destructive"
               >
                 {errors[modal.cashout.id]}
               </p>

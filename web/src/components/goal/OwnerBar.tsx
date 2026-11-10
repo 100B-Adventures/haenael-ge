@@ -37,8 +37,8 @@ export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
       className="rounded-[11px] px-3 py-2.5 mb-3 flex items-center justify-between [background-color:var(--muted)]! [border:1px_solid_var(--border)]!"
       data-testid="owner-bar"
     >
-      <p className="[font-size:10.5px]! [color:#7a7363]! [line-height:1.4]!">
-        <b className="[color:var(--accent-foreground)]! [font-size:11px]!">{PRODUCT_COPY.TEXT_001}</b>
+      <p className="[font-size:var(--text-meta-micro)]! text-muted-foreground [line-height:1.4]!">
+        <b className="[color:var(--accent-foreground)]! [font-size:var(--text-meta-micro)]!">{PRODUCT_COPY.TEXT_001}</b>
         {" · "}
         <span data-testid="owner-bar-status">
           {newCount === null
@@ -50,7 +50,7 @@ export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
       </p>
       <Link
         href="/me"
-        className="text-white font-bold rounded-[8px] text-center [font-size:10.5px]! [background-color:var(--primary)]! p-[6px_10px]! [flex:0_0_auto]!"
+        className="text-white font-bold rounded-[8px] text-center [font-size:var(--text-meta-micro)]! [background-color:var(--primary)]! p-[6px_10px]! [flex:0_0_auto]!"
         data-testid="owner-bar-cta"
       >{PRODUCT_COPY.TEXT_004}</Link>
     </div>

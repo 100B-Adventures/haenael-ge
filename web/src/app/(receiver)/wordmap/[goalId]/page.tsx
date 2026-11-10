@@ -104,13 +104,13 @@ export default async function WordmapFullViewPage({ params }: Props) {
           </div>
 
           {/* 워터마크 */}
-          <p className="text-right font-extrabold mt-2 [font-size:10px]! [color:var(--accent-foreground)]! [opacity:0.8]!">{PRODUCT_COPY.TEXT_003}</p>
+          <p className="text-right font-extrabold mt-2 [font-size:var(--text-meta-micro)]! [color:var(--accent-foreground)]! [opacity:0.8]!">{PRODUCT_COPY.TEXT_003}</p>
         </div>
       </div>
 
       {/* 공유 아이콘 바 */}
       <div className="pb-[max(28px,env(safe-area-inset-bottom,28px))] pb-[max(28px,_env(safe-area-inset-bottom,_28px))]!">
-        <h2 className="mb-2 text-xs font-bold text-muted-foreground">워드맵 내보내기</h2>
+        <h2 className="mb-2 text-[length:var(--text-meta-micro)]! font-bold text-muted-foreground">워드맵 내보내기</h2>
         <WordmapShareIcons
           goalId={goalIdNum}
           goalSlug={goal.slug}
