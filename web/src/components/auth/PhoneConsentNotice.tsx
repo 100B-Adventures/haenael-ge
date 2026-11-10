@@ -68,7 +68,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
       <p className="text-[13.5px] font-extrabold text-[var(--accent-foreground)]">
         {title}
       </p>
-      <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-accent-foreground">
+      <p className="mt-1 text-balance text-[length:var(--text-meta-micro)]! leading-relaxed text-accent-foreground">
         {description}
       </p>
       <Link
