@@ -2,18 +2,18 @@
 
 | 표지 | 값 |
 |---|---|
-| 현재 보고 버전 | v2.1.23 (2026-11-11, F-8 최종 builder 증거 정합) |
-| 현재 상태 | **source `07a0075` builder 증거 충족, 독립 qa 재승인 대기.** 회귀 45/45, 환전 3경로 27폭 위반 0, staging·운영 결제 HTTP 503. SEC-EXT-01은 실제 callback 증거로 PASS, 오늘 재실행은 카카오 세션 만료 환경 미완. SEC-PAY-01 성공 callback은 `accepted_unverified` |
-| 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-7 수정·증거 정합: code-builder / GPT-5 Codex |
+| 현재 보고 버전 | v2.1.24 (2026-11-11, F-9 13px·터치 높이 해소 증거 정합) |
+| 현재 상태 | **source `ad7dce4` F-9 builder 수정·직접 실측 충족, 독립 qa 재승인 대기.** `web/src` 13px 미만 리터럴 0, Vitest 553/553, 디자인 토큰 신규 위반 0, 6경로×9폭 54/54 위반 0, 고아 줄바꿈 계약 1/1 PASS. 허용된 전체 회귀 2회는 각각 환경성 `ERR_NETWORK_CHANGED` 1건과 `/me` 고아 줄바꿈 1건 때문에 44/45였고, 후자는 `ad7dce4`에서 보정 후 표적 계약으로 해소했다. 최종 SHA 전체 45건은 반복 상한에 따라 재실행하지 않았다 |
+| 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-9 수정·증거 정합: code-builder / GPT-5 Codex |
 | 라인·단계 | `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
-| 제품 source | `07a0075018dfc95eacb192d6bda66154842f8a26` |
-| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_Fsrr1nZ5gtzwKsQLV5Kwqc2kbsEx`, health `version=2.1.2`, `sourceSha=07a0075018dfc95eacb192d6bda66154842f8a26`(`.goal/runs/w12-f8-07a0075/{deploy.json,health.json}`) |
+| 제품 source | `ad7dce4376cd77d5e840cd3192e138d4bed7a7e1` |
+| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_GpnfRuCiGHxY4CjsbZmBLxMVguZq`, immutable URL `https://haenael-5i2078y7q-100-b.vercel.app`, health `version=2.1.2`, `sourceSha=ad7dce4376cd77d5e840cd3192e138d4bed7a7e1`(`.goal/runs/w12-f9-ad7dce4/{deploy.json,health-alias.json,health-immutable.json}`) |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
-| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.22 |
+| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.23 |
 
 ## 목차 <a id="t-toc"></a>
 
-**현재 보고 (최종 source `07a0075` F-8 builder 증거 · 독립 qa 재승인 대기)**
+**현재 보고 (최종 source `ad7dce4` F-9 builder 증거 · 독립 qa 재승인 대기)**
 1. [요약](#t-summary)
 2. [목적·범위·참고 기준](#t-scope)
 3. [수용 조건과 결과](#t-results)
@@ -27,19 +27,21 @@
 
 ## 1. 요약 <a id="t-summary"></a>
 
-- **최종 source 및 staging**: `07a0075`. 격리 staging health가 `version=2.1.2`, `sourceSha=07a0075018dfc95eacb192d6bda66154842f8a26`로 일치한다. 근거 `.goal/runs/w12-f8-07a0075/{deploy.json,health.json}`.
-- **최종 source 전체 회귀**: source `07a0075` exact staging의 유효 실행 r3에서 45건을 retries 0으로 단일 실행해 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0, 492.6초를 기록했다. 종료 후 결제 API HTTP 503과 fixture 잔존 0을 확인했다. r1·r2의 `ERR_NETWORK_CHANGED`·단일 timeout은 제품·시험 코드 변경 없이 재실행해 해소된 환경 결함이다. 근거 `.goal/runs/w12-regression-07a0075-r3/{report.json,playwright.exit,run.exit,payment-restore.http,execution.log}`.
+- **최종 source 및 staging**: `ad7dce4`. 격리 staging 별칭과 immutable URL의 health가 `version=2.1.2`, `sourceSha=ad7dce4376cd77d5e840cd3192e138d4bed7a7e1`로 일치한다. 근거 `.goal/runs/w12-f9-ad7dce4/{deploy.json,alias.log,health-alias.json,health-immutable.json}`.
+- **F-9 정적·단위 검증**: `web/src` 전수 검색에서 13px 미만 글자 리터럴 0, 디자인 토큰 검사 303파일·기존 40·신규 0, Vitest `92 files / 553 tests` 전부 PASS다. 마이페이지 응원 탭은 `--tap-min-size` 44px에 spacing 토큰 2px를 더해 최소 46px로 고정했다. 근거 `/tmp/haenael-f9-{design-token,vitest}-final5.log`, commits `6bed685`, `a95cd5a`, `dbc8dca`, `b772642`, `ad7dce4`.
+- **전체 회귀와 후속 해소**: source `b772642`에서 허용된 전체 회귀를 2회 실행했다. 1차는 `44 expected / 1 unexpected`이며 유일한 실패는 `PW-02`에 수집된 `ERR_NETWORK_CHANGED`였다. 허용된 재실행은 `44 expected / 1 unexpected`이며 `/me` 전화번호 동의 안내의 14px 고아 줄바꿈을 발견했다. source `ad7dce4`에서 균형 줄바꿈으로 보정하고 최종 staging의 `QA-TC-SP-04`를 표적 재실행해 `1 expected / 0 unexpected`, fixture 잔존 0을 확인했다. 두 전체 회귀 모두 종료 후 결제 API HTTP 503과 fixture 잔존 0이었다. 반복 상한에 따라 최종 SHA 전체 45건은 재실행하지 않았다. 근거 `.goal/runs/w12-regression-b772642{,-r2}/`, `.goal/runs/w12-f9-sp04-ad7dce4/`.
+- **최종 source 6경로 9폭**: `/onboarding`, `/me`, `/friends`, `/my`, `/g/<slug>`, `/cashout`을 360·390·412·600·700·780·820·900·1000px에서 측정했다. 54/54 모두 13px 미만 글자 0, 44px 미만 누름 0, 눌림 상태 커버 90% 이상, 가로 넘침 0, 콘솔 오류 0이며 시험 회원·목표·잔액·Auth 사용자의 잔존은 0이다. Auth 정리는 `auth.admin.deleteUser`를 사용했다. 근거 `.goal/runs/w12-f9-ergonomics-ad7dce4/{observations.json,run.log,*.png}`.
 - **환전 3경로 4축 관찰**: `/cashout`, `/cashout/status`, `/cashout/history`를 각각 360·390·412·600·700·780·820·900·1000px에서 측정했다. 27/27 모두 13px 미만 글자 0, 본문 토큰 16px, 44px 미만 누름 0, 눌림 상태 100%, 가로 넘침 0, 콘솔 오류 0이다. 근거 `.goal/runs/w12-ergonomics-07a0075/{observations.json,measure.log,*.png}`.
 - **fixture 정리**: 실측에 만든 폼 회원과 상태 회원, 환전 신청, ledger의 잔존은 각각 0이다. 정리는 `auth.admin.deleteUser` 경로를 사용했다. 근거 `.goal/runs/w12-ergonomics-07a0075/observations.json`의 `cleanup.remaining`.
 - **현재 디자인 분모**: 기존 독립 판정 `26 일치 / 0 불일치 / 0 미확인`을 승계한다. `cashout`은 **일치(구조·순서. 추가 5요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)**이며 픽셀 동일 판정이 아니다. 이번 턴에 시안 `cashout.png`와 최종 `allowed-form-390.png`를 직접 대조해 핵심 순서 유지와 추가 요소를 함께 기록했다. 내역 날짜 KST 표시는 `58316d8`에서 수정되고 경계 시각 단위 시험이 추가됐다.
-- **qa 단계**: F-8 builder 재검증 증거를 정합했으며 독립 qa 승인 줄은 작성하지 않았다.
+- **qa 단계**: F-9 builder 수정·실측 증거를 정합했으며 독립 qa 승인 줄은 작성하지 않았다.
 - **SEC-EXT-01 카카오 로그인 callback**: **PASS.** 루트 저장소 `.goal/feature-list.json`의 `G4-AUTH-01`에 2026-11-07 13:47 KST source `a738543` staging에서 실제 카카오 동의 뒤 `/my` 도달과 `auth.users` Kakao 행 `last_sign_in_at` 갱신 관찰이 기록돼 있다. `git diff --stat a738543..07a0075 -- web/src/app/auth web/src/lib/auth web/src/proxy.ts supabase/functions/auth-kakao`는 출력 0줄이다. 오늘 `.goal/runs/w12-f8-07a0075/kakao-probe.log` 재실행은 9342 크롬의 카카오 세션 만료로 `interactive_login_required`, `callbackObserved=false`, `productSessionPresent=false`였으므로 환경 미완으로 기록하고 기존 PASS를 뒤집지 않는다.
 - **SEC-PAY-01 결제 callback**: `.goal/runs/w12-f8-8cb7b41/toss-success.log`의 `TOSS_CARD_EXTERNAL_AUTH`에서 토스 테스트 키도 카드사 본인인증을 요구함을 관찰했다. 성공 callback은 `accepted_unverified`, 취소·금액 변조는 PASS다. source `07a0075`에서 staging·운영 `cheer-order`가 각각 HTTP 503 `payments_disabled`임을 직접 확인했다. 근거 `.goal/runs/w12-f8-07a0075/{staging-cheer-order.http,staging-cheer-order.json,production-cheer-order.http,production-cheer-order.json}`.
 
 ## 2. 목적·범위·참고 기준 <a id="t-scope"></a>
 
-- **목적**: W-12 환전 신청(D-053)의 F-7 해소 source `8cb7b41` builder 증거를 기능 해피·엣지, 디자인 QA, 실제 신청 폼 모바일 ergonomics 4축 기준으로 집약한다.
-- **범위 안(현재)**: 시험 키 4종이 주입된 격리 staging, 허용 회원 신청·중복·허용 밖 거부, DB `REQUESTED`·마스킹·원문 부재·`CASHOUT_HOLD`, 최종 source 전체 회귀 45건, 계좌 입력 신청 폼과 `REQUESTED` 상태·내역 화면 27폭 ergonomics, 결제 플래그 원복, fixture 정리.
+- **목적**: W-12 F-9 해소 source `ad7dce4`의 앱 전역 13px 최소 글자, 44px 누름, 눌림 상태, 가로 넘침, 고아 줄바꿈 증거를 집약한다.
+- **범위 안(현재)**: 격리 staging, `web/src` 13px 미만 리터럴, Vitest·디자인 토큰 검사, 6경로×9폭 실측, 고아 줄바꿈 표적 계약, 허용된 전체 회귀 2회, 결제 플래그 원복, fixture 정리.
 - **범위 안(과거 근거, 16e483d)**: 회귀 45건, 결제 성공·성장 2화면 3폭 직접 대조, 나머지 23화면 증거 재사용 판정. 당시 D-052 로 cashout 제외.
 - **범위 밖**: 실제 Toss 승인 호출, 운영, 비 Chromium, 성능·부하·보안(회장 미지정).
 - **참고한 보고서 구성(2026-11-09 조회)**: [GitLab 단위 시험 보고서](https://docs.gitlab.com/ci/testing/unit_test_reports/) 의 "요약 건수 먼저, 실패 건은 상세·첨부로 연결, 기준 대비 새 실패·해소 구분" 을 차용해 §1 건수 우선과 §8 이력의 614c949(44/45) 대비 해소 기록을 둔다. [Playwright 보고자](https://playwright.dev/docs/test-reporters) 의 "실행 하나 = JSON 객체 하나, 첨부는 별도 디렉터리" 구조를 차용해 §5 경로 root 표를 둔다. JUnit 첨부 태그·HTML 보고서는 채택하지 않았다(이 대장은 경로 표로 충분).
@@ -57,6 +59,7 @@
 | F-6 | 최종 source 허용 회원 신청·폼 상태 | 시험 키 4종을 넣은 격리 staging에서 허용 회원 신청 성공·중복 차단·허용 밖 거부·신청 폼 9폭 실측 | **builder 해소.** `73d08c7`을 시험 키와 재배포해 실제 폼에서 44px 미만 누름 6개를 발견했고, `e5b65f1`에서 수정 후 최종 staging 재관찰했다. 신청 1건 `REQUESTED`, 마스킹·원문 0·`CASHOUT_HOLD` 1, 중복·허용 밖 거부, 폼 9폭 3축 위반 0, fixture 잔존 0 | `.goal/verify-20261110-1147.md` 후속, `.goal/runs/w12-f6-deploy-{73d08c7,e5b65f1}/`, `.goal/runs/w12-f6-verify-e5b65f1/` |
 | F-1 재검증 | 최종 source 전체 회귀·상태 화면 크기 | source `e5b65f1` staging에서 45건 전체 회귀와 `/cashout/status`·`/cashout/history` 9폭을 새로 실행 | **builder 해소, 독립 qa 재승인 대기.** 회귀 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0. `REQUESTED detail`·`REQUESTED history row` 상태 18/18에서 3축 위반 0, 390px 캡처 저장, 결제 플래그 원복과 fixture 정리 확인 | `.goal/runs/w12-regression-e5b65f1/`, `.goal/runs/w12-state-ergonomics-e5b65f1/` |
 | F-7 | 신청 폼 눌림 상태 | 측정기와 같은 탭 대상 선택자에서 9폭 `active_ratio >= 90%`, 나머지 3축 위반 0, 폭별 캡처 | **builder 해소.** 폼 9폭과 실제 데이터 상태·내역 18폭 모두 `active_ratio=100%`, 글자·탭 크기·넘침 위반 0, 본문 토큰 16px, 캡처 27장, fixture 잔존 0 | `.goal/verify-20261110-1252.md`, `.goal/runs/w12-ergonomics-8cb7b41/{observations.json,measure.log,*.png}` |
+| F-9 | 앱 전역 13px 최소 글자·44px 누름·고아 줄바꿈 | `web/src` 13px 미만 리터럴 0, Vitest·디자인 토큰 검사 PASS, 6경로×9폭 글자·누름·눌림·넘침 위반 0 | **builder 해소, 독립 qa 재승인 대기.** 최종 source `ad7dce4` 54/54 위반 0, `QA-TC-SP-04` 1/1 PASS, fixture 잔존 0. 전체 회귀는 `b772642`에서 2회 44/45였고 최종 고아 줄바꿈 보정 뒤 전체 45건은 반복 상한으로 미실행 | `.goal/verify-20261111-0547.md`, `.goal/runs/w12-f9-ad7dce4/`, `.goal/runs/w12-f9-ergonomics-ad7dce4/`, `.goal/runs/w12-f9-sp04-ad7dce4/`, `.goal/runs/w12-regression-b772642{,-r2}/` |
 
 ## 4. 추적성 <a id="t-trace"></a>
 
@@ -102,11 +105,13 @@ flowchart LR
 | O-4 | v2.1.14 에서 요청 번호 열과 요청→요약→시험 원본 3층 추적표를 [§4](#t-trace) 에 두었다. 단 qa-verifier 규격의 `docs/qa/testcases.md` TC 정본 파일은 아직 없다(시험 ID 는 회귀 `summary.json` 이 원본) | 다음 회차 이관 |
 | O-5 | 이력 19:33 절 등 띄어쓰기 결손은 원문 보존 원칙으로 고치지 않고 [보관본](archive/v2-qa-tracker-history-v1.0.0-claude-opus-20261109-2008.md) 으로 옮겼다. 같은 사실은 §1·§3·§4 에 다시 적었다 | 기록만 |
 | O-6 | 표현 편차 **후보**(판정 아님): 1024 pair 에서 `paysuccess` 세로 정렬(시안 상단, staging 중앙)과 `dopamine` CTA 아래 안내 박스 미표시. 첫 독립 판정 VERDICT PASS 는 그대로이며 이 후보로 PASS 를 뒤집거나 일치로 바꿔 세지 않는다. 새 화면 수정 없음. 상세 [매트릭스 O-6](design-conformance-matrix.md#open) | 컨트롤러 재판정 |
+| O-7 | 최종 source `ad7dce4`는 6경로×9폭과 고아 줄바꿈 표적 계약을 통과했으나, 전체 45건은 source `b772642`에서 허용된 2회까지만 실행했다. 최종 SHA 전체 회귀는 독립 qa가 수행할 항목으로 남긴다 | 컨트롤러: 독립 qa 재검증 |
 
 ## 7. 개정 이력 <a id="t-revisions"></a>
 
 | 버전 | 시각(KST) | 변경 |
 |---|---|---|
+| v2.1.24 | 2026-11-11 | F-9 최종 source `ad7dce4` staging health 일치, 13px 미만 리터럴 0, Vitest 553/553, 디자인 토큰 신규 0, 6경로×9폭 54/54 위반 0, 고아 줄바꿈 계약 1/1 PASS를 연결. 전체 회귀 2회 44/45와 최종 SHA 전체 회귀 미실행을 숨기지 않고 O-7에 기록. 독립 qa 승인 줄 미작성 |
 | v2.1.23 | 2026-11-11 | source `07a0075` staging health 일치, 회귀 r3 45/45, 환전 3경로 27폭 위반 0, staging·운영 결제 503을 표지·§1에 연결. SEC-EXT-01은 2026-11-07 실제 callback·제품 세션과 이후 인증 경로 diff 0으로 PASS, 오늘 재실행은 카카오 세션 만료 환경 미완으로 분리. 독립 qa 승인 줄 미작성 |
 | v2.1.22 | 2026-11-11 | F-8 SEC-PAY-01 성공 callback을 외부 카드 본인인증 제약의 `accepted_unverified`로 기록. 취소·금액 변조 PASS와 staging·운영 결제 비활성 503 출시 조건을 고정. 최종 source 증거는 배포 뒤 갱신 예정 |
 | v2.1.21 | 2026-11-10 | F-7 눌림 상태를 최종 source `8cb7b41`에서 해소. 시험 키 포함 staging health SHA 일치, 전체 회귀 45/45, 신청 폼·상태·내역 27폭의 글자·본문 토큰·탭 크기·눌림 상태·넘침을 재측정해 위반 0과 눌림 100%, 폭별 캡처 27장, fixture 잔존 0을 연결. 독립 qa 승인 줄 미작성 |
