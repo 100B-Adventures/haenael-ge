@@ -2,8 +2,8 @@
 
 | 표지 | 값 |
 |---|---|
-| 현재 보고 버전 | v2.1.21 (2026-11-10, F-7 눌림 상태와 최종 source 전수 재검증) |
-| 현재 상태 | **F-7 builder 해소, 독립 qa 재승인 대기.** 최종 staging source `8cb7b41`, 전체 회귀 `45/45`, 신청 폼·상태·내역 27폭에서 4축 위반 0, 눌림 상태 커버 100%. 디자인 분모 `26 일치 / 0 불일치 / 0 미확인` |
+| 현재 보고 버전 | v2.1.22 (2026-11-11, F-8 외부 인증 제약 수용과 13px 최소선 반영 착수) |
+| 현재 상태 | **F-8 SEC-PAY-01 성공 callback `accepted_unverified`, 독립 qa 재승인 대기.** 토스 취소·금액 변조 PASS. 2.1.0 출시는 staging·운영 `PAYMENTS_ENABLED=false`와 `cheer-order` HTTP 503 조건이다. 최종 staging source·회귀·9폭은 이번 source 배포 뒤 갱신한다. |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-7 수정·증거 정합: code-builder / GPT-5 Codex |
 | 라인·단계 | `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
 | 제품 source | `8cb7b4101aa4c4eec5cab26a3aff9d782d7034d6` |
@@ -33,6 +33,7 @@
 - **fixture 정리**: 실측에 만든 폼 회원과 상태 회원, 환전 신청, ledger의 잔존은 각각 0이다. 근거 `.goal/runs/w12-ergonomics-8cb7b41/observations.json`의 `cleanup.remaining`.
 - **현재 디자인 분모**: 기존 독립 판정 `26 일치 / 0 불일치 / 0 미확인`을 승계한다. `cashout`은 **일치(구조·순서. 추가 5요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)**이며 픽셀 동일 판정이 아니다. 이번 턴에 시안 `cashout.png`와 최종 `allowed-form-390.png`를 직접 대조해 핵심 순서 유지와 추가 요소를 함께 기록했다. 내역 날짜 KST 표시는 `58316d8`에서 수정되고 경계 시각 단위 시험이 추가됐다.
 - **qa 단계**: F-7 builder 재검증 증거를 정합했으며 독립 qa 승인 줄은 작성하지 않았다.
+- **F-8 외부 인증 경계**: `.goal/runs/w12-f8-8cb7b41/toss-success.log`의 `TOSS_CARD_EXTERNAL_AUTH`에서 토스 테스트 키도 카드사 본인인증을 요구함을 관찰했다. 성공 callback은 `accepted_unverified`, 취소·금액 변조는 `.goal/runs/w12-f8-8cb7b41/toss-cancel.log` 1/1 PASS다. 결제는 staging·운영 모두 비활성 상태로 출시한다.
 
 ## 2. 목적·범위·참고 기준 <a id="t-scope"></a>
 
@@ -105,6 +106,7 @@ flowchart LR
 
 | 버전 | 시각(KST) | 변경 |
 |---|---|---|
+| v2.1.22 | 2026-11-11 | F-8 SEC-PAY-01 성공 callback을 외부 카드 본인인증 제약의 `accepted_unverified`로 기록. 취소·금액 변조 PASS와 staging·운영 결제 비활성 503 출시 조건을 고정. 최종 source 증거는 배포 뒤 갱신 예정 |
 | v2.1.21 | 2026-11-10 | F-7 눌림 상태를 최종 source `8cb7b41`에서 해소. 시험 키 포함 staging health SHA 일치, 전체 회귀 45/45, 신청 폼·상태·내역 27폭의 글자·본문 토큰·탭 크기·눌림 상태·넘침을 재측정해 위반 0과 눌림 100%, 폭별 캡처 27장, fixture 잔존 0을 연결. 독립 qa 승인 줄 미작성 |
 | v2.1.19 | 2026-11-10 | 최종 source `e5b65f1` exact staging 전체 회귀 45/45, 결제 플래그 HTTP 503 원복, `/cashout/status`·`/cashout/history` `REQUESTED` 화면 18/18 3축 위반 0, 390px 캡처와 fixture 정리 증거를 표지·§1~§6·mermaid에 연결. 독립 qa 승인 줄 미작성 |
 | v2.1.18 | 2026-11-10 | cashout 승인 시안과 최종 staging 390px 폼을 직접 대조. 기존 구조·순서 특수 판정은 승계하되 픽셀 동일하지 않음과 추가 요소를 명시 |

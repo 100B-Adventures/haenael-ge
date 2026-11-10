@@ -16,7 +16,7 @@ export default function WordmapNotFound() {
       className="min-h-svh flex flex-col items-center justify-center px-[22px] text-center [background-color:var(--background)]!"
       data-testid="wordmap-not-found"
     >
-      <p className="font-extrabold mb-6 [font-size:12.5px]! [color:var(--clover-bright)]!">{PRODUCT_COPY.TEXT_001}</p>
+      <p className="font-extrabold mb-6 [font-size:var(--text-wordmark)]! [color:var(--clover-bright)]!">{PRODUCT_COPY.TEXT_001}</p>
 
       <p className="font-black mb-2 [font-size:24px]! [letter-spacing:-0.5px]! [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_002}</p>
       <p className="text-[14px] leading-relaxed mb-8 [color:var(--muted-foreground)]!">{PRODUCT_COPY.TEXT_003}<br />{PRODUCT_COPY.TEXT_004}</p>

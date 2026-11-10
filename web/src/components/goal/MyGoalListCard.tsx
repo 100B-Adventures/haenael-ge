@@ -46,7 +46,7 @@ export function MyGoalListCard({ goal }: { goal: MyGoalListCardData }) {
       <div className="grid grid-cols-2 items-center gap-2">
         <Link
           href={`/me/goal/${goal.id}`}
-          className="flex min-h-11 items-center justify-center rounded-sm border border-primary px-3 text-[12.5px] font-bold text-accent-foreground"
+          className="flex min-h-11 items-center justify-center rounded-sm border border-primary px-3 text-[length:var(--text-input-label)]! font-bold text-accent-foreground"
           data-testid="my-goal-list-card-manage-link"
         >{PRODUCT_COPY.TEXT_002}</Link>
         <MyLinkCard slug={goal.slug} variant="button" />

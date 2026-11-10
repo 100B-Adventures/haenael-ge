@@ -2,12 +2,12 @@
 
 | 항목 | 값 |
 |---|---|
-| 버전 | v2.0.0 |
-| 작성일 | 2026-10-25 |
+| 버전 | v2.1.0 |
+| 작성일 | 2026-11-11 |
 | 작성자/모델 | qa-verifier / gpt-codex gpt-5.6-sol, reasoning high |
 | 상류 산출물(핀) | D-049, V2 server contract migration SHA-256 `131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999` |
 | 대상 환경 | Supabase staging `ezzklgotgydwxqebfoys`, Vercel preview |
-| 승인 상태 | QA 승인 전. 확인한 보안 통제는 통과, 외부 인증·실제 지급은 미검증 |
+| 승인 상태 | QA 승인 전. SEC-PAY-01 성공 callback은 `accepted_unverified`, 취소·금액 변조와 결제 비활성 경계는 PASS |
 
 ## 목차
 
@@ -23,7 +23,7 @@
 
 ## TL;DR
 
-V2의 DB 권한, Storage 비공개 경로, IDOR, 프로필 사진 업로드·정상 TTL 삭제, 의존성 취약점은 실행 증거로 통과했다. 실제 Kakao OAuth callback과 실제 지급·반려는 계정 로그인과 금전 처리 권한이 필요해 미검증이며, 이 둘을 소스 리뷰나 HTTP 200으로 대체하지 않았다.
+V2의 DB 권한, Storage 비공개 경로, IDOR, 프로필 사진 업로드·정상 TTL 삭제, 의존성 취약점은 실행 증거로 통과했다. SEC-PAY-01은 토스 테스트 키도 실제 카드 본인인증을 요구해 성공 callback만 `accepted_unverified`로 수용한다. 취소·금액 변조는 PASS이고 staging·운영은 `PAYMENTS_ENABLED=false`와 `cheer-order` HTTP 503으로 결제를 비활성화한다.
 
 ## 1. 목적·범위·용어
 
@@ -64,7 +64,9 @@ flowchart LR
 | 비공개 Storage 경로 | 친구 응답은 원본 path를 숨기고 Presigned URL만 제공. 관리자 검수만 원본 path 수신 | 관찰됨 | PASS |
 | IDOR | friendId와 목표 소유자가 다른 실제 요청 404 | 관찰됨 | PASS |
 | production dependency | `npm audit --omit=dev`: info/low/moderate/high/critical 0/0/0/0/0 | 테스트됨 | PASS |
-| 결제 차단 | staging `NEXT_PUBLIC_PAYMENTS_ENABLED=false`, 주문 HTTP 503 `payments_disabled` | 관찰됨 | PASS |
+| 결제 차단 | staging은 이전 F-7 종료에서, 운영은 2026-11-11 직접 호출에서 각각 `PAYMENTS_ENABLED=false`, `cheer-order` HTTP 503 `payments_disabled` | 관찰됨 | PASS |
+| Toss sandbox 성공 callback | 테스트 결제창 진입 뒤 카드사 외부 본인인증 화면에서 중단. 테스트 키도 실제 카드 본인인증 필요 | 관찰됨 | `accepted_unverified` |
+| Toss 취소·금액 변조 | 실제 결제창 취소 뒤 주문 `PENDING` 불변, 변조 금액 confirm은 `amount_mismatch`로 거부 | 테스트됨 | PASS |
 | 관리자 환전 소스 | 계좌 전체 번호는 지급 모달에서만 표시, 닫으면 해제. 감사·10분 열람·잠금 RPC 유지. 독립 review NO_FINDINGS | 근거 확인 | PASS, 소스 한정 |
 | Kakao OAuth | authorize 화면과 staging callback 형식까지만 도달 | 미검증 | 실제 callback 미검증 |
 | 실제 지급·반려 | 버튼·모달 소스 경계만 확인 | 미검증 | 금전 처리 미실행 |
@@ -79,12 +81,12 @@ flowchart LR
 | AC-COVER-01~05 | 커버 서명·업로드·검수·오류·권한 경계 | 정상 200, hash 422, 타인 404, format 415, 최소권한 거부 | PASS | staging E2E와 서버 계약 로그 |
 | AC-FRIEND-01~02 | 친구 수락 동시성, 다른 사용자 정보 비노출 | 성공 1·used 1·connection 1, IDOR 404 | PASS | staging E2E |
 | 개인정보 변경 | 프로필 사진 원본을 비공개로 두고 안전하게 교체·정리 | Presigned URL, private path 비노출, TTL 삭제 | PASS | `staging-profile-avatar-cleanup-observation-20261025-1001.json` |
-| 결제·환전 | staging에서 실결제 차단, 관리자 계좌번호 최소 노출 | 503 경계·독립 소스 리뷰 | PASS, 실제 지급 미검증 | dependency·security review 증거 |
+| 결제·환전 | staging·운영 결제 차단, Toss 취소·금액 변조 거부, 관리자 계좌번호 최소 노출 | 503 경계·sandbox edge·독립 소스 리뷰 | PASS. 성공 callback은 `accepted_unverified` | `.goal/runs/w12-f8-8cb7b41/{toss-cancel.log,toss-success.log}` |
 
 ## 5. 안 한 것
 
 1. 실제 Kakao 계정 로그인 뒤 `/auth/kakao/callback` 세션 생성.
-2. Toss 개발자 계정으로 PG sandbox 결제 승인·취소·webhook 왕복.
+2. Toss sandbox 성공 callback. 테스트 키도 카드사 외부 본인인증을 요구해 자동화가 물리적으로 완료할 수 없다. 취소·금액 변조는 실행해 PASS했다.
 3. 실제 관리자 지급 완료·반려와 그 결과 감사로그 생성. 금전 상태를 바꾸므로 실행하지 않았다.
 4. 운영 환경 권한·헤더·Storage 검증. 이번 범위는 무료 staging이다.
 
@@ -98,17 +100,19 @@ flowchart LR
 | private Storage 원본 path는 일반 사용자 응답에 없음 | 충족 |
 | 교체된 프로필 사진은 TTL 뒤 cron과 worker로 실제 삭제 | 충족 |
 | dependency 취약점 high/critical 0 | 충족 |
-| staging 실결제는 503으로 차단 | 충족 |
-| 외부 OAuth와 실제 금전 처리는 실행 없이는 PASS 금지 | 미검증 유지 |
+| staging·운영 결제는 `PAYMENTS_ENABLED=false`와 `cheer-order` 503으로 차단 | 충족 |
+| Toss 취소와 금액 변조는 주문·원장을 승인하지 않음 | 충족 |
+| Toss sandbox 성공 callback | `accepted_unverified`: 테스트 키의 카드사 본인인증 필요. 결제 비활성 상태로 출시 |
+| 실제 Kakao OAuth와 실제 금전 처리는 실행 없이는 PASS 금지 | 미검증 유지 |
 
-**판정:** 확인한 V2 보안 통제 PASS. 전체 릴리스 승인은 Kakao callback과 Toss sandbox 검증 전까지 보류한다.
+**판정:** 확인한 V2 보안 통제 PASS. SEC-PAY-01 성공 callback은 외부 본인인증 제약으로 `accepted_unverified`이며, 2.1.0 출시는 staging·운영 결제 비활성 조건이다. Kakao callback과 실제 지급·반려는 별도 미검증으로 유지한다.
 
 ## 7. 결함·잔여 리스크
 
 | ID | 심각도 | 상태 | 내용 |
 |---|---|---|---|
 | SEC-EXT-01 | release blocker | open | 실제 Kakao OAuth callback 세션 미검증 |
-| SEC-PAY-01 | release blocker | open | PG sandbox 승인·취소·webhook 미검증 |
+| SEC-PAY-01 | accepted_unverified | accepted_unverified | 성공 callback은 카드사 본인인증 필요. 취소·금액 변조 PASS. staging·운영 `PAYMENTS_ENABLED=false`, `cheer-order` 503 조건으로 2.1.0 출시 |
 | SEC-ADMIN-01 | major | open | 실제 지급·반려·감사로그 브라우저 경로 미검증 |
 
 ## 8. 벤치마크·자체 검토
@@ -123,6 +127,7 @@ ISO/IEC/IEEE 29119의 테스트 증거 분리와 Playwright의 web-first asserti
 
 | 버전 | 날짜 | 변경 | 작성자 |
 |---|---|---|---|
+| v2.1.0 | 2026-11-11 | SEC-PAY-01 성공 callback을 외부 본인인증 사유의 `accepted_unverified`로 기록하고 취소·금액 변조 PASS, 결제 비활성 503 출시 조건을 고정 | code-builder |
 | v2.0.0 | 2026-10-25 | V2 staging 최신 증거로 전면 재작성 | qa-verifier |
 
 ---

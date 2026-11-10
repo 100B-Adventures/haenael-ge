@@ -28,7 +28,7 @@ colors:
 typography:
   wordmark:
     fontFamily: Pretendard
-    fontSize: 12.5px
+    fontSize: 13px
     fontWeight: 800
     letterSpacing: -0.2px
   goal-title:
@@ -65,7 +65,7 @@ typography:
     fontWeight: 800
   input-label:
     fontFamily: Pretendard
-    fontSize: 12.5px
+    fontSize: 13px
     fontWeight: 700
   body-description:
     fontFamily: Pretendard
@@ -257,7 +257,7 @@ motion:
 
 `--faint`(흰배경 2.94:1 · 앱배경 2.81:1 · 웜면 2.56:1)는 **비활성 상태와 글자가 아닌 장식에만 쓴다** (D-029 적용, 2026-10-20). **placeholder 는 여기서 빠졌다**: placeholder 는 사람이 읽는 글자라 4.5:1 이 걸린다. **셰브론·화살표 글리프도 빠졌다**: 그것은 글자가 아니라 3:1 이 걸리는데 `--faint` 는 **그 3:1 조차 넘지 못한다**(2.94:1). 그래서 `--faint` 가 남는 자리는 ①비활성·잠김 상태(접근성 하한 자체가 면제된다) ②색이 정보를 지지 않는 순수 장식 배경, 둘뿐이다. 읽혀야 하는 보조 텍스트는 전부 `--muted-color`(흰배경 5.38:1) 이상. 돈 설명은 예외 없이 `--muted-color` 이상(§8.4).
 
-**상태색은 원색과 글자색을 짝으로 쓴다** 🔒(2026-08-21). `--clover` / `--clover-ink`가 그랬듯 `--amber` / `--amber-ink`, `--danger` / `--danger-ink`도 짝이다. 원색(`--amber`·`--danger`)은 테두리·점·채움에만 쓰고, **soft 배경 위의 글자는 반드시 ink 짝**을 쓴다. 원색을 12.5px 본문에 쓰면 soft 배경 위에서 3.29:1로 AA 미달이다.
+**상태색은 원색과 글자색을 짝으로 쓴다** 🔒(2026-08-21). `--clover` / `--clover-ink`가 그랬듯 `--amber` / `--amber-ink`, `--danger` / `--danger-ink`도 짝이다. 원색(`--amber`·`--danger`)은 테두리·점·채움에만 쓰고, **soft 배경 위의 글자는 반드시 ink 짝**을 쓴다. 원색을 13px 본문에 쓰면 soft 배경 위에서 3.29:1로 AA 미달이다.
 
 ⚠️ **`--clover` 위 흰 글자 4.38:1은 AA(4.5) 미달이고, 회장이 "일단 넘어가자"로 보류했다**(2026-08-21). 브랜드 주색이라 임의 변경 금지. 재개하면 `#19834A`(4.79:1)가 후보다. 그 전까지 이 값은 **알려진 미달**로 두고 새 화면에서 재발 지적하지 않는다.
 
@@ -334,17 +334,19 @@ motion:
 
 #### 3.8.2 Typography 역할 ↔ 코드
 
+> 2026-11-10 컨트롤러 (가) 판정: `standard-design.md` §17.3의 13px 미만 금지에 따라 `wordmark`와 `input-label`을 12.5px에서 13px로 승격했다. 예외는 두지 않는다.
+
 | 역할 | 칠 값 또는 클래스 | 실제 값(코드 실측 파일:행) | 쓰는 곳 |
 |---|---|---|---|
 | 제품 기본 서체 | `font-[family-name:var(--font-pretendard)]` | Pretendard Variable, weight 100~900, `display: swap` [실측 `web/src/app/layout.tsx`:13-17,40-41] | 전 제품 UI |
-| 워드마크 | `font-extrabold` + inline size·tracking | 12.5px / 800 / `-0.2px` [실측 `web/src/app/(receiver)/me/page.tsx`:233-239] | "해낼게." 상단 표기 |
+| 워드마크 | `font-extrabold` + `--text-wordmark` | 13px / 800 / `-0.2px` [실측 `web/src/components/receiver/ReceiverShell.tsx`, `web/src/app/globals.css`] | "해낼게." 상단 표기 |
 | 목표 제목 | `font-extrabold leading-[1.32]` + inline size·tracking | 22px / 800 / 1.32 / `-0.4px` [실측 `web/src/app/(receiver)/me/page.tsx`:254-263] | `/me` 목표 제목 |
 | 페이지 제목 | `text-[22px] sm:text-[30px] font-black tracking-[-0.4px]` | 모바일 22px, 데스크톱 30px / 900 / `-0.4px` [실측 `web/src/app/(receiver)/cashout/page.tsx`:43-45] | 환전 신청·상태 H1 |
 | 시트 제목 | `text-[19px] font-black` | 19px / 900 [실측 `web/src/components/goal/GoalEditSheet.tsx`:181-186] | 목표 편집 H2 |
 | 잔액 핵심 숫자 | `font-extrabold` + inline size | 20px / 800 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:36-44] | 모인 클로버 총량 |
 | 행 값 강조 | `block whitespace-nowrap` + inline size | 13px / 기본 `strong` 700 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:78-84,97-103] | 사용 가능·잠김 클로버 |
 | 주 CTA | `text-[15px] font-extrabold` | 15px / 800 [실측 `web/src/components/cashout/CashoutRequestForm.tsx`:317-323, `web/src/components/goal/GoalEditSheet.tsx`:310-315] | 환전 신청, 저장 |
-| 입력 라벨 | `text-[12.5px] font-bold` | 12.5px / 700 [실측 `web/src/components/cashout/CashoutRequestForm.tsx`:213-216,236-241] | 은행·계좌·예금주 라벨 |
+| 입력 라벨 | `--text-input-label` + `font-bold` | 13px / 700 [실측 `web/src/components/cashout/CashoutRequestForm.tsx`, `web/src/app/globals.css`] | 은행·계좌·예금주 라벨 |
 | 본문 설명 | `text-[12px] leading-relaxed` | 12px / 400 / 약 1.625 [실측 `web/src/app/(receiver)/cashout/status/page.tsx`:88-90] | 상태 이유, 다음 행동 |
 | 본문 링크 | `font-size: var(--text-body)` | 16px / 400 / 1.5 [실측 `web/src/app/globals.css`, `web/src/components/common/LegalFooter.tsx`] | 마이페이지 약관·개인정보처리방침 진입 |
 | 작은 라벨 | inline size·weight | 11.5px / 700 [실측 `web/src/components/goal/SplitBalanceCard.tsx`:75-83,91-102] | 분할 잔액 양쪽 라벨 |
@@ -494,7 +496,7 @@ motion:
 |---|---|---|
 | **① 문서 셸** | `<html lang="ko">` + Pretendard 변수 + `bg-background` + Footer + Toaster(Sonner, `position="top-center"`, `richColors`) | ✅ 공유. `web/src/app/layout.tsx` |
 | **② 페이지 셸** | `<main className="min-h-svh">` + 배경 `#FBFAF7` + §3.7 좌우 여백 22px + 상하 여백 + 최대 폭 컨테이너 | ✅ `ReceiverPageShell` + `.receiver-page-frame` 공유 |
-| **③ 상단 바** | 좌 = "해낼게." 워드마크(닷 = `--clover-bright`, 12.5px/800), 우 = NotificationBadge + LogoutButton. 아래 여백 20px | ✅ `ReceiverTopBar`의 `home`·`detail` 변형 |
+| **③ 상단 바** | 좌 = "해낼게." 워드마크(닷 = `--clover-bright`, 13px/800), 우 = NotificationBadge + LogoutButton. 아래 여백 20px | ✅ `ReceiverTopBar`의 `home`·`detail` 변형 |
 | **④ 하단 회수 링크** | 하위 화면은 본문 끝에 "홈으로 돌아가기"(12px, `--muted`. D-029 로 --faint 에서 이관) 1개 | ✅ `BackHomeLink` 공유 |
 
 **규칙 (신규 화면은 이걸 상속한다).**

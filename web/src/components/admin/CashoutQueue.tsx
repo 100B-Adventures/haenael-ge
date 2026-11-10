@@ -234,7 +234,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
               >
                 {modal.action === "paid" ? PRODUCT_COPY.TEXT_011 : PRODUCT_COPY.TEXT_012}
               </span>{PRODUCT_COPY.TEXT_013}</h3>
-            <div className="mt-4 rounded-sm bg-muted p-4 text-[12.5px]">
+            <div className="mt-4 rounded-sm bg-muted p-4 text-[length:var(--text-input-label)]!">
               <div className="flex justify-between py-1">
                 <span>{PRODUCT_COPY.TEXT_014}</span>
                 <strong>
@@ -269,7 +269,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
               </div>
             </div>
             {modal.action === "paid" ? (
-              <label className="mt-4 flex gap-2 text-[12.5px] leading-relaxed text-muted-foreground">
+              <label className="mt-4 flex gap-2 text-[length:var(--text-input-label)]! leading-relaxed text-muted-foreground">
                 <input
                   type="checkbox"
                   checked={paidConfirmed}
@@ -305,7 +305,7 @@ export function CashoutQueue({ cashouts }: { cashouts: AdminCashout[] }) {
                       [modal.cashout.id]: event.target.value,
                     }))
                   }
-                  className="mt-2 w-full rounded-sm border border-border p-3 text-[12.5px]"
+                  className="mt-2 w-full rounded-sm border border-border p-3 text-[length:var(--text-input-label)]!"
                 />
               </div>
             )}

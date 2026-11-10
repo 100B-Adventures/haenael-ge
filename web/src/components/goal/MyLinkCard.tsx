@@ -80,7 +80,7 @@ export function MyLinkCard({ slug, variant = "card" }: MyLinkCardProps) {
       <button
         type="button"
         onClick={handleCopy}
-        className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-sm px-3 text-[12.5px] font-bold transition-colors ${
+        className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-sm px-3 text-[length:var(--text-input-label)]! font-bold transition-colors ${
           copied
             ? "bg-primary text-primary-foreground"
             : copyFailed
