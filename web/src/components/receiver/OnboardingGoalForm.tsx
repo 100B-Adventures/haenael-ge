@@ -415,7 +415,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-title"
-            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
+            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold transition-opacity active:opacity-80 [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_006}</label>
           <div
             className="flex items-center rounded-[12px] px-4 gap-2 [background-color:var(--card)]!"
@@ -447,7 +447,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-reason"
-            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
+            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold transition-opacity active:opacity-80 [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_009}</label>
           <textarea
             id="goal-reason"
@@ -468,7 +468,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-due-date"
-            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
+            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold transition-opacity active:opacity-80 [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_008}</label>
           <input
             id="goal-due-date"
