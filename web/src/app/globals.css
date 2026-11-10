@@ -2767,7 +2767,7 @@
   }
 
   .my-cheer-tabs button {
-    min-height: var(--tap-min-size);
+    min-height: calc(var(--tap-min-size) + var(--sp-0));
     border: 1px solid var(--line);
     border-radius: 9999px;
     padding-inline: 0.9375rem;
