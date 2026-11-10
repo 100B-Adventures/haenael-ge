@@ -41,7 +41,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
         role="status"
       >
         <p className="text-[13.5px] font-extrabold text-amber-ink">{PRODUCT_COPY.TEXT_001}</p>
-        <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[#8A6218]">
+        <p className={`mt-1 ${context === "cashout" ? "text-[length:var(--text-meta-micro)]!" : "text-[11.5px]"} leading-relaxed text-[#8A6218]`}>
           {context === "cashout"
             ? PRODUCT_COPY.TEXT_002
             : PRODUCT_COPY.TEXT_003}
@@ -68,7 +68,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
       <p className="text-[13.5px] font-extrabold text-[var(--accent-foreground)]">
         {title}
       </p>
-      <p className="mt-1 text-[length:var(--text-meta-micro)]! leading-relaxed text-[#3D7A5A]">
+      <p className={`mt-1 ${context === "cashout" ? "text-[length:var(--text-meta-micro)]!" : "text-[11.5px]"} leading-relaxed text-[#3D7A5A]`}>
         {description}
       </p>
       <Link

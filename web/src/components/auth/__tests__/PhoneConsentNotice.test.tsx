@@ -9,15 +9,15 @@ describe("PhoneConsentNotice", () => {
 
   it("전화번호가 없으면 재동의 안내와 현재 경로 CTA를 보여준다", () => {
     const { container } = render(
-      <PhoneConsentNotice hasPhone={false} redirectPath="/me" context="me" />,
+      <PhoneConsentNotice hasPhone={false} redirectPath="/cashout" context="cashout" />,
     );
 
     expect(screen.getByTestId("phone-consent-notice")).toHaveTextContent(
-      "알림 받으려면 전화번호 동의가 필요해요",
+      "환전 안내를 받을 전화번호가 필요해요",
     );
     expect(screen.getByTestId("phone-consent-cta")).toHaveAttribute(
       "href",
-      "/auth/kakao/start?redirect=%2Fme",
+      "/auth/kakao/start?redirect=%2Fcashout",
     );
     expect(container.innerHTML).not.toMatch(/text-\[(?:11\.5|12\.5)px\]/);
   });
