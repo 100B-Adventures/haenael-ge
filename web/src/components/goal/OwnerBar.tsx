@@ -50,7 +50,7 @@ export function OwnerBar({ cheerCreatedAts }: { cheerCreatedAts: string[] }) {
       </p>
       <Link
         href="/me"
-        className="text-white font-bold rounded-[8px] text-center [font-size:var(--text-meta-micro)]! [background-color:var(--primary)]! p-[6px_10px]! [flex:0_0_auto]!"
+        className="text-white font-bold rounded-[8px] text-center [font-size:var(--text-meta-micro)]! [background-color:var(--primary)]! p-[6px_10px]! [flex:0_0_auto]! [min-width:var(--tap-min-size)]! [min-height:var(--tap-min-size)]! [display:inline-flex]! [align-items:center]! [justify-content:center]!"
         data-testid="owner-bar-cta"
       >{PRODUCT_COPY.TEXT_004}</Link>
     </div>

@@ -415,10 +415,10 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-title"
-            className="text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
+            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_006}</label>
           <div
-            className="flex items-center rounded-[12px] px-4 py-3 gap-2 [background-color:var(--card)]!"
+            className="flex items-center rounded-[12px] px-4 gap-2 [background-color:var(--card)]!"
             style={{
               border: `1px solid ${errors.title ? "var(--destructive)" : "var(--border)"}`,
             }}
@@ -429,7 +429,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
               value={values.title}
               onChange={(e) => handleChange("title", e.target.value)}
               placeholder={PRODUCT_COPY.TEXT_014}
-              className="flex-1 min-w-0 outline-none text-[14px] font-bold bg-transparent [color:var(--foreground)]!"
+              className="min-h-11 flex-1 min-w-0 outline-none text-[14px] font-bold bg-transparent [color:var(--foreground)]!"
               maxLength={60}
               data-testid="goal-title-input"
               autoComplete="off"
@@ -447,7 +447,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-reason"
-            className="text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
+            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_009}</label>
           <textarea
             id="goal-reason"
@@ -468,7 +468,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="goal-due-date"
-            className="text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
+            className="flex min-h-11 items-center text-[length:var(--text-body)]! font-bold [color:var(--foreground)]!"
           >{PRODUCT_COPY.TEXT_008}</label>
           <input
             id="goal-due-date"

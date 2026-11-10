@@ -218,6 +218,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  :is(a[href], button, [role="button"], input:not([type="hidden"]), select, textarea, summary, label[for]) {
+    transition-property: opacity, transform;
+    transition-duration: 150ms;
+  }
+  :is(a[href], button, [role="button"], input:not([type="hidden"]), select, textarea, summary, label[for]):active {
+    opacity: 0.8;
+  }
   body {
     @apply bg-background text-foreground;
   }

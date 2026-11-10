@@ -210,7 +210,7 @@ export default async function ReceiverHomePage({
                   pendingNetKrw={pendingCashout?.net_krw ?? null}
                 />
               </div>
-              <Link href="/me/achievements" className="shrink-0 text-[length:var(--text-meta-micro)]! font-extrabold text-accent-foreground">내 업적 보기 ›</Link>
+              <Link href="/me/achievements" className="inline-flex min-h-11 shrink-0 items-center text-[length:var(--text-meta-micro)]! font-extrabold text-accent-foreground">내 업적 보기 ›</Link>
             </div>
           )}
         </div>
