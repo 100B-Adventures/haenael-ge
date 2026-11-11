@@ -2597,11 +2597,15 @@ test.describe("V2 web-first social slice", () => {
     await paymentPage.getByTestId("payment-success-back").click();
     const feedback = paymentPage.getByTestId("payment-growth-feedback");
     await expect(feedback).toBeVisible();
-    const [wordmapBox, feedbackBox] = await Promise.all([
-      paymentPage.getByTestId("payment-growth-wordmap").locator(".wordmap-cloud").boundingBox(),
-      feedback.boundingBox(),
-    ]);
-    expect(wordmapBox?.height).toBeCloseTo(200, 0);
+    const wordmapCloud = paymentPage
+      .getByTestId("payment-growth-wordmap")
+      .locator(".wordmap-cloud");
+    // The approved 200px box enters with scale(0.94), so its first visual frame is 188px.
+    // Assert the settled layout instead of changing the approved 200px contract.
+    await expect
+      .poll(async () => (await wordmapCloud.boundingBox())?.height, { timeout: 2_000 })
+      .toBeCloseTo(200, 0);
+    const feedbackBox = await feedback.boundingBox();
     expect(
       feedbackBox ? feedbackBox.y + feedbackBox.height : Number.POSITIVE_INFINITY,
     ).toBeLessThanOrEqual(780);
