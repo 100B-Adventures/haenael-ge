@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { PRODUCT_COPY } from "@/lib/copy/generated/app-payment-success-page";
 import PaymentSuccessPage from "../page";
 
 const { createServerSupabaseClientMock, purchaseConversionMock } = vi.hoisted(() => ({
@@ -155,6 +156,9 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
   expect(screen.getByTestId("payment-growth-count")).toHaveTextContent("5개의 응원 단어");
   expect(screen.getByRole("heading", { name: "응원을 보내면 내가 쓴 단어가 바로 쌓여요" })).toBeInTheDocument();
   expect(screen.getByText(/로그인하지 않아도 응원할 수 있어요/)).toBeInTheDocument();
+  expect(screen.getByTestId("payment-growth-feedback")).toHaveTextContent(
+    PRODUCT_COPY.GROWTH_FEEDBACK,
+  );
   expect(screen.getByTestId("payment-growth-message")).toHaveTextContent("끝까지 응원할게");
   expect(screen.getByTestId("payment-growth-wordmap")).toHaveTextContent("끝까지");
   expect(screen.getByTestId("payment-growth-cheer-link")).toHaveAttribute(

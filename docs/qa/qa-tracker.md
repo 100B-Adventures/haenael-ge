@@ -100,13 +100,13 @@ flowchart LR
 
 | ID | 내용 | 소유 |
 |---|---|---|
-| O-1 | 시안 핀 SHA `afca1c03…`(커밋 `7ecfb55`)와 작업트리 파일 SHA `5956191b…`(커밋 `3142e9a` 에서 변경) 불일치. 컨트롤러가 `paysuccess`·`dopamine` 두 화면 markup 이 `7ecfb55` 와 완전히 같고 CSS 차이는 `business-info` 뿐임을 확인했다(근거 확인, 이 문서 작성자는 재실행하지 않음). 따라서 이번 2화면 판정에는 영향이 없고, 핀 갱신 여부는 별도 추적 문제로 남긴다. 핀은 바꾸지 않았다 | 컨트롤러 |
-| O-2 | 매트릭스 재사용 6행 개별 PNG 경로 미기재 | 다음 QA 회차 |
+| O-1 | **닫힘.** 승인본은 `pipeline-state.v2.md approved_artifacts`가 핀한 커밋 `7ecfb55`, SHA-256 `afca1c03…`로 확정한다. 현재 파일 SHA `5956191b…`는 business 정보·coverage 표의 미승인 후속 편집이고 `paysuccess`·`dopamine` markup·CSS는 승인본과 같다. 승인 이력 없는 후속 파일로 핀을 갱신하지 않는다 | 닫힘 |
+| O-2 | **닫힘.** 매트릭스 재사용 6행에 승인본·제품 PNG 상대 경로를 직접 기입했다 | 닫힘 |
 | O-3 | F-7 builder 증거는 최종 source `8cb7b41`에서 정합됐다. 독립 qa 승인 줄은 이 문서 작업 범위 밖이며 작성하지 않았다 | 컨트롤러: 독립 qa 재검증·게이트 판정 |
-| O-4 | v2.1.14 에서 요청 번호 열과 요청→요약→시험 원본 3층 추적표를 [§4](#t-trace) 에 두었다. 단 qa-verifier 규격의 `docs/qa/testcases.md` TC 정본 파일은 아직 없다(시험 ID 는 회귀 `summary.json` 이 원본) | 다음 회차 이관 |
+| O-4 | **닫힘.** `docs/qa/testcases.md`에 `.goal/runs/w12-regression-585ba55-r2/summary.json`의 45개 시험 ID·제목·목적을 고정했다 | 닫힘 |
 | O-5 | 이력 19:33 절 등 띄어쓰기 결손은 원문 보존 원칙으로 고치지 않고 [보관본](archive/v2-qa-tracker-history-v1.0.0-claude-opus-20261109-2008.md) 으로 옮겼다. 같은 사실은 §1·§3·§4 에 다시 적었다 | 기록만 |
 | O-6 | 표현 편차 **후보**(판정 아님): 1024 pair 에서 `paysuccess` 세로 정렬(시안 상단, staging 중앙)과 `dopamine` CTA 아래 안내 박스 미표시. 첫 독립 판정 VERDICT PASS 는 그대로이며 이 후보로 PASS 를 뒤집거나 일치로 바꿔 세지 않는다. 새 화면 수정 없음. 상세 [매트릭스 O-6](design-conformance-matrix.md#open) | 컨트롤러 재판정 |
-| O-7 | 최종 source `ad7dce4`는 6경로×9폭과 고아 줄바꿈 표적 계약을 통과했으나, 전체 45건은 source `b772642`에서 허용된 2회까지만 실행했다. 최종 SHA 전체 회귀는 독립 qa가 수행할 항목으로 남긴다 | 컨트롤러: 독립 qa 재검증 |
+| O-7 | **닫힘.** 운영 2.1.3과 같은 staging health source `585ba55aba8c5abe75b22bc6b0131182a0781b16`의 `.goal/runs/w12-regression-585ba55-r2/`가 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. `summary.json.source`의 오래된 값은 제품 source 근거에서 제외한다 | 닫힘 |
 
 ## 7. 개정 이력 <a id="t-revisions"></a>
 

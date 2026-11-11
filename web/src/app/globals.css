@@ -4422,11 +4422,9 @@
   background: var(--background);
 }
 
-@media (max-width: 43.75rem) {
-  .payment-success-shell:has([data-testid="payment-success-state"]) {
-    justify-content: flex-start;
-    padding: 0 0.5rem var(--space-page-y);
-  }
+.payment-success-shell:has([data-testid="payment-success-state"]) {
+  justify-content: flex-start;
+  padding: 0 var(--sp-2) var(--space-page-y);
 }
 
 .payment-success-shell:has(.wordmap-growth-overlay) {
@@ -4545,7 +4543,7 @@
 }
 
 .wordmap-growth-visual .wordmap-cloud {
-  min-height: 15.5rem;
+  min-height: 12.5rem;
 }
 
 .wordmap-growth-count {

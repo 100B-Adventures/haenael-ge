@@ -98,8 +98,8 @@
 |---|---|---|---|
 | `admin` | 390·768·1024·1440. 운영 경보 36건을 삭제하지 않고 상세는 `aria-expanded=false`, 직접 클릭 뒤 `true`와 현재 fixture 상세를 관찰 | 일치 | `direct-captures/admin-{390,768,1024,1440}.png`, `observations.json` |
 | `bannerupload` | 390·768·1024·1440. 빈 보관함 상태, 불투명 배경 `rgb(251,250,247)`가 viewport 전체 폭을 덮음. 390에서 사진 2장 선택·선택 변경·세로 위치 76·crop·쓰기 뒤 서버 `REVIEW` 관찰 | 일치 | `direct-captures/bannerupload-*-empty.png`, `bannerupload-390-selected-review.png`, `targeted-observations.json` |
-| `belong` | 390·1024·1440. 관계 배지·아바타·수치는 fixture 차이이며 관계 해제는 D-026 기능이다. 방향·순서·위계는 승인본과 같음 | 일치 | 현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거 |
-| `business` | 390·1024·1440. 6행·순서·법적 고지 블록 유지. 데스크톱 전체 폭 확장은 DESIGN 데스크톱 가용 폭 100% 결정 | 일치 | 이전 3폭 좌우 대조와 UI 불변 diff 근거 |
+| `belong` | 390·1024·1280. 관계 배지·아바타·수치는 fixture 차이이며 관계 해제는 D-026 기능이다. 방향·순서·위계는 승인본과 같음 | 일치 | `docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-124745/{approved-belong-390,dev-belong-390,dev-belong-1024,dev-belong-1280}.png` |
+| `business` | 390 full-page·390×844. 6행·순서·법적 고지 블록 유지. 데스크톱 전체 폭 확장은 DESIGN 데스크톱 가용 폭 100% 결정 | 일치 | 승인본 `docs/design/boards/shots/v2-design-revision-v4/legal-v4-390-full.png`, 제품 `docs/qa/evidence/v2-r10-r11-r18-r19-v1-gpt-codex/{business-information-390-full,business-information-390x844}.png` |
 | `cashhistory` | 390·768·1024·1440. compact 요약 3칸, 거래 행, 세금 고지, 환전·홈 동작 순서가 승인본과 같고 fixture 금액·건수만 다름 | 일치 | `direct-captures/cashhistory-{390,768,1024,1440}.png` |
 | `cashout` | source `e5b65f1`에서 누름 크기는 해소됐지만 신청 폼의 눌림 상태가 23%라 F-7이 됐다. 최종 source `8cb7b41`은 측정기와 같은 선택자의 label·input·select·링크·버튼에 토큰 기반 눌림 상태를 적용했다. 계좌 입력·은행 선택·신청 버튼이 보이는 360·390·412·600·700·780·820·900·1000px 폼에서 13px 미만 글자 0, 본문 토큰 16px, 44px 미만 누름 0, 눌림 상태 100%, 가로 넘침·콘솔 오류 0이다. 390px 승인 시안과 최종 화면의 제목, 금액 요약, 은행·계좌·예금주 폼, 신청 버튼 핵심 순서는 유지되지만 픽셀 동일하지 않다. 새 헤더, 모인 클로버 분해, 수수료·세금 설명, 환전량, 전화번호, 암호화 안내는 기존 core 판정을 승계한다 | **일치(구조·순서. 추가 요소는 2026-08-30 core 판정 승계, 시안 승격은 디자인 갱신 과제로 이관)** | 시안 `docs/design/prototypes/clean-frames/social-viral-loop/cashout.png`, 최종 `.goal/runs/w12-ergonomics-8cb7b41/{cashout-form-390.png,contact-form.png,observations.json}`, 배포 `.goal/runs/w12-f7-deploy-8cb7b41/`, 제품 `8cb7b41` |
 | `cashstatus` | 390·768·1024·1440. 상단 상세 헤더, 접수 hero, 세로 3단계, 금액·잔액·알림·홈 순서가 승인 계약과 같음 | 일치 | `direct-captures/cashstatus-{390,768,1024,1440}.png` |
@@ -107,14 +107,14 @@
 | `coverage` | 제품 `page.tsx` route 24개와 승인 시안 coverage 표 24행을 코드·문서로 확인. landing 캡처를 근거로 쓰지 않음 | 일치 | `find web/src/app -name page.tsx`=24, 승인 시안 표=24 |
 | `dopamine` | 390·1024·1440. source `16e483d` staging 실제 DB `DONE` 3건. 성공 화면에서 `친구 목표로 돌아가기` 클릭 뒤 성장 상태로 전환(성공 상태 0). 뒤로가기 header·목표 문맥 kicker·커버 이미지 decode 완료·성장 워드맵(단어 11개, 영역 밖 0)·누적 `17개`·방금 보낸 말 `끝까지 응원할게`·녹색 `조용히 응원하기` CTA(`/g/<slug>#cheer` 이동, 응원 영역 표시)·하단 4탭, overflow 0, console error 0. 사진·목표명·단어 수·`서연` 이름은 fixture·시안 예시 데이터 차이(공개 목표 화면도 소유자 이름을 쓰지 않음). 1440px 시안의 어두운 바깥 여백은 프로토타입 무대 배경으로 보고 표현 차이로 기록 | 일치 | `.goal/runs/g7-independent-192x/{paysuccess,dopamine}-{staging16e,pair16e}-{390,1024,1440}.png`, `observations.json` |
 | `friends` | 직전 390·1024·1440 시안 대조를 재사용하고 최신 source의 390px 쓰기 fixture를 추가 관찰. 친구 1명, 목록 손님 과거 응원 섹션 0, 빈 초대 카드 0, 회원 간 상세 이력 2건(보냄 1·받음 1), MY 받은 응원의 손님 상세, 홈 응원 합계 12를 확인. 11건의 손님 원시 행과 MY RPC 11건은 상단 SQL rollback 근거로 구분 | 일치 | 직전 3폭 `direct-captures/friends-*`, 최신 `.goal/runs/g7-final-qa-20261109/friend-preservation/{friends-390,friend-detail-history-390,my-received-390}.png`, `observations.json` |
-| `goaldetail` | 제목·금액·응원 단어·응원자 수는 fixture 차이이고 승인 viewport 아래 관리 기능은 D-049 기능이다. 핵심 배치·위계는 같음 | 일치 | 현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거 |
-| `goalpublic` | 커버·WHY·응원 집계·워드맵·CTA의 방향·순서·위계가 같음. fixture 내용 차이는 불일치로 세지 않음 | 일치 | 현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거 |
+| `goaldetail` | 제목·금액·응원 단어·응원자 수는 fixture 차이이고 승인 viewport 아래 관리 기능은 D-049 기능이다. 핵심 배치·위계는 같음 | 일치 | `docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-124745/{approved-goal-detail-390,dev-goal-detail-390,dev-goal-detail-1024,dev-goal-detail-1280}.png` |
+| `goalpublic` | 커버·WHY·응원 집계·워드맵·CTA의 방향·순서·위계가 같음. fixture 내용 차이는 불일치로 세지 않음 | 일치 | `docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-124745/{approved-goalpublic-390,dev-goalpublic-390,dev-goalpublic-1024,dev-goalpublic-1280}.png` |
 | `home` | 390·768·1024·1440. 목표 3개, 바깥 중복 상세 버튼 0, fixed nav 표시. `/me?q`는 `/me/goal/3811?q`로 리다이렉트되어 일치 검색 card 1개와 고유 empty status `검색 결과가 없어요.`를 관찰 | 일치 | `direct-captures/home-*.png`, `home-search-{match,empty}-390.png`, `observations.json` |
 | `how` | 390·1024·1440. 동의 모달 0, 평문 3단계, 단일 CTA `나도 시작하기`, CTA `/onboarding`, overflow 0을 승인본과 동일 상태로 확인 | 일치 | `comparison-captures/how-{390,1024,1440}-pair-clean.png`, `observations.json` |
-| `inviteaccept` | 커버·아바타·초대 문구·로그인 수락 CTA의 방향·순서·위계가 같음 | 일치 | 현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거 |
+| `inviteaccept` | 커버·아바타·초대 문구·로그인 수락 CTA의 방향·순서·위계가 같음 | 일치 | `docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-124745/{approved-inviteaccept-390,dev-inviteaccept-390,dev-inviteaccept-1024,dev-inviteaccept-1280}.png` |
 | `landing` | 390·768·1024·1440에서 동의 모달 0. 로고·설명·워드맵·CTA·보조 링크·하단 탭의 방향·순서·위계가 승인본과 같음 | 일치 | `direct-captures/landing-{390,768,1024,1440}.png` |
 | `login` | 390·1024·1440. 실제 저장 맥락 sheet에서 기본 제목 `로그인하고 이어가기`, 작성 목표 제목, 로그인 뒤 작성 내용 보존 안내, Kakao CTA·법적 링크를 확인. generic 기본 부제는 승인본 `카카오로 3초 만에 시작해요`와 제품 시험이 동일하며 저장 맥락 변형과 구분 | 일치 | `comparison-captures/login-saved-{390,1024,1440}-pair-clean.png`; prototype:2772~2773, `LoginSheet.test.tsx:78~86` |
-| `mypage` | 계정·법적 목록은 D-040 필수 기능이며 프로필·활동·응원 탭의 방향·순서·위계가 승인본과 같음 | 일치 | 현 source 회귀 캡처와 이전 1024 좌우 대조 재사용. UI 불변 diff 근거 |
+| `mypage` | 계정·법적 목록은 D-040 필수 기능이며 프로필·활동·응원 탭의 방향·순서·위계가 승인본과 같음 | 일치 | `docs/qa/evidence/v2-ssot-20261025/captures-v10-staging-20261025-124745/{approved-mypage-390,dev-mypage-390,dev-mypage-1024,dev-mypage-1280}.png` |
 | `mywordmap` | 390·768·1024·1440. `응원 워드맵` 헤더, D-30·진행 중·실제 목표·22명·실제 단어 읽기 카드가 먼저 오고 이미지 저장·인스타·링크 복사는 아래에 있음 | 일치 | `direct-captures/mywordmap-{390,768,1024,1440}.png`, `observations.json` |
 | `onboarding` | 390·768·1024·1440. 공부·시험 preset 직접 선택 뒤 `aria-pressed=true`, 이미지 decode 완료·`naturalWidth>0`; 승인 문구·필드·배너·CTA 위계 일치 | 일치 | `direct-captures/onboarding-{390,768,1024,1440}.png`, `observations.json` |
 | `payfail` | 390·768·1024·1440. 전체페이지 상단 피드백, 오류 icon·제목·설명과 `해낼게 홈으로` 링크를 직접 확인 | 일치 | `direct-captures/payfail-{390,768,1024,1440}.png` |
@@ -158,18 +158,18 @@
 | `observations.json`(결제 행) | `.goal/runs/g7-independent-192x/observations.json` | `16e483d` | paysuccess·dopamine |
 | `targeted-observations.json` | `.goal/runs/g7-surf-post-remediation-20261108/direct-captures/targeted-observations.json` | `4b15cd88` | bannerupload |
 
-"현 source 회귀 캡처와 이전 1024 좌우 대조 재사용" 행(belong·business·goaldetail·goalpublic·inviteaccept·mypage)은 개별 PNG 경로가 판정표에 없다. 이번 보완에서 새로 찾아 붙이지 않았다([O-2](#open)).
+재사용 6행(belong·business·goaldetail·goalpublic·inviteaccept·mypage)은 판정표에 승인본과 제품 PNG의 저장소 상대 경로를 직접 기입했다.
 
 ## 10. 한계와 오픈 이슈 <a id="open"></a>
 
 | ID | 내용 | 영향 | 소유 |
 |---|---|---|---|
-| O-1 | 승인 시안 핀 SHA `afca1c03…`(커밋 `7ecfb55`) 와 작업트리 파일 SHA `5956191b…`(커밋 `3142e9a` "reconcile approved social surfaces" 에서 변경)가 다르다. 3142e9a 이후 대조는 변경된 파일 기준일 수 있다 | 판정 기준 시안 버전 불명확. 제품 판정을 바꾸지 않고 기록만 한다 | 컨트롤러: 핀 갱신 또는 재대조 결정 |
-| O-2 | 재사용 6행의 개별 PNG 경로 미기재 | 제3자가 해당 행 원본을 바로 열 수 없음 | 다음 QA 회차 |
+| O-1 | **닫힘.** `pipeline-state.v2.md approved_artifacts`가 핀한 승인본은 커밋 `7ecfb55`의 SHA-256 `afca1c03…`다. 현재 파일 SHA `5956191b…`는 커밋 `3142e9a`의 미승인 후속 편집이며 diff는 business 정보와 coverage 표에 한정되고 `paysuccess`·`dopamine` markup·CSS는 승인본과 같다. 승인 이력 없는 후속 파일로 핀을 바꾸면 안 되므로 핀은 유지하고 대조는 `git show 7ecfb55:docs/design/prototypes/social-viral-loop-v3-opus5.html`을 사용한다 | 판정 기준을 승인 시점 파일로 확정 | 닫힘 |
+| O-2 | **닫힘.** 재사용 6행에 승인본·제품 PNG 경로를 직접 기입했다 | 제3자가 행에서 원본을 바로 열 수 있음 | 닫힘 |
 | O-3 | F-7 builder 증거는 최종 source `8cb7b41`에서 정합됐다. 독립 qa 승인 줄은 작성하지 않았다 | 독립 qa 재판정 전 단계 승격 없음 | 컨트롤러: 독립 qa 재검증·게이트 판정 |
 | O-4 | 실제 Toss 승인 호출·운영·비 Chromium 미검증 | 보장 범위 밖 | 회장 지정 시 |
 | O-6 | 2026-11-09 19:5x 문서 보완 중 1024 pair 2장(`.goal/runs/g7-independent-192x/{paysuccess,dopamine}-pair16e-1024.png`)을 Read 로 직접 대조했다. `paysuccess`: 시안은 내용이 상단 정렬, staging 은 viewport 세로 중앙 정렬이고 아이콘 원 안 글리프 유무가 다르다. `dopamine`: 시안 CTA 아래 안내 박스("보낸 응원이 워드맵에 쌓였어요…")가 staging 1024 프레임에는 보이지 않는다(스크롤 밖인지 미확인). 독립 판정의 `일치`는 바꾸지 않았다 | 정렬 축·표시 요소 축 차이 후보. 표현 편차인지 계약 누락인지 판정 필요 | 컨트롤러: 재판정 또는 회장 수용 확인 |
-| O-7 | 최종 source `ad7dce4`의 6경로×9폭과 고아 줄바꿈 표적 계약은 PASS지만, 전체 45건은 source `b772642`에서 허용된 2회까지만 실행했다 | 최종 SHA 누적 회귀는 독립 qa에서 재확인 필요 | 컨트롤러: 독립 qa 재검증 |
+| O-7 | **닫힘.** 운영 2.1.3과 같은 staging health source `585ba55aba8c5abe75b22bc6b0131182a0781b16`에서 `.goal/runs/w12-regression-585ba55-r2/` 전체 회귀가 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다 | `summary.json.source`의 오래된 값은 제품 source 근거에서 제외하고 `health.json.sourceSha`를 사용 | 닫힘 |
 
 ## 11. 과거 회차 이력 (판정 효력 없음) <a id="history"></a>
 
