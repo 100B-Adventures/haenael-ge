@@ -3,7 +3,10 @@
 ```yaml
 release: 2.1.3
 date: 2026-11-11
-status: releasing
+status: released
+released_at: 2026-11-11 15:2x KST (main 4a2421a, Vercel 자동배포, 운영 health version 2.1.3 sourceSha 4a2421a)
+ci: main CI 42974504576 success(단위+빌드·배포환경 계약·환전 E2E·pgTAP), 첫 시도 42970386343 은 환전 E2E 확인 상자 높이 기준값·클래스 접두어 등록 누락으로 실패 → 4a2421a 에서 수정(제품 코드 0)
+production_readonly_e2e: 42974896283 success
 line: v2
 delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app
