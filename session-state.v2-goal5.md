@@ -1,3 +1,21 @@
+## 2026-11-11 15:5x KST 인계 (최신, 2.1.3 운영 반영)
+
+### 무엇을 어디까지 했나
+- 컨트롤러 재지시로 W-12 마무리: Codex 발주(F-8 근거 기록·13px 토큰·F-9 전역 13px·누름 개선·CI 수정), 독립 검증 5차 FAIL(F-9) → 6차 PASS, qa 승인(approver: claude independent-verify 20261111-1349).
+- 운영 2.1.3: main 9fa18ff→6e1260d→4a2421a fast-forward, 운영 health 2.1.3·4a2421a, main CI 42974504576 success, 운영 읽기 전용 E2E 42974896283 success. notify-ops decide(사전)·p3(완료) 발송.
+- hotfix worktree 옛 증거 폴더 68개(836MB)를 /mnt/hdd/archive/haenael-ge-v2-hotfix-goal-runs 로 옮기고 원래 자리에 심볼릭 링크.
+
+### 남은 이슈·블로커
+- toss-confirm 엣지 함수 f51db42 운영 반영 여부 미확인(결제 비활성).
+- Vercel 프로젝트 haenael-ge-v2-hotfix 삭제는 회장 결정 대기.
+- RELEASE.md·인프라.md 2.1.3 기록(585ba55)은 브랜치에만 있고 main 에 미반영(문서 때문에 운영 재배포하지 않으려고).
+
+### 다음에 칠 명령
+- 없음. 다음 main 반영 때 585ba55 가 함께 올라간다.
+
+### 검증했나
+- 관찰됨: 운영 health·CI·운영 읽기 전용 E2E·staging 회귀 45/45 결과를 직접 조회.
+
 ## 2026-11-10 13:4x KST 인계 (최신, 이 세션 종료)
 
 ### 무엇을 어디까지 했나
