@@ -2,18 +2,18 @@
 
 | 표지 | 값 |
 |---|---|
-| 현재 보고 버전 | v2.1.26 (2026-11-11, 운영 2.1.3 main CI 실패 2건 수정·로컬 재현) |
-| 현재 상태 | **🔧 수정 검증 완료, main CI 재실행 대기.** CI와 같은 순서의 로컬 재현에서 배포 환경·환전 층간 계약이 통과했고, 로컬 Supabase를 사용한 환전 브라우저 E2E는 13/13 통과했다. Vitest 553/553와 디자인 토큰 신규 위반 0도 확인했다. GitHub Actions run `42970386343` 자체는 실패 이력이며 새 main CI 성공 전까지 CI PASS로 판정하지 않는다 |
+| 현재 보고 버전 | v2.1.27 (2026-11-12, SMOKE-01 회귀 시험 측정 대상 오류 확인·최종 source 전체 회귀 대기) |
+| 현재 상태 | **❌ NG, 최종 source 전체 회귀 대기.** source `012e0d3` 전체 회귀는 44/45이며 `SMOKE-01`이 승인 규격 200px가 적용되는 내부 `.wordmap-cloud` 대신 부가 콘텐츠까지 포함한 `payment-growth-wordmap` 래퍼를 측정해 390.100px를 반환했다. source `3cd449a`가 올바른 결제 fixture와 내부 요소 locator로 고쳤지만, 표적 실행은 grep 패턴 불일치로 시험 0건·EXIT 1이어서 PASS 근거가 아니다. 최종 source staging 전체 회귀 45/45 전에는 닫지 않는다 |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-9 수정·증거 정합: code-builder / GPT-5 Codex |
 | 라인·단계 | `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
-| 제품 source | 운영 2.1.3 `6e1260d0eb7f9705ade81d10ce8c0d81c25824d8`. 이번 수정은 E2E 기준과 사용자 정의 클래스 접두어 계약이며 제품 런타임 코드는 변경하지 않음 |
-| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_GpnfRuCiGHxY4CjsbZmBLxMVguZq`, immutable URL `https://haenael-5i2078y7q-100-b.vercel.app`, health `version=2.1.2`, `sourceSha=ad7dce4376cd77d5e840cd3192e138d4bed7a7e1`(`.goal/runs/w12-f9-ad7dce4/{deploy.json,health-alias.json,health-immutable.json}`) |
+| 제품 source | `3cd449a`: 결제 성공·성장 화면 제품 수정 `5075755`, layout 계약 시험 `012e0d3`, 올바른 결제 fixture·내부 `.wordmap-cloud` locator 보정 `3cd449a`. 최종 QA 문서 커밋 뒤 staging에 재배포 예정 |
+| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. 현재 health source `3cd449a`; 최종 QA 문서 커밋의 sourceSha 일치와 전체 회귀 45/45는 대기 |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
 | 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.23 |
 
 ## 목차 <a id="t-toc"></a>
 
-**현재 보고 (최종 source `ad7dce4` F-9 builder 증거 · 독립 qa 재승인 대기)**
+**현재 보고 (source `3cd449a` SMOKE-01 시험 보정 · 최종 source 전체 회귀 대기)**
 1. [요약](#t-summary)
 2. [목적·범위·참고 기준](#t-scope)
 3. [수용 조건과 결과](#t-results)
@@ -27,7 +27,7 @@
 
 ## 1. 요약 <a id="t-summary"></a>
 
-- **🔧 main CI 실패 2건 수정·로컬 재현**: `TC-E2E-V37`은 `afac574`의 12.5px→13px 변경이 기존 허용 오차 경계를 넘긴 원인이었다. 확인 상태는 12.5px 가상 실측 512.78125px가 기존 509.09375±4px 안이지만 13px 실측 514.28125px는 밖이다. 제출 중 상태도 626.0625px에서 627.5625px로 늘며 기존 622.8125±4px 경계를 넘었다. 새 실측 기준에서 환전 E2E 13/13 PASS다. `payment-*`는 결제 성공 페이지·성장 오버레이가 공유하는 정당한 클래스 접두어로 계약에 등록했고 `unknown_prefixes=0`이다. 근거 `.goal/runs/w12-ci-fix-6e1260d/{qa-contracts.log,e2e-cashout-probe.log,e2e-cashout-final.log,design-token-lint.log,vitest.log}`. main CI 재실행은 아직이다.
+- **❌ SMOKE-01 최종 source 전체 회귀 대기**: source `012e0d3` 전체 회귀는 `44 expected / 1 unexpected`이며 유일한 실패는 승인 규격 200px가 적용되는 내부 `.wordmap-cloud`가 아니라 부가 콘텐츠를 포함한 `payment-growth-wordmap` 래퍼를 측정해 390.100px가 나온 시험 결함이다. `5075755`의 제품 변경은 내부 `.wordmap-cloud`를 `12.5rem`(200px)로 맞춘 승인 규격 구현이다. `3cd449a`가 결제 fixture와 locator를 바로잡았으나 `.goal/runs/w12-o6-smoke-3cd449a/`는 grep 패턴 불일치로 시험 0건·EXIT 1이므로 검증 근거에서 제외한다. 최종 source staging 전체 회귀 45/45 전에는 O-6·O-7을 닫지 않는다.
 - **최종 source 및 staging**: `ad7dce4`. 격리 staging 별칭과 immutable URL의 health가 `version=2.1.2`, `sourceSha=ad7dce4376cd77d5e840cd3192e138d4bed7a7e1`로 일치한다. 근거 `.goal/runs/w12-f9-ad7dce4/{deploy.json,alias.log,health-alias.json,health-immutable.json}`.
 - **F-9 정적·단위 검증**: `web/src` 전수 검색에서 13px 미만 글자 리터럴 0, 디자인 토큰 검사 303파일·기존 40·신규 0, Vitest `92 files / 553 tests` 전부 PASS다. 마이페이지 응원 탭은 `--tap-min-size` 44px에 spacing 토큰 2px를 더해 최소 46px로 고정했다. 근거 `/tmp/haenael-f9-{design-token,vitest}-final5.log`, commits `6bed685`, `a95cd5a`, `dbc8dca`, `b772642`, `ad7dce4`.
 - **전체 회귀와 후속 해소**: source `b772642`에서 허용된 전체 회귀를 2회 실행했다. 1차는 `44 expected / 1 unexpected`이며 유일한 실패는 `PW-02`에 수집된 `ERR_NETWORK_CHANGED`였다. 허용된 재실행은 `44 expected / 1 unexpected`이며 `/me` 전화번호 동의 안내의 14px 고아 줄바꿈을 발견했다. source `ad7dce4`에서 균형 줄바꿈으로 보정하고 최종 staging의 `QA-TC-SP-04`를 표적 재실행해 `1 expected / 0 unexpected`, fixture 잔존 0을 확인했다. 두 전체 회귀 모두 종료 후 결제 API HTTP 503과 fixture 잔존 0이었다. 반복 상한에 따라 최종 SHA 전체 45건은 재실행하지 않았다. 근거 `.goal/runs/w12-regression-b772642{,-r2}/`, `.goal/runs/w12-f9-sp04-ad7dce4/`.
@@ -112,6 +112,7 @@ flowchart LR
 
 | 버전 | 시각(KST) | 변경 |
 |---|---|---|
+| v2.1.27 | 2026-11-12 | source `012e0d3` 전체 회귀 44/45의 `SMOKE-01` 실패를 즉시 NG 등록. 승인 규격 200px의 대상은 내부 `.wordmap-cloud`인데 시험이 바깥 래퍼를 측정한 원인을 확인했다. `3cd449a`의 fixture·locator 보정은 표적 실행 0건·EXIT 1이라 아직 PASS로 세지 않고 최종 source 전체 회귀를 대기 |
 | v2.1.26 | 2026-11-11 | run `42970386343` 실패 2건 수정. 13px 변경의 전후 높이를 같은 DOM에서 실측해 기존 허용 범위 통과·이탈을 증명하고 확인·제출 중 상태 기준을 갱신. 정당한 `payment-*` 접두어를 계약에 등록. 로컬 계약 PASS, 환전 E2E 13/13, Vitest 553/553, 디자인 토큰 신규 0. main CI 재실행 대기 |
 | v2.1.25 | 2026-11-11 | 운영 2.1.3 main CI run `42970386343`의 실패 2건을 즉시 NG 등록. `TC-E2E-V37` 확인 상자 높이 오차와 웹 사용자 정의 클래스 검사 `payment-*` 미등록 접두어를 원본 로그 수치로 기록. 수정·재현 전 PASS 금지 |
 | v2.1.24 | 2026-11-11 | F-9 최종 source `ad7dce4` staging health 일치, 13px 미만 리터럴 0, Vitest 553/553, 디자인 토큰 신규 0, 6경로×9폭 54/54 위반 0, 고아 줄바꿈 계약 1/1 PASS를 연결. 전체 회귀 2회 44/45와 최종 SHA 전체 회귀 미실행을 숨기지 않고 O-7에 기록. 독립 qa 승인 줄 미작성 |
