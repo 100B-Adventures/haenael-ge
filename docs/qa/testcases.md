@@ -1,12 +1,12 @@
 # v2 누적 회귀 시험 정본
 
-> STAMP: 2026-11-12 02:34 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.26 · 원본 `.goal/runs/w12-regression-585ba55-r2/summary.json`
+> STAMP: 2026-11-12 03:20 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.29 · 원본 `.goal/runs/w12-regression-edb4c99/summary.json`
 
 ## 범위와 원본
 
-이 문서는 운영 2.1.3과 같은 제품 source `585ba55aba8c5abe75b22bc6b0131182a0781b16`을 staging에서 실행한 누적 회귀 45건의 ID, 제목, 검증 목적을 고정한다. 실행 결과의 source 정본은 `health.json`이며, `summary.json.source=16e483d…`는 실행기가 남긴 오래된 요약 메타데이터라 제품 source 증거로 쓰지 않는다.
+이 문서는 최종 제품 source `edb4c99a165c8ac59252073375e67dfa1c839a77`을 staging에서 실행한 누적 회귀 45건의 ID, 제목, 검증 목적을 고정한다. 실행 결과의 source는 `health.json`과 `summary.json.source`가 모두 `edb4c99…`로 일치한다.
 
-실행 결과는 `.goal/runs/w12-regression-585ba55-r2/`의 `health.json`, `summary.json`, `playwright.exit`, `run.exit`을 함께 본다. 해당 실행은 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다.
+실행 결과는 `.goal/runs/w12-regression-edb4c99/`의 `health.json`, `summary.json`, `playwright.exit`, `run.exit`을 함께 본다. 해당 실행은 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0도 확인했다.
 
 ## 시험 목록
 
@@ -63,9 +63,9 @@
 Playwright의 [시각 비교 공식 문서](https://playwright.dev/docs/test-snapshots)가 같은 운영체제·브라우저·설정에서 기준과 결과를 비교하도록 권고하는 구조를 차용했다. 이번 실행은 동일 Chromium staging 조건의 단일 회귀 결과를 정본으로 삼는다. Playwright 스냅샷 파일명 규약은 현재 회귀 실행기가 JSON과 PNG 경로를 이미 고정하므로 추가하지 않았다.
 
 KNOWLEDGE_QUERY: haenael-ge v2 QA 회귀 정본, D-051, 45개 시험 원본을 조회했다.
-HITS_USED: `docs/qa/qa-tracker.md`, `wiki/거버넌스/결정.md`, `.goal/runs/w12-regression-585ba55-r2/{summary.json,health.json}`을 시험 목록·제품 source·정책 근거로 채택했다.
-HITS_REJECTED: `.goal/runs/w12-regression-585ba55-r2/summary.json.source`는 health와 충돌하는 오래된 메타데이터라 제품 source 근거에서 제외했다.
-CONFLICTS: `summary.json.source=16e483d…`와 `health.json.sourceSha=585ba55…`가 충돌한다. 제품 배포 source 판정은 실제 staging health를 따른다.
+HITS_USED: `docs/qa/qa-tracker.md`, `wiki/거버넌스/결정.md`, `.goal/runs/w12-regression-edb4c99/{summary.json,health.json}`을 시험 목록·제품 source·정책 근거로 채택했다.
+HITS_REJECTED: 이전 `.goal/runs/w12-regression-585ba55-r2/`는 과거 성공 이력으로 보존하지만 최종 source 근거로는 쓰지 않았다.
+CONFLICTS: 없음. 최종 실행의 `summary.json.source`와 `health.json.sourceSha`가 일치한다.
 SKILLS_USED: haenael-supabase-build — haenael 회귀·staging·fixture 계약을 적용했다.
 SKILLS_SKIPPED: ponytail — candidate 상태이며 미설치·코드 미열람 도구라 이번 QA 정본 생성에 시험하지 않았다.
-SOURCES/MODEL: GPT-5 Codex | `docs/qa/qa-tracker.md` | `wiki/거버넌스/결정.md` | `.goal/runs/w12-regression-585ba55-r2/{summary.json,health.json}` | https://playwright.dev/docs/test-snapshots
+SOURCES/MODEL: GPT-5 Codex | `docs/qa/qa-tracker.md` | `wiki/거버넌스/결정.md` | `.goal/runs/w12-regression-edb4c99/{summary.json,health.json}` | https://playwright.dev/docs/test-snapshots
