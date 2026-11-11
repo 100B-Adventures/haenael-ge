@@ -8,16 +8,18 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude  # 승인(qa 독립 검증) = Claude, 개발·QA 루프 = Codex Goal (회장 2026-11-08)
-current_stage: qa  # 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
+current_stage: ship  # 2026-11-11 14:27 KST qa 승인(독립 검증 6차 PASS, source ad7dce4). 운영 반영은 회장 원문 대기. 이전 주석: 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
 latest_preview_deployment:
-  version: 2.1.1
-  source_sha: 62585130ceaa56a4677e67cea597a0ac0b12697f
+  version: 2.1.2
+  source_sha: ad7dce4376cd77d5e840cd3192e138d4bed7a7e1
   url: https://haenael-ge-v2-staging-100-b.vercel.app
-  immutable_url: https://haenael-3df12spgw-100-b.vercel.app
+  immutable_url: https://haenael-5i2078y7q-100-b.vercel.app
+  deployment_id: dpl_GpnfRuCiGHxY4CjsbZmBLxMVguZq
   supabase_project_ref: ezzklgotgydwxqebfoys
-  smoke_evidence: /tmp/haenael-hotfix-final-20261108
-  qa_approved: false  # 2026-11-08 정정: 독립 검증 없음
-  production_deployed: true
+  regression_evidence: .goal/runs/w12-regression-ad7dce4/  # 45/45, 컨트롤러 실행
+  ergonomics_evidence: .goal/runs/w12-independent-verify-20261111-ad7dce4/  # 독립 검증 8경로x9폭
+  qa_approved: true  # 2026-11-11 14:27 KST claude independent-verify
+  production_deployed: false
 latest_production_deployment:
   version: 2.1.1
   source_sha: 62585130ceaa56a4677e67cea597a0ac0b12697f
@@ -44,6 +46,8 @@ distribution:
 release_targets:
   - { release: 2.1.1, channel: web, url: https://haenael-ge.vercel.app, deployed: 2026-11-08 03:28, health_version: 2.1.1 }
   - { release: 2.0.0, channel: web, url: https://haenael-ge.vercel.app, deployed: 2026-10-14 00:56, health_version: 2.0.0 }
+# approved_stages: 2026-11-11 14:27 KST 독립 검증 6차로 마지막 단계 추가. stage-gate 가 읽는 단일 필드
+approved_stages: [plan, design, eng-design, build, qa]
 approved_artifacts:
   plan:
     - { path: docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md, version: 1.0.0, status: approved, label: "V2 청사진" }
@@ -81,12 +85,19 @@ approved_artifacts:
     - { path: docs/eng-design/v2-prototype-server-contract-v1.0.0-gpt-codex-20261025-0653.md, version: unversioned, status: approved, label: "프로토타입 구현 서버 계약 보완", sha256: b2505912b09c4b6b4e396fdbc5d87d34f010815c202082e42322c09d0949fe6e }
     - { path: supabase/migrations/20261025010000_v2_prototype_contract_completion.sql, version: unversioned, status: approved, label: "신규 migration, staging 적용·운영 미적용", sha256: 131046072ee84a5306f6578826ff74767e0d1b4e7f2d8b4277a9819b95630999 }
   qa:
-    - { path: docs/qa/v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.md, version: unversioned, status: changes-requested, label: "현재 staging QA, OAuth·PG 미검증으로 승인 보류", sha256: 5c32e855d0e95890effe460ae31904701b876146b51b229ae30dca14a7696658 }
-    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: changes-requested, label: "현재 기능 QA 추적", sha256: 845eb0acf7e93f5912c622ddd4187d9307046d826450ec7123f0e2df9f695662 }
-    - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: changes-requested, label: "프로토타입·staging 대조", sha256: d1a5d7d591a752c8e18ce2576639916d930a8950d12a2a58d5ee41d2272f28ad }
-    - { path: docs/qa/cross-browser-matrix.md, version: unversioned, status: changes-requested, label: "Chromium·모바일 검증, 선택 브라우저 미검증", sha256: 6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55 }
-    - { path: docs/qa/security-report.md, version: unversioned, status: changes-requested, label: "보안 검증과 미검증 범위", sha256: 7edd2b218baf1f1cc87f1bbc6c3bb6e60f11a9a5ac05a3a08679c99037d0d9f3 }
-    - { path: docs/qa/perf-report.md, version: unversioned, status: changes-requested, label: "성능 측정 범위, Web Vitals·부하 미검증", sha256: bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092 }
+    # 2026-11-11 14:27 KST qa 승인 핀(독립 검증 6차). 해시 핀 = docs/pipeline/pins/approved-qa-pins.json (artifact commit aaffb94)
+    - { path: docs/qa/qa-tracker.md, version: 2.1.24, status: approved, label: "W-12 QA 추적(F-9 해소, source ad7dce4)", sha256: c2282e9e41ade2857f1f2b275ae07e3952c062105941f1afef9589f5fb9066d7 }
+    - { path: docs/qa/design-conformance-matrix.md, version: 2.1.23, status: approved, label: "프로토타입·staging 8열 대조 26 일치/0 불일치/0 미확인", sha256: 3c8458a0a7bd91a967dea8c921a9b13dc908100e11cab6972bc7b07a8b32829b }
+    - { path: docs/qa/security-report.md, version: 2.1.1, status: approved, label: "보안 검증(SEC-EXT-01 PASS, SEC-PAY-01 accepted_unverified)", sha256: a44645748c3e017ec7e250258f0b1965fa848c168a3939aade047fa191b5d25a }
+    - { path: docs/qa/cross-browser-matrix.md, version: 2.0.0, status: approved, label: "Chromium·모바일 검증, 선택 브라우저 미검증(회장 지정 없는 선택 항목)", sha256: 6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55 }
+    - { path: docs/qa/perf-report.md, version: 2.0.0, status: approved, label: "성능 측정 범위, Web Vitals·부하 미검증(회장 지정 없는 선택 항목)", sha256: bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092 }
+  qa:
+    - { path: docs/qa/v2-staging-qa-v1.0.0-gpt-codex-20261025-0815.md, version: unversioned, status: superseded, label: "현재 staging QA, OAuth·PG 미검증으로 승인 보류", sha256: 5c32e855d0e95890effe460ae31904701b876146b51b229ae30dca14a7696658 }
+    - { path: docs/qa/qa-tracker-v2-social-viral-loop.md, version: unversioned, status: superseded, label: "현재 기능 QA 추적", sha256: 845eb0acf7e93f5912c622ddd4187d9307046d826450ec7123f0e2df9f695662 }
+    - { path: docs/qa/design-conformance-matrix.md, version: unversioned, status: superseded, label: "프로토타입·staging 대조", sha256: d1a5d7d591a752c8e18ce2576639916d930a8950d12a2a58d5ee41d2272f28ad }
+    - { path: docs/qa/cross-browser-matrix.md, version: unversioned, status: superseded, label: "Chromium·모바일 검증, 선택 브라우저 미검증", sha256: 6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55 }
+    - { path: docs/qa/security-report.md, version: unversioned, status: superseded, label: "보안 검증과 미검증 범위", sha256: 7edd2b218baf1f1cc87f1bbc6c3bb6e60f11a9a5ac05a3a08679c99037d0d9f3 }
+    - { path: docs/qa/perf-report.md, version: unversioned, status: superseded, label: "성능 측정 범위, Web Vitals·부하 미검증", sha256: bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092 }
   ship:
     - { path: RELEASE.md, version: 2.1.1, status: approved, label: "해낼게 2.1.1 운영 릴리스 매니페스트" }
     - { path: CHANGELOG.md, version: 2.1.1, status: approved, label: "2.1.1 변경 기록" }
@@ -98,11 +109,21 @@ stages:
   eng-design: { status: approved, artifacts_ok: true }
   build:      { status: approved, artifacts_ok: true }
   qa:         { status: approved, artifacts_ok: true }
-  ship:       { status: released, artifacts_ok: true }
+  ship:       { status: in-progress, artifacts_ok: false }  # 2.1.2(ad7dce4) 운영 반영 대기. 2.1.1 은 released
 critic_cycles:
   build:
     - { cycle: 1, critic: code-reviewer, major_findings: 0, resolved: true, chairman_qs: "asked=4 answered=4, D-049로 세 구현 선택과 무료 staging 조건 확정", evidence: docs/build-log.md }
-external_integration_pending: [kakao-oauth, toss-sandbox]
+external_integration_pending: [toss-sandbox]  # 2026-11-11 kakao-oauth 제거: 11-07 실왕복 PASS, a738543..ad7dce4 인증 경로 diff 0
+accepted_unverified:
+  - id: SEC-PAY-01
+    item: "토스 결제 성공 callback"
+    classification: env-blocked  # 토스 테스트 키도 카드사 본인인증 요구(TOSS_CARD_EXTERNAL_AUTH). 우리가 만든 제한 아님
+    blocker: "실카드·실결제 금지(회장 2026-11-08 원문, wiki/거버넌스/요청.md:159)"
+    release_condition: "staging·운영 PAYMENTS_ENABLED=false, cheer-order HTTP 503 payments_disabled (2026-11-11 14:01 KST staging 직접 관찰)"
+    verified_otherwise: "취소·금액 변조 PASS(.goal/runs/w12-f8-8cb7b41/)"
+    reverify: "결제를 켜기 전 sandbox 실카드 승인 1회 왕복 후 재검증. 후속 항목 = 아래 승인 로그 2026-11-11 14:27"
+    recorded_at: "2026-11-11 14:27 KST"
+    approver: "claude independent-verify 20261111-1349"
 latest_controller_verification:
   observed_at: "2026-11-03 01:45 KST"
   source_sha: 28b483f13a46e2af34f41b216410c8149dad88e2
@@ -181,6 +202,17 @@ override_expires: ""
 - 운영 배포·운영 DB 변경·실결제 미실행. 2026-10-14 릴리스 기록은 과거 이력이며 이번 승인 근거가 아니다.
 
 ## 승인 로그 (append-only · 최신순)
+
+2026-11-11 14:27 KST — qa APPROVED — W-12 독립 검증 6차 PASS. staging source ad7dce4(health 직접 관찰), F-9 해소, 6bed685..ad7dce4 신규 결함 0. 결과 판정문 `.goal/verify-20261111-1349-pass.md` (artifacts: qa-tracker 2.1.24 · design-conformance-matrix 2.1.23 · security-report 2.1.1 · cross-browser-matrix 2.0.0 · perf-report 2.0.0, 해시 핀 docs/pipeline/pins/approved-qa-pins.json @aaffb94) · approver: claude independent-verify 20261111-1349
+
+- **재검증(검증자 직접 관찰)**: staging health `sourceSha ad7dce4`, `supabaseProjectRef ezzklgotgydwxqebfoys`. staging `cheer-order` HTTP 503 `payments_disabled`(14:01 KST). 운영 health 2.1.2·`9fa18ff`(아래 기록 결손 참조). 회귀 `.goal/runs/w12-regression-ad7dce4/report.json` expected 45·unexpected 0·flaky 0·skipped 0, health 파일 sourceSha ad7dce4, 결제 복구 503.
+- **모바일 크기 실측(하네스 측정기 판정 함수 원문 사용)**: `/onboarding`(목표 없는 회원, 입력 폼 노출) · `/me`(목표 1개) · `/friends` · `/my` · `/g/<slug>` · `/cashout`(신청 폼 노출) · `/wordmap/<id>` · `/admin`(관리자 allowlist fixture) 8경로 × 9폭 = 72회 유효 측정. 13px 미만 0, 본문 토큰 16px, 눌림 커버 100%, 가로 넘침 0, 콘솔 오류 0. 측정기 휴리스틱이 낸 2건은 직접 확인해 결함 아님으로 판정했다: ①`/onboarding` 1×1 `input.sr-only[type=file]`(사진 올리기 버튼이 프로그램으로 여는 숨은 입력, 사용자 누름 대상 아님, 보이는 버튼은 44px 통과) ②`/me` 하단 고정 64px 대 main 여백 40px(스크롤 끝에서 마지막 콘텐츠 하단이 탭바 상단보다 73px 위, 9폭 모두 가림 0). 증거 `.goal/runs/w12-independent-verify-20261111-ad7dce4/observations{,-r2,-r3,-r4}.json`.
+- **시안 대조(390px 나란히)**: onboarding·home·mypage·goalpublic·cashout·mywordmap 6장 `cmp-*-390.png`. 13px·누름 변경이 만든 새 이탈 없음. 온보딩 라벨이 시안처럼 본문급 굵은 글자로 돌아왔다.
+- **kakao-oauth**: `external_integration_pending` 에서 제거. 11-07 실왕복 PASS, `a738543..ad7dce4` 인증 경로 diff 는 `lib/supabase/service.ts`(환전 키 분기) 뿐.
+- **SEC-PAY-01**: frontmatter `accepted_unverified` 기록. 후속 = 결제를 켜기 전 sandbox 실카드 승인 1회 왕복 재검증(PAYMENTS_ENABLED=true 전환 조건).
+- **기록 결손(차단 아님)**: ①qa-tracker v2.1.24 는 "최종 SHA 전체 45건 미실행"이라 적었으나 컨트롤러가 ad7dce4 에서 45/45 를 실행했다(`w12-regression-ad7dce4`). 다음 tracker 판에서 정정 ②`latest_production_deployment` 는 2.1.1(6258513)인데 운영 health 는 2.1.2·9fa18ff ③canonical(`/Users/sj/sj_code_master/haenael-ge`, 다른 브랜치) 사본은 이 승인 미동기화 ④회귀 summary.md 제목이 `16e483d` 로 낡음(본문·health 는 ad7dce4) ⑤이 머신에서 별칭 주소가 반복 호출 시 Vercel 보안 검문 403 을 낸다. immutable 주소로 측정을 마쳤다.
+- **운영 반영은 이 승인과 별개다.** 회장 원문("해낼게 운영 올려" 류) 뒤에만 한다.
+- **정합 훅 경고(위조하지 않음)**: `pipeline-state-coherence.sh` 가 order 첫 칸 `discovery` 승인 부재를 '승인 구멍'으로 표시한다. 이 라인은 plan(2026-10-13 core 이관)부터 시작했고 discovery 승인 기록이 실제로 없다. 기록을 지어 넣지 않고 그대로 둔다. stage-gate 배포 판정(qa 포함 여부·approver 줄)에는 영향 없다. 해소는 하네스 쪽 '라인 시작 단계' 표기 도입이 필요하다.
 
 ### 2026-10-25 13:23 KST · build 재검증 승인, qa 진입. QA·ship 미승인
 

@@ -1,0 +1,45 @@
+{
+  "stage": "qa",
+  "line": "v2",
+  "approved_at": "2026-11-11 14:27 KST",
+  "approver": "claude independent-verify 20261111-1349",
+  "artifact_commit": "aaffb9400321748e50b4190875be04d6105c73b3",
+  "product_source_sha": "ad7dce4376cd77d5e840cd3192e138d4bed7a7e1",
+  "staging": {
+    "alias": "https://haenael-ge-v2-staging-100-b.vercel.app",
+    "immutable": "https://haenael-5i2078y7q-100-b.vercel.app",
+    "health_sourceSha": "ad7dce4376cd77d5e840cd3192e138d4bed7a7e1"
+  },
+  "files": [
+    {
+      "path": "docs/qa/qa-tracker.md",
+      "version": "v2.1.24",
+      "blob": "d8d94e16905750aabdf14c35f97ba32634258c4c",
+      "sha256": "c2282e9e41ade2857f1f2b275ae07e3952c062105941f1afef9589f5fb9066d7"
+    },
+    {
+      "path": "docs/qa/design-conformance-matrix.md",
+      "version": "v2.1.23",
+      "blob": "b66ab40f4b161c35e1c273118e08a2921e7fe954",
+      "sha256": "3c8458a0a7bd91a967dea8c921a9b13dc908100e11cab6972bc7b07a8b32829b"
+    },
+    {
+      "path": "docs/qa/security-report.md",
+      "version": "v2.1.1",
+      "blob": "d802749ed400bae4600c9fc8508090475185ef43",
+      "sha256": "a44645748c3e017ec7e250258f0b1965fa848c168a3939aade047fa191b5d25a"
+    },
+    {
+      "path": "docs/qa/cross-browser-matrix.md",
+      "version": "v2.0.0",
+      "blob": "6d7c80e872126e805be3efc5feae412b894e4c30",
+      "sha256": "6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55"
+    },
+    {
+      "path": "docs/qa/perf-report.md",
+      "version": "v2.0.0",
+      "blob": "6b9e9e0f3088e96f61b5ab46e22137fd2d08e778",
+      "sha256": "bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092"
+    }
+  ]
+}
