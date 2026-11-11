@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-11 14:31 KST · W12 qa 독립 검증 6차(Claude qa-verifier) VERDICT PASS, qa 승인
+
+- 요청: Goal 컨트롤러가 approve 독립 검증 절차로 v2 qa 판정 요청(staging ad7dce4, F-9 해소·13px/누름 변경 신규 결함 여부).
+- 한 것: health·결제 503 직접 관찰. 8경로(onboarding·me·friends·my·g·cashout·wordmap·admin)×9폭 72회 하네스 측정기 함수로 재측정, 위반 0(휴리스틱 2건 직접 확인 후 결함 아님). 390 시안 대조 6장 신규 이탈 0. 회귀 45/45 원본 대조 후 케이스별 보고서 `docs/qa/v2-regression-ad7dce4-v1.0.0-claude-opus-20261111-1430.md` 작성. pipeline-state.v2.md qa 승인(approver: claude independent-verify), kakao-oauth pending 제거, SEC-PAY-01 accepted_unverified. 핀 `docs/pipeline/pins/approved-qa-pins.json`. notify-ops decide 1회.
+- 검증 등급: 관찰됨(측정·health·503), 근거 확인(회귀 원본). 판정문 `.goal/verify-20261111-1349-pass.md`.
+- 남은 것: 운영 반영은 회장 원문 대기. push 안 함(로컬 커밋 dc3cc70·1bce631 외). qa-tracker '최종 SHA 미실행' 서술 정정, latest_production_deployment 2.1.2 갱신, canonical 사본 동기화.
+
 ## 2026-11-11 05:56 KST · W12 qa 독립 검증 5차(Claude qa-verifier) VERDICT FAIL
 
 - 무엇을 어디까지: staging 07a0075 직접 재확인. health 200, cheer-order staging·운영 503, 회귀 r3 45/0/0/0 원본 대조, a738543..07a0075 OAuth callback·middleware diff 0. F-8 해소(카카오 PASS, 토스는 결제 비활성 출고 조건 수용).

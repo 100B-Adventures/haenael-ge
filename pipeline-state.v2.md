@@ -87,6 +87,7 @@ approved_artifacts:
   qa:
     # 2026-11-11 14:27 KST qa 승인 핀(독립 검증 6차). 해시 핀 = docs/pipeline/pins/approved-qa-pins.json (artifact commit aaffb94)
     - { path: docs/qa/qa-tracker.md, version: 2.1.24, status: approved, label: "W-12 QA 추적(F-9 해소, source ad7dce4)", sha256: c2282e9e41ade2857f1f2b275ae07e3952c062105941f1afef9589f5fb9066d7 }
+    - { path: docs/qa/v2-regression-ad7dce4-v1.0.0-claude-opus-20261111-1430.md, version: 1.0.0, status: approved, label: "누적 회귀 45/45 케이스별(source ad7dce4)", sha256: 6bd4fe0a94290a5cc2fa6724b7fe03518b565e088693ce629438ddf6510f08ba }
     - { path: docs/qa/design-conformance-matrix.md, version: 2.1.23, status: approved, label: "프로토타입·staging 8열 대조 26 일치/0 불일치/0 미확인", sha256: 3c8458a0a7bd91a967dea8c921a9b13dc908100e11cab6972bc7b07a8b32829b }
     - { path: docs/qa/security-report.md, version: 2.1.1, status: approved, label: "보안 검증(SEC-EXT-01 PASS, SEC-PAY-01 accepted_unverified)", sha256: a44645748c3e017ec7e250258f0b1965fa848c168a3939aade047fa191b5d25a }
     - { path: docs/qa/cross-browser-matrix.md, version: 2.0.0, status: approved, label: "Chromium·모바일 검증, 선택 브라우저 미검증(회장 지정 없는 선택 항목)", sha256: 6e2ddce27342f2b2cadc7e82a329af3040d07e45eeac46e593fe1de6a2590d55 }
@@ -203,7 +204,7 @@ override_expires: ""
 
 ## 승인 로그 (append-only · 최신순)
 
-2026-11-11 14:27 KST — qa APPROVED — W-12 독립 검증 6차 PASS. staging source ad7dce4(health 직접 관찰), F-9 해소, 6bed685..ad7dce4 신규 결함 0. 결과 판정문 `.goal/verify-20261111-1349-pass.md` (artifacts: qa-tracker 2.1.24 · design-conformance-matrix 2.1.23 · security-report 2.1.1 · cross-browser-matrix 2.0.0 · perf-report 2.0.0, 해시 핀 docs/pipeline/pins/approved-qa-pins.json @aaffb94) · approver: claude independent-verify 20261111-1349
+2026-11-11 14:27 KST — qa APPROVED — W-12 독립 검증 6차 PASS. staging source ad7dce4(health 직접 관찰), F-9 해소, 6bed685..ad7dce4 신규 결함 0. 결과 판정문 `.goal/verify-20261111-1349-pass.md` (artifacts: qa-tracker 2.1.24 · regression ad7dce4 1.0.0 · design-conformance-matrix 2.1.23 · security-report 2.1.1 · cross-browser-matrix 2.0.0 · perf-report 2.0.0, 해시 핀 docs/pipeline/pins/approved-qa-pins.json @aaffb94) · approver: claude independent-verify 20261111-1349
 
 - **재검증(검증자 직접 관찰)**: staging health `sourceSha ad7dce4`, `supabaseProjectRef ezzklgotgydwxqebfoys`. staging `cheer-order` HTTP 503 `payments_disabled`(14:01 KST). 운영 health 2.1.2·`9fa18ff`(아래 기록 결손 참조). 회귀 `.goal/runs/w12-regression-ad7dce4/report.json` expected 45·unexpected 0·flaky 0·skipped 0, health 파일 sourceSha ad7dce4, 결제 복구 503.
 - **모바일 크기 실측(하네스 측정기 판정 함수 원문 사용)**: `/onboarding`(목표 없는 회원, 입력 폼 노출) · `/me`(목표 1개) · `/friends` · `/my` · `/g/<slug>` · `/cashout`(신청 폼 노출) · `/wordmap/<id>` · `/admin`(관리자 allowlist fixture) 8경로 × 9폭 = 72회 유효 측정. 13px 미만 0, 본문 토큰 16px, 눌림 커버 100%, 가로 넘침 0, 콘솔 오류 0. 측정기 휴리스틱이 낸 2건은 직접 확인해 결함 아님으로 판정했다: ①`/onboarding` 1×1 `input.sr-only[type=file]`(사진 올리기 버튼이 프로그램으로 여는 숨은 입력, 사용자 누름 대상 아님, 보이는 버튼은 44px 통과) ②`/me` 하단 고정 64px 대 main 여백 40px(스크롤 끝에서 마지막 콘텐츠 하단이 탭바 상단보다 73px 위, 9폭 모두 가림 0). 증거 `.goal/runs/w12-independent-verify-20261111-ad7dce4/observations{,-r2,-r3,-r4}.json`.

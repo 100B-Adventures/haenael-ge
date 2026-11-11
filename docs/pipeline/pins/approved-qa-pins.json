@@ -40,6 +40,13 @@
       "version": "v2.0.0",
       "blob": "6b9e9e0f3088e96f61b5ab46e22137fd2d08e778",
       "sha256": "bd842698a3cb7a27fc477842c2569ed5205320dff716f883e70742601885c092"
+    },
+    {
+      "path": "docs/qa/v2-regression-ad7dce4-v1.0.0-claude-opus-20261111-1430.md",
+      "version": "v1.0.0",
+      "blob": "12f351b339497409a6e8ecf3929f5defc175ef10",
+      "sha256": "6bd4fe0a94290a5cc2fa6724b7fe03518b565e088693ce629438ddf6510f08ba",
+      "commit": "1bce63145f76dee731915e74146db3f4a7fad00d"
     }
   ]
 }
