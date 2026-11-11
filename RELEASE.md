@@ -1,3 +1,25 @@
+# 릴리스 매니페스트: 해낼게 2.1.3
+
+```yaml
+release: 2.1.3
+date: 2026-11-11
+status: releasing
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.1.2 (9fa18ff)
+source_commit: ad7dce4376cd77d5e840cd3192e138d4bed7a7e1
+approval: 회장 2026-11-11 정책 원문(컨트롤러 전달) "다 첫 배포 단계고 아직 유저가 없고 하니까 일단은 쭉쭉 밀고 넘어가가지고 개발하고 QA하고 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다". staging 결과는 notify-ops decide 로 11-11 보고함
+ships:
+  code: 환전 화면 13px 글자·44px 누름·눌림 표시, 환전 날짜 한국 시간, 신규 회원 첫 화면(onboarding) 라벨, 앱 전역 13px 미만 글자 제거, 마이페이지 응원 탭 누름 높이, 격리 staging 환전 시험 모드(D-053, 운영에서는 비활성)
+  migrations: none
+  edge_functions: 이번 웹 배포에 포함 안 함. 9fa18ff 이후 toss-confirm 변경 1건(f51db42, 결제 비활성 중 확정 영수증 재처리)은 운영 반영 여부 미확인, 결제 비활성 상태라 실사용 경로 아님
+qa_gate:
+  approved: true
+  evidence: .goal/verify-20261111-1349-pass.md (독립 검증 6차 PASS), 회귀 .goal/runs/w12-regression-ad7dce4 45/45
+  accepted_unverified: SEC-PAY-01 토스 sandbox 성공 콜백(실카드 인증 필요, 결제 비활성 출고 조건)
+```
+
 # 릴리스 매니페스트: 해낼게 2.1.2
 
 ```yaml
