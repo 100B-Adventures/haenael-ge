@@ -2,14 +2,14 @@
 
 | 표지 | 값 |
 |---|---|
-| 문서 버전 | v2.1.24 (2026-11-12, 결제 성공·성장 화면 O-6 해소와 최종 source 회귀. `26 일치 / 0 불일치 / 0 미확인`) |
+| 문서 버전 | v2.1.25 (2026-11-12, 독립 검증 7차 F-1·F-2 NG 등록) |
 | 작성 시각 | 2026-11-12 최종 staging 1024px 결제 2화면 재관찰과 전체 회귀. 이전 판정 근거 시각은 이력에 보존 |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-9 수정·증거 정합: code-builder / GPT-5 Codex |
 | 파이프라인 | 라인 `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
 | 제품 source | `edb4c99a165c8ac59252073375e67dfa1c839a77` (staging 별칭·immutable URL health `sourceSha` 일치) |
 | staging | `https://haenael-ge-v2-staging-100-b.vercel.app` |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a` (`pipeline-state.v2.md:52`). 작업트리 파일 SHA 는 다르다. [O-1](#open) 참조 |
-| 독립 판정 | builder 수정·실측 완료, 독립 qa 재승인 대기. 기존 FAIL 판정 원본은 보존 |
+| 독립 판정 | **FAIL.** `.goal/verify-20261112-0324.md` F-1·F-2 재작업 중. 승인 236px 복원과 390·1024·1440px 새 증거 전에는 일치 판정 보류 |
 
 ## 목차 <a id="toc"></a>
 
@@ -27,6 +27,8 @@
 12. [개정 이력](#revisions)
 
 ## 1. 요약 <a id="summary"></a>
+
+**독립 검증 7차 판정: FAIL.** F-1은 승인 프로토타입의 236px 워드맵을 제품·시험·문서가 200px로 잘못 고정한 결함이고, F-2는 AC-2의 3폭 중 최종 문서가 1024px만 인용한 결손이다. 방안 ① 수정과 새 source 증거가 끝날 때까지 `paysuccess`·`dopamine` 최종 판정은 보류한다.
 
 **현재 builder 판정(최종 source `edb4c99`): `26 일치 / 0 불일치 / 0 미확인`. `paysuccess`는 승인 시안처럼 상단 정렬됐고, `dopamine`은 CTA 아래 성장 피드백 박스와 최종 200px 워드맵을 1024px 실화면에서 확인했다. 독립 qa 승인 줄은 작성하지 않았다.**
 

@@ -2,14 +2,14 @@
 
 | 표지 | 값 |
 |---|---|
-| 현재 보고 버전 | v2.1.29 (2026-11-12, 결제 성공·성장 화면 O-6 해소와 최종 source 전체 회귀 45/45) |
-| 현재 상태 | **✅ builder 증거 충족, 독립 qa 재승인 대기.** source `edb4c99` staging 전체 회귀는 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. `SMOKE-01`은 진입 모션 종료 뒤 승인 규격 200px를 검증하고, 결제 성공 상단 정렬과 성장 피드백 박스를 1024px 실화면에서 확인했다. 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0이다. 독립 검증과 단계 승격은 수행하지 않았다 |
+| 현재 보고 버전 | v2.1.30 (2026-11-12, 독립 검증 7차 F-1·F-2 NG 등록) |
+| 현재 상태 | **❌ NG, F-1·F-2 재작업 중.** 독립 검증 `.goal/verify-20261112-0324.md`에서 제품 워드맵 200px가 승인 시안 236px와 다르고, AC-2의 390·1024·1440px 중 문서 인용은 1024px만 있는 것을 확인했다. 방안 ①로 236px 복원·스크롤 도달성 단언·3폭 같은 폭 대조를 수행하며, 새 exact source 전체 회귀 전에는 builder 해소로 판정하지 않는다 |
 | 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-9 수정·증거 정합: code-builder / GPT-5 Codex |
 | 라인·단계 | `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
 | 제품 source | `edb4c99a165c8ac59252073375e67dfa1c839a77`: 결제 성공·성장 화면 수정 `5075755`, layout 계약 `012e0d3`, fixture·locator 보정 `3cd449a`, 진입 모션 종료 뒤 최종 layout 재시도 `edb4c99` |
 | staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_EbvPrvnfGmfEmL7WtNLC24fu2Hee`, immutable URL `https://haenael-ncot73xha-100-b.vercel.app`, 별칭·immutable health `sourceSha=edb4c99a165c8ac59252073375e67dfa1c839a77`, `version=2.1.3` |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
-| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.24 |
+| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.25 |
 
 ## 목차 <a id="t-toc"></a>
 
@@ -27,6 +27,7 @@
 
 ## 1. 요약 <a id="t-summary"></a>
 
+- **❌ 독립 검증 7차 NG**: F-1은 승인 프로토타입 `#dopamine .wordmap.cloud`의 236px와 달리 제품·시험·문서가 200px를 승인값으로 잘못 고정한 결함이다. F-2는 AC-2가 390·1024·1440px 대조를 요구하지만 최종 문서가 1024px만 인용한 증거 결손이다. 방안 ① 수정과 새 source staging 전체 회귀가 끝나기 전까지 아래 `edb4c99` PASS 기록은 과거 이력이다. 근거 `.goal/verify-20261112-0324.md`.
 - **✅ SMOKE-01·O-6 해소**: source `edb4c99`에서 승인 시안과 staging 1024px 실화면을 직접 대조했다. 결제 성공 화면은 상단 정렬이고, 성장 화면은 CTA 아래 피드백 박스와 진입 모션 종료 뒤 200px 워드맵을 표시한다. `SMOKE-01`을 포함한 전체 회귀 45건이 전부 expected다. 근거 `.goal/runs/w12-regression-edb4c99/{summary.json,captures/o6-paysuccess-1024.png,captures/o6-dopamine-1024.png}`.
 - **최종 source 및 staging**: `edb4c99`. 격리 staging 별칭과 immutable URL의 health가 `version=2.1.3`, `sourceSha=edb4c99a165c8ac59252073375e67dfa1c839a77`로 일치한다. 근거 `.goal/runs/v2-qa-final-edb4c99/{deploy.json,alias.log,health-alias.json,health-immutable.json}`.
 - **전체 회귀·정리**: source `edb4c99` 단일 실행은 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, Playwright·전체 실행 EXIT 0, 575.9초다. 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0이다. 근거 `.goal/runs/w12-regression-edb4c99/`.

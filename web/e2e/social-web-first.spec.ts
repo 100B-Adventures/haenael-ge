@@ -2588,36 +2588,58 @@ test.describe("V2 web-first social slice", () => {
     const successBox = await successState.boundingBox();
     expect(successBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(64);
     const o6CaptureDir = process.env.E2E_CAPTURE_DIR;
+    const comparisonWidths = [390, 1024, 1440] as const;
     if (o6CaptureDir) {
       mkdirSync(o6CaptureDir, { recursive: true });
-      await paymentPage.screenshot({
-        path: `${o6CaptureDir}/o6-paysuccess-1024.png`,
-      });
+      for (const width of comparisonWidths) {
+        await paymentPage.setViewportSize({ width, height: 844 });
+        await paymentPage.screenshot({
+          path: `${o6CaptureDir}/f1-paysuccess-${width}.png`,
+        });
+      }
     }
+    await paymentPage.setViewportSize({ width: 1024, height: 844 });
     await paymentPage.getByTestId("payment-success-back").click();
     const feedback = paymentPage.getByTestId("payment-growth-feedback");
     await expect(feedback).toBeVisible();
     const wordmapCloud = paymentPage
       .getByTestId("payment-growth-wordmap")
       .locator(".wordmap-cloud");
-    // The approved 200px box enters with scale(0.94), so its first visual frame is 188px.
-    // Assert the settled layout instead of changing the approved 200px contract.
+    // The approved #dopamine .wordmap.cloud contract is 236px. Its entrance animation
+    // starts at scale(0.94), so poll the settled layout rather than an intermediate frame.
     await expect
       .poll(async () => (await wordmapCloud.boundingBox())?.height, { timeout: 2_000 })
-      .toBeCloseTo(200, 0);
+      .toBeCloseTo(236, 0);
+    if (o6CaptureDir) {
+      for (const width of comparisonWidths) {
+        await paymentPage.setViewportSize({ width, height: 844 });
+        await paymentPage.evaluate(() => window.scrollTo(0, 0));
+        await paymentPage.screenshot({
+          path: `${o6CaptureDir}/f1-dopamine-${width}.png`,
+        });
+      }
+    }
+    await paymentPage.setViewportSize({ width: 1024, height: 844 });
+    // The approved prototype scrolls beneath the fixed bottom tabs. This checks that the
+    // feedback box is actually reachable and unobscured after scrolling; it does not relax
+    // the former viewport-bottom threshold to accommodate a shorter word-map.
+    await feedback.evaluate((element) => {
+      element.scrollIntoView({ block: "center" });
+    });
+    await paymentPage.evaluate(() => new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    }));
     const feedbackBox = await feedback.boundingBox();
-    expect(
-      feedbackBox ? feedbackBox.y + feedbackBox.height : Number.POSITIVE_INFINITY,
-    ).toBeLessThanOrEqual(780);
+    const bottomTabBox = await paymentPage.locator(".receiver-tabbar").boundingBox();
+    expect(await paymentPage.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    expect(feedbackBox?.y ?? Number.NEGATIVE_INFINITY).toBeGreaterThanOrEqual(0);
+    expect(feedbackBox && bottomTabBox
+      ? feedbackBox.y + feedbackBox.height
+      : Number.POSITIVE_INFINITY).toBeLessThanOrEqual(bottomTabBox?.y ?? 0);
     expect(await paymentPage.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth
     )).toBe(0);
     expect(paymentConsoleErrors).toEqual([]);
-    if (o6CaptureDir) {
-      await paymentPage.screenshot({
-        path: `${o6CaptureDir}/o6-dopamine-1024.png`,
-      });
-    }
     await paymentPage.close();
 
     const adminContext = await authContext(browser, emails.admin);
