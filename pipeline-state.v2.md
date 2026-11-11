@@ -8,26 +8,24 @@ line: v2
 repo: /Users/sj/sj_code_master/haenael-ge
 pipeline_version: 1
 controller: claude  # 승인(qa 독립 검증) = Claude, 개발·QA 루프 = Codex Goal (회장 2026-11-08)
-current_stage: ship  # 2026-11-11 14:27 KST qa 승인(독립 검증 6차 PASS, source ad7dce4). 운영 반영은 회장 원문 대기. 이전 주석: 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
+current_stage: ship  # 2026-11-11 14:27 KST qa 승인(독립 검증 6차 PASS, source ad7dce4). 2026-11-11 15:2x 운영 2.1.3 반영(회장 11-11 정책 원문), 11-12 02시 문서 커밋 585ba55 를 staging 회귀 45/45 뒤 main 반영. 이전 주석: 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
 latest_preview_deployment:
-  version: 2.1.2
-  source_sha: ad7dce4376cd77d5e840cd3192e138d4bed7a7e1
+  version: 2.1.3
+  source_sha: 585ba55aba8c5abe75b22bc6b0131182a0781b16  # 제품 코드 = 4a2421a 와 동일(web/src·supabase diff 0)
   url: https://haenael-ge-v2-staging-100-b.vercel.app
-  immutable_url: https://haenael-5i2078y7q-100-b.vercel.app
-  deployment_id: dpl_GpnfRuCiGHxY4CjsbZmBLxMVguZq
+  immutable_url: https://haenael-cki63z2v5-100-b.vercel.app
   supabase_project_ref: ezzklgotgydwxqebfoys
-  regression_evidence: .goal/runs/w12-regression-ad7dce4/  # 45/45, 컨트롤러 실행
-  ergonomics_evidence: .goal/runs/w12-independent-verify-20261111-ad7dce4/  # 독립 검증 8경로x9폭
-  qa_approved: true  # 2026-11-11 14:27 KST claude independent-verify
-  production_deployed: false
+  regression_evidence: .goal/runs/w12-regression-585ba55-r2/  # 45/45, release_commit_rule(운영 후보 트리 재회귀). r1 은 LG-02 단일 timeout
+  qa_approved: true  # 2026-11-11 14:27 KST claude independent-verify (source ad7dce4, 제품 코드 동일)
+  production_deployed: true
 latest_production_deployment:
-  version: 2.1.1
-  source_sha: 62585130ceaa56a4677e67cea597a0ac0b12697f
+  version: 2.1.3
+  source_sha: 585ba55aba8c5abe75b22bc6b0131182a0781b16  # 2.1.3 첫 반영 6e1260d·4a2421a(11-11 15:2x), 문서 커밋 585ba55(11-12 02시)
   url: https://haenael-ge.vercel.app
-  immutable_url: https://haenael-icgy87npb-100-b.vercel.app
-  deployment_id: dpl_GefEbrtCfcDLsQbbaLgyVE4URiYJ
+  deployment: main push 자동배포
   supabase_project_ref: ossvejipdivgxzcqszbw
-  health: { status: ok, database: ok, http: 200 }
+  ci: "main CI 42974504576 success(4a2421a), 운영 읽기 전용 E2E 42974896283 success(4a2421a)"
+  approval: '회장 2026-11-11 정책 원문(컨트롤러 전달) "다 첫 배포 단계고 아직 유저가 없고 ... 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다"'
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.
