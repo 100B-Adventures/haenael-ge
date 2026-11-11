@@ -1208,6 +1208,7 @@ test.describe("V2 web-first social slice", () => {
           order_id: `social-${runId}-${index}`,
           amount_krw: 1000,
           status: "DONE",
+          payment_key: `social-key-${runId}-${index}`,
           pg_customer_key: "SOCIAL_E2E",
         }).select("id").single();
       if (paymentError || !payment) {
@@ -2560,6 +2561,51 @@ test.describe("V2 web-first social slice", () => {
     )).toBe(0);
     expect(inviteConsoleErrors).toEqual([]);
     await invitePage.close();
+
+    const paymentPage = await newRemotePage(browser, {
+      viewport: { width: 1024, height: 844 },
+    });
+    const paymentConsoleErrors: string[] = [];
+    paymentPage.on("console", (message) => {
+      if (message.type() === "error") paymentConsoleErrors.push(message.text());
+    });
+    const successResponse = await paymentPage.goto(
+      `/payment/success?paymentKey=social-key-${runId}-0&orderId=social-${runId}-0&amount=1000&goalSlug=${publicSlug}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    expect(successResponse?.status()).toBe(200);
+    const successState = paymentPage.getByTestId("payment-success-state");
+    await expect(successState).toBeVisible();
+    const successBox = await successState.boundingBox();
+    expect(successBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(64);
+    const o6CaptureDir = process.env.E2E_CAPTURE_DIR;
+    if (o6CaptureDir) {
+      mkdirSync(o6CaptureDir, { recursive: true });
+      await paymentPage.screenshot({
+        path: `${o6CaptureDir}/o6-paysuccess-1024.png`,
+      });
+    }
+    await paymentPage.getByTestId("payment-success-back").click();
+    const feedback = paymentPage.getByTestId("payment-growth-feedback");
+    await expect(feedback).toBeVisible();
+    const [wordmapBox, feedbackBox] = await Promise.all([
+      paymentPage.getByTestId("payment-growth-wordmap").boundingBox(),
+      feedback.boundingBox(),
+    ]);
+    expect(wordmapBox?.height).toBeCloseTo(200, 0);
+    expect(
+      feedbackBox ? feedbackBox.y + feedbackBox.height : Number.POSITIVE_INFINITY,
+    ).toBeLessThanOrEqual(780);
+    expect(await paymentPage.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth
+    )).toBe(0);
+    expect(paymentConsoleErrors).toEqual([]);
+    if (o6CaptureDir) {
+      await paymentPage.screenshot({
+        path: `${o6CaptureDir}/o6-dopamine-1024.png`,
+      });
+    }
+    await paymentPage.close();
 
     const adminContext = await authContext(browser, emails.admin);
     const adminPage = await adminContext.newPage();
