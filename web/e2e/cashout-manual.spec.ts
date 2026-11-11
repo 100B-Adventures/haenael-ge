@@ -855,24 +855,74 @@ test.describe("수동 환전: happy + edge", () => {
     await page.getByTestId("cashout-confirm-button").click();
     await expect(page.getByRole("heading", { name: "이 계좌가 맞나요?" })).toBeVisible();
     await expect(page.getByTestId("cashout-form-breakdown")).toHaveCount(0);
+    const confirmTypography = await page.getByTestId("cashout-confirm-step").locator("dl").evaluate((summary) => {
+      const cashoutPage = summary.closest<HTMLElement>('[data-testid="cashout-page"]');
+      if (!cashoutPage) throw new Error("cashout-page was not found from the confirmation summary");
+
+      const currentFontSize = getComputedStyle(summary).fontSize;
+      const currentHeight = cashoutPage.getBoundingClientRect().height;
+      const originalStyle = summary.getAttribute("style");
+      summary.style.setProperty("font-size", "12.5px", "important");
+      const legacy12_5Height = cashoutPage.getBoundingClientRect().height;
+      if (originalStyle === null) summary.removeAttribute("style");
+      else summary.setAttribute("style", originalStyle);
+
+      return {
+        currentFontSize,
+        currentHeight,
+        legacy12_5Height,
+        heightDelta: currentHeight - legacy12_5Height,
+      };
+    });
     const confirmBox = await page.getByTestId("cashout-page").boundingBox();
     expect(confirmBox).not.toBeNull();
-    expect(Math.abs((confirmBox?.height ?? 0) - 509.09375)).toBeLessThanOrEqual(4);
+    expect(confirmTypography.currentFontSize).toBe("13px");
+    // Controller 2026-11-10 ruling: text below 13px is forbidden. afac574 raised the three-row
+    // confirmation summary from 12.5px to 13px. The local counterfactual remains within the old
+    // tolerance, while 13px crosses it; 6bed685..ad7dce4 did not change this component.
+    expect(Math.abs(confirmTypography.legacy12_5Height - 509.09375)).toBeLessThanOrEqual(4);
+    expect(Math.abs(confirmTypography.currentHeight - 509.09375)).toBeGreaterThan(4);
+    expect(Math.abs((confirmBox?.height ?? 0) - 514.28125)).toBeLessThanOrEqual(4);
     await page.getByTestId("cashout-page").screenshot({ path: path.join(CAPTURE_DIR, "cashout-confirm-390.png") });
     cashoutDelayMs = 1_000;
     await page.getByTestId("cashout-submit-button").click();
     await expect(page.getByTestId("cashout-submitting-state")).toBeVisible();
     await expect(page.getByRole("heading", { name: "잠깐 기다리는 동안에도 지금 하는 일을 알려드려요" })).toBeVisible();
     await expect(page.getByTestId("cashout-confirm-banner")).toHaveCount(0);
+    const submittingTypography = await page.getByTestId("cashout-submitting-state").locator("dl").evaluate((summary) => {
+      const cashoutPage = summary.closest<HTMLElement>('[data-testid="cashout-page"]');
+      if (!cashoutPage) throw new Error("cashout-page was not found from the submitting summary");
+
+      const currentFontSize = getComputedStyle(summary).fontSize;
+      const currentHeight = cashoutPage.getBoundingClientRect().height;
+      const originalStyle = summary.getAttribute("style");
+      summary.style.setProperty("font-size", "12.5px", "important");
+      const legacy12_5Height = cashoutPage.getBoundingClientRect().height;
+      if (originalStyle === null) summary.removeAttribute("style");
+      else summary.setAttribute("style", originalStyle);
+
+      return {
+        currentFontSize,
+        currentHeight,
+        legacy12_5Height,
+        heightDelta: currentHeight - legacy12_5Height,
+      };
+    });
     const submittingBox = await page.getByTestId("cashout-page").boundingBox();
     expect(submittingBox).not.toBeNull();
-    expect(Math.abs((submittingBox?.height ?? 0) - 622.8125)).toBeLessThanOrEqual(4);
+    console.log(JSON.stringify({ cashoutTypographyProbe: { confirmTypography, submittingTypography } }));
+    expect(submittingTypography.currentFontSize).toBe("13px");
+    expect(Math.abs(submittingTypography.legacy12_5Height - 622.8125)).toBeLessThanOrEqual(4);
+    expect(Math.abs(submittingTypography.currentHeight - 622.8125)).toBeGreaterThan(4);
+    expect(Math.abs((submittingBox?.height ?? 0) - 627.5625)).toBeLessThanOrEqual(4);
     await page.getByTestId("cashout-page").screenshot({ path: path.join(CAPTURE_DIR, "cashout-submitting-390.png") });
     console.log(JSON.stringify({
       cashoutVisualMetrics: {
         viewport: "390x844",
         confirmHeight: confirmBox?.height,
+        confirmTypography,
         submittingHeight: submittingBox?.height,
+        submittingTypography,
       },
     }));
     await expect(page.getByTestId("cashout-request-success")).toBeVisible();
