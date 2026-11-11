@@ -880,6 +880,8 @@ test.describe("V2 web-first social slice", () => {
   let publicSlug = "";
   let smokeInviteToken = "";
   let smokeInviteId = "";
+  let layoutPaymentKey = "";
+  let layoutPaymentOrderId = "";
   const paymentIds: number[] = [];
   const delayedProfileCleanups: Array<{ queueId: number; assetId: string; objectPath: string; availableAt: string }> = [];
   const ownerLongMessage = "익명으로 남기지만 매일 꾸준히 공부하는 모습을 보고 있어요. 오늘도 한 걸음씩 나아가면 분명히 목표를 해낼 수 있으니 끝까지 함께 응원할게요.";
@@ -1215,6 +1217,13 @@ test.describe("V2 web-first social slice", () => {
         throw paymentError ?? new Error("payment_failed");
       }
       paymentIds.push(payment.id);
+      if (
+        fixture.goalId === friendPublicGoal &&
+        !layoutPaymentKey
+      ) {
+        layoutPaymentKey = `social-key-${runId}-${index}`;
+        layoutPaymentOrderId = `social-${runId}-${index}`;
+      }
       const { data: insertedCheer, error: cheerError } = await admin.from("cheer").insert({
         goal_id: fixture.goalId,
         display_name: fixture.displayName,
@@ -2570,7 +2579,7 @@ test.describe("V2 web-first social slice", () => {
       if (message.type() === "error") paymentConsoleErrors.push(message.text());
     });
     const successResponse = await paymentPage.goto(
-      `/payment/success?paymentKey=social-key-${runId}-0&orderId=social-${runId}-0&amount=1000&goalSlug=${publicSlug}`,
+      `/payment/success?paymentKey=${layoutPaymentKey}&orderId=${layoutPaymentOrderId}&amount=1000&goalSlug=friend-public-${runId}`,
       { waitUntil: "domcontentloaded" },
     );
     expect(successResponse?.status()).toBe(200);
@@ -2589,7 +2598,7 @@ test.describe("V2 web-first social slice", () => {
     const feedback = paymentPage.getByTestId("payment-growth-feedback");
     await expect(feedback).toBeVisible();
     const [wordmapBox, feedbackBox] = await Promise.all([
-      paymentPage.getByTestId("payment-growth-wordmap").boundingBox(),
+      paymentPage.getByTestId("payment-growth-wordmap").locator(".wordmap-cloud").boundingBox(),
       feedback.boundingBox(),
     ]);
     expect(wordmapBox?.height).toBeCloseTo(200, 0);
