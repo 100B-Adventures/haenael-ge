@@ -8,7 +8,15 @@
 </head>
 <body>
   <h1>해낼게 V2 개발·스테이징 QA 산출물</h1>
-  <p>담당자가 작성한 문서 원문과 실제 화면 대조입니다. S1·S2·S3는 무료 staging 내부 범위에서 독립 QA PASS로 닫혔습니다. G4-AUTH의 취소·오류·비인증 경계는 PASS지만 실제 Kakao 성공 왕복은 계정 재로그인 대기입니다. Toss sandbox callback·실결제는 미검증이며 전체 제품 QA와 운영 배포는 승인되지 않았습니다.</p>
+  <p>담당자가 작성한 문서 원문과 실제 화면 대조입니다. S1·S2·S3는 무료 staging 내부 범위에서 독립 QA PASS로 닫혔습니다. 2026-10-30 최신 스테이징 소스 <code>a88d137</code>의 CI 5개 job과 관리자 horizontal overflow 표적 검증은 PASS입니다. 관리자 화면에는 지급 예정 금액 색과 회원 상세 기본 펼침의 승인 시안 불일치가 남아 있습니다. G4-AUTH의 취소·오류·비인증 경계는 PASS지만 실제 Kakao 성공 왕복은 계정 재로그인 대기입니다. Toss Payments CARD 실제 callback·실결제는 미검증이며 전체 제품 QA와 운영 배포는 승인되지 않았습니다.</p>
+  <h2>2026-10-30 최신 스테이징 검증</h2>
+  <ul>
+    <li><a href="https://github.com/100B-Adventures/haenael-ge/actions/runs/41052383502">커밋 a88d137 CI 5개 job success</a></li>
+    <li><a href="file:///Users/sj/sj_code_master/haenael-ge/.goal/runs/g4-admin-design-compare/approved-cover-review-390.png">승인 시안 관리자 화면 390×844 CSS px</a></li>
+    <li><a href="file:///Users/sj/sj_code_master/haenael-ge/.goal/runs/g4-admin-design-compare/dev-cover-review-390.png">실제 스테이징 관리자 화면 390×844 CSS px</a></li>
+    <li><a href="file:///Users/sj/sj_code_master/haenael-ge/.goal/runs/g4-admin-design-compare/dev-cover-review-1024.png">실제 스테이징 관리자 화면 1024px, horizontal overflow 0</a></li>
+    <li><a href="../v2-goal-round4-20261029/payment/index.html">Toss Payments CARD 검증, 실제 callback은 blocked</a></li>
+  </ul>
   <ul>
     <li><a href="https://haenael-ge-v2-staging-100-b.vercel.app">스테이징 앱</a></li>
     <li><a href="../v2-goal-20261027/S1/index.html">S1 목표 관리 실제 데모 · 독립 QA PASS</a></li>

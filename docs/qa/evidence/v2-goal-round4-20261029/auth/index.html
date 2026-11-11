@@ -27,6 +27,7 @@
     <div class="metric"><strong>307</strong>비인증 <code>/my</code> → <code>/?next=/my</code></div>
     <div class="metric"><strong>0</strong>비인증 Supabase 세션·개인정보 DOM</div>
     <div class="metric"><strong>EXIT 0</strong>기준 회귀, 새 실패 0</div>
+    <div class="metric"><strong>4/4 PASS</strong>작업 브랜치 GitHub Actions</div>
   </section>
 
   <h2>G4-AUTH-02 실제 UI와 서버 결과</h2>
@@ -47,9 +48,10 @@
   <h2>G4-AUTH-01 외부 차단 증거</h2>
   <div class="card">
     <ul>
-      <li>haenael 전용 Chrome에서 Kakao 쿠키 13개를 값 노출 없이 읽어 headless 컨텍스트에 주입했습니다.</li>
+      <li>Chrome 프로필 <code>haenael-ge</code>(CDP 포트 9342)에서 Kakao 쿠키 13개를 값 노출 없이 읽어 headless 컨텍스트에 주입했습니다.</li>
       <li>실제 Kakao authorize 화면은 계정 비밀번호 입력을 요구했고 테스트는 <code>external_kakao_session_expired</code>로 종료됐습니다.</li>
-      <li>메인 Chrome의 최소 쿠키 프로필을 복제한 두 번째 headless 시도도 제한시간 안에 사용할 수 있는 세션을 만들지 못했고, 생성한 임시 프로필과 프로세스는 정리했습니다.</li>
+      <li>메인 Chrome의 최소 쿠키 프로필을 복제한 두 번째 headless 시도도 30초 timeout 안에 사용할 수 있는 세션을 만들지 못했고, 생성한 임시 프로필과 프로세스는 정리했습니다.</li>
+      <li>회장 로그인용으로 같은 프로필에 <code>/auth/kakao/start?redirect=/my</code>를 열어 Kakao 계정 로그인 화면까지 준비했습니다. 포커스는 전환하지 않았습니다.</li>
       <li>따라서 Kakao 동의 → callback → Supabase 세션 → <code>/my</code> 성공 왕복은 PASS로 승격하지 않았습니다.</li>
     </ul>
   </div>
@@ -59,14 +61,15 @@
     <ul>
       <li><a href="../../../../../web/e2e/v2-live-auth.spec.ts">G4-AUTH 실제 E2E 원문</a></li>
       <li><a href="https://haenael-ge-v2-staging-100-b.vercel.app">검증 대상 staging</a></li>
+      <li><a href="https://github.com/100B-Adventures/haenael-ge/actions/runs/40823764380">작업 브랜치 GitHub Actions · 4개 job 모두 success</a></li>
       <li><a href="https://developers.kakao.com/docs/ko/kakaologin/trouble-shooting">Kakao Login 공식 오류·취소 기준</a></li>
       <li><a href="https://developers.kakao.com/docs/ko/kakaologin/prerequisite">Kakao Login 공식 redirect URI·사전 설정 기준</a></li>
     </ul>
   </div>
-  <p class="note">G4-AUTH-02와 로컬 기준 회귀는 PASS지만 G4-AUTH-01이 외부 재로그인 대기이므로 슬라이스 전체는 BLOCKED입니다. 작업 브랜치 push는 현재 세션의 외부쓰기 정책이 실행 전에 차단해 원격 CI는 미실행입니다. 전체 제품 QA, 운영 배포, 다음 결제 슬라이스는 진행하지 않았습니다.</p>
+  <p class="note">G4-AUTH-02와 로컬 기준 회귀, 작업 브랜치 GitHub Actions 4개 job은 PASS지만 G4-AUTH-01이 외부 재로그인 대기이므로 슬라이스 전체는 BLOCKED입니다. 전체 제품 QA와 운영 배포는 진행하지 않았습니다.</p>
 
   <footer>
-    STAMP: 2026-10-29 04:23 KST · model Codex(model ID 미노출) · agent code-builder · skill haenael-supabase-build · basis 승인 prototype v3.0.0, eng-design v1.2.5, staging Playwright, Kakao 공식 문서 · 고민: 서버·테스트 결함과 실제 계정 재인증 의존을 분리해 PASS를 과장하지 않음<br>
+    STAMP: 2026-10-29 14:36 KST · model Codex(model ID 미노출) · agent code-builder · skill haenael-supabase-build · basis 승인 prototype v3.0.0, eng-design v1.2.5, staging Playwright, GitHub Actions, Kakao 공식 문서 · 고민: 서버·테스트 결함과 실제 계정 재인증 의존을 분리해 PASS를 과장하지 않음<br>
     SKILLS_USED: haenael-supabase-build · 해낼게 Supabase build 슬라이스의 staging·보안·정리 계약 적용<br>
     SKILLS_SKIPPED: 없음<br>
     KNOWLEDGE_QUERY: 해낼게 G4-AUTH 승인 설계·D-049·Kakao OAuth 공식 취소/redirect 계약<br>
