@@ -4,6 +4,7 @@ import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { isSensitiveAnalyticsPath } from "@/lib/analytics";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
+import { isAnalyticsProductionHost } from "@/lib/site-host";
 
 const CLARITY_PROJECT_ID = "z7rlqfvdmm";
 
@@ -12,6 +13,7 @@ export function MicrosoftClarity() {
   const consent = useAnalyticsConsent();
   if (
     process.env.NODE_ENV !== "production" || consent !== "granted" ||
+    !isAnalyticsProductionHost() ||
     isSensitiveAnalyticsPath(pathname)
   ) return null;
 

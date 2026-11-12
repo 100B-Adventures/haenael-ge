@@ -4,6 +4,7 @@
 
 import { isSensitiveAnalyticsPath, trackEvent } from "@/lib/analytics";
 import { hasAnalyticsConsent } from "@/lib/analytics/consent";
+import { isAnalyticsProductionHost } from "@/lib/site-host";
 
 type MetaPixelFunction = ((...args: unknown[]) => void) & {
   callMethod?: (...args: unknown[]) => void;
@@ -29,7 +30,7 @@ const FBQ_POLL_MS = 100;
 export function initializeMetaPixel(): boolean {
   if (typeof window === "undefined" || !hasAnalyticsConsent()) return false;
   if (window.fbq) return true;
-  if (process.env.NODE_ENV !== "production") return false;
+  if (process.env.NODE_ENV !== "production" || !isAnalyticsProductionHost()) return false;
 
   const fbq: MetaPixelFunction = (...args: unknown[]) => {
     if (fbq.callMethod) fbq.callMethod(...args);

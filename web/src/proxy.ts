@@ -21,7 +21,7 @@ import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import protectedRoutes from "../qa/contracts/protected-routes.json";
 
-const CANONICAL_HOST = "haenael-ge.vercel.app";
+import { CANONICAL_HOST } from "@/lib/site-host";
 
 // 서버 로그로 확정된, canonical과 다른 레거시 production 별칭 호스트만 화이트리스트.
 // (프리뷰 해시 도메인은 여기 넣지 않는다 — 매번 바뀌므로 정확 매칭 화이트리스트가

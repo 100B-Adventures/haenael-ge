@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import { initGA, isSensitiveAnalyticsPath, trackPageView } from "@/lib/analytics";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
+import { isAnalyticsProductionHost } from "@/lib/site-host";
 
 function RouteTracker() {
   const pathname = usePathname();
@@ -28,6 +29,7 @@ export function GoogleAnalytics() {
   if (
     process.env.NODE_ENV !== "production" ||
     consent !== "granted" ||
+    !isAnalyticsProductionHost() ||
     !measurementId ||
     measurementId === "G-XXXXXXXXXX" ||
     isSensitiveAnalyticsPath(pathname)

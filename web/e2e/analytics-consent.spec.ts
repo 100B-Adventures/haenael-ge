@@ -11,6 +11,8 @@ function loadedProviders(urls: string[]) {
 }
 
 test("AN-CONSENT-01 동의 전 무전송, 동의 후 로드, 철회 후 재차단", async ({ page }) => {
+  // 비운영 호스트에서는 운영 측정 ID 를 싣지 않는다. 배선 확인용 명시 플래그를 켜고, 아래 route 가 모든 분석 요청을 abort 한다.
+  await page.addInitScript(() => window.localStorage.setItem("haenael_analytics_e2e_intercepted_v1", "1"));
   const analyticsRequests: string[] = [];
   await page.route("**/*", async (route) => {
     const url = route.request().url();

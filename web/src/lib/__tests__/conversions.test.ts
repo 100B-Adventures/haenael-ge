@@ -11,6 +11,7 @@ import {
 } from "@/lib/analytics/conversions";
 import { markAuthConversion } from "@/lib/auth/signup-mark";
 import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics/consent";
+import { ANALYTICS_E2E_INTERCEPT_KEY } from "@/lib/site-host";
 
 describe("광고 전환 이벤트", () => {
   const fbq = vi.fn();
@@ -83,6 +84,7 @@ describe("광고 전환 이벤트", () => {
   });
 
   it("Meta 스크립트가 늦어도 동의 후 로컬 큐에 전환을 보존한다", async () => {
+    window.localStorage.setItem(ANALYTICS_E2E_INTERCEPT_KEY, "1"); // jsdom 은 localhost 라 운영 호스트 게이트를 명시 플래그로 연다
     delete window.fbq;
     vi.stubEnv("NODE_ENV", "production");
     const queued = await trackPurchaseConversion("order-2", 1000, "event-order-2");
@@ -98,6 +100,7 @@ describe("광고 전환 이벤트", () => {
   });
 
   it("민감 경로에서 주소를 정리한 뒤에도 Meta Pixel을 지연 초기화할 수 있다", () => {
+    window.localStorage.setItem(ANALYTICS_E2E_INTERCEPT_KEY, "1"); // jsdom 은 localhost 라 운영 호스트 게이트를 명시 플래그로 연다
     vi.stubEnv("NODE_ENV", "production");
     delete window.fbq;
 
@@ -108,6 +111,14 @@ describe("광고 전환 이벤트", () => {
     )).not.toBeNull();
     const initializedFbq = Reflect.get(window, "fbq") as { queue?: unknown[][] };
     expect(initializedFbq.queue?.[0]).toEqual(["init", META_PIXEL_ID]);
+  });
+
+  it("운영 호스트가 아니면 동의가 있어도 Meta Pixel 을 초기화하지 않는다", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    delete window.fbq;
+    expect(initializeMetaPixel()).toBe(false);
+    expect(window.fbq).toBeUndefined();
+    expect(document.querySelector('script[src*="connect.facebook.net"]')).toBeNull();
   });
 
   it("명시적 동의 전에는 GA4·Meta를 초기화하거나 전송하지 않는다", async () => {
