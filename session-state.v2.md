@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-12 21:30 KST] compact 마크 (auto)
+- 세션 f904f244 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 4597294 sync: joseongjin-ui-MacBookPro 문서 자동 커밋
+- compact 직전 컨텍스트: 199066 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 8]: [report-lint] ⛔ 반려: 아래 위반을 **한 번에 모두** 고쳐라. 보고 초안 파일을 고쳐 전문을 그대로 다시 내라. 맨 아래 덧붙이기는 최종 보고를 가린다(회장 2026-10-18). 다음부터는 내기 전에 stop-preflight.sh <초안> 으로 미리 돌려라. [report-lint] ⛔ 반려: 임원 보고의 첫 비어 있지 않은 줄이 "한 줄 결론:"이 아니다. 요청·작업일지보다 결론을 먼저 써라.
+- 직전에 고친 파일: deploy-plan.md deploy-plan.html
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## 열린 항목
 
 - 2.2.0+whats-new-updates: Codex 수정(617b084, staging 반영) 회귀 진행 중 → 독립 검증 11차 → PASS 시 컨트롤러 결과 단락 → 운영 배포. (114 haenael-ge-89 세션)
