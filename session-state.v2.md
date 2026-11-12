@@ -5,7 +5,7 @@
 ## 열린 항목
 
 - 2.2.0+whats-new-updates: 운영 반영 완료(11-13 00:0x, f2c9ee6, CI·운영 읽기 전용 E2E success). 결과는 product-controller(오프라인, 전달 대기)·claude-31 에 송부.
-- 2.2.1+fix-analytics-host(190f7e5): staging 반영(health 2.2.1). 전체 회귀는 아직 0회 실행: r1·r4 heavy-slot 30분 대기 초과(75), r2 heavy-slot.sh 수정 순간 문법 오류, r3 HEAD≠190f7e5 사전검사(문서 커밋 e4a0eb9, web·supabase 차이 0 → r4 부터 diff 검사로 교체). r5 대기 중(.goal/runs/v2-2.2.1-regression-190f7e5-r5). 다음: 회귀 45/45 → 독립 검증 12차(Claude qa-verifier) → 결과 단락을 [🇪🇸 제품·하네스-온프렘] 에 → irreversible-approve(STAGING_REPORT) → main push.
+- 2.2.1+fix-analytics-host(190f7e5): staging 반영(health 2.2.1). 전체 회귀 r5(02:1x 실행) 44/45, 실패 QA-TC-LG-02 = net::ERR_NETWORK_CHANGED(환경성). 단독 재실행은 30초 제한 초과(이전 통과 18~24초, 동시 무거운 작업 2건 중, 실패 캡처 8번째 화면 /wordmap 정상 렌더). 90초 진단 실행 대기 중(.goal/runs/v2-2.2.1-regression-190f7e5-r5/diag-LG-02-90s.json). 결제 복구 503 확인. 다음: 진단 결과 → 결과 단락 [🇪🇸 제품·하네스-온프렘] → 독립 검증 12차(Claude qa-verifier, LG-02 시간 여유 문제 포함 판정) → irreversible-approve(STAGING_REPORT) → main push. 진단이 단언 실패면 결함으로 보고 수정 먼저.
 - hotfix 작업트리 /mnt/hdd 이전 완료(심링크). 원본 복사본은 /mnt/hdd/.trash-114/haenael-ge-v2-hotfix-root-copy-20261113 로 이동(하네스 휴지통 규칙, 되돌릴 수 있음).
 - Codex 한도 소진(재개 11-18 13:03). 마지막 Codex 작업 CODEX_RESUME=01a1c700-5ad6-7702-a64f-9356af706dd9 (code-builder, 2.2.0, rc=0 종료라 이어갈 미완 없음). 그때까지 구현·QA 는 Claude 하위 에이전트. 결제 코드 교차리뷰는 다른 Claude 세션 또는 11-18 이후.
 - Vercel 프로젝트 `haenael-ge-v2-hotfix` 삭제: 회장 결정 대기.
