@@ -81,8 +81,8 @@ export function parsePublicReleaseNotes(markdown) {
 }
 
 const releaseNotes = parsePublicReleaseNotes(readFileSync(releasePath, "utf8"));
-if (releaseNotes.length !== 3 || releaseNotes[0]?.version !== "2.1.5") {
-  throw new Error(`expected newest three public releases from 2.1.5, received ${releaseNotes.map(({ version }) => version).join(", ")}`);
+if (releaseNotes.length !== 3 || releaseNotes[0]?.version !== "2.2.0") {
+  throw new Error(`expected newest three public releases from 2.2.0, received ${releaseNotes.map(({ version }) => version).join(", ")}`);
 }
 
 const generated = `${JSON.stringify({ source: "RELEASE.md", releases: releaseNotes }, null, 2)}\n`;

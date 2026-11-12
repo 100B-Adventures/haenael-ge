@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ReleaseFeedback } from "@/components/releases/ReleaseFeedback";
 import { publicReleaseNotes } from "@/lib/release-notes";
 
 export const metadata: Metadata = {
@@ -44,6 +45,7 @@ export default function UpdatesPage() {
           </li>
         ))}
       </ol>
+      <ReleaseFeedback />
     </main>
   );
 }

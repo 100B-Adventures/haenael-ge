@@ -6,9 +6,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
+import { createClient } from "@/lib/supabase/client";
 import {
   latestPublicRelease,
+  newerReleaseVersion,
   WHATS_NEW_LAST_SEEN_KEY,
+  WHATS_NEW_USER_METADATA_KEY,
 } from "@/lib/release-notes";
 
 export { WHATS_NEW_LAST_SEEN_KEY } from "@/lib/release-notes";
@@ -30,15 +33,49 @@ export function WhatsNewCard() {
       return;
     }
 
-    try {
-      if (window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY) === latestPublicRelease.version) return;
-      window.localStorage.setItem(WHATS_NEW_LAST_SEEN_KEY, latestPublicRelease.version);
-    } catch {
-      // 저장소가 차단돼도 이번 방문의 안내와 닫기는 동작한다.
-    }
+    let active = true;
+    const syncSeenVersion = async () => {
+      let localVersion: string | null = null;
+      try {
+        localVersion = window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY);
+      } catch {
+        // 저장소가 차단돼도 회원 메타데이터 확인과 이번 방문의 안내는 동작한다.
+      }
 
-    setVisible(true);
-    trackEvent("whats_new_view", { release: latestPublicRelease.version });
+      const supabase = createClient();
+      const { data } = await supabase.auth.getUser();
+      if (!active) return;
+
+      const user = data.user;
+      const metadataVersion = typeof user?.user_metadata?.[WHATS_NEW_USER_METADATA_KEY] === "string"
+        ? user.user_metadata[WHATS_NEW_USER_METADATA_KEY]
+        : null;
+      const newestSeenVersion = newerReleaseVersion(localVersion, metadataVersion);
+      const hasSeenCurrent = newerReleaseVersion(newestSeenVersion, latestPublicRelease.version) === newestSeenVersion;
+      const versionToPersist = hasSeenCurrent ? newestSeenVersion : latestPublicRelease.version;
+
+      try {
+        window.localStorage.setItem(WHATS_NEW_LAST_SEEN_KEY, versionToPersist!);
+      } catch {
+        // 브라우저 저장소가 차단되면 회원 메타데이터를 우선 사용한다.
+      }
+
+      if (user && metadataVersion !== versionToPersist) {
+        await supabase.auth.updateUser({
+          data: { [WHATS_NEW_USER_METADATA_KEY]: versionToPersist },
+        });
+        if (!active) return;
+      }
+
+      if (hasSeenCurrent) return;
+      setVisible(true);
+      trackEvent("whats_new_view", { release: latestPublicRelease.version });
+    };
+
+    void syncSeenVersion();
+    return () => {
+      active = false;
+    };
   }, [consent, pathname]);
 
   if (!visible) return null;
@@ -74,7 +111,6 @@ export function WhatsNewCard() {
           href={latestPublicRelease.feedbackHref}
           prefetch={false}
           className="whats-new-secondary"
-          onClick={() => trackEvent("whats_new_feedback", { release: latestPublicRelease.version })}
         >
           의견 남기기
         </Link>

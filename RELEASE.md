@@ -1,8 +1,8 @@
-# 릴리스 후보 매니페스트: 해낼게 2.1.5
+# 릴리스 후보 매니페스트: 해낼게 2.2.0
 
 ```yaml
-release: 2.1.5
-release_tag: 2.1.5+whats-new-updates
+release: 2.2.0
+release_tag: 2.2.0+whats-new-updates
 date: 2026-11-12
 status: staging-candidate
 line: v2
@@ -11,12 +11,12 @@ canonical_url: https://haenael-ge.vercel.app
 parent_release: 2.1.4 (8f7fd9a)
 public_note:
   title: "새로 달라진 점을 한곳에서 확인하세요"
-  summary: "최근 업데이트를 로그인 없이 보고, 새 기능을 바로 써 보거나 의견을 남길 수 있어요."
+  summary: "최근 업데이트를 로그인 없이 보고, 좋아요·별로예요로 바로 의견을 보낼 수 있어요."
   notify: true
   try_href: /updates
-  feedback_href: /updates
+  feedback_href: /updates#feedback
 ships:
-  code: 공개 업데이트 기록, 버전별 최초 1회 새로운 기능 카드, 분석 동의 기반 GA4 반응 이벤트, Google 소유확인 메타 2개
+  code: 공개 업데이트 기록, 회원 Auth user_metadata·비회원 localStorage 기반 버전별 최초 1회 새로운 기능 카드, 분석 동의 기반 GA4 rating 의견, 기존 이메일 문의 경로, Google 소유확인 메타 2개
   migrations: none
   edge_functions: none
 qa_gate:
@@ -28,7 +28,8 @@ qa_gate:
 
 ```yaml
 release: 2.1.4
-release_tag: 2.1.4+search-analytics
+release_tag: 2.1.4+fix-search-analytics
+release_tag_correction_reason: 운영 버전 번호는 유지하고 PATCH 릴리스 태그 규칙에 맞춰 fix 작업 태그로 정정
 date: 2026-11-12
 status: released
 released_at: 2026-11-12 15:5x KST (main 8f7fd9a, 운영 health 2.1.4)
@@ -58,7 +59,8 @@ qa_gate:
 
 ```yaml
 release: 2.1.3
-release_tag: 2.1.3+mobile-accessibility
+release_tag: 2.1.3+fix-mobile-accessibility
+release_tag_correction_reason: 운영 버전 번호는 유지하고 PATCH 릴리스 태그 규칙에 맞춰 fix 작업 태그로 정정
 date: 2026-11-11
 status: released
 released_at: 2026-11-11 15:2x KST (main 4a2421a, Vercel 자동배포, 운영 health version 2.1.3 sourceSha 4a2421a)

@@ -1,6 +1,13 @@
 import generated from "@/generated/public-release-notes.json";
 
 export const WHATS_NEW_LAST_SEEN_KEY = "haenael_whats_new_last_seen_version";
+export const WHATS_NEW_USER_METADATA_KEY = "haenael_whats_new_last_seen_version";
+
+export function newerReleaseVersion(left: string | null, right: string | null): string | null {
+  const versions = [left, right].filter((value): value is string => /^\d+\.\d+\.\d+$/.test(value ?? ""));
+  if (versions.length === 0) return null;
+  return versions.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0];
+}
 
 export interface PublicReleaseNote {
   version: string;
