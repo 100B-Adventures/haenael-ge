@@ -1,10 +1,12 @@
-# 릴리스 후보 매니페스트: 해낼게 2.2.1
+# 릴리스 매니페스트: 해낼게 2.2.1
 
 ```yaml
 release: 2.2.1
 release_tag: 2.2.1+fix-analytics-host
 date: 2026-11-13
-status: staging-candidate
+status: releasing
+product_source: 190f7e5d6c28c856b5197a52aea3ce488929e52f
+approval: 회장 2026-11-11 04:40 정책 원문(컨트롤러 전달) "... 개발하고 QA하고 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다". staging 결과 단락은 11-13 03:0x [🇪🇸 제품·하네스-온프렘] 에 먼저 송부
 line: v2
 delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app
@@ -21,8 +23,8 @@ ships:
   migrations: none
   edge_functions: none
 qa_gate:
-  approved: false
-  evidence: staging 관찰 전
+  approved: true
+  evidence: .goal/verify-20261113-0300-pass.md (독립 검증 12차 PASS, f2c9ee6..190f7e5). 회귀 .goal/runs/v2-2.2.1-regression-190f7e5-r5 44/45, QA-TC-LG-02 는 시험 시간 예산 결함(90초 단독 통과 28.2초, diag-LG-02-90s.json). 후속: LG-02 test.setTimeout(90_000)
 ```
 
 # 릴리스 후보 매니페스트: 해낼게 2.2.0
