@@ -19,13 +19,13 @@ latest_preview_deployment:
   qa_approved: true  # 2026-11-12 23:00 KST claude independent-verify 20261112-2253 (2.2.0 재확인)
   production_deployed: false  # 운영은 아직 585ba55. 운영 반영은 회장 원문 필요
 latest_production_deployment:
-  version: 2.1.3
-  source_sha: 585ba55aba8c5abe75b22bc6b0131182a0781b16  # 2.1.3 첫 반영 6e1260d·4a2421a(11-11 15:2x), 문서 커밋 585ba55(11-12 02시)
+  version: 2.2.0  # release_tag 2.2.0+whats-new-updates
+  source_sha: f2c9ee603858ef818066ab871b80e705f63c3dfa  # 첫 반영 2ae841b(11-12 23:2x), CI 계약 수정 재빌드 f2c9ee6(11-13 00:0x). 화면 코드 동일
   url: https://haenael-ge.vercel.app
   deployment: main push 자동배포
   supabase_project_ref: ossvejipdivgxzcqszbw
-  ci: "main CI 42974504576 success(4a2421a), 운영 읽기 전용 E2E 42974896283 success(4a2421a)"
-  approval: '회장 2026-11-11 정책 원문(컨트롤러 전달) "다 첫 배포 단계고 아직 유저가 없고 ... 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다"'
+  ci: "main CI 43242763386 success(f2c9ee6), 운영 읽기 전용 E2E 43243480064 success(f2c9ee6). 직전 43237658028(2ae841b) failure 는 CI 패키지 경계 계약, RELEASE.md ci_fix"
+  approval: '회장 2026-11-11 04:40 정책 원문(컨트롤러 전달) "다 첫 배포 단계고 아직 유저가 없고 ... 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다". STAGING_REPORT msg 11-12 23:0x claude-31'
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.
