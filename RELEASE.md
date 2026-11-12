@@ -1,3 +1,24 @@
+# 릴리스 매니페스트: 해낼게 2.1.4
+
+```yaml
+release: 2.1.4
+date: 2026-11-12
+status: releasing
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.1.3 (585ba55)
+product_source: a74f33ba132176f32003104ab3456406e7d99a0d
+approval: 회장 2026-11-11 정책 원문(컨트롤러 전달) "... 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다", 회장 11-12 "SEO ... 등록해야 되는 거 다 등록 ... 이벤트 ... 전부 다 세팅"(그로스 세션 전달)
+ships:
+  code: 결제 성공·성장 화면 배치를 승인 시안대로(1024 상단 정렬, 워드맵 236px, 소제목 가운데), robots.txt·sitemap.xml(공개 5경로, /g/ 제외), 네이버 소유확인 메타, GA4 이벤트 전송 순서 수정과 login 이벤트, staging 색인 차단, /privacy 링크 누름 44px
+  migrations: none
+  edge_functions: none
+qa_gate:
+  approved: true
+  evidence: .goal/verify-20261112-1445-pass.md (독립 검증 9차 PASS), 회귀 .goal/runs/v2-f3-f4-regression-a74f33b 45/45
+```
+
 # 릴리스 매니페스트: 해낼게 2.1.3
 
 ```yaml
