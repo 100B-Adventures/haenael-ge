@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { BUSINESS_INFORMATION } from "@/lib/legal/exposure";
-import { latestPublicRelease } from "@/lib/release-notes";
+import { latestAnnouncedRelease, latestPublicRelease } from "@/lib/release-notes";
 
 type ReleaseRating = "like" | "dislike";
 
@@ -13,7 +13,8 @@ export function ReleaseFeedback() {
 
   const submitRating = (rating: ReleaseRating) => {
     const sent = trackEvent("whats_new_feedback", {
-      release: latestPublicRelease.version,
+      // 의견은 카드가 안내한 기능 버전에 붙인다. 안내 버전이 없으면 최신 기록 버전.
+      release: (latestAnnouncedRelease ?? latestPublicRelease).version,
       rating,
     });
     setStatus(sent ? "sent" : "blocked");

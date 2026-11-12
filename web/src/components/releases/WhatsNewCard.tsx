@@ -8,7 +8,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
 import { createClient } from "@/lib/supabase/client";
 import {
-  latestPublicRelease,
+  latestAnnouncedRelease,
   newerReleaseVersion,
   WHATS_NEW_LAST_SEEN_KEY,
   WHATS_NEW_USER_METADATA_KEY,
@@ -28,7 +28,8 @@ export function WhatsNewCard() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (consent === null || !latestPublicRelease.notify || isWhatsNewExcludedPath(pathname)) {
+    const announced = latestAnnouncedRelease;
+    if (consent === null || !announced || isWhatsNewExcludedPath(pathname)) {
       setVisible(false);
       return;
     }
@@ -51,8 +52,8 @@ export function WhatsNewCard() {
         ? user.user_metadata[WHATS_NEW_USER_METADATA_KEY]
         : null;
       const newestSeenVersion = newerReleaseVersion(localVersion, metadataVersion);
-      const hasSeenCurrent = newerReleaseVersion(newestSeenVersion, latestPublicRelease.version) === newestSeenVersion;
-      const versionToPersist = hasSeenCurrent ? newestSeenVersion : latestPublicRelease.version;
+      const hasSeenCurrent = newerReleaseVersion(newestSeenVersion, announced.version) === newestSeenVersion;
+      const versionToPersist = hasSeenCurrent ? newestSeenVersion : announced.version;
 
       try {
         window.localStorage.setItem(WHATS_NEW_LAST_SEEN_KEY, versionToPersist!);
@@ -69,7 +70,7 @@ export function WhatsNewCard() {
 
       if (hasSeenCurrent) return;
       setVisible(true);
-      trackEvent("whats_new_view", { release: latestPublicRelease.version });
+      trackEvent("whats_new_view", { release: announced.version });
     };
 
     void syncSeenVersion();
@@ -78,7 +79,8 @@ export function WhatsNewCard() {
     };
   }, [consent, pathname]);
 
-  if (!visible) return null;
+  const release = latestAnnouncedRelease;
+  if (!visible || !release) return null;
 
   return (
     <aside
@@ -95,20 +97,20 @@ export function WhatsNewCard() {
       >
         <X aria-hidden="true" />
       </button>
-      <p className="whats-new-kicker">새로운 기능 · {latestPublicRelease.version}</p>
-      <h2 id="whats-new-title">{latestPublicRelease.title}</h2>
-      <p className="whats-new-summary">{latestPublicRelease.summary}</p>
+      <p className="whats-new-kicker">새로운 기능 · {release.version}</p>
+      <h2 id="whats-new-title">{release.title}</h2>
+      <p className="whats-new-summary">{release.summary}</p>
       <div className="whats-new-actions">
         <Link
-          href={latestPublicRelease.tryHref}
+          href={release.tryHref}
           prefetch={false}
           className="whats-new-primary"
-          onClick={() => trackEvent("whats_new_try", { release: latestPublicRelease.version })}
+          onClick={() => trackEvent("whats_new_try", { release: release.version })}
         >
           써 보기
         </Link>
         <Link
-          href={latestPublicRelease.feedbackHref}
+          href={release.feedbackHref}
           prefetch={false}
           className="whats-new-secondary"
         >

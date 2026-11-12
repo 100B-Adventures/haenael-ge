@@ -22,3 +22,11 @@ export interface PublicReleaseNote {
 
 export const publicReleaseNotes = generated.releases satisfies PublicReleaseNote[];
 export const latestPublicRelease = publicReleaseNotes[0];
+
+// 새로운 기능 카드와 의견 버튼이 가리키는 버전. 버그 수정판(notify:false)이 나와도
+// 아직 안 본 가장 최근 notify:true 버전을 띄운다(release-notes-and-whats-new 표준, 2026-11-13 개정).
+export function findLatestAnnouncedRelease(notes: readonly PublicReleaseNote[]): PublicReleaseNote | null {
+  return notes.find((note) => note.notify) ?? null;
+}
+
+export const latestAnnouncedRelease = findLatestAnnouncedRelease(publicReleaseNotes);

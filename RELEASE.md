@@ -1,3 +1,30 @@
+# 릴리스 후보 매니페스트: 해낼게 2.2.1
+
+```yaml
+release: 2.2.1
+release_tag: 2.2.1+fix-analytics-host
+date: 2026-11-13
+status: staging-candidate
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.2.0 (f2c9ee6)
+reason: 회장 원문(11-12 23:3x, 하네스 컨트롤러 전달) "운영 환경에는 스테이징이나 아니면 에이전트나 내가 들어간 이벤트들이 아니고 실제 이벤트들이 걸려야". 관찰: staging 과 운영이 같은 GA4 G-3QR2FB5BGC·Clarity z7rlqfvdmm 를 싣고 있었다(11-13 00시). 표준 개정 c79a6e8a(새 기능 알림은 아직 안 본 가장 최근 notify:true 버전, 스테이징 측정 태그는 코드의 호스트 판정)
+public_note:
+  title: "시험 방문이 이용 통계에 섞이지 않게 했어요"
+  summary: "개발과 시험에 쓰는 화면의 방문은 이용 통계에 넣지 않아요. 쓰는 방법은 그대로예요."
+  notify: false
+  try_href: /updates
+  feedback_href: /updates#feedback
+ships:
+  code: GA4·Clarity·Meta Pixel 을 운영 canonical 호스트(haenael-ge.vercel.app)에서만 로드(44668ef). E2E 배선 확인은 명시 플래그 haenael_analytics_e2e_intercepted_v1 + 모든 분석 요청 abort. 새로운 기능 카드·의견 버전은 아직 안 본 가장 최근 notify:true 릴리스(2.2.0)를 가리킴
+  migrations: none
+  edge_functions: none
+qa_gate:
+  approved: false
+  evidence: staging 관찰 전
+```
+
 # 릴리스 후보 매니페스트: 해낼게 2.2.0
 
 ```yaml
@@ -22,7 +49,7 @@ ships:
   migrations: none
   edge_functions: none
 ci_fix: main CI 43237658028 은 "배포 환경·환전 층간 계약" 잡 실패. 원인 ①2.2.0 prebuild 의 공개 업데이트 생성기가 web 경계 밖 ../RELEASE.md 를 읽어 web 단독 패키지 빌드에서 ENOENT ②prebuild 앞부분이 바뀌어 배포 스크립트 변이 3건의 치환이 적용되지 않음(변이 없이 통과). 생성기는 원본이 없으면 커밋된 JSON 을 쓰고 버전 비교를 package.json 으로, 변이 시험은 앵커를 "prebuild" 시작으로 바꾸고 치환이 안 되면 실패하게 했다. 운영 화면 코드 변경 없음
-unreleased_after: 2.2.0 위 미출고 변경(다음 운영 릴리스에 실림). 분석 도구(GA4·Clarity·Meta Pixel)를 운영 canonical 호스트에서만 로드. staging·preview 가 운영 측정 ID 로 시험 이벤트를 보내던 문제(11-13 00시 관찰: 두 호스트 모두 G-3QR2FB5BGC·Clarity z7rlqfvdmm). 운영 호스트 동작은 동일하므로 staging 에만 반영
+unreleased_after: 2.2.1 로 출고(아래 2.2.1 매니페스트). 분석 도구(GA4·Clarity·Meta Pixel)를 운영 canonical 호스트에서만 로드. staging·preview 가 운영 측정 ID 로 시험 이벤트를 보내던 문제(11-13 00시 관찰: 두 호스트 모두 G-3QR2FB5BGC·Clarity z7rlqfvdmm). 운영 호스트 동작은 동일하므로 staging 에만 반영
 qa_gate:
   approved: true
   evidence: .goal/verify-20261112-2253.md (독립 검증 11차 PASS, 8f7fd9a..61015de), 회귀 .goal/runs/v2-2.2.0-regression-617b084-r1 45/45, 9폭 측정 .goal/runs/v2-2.2.0-ergonomics-617b084

@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.2.1",
+      "releaseTag": "2.2.1+fix-analytics-host",
+      "date": "2026-11-13",
+      "title": "시험 방문이 이용 통계에 섞이지 않게 했어요",
+      "summary": "개발과 시험에 쓰는 화면의 방문은 이용 통계에 넣지 않아요. 쓰는 방법은 그대로예요.",
+      "notify": false,
+      "tryHref": "/updates",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.2.0",
       "releaseTag": "2.2.0+whats-new-updates",
       "date": "2026-11-12",
@@ -17,16 +27,6 @@
       "date": "2026-11-12",
       "title": "검색과 화면 사용성을 다듬었어요",
       "summary": "공개 안내 페이지를 검색에서 더 잘 찾을 수 있고, 성장 화면과 개인정보 안내를 더 편하게 볼 수 있어요.",
-      "notify": false,
-      "tryHref": "/how",
-      "feedbackHref": "/updates"
-    },
-    {
-      "version": "2.1.3",
-      "releaseTag": "2.1.3+fix-mobile-accessibility",
-      "date": "2026-11-11",
-      "title": "휴대폰에서 글자와 버튼이 더 편해졌어요",
-      "summary": "작은 글자를 키우고 누르기 어려운 버튼을 손봐서 목표와 응원 화면을 더 편하게 사용할 수 있어요.",
       "notify": false,
       "tryHref": "/how",
       "feedbackHref": "/updates"

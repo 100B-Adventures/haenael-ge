@@ -16,9 +16,9 @@ describe("공개 업데이트 기록", () => {
 
     const items = within(screen.getByRole("list", { name: "최근 업데이트" })).getAllByRole("listitem");
     expect(items).toHaveLength(3);
-    expect(items[0]).toHaveTextContent("버전 2.2.0");
-    expect(items[1]).toHaveTextContent("버전 2.1.4");
-    expect(items[2]).toHaveTextContent("버전 2.1.3");
+    expect(items[0]).toHaveTextContent("버전 2.2.1");
+    expect(items[1]).toHaveTextContent("버전 2.2.0");
+    expect(items[2]).toHaveTextContent("버전 2.1.4");
     expect(screen.getByRole("heading", { name: "새로 달라진 점을 확인하세요" })).toBeInTheDocument();
   });
 
