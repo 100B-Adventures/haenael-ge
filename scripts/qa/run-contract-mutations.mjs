@@ -101,8 +101,13 @@ function verifyVercelPackageBoundary() {
     };
     const mutate = (id, path, transform, expectedOutput) => {
       const original = readFileSync(path, "utf8");
+      const mutated = transform(original);
+      // 치환 대상 문자열이 원본에서 사라지면 변이가 적용되지 않아 "막혀야 할 것이 통과" 하는 거짓 FAIL/PASS 가 된다.
+      if (mutated === original) {
+        return { id, passed: false, detail: `mutation_not_applied path=${path}` };
+      }
       try {
-        writeFileSync(path, transform(original));
+        writeFileSync(path, mutated);
         return resultFor(id, runBoundary(), 1, expectedOutput);
       } finally {
         writeFileSync(path, original);
@@ -275,8 +280,8 @@ function verifyVercelPackageBoundary() {
         "MUTATION-PACKAGE-DEPLOY-SCRIPT-TRANSITIVE",
         packageJsonPath,
         (source) => source.replace(
-          '"prebuild": "node scripts/qa/check-web-package-boundary.mjs &&',
-          '"prebuild": "npm run test:qa-contracts && node scripts/qa/check-web-package-boundary.mjs &&',
+          '"prebuild": "',
+          '"prebuild": "npm run test:qa-contracts && ',
         ),
         "deploy-script-depends-outside",
       ),
@@ -284,8 +289,8 @@ function verifyVercelPackageBoundary() {
         "MUTATION-PACKAGE-DEPLOY-SCRIPT-TRANSITIVE-OPTION",
         packageJsonPath,
         (source) => source.replace(
-          '"prebuild": "node scripts/qa/check-web-package-boundary.mjs &&',
-          '"prebuild": "npm --silent run qa:verify-production && node scripts/qa/check-web-package-boundary.mjs &&',
+          '"prebuild": "',
+          '"prebuild": "npm --silent run qa:verify-production && ',
         ),
         "deploy-script-depends-outside",
       ),
@@ -293,8 +298,8 @@ function verifyVercelPackageBoundary() {
         "MUTATION-PACKAGE-DEPLOY-SCRIPT-TRANSITIVE-RUN-OPTION",
         packageJsonPath,
         (source) => source.replace(
-          '"prebuild": "node scripts/qa/check-web-package-boundary.mjs &&',
-          '"prebuild": "npm run --silent qa:verify-production && node scripts/qa/check-web-package-boundary.mjs &&',
+          '"prebuild": "',
+          '"prebuild": "npm run --silent qa:verify-production && ',
         ),
         "deploy-script-depends-outside",
       ),

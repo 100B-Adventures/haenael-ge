@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(scriptDir, "../../..");
-const releasePath = resolve(repoRoot, "RELEASE.md");
-const outputPath = resolve(repoRoot, "web/src/generated/public-release-notes.json");
+const webRoot = resolve(scriptDir, "../..");
+const releasePath = resolve(webRoot, "..", "RELEASE.md");
+const outputPath = resolve(webRoot, "src/generated/public-release-notes.json");
 
 function parseScalar(raw) {
   const value = raw.trim();
@@ -80,9 +80,19 @@ export function parsePublicReleaseNotes(markdown) {
     .slice(0, 3);
 }
 
+// web 만 따로 복사한 패키지(CI 의 VERCEL-PACKAGE 계약, web 경계 밖 파일 없음)에서는 RELEASE.md 가 없다.
+// 그때는 커밋된 생성물을 그대로 쓴다. --check 는 저장소 전체에서만 돌므로 원본이 없으면 실패한다.
+if (!existsSync(releasePath)) {
+  if (process.argv.includes("--check")) throw new Error(`RELEASE.md not found at ${releasePath}`);
+  if (!existsSync(outputPath)) throw new Error(`RELEASE.md and committed ${outputPath} are both missing`);
+  console.log("PUBLIC_RELEASE_NOTES_SKIPPED reason=release-md-outside-package source=committed-json");
+  process.exit(0);
+}
+
+const packageVersion = JSON.parse(readFileSync(resolve(webRoot, "package.json"), "utf8")).version;
 const releaseNotes = parsePublicReleaseNotes(readFileSync(releasePath, "utf8"));
-if (releaseNotes.length !== 3 || releaseNotes[0]?.version !== "2.2.0") {
-  throw new Error(`expected newest three public releases from 2.2.0, received ${releaseNotes.map(({ version }) => version).join(", ")}`);
+if (releaseNotes.length !== 3 || releaseNotes[0]?.version !== packageVersion) {
+  throw new Error(`expected newest three public releases from ${packageVersion}, received ${releaseNotes.map(({ version }) => version).join(", ")}`);
 }
 
 const generated = `${JSON.stringify({ source: "RELEASE.md", releases: releaseNotes }, null, 2)}\n`;
