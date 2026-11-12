@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-12 검색 노출 제어·GA4 제품 이벤트 전달 보정
+
+- Next.js App Router metadata route로 `robots.txt`와 `sitemap.xml`을 추가했다. 검색 허용은 랜딩·이용안내·이용약관·개인정보처리방침·아동 안전 정책으로 한정하고, 인증·관리자·API·결제·환전·친구·마이페이지·온보딩·워드맵과 공개 목표 `/g/<slug>`는 차단했다. 공개 목표는 닉네임·목표·응원 메시지 노출 정책 결정 전까지 sitemap에서도 제외한다.
+- 루트 metadata에 네이버 사이트 소유 확인 값을 추가했다. GA4의 `wordmap_shared`, `wordmap_viewed`, `cashout_initiated`는 초기 React effect가 GA `config`보다 먼저 실행되면 목적지 없이 `dataLayer`에 들어가던 것이 미전송 원인이었다. 이벤트를 측정 ID 설정 완료 전 전용 대기열에 보관하고 `config` 직후 flush하도록 고쳤으며, 분석 동의 거부 시 대기열을 비우고 전송하지 않는 기존 계약을 유지했다.
+- 가입과 로그인 callback은 GA4 권장 이벤트 `sign_up`, `login`을 각각 한 번만 표시하고, 동의가 있는 안전 경로에서만 전송한다. 검색 metadata와 다섯 이벤트 호출·초기화 순서·동의 거부 경계를 단위 시험으로 고정했다.
+- 제품 커밋 `c67cde47349aa496d20c756b93c6b3d6b33a8d7f`에서 Vitest 93파일·563건, TypeScript, design-token lint 신규 위반 0이 통과했다. Vercel staging의 health `sourceSha`가 같은 값을 반환했고 `/robots.txt`, `/sitemap.xml`, `/`가 HTTP 200으로 정확한 차단 목록·공개 URL 5개·네이버 확인 meta를 제공했다.
+- 전체 staging 회귀 첫 실행은 제품 assertion 없이 `OPS-ALERT-01` 30초, `QA-TC-LG-01` 45초 timeout으로 43/45였다. 허용된 환경성 재실행은 45/45, unexpected 0, flaky 0이며 결제 복구 HTTP 503과 DB·Auth·Storage fixture 잔존 0을 확인했다. 운영 배포·main push·Search Console 및 네이버 Search Advisor 제출·독립 검증은 하지 않았다.
+
+> STAMP: 2026-11-12 14:53 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=그로스 검색등록·이벤트 점검표 해낼게 행, 제품 호출 경로·단위시험, staging curl·health, 전체 회귀 r2 · 고민=공개 검색 표면을 법적 정적 페이지로 제한하면서 분석 동의 이전 초기 이벤트도 유실 없이 보류하도록 했다.
+
 ## 2026-11-09 W-12 격리 staging 환전 환경 게이트
 
 - 일반 Vercel Preview는 계속 환전을 거부한다. 정확한 격리 Supabase origin, 서버 전용 opt-in, 전용 회원 allowlist, 전용 암호화 키와 지문 키가 모두 맞을 때만 신청 경로를 연다.
