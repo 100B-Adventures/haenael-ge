@@ -4,7 +4,9 @@
 release: 2.2.1
 release_tag: 2.2.1+fix-analytics-host
 date: 2026-11-13
-status: releasing
+status: released
+released_at: 2026-11-13 04:2x KST (main cd49d84, 운영 health 2.2.1)
+ci: main CI 43289651132 success, 운영 읽기 전용 E2E 43290170725 success
 product_source: 190f7e5d6c28c856b5197a52aea3ce488929e52f
 approval: 회장 2026-11-11 04:40 정책 원문(컨트롤러 전달) "... 개발하고 QA하고 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다". staging 결과 단락은 11-13 03:0x [🇪🇸 제품·하네스-온프렘] 에 먼저 송부
 line: v2
