@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 열린 항목
+
+- 2.2.0+whats-new-updates: Codex 수정(617b084, staging 반영) 회귀 진행 중 → 독립 검증 11차 → PASS 시 컨트롤러 결과 단락 → 운영 배포. (114 haenael-ge-89 세션)
+- Vercel 프로젝트 `haenael-ge-v2-hotfix` 삭제: 회장 결정 대기.
+- 피드백 저장용 새 DB 테이블: 회장 결정 F 대기(그 전까지 GA4 rating·기존 경로만).
+- 저장소 /mnt/hdd 이전(루트 2.9G·hotfix 2.4G): 운영 배포 뒤 유휴 시점에.
+
 ## [2026-11-12 20:34 KST] compact 마크 (auto)
 - 세션 f46c03f7 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: bc1bf42 docs(state): correct stale mac handoff for v2
