@@ -2,7 +2,8 @@
 
 ## 열린 항목
 
-- 2.2.0+whats-new-updates: Codex 수정(617b084, staging 반영) 회귀 진행 중 → 독립 검증 11차 → PASS 시 컨트롤러 결과 단락 → 운영 배포. (114 haenael-ge-89 세션)
+- 2.2.0+whats-new-updates: Codex 수정 완료(617b084, 문서 61015de, staging 반영, 회귀 45/45). 독립 검증 11차(Claude qa-verifier) 실행 중 → PASS 시 컨트롤러 결과 단락 → 운영 배포. (114 haenael-ge-89 세션)
+- Codex 한도 소진(재개 11-18 13:03). 마지막 Codex 작업 CODEX_RESUME=01a1c700-5ad6-7702-a64f-9356af706dd9 (code-builder, 2.2.0, rc=0 종료라 이어갈 미완 없음). 그때까지 구현·QA 는 Claude 하위 에이전트. 결제 코드 교차리뷰는 다른 Claude 세션 또는 11-18 이후.
 - Vercel 프로젝트 `haenael-ge-v2-hotfix` 삭제: 회장 결정 대기.
 - 피드백 저장용 새 DB 테이블: 회장 결정 F 대기(그 전까지 GA4 rating·기존 경로만).
 - 저장소 /mnt/hdd 이전(루트 2.9G·hotfix 2.4G): 운영 배포 뒤 유휴 시점에.
