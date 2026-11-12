@@ -1,22 +1,25 @@
 # v2 누적 회귀·공개 업데이트·분석 이벤트 시험 정본
 
-> STAMP: 2026-11-12 17:08 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.32 · 제품 source `294136d3a30be18be09e2217e7161683a14e37b8`
+> STAMP: 2026-11-12 19:32 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.33 · 제품 source `3e42b0b52b38b39f916972e1a82dfc3bada950d5`
 
 ## 범위와 원본
 
-이 문서는 제품 source `294136d3a30be18be09e2217e7161683a14e37b8`의 공개 업데이트 화면, 버전별 새로운 기능 카드, Google Analytics 4 이벤트, Google 소유 확인 메타, 검색 노출, 9폭 모바일 사용성을 고정한다. staging health의 source와 version은 각각 `294136d…`, `2.1.5`다.
+이 문서는 제품 source `3e42b0b52b38b39f916972e1a82dfc3bada950d5`의 공개 업데이트 화면, 버전별 새로운 기능 카드, Google Analytics 4 이벤트, Google 소유 확인 메타, 검색 노출, 9폭 모바일 사용성을 고정한다. staging health의 source와 version은 각각 `3e42b0b…`, `2.1.5`다.
 
-런타임 결과는 `.goal/runs/v2-2.1.5-deploy-294136d/`와 `.goal/runs/v2-2.1.5-ergonomics-294136d/`을 함께 본다. Vitest는 `95 files / 570 tests`, 디자인 토큰 검사는 `311 files / existing 40 / new 0`이며, 18개 화면·폭 조합에서 글자·누름·눌림 상태·가로 넘침·카드 겹침·콘솔 오류 위반이 모두 0이다.
+런타임 결과는 `.goal/runs/v2-2.1.5-deploy-3e42b0b/`, `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/`, `.goal/runs/v2-2.1.5-ergonomics-294136d/`을 함께 본다. 최종 회귀는 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며, 18개 화면·폭 조합에서 글자·누름·눌림 상태·가로 넘침·카드 겹침·콘솔 오류 위반이 모두 0이다.
 
 ## 공개 업데이트·새로운 기능 카드 추가 시험
 
 | TC-ID | 종류 | Given / When / Then | 판정 | 증거 |
 |---|---|---|---|---|
-| `RELEASE-PUBLIC-01` | 기능-해피·콘텐츠 | Given `RELEASE.md`의 `public_note`, When `/updates`를 빌드·요청, Then 2.1.5부터 최신순 3개를 로그인 없이 렌더하고 HTTP 200 | PASS | `web/src/app/updates/__tests__/page.test.tsx`, `.goal/runs/v2-2.1.5-deploy-294136d/{verification.json,verify.log}` |
+| `RELEASE-PUBLIC-01` | 기능-해피·콘텐츠 | Given `RELEASE.md`의 `public_note`, When `/updates`를 빌드·요청, Then 2.1.5부터 최신순 3개를 로그인 없이 렌더하고 HTTP 200 | PASS | `web/src/app/updates/__tests__/page.test.tsx`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/{verification.json,verify.log}` |
 | `WHATS-NEW-ONCE-01` | 기능-해피·상태 | Given 해당 버전을 보지 않은 회원 또는 비회원, When 첫 방문 뒤 카드를 닫고 다시 방문, Then 카드는 한 번만 보이고 `localStorage`에 2.1.5를 기억 | PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `/tmp/haenael-215-vitest.log` |
-| `WHATS-NEW-GA-01` | 기능-해피·개인정보 | Given 분석 동의 허용, When 카드를 보고 `써 보기`·`의견 남기기`를 선택, Then `whats_new_view`·`whats_new_try`·`whats_new_feedback`을 전송하고, 거부 시 세 이벤트 모두 미전송 | PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `.goal/runs/v2-2.1.5-deploy-294136d/verification.json`의 실제 `whats_new_view` collect |
-| `SEO-GOOGLE-02` | 기능-해피 | Given 루트 metadata, When staging HTML을 요청, Then 기존 값과 신규 값의 `google-site-verification` 메타가 정확히 2개 존재 | PASS | `web/src/app/__tests__/seo-metadata.test.ts`, `.goal/runs/v2-2.1.5-deploy-294136d/verification.json` |
-| `SEO-UPDATES-01` | 기능-해피·보안 | Given 공개 업데이트 경로, When sitemap과 preview robots를 요청, Then sitemap에 `/updates`가 있고 preview robots는 전체 경로를 차단 | PASS | `.goal/runs/v2-2.1.5-deploy-294136d/{sitemap.xml,robots.txt}` |
+| `WHATS-NEW-ACTION-01` | 기능-해피·탐색 | Given 카드가 열림, When `써 보기`와 `의견 남기기`를 선택, Then 두 링크가 RELEASE 2.1.5의 지정 경로로 이동 | PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `web/src/generated/public-release-notes.json` |
+| `WHATS-NEW-GA-GRANTED-01` | 기능-해피·개인정보 | Given 분석 동의 허용, When 카드를 보고 두 행동을 선택, Then `whats_new_view`·`whats_new_try`·`whats_new_feedback`을 전송 | PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/verification.json`의 실제 `whats_new_view` collect |
+| `WHATS-NEW-GA-BLOCKED-01` | 기능-엣지·개인정보 | Given 분석 동의 거부, When 카드를 보고 두 행동을 선택, Then 세 이벤트와 대기열을 모두 생성하지 않음 | PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx` |
+| `SEO-VERIFICATION-02` | 기능-해피 | Given 루트 metadata, When staging HTML을 요청, Then Google verification 기존·신규 값 2개와 Naver verification 1개가 존재 | PASS | `web/src/app/__tests__/seo-metadata.test.ts`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/verification.json`, `.goal/runs/independent-verify-20261112-1352/` |
+| `SEO-UPDATES-01` | 기능-해피·보안 | Given 공개 업데이트 경로, When sitemap과 preview robots를 요청, Then sitemap에 `/updates`가 있고 preview robots는 전체 경로를 차단 | PASS | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{sitemap.xml,robots.txt}` |
+| `REGRESSION-WHATS-ISOLATION-01` | 회귀·시험격리 | Given 기존 소셜 회귀 컨텍스트, When 2.1.5 카드를 이미 본 상태로 고정, Then 카드가 기존 클릭·서버 호출 0건 계약을 가리지 않고 45건 모두 통과 | PASS | source `3e42b0b`, `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{summary.json,report.json,execution.log}` |
 | `ERGO-UPDATES-01` | 모바일·접근성 | Given `/updates`와 새로운 기능 카드가 열린 홈, When 360·390·412·600·700·780·820·900·1000px에서 측정, Then 13px 미만 글자·44px 미만 누름·눌림 상태 90% 미만·가로 넘침·카드와 하단 탭 겹침·콘솔 오류가 모두 0 | PASS | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,measure.log,*.png}` |
 
 ## 검색 노출·GA4·개인정보처리방침 추가 시험
@@ -24,7 +27,7 @@
 | TC-ID | 종류 | Given / When / Then | 판정 | 증거 |
 |---|---|---|---|---|
 | `SEO-ROBOTS-PROD-01` | 기능-해피·보안 | Given `VERCEL_ENV=production`, When `robots()`를 생성, Then `/`·`/how`·`/terms`·`/privacy`·`/child-safety`만 허용하고 인증·관리자·API·개인·결제 경로와 `/g/`를 차단하며 운영 sitemap URL을 제공 | PASS | `.goal/runs/v2-f3-f4-local/{targeted-vitest.log,vitest.log}`, `web/src/app/__tests__/seo-metadata.test.ts` |
-| `SEO-SITEMAP-01` | 기능-해피·보안 | Given 운영 sitemap, When URL 목록을 생성, Then 공개 정적 URL은 정확히 6개이고 각 항목에 lastmod가 있으며 `/updates`는 포함하고 `/g/`는 제외 | PASS | `web/src/app/__tests__/seo-metadata.test.ts`, `.goal/runs/v2-2.1.5-deploy-294136d/sitemap.xml` |
+| `SEO-SITEMAP-01` | 기능-해피·보안 | Given 운영 sitemap, When URL 목록을 생성, Then 공개 정적 URL은 정확히 6개이고 각 항목에 lastmod가 있으며 `/updates`는 포함하고 `/g/`는 제외 | PASS | `web/src/app/__tests__/seo-metadata.test.ts`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/sitemap.xml` |
 | `SEO-NAVER-01` | 기능-해피 | Given 루트 metadata, When 랜딩 HTML을 렌더, Then `naver-site-verification` 값이 정확히 한 번 포함 | PASS | `.goal/runs/independent-verify-20261112-1352/`, `.goal/runs/v2-f3-f4-local/vitest.log` |
 | `ANALYTICS-CONSENT-GRANTED-01` | 기능-해피·개인정보 | Given 분석 동의 허용, When 초기 이벤트를 전송, Then `js → consent update → config(G-3QR2FB5BGC)` 뒤 `wordmap_shared`·`wordmap_viewed`·`cashout_initiated`·`sign_up`·`login`이 gtag 경로로 전달 | PASS | `.goal/runs/independent-verify-20261112-1352/{ga.json,granted.png}`, `.goal/runs/v2-f3-f4-local/vitest.log` |
 | `ANALYTICS-CONSENT-BLOCKED-01` | 기능-엣지·개인정보 | Given 동의 거부 또는 미선택, When 페이지와 로그인 표식을 처리, Then gtag.js·collect·dataLayer 전송은 0이고 로그인 표식 쿠키는 보존 | PASS | `.goal/runs/independent-verify-20261112-1352/{ga.json,denied.png,none.png}`, `.goal/runs/v2-f3-f4-local/vitest.log` |
@@ -87,10 +90,10 @@
 
 Playwright의 [시각 비교 공식 문서](https://playwright.dev/docs/test-snapshots)가 같은 운영체제·브라우저·설정에서 기준과 결과를 비교하도록 권고하는 구조를 차용했다. 이번 실행은 동일 Chromium staging 조건의 단일 회귀 결과를 정본으로 삼는다. Playwright 스냅샷 파일명 규약은 현재 회귀 실행기가 JSON과 PNG 경로를 이미 고정하므로 추가하지 않았다.
 
-KNOWLEDGE_QUERY: haenael-ge v2 QA 회귀 정본, D-051, 45개 시험 원본을 조회했다.
-HITS_USED: `docs/qa/qa-tracker.md`, `wiki/거버넌스/결정.md`, `.goal/runs/w12-regression-edb4c99/{summary.json,health.json}`을 시험 목록·제품 source·정책 근거로 채택했다.
-HITS_REJECTED: 이전 `.goal/runs/w12-regression-585ba55-r2/`는 과거 성공 이력으로 보존하지만 최종 source 근거로는 쓰지 않았다.
-CONFLICTS: 없음. 최종 실행의 `summary.json.source`와 `health.json.sourceSha`가 일치한다.
-SKILLS_USED: haenael-supabase-build — haenael 회귀·staging·fixture 계약을 적용했다.
-SKILLS_SKIPPED: ponytail — candidate 상태이며 미설치·코드 미열람 도구라 이번 QA 정본 생성에 시험하지 않았다.
-SOURCES/MODEL: GPT-5 Codex | `docs/qa/qa-tracker.md` | `wiki/거버넌스/결정.md` | `.goal/runs/w12-regression-edb4c99/{summary.json,health.json}` | https://playwright.dev/docs/test-snapshots
+KNOWLEDGE_QUERY: 2.1.5 공개 업데이트·새로운 기능 카드·Analytics·검색 메타의 기존 시험과 staging 증거 경로를 조회했다.
+HITS_USED: `web/src/app/updates/__tests__/page.test.tsx`, `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `web/src/app/__tests__/seo-metadata.test.ts`, source `3e42b0b` deploy·회귀·9폭 측정 결과를 계약과 판정 근거로 채택했다.
+HITS_REJECTED: r1은 제한시간 중단, r2는 r1 시험 데이터 영향, r3은 호스트 부하 중 timeout이므로 최종 출고 판정에서 제외하고 실행 이력으로만 보존했다.
+CONFLICTS: 없음. r4의 `summary.json.source`와 staging `health.json.sourceSha`가 일치한다.
+SKILLS_USED: haenael-supabase-build — 해낼게 staging·회귀·시험 데이터 정리 계약을 적용했다.
+SKILLS_SKIPPED: qa·qa-only — 제품 재실행과 독립 검증이 금지된 문서 정합 과제라 미사용했다.
+SOURCES/MODEL: GPT-5 Codex | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{verification.json,robots.txt,sitemap.xml}` | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{summary.json,report.json,payment-restore.http}` | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,measure.log}` | https://playwright.dev/docs/test-snapshots

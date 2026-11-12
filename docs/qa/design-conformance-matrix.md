@@ -2,14 +2,14 @@
 
 | 표지 | 값 |
 |---|---|
-| 문서 버전 | v2.1.27 (2026-11-12, 독립 검증 8차 F-3·F-4 builder 해소) |
-| 작성 시각 | 2026-11-12 최종 staging 성장 화면 정렬·preview robots·개인정보처리방침 9폭·전체 회귀 재관찰. 이전 판정 근거 시각은 이력에 보존 |
-| 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-3·F-4 수정·증거 정합: code-builder / GPT-5 Codex |
+| 문서 버전 | v2.1.28 (2026-11-12, 2.1.5 공개 업데이트·새로운 기능 카드) |
+| 작성 시각 | 2026-11-12 source `3e42b0b` staging 카드 390·1440px, `/updates` 9폭, 전체 회귀 r4 재관찰. 이전 판정 근거 시각은 이력에 보존 |
+| 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. 2.1.5 문서·증거 정합: code-builder / GPT-5 Codex |
 | 파이프라인 | 라인 `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
-| 제품 source | `a74f33ba132176f32003104ab3456406e7d99a0d` (staging 별칭 health `sourceSha` 일치) |
+| 제품 source | `3e42b0b52b38b39f916972e1a82dfc3bada950d5` (staging 별칭·immutable health `sourceSha` 일치) |
 | staging | `https://haenael-ge-v2-staging-100-b.vercel.app` |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c0374e5c7f7df6e874e41be3f59f6463b2b256f5e2c4e6fef6b24d5de9a` (`pipeline-state.v2.md:52`). 작업트리 파일 SHA 는 다르다. [O-1](#open) 참조 |
-| 독립 판정 | 검증 8차 FAIL 원본 보존. F-3·F-4 builder 해소 증거 충족, 독립 qa 재승인 대기 |
+| 독립 판정 | 기존 검증 8차 원본 보존. 2.1.5 builder 증거 충족, 독립 qa 재승인 대기 |
 
 ## 목차 <a id="toc"></a>
 
@@ -18,7 +18,7 @@
 3. [용어](#terms)
 4. [수용 조건](#acceptance)
 5. [검증 결과](#results)
-6. [화면별 판정표 26행](#screens)
+6. [승인 시안 26행과 2.1.5 추가 UI](#screens)
 7. [추적성: 결정 → 시안 화면 → 관찰 → 회귀](#trace)
 8. [출고 기준과 보장 범위](#gate)
 9. [증거와 경로 해석](#paths)
@@ -28,14 +28,18 @@
 
 ## 1. 요약 <a id="summary"></a>
 
+**2.1.5 추가 UI(source `3e42b0b`)**: `/updates`와 새로운 기능 카드는 전용 승인 시안이 없으므로 기존 26화면 픽셀 분모에는 넣지 않고 DESIGN.md 토큰 기준으로 별도 판정한다. 카드 390·1440px에서 `--card`·`--line`·`--radius-card`·`--tap-min-size`·13px 이상 글자 토큰을 사용하고 하단 탭 겹침 0을 관찰했다. `/updates`와 카드 열린 홈의 9폭 18/18은 글자·누름·눌림 상태·가로 넘침·겹침·콘솔 오류 위반 0이다.
+
+**최종 source 회귀(source `3e42b0b`)**: staging health는 `version=2.1.5`, `sourceSha=3e42b0b…`, `database=ok`다. 회귀 r4는 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0을 확인했다. 근거 `.goal/runs/v2-2.1.5-deploy-3e42b0b/`, `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/`, `.goal/runs/v2-2.1.5-ergonomics-294136d/`.
+
 **독립 검증 8차 F-3·F-4 builder 해소(source `a74f33b`)**: `dopamine` 목표 문맥 소제목의 강제 왼쪽 정렬을 제거해 승인 시안 `.dopa-top`처럼 가운데 정렬했고 `SMOKE-01`에서 computed `text-align:center`를 단언했다. preview robots 전체 차단과 `/privacy` 9폭 누름 영역 계약, 검색 노출·GA4 시험 문서를 함께 정합했다. builder 판정은 `26 일치 / 0 불일치 / 0 미확인`이며 독립 qa 승인 줄은 작성하지 않았다.
 
 **최종 source 재검증(source `a74f33b`)**: staging health `sourceSha`가 일치하고 `/robots.txt`는 HTTP 200과 전체 차단 본문을 반환한다. 전체 회귀 첫 실행은 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 전 축 0을 확인했다. `/privacy` 9폭은 글자·누름·가로 넘침·콘솔 오류 위반 0이다. 근거 `.goal/runs/v2-f3-f4-deploy-a74f33b/`, `.goal/runs/v2-f3-f4-regression-a74f33b/`, `.goal/runs/v2-f3-f4-privacy-a74f33b/`.
 
 ## 2. 목적·범위·참고 기준 <a id="scope"></a>
 
-- **목적**: 승인 시안 26화면의 기존 판정을 보존하면서 최종 source `a74f33b`의 F-3 성장 화면 소제목 가운데 정렬, F-4 검색 노출·GA4 시험 문서, 전체 회귀를 연결한다.
-- **범위 안**: 26화면 판정표, 성장 화면 소제목 가운데 정렬, production·preview robots 분기, `/privacy` 9폭 누름 영역, 전체 회귀 45건, 결제 기능 비활성 복구와 fixture 정리.
+- **목적**: 승인 시안 26화면의 기존 판정을 보존하면서 최종 source `3e42b0b`의 `/updates`와 새로운 기능 카드를 DESIGN.md 토큰·모바일 사용성·회귀 증거에 연결한다.
+- **범위 안**: 기존 26화면 판정표, 2.1.5 추가 UI 2행, 카드 390·1440px, `/updates`·카드 열린 홈 9폭, 전체 회귀 45건, 결제 기능 비활성 복구와 fixture 정리.
 - **범위 밖**: 실제 Toss 승인 호출, 운영 환경, 비 Chromium 브라우저, 성능·부하·보안, 독립 qa 승인.
 - **대조 소스 4종**: 회장 요청·결정은 `wiki/거버넌스/결정.md` D-050~D-053과 F-7 원문 `.goal/verify-20261110-1252.md`, PRD는 `docs/plan/prd-haenael-ge-v0.4.0.md`, 화면·플로우는 `DESIGN.md`와 승인 시안 `docs/design/prototypes/social-viral-loop-v3-opus5.html`, 수치 규격은 `docs/design/design-spec-core-cashout-30-27-v1-gpt-codex.md`와 `standard-design.md` §17.3이다. W-12 현재 변경은 cashout 3상태에 한정하고 나머지 25화면은 제품 diff가 없어 기존 직접 관찰 판정을 승계한다.
 - **참고한 보고서 구성(2026-11-09 조회)**:
@@ -56,7 +60,7 @@
 
 | ID | Given / When / Then |
 |---|---|
-| AC-1 | Given 최종 source `a74f33b` exact staging, When 누적 회귀를 retries 0으로 실행, Then `45 expected / 0 unexpected / 0 flaky / 0 skipped`, Playwright와 전체 실행 EXIT 0 |
+| AC-1 | Given 최종 source `3e42b0b` exact staging, When 누적 회귀를 retries 0으로 실행, Then `45 expected / 0 unexpected / 0 flaky / 0 skipped`, Playwright와 전체 실행 EXIT 0 |
 | AC-2 | Given 실제 `DONE` 결제, When `paysuccess`·`dopamine` 을 열고 CTA 를 누름, Then HTTP 200·overflow 0·console error 0·오류 문구 0, 성장 화면 소제목 computed `text-align:center`, 성공과 성장이 분리되고 시안 구조와 같음 |
 | AC-3 | Given 16e483d diff 가 결제 성공 범위로 한정, When 나머지 23화면 판정, Then 직전 직접 PNG 근거 재사용을 경로와 함께 명시 |
 | AC-4 | Given `cashout` staging 관찰과 2026-08-30 core 판정, When 분모 집계, Then `cashout`을 구조·순서 일치로 포함해 `26/0/0` |
@@ -64,23 +68,27 @@
 | F-6 | Given 시험 키 4종과 최종 source `e5b65f1` staging, When 허용 신청·중복·허용 밖 거부와 계좌 입력 폼 9폭 측정, Then 신청 `REQUESTED`·마스킹·원문 0·`CASHOUT_HOLD`, 중복·허용 밖 거부, 3축 위반 0, fixture 잔존 0 |
 | F-7 | Given 최종 source `8cb7b41` staging의 계좌 입력 폼과 실제 `REQUESTED` 상태·내역, When 측정기 동일 선택자로 9폭씩 측정, Then 글자·본문 토큰·탭 크기·눌림 상태·넘침 기준을 모두 통과하고 폭별 캡처와 fixture 정리 증거가 남음 |
 | F-9 | Given 최종 source `ad7dce4` staging, When 6경로를 9폭으로 실측하고 고아 줄바꿈 계약을 실행, Then 13px 미만 글자·44px 미만 누름·눌림 상태 미달·가로 넘침·콘솔 오류·28px 미만 고아 줄바꿈이 0이고 fixture 잔존이 0 |
+| UI-UPDATE-01 | Given 전용 승인 시안이 없는 `/updates`, When DESIGN.md 토큰과 9폭 실화면을 대조, Then 토큰 밖 값·13px 미만 글자·44px 미만 누름·가로 넘침·콘솔 오류가 0 |
+| UI-WHATS-NEW-01 | Given 전용 승인 시안이 없는 새로운 기능 카드, When 390·1440px 및 9폭으로 관찰, Then DESIGN.md 카드·색·곡률·글자·누름 토큰을 사용하고 하단 탭과 겹치지 않음 |
 
 ## 5. 검증 결과 <a id="results"></a>
 
 | AC | 결과 | 증거 등급 | 원본 |
 |---|---|---|---|
-| AC-1 | 충족, 첫 실행 45/45, Playwright·전체 실행 EXIT 0, 477.8초 | 테스트됨 | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json,playwright.exit,run.exit,health.json}` |
+| AC-1 | 충족, r4 45/45, Playwright·전체 실행 EXIT 0, 579.5초 | 테스트됨 | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{summary.json,report.json,playwright.exit,run.exit,health.json}` |
 | AC-2 | 충족, 기존 3폭 시각 대조 승계와 최종 `SMOKE-01` 가운데 정렬 단언 expected | 관찰됨·테스트됨 | `.goal/runs/w12-regression-a980a13-r2/comparisons/{paysuccess,dopamine}-pair-{390,1024,1440}.png`, `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json}` |
 | AC-3 | 충족, 23화면 재사용 | 근거 확인 | `.goal/verify-20261109-192x.md:33` (diff 7파일 목록) |
 | AC-4 | 충족, `26 일치 / 0 불일치 / 0 미확인` | 관찰됨·근거 확인 | `.goal/runs/w12-staging-20261110/`, `.goal/runs/w12-ergonomics-73d08c7/`, `.goal/verify-20261110-0358.md` §3 |
-| AC-5 | 충족, 결제 기능 비활성 HTTP 503, 최종 회귀 fixture 잔존 0 | 관찰됨 | `.goal/runs/v2-f3-f4-regression-a74f33b/{payment-restore.http,summary.json,execution.log}` |
+| AC-5 | 충족, 결제 기능 비활성 HTTP 503, r4 fixture 잔존 0 | 관찰됨 | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{payment-restore.http,summary.json,execution.log}` |
 | F-6 | builder 해소, 독립 qa 재승인 대기 | 관찰됨·테스트됨 | `.goal/runs/w12-f6-deploy-e5b65f1/`, `.goal/runs/w12-f6-verify-e5b65f1/{observations.json,verify.log}` |
 | F-7 | builder 해소, 27/27 4축 PASS, 눌림 상태 100% | 관찰됨·테스트됨 | `.goal/runs/w12-f7-deploy-8cb7b41/`, `.goal/runs/w12-regression-8cb7b41/`, `.goal/runs/w12-ergonomics-8cb7b41/{observations.json,measure.log,*.png}` |
 | F-9 | builder 해소, 54/54 4축 PASS, 고아 줄바꿈 1/1 PASS, fixture 잔존 0. 최종 SHA 전체 45건은 반복 상한으로 미실행 | 관찰됨·테스트됨 | `.goal/runs/w12-f9-ad7dce4/`, `.goal/runs/w12-f9-ergonomics-ad7dce4/`, `.goal/runs/w12-f9-sp04-ad7dce4/`, `.goal/runs/w12-regression-b772642{,-r2}/` |
+| UI-UPDATE-01 | 충족, 9폭 9/9에서 글자·누름·눌림·넘침·콘솔 위반 0, 최신순 카드 3개 | 관찰됨·테스트됨 | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,updates-*.png}`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/verification.json` |
+| UI-WHATS-NEW-01 | 충족, 390·1440px 카드 토큰 계승과 하단 탭 겹침 0, 9폭 9/9 위반 0 | 관찰됨·근거 확인 | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{whats-new-390.png,whats-new-1440.png,verification.json}`, `.goal/runs/v2-2.1.5-ergonomics-294136d/home-card-*.png`, `DESIGN.md` |
 
 ## 6. W-12 현재 변경 8열 판정표 <a id="screens"></a>
 
-현재 source의 신규 변경은 결제 성장 화면 F-1·F-2이며 [결제 2화면 행](#screens)과 AC-2에 반영했다. 아래 표는 선행 W-12 환전 변경의 8열 판정을 보존한 것으로, `pipeline/product-lane.yaml`과 `approve` QA 게이트에 따라 행동과 수치를 양방향 판정한다. 판정 `✅`는 staging 실화면 HTTP 200, 시험 키, 실제 데이터 상태, 폭별 캡처가 모두 있는 행에만 썼다. 미검증 행은 0개다.
+현재 2.1.5 추가 UI는 [§6.2](#screens-215)에서 별도 판정한다. 아래 표는 선행 W-12 환전 변경의 8열 판정을 보존한 것으로, `pipeline/product-lane.yaml`과 `approve` QA 게이트에 따라 행동과 수치를 양방향 판정한다. 판정 `✅`는 staging 실화면 HTTP 200, 시험 키, 실제 데이터 상태, 폭별 캡처가 모두 있는 행에만 썼다. 미검증 행은 0개다.
 
 | 화면 | 상태 | 행동 명세 | 행동 구현 | 수치 규격 | 수치 구현 | 판정 | 다른 점과 이유 |
 |---|---|---|---|---|---|---|---|
@@ -123,6 +131,15 @@
 | `status` | 390·768·1024·1440. `업적` 제목, hero, 통계, 진행률, 사진 메달 6개, 마이 탭 활성과 실제 4/6 상태를 확인 | 일치 | `direct-captures/status-{390,768,1024,1440}.png`, `observations.json` |
 | `terms` | D-040에 따른 법적 전문·목차·소유 화면을 보존했다. prototype 짧은 예문은 전문 삭제 요구가 아님 | 일치 | 기존 390·1024·1440 대조와 D-040 근거. UI 불변 diff |
 
+### 6.2 2.1.5 추가 UI 판정 <a id="screens-215"></a>
+
+전용 승인 시안이 없으므로 픽셀 일치라고 부르지 않는다. 아래 두 행은 DESIGN.md의 기존 토큰 계승과 실제 staging 사용성만 판정하며, 승인 시안 26화면 분모 `26/0/0`은 변경하지 않는다.
+
+| 화면 | 기준 | staging 관찰 | 판정 | 증거 |
+|---|---|---|---|---|
+| `/updates` | `--background`·`--card`·`--line`·`--radius-card`, 글자 13px 이상, 누름 44px 이상, 최신순 3개 | 360·390·412·600·700·780·820·900·1000px 모두 글자·누름·눌림·넘침·콘솔 위반 0, 업데이트 카드 3개 | DESIGN.md 토큰 기준 충족. 전용 시안이 없어 픽셀 판정 제외 | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,updates-*.png}`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/verification.json` |
+| 새로운 기능 카드 | 같은 카드·선·곡률 토큰, `--tap-min-size`, `--text-meta-micro` 이상, 하단 탭 비가림 | 390px `358×210.765625`, 1440px `420×210.765625`, 두 폭 하단 탭 겹침 면적 0. 9폭 카드 노출·사용성 위반 0 | DESIGN.md 토큰 기준 충족. 전용 시안이 없어 픽셀 판정 제외 | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{whats-new-390.png,whats-new-1440.png,verification.json}`, `.goal/runs/v2-2.1.5-ergonomics-294136d/home-card-*.png` |
+
 ## 7. 추적성: 결정 → 시안 화면 → 관찰 → 회귀 <a id="trace"></a>
 
 | 결정 | 시안 화면(id) | 이번 원본 관찰·캡처 | 회귀 summary 시험 |
@@ -140,11 +157,11 @@
 |---|---|---|---|
 | W-12 환전 신청 happy + edge(현재) | builder 증거 충족 | 시험 키 포함 staging health `sourceSha=8cb7b41`. F-6 쓰기 경로 관찰은 유지되고 F-7 화면 수정 뒤 전체 회귀로 기능 회귀를 확인 | `.goal/runs/w12-f7-deploy-8cb7b41/`, `.goal/runs/w12-regression-8cb7b41/` |
 | 이번 기능 happy + edge(과거 16e483d) | 충족 | 홈 검색 일치·0건, 사진 선택·crop·업로드 `REVIEW`, 환전 읽기, 업적·워드맵·관리자 접힘을 staging에서 실제 조작 | [§6](#screens), `.goal/runs/g7-independent-192x/observations.json` |
-| 최종 source 누적 regression | builder 증거 충족 | source `a74f33b` exact staging의 첫 실행 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, Playwright·전체 실행 EXIT 0, 477.8초, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0 | `.goal/runs/v2-f3-f4-regression-a74f33b/{report.json,summary.json,playwright.exit,run.exit,health.json,payment-restore.http}` |
+| 최종 source 누적 regression | builder 증거 충족 | source `3e42b0b` exact staging의 r4 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, Playwright·전체 실행 EXIT 0, 579.5초, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0 | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{report.json,summary.json,playwright.exit,run.exit,health.json,payment-restore.http}` |
 | 환전 3경로 ergonomics | builder 증거 충족 | 계좌 입력 `/cashout` 폼 9폭, `REQUESTED detail` `/cashout/status` 9폭, `REQUESTED history row` `/cashout/history` 9폭. 27/27 모두 글자 미달 0, 본문 16px, 탭 미달 0, 눌림 100%, 넘침 0, 콘솔 오류 0. 폭별 캡처 27장 직접 확인 | `.goal/runs/w12-ergonomics-8cb7b41/{observations.json,measure.log,cashout-*-*.png,contact-*.png}` |
 | 디자인 QA | builder 증거 충족 | `26 일치 / 0 불일치 / 0 미확인`. 결제 성공은 상단 정렬, 성장 화면은 가운데 소제목·CTA 아래 피드백 박스·승인 236px 워드맵·스크롤 뒤 하단 탭 비가림을 확인했다. cashout은 구조·순서 일치이며 추가 5요소는 2026-08-30 core 판정을 승계 | [§6](#screens), 기존 3폭 `.goal/runs/w12-regression-a980a13-r2/comparisons/{paysuccess,dopamine}-pair-{390,1024,1440}.png`, 최종 정렬 `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json}` |
 
-이 QA 문서가 보장하는 것은 source `a74f33b` exact staging에서 전체 회귀 45/45, 성장 화면 소제목 가운데 정렬, preview robots 전체 차단, `/privacy` 9폭 누름 영역 위반 0, 결제 성공·성장 390·1024·1440px 승인 시안 정합 승계, 성장 워드맵 236px와 스크롤 도달성, 신청 폼·상태·내역 27폭 4축 위반 0과 눌림 100%, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0이며 디자인 분모가 `26/0/0`으로 정합됐다는 builder 증거다. 보장하지 않는 것은 실제 Toss 승인 호출, 운영 환경, 비 Chromium 브라우저, 독립 qa 승인과 단계 승격이다.
+이 QA 문서가 보장하는 것은 source `3e42b0b` exact staging에서 전체 회귀 r4 45/45, `/updates`와 새로운 기능 카드의 DESIGN.md 토큰 준수, 카드 390·1440px 하단 탭 겹침 0, 두 경로 9폭 18/18 위반 0, 성장 화면 소제목 가운데 정렬, preview robots 전체 차단, `/privacy` 9폭 누름 영역 위반 0, 결제 성공·성장 390·1024·1440px 승인 시안 정합 승계, 성장 워드맵 236px와 스크롤 도달성, 신청 폼·상태·내역 27폭 4축 위반 0과 눌림 100%, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0이며 승인 시안 디자인 분모가 `26/0/0`으로 정합됐다는 builder 증거다. `/updates`와 새로운 기능 카드는 전용 승인 시안이 없어 픽셀 일치를 주장하지 않는다. 보장하지 않는 것은 실제 Toss 승인 호출, 운영 환경, 비 Chromium 브라우저, 독립 qa 승인과 단계 승격이다.
 
 ## 9. 증거와 경로 해석 <a id="paths"></a>
 
@@ -158,6 +175,7 @@
 | `observations.json`(결제 행) | `.goal/runs/g7-independent-192x/observations.json` | `16e483d` | paysuccess·dopamine |
 | `{paysuccess,dopamine}-pair-{390,1024,1440}.png` | `.goal/runs/w12-regression-a980a13-r2/comparisons/` | `a980a13` | paysuccess·dopamine 3폭 최종 대조 |
 | `targeted-observations.json` | `.goal/runs/g7-surf-post-remediation-20261108/direct-captures/targeted-observations.json` | `4b15cd88` | bannerupload |
+| `2.1.5 updates·card` | `.goal/runs/v2-2.1.5-deploy-3e42b0b/`, `.goal/runs/v2-2.1.5-ergonomics-294136d/` | `3e42b0b` 배포·`294136d` 9폭 관찰 | `/updates`·새로운 기능 카드 추가 UI |
 
 재사용 6행(belong·business·goaldetail·goalpublic·inviteaccept·mypage)은 판정표에 승인본과 제품 PNG의 저장소 상대 경로를 직접 기입했다.
 
@@ -170,7 +188,7 @@
 | O-3 | F-7 builder 증거는 최종 source `8cb7b41`에서 정합됐다. 독립 qa 승인 줄은 작성하지 않았다 | 독립 qa 재판정 전 단계 승격 없음 | 컨트롤러: 독립 qa 재검증·게이트 판정 |
 | L-1 | 실제 Toss 승인 호출·운영·비 Chromium 미검증 | 보장 범위 밖 | 회장 지정 시 |
 | O-6 | **닫힘.** 승인 clean frame과 source `a980a13` 실화면을 390·1024·1440px 같은 폭 6쌍으로 직접 대조했고, source `a74f33b`의 `SMOKE-01`이 성장 소제목 가운데 정렬·최종 높이·도달성을 통과했다 | F-1·F-2·F-3 해소 | 닫힘 |
-| O-7 | **닫힘.** staging health source `a74f33ba132176f32003104ab3456406e7d99a0d`에서 `.goal/runs/v2-f3-f4-regression-a74f33b/` 전체 회귀가 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0도 확인했다 | 최종 제품 source와 회귀 source 일치 | 닫힘 |
+| O-7 | **닫힘.** staging health source `3e42b0b52b38b39f916972e1a82dfc3bada950d5`에서 `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/` 전체 회귀가 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0도 확인했다 | 최종 제품 source와 회귀 source 일치 | 닫힘 |
 
 ## 11. 과거 회차 이력 (판정 효력 없음) <a id="history"></a>
 
@@ -185,6 +203,7 @@
 
 | 버전 | 시각(KST) | 변경 | 작성 |
 |---|---|---|---|
+| v2.1.28 | 2026-11-12 19:32 | source `3e42b0b`의 `/updates`와 새로운 기능 카드를 전용 시안 없음으로 분리하고 DESIGN.md 토큰 기준 2행을 추가. 카드 390·1440px, 2경로 9폭 18/18 위반 0, 회귀 r4 45/45, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0을 연결. 승인 시안 26화면 분모는 변경하지 않음 | code-builder / GPT-5 Codex |
 | v2.1.27 | 2026-11-12 14:26 | source `a74f33b`에서 성장 화면 소제목 가운데 정렬을 `SMOKE-01` computed style로 고정하고, preview robots 전체 차단과 `/privacy` 9폭 누름 영역 위반 0을 확인. 전체 회귀 45/45, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0. 검색 노출·GA4·개인정보처리방침 9개 TC 증거를 QA 문서에 연결. 독립 qa 승인 줄 미작성 | code-builder / GPT-5 Codex |
 | v2.1.26 | 2026-11-12 | source `a980a13`에서 승인 236px 복원·스크롤 도달성·3폭 같은 폭 대조 6쌍을 확인. Playwright browser revision 환경 실패 1회 뒤 허용 재실행 45/45, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0. 독립 qa 승인 줄 미작성 | code-builder / GPT-5 Codex |
 | v2.1.25 | 2026-11-12 | 독립 검증 7차 F-1·F-2를 NG 등록하고 재작업 전 결제 2화면 최종 판정을 보류 | code-builder / GPT-5 Codex |
@@ -206,9 +225,9 @@
 
 SKILLS_USED: haenael-supabase-build — 최종 source·staging·회귀·ergonomics 증거 정합에 적용
 SKILLS_SKIPPED: qa·qa-only — 제품·브라우저 재실행과 독립 승인 작성이 금지된 문서 정합 과제라 미사용
-SOURCES/MODEL: GPT-5 Codex | `.goal/verify-20261112-1352.md` | `.goal/runs/v2-f3-f4-deploy-a74f33b/{deploy.json,health.json,robots.headers,robots.txt}` | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json,payment-restore.http,captures}` | `.goal/runs/v2-f3-f4-privacy-a74f33b/{observations.json,measure.log,privacy-*.png}` | 기존 3폭 대조 `.goal/runs/w12-regression-a980a13-r2/comparisons/` | `docs/plan/prd-haenael-ge-v0.4.0.md` | `DESIGN.md` | 기존 벤치마크 https://docs.gitlab.com/ci/testing/unit_test_reports/ · https://playwright.dev/docs/test-reporters
+SOURCES/MODEL: GPT-5 Codex | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{verification.json,whats-new-390.png,whats-new-1440.png}` | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{summary.json,report.json,payment-restore.http}` | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,measure.log}` | 기존 3폭 대조 `.goal/runs/w12-regression-a980a13-r2/comparisons/` | `DESIGN.md` | 기존 벤치마크 https://docs.gitlab.com/ci/testing/unit_test_reports/ · https://playwright.dev/docs/test-reporters
 
-## 문서 품질 채점 (standard-doc-review.md §2, v2.1.27 최신)
+## 문서 품질 채점 (standard-doc-review.md §2, v2.1.28 최신)
 
 - 완결성 5: 표지·범위·수용 조건·결과·추적성·출고 기준이 최종 source 상태와 맞고 O-1·O-2·O-6·O-7을 증거 경로와 함께 닫았다.
 - 정밀성 4: 최종 SHA, 회귀 45건 통계·종료코드·복구 HTTP, 결제 2화면 3폭 대조 6쌍, 3경로 27폭 4축 수치와 `26/0/0` 분모를 원본 경로와 함께 명시했다.

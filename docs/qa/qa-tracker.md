@@ -2,18 +2,18 @@
 
 | 표지 | 값 |
 |---|---|
-| 현재 보고 버전 | v2.1.32 (2026-11-12, 독립 검증 8차 F-3·F-4 builder 해소) |
-| 현재 상태 | **✅ builder 증거 충족, 독립 qa 재승인 대기.** source `a74f33b`에서 성장 화면 소제목을 승인 시안대로 가운데 정렬하고 `SMOKE-01`에 computed style 단언을 추가했다. preview robots 전체 차단과 `/privacy` 9폭 누름 영역을 확인했고, exact source 전체 회귀는 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다 |
-| 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. F-3·F-4 수정·증거 정합: code-builder / GPT-5 Codex |
+| 현재 보고 버전 | v2.1.33 (2026-11-12, 2.1.5 공개 업데이트·새로운 기능 카드) |
+| 현재 상태 | **✅ builder 증거 충족, 독립 qa 재승인 대기.** source `3e42b0b` staging에서 공개 `/updates`, 버전별 새로운 기능 카드, Google·Naver 소유 확인 메타와 동의별 Analytics 계약을 확인했다. 회귀 r4는 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며 결제 기능 비활성 복구 HTTP 503과 test fixture(시험 데이터) 잔존 0이다 |
+| 작성자·모델 | 기존 판정: qa-verifier / Claude Opus 5.5. 2.1.5 문서·증거 정합: code-builder / GPT-5 Codex |
 | 라인·단계 | `v2`, `current_stage: qa`, 독립 qa 승인 줄 미작성 |
-| 제품 source | `a74f33ba132176f32003104ab3456406e7d99a0d`: 성장 화면 소제목 가운데 정렬, preview robots 전체 차단, `/privacy` 누름 영역 44px 계약 |
-| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`. deployment `dpl_5Uc8hTQ6Z2D3VSTShQaT9EF9HWtB`, immutable URL `https://haenael-o58w0t6lq-100-b.vercel.app`, 별칭 health `sourceSha=a74f33ba132176f32003104ab3456406e7d99a0d`, `version=2.1.3` |
+| 제품 source | `3e42b0b52b38b39f916972e1a82dfc3bada950d5`: 2.1.5 공개 업데이트·새로운 기능 카드와 기존 소셜 회귀 카드 격리 |
+| staging | `https://haenael-ge-v2-staging-100-b.vercel.app`, immutable URL `https://haenael-63r4zwp4f-100-b.vercel.app`, health `sourceSha=3e42b0b52b38b39f916972e1a82dfc3bada950d5`, `version=2.1.5`, `database=ok` |
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
-| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.27 |
+| 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.1.28 |
 
 ## 목차 <a id="t-toc"></a>
 
-**현재 보고 (source `a74f33b` F-3·F-4 builder 해소 · 전체 회귀 45/45 · 독립 qa 재승인 대기)**
+**현재 보고 (source `3e42b0b` 2.1.5 공개 업데이트·새로운 기능 카드 · 회귀 r4 45/45 · 독립 qa 재승인 대기)**
 1. [요약](#t-summary)
 2. [목적·범위·참고 기준](#t-scope)
 3. [수용 조건과 결과](#t-results)
@@ -27,6 +27,10 @@
 
 ## 1. 요약 <a id="t-summary"></a>
 
+- **2.1.5 공개 업데이트**: `/updates`는 로그인 없이 HTTP 200으로 열리고 `RELEASE.md public_note`에서 최신순 3개를 렌더한다. sitemap에는 `/updates`가 포함되고 preview robots는 전체 차단을 유지한다. Google verification 메타 2개와 Naver verification 메타 1개를 단위 시험·staging HTML 증거에 연결했다.
+- **새로운 기능 카드와 Analytics**: 첫 방문 한 번 노출·닫기 기억·`써 보기`·`의견 남기기`, `whats_new_view`·`whats_new_try`·`whats_new_feedback`의 동의 허용 전송과 거부 미전송을 `docs/qa/testcases.md`에 고정했다. staging에서 390·1440px 캡처, 하단 탭 겹침 0, 실제 `whats_new_view` collect를 관찰했다. 근거 `.goal/runs/v2-2.1.5-deploy-3e42b0b/`.
+- **회귀·모바일 측정**: source `3e42b0b` 회귀 r4는 45/45, EXIT 0, 결제 기능 비활성 복구 HTTP 503, DB·Auth·Storage fixture 잔존 0이다. `/updates`와 카드 열린 홈의 9폭 측정은 18/18에서 `fontBelow13=0`, `tapBelow44=0`, 눌림 상태 미달 0, 가로 넘침 0, 카드·하단 탭 겹침 0, 콘솔 오류 0이다. 근거 `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/`, `.goal/runs/v2-2.1.5-ergonomics-294136d/`.
+- **중간 실행 해석**: r1은 Codex 제한시간으로 15/45에서 중단됐고 그 test fixture가 r2 관리자 큐 2건에 영향을 줬다. 해당 데이터를 정리한 뒤 r3은 호스트 부하 20에서 법적 고지 2건이 timeout이었다. 최종 판정은 test fixture 잔존 0과 45/45를 함께 만족한 r4만 사용한다.
 - **✅ F-3·F-4 builder 해소**: source `a74f33b`에서 `.wordmap-growth-kicker`의 강제 왼쪽 정렬을 제거해 승인 시안 `.dopa-top`처럼 가운데 정렬하고, `SMOKE-01`에 computed `text-align:center` 단언을 추가했다. preview 환경은 robots 전체 차단, production 분기는 기존 공개·비공개 규칙을 유지한다. `/privacy` 목차·본문 링크는 `--tap-min-size` 44px를 사용한다. 검색 노출·GA4·개인정보처리방침 9개 TC와 증거를 `docs/qa/testcases.md`에 추가했다.
 - **최종 source 및 staging**: `a74f33b`. 격리 staging health가 `version=2.1.3`, `sourceSha=a74f33ba132176f32003104ab3456406e7d99a0d`로 일치하고 `/robots.txt`는 HTTP 200, `User-Agent: *`, `Disallow: /`만 반환한다. 근거 `.goal/runs/v2-f3-f4-deploy-a74f33b/`.
 - **전체 회귀·정리**: 첫 실행에서 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0, 477.8초다. 결제 기능은 HTTP 503으로 복구했고 DB·Auth·Storage fixture 잔존은 전부 0이다. 근거 `.goal/runs/v2-f3-f4-regression-a74f33b/`.
@@ -46,8 +50,8 @@
 
 ## 2. 목적·범위·참고 기준 <a id="t-scope"></a>
 
-- **목적**: 최종 source `a74f33b`에서 독립 검증 8차 F-3·F-4를 승인 정렬·검색 색인 안전·GA4·누름 영역 계약과 누적 회귀로 해소한다.
-- **범위 안(현재)**: 성장 화면 소제목 가운데 정렬 단언, production·preview robots 분기, sitemap·네이버 메타·GA4 동의별 계약, `/privacy` 9폭 누름 영역, 누적 회귀 45건, 결제 기능 비활성 복구, fixture 정리, QA 문서 정합.
+- **목적**: 최종 source `3e42b0b`의 2.1.5 공개 업데이트·새로운 기능 카드·검색 소유 확인·Analytics 동의 계약을 staging 관찰과 누적 회귀에 연결한다.
+- **범위 안(현재)**: `/updates`, 새로운 기능 카드, Google·Naver verification 메타, robots·sitemap, Analytics 이벤트 3종, 2경로 9폭, 누적 회귀 45건, 결제 기능 비활성 복구, fixture 정리, QA 문서 정합.
 - **범위 안(과거 근거, 16e483d)**: 회귀 45건, 결제 성공·성장 2화면 3폭 직접 대조, 나머지 23화면 증거 재사용 판정. 당시 D-052 로 cashout 제외.
 - **범위 밖**: 실제 Toss 승인 호출, 운영, 비 Chromium, 성능·부하·보안(회장 미지정).
 - **참고한 보고서 구성(2026-11-09 조회)**: [GitLab 단위 시험 보고서](https://docs.gitlab.com/ci/testing/unit_test_reports/) 의 "요약 건수 먼저, 실패 건은 상세·첨부로 연결, 기준 대비 새 실패·해소 구분" 을 차용해 §1 건수 우선과 §8 이력의 614c949(44/45) 대비 해소 기록을 둔다. [Playwright 보고자](https://playwright.dev/docs/test-reporters) 의 "실행 하나 = JSON 객체 하나, 첨부는 별도 디렉터리" 구조를 차용해 §5 경로 root 표를 둔다. JUnit 첨부 태그·HTML 보고서는 채택하지 않았다(이 대장은 경로 표로 충분).
@@ -56,9 +60,18 @@
 
 | ID | 출고 항목 | 수용 조건 | 결과 | 증거(저장소 루트 기준) |
 |---|---|---|---|---|
+| RELEASE-PUBLIC-01 | 공개 업데이트 | 비로그인 HTTP 200, `public_note` 최신순 3개 | 충족. staging 200·3개 렌더 | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{verification.json,verify.log}`, `web/src/app/updates/__tests__/page.test.tsx` |
+| WHATS-NEW-ONCE-01 | 버전별 카드 | 첫 방문 1회, 닫기 뒤 같은 버전 재노출 없음 | 충족. 2.1.5 localStorage 기억 단위 시험 PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx` |
+| WHATS-NEW-ACTION-01 | 카드 행동 | `써 보기`·`의견 남기기`가 RELEASE 지정 경로와 연결 | 충족. 생성 release note와 카드 링크 계약 일치 | `web/src/generated/public-release-notes.json`, `web/src/components/releases/WhatsNewCard.tsx` |
+| WHATS-NEW-GA-GRANTED-01 | Analytics 허용 | view·try·feedback 3종 전송 | 충족. 단위 시험 3종 PASS, staging `whats_new_view` collect 관찰 | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/verification.json` |
+| WHATS-NEW-GA-BLOCKED-01 | Analytics 거부 | view·try·feedback·대기열 미생성 | 충족. 단위 시험 PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx` |
+| SEO-VERIFICATION-02 | 검색 소유 확인 | Google 메타 2개·Naver 메타 1개 | 충족. Google 2개 staging HTML 관찰, Naver 단위 시험·기존 독립 증거 | `.goal/runs/v2-2.1.5-deploy-3e42b0b/verification.json`, `.goal/runs/independent-verify-20261112-1352/` |
+| SEO-UPDATES-01 | robots·sitemap | preview 전체 차단 유지, sitemap `/updates` 포함 | 충족. 양쪽 HTTP 200과 본문 확인 | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{robots.txt,sitemap.xml}` |
+| REGRESSION-WHATS-ISOLATION-01 | 기존 회귀 카드 격리 | 기존 소셜 시험은 2.1.5 안내를 본 상태로 실행, 45/45 | 충족. r4 45/45, EXIT 0, 결제 503 복구, fixture 잔존 0 | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{summary.json,report.json,execution.log,payment-restore.http}` |
+| ERGO-UPDATES-01 | `/updates`·카드 모바일 사용성 | 2경로×9폭에서 글자·누름·눌림·넘침·겹침·콘솔 위반 0 | 충족. 18/18 위반 0 | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,measure.log,*.png}` |
 | F-3 | 성장 화면 소제목 정렬 | 승인 시안 `.dopa-top`처럼 소제목 computed `text-align:center`, 전체 회귀 `SMOKE-01` expected | 충족. 강제 `text-align:left` 제거, computed style 단언 expected | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json}` |
 | SEO-ROBOTS-PROD-01 | production robots | 공개 5경로 허용, 비공개 경로 차단, sitemap 포함 | 충족, 단위 시험 PASS | `.goal/runs/v2-f3-f4-local/{targeted-vitest.log,vitest.log}` |
-| SEO-SITEMAP-01 | sitemap 공개 URL | 5개 URL, `/g/` 부재 | 충족, 단위 시험 PASS | `.goal/runs/v2-f3-f4-local/{targeted-vitest.log,vitest.log}` |
+| SEO-SITEMAP-01 | sitemap 공개 URL | 공개 URL 6개, `/updates` 포함, `/g/` 부재 | 충족. 단위 시험과 staging XML 확인 | `web/src/app/__tests__/seo-metadata.test.ts`, `.goal/runs/v2-2.1.5-deploy-3e42b0b/sitemap.xml` |
 | SEO-NAVER-01 | 네이버 소유 확인 메타 | 지정 verification 값 존재 | 충족, 단위 시험 PASS·독립 검증 증거 승계 | `.goal/runs/v2-f3-f4-local/vitest.log`, `.goal/runs/independent-verify-20261112-1352/` |
 | ANALYTICS-CONSENT-GRANTED-01 | GA4 동의 허용 | config 뒤 이벤트 전송 | 충족, 단위 시험 PASS | `.goal/runs/v2-f3-f4-local/vitest.log` |
 | ANALYTICS-CONSENT-BLOCKED-01 | GA4 거부·미선택 | 이벤트 미전송, 기존 동의 쿠키 보존 | 충족, 단위 시험 PASS | `.goal/runs/v2-f3-f4-local/vitest.log` |
@@ -66,11 +79,11 @@
 | SEO-ROBOTS-PREVIEW-01 | preview robots | 전체 `Disallow: /` | 충족. staging HTTP 200, 전체 차단 본문 확인 | `.goal/runs/v2-f3-f4-deploy-a74f33b/{robots.headers,robots.txt}` |
 | PRIVACY-TAP-01 | 개인정보처리방침 누름 영역 | 목차·본문 링크 9폭 모두 44px 이상 | 충족. 9/9, 폭별 14개 대상 `tapBelow44=0` | `.goal/runs/v2-f3-f4-privacy-a74f33b/{observations.json,measure.log,privacy-*.png}` |
 | DESIGN-DOPAMINE-ALIGN-01 | 성장 화면 소제목 | 소제목 가운데 정렬 | 충족, `SMOKE-01` expected | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json}` |
-| AC-1 | 최종 source 누적 회귀 | source `a74f33b` 45건 retries 0, unexpected·flaky·skipped 0, EXIT 0 | 충족 45/45, 477.8초, health source 일치 | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json,playwright.exit,run.exit,health.json}` |
+| AC-1 | 최종 source 누적 회귀 | source `3e42b0b` 45건 retries 0, unexpected·flaky·skipped 0, EXIT 0 | 충족. r4 45/45, 579.5초, health source 일치 | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{summary.json,report.json,playwright.exit,run.exit,health.json}` |
 | AC-2 | 기능 해피·엣지 + 디자인(결제 2화면) | 실제 `DONE` 결제, 390·1024·1440px 승인 시안 대조, 성공 상단 정렬, 성장 소제목 가운데 정렬, 피드백 박스, 최종 워드맵 236px, 스크롤 뒤 하단 탭 비가림, overflow·console error 0 | 충족. 기존 2화면 × 3폭 = 6쌍 직접 대조를 승계하고 최종 `SMOKE-01`의 computed 가운데 정렬 단언 expected | 기존 대조 `.goal/runs/w12-regression-a980a13-r2/comparisons/{paysuccess,dopamine}-pair-{390,1024,1440}.png`, 최종 `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json}` |
 | AC-3 | 디자인(나머지 23화면) | diff 가 해당 UI 를 바꾸지 않을 때 직전 직접 PNG 재사용 | 충족(재사용) | `.goal/verify-20261109-192x.md:33`, 매트릭스 §9 |
 | AC-4 | 분모 | 승인된 기준으로 26화면 판정 | `26 일치 / 0 불일치 / 0 미확인`. cashout은 구조·순서 일치, 추가 5요소는 2026-08-30 core 판정 승계 | D-052·D-053, 매트릭스 §6, `.goal/verify-20261110-0358.md` §3 |
-| AC-5 | 정리 | 결제 기능 비활성 복구 HTTP 503, 회귀 fixture 잔존 0 | 충족. 결제 기능 비활성 복구 503, DB·Auth·Storage fixture 잔존 0 | `.goal/runs/v2-f3-f4-regression-a74f33b/{payment-restore.http,summary.json,execution.log}` |
+| AC-5 | 정리 | 결제 기능 비활성 복구 HTTP 503, 회귀 test fixture 잔존 0 | 충족. r4 종료 뒤 결제 기능 비활성 복구 503, DB·Auth·Storage test fixture 잔존 0 | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{payment-restore.http,summary.json,execution.log}` |
 | W-12 | 환전 신청 격리 검증(D-053, 최종 source `8cb7b41`) | 격리 staging 신청·마스킹·상태·내역 + 디자인 판정 + 전체 회귀 + 3경로 27폭 ergonomics 4축 | **builder 증거 충족, 독립 qa 재승인 대기.** staging source 일치, 회귀 45/45, 신청 폼 9/9와 상태·내역 18/18에서 4축 위반 0, 눌림 상태 100% | `.goal/runs/w12-f7-deploy-8cb7b41/`, `.goal/runs/w12-regression-8cb7b41/`, `.goal/runs/w12-ergonomics-8cb7b41/`, `8cb7b41`, 매트릭스 §6 |
 | F-6 | 최종 source 허용 회원 신청·폼 상태 | 시험 키 4종을 넣은 격리 staging에서 허용 회원 신청 성공·중복 차단·허용 밖 거부·신청 폼 9폭 실측 | **builder 해소.** `73d08c7`을 시험 키와 재배포해 실제 폼에서 44px 미만 누름 6개를 발견했고, `e5b65f1`에서 수정 후 최종 staging 재관찰했다. 신청 1건 `REQUESTED`, 마스킹·원문 0·`CASHOUT_HOLD` 1, 중복·허용 밖 거부, 폼 9폭 3축 위반 0, fixture 잔존 0 | `.goal/verify-20261110-1147.md` 후속, `.goal/runs/w12-f6-deploy-{73d08c7,e5b65f1}/`, `.goal/runs/w12-f6-verify-e5b65f1/` |
 | F-1 재검증 | 최종 source 전체 회귀·상태 화면 크기 | source `e5b65f1` staging에서 45건 전체 회귀와 `/cashout/status`·`/cashout/history` 9폭을 새로 실행 | **builder 해소, 독립 qa 재승인 대기.** 회귀 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0. `REQUESTED detail`·`REQUESTED history row` 상태 18/18에서 3축 위반 0, 390px 캡처 저장, 결제 플래그 원복과 fixture 정리 확인 | `.goal/runs/w12-regression-e5b65f1/`, `.goal/runs/w12-state-ergonomics-e5b65f1/` |
@@ -109,7 +122,7 @@ flowchart LR
 
 ## 5. 증거와 경로 해석 <a id="t-paths"></a>
 
-이 대장의 모든 `.goal/…` 경로는 저장소 루트 기준이다. 최종 source 배포 root는 `.goal/runs/v2-f3-f4-deploy-a74f33b/`, 전체 회귀 root는 `.goal/runs/v2-f3-f4-regression-a74f33b/`, `/privacy` 9폭 측정 root는 `.goal/runs/v2-f3-f4-privacy-a74f33b/`, 신청 폼·상태·내역 27폭 4축 root는 `.goal/runs/w12-ergonomics-8cb7b41/`이다. 판정표 접두어 `direct-captures/`·`comparison-captures/`의 root는 [매트릭스 §9](design-conformance-matrix.md#paths)에서 해석한다. 독립 FAIL 원본은 보존하고 후속 해소 근거만 현재 문서에 연결했다.
+이 대장의 모든 `.goal/…` 경로는 저장소 루트 기준이다. 2.1.5 최종 source 배포·캡처 root는 `.goal/runs/v2-2.1.5-deploy-3e42b0b/`, 전체 회귀 root는 `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/`, 2경로 9폭 root는 `.goal/runs/v2-2.1.5-ergonomics-294136d/`이다. 기존 F-3·F-4 배포·회귀·privacy 근거와 W-12 신청 폼·상태·내역 근거는 과거 항목에 보존한다. 판정표 접두어 `direct-captures/`·`comparison-captures/`의 root는 [매트릭스 §9](design-conformance-matrix.md#paths)에서 해석한다.
 
 ## 6. 한계와 오픈 이슈 <a id="t-open"></a>
 
@@ -118,15 +131,16 @@ flowchart LR
 | O-1 | **닫힘.** 승인본은 `pipeline-state.v2.md approved_artifacts`가 핀한 커밋 `7ecfb55`, SHA-256 `afca1c03…`로 확정한다. 현재 파일 SHA `5956191b…`는 business 정보·coverage 표의 미승인 후속 편집이고 `paysuccess`·`dopamine` markup·CSS는 승인본과 같다. 승인 이력 없는 후속 파일로 핀을 갱신하지 않는다 | 닫힘 |
 | O-2 | **닫힘.** 매트릭스 재사용 6행에 승인본·제품 PNG 상대 경로를 직접 기입했다 | 닫힘 |
 | O-3 | F-7 builder 증거는 최종 source `8cb7b41`에서 정합됐다. 독립 qa 승인 줄은 이 문서 작업 범위 밖이며 작성하지 않았다 | 컨트롤러: 독립 qa 재검증·게이트 판정 |
-| O-4 | **닫힘.** `docs/qa/testcases.md`의 누적 45개 회귀 시험과 검색 노출·GA4·개인정보처리방침 9개 추가 TC를 최종 source 증거에 연결했다. `.goal/runs/v2-f3-f4-regression-a74f33b/summary.json`은 45/45다 | 닫힘 |
+| O-4 | **닫힘.** `docs/qa/testcases.md`의 누적 45개 회귀 시험에 2.1.5 공개 업데이트·새로운 기능 카드·Analytics·검색 소유 확인·9폭 측정 TC를 추가하고 source `3e42b0b` 증거에 연결했다. `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/summary.json`은 45/45다 | 닫힘 |
 | O-5 | 이력 19:33 절 등 띄어쓰기 결손은 원문 보존 원칙으로 고치지 않고 [보관본](archive/v2-qa-tracker-history-v1.0.0-claude-opus-20261109-2008.md) 으로 옮겼다. 같은 사실은 §1·§3·§4 에 다시 적었다 | 기록만 |
 | O-6 | **닫힘.** 승인 clean frame과 source `a980a13` 실화면을 390·1024·1440px 같은 폭으로 합성한 6쌍을 직접 대조했다. `paysuccess`는 상단 정렬, `dopamine`은 CTA 아래 성장 피드백 박스·승인 236px 워드맵·스크롤 뒤 하단 탭 비가림을 표시한다. 최종 `SMOKE-01` expected | 닫힘 |
-| O-7 | **닫힘.** staging health source `a74f33ba132176f32003104ab3456406e7d99a0d`의 `.goal/runs/v2-f3-f4-regression-a74f33b/`가 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0도 확인했다 | 닫힘 |
+| O-7 | **닫힘.** staging health source `3e42b0b52b38b39f916972e1a82dfc3bada950d5`의 `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/`가 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이다. 결제 기능 비활성 복구 HTTP 503과 test fixture 잔존 0도 확인했다 | 닫힘 |
 
 ## 7. 개정 이력 <a id="t-revisions"></a>
 
 | 버전 | 시각(KST) | 변경 |
 |---|---|---|
+| v2.1.33 | 2026-11-12 19:32 | source `3e42b0b`의 2.1.5 공개 업데이트·새로운 기능 카드·검색 소유 확인·Analytics TC를 연결. staging `/updates` 200, Google 메타 2개, 실제 `whats_new_view` collect, 카드 390·1440px, 2경로 9폭 18/18 위반 0, 회귀 r4 45/45, 결제 기능 비활성 복구 HTTP 503, test fixture 잔존 0. 독립 qa 승인 줄 미작성 |
 | v2.1.32 | 2026-11-12 14:26 | source `a74f33b`에서 성장 화면 소제목 가운데 정렬, preview robots 전체 차단, `/privacy` 누름 영역 44px를 반영. Vitest 565/565, 디자인 토큰 신규 0, staging robots 전체 차단, `/privacy` 9폭 위반 0, 전체 회귀 45/45, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0. 검색 노출·GA4·개인정보처리방침 9개 TC와 증거를 추가. 독립 qa 승인 줄 미작성 |
 | v2.1.31 | 2026-11-12 | source `a980a13`에서 승인 236px 복원·스크롤 도달성·3폭 캡처를 검증. Playwright browser revision 환경 실패 1회 뒤 허용 재실행 45/45, 결제 기능 비활성 복구 HTTP 503, fixture 잔존 0. 독립 qa 승인 줄 미작성 |
 | v2.1.30 | 2026-11-12 | 독립 검증 7차 F-1·F-2를 즉시 NG 등록하고 재작업 전 PASS 판정을 보류 |
@@ -162,7 +176,7 @@ flowchart LR
 | 원문 동일성 | SHA-256 `82859841…3d3c305323` 일치 | 이관 전 추출본과 보관본 본문(`ARCHIVE-BODY-BEGIN` 이후)을 각각 `sha256sum` |
 | 가장 최근 이력 절 | `2026-11-09 19:5x KST · 16e483d 독립 판정 반영` | 보관본 첫 회차 절 |
 
-## 문서 품질 채점 (standard-doc-review.md §2, v2.1.32 최신)
+## 문서 품질 채점 (standard-doc-review.md §2, v2.1.33 최신)
 
 - 완결성 5: 표지·목적·범위·수용 조건·추적성·오픈 이슈·개정 이력이 최종 source 상태와 맞고 O-1·O-2·O-4·O-6·O-7을 닫았다.
 - 정밀성 4: 최종 SHA, deployment ID, health version, 회귀 45건 통계·종료코드·복구 HTTP, 결제 2화면 3폭 대조 6쌍, 신청·상태·내역 27폭 4축 수치와 증거 root를 명시했다. 과거 이력에는 분 단위가 `x`인 기록이 남는다.
@@ -184,4 +198,4 @@ WEAKEST_LINE: "벤치마크 반영 3". 이번 변경은 정해진 규격의 버�
 과거 점수(v2.1.14 자가신고, 무효): 완결성=4 정밀성=4 벤치마크=4 추적성=4 전문성=4 total=20/25
 과거 약점: "D-050a … 614c949 회차 재사용: `.goal/runs/g7-final-qa-20261109/friend-preservation/…`" (§4. 이번 source 16e483d 의 친구·손님 화면 직접 관찰이 아니라 회귀 #44 expected 와 직전 회차 관찰에 기댄다)
 
-SOURCES/MODEL: GPT-5 Codex | `.goal/verify-20261112-1352.md` | `.goal/runs/v2-f3-f4-deploy-a74f33b/{deploy.json,health.json,robots.headers,robots.txt}` | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,report.json,payment-restore.http,captures}` | `.goal/runs/v2-f3-f4-privacy-a74f33b/{observations.json,measure.log,privacy-*.png}` | 기존 3폭 대조 `.goal/runs/w12-regression-a980a13-r2/comparisons/` | 기존 벤치마크 https://docs.gitlab.com/ci/testing/unit_test_reports/ · https://playwright.dev/docs/test-reporters
+SOURCES/MODEL: GPT-5 Codex | `.goal/runs/v2-2.1.5-deploy-3e42b0b/{verification.json,robots.txt,sitemap.xml,whats-new-390.png,whats-new-1440.png}` | `.goal/runs/v2-2.1.5-regression-3e42b0b-r4/{summary.json,report.json,payment-restore.http}` | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,measure.log}` | `docs/qa/testcases.md` | 기존 벤치마크 https://docs.gitlab.com/ci/testing/unit_test_reports/ · https://playwright.dev/docs/test-reporters
