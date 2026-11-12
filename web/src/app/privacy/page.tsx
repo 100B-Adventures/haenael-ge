@@ -117,20 +117,20 @@ export default function PrivacyPage() {
       <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
         <li>
           <strong>Google Analytics(GA4)</strong>{PRODUCT_COPY.TEXT_108}{" "}
-          <a className="underline" href="https://support.google.com/policies/contact/general_privacy_form">
+          <a className="legal-document-link underline" href="https://support.google.com/policies/contact/general_privacy_form">
             Google 개인정보 문의
           </a>{" "}
-          및 <a className="underline" href="https://tools.google.com/dlpage/gaoptout">{PRODUCT_COPY.TEXT_109}</a>.
+          및 <a className="legal-document-link underline" href="https://tools.google.com/dlpage/gaoptout">{PRODUCT_COPY.TEXT_109}</a>.
         </li>
         <li>
           <strong>Microsoft Clarity</strong>{PRODUCT_COPY.TEXT_111}
         </li>
         <li>
           <strong>Meta 픽셀</strong>{PRODUCT_COPY.TEXT_112}{" "}
-          <a className="underline" href="https://www.facebook.com/adpreferences">
+          <a className="legal-document-link underline" href="https://www.facebook.com/adpreferences">
             {PRODUCT_COPY.TEXT_113}
           </a>{" "}
-          또는 <a className="underline" href="https://www.facebook.com/privacy/policy/">Meta 개인정보처리방침</a>.
+          또는 <a className="legal-document-link underline" href="https://www.facebook.com/privacy/policy/">Meta 개인정보처리방침</a>.
         </li>
       </ul>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_115}</p>

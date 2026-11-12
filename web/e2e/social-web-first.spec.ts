@@ -2602,6 +2602,11 @@ test.describe("V2 web-first social slice", () => {
     await paymentPage.getByTestId("payment-success-back").click();
     const feedback = paymentPage.getByTestId("payment-growth-feedback");
     await expect(feedback).toBeVisible();
+    const growthKicker = paymentPage.locator(".wordmap-growth-kicker");
+    await expect(growthKicker).toBeVisible();
+    expect(await growthKicker.evaluate((element) =>
+      getComputedStyle(element).textAlign
+    )).toBe("center");
     const wordmapCloud = paymentPage
       .getByTestId("payment-growth-wordmap")
       .locator(".wordmap-cloud");

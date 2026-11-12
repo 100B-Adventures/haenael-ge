@@ -32,4 +32,16 @@ describe("개인정보처리방침", () => {
     expect(page).toHaveTextContent("동의 철회");
     expect(screen.getByTestId("analytics-consent-controls")).toBeInTheDocument();
   });
+
+  it("목차와 본문 외부 링크에 44px 누름 영역 계약을 적용한다", () => {
+    render(<PrivacyPage />);
+
+    const toc = screen.getByRole("navigation", { name: "개인정보처리방침 목차" });
+    expect(toc.querySelectorAll("a")).toHaveLength(4);
+    expect(toc.querySelectorAll("a[href^='#']")).toHaveLength(4);
+
+    const bodyLinks = screen.getByTestId("privacy-page")
+      .querySelectorAll("a.legal-document-link");
+    expect(bodyLinks).toHaveLength(4);
+  });
 });

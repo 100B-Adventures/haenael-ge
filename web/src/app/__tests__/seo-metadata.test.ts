@@ -9,7 +9,8 @@ vi.mock("next/font/local", () => ({
 import { metadata } from "@/app/layout";
 
 describe("검색 엔진 메타데이터", () => {
-  it("robots는 공개 정적 페이지를 허용하고 비공개·판단 대기 경로를 차단한다", () => {
+  it("운영 robots는 공개 정적 페이지만 허용하고 비공개·판단 대기 경로를 차단한다", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
     const result = robots();
     expect(result.sitemap).toBe("https://haenael-ge.vercel.app/sitemap.xml");
     expect(result.rules).toEqual({
@@ -20,6 +21,20 @@ describe("검색 엔진 메타데이터", () => {
         "/me", "/my", "/onboarding", "/payment", "/wordmap",
       ],
     });
+    vi.unstubAllEnvs();
+  });
+
+  it("preview와 로컬 robots는 전체 경로를 차단하고 sitemap을 노출하지 않는다", () => {
+    for (const vercelEnv of ["preview", "development"]) {
+      vi.stubEnv("VERCEL_ENV", vercelEnv);
+      expect(robots()).toEqual({
+        rules: {
+          userAgent: "*",
+          disallow: "/",
+        },
+      });
+    }
+    vi.unstubAllEnvs();
   });
 
   it("sitemap은 실제 공개 정적 URL과 lastmod만 제공한다", () => {
