@@ -1,12 +1,26 @@
-# v2 누적 회귀 시험 정본
+# v2 누적 회귀·검색 노출·분석 이벤트 시험 정본
 
-> STAMP: 2026-11-12 03:20 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.29 · 원본 `.goal/runs/w12-regression-edb4c99/summary.json`
+> STAMP: 2026-11-12 14:26 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.32 · 원본 `.goal/runs/v2-f3-f4-regression-a74f33b/summary.json`
 
 ## 범위와 원본
 
-이 문서는 최종 제품 source `edb4c99a165c8ac59252073375e67dfa1c839a77`을 staging에서 실행한 누적 회귀 45건의 ID, 제목, 검증 목적을 고정한다. 실행 결과의 source는 `health.json`과 `summary.json.source`가 모두 `edb4c99…`로 일치한다.
+이 문서는 최종 제품 source `a74f33ba132176f32003104ab3456406e7d99a0d`을 staging에서 실행한 누적 회귀 45건과 검색 노출·분석 이벤트·개인정보처리방침 누름 영역 시험을 고정한다. 실행 결과의 source는 `health.json`과 `summary.json.source`가 모두 `a74f33b…`로 일치한다.
 
-실행 결과는 `.goal/runs/w12-regression-edb4c99/`의 `health.json`, `summary.json`, `playwright.exit`, `run.exit`을 함께 본다. 해당 실행은 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0도 확인했다.
+실행 결과는 `.goal/runs/v2-f3-f4-regression-a74f33b/`의 `health.json`, `summary.json`, `playwright.exit`, `run.exit`을 함께 본다. 해당 실행은 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0도 확인했다.
+
+## 검색 노출·GA4·개인정보처리방침 추가 시험
+
+| TC-ID | 종류 | Given / When / Then | 판정 | 증거 |
+|---|---|---|---|---|
+| `SEO-ROBOTS-PROD-01` | 기능-해피·보안 | Given `VERCEL_ENV=production`, When `robots()`를 생성, Then `/`·`/how`·`/terms`·`/privacy`·`/child-safety`만 허용하고 인증·관리자·API·개인·결제 경로와 `/g/`를 차단하며 운영 sitemap URL을 제공 | PASS | `.goal/runs/v2-f3-f4-local/{targeted-vitest.log,vitest.log}`, `web/src/app/__tests__/seo-metadata.test.ts` |
+| `SEO-SITEMAP-01` | 기능-해피·보안 | Given 운영 sitemap, When URL 목록을 생성, Then 공개 정적 URL은 정확히 5개이고 각 항목에 lastmod가 있으며 `/g/`는 없음 | PASS | `.goal/runs/independent-verify-20261112-1352/`, `.goal/runs/v2-f3-f4-local/vitest.log` |
+| `SEO-NAVER-01` | 기능-해피 | Given 루트 metadata, When 랜딩 HTML을 렌더, Then `naver-site-verification` 값이 정확히 한 번 포함 | PASS | `.goal/runs/independent-verify-20261112-1352/`, `.goal/runs/v2-f3-f4-local/vitest.log` |
+| `ANALYTICS-CONSENT-GRANTED-01` | 기능-해피·개인정보 | Given 분석 동의 허용, When 초기 이벤트를 전송, Then `js → consent update → config(G-3QR2FB5BGC)` 뒤 `wordmap_shared`·`wordmap_viewed`·`cashout_initiated`·`sign_up`·`login`이 gtag 경로로 전달 | PASS | `.goal/runs/independent-verify-20261112-1352/{ga.json,granted.png}`, `.goal/runs/v2-f3-f4-local/vitest.log` |
+| `ANALYTICS-CONSENT-BLOCKED-01` | 기능-엣지·개인정보 | Given 동의 거부 또는 미선택, When 페이지와 로그인 표식을 처리, Then gtag.js·collect·dataLayer 전송은 0이고 로그인 표식 쿠키는 보존 | PASS | `.goal/runs/independent-verify-20261112-1352/{ga.json,denied.png,none.png}`, `.goal/runs/v2-f3-f4-local/vitest.log` |
+| `ANALYTICS-LOGIN-01` | 기능-해피·회귀 | Given 기존 회원 로그인 표식과 분석 동의 허용, When 전환 컴포넌트가 실행, Then `login{method:oauth}`을 1회 전송하고 표식 쿠키를 삭제 | PASS | `.goal/runs/independent-verify-20261112-1352/{ga.json,granted.png}`, `.goal/runs/v2-f3-f4-local/vitest.log` |
+| `SEO-ROBOTS-PREVIEW-01` | 기능-엣지·보안 | Given `VERCEL_ENV=preview`, When staging `/robots.txt`를 요청, Then HTTP 200과 `User-Agent: *`, `Disallow: /`만 반환하고 sitemap을 노출하지 않음 | PASS | `.goal/runs/v2-f3-f4-deploy-a74f33b/{robots.headers,robots.txt,health.json}`, `.goal/runs/v2-f3-f4-local/vitest.log` |
+| `PRIVACY-TAP-01` | 모바일·접근성 | Given `/privacy`, When 360·390·412·600·700·780·820·900·1000px에서 목차·본문 링크를 측정, Then 44px 미만 누름·13px 미만 글자·가로 넘침·콘솔 오류가 모두 0 | PASS | `.goal/runs/v2-f3-f4-privacy-a74f33b/{observations.json,measure.log,privacy-*.png}` |
+| `DESIGN-DOPAMINE-ALIGN-01` | 디자인·회귀 | Given 승인 시안 `.dopa-top{text-align:center}`, When 성장 화면을 열고 소제목 computed style을 측정, Then `text-align:center`, 워드맵 236px, overflow·console error 0 | PASS | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,execution.log,captures/f1-dopamine-*.png}`, `SMOKE-01` |
 
 ## 시험 목록
 

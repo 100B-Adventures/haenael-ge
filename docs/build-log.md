@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-12 독립 검증 8차 F-3·F-4 보정
+
+- 성장 화면 목표 문맥 소제목의 강제 왼쪽 정렬을 제거해 승인 시안처럼 가운데 정렬하고, `SMOKE-01`에 computed `text-align:center` 단언을 추가했다.
+- Vercel preview 빌드는 `robots.txt`를 전체 `Disallow: /`로 반환하고 production은 기존 공개·비공개 경로 정책과 sitemap을 유지한다. `/privacy` 목차·본문 링크는 `--tap-min-size` 44px를 사용한다.
+- source `a74f33ba132176f32003104ab3456406e7d99a0d`를 격리 staging에 배포했다. health sourceSha 일치, staging robots HTTP 200·전체 차단, `/privacy` 9폭 누름·글자·넘침·콘솔 위반 0을 확인했다.
+- Vitest 93파일·565건, design-token lint 신규 0, 전체 staging 회귀 45/45가 통과했다. 결제 기능 비활성 복구 HTTP 503과 DB·Auth·Storage fixture 잔존 0을 확인했다. 운영 배포·main push·독립 검증은 하지 않았다.
+
+> STAMP: 2026-11-12 14:26 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=독립 검증 8차 F-3·F-4, staging health·robots, `/privacy` 9폭, 전체 회귀 · 고민=production 검색 정책을 보존하면서 preview의 색인만 확실히 막고 승인 시안의 가운데 정렬을 자동 회귀 계약으로 고정했다.
+
 ## 2026-11-12 검색 노출 제어·GA4 제품 이벤트 전달 보정
 
 - Next.js App Router metadata route로 `robots.txt`와 `sitemap.xml`을 추가했다. 검색 허용은 랜딩·이용안내·이용약관·개인정보처리방침·아동 안전 정책으로 한정하고, 인증·관리자·API·결제·환전·친구·마이페이지·온보딩·워드맵과 공개 목표 `/g/<slug>`는 차단했다. 공개 목표는 닉네임·목표·응원 메시지 노출 정책 결정 전까지 sitemap에서도 제외한다.
