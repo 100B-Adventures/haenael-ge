@@ -1,27 +1,33 @@
 {
   "stage": "qa",
   "line": "v2",
-  "approved_at": "2026-11-11 14:27 KST",
-  "approver": "claude independent-verify 20261111-1349",
-  "artifact_commit": "aaffb9400321748e50b4190875be04d6105c73b3",
-  "product_source_sha": "ad7dce4376cd77d5e840cd3192e138d4bed7a7e1",
+  "approved_at": "2026-11-12 15:09 KST",
+  "approver": "claude independent-verify 20261112-1445",
+  "artifact_commit": "fb096de60e2e5b4e83203dbff60248e223798c23",
+  "product_source_sha": "a74f33ba132176f32003104ab3456406e7d99a0d",
   "staging": {
     "alias": "https://haenael-ge-v2-staging-100-b.vercel.app",
-    "immutable": "https://haenael-5i2078y7q-100-b.vercel.app",
-    "health_sourceSha": "ad7dce4376cd77d5e840cd3192e138d4bed7a7e1"
+    "deployment": "dpl_5Uc8hTQ6Z2D3VSTShQaT9EF9HWtB",
+    "health_sourceSha": "a74f33ba132176f32003104ab3456406e7d99a0d"
   },
   "files": [
     {
       "path": "docs/qa/qa-tracker.md",
-      "version": "v2.1.24",
-      "blob": "d8d94e16905750aabdf14c35f97ba32634258c4c",
-      "sha256": "c2282e9e41ade2857f1f2b275ae07e3952c062105941f1afef9589f5fb9066d7"
+      "version": "v2.1.32",
+      "blob": "490d6c7b57dccffa6b071374fe4700612a3562c9",
+      "sha256": "07dfaed282eca70984ba9630a917875e4127d6bdead83699d39df3768b55731f"
     },
     {
       "path": "docs/qa/design-conformance-matrix.md",
-      "version": "v2.1.23",
-      "blob": "b66ab40f4b161c35e1c273118e08a2921e7fe954",
-      "sha256": "3c8458a0a7bd91a967dea8c921a9b13dc908100e11cab6972bc7b07a8b32829b"
+      "version": "v2.1.27",
+      "blob": "993f19a473dd19db131da3d3408b431a440e9beb",
+      "sha256": "77538797d76d0e7bcc8d7562448a260e328244f28c9e4d619e981378666aece2"
+    },
+    {
+      "path": "docs/qa/testcases.md",
+      "version": "unversioned (append-only TC 정본)",
+      "blob": "b76a6fd8c47dd65d178ce57aa6f230ce8bf739ef",
+      "sha256": "3076f4f1818442f145c248ef6824ec98c6ce73cc3c7c72c61127ad867509a792"
     },
     {
       "path": "docs/qa/security-report.md",
@@ -48,5 +54,19 @@
       "sha256": "6bd4fe0a94290a5cc2fa6724b7fe03518b565e088693ce629438ddf6510f08ba",
       "commit": "1bce63145f76dee731915e74146db3f4a7fad00d"
     }
-  ]
+  ],
+  "regression_evidence": {
+    "path": ".goal/runs/v2-f3-f4-regression-a74f33b/report.json",
+    "note": "gitignored 실행 원본. 판정 요약은 docs/qa/testcases.md 와 qa-tracker v2.1.32",
+    "expected": 45,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
+  "supersedes": {
+    "approved_at": "2026-11-11 14:27 KST",
+    "approver": "claude independent-verify 20261111-1349",
+    "artifact_commit": "aaffb9400321748e50b4190875be04d6105c73b3",
+    "product_source_sha": "ad7dce4376cd77d5e840cd3192e138d4bed7a7e1"
+  }
 }

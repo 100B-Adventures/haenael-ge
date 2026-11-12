@@ -11,13 +11,13 @@ controller: claude  # 승인(qa 독립 검증) = Claude, 개발·QA 루프 = Cod
 current_stage: ship  # 2026-11-11 14:27 KST qa 승인(독립 검증 6차 PASS, source ad7dce4). 2026-11-11 15:2x 운영 2.1.3 반영(회장 11-11 정책 원문), 11-12 02시 문서 커밋 585ba55 를 staging 회귀 45/45 뒤 main 반영. 이전 주석: 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
 latest_preview_deployment:
   version: 2.1.3
-  source_sha: 585ba55aba8c5abe75b22bc6b0131182a0781b16  # 제품 코드 = 4a2421a 와 동일(web/src·supabase diff 0)
+  source_sha: a74f33ba132176f32003104ab3456406e7d99a0d  # 2026-11-12 F-3 성장 소제목 정렬·preview robots 전체 차단·privacy 누름 44px. 문서 커밋 fb096de(web·supabase diff 0)
   url: https://haenael-ge-v2-staging-100-b.vercel.app
-  immutable_url: https://haenael-cki63z2v5-100-b.vercel.app
+  deployment: dpl_5Uc8hTQ6Z2D3VSTShQaT9EF9HWtB
   supabase_project_ref: ezzklgotgydwxqebfoys
-  regression_evidence: .goal/runs/w12-regression-585ba55-r2/  # 45/45, release_commit_rule(운영 후보 트리 재회귀). r1 은 LG-02 단일 timeout
-  qa_approved: true  # 2026-11-11 14:27 KST claude independent-verify (source ad7dce4, 제품 코드 동일)
-  production_deployed: true
+  regression_evidence: .goal/runs/v2-f3-f4-regression-a74f33b/  # 45/45
+  qa_approved: true  # 2026-11-12 15:09 KST claude independent-verify 20261112-1445 (재확인)
+  production_deployed: false  # 운영은 아직 585ba55. 운영 반영은 회장 원문 필요
 latest_production_deployment:
   version: 2.1.3
   source_sha: 585ba55aba8c5abe75b22bc6b0131182a0781b16  # 2.1.3 첫 반영 6e1260d·4a2421a(11-11 15:2x), 문서 커밋 585ba55(11-12 02시)
@@ -201,6 +201,10 @@ override_expires: ""
 - 운영 배포·운영 DB 변경·실결제 미실행. 2026-10-14 릴리스 기록은 과거 이력이며 이번 승인 근거가 아니다.
 
 ## 승인 로그 (append-only · 최신순)
+
+2026-11-12 15:09 KST — qa APPROVED (재확인) — 독립 검증 9차 PASS, 범위 585ba55..fb096de. 8차 F-3(성장 소제목 가운데 정렬, staging SMOKE-01 단독 재실행·390/1024/1440 글자 중심=화면 중심·clean frame 같은 폭 대조)·F-4(testcases.md 9 TC·qa-tracker·matrix 가 c67cde4·a74f33b 변경을 판정·증거로 담음) 해소. /privacy 9폭 44px 미만 0, staging robots 전체 차단·운영 분기 단위 시험 PASS·c67cde4 대비 production 반환 동일, 회귀 원본 45/45. staging source a74f33b(health 직접 관찰). 판정문 `.goal/verify-20261112-1445-pass.md` (artifacts: qa-tracker 2.1.32 · design-conformance-matrix 2.1.27 · testcases.md @fb096de · security-report 2.1.1 · cross-browser-matrix 2.0.0 · perf-report 2.0.0, 해시 핀 docs/pipeline/pins/approved-qa-pins.json @fb096de) · approver: claude independent-verify 20261112-1445
+
+- **미검증**: 운영 robots 실응답(운영 배포 전이라 미관찰, ship 직후 1회 curl 확인). 범위 밖 관찰: 동의 배너 '동의하지 않음' 버튼 390px 한 글자 줄바꿈(기존, 별도 과제 권고).
 
 2026-11-11 14:27 KST — qa APPROVED — W-12 독립 검증 6차 PASS. staging source ad7dce4(health 직접 관찰), F-9 해소, 6bed685..ad7dce4 신규 결함 0. 결과 판정문 `.goal/verify-20261111-1349-pass.md` (artifacts: qa-tracker 2.1.24 · regression ad7dce4 1.0.0 · design-conformance-matrix 2.1.23 · security-report 2.1.1 · cross-browser-matrix 2.0.0 · perf-report 2.0.0, 해시 핀 docs/pipeline/pins/approved-qa-pins.json @aaffb94) · approver: claude independent-verify 20261111-1349
 
