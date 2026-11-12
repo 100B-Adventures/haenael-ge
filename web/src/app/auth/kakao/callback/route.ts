@@ -16,7 +16,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@/lib/supabase/route-handler";
-import { markIfNewAccount } from "@/lib/auth/signup-mark";
+import { markAuthConversion } from "@/lib/auth/signup-mark";
 import {
   KAKAO_OAUTH_NONCE_COOKIE,
   parseOAuthState,
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  markIfNewAccount(successResponse, verified?.user);
+  markAuthConversion(successResponse, verified?.user);
 
   // nonce는 1회용 — 성공 경로에서도 삭제(재사용 방지)
   successResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);

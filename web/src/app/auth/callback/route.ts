@@ -17,7 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@/lib/supabase/route-handler";
 import { isSafeRedirectPath } from "@/lib/auth/redirect-path";
-import { markIfNewAccount } from "@/lib/auth/signup-mark";
+import { markAuthConversion } from "@/lib/auth/signup-mark";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/?auth_error=session_failed", request.url));
   }
 
-  markIfNewAccount(successResponse, exchanged?.user);
+  markAuthConversion(successResponse, exchanged?.user);
 
   return successResponse;
 }

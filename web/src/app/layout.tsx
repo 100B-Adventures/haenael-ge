@@ -52,6 +52,9 @@ export const metadata: Metadata = {
   // Search Console URL 접두어 속성 https://haenael-ge.vercel.app/ 소유 확인(2026-11-03). 지우면 확인이 풀린다.
   verification: {
     google: "007ezK4On6DFJDGYS_WkUBzXCiac27i59jEMuBMuL4c",
+    other: {
+      "naver-site-verification": "e360b73dcf21099e19c1acf7aaf3ae67242f68fe",
+    },
   },
 };
 

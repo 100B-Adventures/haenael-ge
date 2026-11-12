@@ -12,8 +12,13 @@ declare global {
       params?: Record<string, unknown>,
     ) => void;
     dataLayer?: unknown[];
+    haenaelGtagPending?: GtagCall[];
+    haenaelGtagMeasurementId?: string;
   }
 }
+
+type GtagCommand = "config" | "consent" | "event" | "js";
+type GtagCall = [GtagCommand, string | Date, Record<string, unknown>?];
 
 /** 핵심 이벤트 (architecture §6 에서 확정) */
 export type HaenaelEvent =
@@ -29,6 +34,7 @@ export type HaenaelEvent =
   | "wordmap_shared"
   | "cashout_initiated"
   | "sign_up"
+  | "login"
   | "purchase";
 
 /** 결제 키와 초대 토큰이 URL에 포함될 수 있어 외부 분석 도구가 읽으면 안 되는 경로. */
@@ -44,24 +50,20 @@ export function sanitizePagePath(pagePath: string): string {
   return pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`;
 }
 
-// gtag 미초기화 시에도 이벤트가 유실되지 않도록 dataLayer에 직접 push하는 폴백.
-// gtag()는 arguments 객체를 push하므로 동일한 형태로 맞춘다(초기화 후 GA가 큐를 소비).
+// config 전에 dataLayer에 event를 직접 넣으면 측정 대상이 없는 순서로 소비될 수 있다.
+// 앱 대기열에 보존하고 initGA가 js → consent → config 뒤에 전달한다.
 function callGtag(
   command: "config" | "event" | "js",
   targetIdOrEvent: string | Date,
   params?: Record<string, unknown>,
 ): boolean {
   if (typeof window === "undefined" || !hasAnalyticsConsent()) return false;
-  if (window.gtag) {
+  if (window.gtag && window.haenaelGtagMeasurementId) {
     window.gtag(command, targetIdOrEvent, params);
     return true;
   }
-  window.dataLayer = window.dataLayer ?? [];
-  const args: unknown[] =
-    params === undefined ? [command, targetIdOrEvent] : [command, targetIdOrEvent, params];
-  (function (..._args: unknown[]) {
-    window.dataLayer!.push(arguments);
-  })(...args);
+  window.haenaelGtagPending = window.haenaelGtagPending ?? [];
+  window.haenaelGtagPending.push([command, targetIdOrEvent, params]);
   return true;
 }
 
@@ -77,15 +79,38 @@ export function trackEvent(
   return callGtag("event", event, params);
 }
 
-export function initGA(measurementId: string): void {
-  if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
+export function initGA(measurementId: string): boolean {
+  if (typeof window === "undefined" || !hasAnalyticsConsent() || !measurementId) return false;
+  if (window.gtag && window.haenaelGtagMeasurementId === measurementId) return true;
+
+  const pending = window.haenaelGtagPending?.splice(0) ?? [];
   window.dataLayer = window.dataLayer ?? [];
-  // eslint-disable-next-line prefer-rest-params
-  function gtag(..._args: unknown[]) {
-    // eslint-disable-next-line prefer-rest-params
-    window.dataLayer!.push(arguments);
+  if (!window.gtag) {
+    function gtag(..._args: unknown[]) {
+      // GA4의 표준 gtag 큐 형식은 arguments 객체다.
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer!.push(arguments);
+    }
+    window.gtag = gtag as NonNullable<Window["gtag"]>;
   }
-  window.gtag = gtag as typeof window.gtag;
+  const gtag = window.gtag;
+  if (!gtag) return false;
+
   gtag("js", new Date());
-  gtag("config", measurementId, { send_page_view: false });
+  gtag("consent", "update", {
+    analytics_storage: "granted",
+    ad_storage: "granted",
+    ad_user_data: "granted",
+    ad_personalization: "granted",
+  });
+  gtag("config", measurementId, {
+    send_page_view: false,
+    cookie_domain: window.location.hostname,
+  });
+  window.haenaelGtagMeasurementId = measurementId;
+
+  for (const [command, targetIdOrEvent, params] of pending) {
+    gtag(command, targetIdOrEvent, params);
+  }
+  return true;
 }

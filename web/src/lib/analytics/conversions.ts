@@ -19,6 +19,7 @@ declare global {
 }
 
 export const SIGNUP_MARK_COOKIE = "hg_signup_mark";
+export const LOGIN_MARK_COOKIE = "hg_login_mark";
 export const META_PIXEL_ID = "1678305073814051";
 
 const FBQ_WAIT_MS = 5000;
@@ -101,6 +102,14 @@ export async function trackSignUpConversion(userId: string): Promise<boolean> {
   if (!gaQueued || !metaQueued) return false;
   markSent(marker);
   return true;
+}
+
+export function trackLoginConversion(method = "oauth"): boolean {
+  if (
+    typeof window === "undefined" || isSensitiveAnalyticsPath(window.location.pathname) ||
+    !hasAnalyticsConsent()
+  ) return false;
+  return trackEvent("login", { method });
 }
 
 /**

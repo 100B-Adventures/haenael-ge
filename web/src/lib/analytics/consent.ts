@@ -47,6 +47,7 @@ export function setAnalyticsConsent(consent: AnalyticsConsent): void {
     return;
   }
   if (consent === "denied") {
+    window.haenaelGtagPending = [];
     window.gtag?.("consent", "update", {
       analytics_storage: "denied",
       ad_storage: "denied",

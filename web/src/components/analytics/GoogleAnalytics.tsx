@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { isSensitiveAnalyticsPath, trackPageView } from "@/lib/analytics";
+import { initGA, isSensitiveAnalyticsPath, trackPageView } from "@/lib/analytics";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
 
 function RouteTracker() {
@@ -11,6 +11,13 @@ function RouteTracker() {
   useEffect(() => {
     trackPageView(pathname);
   }, [pathname]);
+  return null;
+}
+
+function GtagInitializer({ measurementId }: { measurementId: string }) {
+  useEffect(() => {
+    initGA(measurementId);
+  }, [measurementId]);
   return null;
 }
 
@@ -28,21 +35,7 @@ export function GoogleAnalytics() {
   return (
     <>
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`} strategy="afterInteractive" />
-      {/* onReady는 src 없는 Script에서 발화하지 않아 initGA가 영구 미실행되던 결함 — 인라인 초기화로 교체 */}
-      <Script
-        id="ga4-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-window.dataLayer = window.dataLayer || [];
-function gtag(){window.dataLayer.push(arguments);}
-window.gtag = gtag;
-gtag('js', new Date());
-gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted' });
-gtag('config', '${measurementId}', { send_page_view: false, cookie_domain: window.location.hostname });
-`,
-        }}
-      />
+      <GtagInitializer measurementId={measurementId} />
       <Suspense fallback={null}><RouteTracker /></Suspense>
     </>
   );

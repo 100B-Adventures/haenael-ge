@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   META_PIXEL_ID,
+  LOGIN_MARK_COOKIE,
   SIGNUP_MARK_COOKIE,
   initializeMetaPixel,
   trackPurchaseConversion,
+  trackLoginConversion,
   trackSignUpConversion,
 } from "@/lib/analytics/conversions";
-import { markIfNewAccount } from "@/lib/auth/signup-mark";
+import { markAuthConversion } from "@/lib/auth/signup-mark";
 import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics/consent";
 
 describe("광고 전환 이벤트", () => {
@@ -20,11 +22,13 @@ describe("광고 전환 이벤트", () => {
     vi.clearAllMocks();
     window.fbq = fbq;
     window.gtag = gtag as typeof window.gtag;
+    window.haenaelGtagMeasurementId = "G-TEST123";
   });
 
   afterEach(() => {
     delete window.fbq;
     delete window.gtag;
+    delete window.haenaelGtagMeasurementId;
     vi.unstubAllEnvs();
     document.querySelectorAll('script[src="https://connect.facebook.net/en_US/fbevents.js"]')
       .forEach((script) => script.remove());
@@ -60,6 +64,11 @@ describe("광고 전환 이벤트", () => {
       { eventID: "haenael-signup:user-1" },
     );
     expect(gtag).toHaveBeenCalledTimes(1);
+  });
+
+  it("기존 회원 로그인은 GA4 권장 login 이벤트와 method를 보낸다", () => {
+    expect(trackLoginConversion("oauth")).toBe(true);
+    expect(gtag).toHaveBeenCalledWith("event", "login", { method: "oauth" });
   });
 
   it("초대 토큰 URL에서는 가입 전환과 Meta 초기화를 모두 막는다", () => {
@@ -120,18 +129,21 @@ describe("가입 표식 쿠키", () => {
 
   it("방금 만든 계정에만 남긴다", () => {
     const fresh = redirect();
-    markIfNewAccount(fresh, { id: "u1", created_at: "2026-11-05T00:09:00Z" }, now);
+    markAuthConversion(fresh, { id: "u1", created_at: "2026-11-05T00:09:00Z" }, now);
     expect(fresh.cookies.get(SIGNUP_MARK_COOKIE)?.value).toBe("u1");
+    expect(fresh.cookies.get(LOGIN_MARK_COOKIE)).toBeUndefined();
     expect(fresh.headers.get("set-cookie")).toContain("Max-Age=86400");
 
     const old = redirect();
-    markIfNewAccount(old, { id: "u2", created_at: "2026-11-01T00:00:00Z" }, now);
+    markAuthConversion(old, { id: "u2", created_at: "2026-11-01T00:00:00Z" }, now);
     expect(old.cookies.get(SIGNUP_MARK_COOKIE)).toBeUndefined();
+    expect(old.cookies.get(LOGIN_MARK_COOKIE)?.value).toBe("oauth");
   });
 
   it("사용자 정보가 없으면 아무것도 하지 않는다", () => {
     const response = redirect();
-    markIfNewAccount(response, null, now);
+    markAuthConversion(response, null, now);
     expect(response.cookies.get(SIGNUP_MARK_COOKIE)).toBeUndefined();
+    expect(response.cookies.get(LOGIN_MARK_COOKIE)).toBeUndefined();
   });
 });
