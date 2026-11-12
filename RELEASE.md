@@ -3,7 +3,9 @@
 ```yaml
 release: 2.1.4
 date: 2026-11-12
-status: releasing
+status: released
+released_at: 2026-11-12 15:5x KST (main 8f7fd9a, 운영 health 2.1.4)
+ci: main CI 43170109404 success, 운영 읽기 전용 E2E 43170512745 success, staging 운영 후보 회귀 .goal/runs/v2-release-2.1.4-8f7fd9a 45/45
 line: v2
 delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app
