@@ -22,6 +22,7 @@ ships:
   migrations: none
   edge_functions: none
 ci_fix: main CI 43237658028 은 "배포 환경·환전 층간 계약" 잡 실패. 원인 ①2.2.0 prebuild 의 공개 업데이트 생성기가 web 경계 밖 ../RELEASE.md 를 읽어 web 단독 패키지 빌드에서 ENOENT ②prebuild 앞부분이 바뀌어 배포 스크립트 변이 3건의 치환이 적용되지 않음(변이 없이 통과). 생성기는 원본이 없으면 커밋된 JSON 을 쓰고 버전 비교를 package.json 으로, 변이 시험은 앵커를 "prebuild" 시작으로 바꾸고 치환이 안 되면 실패하게 했다. 운영 화면 코드 변경 없음
+unreleased_after: 2.2.0 위 미출고 변경(다음 운영 릴리스에 실림). 분석 도구(GA4·Clarity·Meta Pixel)를 운영 canonical 호스트에서만 로드. staging·preview 가 운영 측정 ID 로 시험 이벤트를 보내던 문제(11-13 00시 관찰: 두 호스트 모두 G-3QR2FB5BGC·Clarity z7rlqfvdmm). 운영 호스트 동작은 동일하므로 staging 에만 반영
 qa_gate:
   approved: true
   evidence: .goal/verify-20261112-2253.md (독립 검증 11차 PASS, 8f7fd9a..61015de), 회귀 .goal/runs/v2-2.2.0-regression-617b084-r1 45/45, 9폭 측정 .goal/runs/v2-2.2.0-ergonomics-617b084
