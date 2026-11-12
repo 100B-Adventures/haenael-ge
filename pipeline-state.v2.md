@@ -16,7 +16,7 @@ latest_preview_deployment:
   deployment: dpl_5Uc8hTQ6Z2D3VSTShQaT9EF9HWtB
   supabase_project_ref: ezzklgotgydwxqebfoys
   regression_evidence: .goal/runs/v2-f3-f4-regression-a74f33b/  # 45/45
-  qa_approved: true  # 2026-11-12 15:09 KST claude independent-verify 20261112-1445 (재확인)
+  qa_approved: true  # 2026-11-12 23:00 KST claude independent-verify 20261112-2253 (2.2.0 재확인)
   production_deployed: false  # 운영은 아직 585ba55. 운영 반영은 회장 원문 필요
 latest_production_deployment:
   version: 2.1.3
@@ -201,6 +201,8 @@ override_expires: ""
 - 운영 배포·운영 DB 변경·실결제 미실행. 2026-10-14 릴리스 기록은 과거 이력이며 이번 승인 근거가 아니다.
 
 ## 승인 로그 (append-only · 최신순)
+
+2026-11-12 23:00 KST — qa APPROVED (재확인) — 독립 검증 11차 PASS, 범위 8f7fd9a..61015de (2.2.0+whats-new-updates, staging source 617b084). 10차 F-1~F-5 전건 해소: F-1 /updates 좋아요·별로 → staging 실제 GA4 collect en=whats_new_feedback ep.rating=like ep.release=2.2.0 관찰, 분석 동의 거부 시 collect 0·gtag 미로드·이메일 문의 링크 표시. F-2 VERSION·web/package.json 2.2.0, RELEASE.md release_tag 2.2.0+whats-new-updates, 2.1.3·2.1.4 번호 유지·태그만 fix- 정정. F-3 회원 user_metadata+localStorage 최신 SemVer 사용(단위 6건 PASS, 로그인 실화면은 미검증). F-4 keep-all computed 카드·/updates 관찰. F-5 카드 닫기→홈 CTA→/onboarding 관찰(390·1440). supabase diff 0. 카드·/updates 하단탭 겹침 0·13px 미만 0·44px 미만 0·넘침 0, 측정기 /·/updates×360·390·1000 6/6 pass. 구글 메타 2·네이버 1, staging robots Disallow:/, sitemap /updates. 회귀 원본 45/45(expected 45 · unexpected 0 · flaky 0), whats-new 전용 2/2 별도 실행, 단언 완화 0. 판정문 `.goal/verify-20261112-2253.md` (artifacts: v2 2.2.0 source 617b084) · approver: claude independent-verify 20261112-2253
 
 2026-11-12 15:09 KST — qa APPROVED (재확인) — 독립 검증 9차 PASS, 범위 585ba55..fb096de. 8차 F-3(성장 소제목 가운데 정렬, staging SMOKE-01 단독 재실행·390/1024/1440 글자 중심=화면 중심·clean frame 같은 폭 대조)·F-4(testcases.md 9 TC·qa-tracker·matrix 가 c67cde4·a74f33b 변경을 판정·증거로 담음) 해소. /privacy 9폭 44px 미만 0, staging robots 전체 차단·운영 분기 단위 시험 PASS·c67cde4 대비 production 반환 동일, 회귀 원본 45/45. staging source a74f33b(health 직접 관찰). 판정문 `.goal/verify-20261112-1445-pass.md` (artifacts: qa-tracker 2.1.32 · design-conformance-matrix 2.1.27 · testcases.md @fb096de · security-report 2.1.1 · cross-browser-matrix 2.0.0 · perf-report 2.0.0, 해시 핀 docs/pipeline/pins/approved-qa-pins.json @fb096de) · approver: claude independent-verify 20261112-1445
 

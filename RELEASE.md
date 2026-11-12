@@ -4,11 +4,13 @@
 release: 2.2.0
 release_tag: 2.2.0+whats-new-updates
 date: 2026-11-12
-status: staging-candidate
+status: releasing
 line: v2
-delivery: vercel
+delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app
 parent_release: 2.1.4 (8f7fd9a)
+product_source: 617b084bfeb4ffb9b91ac3b08b136d27f287269d
+approval: 회장 2026-11-11 04:40 정책 원문(컨트롤러 전달) "일단은 다 첫 배포 단계고 아직 유저가 없고 하니까 ... 개발하고 QA하고 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다", 회장 11-12 15:1x 버전 업데이트 기록·첫 방문 안내 지시(컨트롤러 전달). staging 결과 단락은 11-12 23:0x 컨트롤러 claude-31 에 먼저 송부
 public_note:
   title: "새로 달라진 점을 한곳에서 확인하세요"
   summary: "최근 업데이트를 로그인 없이 보고, 좋아요·별로예요로 바로 의견을 보낼 수 있어요."
@@ -20,8 +22,8 @@ ships:
   migrations: none
   edge_functions: none
 qa_gate:
-  approved: false
-  evidence: staging·전체 회귀·독립 검증 전
+  approved: true
+  evidence: .goal/verify-20261112-2253.md (독립 검증 11차 PASS, 8f7fd9a..61015de), 회귀 .goal/runs/v2-2.2.0-regression-617b084-r1 45/45, 9폭 측정 .goal/runs/v2-2.2.0-ergonomics-617b084
 ```
 
 # 릴리스 매니페스트: 해낼게 2.1.4
