@@ -1,10 +1,10 @@
 {
   "name": "web",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/qa/check-web-package-boundary.mjs && node scripts/qa/check-deploy-env.mjs --target vercel-production --source runtime --only-if-vercel",
+    "prebuild": "node scripts/qa/generate-public-release-notes.mjs && node scripts/qa/check-web-package-boundary.mjs && node scripts/qa/check-deploy-env.mjs --target vercel-production --source runtime --only-if-vercel",
     "build": "next build",
     "lint": "oxlint .",
     "qa:predeploy-production": "node scripts/qa/check-web-package-boundary.mjs && node scripts/qa/check-deploy-env.mjs --target vercel-production --source provider && node scripts/qa/check-deploy-env.mjs --target supabase-production --source provider --vault-source provider",

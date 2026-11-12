@@ -35,6 +35,9 @@ export type HaenaelEvent =
   | "cashout_initiated"
   | "sign_up"
   | "login"
+  | "whats_new_view"
+  | "whats_new_try"
+  | "whats_new_feedback"
   | "purchase";
 
 /** 결제 키와 초대 토큰이 URL에 포함될 수 있어 외부 분석 도구가 읽으면 안 되는 경로. */

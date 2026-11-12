@@ -15,7 +15,7 @@ describe("검색 엔진 메타데이터", () => {
     expect(result.sitemap).toBe("https://haenael-ge.vercel.app/sitemap.xml");
     expect(result.rules).toEqual({
       userAgent: "*",
-      allow: ["/", "/how", "/terms", "/privacy", "/child-safety"],
+      allow: ["/", "/how", "/terms", "/privacy", "/child-safety", "/updates"],
       disallow: [
         "/admin", "/api", "/auth", "/cashout", "/friends", "/g/", "/invite",
         "/me", "/my", "/onboarding", "/payment", "/wordmap",
@@ -45,6 +45,7 @@ describe("검색 엔진 메타데이터", () => {
       "https://haenael-ge.vercel.app/terms",
       "https://haenael-ge.vercel.app/privacy",
       "https://haenael-ge.vercel.app/child-safety",
+      "https://haenael-ge.vercel.app/updates",
     ]);
     expect(result.every(({ lastModified }) => lastModified instanceof Date)).toBe(true);
     expect(result.some(({ url }) => url.includes("/g/"))).toBe(false);
@@ -55,6 +56,15 @@ describe("검색 엔진 메타데이터", () => {
       other: {
         "naver-site-verification": "e360b73dcf21099e19c1acf7aaf3ae67242f68fe",
       },
+    });
+  });
+
+  it("루트 metadata에 기존·신규 Google 소유확인 값을 함께 둔다", () => {
+    expect(metadata.verification).toMatchObject({
+      google: [
+        "007ezK4On6DFJDGYS_WkUBzXCiac27i59jEMuBMuL4c",
+        "XUrxD5gwZQttnOgeO08tQJGZg7yZN4aHHZB38EPJeIw",
+      ],
     });
   });
 });

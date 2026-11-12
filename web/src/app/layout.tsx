@@ -12,6 +12,7 @@ import { SensitiveNavigationBoundary } from "@/components/analytics/SensitiveNav
 import { SignupConversion } from "@/components/analytics/SignupConversion";
 import { ConditionalFooter } from "@/components/common/ConditionalFooter";
 import { RegisterServiceWorker } from "@/components/pwa/RegisterServiceWorker";
+import { WhatsNewCard } from "@/components/releases/WhatsNewCard";
 import "./globals.css";
 
 // Pretendard Variable — 한국어 웹 표준 가변 폰트
@@ -51,7 +52,10 @@ export const metadata: Metadata = {
   },
   // Search Console URL 접두어 속성 https://haenael-ge.vercel.app/ 소유 확인(2026-11-03). 지우면 확인이 풀린다.
   verification: {
-    google: "007ezK4On6DFJDGYS_WkUBzXCiac27i59jEMuBMuL4c",
+    google: [
+      "007ezK4On6DFJDGYS_WkUBzXCiac27i59jEMuBMuL4c",
+      "XUrxD5gwZQttnOgeO08tQJGZg7yZN4aHHZB38EPJeIw",
+    ],
     other: {
       "naver-site-verification": "e360b73dcf21099e19c1acf7aaf3ae67242f68fe",
     },
@@ -77,6 +81,7 @@ export default function RootLayout({
         <SensitiveNavigationBoundary />
         <SignupConversion />
         <AnalyticsConsentBanner />
+        <WhatsNewCard />
         <RegisterServiceWorker />
         <div className="flex-1 flex flex-col">{children}</div>
         <ConditionalFooter />

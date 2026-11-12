@@ -1,7 +1,34 @@
+# 릴리스 후보 매니페스트: 해낼게 2.1.5
+
+```yaml
+release: 2.1.5
+release_tag: 2.1.5+whats-new-updates
+date: 2026-11-12
+status: staging-candidate
+line: v2
+delivery: vercel
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.1.4 (8f7fd9a)
+public_note:
+  title: "새로 달라진 점을 한곳에서 확인하세요"
+  summary: "최근 업데이트를 로그인 없이 보고, 새 기능을 바로 써 보거나 의견을 남길 수 있어요."
+  notify: true
+  try_href: /updates
+  feedback_href: /updates
+ships:
+  code: 공개 업데이트 기록, 버전별 최초 1회 새로운 기능 카드, 분석 동의 기반 GA4 반응 이벤트, Google 소유확인 메타 2개
+  migrations: none
+  edge_functions: none
+qa_gate:
+  approved: false
+  evidence: staging·전체 회귀·독립 검증 전
+```
+
 # 릴리스 매니페스트: 해낼게 2.1.4
 
 ```yaml
 release: 2.1.4
+release_tag: 2.1.4+search-analytics
 date: 2026-11-12
 status: released
 released_at: 2026-11-12 15:5x KST (main 8f7fd9a, 운영 health 2.1.4)
@@ -12,6 +39,12 @@ canonical_url: https://haenael-ge.vercel.app
 parent_release: 2.1.3 (585ba55)
 product_source: a74f33ba132176f32003104ab3456406e7d99a0d
 approval: 회장 2026-11-11 정책 원문(컨트롤러 전달) "... 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다", 회장 11-12 "SEO ... 등록해야 되는 거 다 등록 ... 이벤트 ... 전부 다 세팅"(그로스 세션 전달)
+public_note:
+  title: "검색과 화면 사용성을 다듬었어요"
+  summary: "공개 안내 페이지를 검색에서 더 잘 찾을 수 있고, 성장 화면과 개인정보 안내를 더 편하게 볼 수 있어요."
+  notify: false
+  try_href: /how
+  feedback_href: /updates
 ships:
   code: 결제 성공·성장 화면 배치를 승인 시안대로(1024 상단 정렬, 워드맵 236px, 소제목 가운데), robots.txt·sitemap.xml(공개 5경로, /g/ 제외), 네이버 소유확인 메타, GA4 이벤트 전송 순서 수정과 login 이벤트, staging 색인 차단, /privacy 링크 누름 44px
   migrations: none
@@ -25,6 +58,7 @@ qa_gate:
 
 ```yaml
 release: 2.1.3
+release_tag: 2.1.3+mobile-accessibility
 date: 2026-11-11
 status: released
 released_at: 2026-11-11 15:2x KST (main 4a2421a, Vercel 자동배포, 운영 health version 2.1.3 sourceSha 4a2421a)
@@ -36,6 +70,12 @@ canonical_url: https://haenael-ge.vercel.app
 parent_release: 2.1.2 (9fa18ff)
 source_commit: ad7dce4376cd77d5e840cd3192e138d4bed7a7e1
 approval: 회장 2026-11-11 정책 원문(컨트롤러 전달) "다 첫 배포 단계고 아직 유저가 없고 하니까 일단은 쭉쭉 밀고 넘어가가지고 개발하고 QA하고 스테이징 올리고 나한테 결과 주고 그 다음에 운영 배포하고 뭐 그 정도 해도 된다". staging 결과는 notify-ops decide 로 11-11 보고함
+public_note:
+  title: "휴대폰에서 글자와 버튼이 더 편해졌어요"
+  summary: "작은 글자를 키우고 누르기 어려운 버튼을 손봐서 목표와 응원 화면을 더 편하게 사용할 수 있어요."
+  notify: false
+  try_href: /how
+  feedback_href: /updates
 ships:
   code: 환전 화면 13px 글자·44px 누름·눌림 표시, 환전 날짜 한국 시간, 신규 회원 첫 화면(onboarding) 라벨, 앱 전역 13px 미만 글자 제거, 마이페이지 응원 탭 누름 높이, 격리 staging 환전 시험 모드(D-053, 운영에서는 비활성)
   migrations: none
