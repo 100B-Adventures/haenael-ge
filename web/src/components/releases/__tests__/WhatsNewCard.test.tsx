@@ -8,7 +8,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href, onClick, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+  default: ({ children, href, onClick, prefetch: _prefetch, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string; prefetch?: boolean }) => (
     <a
       href={href}
       onClick={(event) => {

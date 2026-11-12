@@ -1,5 +1,7 @@
 import generated from "@/generated/public-release-notes.json";
 
+export const WHATS_NEW_LAST_SEEN_KEY = "haenael_whats_new_last_seen_version";
+
 export interface PublicReleaseNote {
   version: string;
   releaseTag: string;

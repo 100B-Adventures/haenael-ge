@@ -1,19 +1,30 @@
-# v2 누적 회귀·검색 노출·분석 이벤트 시험 정본
+# v2 누적 회귀·공개 업데이트·분석 이벤트 시험 정본
 
-> STAMP: 2026-11-12 14:26 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.32 · 원본 `.goal/runs/v2-f3-f4-regression-a74f33b/summary.json`
+> STAMP: 2026-11-12 17:08 KST · GPT-5 Codex · code-builder · haenael-supabase-build · 기반 포맷 `docs/qa/qa-tracker.md` v2.1.32 · 제품 source `294136d3a30be18be09e2217e7161683a14e37b8`
 
 ## 범위와 원본
 
-이 문서는 최종 제품 source `a74f33ba132176f32003104ab3456406e7d99a0d`을 staging에서 실행한 누적 회귀 45건과 검색 노출·분석 이벤트·개인정보처리방침 누름 영역 시험을 고정한다. 실행 결과의 source는 `health.json`과 `summary.json.source`가 모두 `a74f33b…`로 일치한다.
+이 문서는 제품 source `294136d3a30be18be09e2217e7161683a14e37b8`의 공개 업데이트 화면, 버전별 새로운 기능 카드, Google Analytics 4 이벤트, Google 소유 확인 메타, 검색 노출, 9폭 모바일 사용성을 고정한다. staging health의 source와 version은 각각 `294136d…`, `2.1.5`다.
 
-실행 결과는 `.goal/runs/v2-f3-f4-regression-a74f33b/`의 `health.json`, `summary.json`, `playwright.exit`, `run.exit`을 함께 본다. 해당 실행은 `45 expected / 0 unexpected / 0 flaky / 0 skipped`, EXIT 0이며 결제 기능 비활성 복구 HTTP 503과 fixture 잔존 0도 확인했다.
+런타임 결과는 `.goal/runs/v2-2.1.5-deploy-294136d/`와 `.goal/runs/v2-2.1.5-ergonomics-294136d/`을 함께 본다. Vitest는 `95 files / 570 tests`, 디자인 토큰 검사는 `311 files / existing 40 / new 0`이며, 18개 화면·폭 조합에서 글자·누름·눌림 상태·가로 넘침·카드 겹침·콘솔 오류 위반이 모두 0이다.
+
+## 공개 업데이트·새로운 기능 카드 추가 시험
+
+| TC-ID | 종류 | Given / When / Then | 판정 | 증거 |
+|---|---|---|---|---|
+| `RELEASE-PUBLIC-01` | 기능-해피·콘텐츠 | Given `RELEASE.md`의 `public_note`, When `/updates`를 빌드·요청, Then 2.1.5부터 최신순 3개를 로그인 없이 렌더하고 HTTP 200 | PASS | `web/src/app/updates/__tests__/page.test.tsx`, `.goal/runs/v2-2.1.5-deploy-294136d/{verification.json,verify.log}` |
+| `WHATS-NEW-ONCE-01` | 기능-해피·상태 | Given 해당 버전을 보지 않은 회원 또는 비회원, When 첫 방문 뒤 카드를 닫고 다시 방문, Then 카드는 한 번만 보이고 `localStorage`에 2.1.5를 기억 | PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `/tmp/haenael-215-vitest.log` |
+| `WHATS-NEW-GA-01` | 기능-해피·개인정보 | Given 분석 동의 허용, When 카드를 보고 `써 보기`·`의견 남기기`를 선택, Then `whats_new_view`·`whats_new_try`·`whats_new_feedback`을 전송하고, 거부 시 세 이벤트 모두 미전송 | PASS | `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `.goal/runs/v2-2.1.5-deploy-294136d/verification.json`의 실제 `whats_new_view` collect |
+| `SEO-GOOGLE-02` | 기능-해피 | Given 루트 metadata, When staging HTML을 요청, Then 기존 값과 신규 값의 `google-site-verification` 메타가 정확히 2개 존재 | PASS | `web/src/app/__tests__/seo-metadata.test.ts`, `.goal/runs/v2-2.1.5-deploy-294136d/verification.json` |
+| `SEO-UPDATES-01` | 기능-해피·보안 | Given 공개 업데이트 경로, When sitemap과 preview robots를 요청, Then sitemap에 `/updates`가 있고 preview robots는 전체 경로를 차단 | PASS | `.goal/runs/v2-2.1.5-deploy-294136d/{sitemap.xml,robots.txt}` |
+| `ERGO-UPDATES-01` | 모바일·접근성 | Given `/updates`와 새로운 기능 카드가 열린 홈, When 360·390·412·600·700·780·820·900·1000px에서 측정, Then 13px 미만 글자·44px 미만 누름·눌림 상태 90% 미만·가로 넘침·카드와 하단 탭 겹침·콘솔 오류가 모두 0 | PASS | `.goal/runs/v2-2.1.5-ergonomics-294136d/{observations.json,measure.log,*.png}` |
 
 ## 검색 노출·GA4·개인정보처리방침 추가 시험
 
 | TC-ID | 종류 | Given / When / Then | 판정 | 증거 |
 |---|---|---|---|---|
 | `SEO-ROBOTS-PROD-01` | 기능-해피·보안 | Given `VERCEL_ENV=production`, When `robots()`를 생성, Then `/`·`/how`·`/terms`·`/privacy`·`/child-safety`만 허용하고 인증·관리자·API·개인·결제 경로와 `/g/`를 차단하며 운영 sitemap URL을 제공 | PASS | `.goal/runs/v2-f3-f4-local/{targeted-vitest.log,vitest.log}`, `web/src/app/__tests__/seo-metadata.test.ts` |
-| `SEO-SITEMAP-01` | 기능-해피·보안 | Given 운영 sitemap, When URL 목록을 생성, Then 공개 정적 URL은 정확히 5개이고 각 항목에 lastmod가 있으며 `/g/`는 없음 | PASS | `.goal/runs/independent-verify-20261112-1352/`, `.goal/runs/v2-f3-f4-local/vitest.log` |
+| `SEO-SITEMAP-01` | 기능-해피·보안 | Given 운영 sitemap, When URL 목록을 생성, Then 공개 정적 URL은 정확히 6개이고 각 항목에 lastmod가 있으며 `/updates`는 포함하고 `/g/`는 제외 | PASS | `web/src/app/__tests__/seo-metadata.test.ts`, `.goal/runs/v2-2.1.5-deploy-294136d/sitemap.xml` |
 | `SEO-NAVER-01` | 기능-해피 | Given 루트 metadata, When 랜딩 HTML을 렌더, Then `naver-site-verification` 값이 정확히 한 번 포함 | PASS | `.goal/runs/independent-verify-20261112-1352/`, `.goal/runs/v2-f3-f4-local/vitest.log` |
 | `ANALYTICS-CONSENT-GRANTED-01` | 기능-해피·개인정보 | Given 분석 동의 허용, When 초기 이벤트를 전송, Then `js → consent update → config(G-3QR2FB5BGC)` 뒤 `wordmap_shared`·`wordmap_viewed`·`cashout_initiated`·`sign_up`·`login`이 gtag 경로로 전달 | PASS | `.goal/runs/independent-verify-20261112-1352/{ga.json,granted.png}`, `.goal/runs/v2-f3-f4-local/vitest.log` |
 | `ANALYTICS-CONSENT-BLOCKED-01` | 기능-엣지·개인정보 | Given 동의 거부 또는 미선택, When 페이지와 로그인 표식을 처리, Then gtag.js·collect·dataLayer 전송은 0이고 로그인 표식 쿠키는 보존 | PASS | `.goal/runs/independent-verify-20261112-1352/{ga.json,denied.png,none.png}`, `.goal/runs/v2-f3-f4-local/vitest.log` |

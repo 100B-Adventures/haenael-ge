@@ -6,9 +6,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
-import { latestPublicRelease } from "@/lib/release-notes";
+import {
+  latestPublicRelease,
+  WHATS_NEW_LAST_SEEN_KEY,
+} from "@/lib/release-notes";
 
-export const WHATS_NEW_LAST_SEEN_KEY = "haenael_whats_new_last_seen_version";
+export { WHATS_NEW_LAST_SEEN_KEY } from "@/lib/release-notes";
 
 export function isWhatsNewExcludedPath(pathname: string): boolean {
   return pathname === "/updates" ||
@@ -61,6 +64,7 @@ export function WhatsNewCard() {
       <div className="whats-new-actions">
         <Link
           href={latestPublicRelease.tryHref}
+          prefetch={false}
           className="whats-new-primary"
           onClick={() => trackEvent("whats_new_try", { release: latestPublicRelease.version })}
         >
@@ -68,6 +72,7 @@ export function WhatsNewCard() {
         </Link>
         <Link
           href={latestPublicRelease.feedbackHref}
+          prefetch={false}
           className="whats-new-secondary"
           onClick={() => trackEvent("whats_new_feedback", { release: latestPublicRelease.version })}
         >

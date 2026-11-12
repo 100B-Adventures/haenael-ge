@@ -11,6 +11,10 @@ import {
   type AnalyticsConsent,
 } from "../src/lib/analytics/consent";
 import {
+  latestPublicRelease,
+  WHATS_NEW_LAST_SEEN_KEY,
+} from "../src/lib/release-notes";
+import {
   runStagingFixtureSql,
   STAGING_PROJECT_REF,
 } from "./support/staging-fixture-sql";
@@ -705,9 +709,16 @@ async function routeStagingOriginWithoutToolbar(target: BrowserContext | Page) {
 
 async function initializeSocialAnalyticsConsent(target: BrowserContext | Page) {
   const consent: AnalyticsConsent = "denied";
-  await target.addInitScript(({ key, value }) => {
-    window.localStorage.setItem(key, value);
-  }, { key: ANALYTICS_CONSENT_KEY, value: consent });
+  await target.addInitScript(({ consentKey, consentValue, releaseKey, releaseVersion }) => {
+    window.localStorage.setItem(consentKey, consentValue);
+    // 기존 소셜 회귀는 기능별 동작을 검증한다. 새 버전 카드는 전용 단위·런타임 TC에서 별도로 검증한다.
+    window.localStorage.setItem(releaseKey, releaseVersion);
+  }, {
+    consentKey: ANALYTICS_CONSENT_KEY,
+    consentValue: consent,
+    releaseKey: WHATS_NEW_LAST_SEEN_KEY,
+    releaseVersion: latestPublicRelease.version,
+  });
 }
 
 async function newRemotePage(
