@@ -3,7 +3,8 @@
 ## 열린 항목
 
 - 2.2.0+whats-new-updates: 운영 반영 완료(11-13 00:0x, f2c9ee6, CI·운영 읽기 전용 E2E success). 결과는 product-controller(오프라인, 전달 대기)·claude-31 에 송부.
-- 2.2.0 위 미출고: 44668ef 분석 도구 운영 호스트 전용(staging 만 반영). 다음 릴리스에 실림. 그 전에 카드 노출 규칙(아직 안 본 최근 notify:true 버전) 결정 필요, claude-31 에 표준 해석 질의.
+- 2.2.1+fix-analytics-host(190f7e5): 분석 운영 호스트 전용 + 카드는 아직 안 본 최근 notify:true(표준 c79a6e8a). staging 반영, 회귀 진행 중 → 독립 검증 12차 → 결과 단락 → 운영.
+- hotfix 작업트리 /mnt/hdd 이전 완료(심링크). 원본 복사본 .haenael-ge-v2-hotfix.moved 2.4G 삭제는 회장 승인 대기.
 - Codex 한도 소진(재개 11-18 13:03). 마지막 Codex 작업 CODEX_RESUME=01a1c700-5ad6-7702-a64f-9356af706dd9 (code-builder, 2.2.0, rc=0 종료라 이어갈 미완 없음). 그때까지 구현·QA 는 Claude 하위 에이전트. 결제 코드 교차리뷰는 다른 Claude 세션 또는 11-18 이후.
 - Vercel 프로젝트 `haenael-ge-v2-hotfix` 삭제: 회장 결정 대기.
 - 피드백 저장용 새 DB 테이블: 회장 결정 F 대기(그 전까지 GA4 rating·기존 경로만).
