@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "controller_brief": "/Users/sj/wt/haenael-v2-cheer-slices-20261027/.goal/task.md",
+  "env_check": "node -e \"require.resolve('next',{paths:['./web']});require.resolve('@playwright/test',{paths:['./web']})\" && curl --fail --silent --show-error --max-time 20 https://haenael-ge-v2-staging-100-b.vercel.app/api/health >/dev/null",
+  "regression": "cd web && npm test && npx tsc --noEmit",
+  "slices": [
+    {
+      "id": "S1",
+      "flow": "목표 관리 → 응원자 횟수 배지: 승인 v3와 일치하는 실제 화면까지 수정·검증",
+      "demo": ".goal/evidence/S1/index.html"
+    },
+    {
+      "id": "S2",
+      "flow": "공유 응원 링크 → 공개 목표 조회: 최신 수정본의 실제 브라우저 QA와 배포 준비",
+      "demo": ".goal/evidence/S2/index.html"
+    }
+  ],
+  "items": [
+    {
+      "id": "S1-1",
+      "slice": "S1",
+      "desc": "QA-V2-VISUAL-20261025-01 배지 결함을 D-049 승인본대로 수정하고 회귀 테스트 실행",
+      "verify": "node scripts/qa/goal-cheer-slices.mjs verify S1-code",
+      "status": "fail"
+    },
+    {
+      "id": "S1-2",
+      "slice": "S1",
+      "desc": "이 worktree 최신 소스로 실제 앱을 실행하여 목표 상세의 배지 배경·padding·radius를 390px와 데스크톱에서 실측하고 승인본 대조 PNG·JSON·데모 생성",
+      "verify": "node scripts/qa/goal-cheer-slices.mjs verify S1-browser",
+      "status": "fail"
+    },
+    {
+      "id": "S2-1",
+      "slice": "S2",
+      "desc": "실제 staging 테스트 목표의 공개 링크를 최신 worktree 앱에서 열어 정상 조회·모바일 오버플로·콘솔 오류·인증 경계를 실제 브라우저로 검증. API/UI mock이나 별도 CSS 모사 페이지 금지",
+      "verify": "node scripts/qa/goal-cheer-slices.mjs verify S2-browser",
+      "status": "fail"
+    },
+    {
+      "id": "S2-2",
+      "slice": "S2",
+      "desc": "전체 회귀·타입검사와 독립 교차 리뷰를 통과하고 변경 코드·실행 로그·스크린샷·원본 commit·남은 외부 검증을 묶은 배포 준비 산출물 생성. push·운영배포 금지",
+      "verify": "node scripts/qa/goal-cheer-slices.mjs verify S2-release",
+      "status": "fail"
+    },
+    {
+      "id": "X1",
+      "desc": "운영 배포와 운영 DB 반영, 실결제, 스토어 제출",
+      "status": "fail",
+      "external": true
+    }
+  ]
+}
