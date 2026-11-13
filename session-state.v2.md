@@ -4,6 +4,7 @@
 
 ## 열린 항목
 
+- 회장 11-13 21시 운영 피드백 14건 판정 완료: docs/plan/v2-chairman-feedback-backlog-v0.1.0-claude-opus-20261113-2110.md(hotfix 260fd43). 목표 소실은 삭제 아님(마감 지난 목표가 접힘), 친구 0건은 옛 응원에 회원 기록 없음, 로그인 리다이렉트·OG 이미지·카카오 공유·HEIC 업로드는 결함. 구현 미착수(주간 94%), 2.2.2 로 묶어 11-14 19:00 리셋 뒤(3% 상한) 또는 Codex 11-18. 회장 결정 3건 open-decisions(62f56e37): 의견 텍스트→슬랙, 동의 배너 축소, 친구 수동 연결.
 - 2.2.0+whats-new-updates: 운영 반영 완료(11-13 00:0x, f2c9ee6, CI·운영 읽기 전용 E2E success). 결과는 product-controller(오프라인, 전달 대기)·claude-31 에 송부.
 - 2.2.1 운영 반영 완료(11-13 04:2x, cd49d84, CI 43289651132·운영 읽기 전용 E2E 43290170725 success). 후속: QA-TC-LG-02 에 test.setTimeout(90_000)(독립 검증 12차 조건), 동의 거부·스크립트 차단 시 의견 버튼 "보냈어요" 오표시 점검(제품·하네스 요청).
 - 운영 Supabase 백업: 114 crontab 매일 04:10 scripts/ops/backup-prod-db.sh(hotfix 작업트리, gpg AES256, /mnt/hdd 14일, 실패 notify-ops). 첫 덤프 11-13 17:51 복원 시험 행 수 운영 일치. 보안 점검 34+5+2 판정 완료(열린 경로 0), 위생 마이그레이션 staging 적용·E2E 44/45(OPS-ALERT-01 부하, 단독 통과), 운영 적용은 회장 합의 대기.
