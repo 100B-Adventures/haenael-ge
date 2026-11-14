@@ -358,12 +358,12 @@ export function CheerPaymentButton({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4 [background-color:rgba(22,20,15,0.32)]!"
+          className="cheer-payment-overlay fixed inset-0 z-50 flex items-end justify-center px-4 [background-color:rgba(22,20,15,0.32)]!"
           data-testid="cheer-payment-sheet"
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-[430px] rounded-[22px] p-5 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
+          <div className="cheer-payment-panel w-full max-w-[430px] rounded-[22px] p-5 [background-color:var(--card)]! [border:1px_solid_var(--border)]!">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[length:var(--text-meta-micro)]! font-extrabold [color:var(--accent-foreground)]!">{PRODUCT_COPY.TEXT_003}</p>

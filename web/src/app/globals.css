@@ -1162,6 +1162,17 @@
     font-weight: 700;
   }
 
+  /* 응원 결제창: 하단 탭과 안전 영역 위에 놓고, 화면이 낮으면 결제창 안에서 스크롤(2026-11-15 운영 390×664 관찰) */
+  .cheer-payment-overlay {
+    padding-top: max(var(--sp-3), env(safe-area-inset-top));
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+  .cheer-payment-panel {
+    max-height: calc(100dvh - 4.75rem - max(var(--sp-3), env(safe-area-inset-top)) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .landing-explain {
     display: grid;
     gap: 0.5rem;

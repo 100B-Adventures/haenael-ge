@@ -1,3 +1,30 @@
+# 릴리스 후보 매니페스트: 해낼게 2.3.1
+
+```yaml
+release: 2.3.1
+release_tag: 2.3.1+fix-cheer-sheet-height
+date: 2026-11-15
+status: staging-candidate
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.3.0 (1f90c0f)
+reason: 2.3.0 운영에서 결제를 켠 뒤 화면 관찰(실결제 없음). 390×844 에서 "결제하고 응원하기" 버튼 아래 절반이 하단 탭에 가리고, 390×664(아이폰 사파리 실높이 수준)에서는 결제창 닫기 버튼이 화면 위 -39px 로 밀리며 결제창이 스크롤되지 않아 금액 선택에 닿지 못함
+public_note:
+  title: "응원 결제창이 작은 화면에서도 잘 보여요"
+  summary: "휴대폰 화면이 작아도 응원 결제창을 끝까지 볼 수 있고, 결제 버튼이 아래 메뉴에 가리지 않아요."
+  notify: false
+  try_href: /updates
+  feedback_href: /updates#feedback
+ships:
+  code: 응원 결제창을 하단 탭·안전 영역 위에 놓고 남은 높이 안에서 스크롤(cheer-payment-overlay·cheer-payment-panel)
+  migrations: none
+  edge_functions: none
+qa_gate:
+  approved: false
+  evidence: staging 관찰 전
+```
+
 # 릴리스 매니페스트: 해낼게 2.3.0
 
 ```yaml

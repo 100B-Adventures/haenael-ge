@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.3.1",
+      "releaseTag": "2.3.1+fix-cheer-sheet-height",
+      "date": "2026-11-15",
+      "title": "응원 결제창이 작은 화면에서도 잘 보여요",
+      "summary": "휴대폰 화면이 작아도 응원 결제창을 끝까지 볼 수 있고, 결제 버튼이 아래 메뉴에 가리지 않아요.",
+      "notify": false,
+      "tryHref": "/updates",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.3.0",
       "releaseTag": "2.3.0+chairman-feedback-1114",
       "date": "2026-11-15",
@@ -18,16 +28,6 @@
       "title": "시험 방문이 이용 통계에 섞이지 않게 했어요",
       "summary": "개발과 시험에 쓰는 화면의 방문은 이용 통계에 넣지 않아요. 쓰는 방법은 그대로예요.",
       "notify": false,
-      "tryHref": "/updates",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.2.0",
-      "releaseTag": "2.2.0+whats-new-updates",
-      "date": "2026-11-12",
-      "title": "새로 달라진 점을 한곳에서 확인하세요",
-      "summary": "최근 업데이트를 로그인 없이 보고, 좋아요·별로예요로 바로 의견을 보낼 수 있어요.",
-      "notify": true,
       "tryHref": "/updates",
       "feedbackHref": "/updates#feedback"
     }
