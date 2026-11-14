@@ -237,7 +237,7 @@ export function MyPageOverview({
             )
             : <span aria-hidden="true">{initial}</span>}
           </span>
-          <span className="my-profile-edit-badge" aria-hidden="true"><Pencil /></span>
+          <span className="my-profile-edit-badge" aria-hidden="true"><Camera /></span>
         </button>
         <div className={`my-profile-copy min-w-0 flex-1 ${!editingNickname && !editingBio ? "is-display" : ""}`}>
           {editingNickname || editingBio
