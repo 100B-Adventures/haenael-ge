@@ -2,6 +2,7 @@
 // folder-structure.md: "루트: Pretendard·토큰·Toaster(Sonner)"
 
 import type { Metadata, Viewport } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/og";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { AnalyticsConsentBanner } from "@/components/analytics/AnalyticsConsentBanner";
@@ -35,7 +36,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ko_KR",
     siteName: "해낼게",
+    images: [DEFAULT_OG_IMAGE],
   },
+  twitter: { card: "summary_large_image", images: [DEFAULT_OG_IMAGE.url] },
   // 홈 화면 추가용. 매니페스트는 app/manifest.ts 가 만든다.
   manifest: "/manifest.webmanifest",
   icons: {

@@ -27,7 +27,7 @@ export default function UpdatesPage() {
       <section className="updates-page-intro" aria-labelledby="updates-title">
         <p>해낼게의 변화</p>
         <h1 id="updates-title">새로 달라진 점을 확인하세요</h1>
-        <span>최근 업데이트 3개를 쉬운 말로 정리했어요.</span>
+        <span>해낼게가 요즘 이렇게 나아지고 있어요.</span>
       </section>
 
       <ol className="updates-list" aria-label="최근 업데이트">

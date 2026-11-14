@@ -46,6 +46,7 @@ export function buildContentSecurityPolicy(
     "https://www.googletagmanager.com",
     "https://*.clarity.ms",
     "https://connect.facebook.net",
+    "https://t1.kakaocdn.net",
   ]
     .filter(Boolean)
     .join(" "),

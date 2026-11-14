@@ -1,3 +1,31 @@
+# 릴리스 후보 매니페스트: 해낼게 2.3.0
+
+```yaml
+release: 2.3.0
+release_tag: 2.3.0+chairman-feedback-1114
+date: 2026-11-15
+status: staging-candidate
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.2.1 (cd49d84)
+reason: 회장 2026-11-14 운영 피드백 14건(백로그 docs/plan/v2-chairman-feedback-backlog-v0.1.0-claude-opus-20261113-2110.md) 중 회장 지시분. "Q3 켜 ... Q4에서 Q9까지 다 수정 ... Q11 동의 ... Q12 ... Q13 UX 신경 ... Q14 고치면 되고. 쭉 진행"
+public_note:
+  title: "초대하기와 의견 보내기가 쉬워졌어요"
+  summary: "초대 링크에 미리보기 사진과 내 목표가 함께 보이고, 업데이트 화면에서 한 줄 의견을 바로 보낼 수 있어요. 마감이 지난 목표도 홈에서 바로 보여요."
+  notify: true
+  try_href: /invite
+  feedback_href: /updates#feedback
+ships:
+  code: 링크 미리보기 이미지(OG)·초대 링크 제목·설명, 카카오톡 공유(카카오 JS 키 설정 시), 초대 미리보기를 내 이름·목표로, 프로필 편집 펜 하나로 통합·이름·소개 한 번에 저장, 내 사진 올리기 버튼 정리, 마감 지난 진행 중 목표를 홈 목록에 D+N 으로, 공개 목표·안내창 로그인 뒤 보던 화면으로 복귀, 홈 "그게 무슨 말이냐면" 아래 돈 응원 3단계 설명, 업데이트 화면 문구, 한 줄 의견 → 슬랙(/api/feedback)
+  migrations: none
+  edge_functions: none (운영 함수 시크릿 COVER_PUBLIC_BASE_URL·PROFILE_PUBLIC_BASE_URL 은 11-15 00시 별도 반영, 사진·커버 업로드 복구)
+  env: Vercel Production SLACK_FEEDBACK_WEBHOOK_URL 추가, NEXT_PUBLIC_PAYMENTS_ENABLED=true(회장 "켜"). Supabase 운영 PAYMENTS_ENABLED=true
+qa_gate:
+  approved: false
+  evidence: staging 관찰 전
+```
+
 # 릴리스 매니페스트: 해낼게 2.2.1
 
 ```yaml

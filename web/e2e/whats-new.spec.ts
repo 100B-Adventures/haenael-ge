@@ -5,7 +5,7 @@ const SEEN_KEY = "haenael_whats_new_last_seen_version";
 const ANALYTICS_E2E_INTERCEPT_KEY = "haenael_analytics_e2e_intercepted_v1";
 const ANALYTICS_COLLECT_URL = /(?:google-analytics\.com|analytics\.google\.com|clarity\.ms|facebook\.com\/tr)/;
 
-test.describe("2.2.0 새로운 기능 안내", () => {
+test.describe("새로운 기능 안내", () => {
   test("TC-WHATS-NEW-CTA-01 카드 닫기 뒤 홈 핵심 CTA를 사용할 수 있다", async ({ page }) => {
     await page.addInitScript(({ consentKey, seenKey }) => {
       window.localStorage.setItem(consentKey, "denied");
@@ -39,7 +39,7 @@ test.describe("2.2.0 새로운 기능 안내", () => {
     const request = await collectRequest;
     const params = new URL(request.url()).searchParams;
     expect(params.get("ep.rating")).toBe("like");
-    expect(params.get("ep.release")).toBe("2.2.0");
+    expect(params.get("ep.release")).toBe("2.3.0");
     await expect(page.getByRole("status")).toHaveText("의견을 보냈어요. 고맙습니다.");
   });
 });

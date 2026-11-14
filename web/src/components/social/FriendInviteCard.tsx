@@ -7,10 +7,13 @@ import { useState } from "react";
 import { createFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InviteCreated } from "@/lib/social/contracts";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendinvitecard";
+import { DEFAULT_OG_IMAGE } from "@/lib/og";
+import { shareToKakao } from "@/lib/kakao-share";
 
 export function FriendInviteCard(
-  { goals, acceptedFriend }: {
+  { goals, acceptedFriend, me }: {
     goals: Array<{ id: number; title: string; visibility: string }>;
+    me?: { nickname: string | null; profileImage: string | null };
     acceptedFriend?: {
       nickname: string;
       profileImage: string | null;
@@ -23,6 +26,12 @@ export function FriendInviteCard(
   >("idle");
 
   const goalId = goals[0]?.id ?? 0;
+  const myName = me?.nickname?.trim() || "나";
+  // 카카오톡·메신저 미리보기와 같은 문장(초대 링크 페이지 generateMetadata 와 맞춘다).
+  const previewTitle = `${myName}님이 해낼게에 초대했어요`;
+  const previewDescription = goals[0]?.title
+    ? `“${goals[0].title}” 서로의 목표를 같이 응원해요. 들어가서 내 목표도 써 보세요.`
+    : "서로의 목표를 같이 응원해요. 들어가서 내 목표도 써 보세요.";
 
   async function ensureInvite() {
     if (invite) return invite;
@@ -57,6 +66,18 @@ export function FriendInviteCard(
     const created = await ensureInvite();
     if (!created) return;
     const selectedGoal = goals[0];
+    // 1) 카카오톡 공유창(키가 있을 때) 2) 휴대폰 공유창 3) 링크 복사
+    const sentToKakao = await shareToKakao({
+      url: invitationUrl(created),
+      title: previewTitle,
+      description: previewDescription,
+      imageUrl: `${window.location.origin}${DEFAULT_OG_IMAGE.url}`,
+      buttonTitle: "들어가서 내 목표 쓰기",
+    });
+    if (sentToKakao) {
+      setState("shared");
+      return;
+    }
     if (!navigator.share) {
       try {
         await navigator.clipboard.writeText(invitationUrl(created));
@@ -68,8 +89,8 @@ export function FriendInviteCard(
     }
     try {
       await navigator.share({
-        title: "해낼게 친구 초대",
-        text: `같이 응원할래? ${selectedGoal?.title ?? "내 목표"}`,
+        title: previewTitle,
+        text: selectedGoal?.title ? `같이 응원할래? ${selectedGoal.title}` : "같이 응원할래?",
         url: invitationUrl(created),
       });
       setState("shared");
@@ -99,18 +120,17 @@ export function FriendInviteCard(
         <p>{PRODUCT_COPY.TEXT_005}</p>
         <div>
           <div className="invite-preview-top">
-            <span className="invite-preview-avatar">
-              <Image
-                src="/images/social-viral/seoyeon.png"
-                alt="서연"
-                width={64}
-                height={64}
-              />
-            </span>
+            <Image
+              src={DEFAULT_OG_IMAGE.url}
+              alt=""
+              width={600}
+              height={315}
+              className="invite-preview-og"
+            />
           </div>
           <div className="invite-preview-body">
-            <h2>{PRODUCT_COPY.TEXT_006}</h2>
-            <p>{PRODUCT_COPY.TEXT_007}</p>
+            <h2>{previewTitle}</h2>
+            <p>{previewDescription}</p>
           </div>
           <strong>{PRODUCT_COPY.TEXT_008}</strong>
         </div>

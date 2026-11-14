@@ -684,6 +684,60 @@
     background: var(--background);
   }
 
+  .updates-feedback-actions button[aria-pressed="true"] {
+    border-color: var(--clover);
+    color: var(--clover-ink);
+    background: var(--clover-soft);
+  }
+
+  .updates-feedback-actions button:active,
+  .updates-feedback-form button:active {
+    opacity: 0.75;
+  }
+
+  .updates-feedback-form {
+    display: grid;
+    gap: var(--sp-1);
+    margin-top: var(--sp-4);
+  }
+
+  .updates-feedback-form label {
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+    font-weight: 700;
+  }
+
+  .updates-feedback-form > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--sp-2);
+  }
+
+  .updates-feedback-form > div input {
+    min-width: 0;
+    min-height: var(--tap-min-size);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--background);
+    padding-inline: var(--sp-3);
+    font-size: 1rem;
+  }
+
+  .updates-feedback-form button {
+    min-width: var(--tap-min-size);
+    min-height: var(--tap-min-size);
+    border-radius: var(--radius-control);
+    padding-inline: var(--sp-3);
+    color: var(--card);
+    background: var(--primary);
+    font-size: var(--text-label-small);
+    font-weight: 800;
+  }
+
+  .updates-feedback-form button:disabled {
+    opacity: 0.45;
+  }
+
   .updates-feedback > p[role="status"] {
     margin-top: var(--sp-3);
     color: var(--muted-color);
@@ -1106,6 +1160,46 @@
     background: var(--clover-soft);
     font-size: var(--text-label-small);
     font-weight: 700;
+  }
+
+  .landing-explain {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0 0 1.125rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .landing-explain li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    border-radius: var(--radius-card);
+    padding: 0.75rem 0.875rem;
+    background: var(--card);
+    color: var(--foreground);
+    font-size: var(--text-body-description);
+    font-weight: 600;
+    line-height: 1.45;
+    word-break: keep-all;
+  }
+
+  .landing-explain b {
+    display: inline-flex;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: var(--clover-soft);
+    color: var(--clover-ink);
+    font-size: var(--text-label-small);
+    font-weight: 800;
+  }
+
+  .landing-explain strong {
+    color: var(--clover-ink);
   }
 
   .landing-approved-preview {
@@ -2662,6 +2756,65 @@
   .my-profile-bio-button:active {
     opacity: 0.75;
   }
+  .my-profile-bio-text {
+    display: block;
+    min-width: 0;
+    min-height: var(--tap-min-size);
+    margin-top: -1.5rem;
+    padding-top: 1.5rem;
+    overflow: hidden;
+    color: inherit;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .my-profile-bio-text:active {
+    opacity: 0.75;
+  }
+  .my-profile-text-editor {
+    display: grid;
+    gap: var(--sp-1);
+  }
+  .my-profile-text-editor input,
+  .my-profile-text-editor textarea {
+    min-width: 0;
+    min-height: var(--tap-min-size);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--background);
+    padding: var(--sp-1) var(--sp-2);
+    font-size: 1rem;
+  }
+  .my-profile-text-editor input {
+    font-weight: 800;
+  }
+  .my-profile-text-editor textarea {
+    min-height: 4rem;
+    resize: none;
+    font-size: var(--text-body-description);
+  }
+  .my-profile-text-editor > div {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-1);
+  }
+  .my-profile-text-editor button {
+    min-width: var(--tap-min-size);
+    min-height: var(--tap-min-size);
+    border-radius: var(--radius-control);
+    padding-inline: var(--sp-3);
+    color: var(--clover-ink);
+    background: var(--clover-soft);
+    font-size: var(--text-label-small);
+    font-weight: 850;
+  }
+  .my-profile-text-editor button:last-child {
+    color: var(--muted-foreground);
+    background: var(--muted);
+  }
+  .my-profile-text-editor button:active {
+    opacity: 0.75;
+  }
   .my-profile-bio-editor {
     display: grid;
     gap: var(--sp-1);
@@ -2729,17 +2882,15 @@
     color: var(--muted-color);
     font-size: var(--text-label-small);
   }
+  /* 내 사진 올리기: 프리셋과 같은 동그라미(회장 2026-11-14 "버튼 넘침") */
   .my-profile-avatar-picker .my-profile-upload-button {
-    display: flex;
-    width: auto;
-    min-width: 4.5rem;
-    flex-direction: column;
-    gap: var(--sp-0);
-    border-radius: var(--radius-control);
+    border-style: dashed;
     color: var(--clover-ink);
+    background: var(--clover-soft);
   }
-  .my-profile-upload-button small {
-    font-size: var(--text-label-small);
+  .my-profile-upload-button svg {
+    width: 1.125rem;
+    height: 1.125rem;
   }
 
   .my-profile-card h2 {
@@ -3511,6 +3662,17 @@
     );
   }
 
+  .invite-preview-top:has(.invite-preview-og) {
+    display: block;
+    min-height: 0;
+  }
+  .invite-preview-og {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+  }
   .invite-preview-avatar {
     position: relative;
     display: flex;

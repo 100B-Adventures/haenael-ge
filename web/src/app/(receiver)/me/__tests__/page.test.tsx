@@ -377,9 +377,9 @@ describe("/me 다중 목표 목록", () => {
     expect(cards[1]).toHaveTextContent("목표B");
   });
 
-  it("마감 지난 목표는 '지난 목표' 접힘 구역에 들어가고 기본은 닫혀 있다", async () => {
+  it("끝낸(CLOSED) 목표는 '지난 목표' 접힘 구역에 들어가고 기본은 닫혀 있다", async () => {
     const activeGoal = { ...GOAL_ROW, id: 1, slug: "goal-active", title: "진행중 해낼게", due_date: "2030-01-01", created_at: "2026-01-01T00:00:00Z" };
-    const pastGoal = { ...GOAL_ROW, id: 2, slug: "goal-past", title: "지난목표 해낼게", due_date: "2020-01-01", created_at: "2019-01-01T00:00:00Z" };
+    const pastGoal = { ...GOAL_ROW, id: 2, slug: "goal-past", title: "지난목표 해낼게", due_date: "2020-01-01", status: "CLOSED", created_at: "2019-01-01T00:00:00Z" };
 
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase([], "01012345678", { reached_threshold: false }, 0, [], [activeGoal, pastGoal]) as never,
@@ -396,6 +396,17 @@ describe("/me 다중 목표 목록", () => {
     // <details>는 open 속성이 없으면 기본적으로 접혀 있다.
     expect(pastSection).not.toHaveAttribute("open");
     expect(screen.getByText(/지난목표/)).toBeInTheDocument();
+  });
+
+  it("마감이 지났어도 끝내지 않은(ACTIVE) 목표는 위 목록에 남는다(회장 2026-11-14 Q1)", async () => {
+    const overdue = { ...GOAL_ROW, id: 3, slug: "goal-overdue", title: "마감지난 해낼게", due_date: "2020-01-01", status: "ACTIVE", created_at: "2019-01-01T00:00:00Z" };
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase([], "01012345678", { reached_threshold: false }, 0, [], [overdue]) as never,
+    );
+    const { default: ReceiverHomePage } = await import("../page");
+    render(await ReceiverHomePage());
+    expect(screen.getByTestId("home-goal-list")).toHaveTextContent("마감지난");
+    expect(screen.queryByTestId("past-goals-section")).not.toBeInTheDocument();
   });
 
   it("목표가 하나뿐이어도 홈 목표 목록을 렌더하고 지난 목표 섹션은 만들지 않는다", async () => {

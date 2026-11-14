@@ -31,10 +31,12 @@
     "NEXT_PUBLIC_PAYMENTS_ENABLED": { "targets": ["vercel-production"], "features": ["payments"] },
     "NEXT_PUBLIC_TOSS_CLIENT_KEY": { "targets": ["vercel-production"], "features": ["payments"] },
     "NEXT_PUBLIC_TOSS_SANDBOX_RESULT": { "targets": [], "features": ["payments-sandbox"], "optional": true },
+    "NEXT_PUBLIC_KAKAO_JS_KEY": { "targets": ["vercel-production"], "features": ["kakao-share"], "optional": true },
+    "SLACK_FEEDBACK_WEBHOOK_URL": { "targets": ["vercel-production"], "features": ["feedback"] },
 
     "SUPABASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
     "SUPABASE_ANON_KEY": { "targets": ["supabase-production"], "features": ["wordmap"] },
-    "COVER_PUBLIC_BASE_URL": { "targets": ["supabase-production"], "features": ["core"], "optional": true },
+    "COVER_PUBLIC_BASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
     "PROFILE_PUBLIC_BASE_URL": { "targets": ["supabase-production"], "features": ["core", "profile"], "optional": true },
     "STORAGE_CLEANUP_INTERNAL_TOKEN": { "targets": ["supabase-production"], "features": ["storage-cleanup"] },
     "PAYMENTS_ENABLED": { "targets": ["supabase-production"], "features": ["payments"] },

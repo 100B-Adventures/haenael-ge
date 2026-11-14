@@ -8,6 +8,7 @@ import {
   ChevronRight,
   HandHeart,
   Megaphone,
+  Camera,
   Pencil,
 } from "lucide-react";
 import { updateMemberPreferencesAction } from "@/app/(receiver)/social-actions";
@@ -99,8 +100,17 @@ export function MyPageOverview({
     });
   }
 
-  async function saveNickname() {
+  function openProfileEditor() {
+    setDraftNickname(nickname);
+    setDraftBio(bio);
+    setProfileError(null);
+    setEditingNickname(true);
+    setEditingBio(true);
+  }
+
+  async function saveProfileText() {
     const nextNickname = draftNickname.trim();
+    const nextBio = draftBio.trim();
     if (!nextNickname) {
       setProfileError("이름을 입력해 주세요.");
       return;
@@ -108,30 +118,20 @@ export function MyPageOverview({
     setProfileSaving(true);
     setProfileError(null);
     try {
-      const { error } = await saveProfile({ nickname: nextNickname, bio, profileImage });
+      const { error } = await saveProfile({ nickname: nextNickname, bio: nextBio, profileImage });
       if (error) throw error;
       setNickname(nextNickname);
       setDraftNickname(nextNickname);
-      setEditingNickname(false);
-    } catch {
-      setProfileError("이름을 저장하지 못했어요. 다시 시도해 주세요.");
-    } finally {
-      setProfileSaving(false);
-    }
-  }
-
-  async function saveBio() {
-    const nextBio = draftBio.trim();
-    setProfileSaving(true);
-    setProfileError(null);
-    try {
-      const { error } = await saveProfile({ nickname, bio: nextBio, profileImage });
-      if (error) throw error;
       setBio(nextBio);
       setDraftBio(nextBio);
+      setEditingNickname(false);
       setEditingBio(false);
     } catch {
-      setProfileError("한 줄 소개를 저장하지 못했어요. 다시 시도해 주세요.");
+      setProfileError(
+        nextNickname !== nickname
+          ? "이름을 저장하지 못했어요. 다시 시도해 주세요."
+          : "한 줄 소개를 저장하지 못했어요. 다시 시도해 주세요.",
+      );
     } finally {
       setProfileSaving(false);
     }
@@ -240,9 +240,9 @@ export function MyPageOverview({
           <span className="my-profile-edit-badge" aria-hidden="true"><Pencil /></span>
         </button>
         <div className={`my-profile-copy min-w-0 flex-1 ${!editingNickname && !editingBio ? "is-display" : ""}`}>
-          {editingNickname
+          {editingNickname || editingBio
             ? (
-              <div className="my-profile-name-editor">
+              <div className="my-profile-text-editor">
                 <label className="sr-only" htmlFor="my-profile-nickname">{PRODUCT_COPY.TEXT_001}</label>
                 <input
                   id="my-profile-nickname"
@@ -251,43 +251,42 @@ export function MyPageOverview({
                   onChange={(event) => setDraftNickname(event.target.value)}
                   autoComplete="nickname"
                 />
-                <button type="button" disabled={profileSaving} onClick={() => void saveNickname()}>
-                  {profileSaving ? PRODUCT_COPY.TEXT_002 : PRODUCT_COPY.TEXT_003}
-                </button>
-                <button type="button" disabled={profileSaving} onClick={() => {
-                  setDraftNickname(nickname);
-                  setEditingNickname(false);
-                  setProfileError(null);
-                }}>{PRODUCT_COPY.TEXT_004}</button>
-              </div>
-            )
-            : (
-              <button type="button" className="my-profile-name-button" onClick={() => setEditingNickname(true)}>
-                <span>{nickname}</span><Pencil aria-hidden="true" />
-              </button>
-            )}
-          {editingBio
-            ? (
-              <div className="my-profile-bio-editor">
                 <label className="sr-only" htmlFor="my-profile-bio">{PRODUCT_COPY.TEXT_005}</label>
-                <textarea id="my-profile-bio" value={draftBio} maxLength={80} disabled={profileSaving} onChange={(event) => setDraftBio(event.target.value)} />
-                <div><button type="button" disabled={profileSaving} onClick={() => void saveBio()}>{PRODUCT_COPY.TEXT_006}</button><button type="button" disabled={profileSaving} onClick={() => { setDraftBio(bio); setEditingBio(false); setProfileError(null); }}>{PRODUCT_COPY.TEXT_007}</button></div>
+                <textarea id="my-profile-bio" value={draftBio} maxLength={80} placeholder={PRODUCT_COPY.TEXT_008} disabled={profileSaving} onChange={(event) => setDraftBio(event.target.value)} />
+                <div>
+                  <button type="button" disabled={profileSaving} onClick={() => void saveProfileText()}>
+                    {profileSaving ? PRODUCT_COPY.TEXT_002 : PRODUCT_COPY.TEXT_003}
+                  </button>
+                  <button type="button" disabled={profileSaving} onClick={() => {
+                    setDraftNickname(nickname);
+                    setDraftBio(bio);
+                    setEditingNickname(false);
+                    setEditingBio(false);
+                    setProfileError(null);
+                  }}>{PRODUCT_COPY.TEXT_004}</button>
+                </div>
               </div>
             )
             : (
-              <div className="my-profile-bio-row">
-                <span>{bio || PRODUCT_COPY.TEXT_008}</span>
-                {!editingNickname && (
+              <>
+                {/* 이름·소개를 누르거나 오른쪽 펜 하나로 같은 편집창을 연다(회장 2026-11-14 "펜 2개 이상"). */}
+                <button type="button" className="my-profile-name-button" onClick={openProfileEditor}>
+                  <span>{nickname}</span>
+                </button>
+                <div className="my-profile-bio-row">
+                  <button type="button" className="my-profile-bio-text" onClick={openProfileEditor} aria-label={`${bio || PRODUCT_COPY.TEXT_009} 한 줄 소개 편집`}>
+                    <span>{bio || PRODUCT_COPY.TEXT_008}</span>
+                  </button>
                   <button
                     type="button"
                     className="my-profile-bio-button"
-                    aria-label={`${bio || PRODUCT_COPY.TEXT_009} 한 줄 소개 편집`}
-                    onClick={() => setEditingBio(true)}
+                    aria-label="프로필 편집"
+                    onClick={openProfileEditor}
                   >
                     <Pencil aria-hidden="true" />
                   </button>
-                )}
-              </div>
+                </div>
+              </>
             )}
           <small>{PRODUCT_COPY.TEXT_010}{dashboard.friend_count}{PRODUCT_COPY.TEXT_011}{activeGoalCount}{PRODUCT_COPY.TEXT_012}</small>
         </div>
@@ -307,8 +306,8 @@ export function MyPageOverview({
                 <Image src={src} alt="" width={48} height={48} />
               </button>
             ))}
-            <button type="button" className="my-profile-upload-button" disabled={profileSaving} onClick={() => profileFileRef.current?.click()}>
-              <span aria-hidden="true">＋</span><small>{PRODUCT_COPY.TEXT_014}</small>
+            <button type="button" className="my-profile-upload-button" aria-label="내 사진 올리기" disabled={profileSaving} onClick={() => profileFileRef.current?.click()}>
+              <Camera aria-hidden="true" />
             </button>
           </div>
           <input ref={profileFileRef} type="file" className="sr-only" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (file) void uploadProfileImage(file); }} />

@@ -8,6 +8,7 @@
 //   - 사회적 증거 프리뷰: 먼저 쌓인 응원의 결과를 먼저 보여줌
 
 import Link from "next/link";
+import { DEFAULT_OG_IMAGE } from "@/lib/og";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "해낼게",
     description: "응원은 돈으로 하는 겁니다.",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 
@@ -96,6 +98,13 @@ export default async function LandingPage() {
         <span>{PRODUCT_COPY.TEXT_006}</span>
       </div>
 
+      {/* "그게 무슨 말이냐면" 의 답: 돈 응원이 어떻게 오가는지 3단계 */}
+      <ol className="landing-explain" data-testid="landing-explain" aria-label="해낼게 응원이 오가는 방법">
+        <li><b aria-hidden="true">1</b><span>목표를 선언하고 <strong>응원 링크</strong>를 친구에게 보내요</span></li>
+        <li><b aria-hidden="true">2</b><span>친구는 메시지와 함께 <strong>🍀 클로버</strong>로 응원해요. 🍀 1개는 1,000원이에요</span></li>
+        <li><b aria-hidden="true">3</b><span>모인 클로버는 <strong>내 계좌로 환전</strong>돼요. 응원 메시지는 아래처럼 워드맵이 돼요</span></li>
+      </ol>
+
       {/* 워드맵 프리뷰 */}
       <div className="landing-approved-preview">
         <WordmapPreview />
@@ -103,19 +112,6 @@ export default async function LandingPage() {
 
       {/* CTA */}
       <div className="landing-approved-actions">
-        {/* 3스텝 안내 */}
-        <div className="landing-approved-steps">
-          <span>{PRODUCT_COPY.TEXT_007}</span>
-          <span className="[opacity:0.45]!">›</span>
-          <span>{PRODUCT_COPY.TEXT_008}{" "}
-            <strong>{PRODUCT_COPY.TEXT_009}</strong>
-          </span>
-          <span className="[opacity:0.45]!">›</span>
-          <span>
-            <strong>{PRODUCT_COPY.TEXT_010}</strong>
-          </span>
-        </div>
-
         {/* Primary CTA */}
         <Link
           href="/onboarding"

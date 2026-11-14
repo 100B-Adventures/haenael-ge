@@ -56,7 +56,6 @@ export default async function ReceiverHomePage({
   // 다중 목표(설계 §4.4~4.6): 계정당 진행 중 목표 상한은 3개이지만 지난(마감)
   // 목표는 소프트삭제되지 않고 그대로 남으므로 상한과 무관하게 여러 개일 수
   // 있다. 진행 중/지난을 한 번에 가져와 화면에서 나눈다.
-  const todayIso = new Date().toISOString().slice(0, 10);
   // 이 다섯 조회는 모두 user.id만 필요하다. 직렬 await로 두면 Supabase RTT가
   // 그대로 누적되므로 인증 경계 뒤에서 한 batch로 시작한다.
   const [
@@ -88,8 +87,10 @@ export default async function ReceiverHomePage({
     redirect("/onboarding");
   }
 
-  const inProgressGoalsRaw = allGoals.filter((g) => g.due_date >= todayIso);
-  const pastGoals = allGoals.filter((g) => g.due_date < todayIso);
+  // 진행 중/지난 목표는 마감일이 아니라 상태로 나눈다. 마감이 지났어도 끝내지 않은 목표는
+  // 위에 D+N 으로 남겨 "목표가 사라졌다" 고 느끼지 않게 한다(회장 2026-11-14 Q1).
+  const inProgressGoalsRaw = allGoals.filter((g) => g.status === "ACTIVE");
+  const pastGoals = allGoals.filter((g) => g.status !== "ACTIVE");
 
   // 진행 중 목표가 전부 마감이면(예: 상태 갱신 지연) 온보딩으로 보내지 않고
   // "지난 목표"만 보여준다(설계 §4.6 "목표 전부 마감" 경계) — 이 경우 primary는 없음.

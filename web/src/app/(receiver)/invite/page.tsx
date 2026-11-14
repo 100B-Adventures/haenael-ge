@@ -24,6 +24,7 @@ export default async function InvitePage() {
   if (error) throw new Error("초대할 목표를 불러오지 못했습니다.");
 
   const acceptedFriend = await loadLatestActiveAcceptedFriend(user.id);
+  const { data: me } = await supabase.from("member").select("nickname,profile_image").eq("id", user.id).maybeSingle();
   return (
     <ReceiverPageShell testId="invite-page" bottomSafe>
       <header className="social-detail-head">
@@ -31,7 +32,11 @@ export default async function InvitePage() {
         <ReceiverBrandMark />
         <span aria-hidden="true" />
       </header>
-      <FriendInviteCard goals={data ?? []} acceptedFriend={acceptedFriend} />
+      <FriendInviteCard
+        goals={data ?? []}
+        acceptedFriend={acceptedFriend}
+        me={{ nickname: me?.nickname ?? null, profileImage: me?.profile_image ?? null }}
+      />
     </ReceiverPageShell>
   );
 }

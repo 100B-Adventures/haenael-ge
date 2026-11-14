@@ -4,6 +4,7 @@
 // 슬라이스 #4 실구현. B2 테스트 결제 CTA + 슬라이스 #10 ReportButton 추가.
 
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/og";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -42,6 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: titleText,
       description: goal.reason ?? "친구의 목표를 조용히 응원하세요.",
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }
@@ -174,7 +176,7 @@ export default async function GoalPublicPage({ params }: Props) {
                 data-testid="relogin-hint"
               >{PRODUCT_COPY.TEXT_006}{" "}
                 <Link
-                  href="/auth/kakao/start?redirect=/me"
+                  href={`/auth/kakao/start?redirect=${encodeURIComponent(`/g/${slug}`)}`}
                   prefetch={false}
                   className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
                   data-testid="relogin-link"
