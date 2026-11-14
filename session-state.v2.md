@@ -4,6 +4,9 @@
 
 ## 열린 항목
 
+- 2.3.0+chairman-feedback-1114(hotfix 53a083d 제품, 이후 e2e·문서): 회장 11-14 지시 Q1·Q4~Q9·Q11~Q14 구현, staging 회귀 45/45(r2), 독립 검증 13차 진행 중 → 결과 단락 → Vercel Production SLACK_FEEDBACK_WEBHOOK_URL 추가·NEXT_PUBLIC_PAYMENTS_ENABLED=true, Supabase PAYMENTS_ENABLED=true(회장 Q3 "켜") → main push. 운영 사진 업로드는 함수 시크릿 2개로 이미 복구(관찰). 조성진·이다솔 친구 연결 완료.
+- 회장 손: 9450 에 솔라피(알림톡 키 11-07 만료 연장)·카카오 개발자(카카오톡 공유 JS 키) 로그인 탭을 띄워 둠. 로그인만 하면 세션이 이어서 처리.
+- Q10 동의 배너: 회장 질문에 답 대기(open-decisions consent-banner).
 - 회장 11-13 21시 운영 피드백 14건 판정 완료: docs/plan/v2-chairman-feedback-backlog-v0.1.0-claude-opus-20261113-2110.md(hotfix 260fd43). 목표 소실은 삭제 아님(마감 지난 목표가 접힘), 친구 0건은 옛 응원에 회원 기록 없음, 로그인 리다이렉트·OG 이미지·카카오 공유·HEIC 업로드는 결함. 구현 미착수(주간 94%), 2.2.2 로 묶어 11-14 19:00 리셋 뒤(3% 상한) 또는 Codex 11-18. 회장 결정 3건 open-decisions(62f56e37): 의견 텍스트→슬랙, 동의 배너 축소, 친구 수동 연결.
 - 2.2.0+whats-new-updates: 운영 반영 완료(11-13 00:0x, f2c9ee6, CI·운영 읽기 전용 E2E success). 결과는 product-controller(오프라인, 전달 대기)·claude-31 에 송부.
 - 2.2.1 운영 반영 완료(11-13 04:2x, cd49d84, CI 43289651132·운영 읽기 전용 E2E 43290170725 success). 후속: QA-TC-LG-02 에 test.setTimeout(90_000)(독립 검증 12차 조건), 동의 거부·스크립트 차단 시 의견 버튼 "보냈어요" 오표시 점검(제품·하네스 요청).
