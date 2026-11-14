@@ -1825,7 +1825,7 @@ test.describe("V2 web-first social slice", () => {
       const bio = document.querySelector<HTMLElement>(".my-profile-bio-button");
       const meta = document.querySelector<HTMLElement>(".my-profile-copy > small");
       const nameText = name?.querySelector<HTMLElement>("span");
-      const bioText = document.querySelector<HTMLElement>(".my-profile-bio-row > span");
+      const bioText = document.querySelector<HTMLElement>(".my-profile-bio-text > span");
       if (!name || !bio || !meta || !nameText || !bioText) {
         throw new Error("profile_edit_targets_missing");
       }
@@ -2031,23 +2031,10 @@ test.describe("V2 web-first social slice", () => {
         .toBeVisible();
       await page.getByRole("button", { name: "한 줄 소개를 적어 주세요." }).click();
       await expect(page.locator(".my-profile-bio-button")).toHaveCount(0);
-      const bioEditGeometry = await page.evaluate(() => {
-        const name = document.querySelector<HTMLElement>(".my-profile-name-button");
-        const editor = document.querySelector<HTMLElement>(".my-profile-bio-editor");
-        if (!name || !editor) throw new Error("bio_edit_geometry_missing");
-        const nameRect = name.getBoundingClientRect();
-        const editorRect = editor.getBoundingClientRect();
-        return {
-          intersection: Math.max(0, Math.min(nameRect.right, editorRect.right) - Math.max(nameRect.left, editorRect.left)) *
-            Math.max(0, Math.min(nameRect.bottom, editorRect.bottom) - Math.max(nameRect.top, editorRect.top)),
-          nameOwnsCenter: document.elementFromPoint(
-            nameRect.left + nameRect.width / 2,
-            nameRect.top + nameRect.height / 2,
-          )?.closest("button") === name,
-        };
-      });
-      expect(bioEditGeometry.intersection).toBe(0);
-      expect(bioEditGeometry.nameOwnsCenter).toBe(true);
+      // 2.3.0: 이름·소개는 한 편집창에서 함께 고친다(회장 2026-11-14 "펜 2개"). 편집창 안에 두 칸이 모두 보여야 한다.
+      await expect(page.locator(".my-profile-text-editor")).toBeVisible();
+      await expect(page.getByRole("textbox", { name: "이름" })).toHaveValue("서연 QA");
+      await expect(page.getByRole("button", { name: "저장" })).toHaveCount(1);
       await page.getByRole("textbox", { name: "한 줄 소개" }).fill("매일 조금씩 오래 가요");
       if (profileEvidenceDir) {
         await page.screenshot({ path: `${profileEvidenceDir}/dev-mypage-profile-bio-edit-390.png` });
@@ -3464,8 +3451,13 @@ test.describe("V2 web-first social slice", () => {
             (element) => element.getBoundingClientRect().height,
           );
           console.info(`LANDING_WORDMAP_HEIGHT ${wordmapHeight}`);
-          expect(wordmapHeight).toBeGreaterThanOrEqual(380);
-          expect(wordmapHeight).toBeLessThanOrEqual(390);
+          // 2.3.0: "그게 무슨 말이냐면 ↓" 바로 아래 돈 응원 3단계 설명이 들어가 워드맵이 줄었다(회장 2026-11-14 Q13).
+          // 시안의 380~390 대신, 워드맵이 보이고 시작하기 버튼이 첫 화면(하단 탭 위) 안에 있는지 본다.
+          expect(wordmapHeight).toBeGreaterThanOrEqual(220);
+          await expect(guestPage.getByTestId("landing-explain").locator("li")).toHaveCount(3);
+          const ctaBottom = await guestPage.getByTestId("landing-cta").evaluate((element) => element.getBoundingClientRect().bottom);
+          const navTop = await guestPage.getByTestId("receiver-bottom-nav").evaluate((element) => element.getBoundingClientRect().top);
+          expect(ctaBottom).toBeLessThanOrEqual(navTop);
         }
         if (width === 390 && label === "goalpublic") {
           const textRows = await guestPage.evaluate(() => {
