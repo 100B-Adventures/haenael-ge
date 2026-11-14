@@ -1,10 +1,12 @@
-# 릴리스 후보 매니페스트: 해낼게 2.3.0
+# 릴리스 매니페스트: 해낼게 2.3.0
 
 ```yaml
 release: 2.3.0
 release_tag: 2.3.0+chairman-feedback-1114
 date: 2026-11-15
-status: staging-candidate
+status: releasing
+product_source: 53a083de3f0eb146e85f88f1414fc2799ccc5082
+approval: 회장 2026-11-11 04:40 정책 원문 + 회장 2026-11-14 "Q3 ... 켜 ... 진행해. 나머지 Q4에서 Q9까지 다 수정하고 ... 쭉 진행". staging 결과 단락은 11-15 02:5x [🇪🇸 제품·하네스-온프렘] 에 먼저 송부
 line: v2
 delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app
@@ -22,8 +24,8 @@ ships:
   edge_functions: none (운영 함수 시크릿 COVER_PUBLIC_BASE_URL·PROFILE_PUBLIC_BASE_URL 은 11-15 00시 별도 반영, 사진·커버 업로드 복구)
   env: Vercel Production SLACK_FEEDBACK_WEBHOOK_URL 추가, NEXT_PUBLIC_PAYMENTS_ENABLED=true(회장 "켜"). Supabase 운영 PAYMENTS_ENABLED=true
 qa_gate:
-  approved: false
-  evidence: staging 관찰 전
+  approved: true
+  evidence: pipeline-state.v2.md 2026-11-15 02:48 독립 검증 13차 PASS(cd49d84..0d08e31), 회귀 .goal/runs/v2-2.3.0-regression-53a083d-r2 45/45(r1 실패 2건은 2.3.0 화면 변경에 맞춘 e2e 기준 수정)
 ```
 
 # 릴리스 매니페스트: 해낼게 2.2.1
