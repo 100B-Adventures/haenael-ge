@@ -93,6 +93,12 @@
 
 Playwright의 [시각 비교 공식 문서](https://playwright.dev/docs/test-snapshots)가 같은 운영체제·브라우저·설정에서 기준과 결과를 비교하도록 권고하는 구조를 차용했다. 이번 실행은 동일 Chromium staging 조건의 단일 회귀 결과를 정본으로 삼는다. Playwright 스냅샷 파일명 규약은 현재 회귀 실행기가 JSON과 PNG 경로를 이미 고정하므로 추가하지 않았다.
 
+## 2.3.1 추가: 응원 결제창 낮은 화면 (2026-11-15 Claude haenael-ge-89 추가)
+
+| TC-ID | 종류 | Given / When / Then | 판정 | 증거 |
+|---|---|---|---|---|
+| `CHEER-SHEET-SHORT-01` | 기능-엣지·레이아웃(돈 경로) | Given 결제가 켜진 공개 목표 `/g/{slug}`, 390×664, When 응원 결제 버튼으로 결제창을 연다(주문 생성 없음), Then 닫기 버튼 top ≥ 0, 패널 `overflow-y: auto`, 패널 안 스크롤 뒤 "결제하고 응원하기" 하단 ≤ 하단 탭 top | PASS(로컬 dev 결제 플래그 켬 + staging DB, staging 웹은 결제 플래그 꺼짐) | `web/e2e/cheer-payment.spec.ts` "결제창은 낮은 화면", `.goal/verify-20261115-1625-pass.md`(390×664·568·640 닫기 top 33). 운영 2.3.0 에서는 같은 시험이 top -39 로 실패(결함 재현) |
+
 KNOWLEDGE_QUERY: 2.2.0 공개 업데이트 의견 제출, 회원 본 버전 동기화, 카드 닫기 뒤 홈 CTA, 9폭 측정의 코드·시험·staging 증거를 조회했다.
 HITS_USED: `web/src/app/updates/__tests__/page.test.tsx`, `web/src/components/releases/__tests__/WhatsNewCard.test.tsx`, `web/e2e/whats-new.spec.ts`, source `617b084` deploy·회귀·9폭 결과를 계약과 판정 근거로 채택했다.
 HITS_REJECTED: `ops_event`·`share_event`·`risk_event`는 각각 운영, 목표 공유, 보안·결제 위험 도메인 테이블이라 업데이트 의견 저장에 사용하지 않았다. 새 테이블·마이그레이션은 금지 계약에 따라 만들지 않았다.
