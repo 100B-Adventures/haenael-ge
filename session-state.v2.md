@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-15 16:06 KST] compact 마크 (auto)
+- 세션 f46c03f7 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: c577c42 docs(state): v2 2.3.0 progress and chairman handoff
+- compact 직전 컨텍스트: 731313 토큰
+- 직전에 고친 파일: run.cjs v230.cjs
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 보고처 = [🇪🇸 제품·하네스-온프렘](SendMessage 주소도 이 이름, 옛 claude-31·product-controller-09 는 닫힘)
 
 ## 열린 항목
