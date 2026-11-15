@@ -30,6 +30,41 @@ test.afterAll(async () => {
 });
 
 test.describe("친구 응원 결제 flow (돈 경로)", () => {
+  // 주문을 만들지 않고 결제창만 연다. 운영 대상으로 돌려도 데이터가 생기지 않는다.
+  test("결제창은 낮은 화면(390×664)에서도 닫기와 결제 버튼이 화면 안, 하단 탭 위에 있다", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 664 });
+    await page.addInitScript(() => {
+      localStorage.setItem("haenael_analytics_consent_v1", "denied");
+      localStorage.setItem("haenael_whats_new_last_seen_version", "9.9.9");
+    });
+    await page.goto(`${baseUrl}/g/${slug}`);
+    await page.getByTestId("cheer-cta").click();
+    const sheet = page.getByTestId("cheer-payment-sheet");
+    await expect(sheet).toBeVisible();
+    const geometry = await page.evaluate(() => {
+      const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-testid=cheer-payment-sheet] button")];
+      const close = buttons.find((button) => /닫기/.test(button.getAttribute("aria-label") ?? button.innerText));
+      const pay = buttons.find((button) => /결제하고 응원하기/.test(button.innerText));
+      const nav = document.querySelector("[data-testid=receiver-bottom-nav]");
+      const navTop = nav ? nav.getBoundingClientRect().top : window.innerHeight;
+      return {
+        closeTop: close ? close.getBoundingClientRect().top : -1,
+        navTop,
+        panelScrollable: (() => {
+          const panel = document.querySelector<HTMLElement>(".cheer-payment-panel");
+          return panel ? getComputedStyle(panel).overflowY : "none";
+        })(),
+        payBottomAfterScroll: (() => {
+          pay?.scrollIntoView({ block: "end" });
+          return pay ? pay.getBoundingClientRect().bottom : Infinity;
+        })(),
+      };
+    });
+    expect(geometry.closeTop).toBeGreaterThanOrEqual(0);
+    expect(geometry.panelScrollable).toBe("auto");
+    expect(geometry.payBottomAfterScroll).toBeLessThanOrEqual(geometry.navTop);
+  });
+
   test("결제 CTA 활성 → 시트 오픈 → 자유금액 입력 → Toss 결제창 로드", async ({ page }) => {
     await page.goto(`${baseUrl}/g/${slug}`);
 
