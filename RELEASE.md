@@ -21,8 +21,9 @@ ships:
   migrations: none
   edge_functions: none
 qa_gate:
-  approved: false
-  evidence: staging 관찰 전
+  approved: true
+  evidence: .goal/verify-20261115-1625-pass.md (독립 검증 14차 PASS, 1f90c0f..a713b7b). 회귀 .goal/runs/v2-2.3.1-regression-a713b7b 44/45, QA-TC-SP-02 는 45초 시험 예산 초과(단독 재실행 통과, diff 무관). staging 웹 빌드는 결제 플래그가 꺼져 있어 새 결제창 e2e 는 같은 코드에 플래그만 켠 로컬 dev + staging DB 로 측정(390×664·568·640 닫기 top 33, 시트 하단 < 탭 상단, 주문 0)
+  follow_up: 시트 안을 아래로 스크롤하면 닫기 버튼도 같이 밀려 올라감(헤더 고정 후보), 직접 입력 "클로버" 단위 두 줄 꺾임(기존), 새 e2e TC 번호 미등록, SP-02 시험 예산 상향, 회귀 summarize.mjs 제목 SHA 하드코딩
 ```
 
 # 릴리스 매니페스트: 해낼게 2.3.0

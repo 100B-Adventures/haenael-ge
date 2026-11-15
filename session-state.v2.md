@@ -1,3 +1,8 @@
+## 2026-11-15 16:25 KST · 2.3.1 qa 독립 검증 14차(Claude qa-verifier) VERDICT PASS
+- 한 것: 1f90c0f..a713b7b 결제창 높이 수정 판정. 6개 뷰포트 직접 재현(닫기 화면 안, 시트 탭 위, 시트 내 스크롤 후 결제 버튼 가려짐 없음, 주문 0), 단위 103/103, staging 회귀 44/45(SP-02 시험결함, 단독 재실행 통과). 3311 dev 종료, web/.next 는 /mnt/hdd/.trash-114/ 로 이동.
+- 남은 이슈: iOS 실기기 safe-area·운영 렌더 미검증, 닫기 버튼이 시트와 같이 스크롤돼 사라짐, TC 번호 미등록, summarize.mjs SHA 라벨 낡음, RELEASE.md qa_gate.approved 갱신 필요. 참고: 루트 레포 pipeline-state.v2.md 는 11-08 판으로 낡았고 실제 최신 로그는 hotfix 작업트리 것이라 여기에 기록함.
+- 다음 액션: 회장 "해낼게 운영 올려" 원문 뒤 운영 반영(컨트롤러), 반영 직후 운영 결제 시트 열기만 스모크. 판정문 .goal/verify-20261115-1625-pass.md.
+
 ## 2026-11-15 02:50 KST 독립 검증 인계 (claude independent-verify)
 - 한 것: 2.3.0(cd49d84..0d08e31) qa 재확인 PASS, 승인 로그 기록(pipeline-state.v2.md). staging 시험 회원 삭제 후 잔존 0 확인.
 - 남은 이슈: 운영 env 3종(SLACK_FEEDBACK_WEBHOOK_URL, COVER/PROFILE_PUBLIC_BASE_URL) 확인 필요 / /api/feedback 속도 제한 없음 / design-spec 워드맵 380~390 갱신 / 시험 아바타 스토리지 객체 1건 정리 큐 / 슬랙 채널 육안·카카오 SDK 실공유 미검증.
