@@ -1,4 +1,48 @@
+## 2026-11-15 02:50 KST 독립 검증 인계 (claude independent-verify)
+- 한 것: 2.3.0(cd49d84..0d08e31) qa 재확인 PASS, 승인 로그 기록(pipeline-state.v2.md). staging 시험 회원 삭제 후 잔존 0 확인.
+- 남은 이슈: 운영 env 3종(SLACK_FEEDBACK_WEBHOOK_URL, COVER/PROFILE_PUBLIC_BASE_URL) 확인 필요 / /api/feedback 속도 제한 없음 / design-spec 워드맵 380~390 갱신 / 시험 아바타 스토리지 객체 1건 정리 큐 / 슬랙 채널 육안·카카오 SDK 실공유 미검증.
+- 다음 액션: 회장 "해낼게 운영 올려" 원문이 있을 때만 운영 반영(컨트롤러). 되돌리기 = cd49d84.
+
 # 해낼게 V2 개발·QA·배포 상태
+
+## 2026-11-13 03:05 KST · 2.2.1 qa 독립 검증 12차(Claude qa-verifier) VERDICT PASS
+
+- 요청: f2c9ee6..190f7e5(2.2.1+fix-analytics-host, staging 190f7e5) approve 독립 검증 7항목 판정.
+- 한 것: staging 동의 후 분석 요청 0, 운영 로드 시도 3건(전부 abort), 카드·/updates·의견 release=2.2.0 관찰, staging E2E 5/5, 단위 24/24, 변이 51/0, supabase diff 0. LG-02(ERR_NETWORK_CHANGED)는 시험결함으로 비차단.
+- 검증 등급: 관찰됨(위 항목) / 근거 확인(LG-02 로그 판독, 직접 재실행 미검증).
+- 기록: pipeline-state.v2.md 승인 로그, .goal/verify-20261113-0300-pass.md, notify-ops decide 1회.
+- 남은 이슈: LG-02 test.setTimeout(90s) 후속, RELEASE.md qa_gate.approved false 갱신, 운영 GA4 실전송은 ship에서.
+- 다음: 운영 반영은 회장 원문 뒤.
+
+## 2026-11-12 23:02 KST · 2.2.0 qa 독립 검증 11차(Claude qa-verifier) VERDICT PASS
+
+- 한 것: 8f7fd9a..61015de(staging 617b084) 판정. 10차 F-1~F-5 전건 해소(GA4 rating=like 실관찰, 거부 시 미전송, 버전 2.2.0, keep-all, 닫기→CTA). supabase diff 0, 회귀 45/45 + whats-new 2/2.
+- 기록: pipeline-state.v2.md 승인 로그, 판정문 .goal/verify-20261112-2253.md.
+- 남은 이슈: 로그인 회원 실화면 미검증, staging GA ID 가 운영과 같은지 미확인, RELEASE.md qa_gate.approved false 갱신 필요.
+- 다음: 운영 반영은 회장 원문 뒤.
+
+## 2026-11-12 15:10 KST · W12 qa 독립 검증 9차(Claude qa-verifier) VERDICT PASS
+
+- 요청: 585ba55..fb096de(8차 F-3·F-4 해소, /privacy 누름 44px, staging robots 전체 차단) qa 독립 판정, staging a74f33b.
+- 한 것: staging health a74f33b 관찰. SMOKE-01 단독 재실행으로 소제목 가운데(3폭 글자 중심=화면 중심) + 시안 같은 폭 대조. /privacy 9폭 측정 44px 미만 0. robots staging 전체 차단, 운영 분기 단위 시험 7/7. 회귀 원본 45/45 파싱. QA 문서 9 TC 확인.
+- 검증 등급: ①③④ 관찰됨, ②⑤ 근거 확인, 운영 robots 실응답 미검증(운영 미반영).
+- 기록: pipeline-state.v2.md 승인 로그 재확인 줄·핀 fb096de(커밋 4b2e8da), 판정문 .goal/verify-20261112-1445-pass.md, notify-ops decide 발송.
+- 다음: 운영 반영은 회장 원문 뒤. 반영 직후 운영 robots curl 1회. 동의 배너 '동의하지 않음' 390px 한 글자 줄바꿈 별도 과제 등록.
+
+## 2026-11-12 14:06 KST · W12 qa 독립 검증 8차(Claude qa-verifier) VERDICT FAIL
+
+- 요청: 585ba55..34bde7b(F-1·F-2 해소 + robots·sitemap·네이버 메타·GA4 순서 수정·login 이벤트) qa 독립 판정, staging c67cde4.
+- 통과: 워드맵 236px 11폭 관찰, 3폭 대조, SMOKE-01 변경은 완화 아님, robots·sitemap·메타 관찰(비공개 라우트 누락 0), GA4 허용 시 config 뒤 page_view·login 전송·거부/미선택 시 무전송 브라우저 관찰, 회귀 r2 45/45 원본 대조, 13px·누름 회귀 0.
+- 결함: F-3 성장 화면 소제목 `globals.css:4516 text-align:left`(시안 가운데, 매트릭스는 일치로 기록). F-4 QA 문서 3종에 c67cde4 변경 TC·판정 없음(tracker source a980a13).
+- 범위 밖 등록 권고: `/privacy` 목차 링크 23px(44px 미만 6~7개), staging 색인 허용.
+- 남은 것: Goal 이 F-3 한 줄 수정·SMOKE-01 정렬 단언·F-4 문서 갱신 → staging 재배포 → 45건 회귀 → 독립 검증 재호출. 판정문 `.goal/verify-20261112-1352.md`, 증거 `.goal/runs/independent-verify-20261112-1352/`. 승인 로그·approved_stages 변경 안 함. 결제 비활성 복구 503, fixture 잔존 0.
+
+## 2026-11-12 03:54 KST · W12 qa 독립 검증 7차(Claude qa-verifier) VERDICT FAIL
+
+- 요청: 585ba55..edb4c99(결제 성공·성장 화면 정합 수정) qa 독립 판정.
+- 한 것: staging health edb4c99 관찰. 회귀 45/45 원본 대조. SMOKE-01 임시 사본으로 실제 DONE 결제 상태를 시드해 11폭 캡처·측정(13px·44px·넘침·콘솔 0). 시험 기준 완화 없음.
+- 결함: F-1 성장 화면 `.wordmap-growth-visual .wordmap-cloud` 200px. 승인 시안 236px(프로토타입 1075줄)과 다른데 문서·시험이 '승인 규격 200px'로 고정. F-2 문서의 폭 대조가 1024만. 판정문 `.goal/verify-20261112-0324.md`, 증거 `.goal/runs/independent-verify-20261112-edb4c99/`.
+- 남은 것: Goal 이 F-1(236 복원 추천)·F-2 수정 → staging 재배포 → 45건 회귀 → 독립 검증 재호출. 승인 로그·approved_stages 변경 안 함.
 
 ## 2026-11-11 14:31 KST · W12 qa 독립 검증 6차(Claude qa-verifier) VERDICT PASS, qa 승인
 
