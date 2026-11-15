@@ -11,7 +11,7 @@
 
 ## 열린 항목
 
-- 2.3.1+fix-cheer-sheet-height(결제창 높이): staging 회귀 44/45·독립 검증 14차 PASS, 11-15 22:3x main 0047a39 push. CI·운영 health·운영 결제창 재측정(주문 0) 확인 중. 후속(차단 아님): 시트 안 스크롤 시 닫기 버튼도 밀림(헤더 고정), 직접 입력 "클로버" 두 줄, 새 e2e TC 번호 미등록, SP-02 시험 예산, 회귀 summarize.mjs 제목 SHA.
+- 2.3.1+fix-cheer-sheet-height(결제창 높이): staging 회귀 44/45·독립 검증 14차 PASS, 11-15 22:3x main 0047a39 push. 닫힘 22:5x: 운영 반영 완료(610adf1, CI 43720418216 success, 운영 결제창 390×664 e2e 통과·주문 0). 0047a39 CI 는 디자인 토큰 기준선 키로 실패했다가 재push 로 해소(실수원장). 후속(차단 아님): 시트 안 스크롤 시 닫기 버튼도 밀림(헤더 고정), 직접 입력 "클로버" 두 줄, 새 e2e TC 번호 미등록, SP-02 시험 예산, 회귀 summarize.mjs 제목 SHA.
 - 2.3.0: 운영 반영 완료(11-15 02:5x, 1f90c0f, CI 43623851873·운영 읽기 전용 E2E 43624217095 success). 결제 ON·SLACK_FEEDBACK_WEBHOOK_URL 추가 완료. hotfix 미커밋 문서는 f5259cb·0047a39 로 커밋(컨트롤러 10:22 감사 지적 해소).
 
 - 닫힘 22:3x 운영 반영 완료(위 항목): 2.3.0+chairman-feedback-1114(hotfix 53a083d 제품, 이후 e2e·문서): 회장 11-14 지시 Q1·Q4~Q9·Q11~Q14 구현, staging 회귀 45/45(r2), 독립 검증 13차 진행 중 → 결과 단락 → Vercel Production SLACK_FEEDBACK_WEBHOOK_URL 추가·NEXT_PUBLIC_PAYMENTS_ENABLED=true, Supabase PAYMENTS_ENABLED=true(회장 Q3 "켜") → main push. 운영 사진 업로드는 함수 시크릿 2개로 이미 복구(관찰). 조성진·이다솔 친구 연결 완료.
