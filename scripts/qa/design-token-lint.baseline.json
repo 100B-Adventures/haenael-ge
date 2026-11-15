@@ -21,7 +21,7 @@
   "web/src/components/common/ReportButton.tsx\t색상 리터럴\tclassName=\"mt-3 w-full rounded-2xl py-2.5 text-[14px] [color:#A09B93]!\"",
   "web/src/components/goal/CheerCount.tsx\t인라인 스타일\tstyle={{",
   "web/src/components/goal/CheerCount.tsx\t색상 리터럴\tbackground: i % 3 === 1 ? \"#E4E0D8\" : \"#cfe0d6\",",
-  "web/src/components/goal/CheerPaymentButton.tsx\t색상 리터럴\tclassName=\"fixed inset-0 z-50 flex items-end justify-center px-4 pb-4 [background-color:rgba(22,20,1",
+  "web/src/components/goal/CheerPaymentButton.tsx\t색상 리터럴\tclassName=\"cheer-payment-overlay fixed inset-0 z-50 flex items-end justify-center px-4 [background-c",
   "web/src/components/goal/CheerPaymentButton.tsx\t색상 리터럴\tclassName=\"flex h-10 w-10 shrink-0 items-center justify-center rounded-full [color:var(--muted-foreg",
   "web/src/components/goal/CheerPaymentButton.tsx\t인라인 스타일\tstyle={{",
   "web/src/components/goal/CheerPaymentButton.tsx\t색상 리터럴\tcolor: selected ? \"var(--accent-foreground)\" : \"#4a4640\",",
