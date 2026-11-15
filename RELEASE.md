@@ -31,7 +31,10 @@ qa_gate:
 release: 2.3.0
 release_tag: 2.3.0+chairman-feedback-1114
 date: 2026-11-15
-status: releasing
+status: released
+released_at: 2026-11-15 02:5x KST (main 1f90c0f, 운영 health 2.3.0)
+ci: main CI 43623851873 success, 운영 읽기 전용 E2E 43624217095 success(정기 43661011804 success)
+post_release_defect: 결제창이 낮은 화면(390×664)에서 닫기 버튼이 화면 위로 39px 잘리고 결제 버튼이 하단 탭에 가림(11-15 운영 실측). 2.3.1 에서 수정
 product_source: 53a083de3f0eb146e85f88f1414fc2799ccc5082
 approval: 회장 2026-11-11 04:40 정책 원문 + 회장 2026-11-14 "Q3 ... 켜 ... 진행해. 나머지 Q4에서 Q9까지 다 수정하고 ... 쭉 진행". staging 결과 단락은 11-15 02:5x [🇪🇸 제품·하네스-온프렘] 에 먼저 송부
 line: v2
