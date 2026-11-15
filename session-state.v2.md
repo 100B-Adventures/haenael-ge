@@ -11,7 +11,10 @@
 
 ## 열린 항목
 
-- 2.3.0+chairman-feedback-1114(hotfix 53a083d 제품, 이후 e2e·문서): 회장 11-14 지시 Q1·Q4~Q9·Q11~Q14 구현, staging 회귀 45/45(r2), 독립 검증 13차 진행 중 → 결과 단락 → Vercel Production SLACK_FEEDBACK_WEBHOOK_URL 추가·NEXT_PUBLIC_PAYMENTS_ENABLED=true, Supabase PAYMENTS_ENABLED=true(회장 Q3 "켜") → main push. 운영 사진 업로드는 함수 시크릿 2개로 이미 복구(관찰). 조성진·이다솔 친구 연결 완료.
+- 2.3.1+fix-cheer-sheet-height(결제창 높이): staging 회귀 44/45·독립 검증 14차 PASS, 11-15 22:3x main 0047a39 push. CI·운영 health·운영 결제창 재측정(주문 0) 확인 중. 후속(차단 아님): 시트 안 스크롤 시 닫기 버튼도 밀림(헤더 고정), 직접 입력 "클로버" 두 줄, 새 e2e TC 번호 미등록, SP-02 시험 예산, 회귀 summarize.mjs 제목 SHA.
+- 2.3.0: 운영 반영 완료(11-15 02:5x, 1f90c0f, CI 43623851873·운영 읽기 전용 E2E 43624217095 success). 결제 ON·SLACK_FEEDBACK_WEBHOOK_URL 추가 완료. hotfix 미커밋 문서는 f5259cb·0047a39 로 커밋(컨트롤러 10:22 감사 지적 해소).
+
+- 닫힘 22:3x 운영 반영 완료(위 항목): 2.3.0+chairman-feedback-1114(hotfix 53a083d 제품, 이후 e2e·문서): 회장 11-14 지시 Q1·Q4~Q9·Q11~Q14 구현, staging 회귀 45/45(r2), 독립 검증 13차 진행 중 → 결과 단락 → Vercel Production SLACK_FEEDBACK_WEBHOOK_URL 추가·NEXT_PUBLIC_PAYMENTS_ENABLED=true, Supabase PAYMENTS_ENABLED=true(회장 Q3 "켜") → main push. 운영 사진 업로드는 함수 시크릿 2개로 이미 복구(관찰). 조성진·이다솔 친구 연결 완료.
 - 회장 손: 9450 에 솔라피(알림톡 키 11-07 만료 연장)·카카오 개발자(카카오톡 공유 JS 키) 로그인 탭을 띄워 둠. 로그인만 하면 세션이 이어서 처리.
 - Q10 동의 배너: 회장 질문에 답 대기(open-decisions consent-banner).
 - 회장 11-13 21시 운영 피드백 14건 판정 완료: docs/plan/v2-chairman-feedback-backlog-v0.1.0-claude-opus-20261113-2110.md(hotfix 260fd43). 목표 소실은 삭제 아님(마감 지난 목표가 접힘), 친구 0건은 옛 응원에 회원 기록 없음, 로그인 리다이렉트·OG 이미지·카카오 공유·HEIC 업로드는 결함. 구현 미착수(주간 94%), 2.2.2 로 묶어 11-14 19:00 리셋 뒤(3% 상한) 또는 Codex 11-18. 회장 결정 3건 open-decisions(62f56e37): 의견 텍스트→슬랙, 동의 배너 축소, 친구 수동 연결.
