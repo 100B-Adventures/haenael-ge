@@ -11,12 +11,14 @@
 
 ## 열린 항목
 
+- ★앱 채널(회장 11-10 12시 "iOS 안드로이드 분명히 얘기를 했을 텐데 … 앱인토스는 일단 배포하고 알아서", 11-16 재질문): 착수 0건. iOS·Android = 웹 V2 를 감싸는 앱으로 기획 단계부터(앱 심사의 현금성 후원·환전 위험 먼저 확인), 앱인토스 = 결제·환전을 뺀 미니앱(miniapp/, 10-12 이후 V2 기능 미반영)을 V2 기준으로 갱신 후 제출. 해낼게 새 기능은 제품·하네스 승인 후라 11-16 00:5x 승인 요청 송부, 승인 오면 기획 위임.
+- 카카오톡 공유: 닫힘 00:5x 카카오 JS 키 도메인(운영·staging) 등록, Vercel Production NEXT_PUBLIC_KAKAO_JS_KEY 추가, 운영 재배포(haenael-20t0a79sg), 운영 번들에 키 포함·운영 도메인 SDK 초기화 성공 관찰. 실제 공유창은 회원 목표가 있는 계정에서 미확인.
+
 - 2.3.1+fix-cheer-sheet-height(결제창 높이): staging 회귀 44/45·독립 검증 14차 PASS, 11-15 22:3x main 0047a39 push. 닫힘 22:5x: 운영 반영 완료(610adf1, CI 43720418216 success, 운영 결제창 390×664 e2e 통과·주문 0). 0047a39 CI 는 디자인 토큰 기준선 키로 실패했다가 재push 로 해소(실수원장). 후속(차단 아님): 시트 안 스크롤 시 닫기 버튼도 밀림(헤더 고정), 직접 입력 "클로버" 두 줄, 새 e2e TC 번호 미등록, SP-02 시험 예산, 회귀 summarize.mjs 제목 SHA.
 - 2.3.0: 운영 반영 완료(11-15 02:5x, 1f90c0f, CI 43623851873·운영 읽기 전용 E2E 43624217095 success). 결제 ON·SLACK_FEEDBACK_WEBHOOK_URL 추가 완료. hotfix 미커밋 문서는 f5259cb·0047a39 로 커밋(컨트롤러 10:22 감사 지적 해소).
 
 - 닫힘 22:3x 운영 반영 완료(위 항목): 2.3.0+chairman-feedback-1114(hotfix 53a083d 제품, 이후 e2e·문서): 회장 11-14 지시 Q1·Q4~Q9·Q11~Q14 구현, staging 회귀 45/45(r2), 독립 검증 13차 진행 중 → 결과 단락 → Vercel Production SLACK_FEEDBACK_WEBHOOK_URL 추가·NEXT_PUBLIC_PAYMENTS_ENABLED=true, Supabase PAYMENTS_ENABLED=true(회장 Q3 "켜") → main push. 운영 사진 업로드는 함수 시크릿 2개로 이미 복구(관찰). 조성진·이다솔 친구 연결 완료.
 - 솔라피: 닫힘 00:1x 회장 로그인 뒤 운영 알림톡 키 만료일 2027-11-16 로 연장(콘솔 관찰), 로그인 상태 유지 켬·login-health 등록. 유지 여부는 11-17 00:1x 이후 확인 전까지 미검증.
-- 회장 손: 카카오 개발자(카카오톡 공유 JS 키) 9450 로그인 대기. 요청 시 "로그인 상태 유지"를 켜 달라고 적는다(browser-automation §1-5-1).
 - Q10 동의 배너: 회장 질문에 답 대기(open-decisions consent-banner).
 - 회장 11-13 21시 운영 피드백 14건 판정 완료: docs/plan/v2-chairman-feedback-backlog-v0.1.0-claude-opus-20261113-2110.md(hotfix 260fd43). 목표 소실은 삭제 아님(마감 지난 목표가 접힘), 친구 0건은 옛 응원에 회원 기록 없음, 로그인 리다이렉트·OG 이미지·카카오 공유·HEIC 업로드는 결함. 구현 미착수(주간 94%), 2.2.2 로 묶어 11-14 19:00 리셋 뒤(3% 상한) 또는 Codex 11-18. 회장 결정 3건 open-decisions(62f56e37): 의견 텍스트→슬랙, 동의 배너 축소, 친구 수동 연결.
 - 2.2.0+whats-new-updates: 운영 반영 완료(11-13 00:0x, f2c9ee6, CI·운영 읽기 전용 E2E success). 결과는 product-controller(오프라인, 전달 대기)·claude-31 에 송부.
