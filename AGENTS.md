@@ -54,3 +54,7 @@ node scripts/qa/verify-storage-cleanup-concurrency.mjs
 node scripts/qa/verify-storage-cleanup-runtime.mjs
 node scripts/qa/verify-cheer-summary-index.mjs
 ```
+
+## 운영 반영(main push) 출고 조건 (2026-11-15 신설)
+
+main push 전에 **같은 커밋으로 CI 를 수동 실행해 green 을 본다.** `gh workflow run CI --ref <브랜치>` 후 `gh run watch <id> --exit-status`. CI 는 main push 와 PR 에서만 자동으로 돌고, Vercel 운영 배포는 CI 결과를 기다리지 않는다. staging 회귀와 독립 검증은 CI 의 단위 테스트·디자인 토큰 검사·프로덕션 빌드를 대신하지 않는다. 2026-11-15 2.3.1 은 이 단계 없이 push 해 디자인 토큰 검사가 실패한 채 운영이 바뀌었다(실수원장 같은 날 22:3x).
