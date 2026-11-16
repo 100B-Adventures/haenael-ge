@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-16 19:18 KST] compact 마크 (auto)
+- 세션 f46c03f7 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: b7ae3cb docs(state): prototype v3.1.0 committed, 3.1.1 and app design in
+- compact 직전 컨텍스트: 239947 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 6]: [handoff-freshness] 이번 턴에 파일을 고치거나 커밋했는데 상태파일을 안 썼다. '/Users/sj/sj_code_master/haenael-ge/session-state.v2.md' 맨 위에 '## YYYY-MM-DD HH:MM KST · 제목' 블록으로 회장 요청·한 것·검증 등급·다음을 적고, 최종 보고 부록에 '인계 기록: session-state.v2.md YYYY-MM-DD HH:MM' 줄을 넣어 다시 내라(회장 2026-10-06). 우회
+- 직전에 고친 파일: report-0136.md brief-app-channels-v0.1.0.md report-1857.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## 2026-11-16 18:57 KST · 프로토타입 3.1.0 커밋, 3.1.1·앱 화면 디자인 진행
 
 - 회장 요청(18시): 앱 3채널 개발 전 단계만, 웹 릴리즈가 최신 승인 프로토타입 기준인지.
