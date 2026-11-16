@@ -123,6 +123,19 @@
         "Patreon: 미국 밖 iOS IAP 강제, 30% 수수료",
         "Buy Me a Coffee: 외부 후원 링크 3.1.1 반려 사례(포럼)"
       ]
+    },
+    "v020-additional": {
+      "checked": "2026-11-16 21시대 KST",
+      "excerpt": "v020-additional-excerpts.md",
+      "points": [
+        "Capacitor server.url 은 운영용 아님(공식)",
+        "Google 한국 현재 Play 15%, 대체 결제 11%. 2026-12-31 까지 한국 새 요율표, 숫자 미공개",
+        "Apple 소규모 사업자 15%",
+        "앱인토스 IAP: 환가성 상품 판매 불가, 15%+5%",
+        "앱인토스 광고: 보상 직접 연결 금지, 배분율 미기재",
+        "Twitch Bits: 앱 가격을 올려 지급 1센트 유지",
+        "TikTok: 코인 현금 교환 불가, 다이아몬드 현금화, 18세 이상"
+      ]
     }
   }
 }
