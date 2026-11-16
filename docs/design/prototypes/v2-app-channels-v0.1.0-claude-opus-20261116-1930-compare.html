@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>해낼게 앱 채널 v0.1.0 · 후보 비교판 (A1 첫 실행 소개 · A3 푸시 사전 안내)</title>
+<style>
+  :root{--bg:#1c1b19;--card:#262421;--line:#3a3631;--ink:#f3efe7;--mut:#a8a196;--acc:#c98a2b;--clover:#1B8A4F;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;padding:24px 20px 60px;}
+  h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
+  .sub{font-size:13px;color:var(--mut);margin-top:6px;line-height:1.6;max-width:1100px}
+  section{margin-top:28px;border-top:1px solid var(--line);padding-top:20px}
+  h2{font-size:17px;font-weight:800}
+  .ctrl{font-size:13px;color:var(--mut);margin-top:6px;line-height:1.6;max-width:1100px}
+  .refs{display:flex;gap:12px;margin-top:12px;overflow-x:auto}
+  .refs figure{flex:0 0 auto;width:220px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
+  .refs img{width:100%;height:150px;object-fit:cover;object-position:top;border-radius:6px;background:#fff}
+  .refs figcaption{font-size:13px;color:var(--mut);margin-top:6px;line-height:1.45}
+  .row{display:flex;gap:16px;margin-top:16px;overflow-x:auto;padding-bottom:6px}
+  .col{flex:0 0 auto;width:281px}
+  .col .lab{font-size:14px;font-weight:800;display:flex;gap:6px;align-items:center;min-height:24px}
+  .rec{background:var(--acc);color:#1c1b19;border-radius:8px;padding:0 6px;font-size:13px}
+  .vw{width:281px;height:608px;overflow:hidden;border-radius:18px;border:1px solid #000;background:#fbfaf7;margin-top:8px}
+  .vw iframe{width:390px;height:844px;border:0;transform:scale(.72);transform-origin:0 0}
+  .now{display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);font-size:13px;line-height:1.6;background:var(--card)}
+  .pros{font-size:13px;color:var(--mut);line-height:1.55;margin-top:8px}
+  .pros b{color:var(--ink)}
+  .pick{margin-top:8px;font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer;min-height:32px}
+  .tabs{display:none;gap:6px;margin-top:12px}
+  .tabs button{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:6px 12px;cursor:pointer}
+  .tabs button.on{background:var(--clover);border-color:var(--clover)}
+  .tabs .pos{font-size:13px;color:var(--mut);align-self:center}
+  .memo{margin-top:28px;border-top:1px solid var(--line);padding-top:20px;max-width:900px}
+  textarea{width:100%;min-height:80px;margin-top:8px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px}
+  .copy{margin-top:10px;font:inherit;font-size:14px;font-weight:800;background:var(--clover);color:#fff;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+  .out{font-size:13px;color:var(--mut);margin-top:8px;white-space:pre-wrap}
+  .stamp{margin-top:36px;font-size:13px;color:#7d786f;line-height:1.6;border-top:1px solid var(--line);padding-top:12px}
+  @media (max-width:900px){ .tabs{display:flex} .row .col.cand{display:none} .row .col.cand.show{display:block} .row .col.now-col{display:none} }
+</style></head>
+<body>
+<h1>앱 채널 v0.1.0 · 처음 정하는 요소 후보 비교판</h1>
+<p class="sub">요소마다 실물 근거(레퍼런스 팩) · 지금 모습 · 후보 3개를 같은 폭·같은 축척으로 나란히 둔다. 후보는 프로토타입 그 자체를 띄운 것이라 칩을 바꾸면 흐름 전체가 그 안으로 바뀐다. 휴대폰 폭에서는 위의 A·B·C 버튼으로 하나씩 본다. 이 페이지는 검수용이고 제품 화면이 아니다.</p>
+
+<section data-el="a1intro">
+  <h2>A1 첫 실행 소개 (iOS·Android)</h2>
+  <p class="ctrl"><b>통제변인(안마다 같음)</b>: 화면 1장, 버튼 2개(시작하기 → 목표 쓰기 / 이미 계정이 있어요 → 로그인), 로그인·권한 요청 0, 결제·금액 0, 더미 목표 "토익 900". <b>안마다 다른 것</b>: 주인공 요소(워드맵 · 카드와 도착 알림 · 선언 문장).</p>
+  <div class="refs">
+    <figure><img src="../refs/app-channels-v0.1.0-claude-opus-20261116-1910/toss-blog-login-notice-02.png" alt=""><figcaption>toss-blog-login-notice-02 · 토스 공식 블로그 · 진입 즉시 로그인 대신 콘텐츠부터</figcaption></figure>
+    <figure><img src="../refs/app-channels-v0.1.0-claude-opus-20261116-1910/toss-blog-login-notice-01.png" alt=""><figcaption>toss-blog-login-notice-01 · 토스 UX 원칙 5가지 · 로그인이 지금 꼭 필요한가</figcaption></figure>
+  </div>
+  <div class="tabs"><button class="on" data-k="A">A</button><button data-k="B">B</button><button data-k="C">C</button><span class="pos">지금 1번째 / 3</span></div>
+  <div class="row">
+    <div class="col now-col"><div class="lab">지금</div><div class="vw now">없음 (새 화면)<br>웹은 랜딩(landing)<br>이 자리를 대신했다</div></div>
+    <div class="col cand show" data-k="A"><div class="lab">A · 워드맵 한 장 <span class="rec">추천</span></div><div class="vw"><iframe src="v2-app-channels-v0.1.0-claude-opus-20261116-1930.html?bare=1&ch=ios&cand=a1intro:A#a1intro" title="A1 후보 A"></iframe></div><p class="pros"><b>좋은 점</b> 보상 모습을 첫눈에 본다. 차용: toss-blog-login-notice-02<br><b>나쁜 점</b> 응원 0 인 사람에게는 남의 결과처럼 보일 수 있다</p><label class="pick"><input type="radio" name="a1intro" value="A" checked>이걸로</label></div>
+    <div class="col cand" data-k="B"><div class="lab">B · 내 카드에 응원 도착</div><div class="vw"><iframe src="v2-app-channels-v0.1.0-claude-opus-20261116-1930.html?bare=1&ch=ios&cand=a1intro:B#a1intro" title="A1 후보 B"></iframe></div><p class="pros"><b>좋은 점</b> "내 카드" 로 주인 의식. 차용: 운영 MyGoalListCard<br><b>나쁜 점</b> 화면 요소가 많아 첫 화면 위계가 약하다</p><label class="pick"><input type="radio" name="a1intro" value="B">이걸로</label></div>
+    <div class="col cand" data-k="C"><div class="lab">C · 선언 문장 + 3단계</div><div class="vw"><iframe src="v2-app-channels-v0.1.0-claude-opus-20261116-1930.html?bare=1&ch=ios&cand=a1intro:C#a1intro" title="A1 후보 C"></iframe></div><p class="pros"><b>좋은 점</b> 무엇을 하는 앱인지 글로 분명하다. 차용: 3.1.1 how 4단계<br><b>나쁜 점</b> 글이 많고 기대감이 약하다</p><label class="pick"><input type="radio" name="a1intro" value="C">이걸로</label></div>
+  </div>
+</section>
+
+<section data-el="a3push">
+  <h2>A3 푸시 사전 안내 (첫 목표 저장 직후)</h2>
+  <p class="ctrl"><b>통제변인</b>: 시점(첫 목표 저장 직후 홈), 제목·설명 문구, 잠금화면 알림 미리보기(금액 0), 시스템 창으로 가는 버튼 "다음", 그 뒤 시스템 창. <b>안마다 다른 것</b>: 배치(시트 · 전체 화면 · 홈 안 카드)와 "나중에" 를 버튼으로 두는가. Apple HIG 는 사전 안내에 버튼 하나와 나가기 버튼 금지를 요구한다(A 는 그 지침과 부딪힌다).</p>
+  <div class="refs">
+    <figure><img src="../refs/app-channels-v0.1.0-claude-opus-20261116-1910/apple-hig-privacy-permission.png" alt="" style="object-position:0 70%"><figcaption>apple-hig-privacy-permission · Pre-alert screens: 버튼 하나, "Allow" 금지, 닫기·취소 금지</figcaption></figure>
+    <figure><img src="../refs/app-channels-v0.1.0-claude-opus-20261116-1910/android-notification-permission.png" alt=""><figcaption>android-notification-permission · Android 13 허용/허용 안함, 이유 먼저 설명</figcaption></figure>
+    <figure><img src="../refs/app-channels-v0.1.0-claude-opus-20261116-1910/webdev-owen-campbell-moores-exa-7047e2dfb6c6.png" alt=""><figcaption>web.dev · 결제 완료 화면 안에서 알림 받기(가치를 본 뒤 묻기)</figcaption></figure>
+    <figure><img src="../refs/app-channels-v0.1.0-claude-opus-20261116-1910/toss-uxguide-03.png" alt=""><figcaption>toss-uxguide-03 · 나쁜 예: 진입 즉시 알림 동의 시트</figcaption></figure>
+  </div>
+  <div class="tabs"><button data-k="A">A</button><button data-k="B">B</button><button class="on" data-k="C">C</button><span class="pos">지금 3번째 / 3</span></div>
+  <div class="row">
+    <div class="col now-col"><div class="lab">지금</div><div class="vw now">없음 (새 화면)<br>웹은 기기 푸시가 없다</div></div>
+    <div class="col cand" data-k="A"><div class="lab">A · 바텀시트 + 나중에</div><div class="vw"><iframe src="v2-app-channels-v0.1.0-claude-opus-20261116-1930.html?bare=1&ch=ios&cand=a3push:A#a3push" title="A3 후보 A"></iframe></div><p class="pros"><b>좋은 점</b> PRD 문구 그대로, 나중에가 분명<br><b>나쁜 점</b> HIG 사전 안내 지침(나가기 버튼 금지)과 부딪혀 심사 위험</p><label class="pick"><input type="radio" name="a3push" value="A">이걸로</label></div>
+    <div class="col cand" data-k="B"><div class="lab">B · 전체 화면 + 다음 1개</div><div class="vw"><iframe src="v2-app-channels-v0.1.0-claude-opus-20261116-1930.html?bare=1&ch=ios&cand=a3push:B#a3push" title="A3 후보 B"></iframe></div><p class="pros"><b>좋은 점</b> HIG 문장 그대로<br><b>나쁜 점</b> 나갈 길이 시스템 창뿐이라 강요로 느껴진다</p><label class="pick"><input type="radio" name="a3push" value="B">이걸로</label></div>
+    <div class="col cand show" data-k="C"><div class="lab">C · 홈 안 카드 + 다음 1개 <span class="rec">추천</span></div><div class="vw"><iframe src="v2-app-channels-v0.1.0-claude-opus-20261116-1930.html?bare=1&ch=ios&cand=a3push:C#a3push" title="A3 후보 C"></iframe></div><p class="pros"><b>좋은 점</b> 화면을 덮지 않아 지나치면 그게 나중에, 버튼은 하나. 차용: web.dev 결제 완료 안 체크<br><b>나쁜 점</b> 덜 눈에 띄어 허용률이 A 보다 낮을 수 있다(실측 전)</p><label class="pick"><input type="radio" name="a3push" value="C" checked>이걸로</label></div>
+  </div>
+</section>
+
+<div class="memo">
+  <h2>고르기 · 메모 · 한 번에 복사</h2>
+  <textarea id="memo" placeholder="고른 이유나 고칠 점을 적어 주세요"></textarea>
+  <button type="button" class="copy" onclick="copyPick()">선택 복사</button>
+  <div class="out" id="out"></div>
+</div>
+<div class="stamp">STAMP · line=v2 · v2-app-channels-v0.1.0 비교판 · 생성 2026-11-16 19:30 KST · model claude-opus · agent product-designer · 레퍼런스 팩 docs/design/refs/app-channels-v0.1.0-claude-opus-20261116-1910/manifest.md · 고민 한 줄: 후보를 그림으로 따로 그리지 않고 프로토타입 자체를 띄워, 고른 안이 그대로 흐름이 되게 했다.</div>
+<script>
+  document.querySelectorAll('section[data-el]').forEach(sec=>{
+    const btns=[...sec.querySelectorAll('.tabs button')], cols=[...sec.querySelectorAll('.col.cand')], pos=sec.querySelector('.tabs .pos');
+    btns.forEach((b,i)=>b.addEventListener('click',()=>{
+      btns.forEach(x=>x.classList.toggle('on',x===b));
+      cols.forEach(c=>c.classList.toggle('show',c.dataset.k===b.dataset.k));
+      pos.textContent='지금 '+(i+1)+'번째 / '+btns.length;
+    }));
+  });
+  function copyPick(){
+    const picks=[...document.querySelectorAll('section[data-el]')].map(s=>{const r=s.querySelector('input:checked');return s.dataset.el+'='+(r?r.value:'미선택');}).join(', ');
+    const txt='앱 채널 v0.1.0 후보 선택: '+picks+(document.getElementById('memo').value.trim()?'\n메모: '+document.getElementById('memo').value.trim():'');
+    document.getElementById('out').textContent=txt;
+    if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
+  }
+</script>
+</body></html>

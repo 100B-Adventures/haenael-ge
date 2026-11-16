@@ -1,0 +1,14 @@
+{
+  "capture_set": "v2-2.3.1-local-paysheet-20261116",
+  "app": "web",
+  "env_url": "http://localhost:3311 (next dev, NEXT_PUBLIC_PAYMENTS_ENABLED=true, staging Supabase ezzklgotgydwxqebfoys)",
+  "source_ref": "hotfix 작업트리 HEAD 2bea104 (web/src 는 운영 2.3.1 과 동일, git log 610adf1..HEAD -- web/src 0건 확인)",
+  "observed_at": "2026-11-16T19:1x+09:00",
+  "browser": "chromium (playwright) 390x844 dpr2 ko-KR reducedMotion=reduce",
+  "items": [
+    {"screen":"goalpublic-guest-whatsnew","request_url":"/g/bfv9osdt","state":"guest, 새 기능 안내 카드 표시(마지막 본 버전 없음)","png":"goalpublic-guest-whatsnew-local@390x844.png"},
+    {"screen":"goalpublic","request_url":"/g/bfv9osdt","state":"guest, 안내 카드 닫힌 상태","png":"goalpublic-local@390x844.png"},
+    {"screen":"goalpublic-paysheet","request_url":"/g/bfv9osdt","state":"'조용히 밀어줄게' 눌러 결제창 열림. 결제 버튼 누르지 않음, 주문 0","png":"goalpublic-paysheet-local@390x844.png"}
+  ],
+  "cleanup": "dev 서버 PID 종료, 3311 포트 비어 있음 확인. 시험 회원 생성 없음(기존 staging 목표 bfv9osdt 비회원 열람)."
+}
