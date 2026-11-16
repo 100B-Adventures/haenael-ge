@@ -134,7 +134,7 @@
 
 ## 3. 결제 정책 판정
 
-원문은 refs 폴더 `apple-review-excerpt.md`·`apple-kr-external-purchase-excerpt.md`·`google-*-excerpt.md`·`v020-additional-excerpts.md`. 조회 2026-11-16.
+원문은 refs 폴더 `refs/app-channels-v0.1.0-claude-opus-20261116-1807/apple-review-excerpt.md`·`refs/app-channels-v0.1.0-claude-opus-20261116-1807/apple-kr-external-purchase-excerpt.md`·`refs/app-channels-v0.1.0-claude-opus-20261116-1807/google-play-payments-excerpt.md`·`refs/app-channels-v0.1.0-claude-opus-20261116-1807/google-kr-alt-billing-excerpt.md`·`refs/app-channels-v0.1.0-claude-opus-20261116-1807/google-webview-spam-excerpt.md`·`refs/app-channels-v0.1.0-claude-opus-20261116-1807/v020-additional-excerpts.md`. 조회 2026-11-16.
 
 ### 3.1 "인앱결제와 외부 결제를 둘 다" 되는가
 
@@ -710,15 +710,15 @@ AC 번호는 각 FR 의 Gherkin 시나리오 순서다. TC 는 기술설계가 `
 
 ## 13. 레퍼런스 사용 기록
 
-- 레퍼런스: `apple-review-excerpt.md` → 차용: 3.1.1 tip·선물 교환 금지·만료 금지, 3.1.1(a), 3.2.1(vii), 4.5.4, 4.8, 5.1.1(v) / 버림: 3.1.3 머리말(우리 유형 아님), 3.1.5(암호화폐)
-- 레퍼런스: `apple-kr-external-purchase-excerpt.md` → 차용: 26%·IAP 병행 불가·새 번들로 iOS 단일 선택 판정과 결정 1 / 버림: 외부 결제 채택
-- 레퍼런스: `google-play-payments-excerpt.md`·`google-kr-alt-billing-excerpt.md` → 차용: 가상 통화는 Play 결제 대상, 한국 대체 결제 나란히·4% 인하·가격 차등 허용으로 Android 판정 / 버림: 3항 peer-to-peer 단독 주장
-- 레퍼런스: `google-webview-spam-excerpt.md` → 차용: 웹뷰 위험을 스택 비교 축으로 / 버림: 없음
-- 레퍼런스: `appintoss-policy-excerpt.md` → 차용: 2-3·3의2·체크리스트 / 버림: §4 조건부 서비스(해당 없음)
-- 레퍼런스: `v020-additional-excerpts.md` → 차용: Capacitor server.url 공식 경고, Google 15%·11%·2026 개편, Apple 15%, 5.6.1, 앱인토스 IAP 판매 불가 상품·수수료, 광고 금지 규칙, Twitch·TikTok 구조 / 버림: Google 2026 EEA·US 요율(한국 미적용)
-- 레퍼런스: `benchmarks-payment-cases-excerpt.md` → 차용: SOOP 기사 사실, Patreon IAP 요구 / 버림: 원문 미열람 2차 보도
-- 레퍼런스: 해조단타 `apps/mobile/package.json` → 차용: Expo 57·RN 0.86·Supabase·expo-router 스택 재사용 근거 / 버림: 그 앱의 화면 구조(도메인이 다름)
-- 레퍼런스: 앱 화면 `v2-screen-inventory-app-channels-v0.1.0-claude-opus-20261116-1930.md` → 차용: A1~A11·T1~T5 번호, 충돌 C1(A3 1버튼)·C2(앱 안 탈퇴) 해소 / 버림: T4 응원 한마디(D-055 폐기)
+- 레퍼런스: `refs/app-channels-v0.1.0-claude-opus-20261116-1807/apple-review-excerpt.md` → 차용: 3.1.1 tip·선물 교환 금지·만료 금지, 3.1.1(a), 3.2.1(vii), 4.5.4, 4.8, 5.1.1(v) / 버림: 3.1.3 머리말(우리 유형 아님), 3.1.5(암호화폐)
+- 레퍼런스: `refs/app-channels-v0.1.0-claude-opus-20261116-1807/apple-kr-external-purchase-excerpt.md` → 차용: 26%·IAP 병행 불가·새 번들로 iOS 단일 선택 판정과 결정 1 / 버림: 외부 결제 채택
+- 레퍼런스: `refs/app-channels-v0.1.0-claude-opus-20261116-1807/google-play-payments-excerpt.md`·`refs/app-channels-v0.1.0-claude-opus-20261116-1807/google-kr-alt-billing-excerpt.md` → 차용: 가상 통화는 Play 결제 대상, 한국 대체 결제 나란히·4% 인하·가격 차등 허용으로 Android 판정 / 버림: 3항 peer-to-peer 단독 주장
+- 레퍼런스: `refs/app-channels-v0.1.0-claude-opus-20261116-1807/google-webview-spam-excerpt.md` → 차용: 웹뷰 위험을 스택 비교 축으로 / 버림: 없음
+- 레퍼런스: `refs/app-channels-v0.1.0-claude-opus-20261116-1807/appintoss-policy-excerpt.md` → 차용: 2-3·3의2·체크리스트 / 버림: §4 조건부 서비스(해당 없음)
+- 레퍼런스: `refs/app-channels-v0.1.0-claude-opus-20261116-1807/v020-additional-excerpts.md` → 차용: Capacitor server.url 공식 경고, Google 15%·11%·2026 개편, Apple 15%, 5.6.1, 앱인토스 IAP 판매 불가 상품·수수료, 광고 금지 규칙, Twitch·TikTok 구조 / 버림: Google 2026 EEA·US 요율(한국 미적용)
+- 레퍼런스: `refs/app-channels-v0.1.0-claude-opus-20261116-1807/benchmarks-payment-cases-excerpt.md` → 차용: SOOP 기사 사실, Patreon IAP 요구 / 버림: 원문 미열람 2차 보도
+- 레퍼런스: 해조단타 `/Users/sj/sj_code_master/haejo-danta/apps/mobile/package.json` → 차용: Expo 57·RN 0.86·Supabase·expo-router 스택 재사용 근거 / 버림: 그 앱의 화면 구조(도메인이 다름)
+- 레퍼런스: 앱 화면 `../design/prototypes/v2-screen-inventory-app-channels-v0.1.0-claude-opus-20261116-1930.md` → 차용: A1~A11·T1~T5 번호, 충돌 C1(A3 1버튼)·C2(앱 안 탈퇴) 해소 / 버림: T4 응원 한마디(D-055 폐기)
 
 ---
 
