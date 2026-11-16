@@ -1,5 +1,20 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-16 18:30 KST · 앱 채널 기획 완료, 결정 3건 등록
+
+- 회장 요청(18시): 앱 3채널 개발 전 단계(기획·디자인)만, 개발·QA 는 11-18 Codex 리셋 뒤. 웹 릴리즈가 최신 승인 프로토타입 기준인지.
+- 한 것: 브리프·레퍼런스 팩·앱 PRD v0.1.0→v0.1.2(prd-architect), 독립 검수 prd-reviewer(Sonnet 5.5) 17/25 반려 → 19/25 반려 → A1 AC·TC 수리. hotfix 87bf5b0. 결정 3건 open-decisions 등록. 프로토타입 v3 역반영(product-designer) 진행 중.
+- 검증 등급: PRD 차단 수리는 근거 확인(grep 재계수). 정책 인용 5건은 검수자가 공식 원문 재조회로 일치(관찰됨). 프로토타입 미회수.
+- 다음: 프로토타입 새 버전 회수·린트 4종 확인 → 앱 화면 디자인 위임 → 회장 통합 보고.
+
+## [2026-11-16 18:29 KST] compact 마크 (auto)
+- 세션 f46c03f7 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 0d7980c docs(state): app channel plan and prototype back-port delegated
+- compact 직전 컨텍스트: 189508 토큰
+- 마지막 회장 요청: <task-notification> <task-id>a171e727e8e1c1584</task-id> <tool-use-id>toolu_01NPQmDSZXnfK1AiXV8NLonS</tool-use-id> <output-file>/tmp/claude-1000/-Users-sj-sj-code-master-haenael-ge/f46c03f7-31c5-52cd-86c0-344d6a103d39/tasks/a171e727e8e1c1584.output</output-file> <status>completed</status> <summary>A
+- 직전에 고친 파일: report-0136.md brief-app-channels-v0.1.0.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-16 18:02 KST] compact 마크 (auto)
 - 세션 f46c03f7 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: 49d719d docs(infra): kakao JS key domains and NEXT_PUBLIC_KAKAO_JS_KEY i
@@ -19,7 +34,8 @@
 
 ## 열린 항목
 
-- ★앱 채널 진행 11-16 18:2x: 회장 18시 원문(hotfix 요청.md 11행)이 개발 전 단계 착수를 직접 지시 → 제품·하네스 승인 대기 해제. 브리프 docs/plan/brief-app-channels-v0.1.0.md(hotfix, 회수 뒤 이름 규칙으로 개명·커밋), 기획 위임(prd-architect, 앱 PRD v0.1.0·심사 정책 조사) 진행 중, 그 뒤 앱 화면 디자인 위임. 개발·QA 는 Codex 재개(11-18 13:03) 뒤. 동시에 프로토타입 v3 → 다음 버전 역반영 위임(2.3.0·2.3.1 화면이 승인 프로토타입에 없음, D-049 정본 뒤처짐) 진행 중.
+- ★앱 채널 진행 11-16 19:0x: 앱 PRD v0.1.2 커밋(hotfix 87bf5b0), 독립 검수 2회 반려 뒤 차단 수리(컨트롤러 재계수 AC 32·TC 33). 회장 결정 3건 open-decisions OD-haenael-20261116-app-channels(하네스 1de4d173). 다음 = 프로토타입 v3.1 회수 뒤 앱 화면 디자인 위임(추천안 A 기준).
+- (이전) 앱 채널 진행 11-16 18:2x: 회장 18시 원문(hotfix 요청.md 11행)이 개발 전 단계 착수를 직접 지시 → 제품·하네스 승인 대기 해제. 브리프 docs/plan/brief-app-channels-v0.1.0.md(hotfix, 회수 뒤 이름 규칙으로 개명·커밋), 기획 위임(prd-architect, 앱 PRD v0.1.0·심사 정책 조사) 진행 중, 그 뒤 앱 화면 디자인 위임. 개발·QA 는 Codex 재개(11-18 13:03) 뒤. 동시에 프로토타입 v3 → 다음 버전 역반영 위임(2.3.0·2.3.1 화면이 승인 프로토타입에 없음, D-049 정본 뒤처짐) 진행 중.
 - ★앱 채널(회장 11-10 12시 "iOS 안드로이드 분명히 얘기를 했을 텐데 … 앱인토스는 일단 배포하고 알아서", 11-16 재질문): 착수 0건. iOS·Android = 웹 V2 를 감싸는 앱으로 기획 단계부터(앱 심사의 현금성 후원·환전 위험 먼저 확인), 앱인토스 = 결제·환전을 뺀 미니앱(miniapp/, 10-12 이후 V2 기능 미반영)을 V2 기준으로 갱신 후 제출. 해낼게 새 기능은 제품·하네스 승인 후라 11-16 00:5x 승인 요청 송부, 승인 오면 기획 위임.
 - 카카오톡 공유: 닫힘 00:5x 카카오 JS 키 도메인(운영·staging) 등록, Vercel Production NEXT_PUBLIC_KAKAO_JS_KEY 추가, 운영 재배포(haenael-20t0a79sg), 운영 번들에 키 포함·운영 도메인 SDK 초기화 성공 관찰. 실제 공유창은 회원 목표가 있는 계정에서 미확인.
 
