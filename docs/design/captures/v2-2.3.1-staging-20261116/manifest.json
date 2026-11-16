@@ -1,0 +1,125 @@
+{
+  "capture_set": "v2-2.3.1-staging-20261116",
+  "app": "web",
+  "env_url": "https://haenael-ge-v2-staging-100-b.vercel.app",
+  "deploy": {
+    "version": "2.3.1",
+    "sourceSha": "a713b7b1069c39b6015899172ee7379907bdcd5c",
+    "supabaseProjectRef": "ezzklgotgydwxqebfoys"
+  },
+  "observed_at": "2026-11-16T09:14:10.548Z",
+  "browser": "chromium (playwright) 390x844 dpr2 ko-KR reducedMotion=reduce",
+  "items": [
+    {
+      "screen": "landing",
+      "role": "guest",
+      "state": "default",
+      "viewport": "390x844",
+      "request_url": "/",
+      "final_url": "/",
+      "http": 200,
+      "png": "landing@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    },
+    {
+      "screen": "updates",
+      "role": "guest",
+      "state": "default",
+      "viewport": "390x844",
+      "request_url": "/updates",
+      "final_url": "/updates",
+      "http": 200,
+      "png": "updates@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    },
+    {
+      "screen": "goalpublic-guest",
+      "role": "guest",
+      "state": "default",
+      "viewport": "390x844",
+      "request_url": "/g/dsg-1794820450548-0",
+      "final_url": "/g/dsg-1794820450548-0",
+      "http": 200,
+      "png": "goalpublic-guest@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    },
+    {
+      "screen": "home",
+      "role": "member",
+      "state": "default",
+      "viewport": "390x844",
+      "request_url": "/me",
+      "final_url": "/me",
+      "http": 200,
+      "png": "home@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    },
+    {
+      "screen": "mypage",
+      "role": "member",
+      "state": "default",
+      "viewport": "390x844",
+      "request_url": "/my",
+      "final_url": "/my",
+      "http": 200,
+      "png": "mypage@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    },
+    {
+      "screen": "mypage-editor",
+      "role": "member",
+      "state": "interaction",
+      "viewport": "390x844",
+      "request_url": "/my",
+      "final_url": "/my",
+      "http": 200,
+      "png": "mypage-editor@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    },
+    {
+      "screen": "mypage-avatar-picker",
+      "role": "member",
+      "state": "interaction",
+      "viewport": "390x844",
+      "request_url": "/my",
+      "final_url": "/my",
+      "http": 200,
+      "png": "mypage-avatar-picker@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    },
+    {
+      "screen": "invite",
+      "role": "member",
+      "state": "default",
+      "viewport": "390x844",
+      "request_url": "/invite",
+      "final_url": "/invite",
+      "http": 200,
+      "png": "invite@390x844.png",
+      "overflowX": 0,
+      "status": "observed",
+      "code_ref": "a713b7b1069c39b6015899172ee7379907bdcd5c"
+    }
+  ],
+  "cleanup": {
+    "sql": "[{\"left\":0}]",
+    "deleteUserError": null,
+    "auth_user_left": 0
+  },
+  "note": "staging 2.3.1(a713b7b). 운영 2.3.1(610adf1)과 web/src 차이 0(git diff a713b7b 610adf1 -- web/src 빈 결과). 새 기능 안내 카드(WhatsNewCard)는 본 화면을 가리지 않게 last_seen=2.3.1 로 닫은 상태. 분석 동의 배너는 denied 로 닫은 상태. staging 은 결제 플래그가 꺼져 있어 응원 결제창은 캡처 불가(코드 b165fbb 기준 시안 반영).",
+  "cleanup_history": "1차 실행(design-backport-1794820311952) 은 goal 삽입 트리거가 만든 시스템 응원 FK 로 member 삭제가 막혀 관리 API SQL + auth.admin.deleteUser 로 2차 정리, 잔존 0(auth.identities·sessions·refresh_tokens 포함). 2차 실행은 같은 방식으로 즉시 정리, 잔존 0."
+}
