@@ -1,0 +1,128 @@
+{
+  "purpose": "앱 채널 PRD v0.1.0 레퍼런스 팩. 워커가 각 URL 을 실제로 열어 요점·인용·조회일을 notes 에 채운다.",
+  "created": "2026-11-16 18:2x KST",
+  "refs": [
+    {
+      "id": "apple-review",
+      "url": "https://developer.apple.com/app-store/review/guidelines/",
+      "focus": "3.1.1, 3.1.3, 3.1.5, 4.2"
+    },
+    {
+      "id": "google-play-payments",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9858738",
+      "focus": "디지털 재화 판정, 예외"
+    },
+    {
+      "id": "google-play-kr-alt-billing",
+      "url": "https://support.google.com/googleplay/android-developer/answer/11222040",
+      "focus": "한국 대체 결제"
+    },
+    {
+      "id": "appintoss-nongame-launch",
+      "url": "https://developers-apps-in-toss.toss.im/",
+      "focus": "비게임 출시 가이드, SSR 금지(D-021), 금지 업종"
+    },
+    {
+      "id": "haejo-danta-D-090",
+      "path": "/Users/sj/sj_code_master/haejo-danta/wiki/거버넌스/결정.md",
+      "focus": "같은 회사 3채널 선례"
+    },
+    {
+      "id": "haenael-miniapp",
+      "path": "/Users/sj/sj_code_master/haenael-ge-v2-hotfix/miniapp/README.md",
+      "focus": "기존 앱인토스 미니앱"
+    }
+  ],
+  "notes": {
+    "apple-review": {
+      "checked": "2026-11-16 18시대 KST",
+      "excerpt": "apple-review-excerpt.md",
+      "points": [
+        "3.1.1: 앱 안 통화·기능 잠금 해제는 IAP. IAP 통화로 디지털 콘텐츠 제공자에게 tip 허용",
+        "3.1.1(a)·3.1.3: 미국 외 스토어에서 IAP 외 결제로 보내는 버튼·링크·유도 금지",
+        "3.2.1(vii): 개인 간 금전 선물은 100% 수령자에게 갈 때만 IAP 면제. 디지털 콘텐츠와 연결되면 IAP",
+        "3.1.5 는 암호화폐 조항이다. 브리프가 말한 '기부 예외'는 3.2.1(vii)·3.2.2(iv)",
+        "4.2: 재포장된 웹사이트 이상이어야 함",
+        "4.8: 카카오 등 소셜 로그인 쓰면 이메일 비공개 가능한 동등 로그인 필수",
+        "5.1.1(v): 앱 안 계정 삭제"
+      ],
+      "quote": "Apps may enable individual users to give a monetary gift to another individual without using in-app purchase, provided that ... 100% of the funds go to the receiver of the gift."
+    },
+    "apple-kr-external": {
+      "checked": "2026-11-16",
+      "url": "https://developer.apple.com/support/storekit-external-entitlement-kr/",
+      "excerpt": "apple-kr-external-purchase-excerpt.md",
+      "points": [
+        "한국 전용 새 바이너리·미게시 번들 ID 에만",
+        "수수료 26%",
+        "같은 앱에서 IAP 와 병행 불가"
+      ]
+    },
+    "google-play-payments": {
+      "checked": "2026-11-16",
+      "excerpt": "google-play-payments-excerpt.md",
+      "points": [
+        "가상 통화는 Play 결제 대상(2항)",
+        "peer-to-peer payments·tax exempt donations 는 Play 결제를 쓰면 안 됨(3항)",
+        "가상 통화는 산 앱 안에서만 사용(5항)"
+      ],
+      "quote": "payments include peer-to-peer payments, online auctions, and tax exempt donations;"
+    },
+    "google-play-kr-alt-billing": {
+      "checked": "2026-11-16",
+      "excerpt": "google-kr-alt-billing-excerpt.md",
+      "points": [
+        "한국 대체 결제 선택 시 수수료 4% 인하",
+        "PCI DSS·24시간 거래 보고 의무"
+      ]
+    },
+    "google-webview-spam": {
+      "checked": "2026-11-16",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9899034",
+      "excerpt": "google-webview-spam-excerpt.md",
+      "points": [
+        "소유자 허가 없는 웹뷰 앱 금지",
+        "사내 경제링고 Android 정지 선례"
+      ]
+    },
+    "appintoss-nongame-launch": {
+      "checked": "2026-11-16",
+      "note": "루트 URL·intro/guide.md 는 404. 정책은 guide/undefined.md, 체크리스트는 checklist/app-nongame.md",
+      "excerpt": "appintoss-policy-excerpt.md",
+      "points": [
+        "SSR 금지·토스 도메인 렌더",
+        "토스 로그인만",
+        "디지털 상품은 인앱결제만",
+        "현금·유사자산 교환·전환 금지(3의2)",
+        "자사 서비스 이동·자사 앱 설치 유도 금지",
+        "공유는 intoss:// 스킴",
+        "§4 조건부 목록에 후원·기부 항목 없음"
+      ]
+    },
+    "haejo-danta-D-090": {
+      "checked": "2026-11-16",
+      "points": [
+        "경제링고 v1.0.9 를 iOS·Android·앱인토스 동시 반영 결정(11-16)",
+        "돈 기능(광고·캐시워크)은 2.0 으로 분리하는 버전 규칙(D-088)",
+        "Android 는 Play 웹뷰 정지 이력 때문에 회장 확인 대기"
+      ]
+    },
+    "haenael-miniapp": {
+      "checked": "2026-11-16",
+      "points": [
+        "Vite+React CSR, 결제·환전·금액·잔액·순위 제외 선언(10-06, V1 시기)",
+        "토스 로그인 → auth-toss Edge Function 계약이 레포에 없음",
+        "static guard 가 cashout·TossPay·openURL·카카오 로그인 차단"
+      ]
+    },
+    "benchmarks-payment-cases": {
+      "checked": "2026-11-16",
+      "excerpt": "benchmarks-payment-cases-excerpt.md",
+      "points": [
+        "SOOP 별풍선: 아웃링크 4년 뒤 2026-04-28 인앱결제 재도입, 앱 160원·웹 110원",
+        "Patreon: 미국 밖 iOS IAP 강제, 30% 수수료",
+        "Buy Me a Coffee: 외부 후원 링크 3.1.1 반려 사례(포럼)"
+      ]
+    }
+  }
+}
