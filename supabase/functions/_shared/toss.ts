@@ -15,6 +15,9 @@ export interface TossConfirmResponse {
   method: string;
   approvedAt: string;
   receiptUrl?: string;
+  mId?: string;
+  orderName?: string;
+  metadata?: Record<string, string>;
   raw?: unknown;
 }
 
@@ -129,6 +132,17 @@ export class TossClient {
       approvedAt,
       receiptUrl: typeof body.receipt?.url === "string"
         ? body.receipt.url
+        : undefined,
+      mId: typeof body.mId === "string" ? body.mId : undefined,
+      orderName: typeof body.orderName === "string"
+        ? body.orderName
+        : undefined,
+      metadata: body.metadata && typeof body.metadata === "object"
+        ? Object.fromEntries(
+          Object.entries(body.metadata).filter((
+            entry,
+          ): entry is [string, string] => typeof entry[1] === "string"),
+        )
         : undefined,
       raw: body,
     };

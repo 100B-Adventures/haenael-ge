@@ -44,6 +44,9 @@
     "STORAGE_CLEANUP_INTERNAL_TOKEN": { "targets": ["supabase-production"], "features": ["storage-cleanup"] },
     "PAYMENTS_ENABLED": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_SECRET_KEY": { "targets": ["supabase-production"], "features": ["payments"] },
+    "TOSS_ALTERNATIVE_MID": { "targets": ["supabase-production"], "features": ["app-channel-google-alternative"] },
+    "GOOGLE_ALTERNATIVE_TOKEN_ENCRYPTION_KEY": { "targets": ["supabase-production"], "features": ["app-channel-google-alternative"] },
+    "PUSH_TOKEN_ENCRYPTION_KEY": { "targets": ["supabase-production"], "features": ["app-channel-push"] },
     "TOSS_WEBHOOK_TOKEN": { "targets": ["supabase-production"], "features": ["payments"] },
     "APPLE_APP_ID": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
     "APPLE_BUNDLE_ID": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
@@ -88,7 +91,7 @@
     },
     "supabase-production": {
       "provider": "supabase",
-      "features": ["core", "profile", "wordmap", "payments", "app-channel-apple", "app-channel-google", "app-channel-toss", "app-channel-reconcile", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
+      "features": ["core", "profile", "wordmap", "payments", "app-channel-apple", "app-channel-google", "app-channel-google-alternative", "app-channel-push", "app-channel-toss", "app-channel-reconcile", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
     }
   }
 }

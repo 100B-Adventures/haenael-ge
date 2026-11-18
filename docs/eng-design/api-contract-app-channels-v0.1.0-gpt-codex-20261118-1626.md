@@ -71,7 +71,19 @@ Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요
 
 ## POST `/functions/v1/register-push-token`
 
-요청은 `platform`, `expo_push_token`, `device_id`, `request_key`. 자기 회원 토큰만 upsert한다. 로그아웃·탈퇴는 `DELETE`로 폐기한다. 알림 본문에는 금액과 클로버 수를 넣지 않는다.
+요청은 `platform`, `expo_push_token`, `device_id`, `request_key`. 자기 회원 토큰만 upsert한다. 로그아웃·탈퇴는 `DELETE`로 폐기한다. `account-delete`가 Auth 사용자와 푸시 토큰을 이미 삭제한 뒤 모바일 클라이언트가 보내는 마지막 `DELETE`는 다른 행을 변경하지 않고 멱등 성공으로 응답한다. 알림 본문에는 금액과 클로버 수를 넣지 않는다.
+
+## POST `/functions/v1/account-delete`
+
+요청은 `{ "request_key": "8~128자" }`이며 회원 ID는 받지 않고 JWT `sub`에서만 파생한다. 서버는 회원 advisory lock을 잡고 다음 항목을 같은 시점에 다시 검사한다.
+
+- 클로버 잔액이 0이 아니면 `409 account_balance_remaining`.
+- `REQUESTED|KYC_PENDING|APPROVED|PAYOUT_SENT` 환전이 있으면 `409 cashout_in_progress`.
+- 아직 release 또는 reverse되지 않은 `clover_maturity`, 진행 중 기프티콘, 미해결 구매 회수 건이 있으면 `409 account_settlement_pending`.
+
+통과하면 생성 상태의 구매 intent를 취소하고 푸시 토큰을 삭제하며 목표·프로필·친구·알림 데이터를 삭제 또는 비식별화한다. 결제·적립·환전 원장은 법정 정산과 부정 사용 대응에 필요한 범위만 비식별 회원 키에 보존한다. 그 뒤 Storage 소유 객체를 삭제하고 서버 전용 `auth.admin.deleteUser(member_id)`를 호출해 Auth 사용자와 refresh token 발급 경로를 제거한다. 이미 발급된 JWT의 남은 수명 동안 민감 쓰기는 `member.deleted_at IS NULL`과 Auth 사용자 존재를 함께 검사한다.
+
+성공은 `200 { "data": { "deleted": true } }`다. 준비 단계 재시도는 `request_key`로 멱등 처리하며, Auth 삭제 전 Storage 삭제 실패는 `503 account_storage_cleanup_failed`, Auth 삭제 실패는 `503 account_auth_delete_failed`로 고정한다. 서비스 역할 키와 개인정보 원문은 응답·로그에 노출하지 않는다.
 
 ## POST `/functions/v1/gift-exchange`
 

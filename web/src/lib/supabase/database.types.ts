@@ -47,6 +47,48 @@ export type Database = {
           },
         ];
       };
+      account_deletion_request: {
+        Row: {
+          auth_deleted_at: string | null;
+          id: number;
+          last_error_code: string | null;
+          member_id: string;
+          prepared_at: string;
+          request_key: string;
+          status: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          auth_deleted_at?: string | null;
+          id?: never;
+          last_error_code?: string | null;
+          member_id: string;
+          prepared_at?: string;
+          request_key: string;
+          status: string;
+          updated_at?: string;
+        };
+        Update: {
+          auth_deleted_at?: string | null;
+          id?: never;
+          last_error_code?: string | null;
+          member_id?: string;
+          prepared_at?: string;
+          request_key?: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "account_deletion_request_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       app_channel_release_gate: {
         Row: {
           approval_reference: string | null;
@@ -398,6 +440,7 @@ export type Database = {
           device_id: string;
           enabled: boolean;
           id: number;
+          last_request_key: string | null;
           last_seen_at: string;
           member_id: string;
           platform: string;
@@ -410,6 +453,7 @@ export type Database = {
           device_id: string;
           enabled?: boolean;
           id?: never;
+          last_request_key?: string | null;
           last_seen_at?: string;
           member_id: string;
           platform: string;
@@ -421,6 +465,7 @@ export type Database = {
           device_id?: string;
           enabled?: boolean;
           id?: never;
+          last_request_key?: string | null;
           last_seen_at?: string;
           member_id?: string;
           platform?: string;
@@ -964,6 +1009,7 @@ export type Database = {
           birth_date: string | null;
           ci: string | null;
           created_at: string;
+          deleted_at: string | null;
           id: string;
           kyc_status: Database["public"]["Enums"]["kyc_status_enum"];
           nickname: string | null;
@@ -978,6 +1024,7 @@ export type Database = {
           birth_date?: string | null;
           ci?: string | null;
           created_at?: string;
+          deleted_at?: string | null;
           id: string;
           kyc_status?: Database["public"]["Enums"]["kyc_status_enum"];
           nickname?: string | null;
@@ -991,6 +1038,7 @@ export type Database = {
           birth_date?: string | null;
           ci?: string | null;
           created_at?: string;
+          deleted_at?: string | null;
           id?: string;
           kyc_status?: Database["public"]["Enums"]["kyc_status_enum"];
           nickname?: string | null;
@@ -1877,6 +1925,10 @@ export type Database = {
     Functions: {
       accept_friend_invite: { Args: { token: string }; Returns: Json };
       account_withdrawal_eligibility: { Args: Record<PropertyKey, never>; Returns: Json };
+      complete_account_deletion: {
+        Args: { p_member_id: string; p_request_key: string };
+        Returns: undefined;
+      };
       ack_payment_conversion: {
         Args: {
           p_event_id: string;
@@ -2167,6 +2219,31 @@ export type Database = {
           purchase_id: number;
         }[];
       };
+      credit_alternative_store_purchase: {
+        Args: {
+          p_account_binding: string;
+          p_environment: string;
+          p_external_transaction_token_enc: string;
+          p_intent_id: string;
+          p_is_anonymous: boolean;
+          p_message: string;
+          p_order_id: string;
+          p_payment_key: string;
+          p_product_id: string;
+          p_purchased_at: string;
+          p_request_key: string;
+          p_user_tax_region: string;
+          p_verified_member_id: string;
+        };
+        Returns: {
+          available_at: string;
+          cheer_id: number;
+          clover_amount: number;
+          is_replay: boolean;
+          purchase_id: number;
+          report_status: string;
+        }[];
+      };
       expire_stale_cheer_payments: { Args: Record<PropertyKey, never>; Returns: number };
       friend_goal_detail: { Args: { goal_id: number }; Returns: Json };
       friend_invite_preview: { Args: { token: string }; Returns: Json };
@@ -2197,6 +2274,10 @@ export type Database = {
           expires_at: string;
           lease_token: string;
         }[];
+      };
+      prepare_account_deletion: {
+        Args: { p_member_id: string; p_request_key: string };
+        Returns: { is_replay: boolean; status: string }[];
       };
       min_cashout_clover: { Args: Record<PropertyKey, never>; Returns: number };
       monitor_storage_cleanup_drain: { Args: { p_stale_after?: string }; Returns: number };
