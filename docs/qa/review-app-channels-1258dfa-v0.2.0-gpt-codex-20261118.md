@@ -152,3 +152,27 @@ SOURCES/MODEL: GPT-5 Codex. 로컬 결정·요청·PRD·FDD·API·코드·시험
 
 REVIEW_VERDICT: BLOCK
 
+## 3회차 재리뷰용 수정 증거
+
+아래 표는 독립 리뷰 판정을 바꾸지 않는다. 커밋 `5ad2ade`의 보정과 실패→통과 시험을 3회차 독립 재리뷰 입력으로 연결한다. 계정 삭제 서버 절차는 선행 커밋 `0345b2a`에 있다.
+
+| 리뷰 항목 | 수정 커밋 | 실패 시험 또는 관찰 | 통과 시험 |
+|---|---|---|---|
+| 1회차 #1 서버 상품 카탈로그, 부분 | `5ad2ade` | 구 앱인토스 상품 ID가 서버 카탈로그와 불일치 | `AP-RV-01`, `AP-RV-02`, `AP-RV-03`, 상품 ID 정적 검색에서 밑줄 형식 0건 |
+| 1회차 #3 Google consume, 부분 | `5ad2ade` | 서버 소비 뒤 Android 클라이언트가 다시 소비 | `TC-APP-02-5`, `TC-APP-02-9`, `TC-APP-02-4` |
+| 1회차 #5 환불 알림·재동기화, 미해소 | `5ad2ade` | 실제 공급자 어댑터와 cursor 함수 부재로 Edge Function 시험 실패 | `TC-APP-03-1`부터 `TC-APP-03-5` |
+| 1회차 #6 부분환불 수량, 부분 | `5ad2ade` | 구 RPC가 공급자 확정 수량 없이 금액 비례 계산 | `RF-RV-01`부터 `RF-RV-11` |
+| 1회차 #12 고위험 시험, 부분 | `5ad2ade` | 실제 공급자 알림·재실행 복구·이중 소비·대체결제 보고 시험 부재 | Edge Function 144/144, DB 531/531, 모바일 18/18 |
+| MAJOR 1 공급자 알림·전량 재동기화 | `5ad2ade` | `/tmp/haenael-app-r3-edge-red.log`에서 Apple 환불 의존성과 cursor 계약 부재 | `TC-APP-03-1`, `TC-APP-03-2`, `TC-APP-03-3`, `TC-APP-03-5` |
+| MAJOR 2 공급자 확정 환불 수량 | `5ad2ade` | DB 시험에서 수량 없는 구 RPC와 만기 행 제약 실패 | `RF-RV-01`, `RF-RV-04`, `RF-RV-05`, `TC-APP-03-8` |
+| MAJOR 3 상품 ID 통일 | `5ad2ade` | 앱인토스 밑줄 상품 ID와 서버 점 형식 불일치 | `AP-RV-02`, `AP-RV-03`, 앱인토스 11/11 |
+| MAJOR 4 미완료 구매 복구 | `5ad2ade` | 앱 시작 복구 함수와 영수증 큐 부재 | `TC-APP-02-9 Android 재실행은 원 intent로 멱등 재전송하고 클라이언트 consume을 하지 않는다` |
+| MAJOR 5 Google 중복 소비 | `5ad2ade` | Android `finishTransaction({isConsumable:true})`가 서버 소비와 중복 | `TC-APP-02-5 Google consume은 서버만 수행하고 클라이언트는 Apple 거래만 finish한다` |
+| MAJOR 6 Google User Choice Billing·보고 | `5ad2ade` | Play Billing 외부 거래 토큰과 보고 함수 부재 | `TC-APP-03-1`, `APP-SRV-DB-07`부터 `APP-SRV-DB-10-3`, `TC-APP-02-10`부터 `TC-APP-02-12` |
+| MAJOR 7 앱 안 계정 삭제 | `0345b2a` | `account-delete` Edge Function 부재 | `TC-APP-09-3`부터 `TC-APP-09-6`, `APP-SRV-DB-11`부터 `APP-SRV-DB-17` |
+| MAJOR 8 `/g/*` 웹 유지 | `5ad2ade` | Android intent filter와 앱 라우터가 `/g/*`를 가로챔 | `TC-APP-06-2 /g 공개 목표는 앱으로 라우팅하지 않고 웹 결제를 보존한다` |
+| MAJOR 9 D-047 모바일 환전 | `5ad2ade` | `mobile-cashout` 함수 부재와 가짜 잔액 화면 | `TC-APP-03-6`, `TC-APP-03-7`, `TC-APP-03-9`, 헤드리스 `/cashout` HTTP 200·콘솔 오류 0 |
+| MINOR 디자인 토큰 | `5ad2ade` | 결제 화면의 직접 지정 반경·타이포그래피 | 모바일 단위 시험 18/18, 9개 너비에서 13px 미만 글자 0·44px 미만 조작 0·가로 넘침 0 |
+
+재리뷰 경계: 실제 Apple·Google·Toss sandbox 알림과 결제, 외부 콘솔 등록, staging·운영 데이터베이스 적용은 실행하지 않았다. 로컬 계약 통과를 공급자 왕복 완료나 배포 승인으로 해석하면 안 된다.
+
