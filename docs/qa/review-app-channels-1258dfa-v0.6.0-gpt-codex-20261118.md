@@ -102,3 +102,15 @@ STATUS: DONE_WITH_CONCERNS
 
 REVIEW_VERDICT: BLOCK
 
+## code-builder 수정 증거
+
+빨강 단계에서는 `unified_purchase_credit.test.sql`이 공통 RPC와 확인 작업 테이블 부재로 18/18 실패했다. 구현 뒤 같은 시험을 포함한 Supabase DB 전체 29파일·587건이 통과했고, 실제 PostgreSQL 두 연결을 사용한 30개 동시 실행 조합도 전부 삭제 차단 결과를 반환했다.
+
+| 6회차 MAJOR | 수정 커밋 | 빨강→초록 시험 | 결과 |
+|---|---|---|---|
+| 1. 일반 인앱결제 검증 중 계정 삭제 경합 | 설계 `c4ba3dc`, 구현 `9f6c443` | `TC-APP-09-11 StoreKit 검증 시작은 공통 RPC만 지난다`, `Google Play 검증 시작은 공통 RPC만 지난다`, `Toss 인앱결제 검증 시작은 공통 RPC만 지난다`; `verify-account-deletion-concurrency.mjs`의 APPLE·GOOGLE_PLAY·TOSS_IAP × 삭제 3단계 × 결제자·목표 소유자 | 통과 |
+| 2. 목표 소유자 삭제가 들어오는 결제를 누락 | 설계 `c4ba3dc`, 구현 `9f6c443` | `TC-APP-09-13 목표 소유자는 들어오는 결제 검증 중 탈퇴가 차단된다`; 5개 공급자 채널의 `RECIPIENT` 15개 동시 실행 | 통과 |
+| 3. 외부 폐기·개인정보 삭제 직전 정산 재검사 누락 | 설계 `c4ba3dc`, 구현 `9f6c443` | `TC-APP-09-13 외부 폐기 기록 직전 새 잔액을 다시 검사한다`, `개인정보 삭제 직전 새 잔액을 다시 검사한다`; 5개 공급자 채널의 `EXTERNAL_REVOKED`·`DATA_DELETE` 20개 동시 실행 | 통과 |
+
+추가 계약 시험: 채널별 내부 적립 함수 3종의 `service_role` 직접 실행 권한이 없음을 `unified_purchase_credit.test.sql`에서 검증했다. Edge Function 표적 시험 22건, 웹 99파일·599건, Deno lint, 웹 단위·보안 TypeScript 검사, Next.js 프로덕션 빌드도 통과했다. 운영 데이터베이스·main push·실제 결제·외부 콘솔·배포는 실행하지 않았다.
+
