@@ -2,6 +2,13 @@
 
 > 상태: 제출 준비 미완료. 운영 DB migration, main push, 실결제, 외부 발신, 스토어 제출은 실행하지 않았다.
 
+## Q7. Apple 로그인 토큰 폐기 자격과 회전
+
+- 배경: 앱은 Apple 로그인 직후 공급자 refresh token을 서버 암호문으로 보관하고, 탈퇴 때 Apple `/auth/revoke`를 Auth 사용자 삭제 전에 호출한다. 실제 호출에는 `APPLE_REVOCATION_TOKEN_ENCRYPTION_KEY`, Apple Services ID 또는 App ID인 `APPLE_REVOKE_CLIENT_ID`, Apple 개인 키로 서명한 만료 전 `APPLE_REVOKE_CLIENT_SECRET`이 필요하다. 이번 작업에서는 Apple Developer 콘솔을 조작하거나 값을 주입하지 않았다.
+- 결정 대상: 앱 식별자 확정 뒤 Apple 폐기용 client ID와 client secret 발급·회전 운영을 승인할지.
+- 추천: App Store Connect 앱 생성 승인과 함께 staging 자격부터 넣고 Apple sandbox 가입→탈퇴 왕복으로 폐기 성공을 확인한다. 운영 자격은 독립 QA 승인 전 주입하지 않는다.
+- 미선택 위험: 코드가 있어도 Apple 토큰 보유 회원의 탈퇴는 `apple_token_revocation_pending`으로 멈추며, token이 없는 과거 회원은 수동 폐기 감사 건으로 남는다.
+
 ## Q6. 공급자 환불 알림과 Google 외부 거래 보고 설정
 
 - 배경: 서버는 Apple App Store Server Notifications V2의 `signedPayload`, Google Real-time Developer Notifications의 Pub/Sub 인증 토큰, Google External Transactions API 보고를 처리한다. 실제 호출에는 Apple 알림 URL, Google Pub/Sub push 구독·서비스 계정, Vault의 보고 worker URL·내부 토큰이 필요하다.

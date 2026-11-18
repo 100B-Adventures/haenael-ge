@@ -18,11 +18,13 @@ import { AppError } from "./errors";
 import {
   attachPendingReceipt,
   enqueuePendingPurchase,
+  recoverAlternativePurchases,
   recoverPendingPurchases,
   removePendingPurchase,
 } from "./purchase-recovery";
 import { createRequestKey } from "./request-key";
 import {
+  confirmAlternativePayment,
   createPurchaseIntent,
   startTossAlternativePayment,
   verifyStorePurchase,
@@ -147,10 +149,10 @@ export async function completeNativePurchase(args: {
       })
     );
     if (choice.kind === "alternative") {
-      await removePendingPurchase(purchaseQueueStorage, intent.intent_id);
       return await startTossAlternativePayment({
         ...args,
         externalTransactionToken: choice.externalTransactionToken,
+        replacedStoreIntentId: intent.intent_id,
       });
     }
     const purchase = choice.purchase;
@@ -188,7 +190,7 @@ export function startNativePurchaseRecovery(): () => void {
   if (Platform.OS !== "ios" && Platform.OS !== "android") return () => undefined;
   let stopped = false;
   let listener: { remove(): void } | undefined;
-  const recover = async (purchases: Purchase[]) => {
+  const recoverStorePurchases = async (purchases: Purchase[]) => {
     if (stopped) return;
     await recoverPendingPurchases({
       storage: purchaseQueueStorage,
@@ -199,7 +201,18 @@ export function startNativePurchaseRecovery(): () => void {
       },
     });
   };
+  const recoverAlternative = async () => {
+    if (stopped) return;
+    await recoverAlternativePurchases({
+      storage: purchaseQueueStorage,
+      confirm: confirmAlternativePayment,
+    });
+  };
   const ready = (async () => {
+    // Alternative checkout recovery does not depend on a Play Billing
+    // connection. Replay it first so an unavailable store cannot strand an
+    // already approved Toss payment.
+    await recoverAlternative();
     await initConnection(
       Platform.OS === "android" && appConfig.googleUserChoiceBillingEnabled
         ? { enableBillingProgramAndroid: "user-choice-billing" }
@@ -207,9 +220,9 @@ export function startNativePurchaseRecovery(): () => void {
     );
     if (stopped) return;
     listener = purchaseUpdatedListener((purchase) => {
-      void recover([purchase]);
+      void recoverStorePurchases([purchase]);
     });
-    await recover(await getAvailablePurchases());
+    await recoverStorePurchases(await getAvailablePurchases());
   })().catch(() => undefined);
   return () => {
     stopped = true;

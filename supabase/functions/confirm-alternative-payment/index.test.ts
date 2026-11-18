@@ -3,6 +3,7 @@ import {
   handleConfirmAlternativePayment,
   normalizeAlternativePayment,
   parseAlternativePaymentRequest,
+  recordCompensationFailure,
 } from "./index.ts";
 
 Deno.test("TC-APP-02-4 인증 없는 대체결제 승인은 공급자 호출 전에 거절한다", async () => {
@@ -99,4 +100,31 @@ Deno.test("TC-APP-02-8 외부거래 토큰 누락은 환경변수나 DB를 읽�
   assertEquals(await response.json(), {
     error: { code: "external_transaction_token_required" },
   });
+});
+
+Deno.test("TC-APP-02-12 승인과 취소가 엇갈리면 복구 원장 RPC를 원 결제 결합값으로 호출한다", async () => {
+  const calls: unknown[] = [];
+  const admin = {
+    rpc: (name: string, args: unknown) => {
+      calls.push({ name, args });
+      return Promise.resolve({ error: null });
+    },
+  };
+  await recordCompensationFailure(admin as never, {
+    intentId: "00000000-0000-0000-0000-000000000111",
+    memberId: "00000000-0000-0000-0000-000000000113",
+    paymentKey: "payment-key-00000001",
+    orderId: "order-00000001",
+    requestKey: "request-key-0001",
+  });
+  assertEquals(calls, [{
+    name: "record_alternative_payment_recovery",
+    args: {
+      p_intent_id: "00000000-0000-0000-0000-000000000111",
+      p_member_id: "00000000-0000-0000-0000-000000000113",
+      p_payment_key: "payment-key-00000001",
+      p_order_id: "order-00000001",
+      p_request_key: "request-key-0001",
+    },
+  }]);
 });

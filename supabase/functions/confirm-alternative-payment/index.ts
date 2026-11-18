@@ -37,6 +37,26 @@ type AlternativePaymentNormalized = {
   purchasedAt: string;
 };
 
+export async function recordCompensationFailure(
+  admin: Pick<SupabaseClient, "rpc">,
+  input: {
+    intentId: string;
+    memberId: string;
+    paymentKey: string;
+    orderId: string;
+    requestKey: string;
+  },
+): Promise<void> {
+  const { error } = await admin.rpc("record_alternative_payment_recovery", {
+    p_intent_id: input.intentId,
+    p_member_id: input.memberId,
+    p_payment_key: input.paymentKey,
+    p_order_id: input.orderId,
+    p_request_key: input.requestKey,
+  });
+  if (error) throw new Error("payment_recovery_record_failed");
+}
+
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -320,6 +340,22 @@ export async function handleConfirmAlternativePayment(
       try {
         await toss.cancelPayment(input.paymentKey, "해낼게 대체결제 적립 실패");
       } catch {
+        try {
+          await recordCompensationFailure(admin, {
+            intentId: input.intentId,
+            memberId: userData.user.id,
+            paymentKey: input.paymentKey,
+            orderId: input.orderId,
+            requestKey: input.requestKey,
+          });
+        } catch {
+          console.error(
+            "[confirm-alternative-payment] recovery ledger write failed",
+          );
+          return json(503, {
+            error: { code: "payment_recovery_record_failed" },
+          });
+        }
         return json(503, {
           error: { code: "payment_compensation_failed" },
         });

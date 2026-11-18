@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { withRegionHeader } from "../_shared/region.ts";
+import { decryptSecret } from "../_shared/secret-box.ts";
 
 const CORS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -52,6 +53,108 @@ export function mapAccountDeletionError(
     return { status: 409, code: "account_deletion_in_progress" };
   }
   return { status: 503, code: "account_delete_failed" };
+}
+
+type AppleRevokeFetcher = (
+  input: string | URL | Request,
+  init?: RequestInit,
+) => Promise<Response>;
+
+export async function revokeAppleCredential(args: {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+  fetcher?: AppleRevokeFetcher;
+}): Promise<void> {
+  const body = new URLSearchParams({
+    client_id: args.clientId,
+    client_secret: args.clientSecret,
+    token: args.refreshToken,
+    token_type_hint: "refresh_token",
+  });
+  const response = await (args.fetcher ?? fetch)(
+    "https://appleid.apple.com/auth/revoke",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    },
+  );
+  if (!response.ok) throw new Error(`apple_revoke_http_${response.status}`);
+}
+
+async function prepareAppleRevocation(args: {
+  admin: SupabaseClient;
+  memberId: string;
+  isAppleIdentity: boolean;
+}): Promise<
+  "not_applicable" | "revoked" | "manual_required" | "retry_required"
+> {
+  if (!args.isAppleIdentity) return "not_applicable";
+  const { data: credential, error: credentialError } = await args.admin.from(
+    "apple_token_revocation",
+  )
+    .select("token_enc,status,attempt_count").eq("member_id", args.memberId)
+    .maybeSingle();
+  if (credentialError) return "retry_required";
+  if (credential?.status === "REVOKED") return "revoked";
+  if (!credential?.token_enc) {
+    const { error } = await args.admin.from("apple_token_revocation").upsert({
+      member_id: args.memberId,
+      token_enc: null,
+      status: "MANUAL_REQUIRED",
+      attempt_count: credential?.attempt_count ?? 0,
+      last_error_code: "provider_token_missing",
+      revoked_at: null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "member_id" });
+    if (error) return "retry_required";
+    return "manual_required";
+  }
+  const encryptionKey = Deno.env.get("APPLE_REVOCATION_TOKEN_ENCRYPTION_KEY");
+  const clientId = Deno.env.get("APPLE_REVOKE_CLIENT_ID");
+  const clientSecret = Deno.env.get("APPLE_REVOKE_CLIENT_SECRET");
+  if (!encryptionKey || !clientId || !clientSecret) {
+    await args.admin.from("apple_token_revocation").update({
+      status: "RETRY_REQUIRED",
+      last_error_code: "apple_revoke_configuration_missing",
+      updated_at: new Date().toISOString(),
+    }).eq("member_id", args.memberId);
+    return "retry_required";
+  }
+  try {
+    const refreshToken = await decryptSecret(
+      credential.token_enc,
+      encryptionKey,
+    );
+    await revokeAppleCredential({ clientId, clientSecret, refreshToken });
+    const { error: updateError } = await args.admin.from(
+      "apple_token_revocation",
+    ).update({
+      token_enc: null,
+      status: "REVOKED",
+      attempt_count: (credential.attempt_count ?? 0) + 1,
+      last_error_code: null,
+      revoked_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }).eq("member_id", args.memberId);
+    if (updateError) return "retry_required";
+    return "revoked";
+  } catch {
+    await args.admin.from("apple_token_revocation").update({
+      status: "RETRY_REQUIRED",
+      attempt_count: (credential.attempt_count ?? 0) + 1,
+      last_error_code: "apple_revoke_failed",
+      updated_at: new Date().toISOString(),
+    }).eq("member_id", args.memberId);
+    return "retry_required";
+  }
+}
+
+export function blocksAuthDeletionForAppleRevocation(
+  result: "not_applicable" | "revoked" | "manual_required" | "retry_required",
+): boolean {
+  return result === "manual_required" || result === "retry_required";
 }
 
 async function removeOwnedStorageObjects(
@@ -145,6 +248,9 @@ export async function handleAccountDelete(req: Request): Promise<Response> {
     return json(401, { error: { code: "unauthorized" } });
   }
   const memberId = userData.user.id;
+  const isAppleIdentity = userData.user.identities?.some(
+    (identity) => identity.provider === "apple",
+  ) || userData.user.app_metadata?.provider === "apple";
 
   const { error: prepareError } = await admin.rpc("prepare_account_deletion", {
     p_member_id: memberId,
@@ -153,6 +259,15 @@ export async function handleAccountDelete(req: Request): Promise<Response> {
   if (prepareError) {
     const mapped = mapAccountDeletionError(new Error(prepareError.message));
     return json(mapped.status, { error: { code: mapped.code } });
+  }
+
+  const appleRevocation = await prepareAppleRevocation({
+    admin,
+    memberId,
+    isAppleIdentity,
+  });
+  if (blocksAuthDeletionForAppleRevocation(appleRevocation)) {
+    return json(503, { error: { code: "apple_token_revocation_pending" } });
   }
 
   try {

@@ -18,6 +18,17 @@ export type PendingPurchase = {
   providerTransactionId?: string;
 };
 
+export type PendingAlternativePurchase = {
+  intentId: string;
+  accountBinding: string;
+  requestKey: string;
+  paymentKey: string;
+  orderId: string;
+  externalTransactionToken: string;
+  message: string;
+  anonymous: boolean;
+};
+
 type RecoverablePurchase = {
   productId: string;
   purchaseToken?: string | null;
@@ -26,6 +37,7 @@ type RecoverablePurchase = {
 };
 
 const QUEUE_KEY = "haenael.pending-store-purchases.v1";
+const ALTERNATIVE_QUEUE_KEY = "haenael.pending-alternative-purchases.v1";
 
 async function readQueue(storage: PurchaseQueueStorage): Promise<PendingPurchase[]> {
   const raw = await storage.getItem(QUEUE_KEY);
@@ -47,6 +59,70 @@ async function writeQueue(
     return;
   }
   await storage.setItem(QUEUE_KEY, JSON.stringify(queue));
+}
+
+async function readAlternativeQueue(
+  storage: PurchaseQueueStorage,
+): Promise<PendingAlternativePurchase[]> {
+  const raw = await storage.getItem(ALTERNATIVE_QUEUE_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed as PendingAlternativePurchase[] : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeAlternativeQueue(
+  storage: PurchaseQueueStorage,
+  queue: PendingAlternativePurchase[],
+): Promise<void> {
+  if (queue.length === 0) {
+    await storage.removeItem(ALTERNATIVE_QUEUE_KEY);
+    return;
+  }
+  await storage.setItem(ALTERNATIVE_QUEUE_KEY, JSON.stringify(queue));
+}
+
+export async function enqueueAlternativePurchase(
+  storage: PurchaseQueueStorage,
+  pending: PendingAlternativePurchase,
+): Promise<void> {
+  const queue = (await readAlternativeQueue(storage)).filter(
+    (item) => item.intentId !== pending.intentId,
+  );
+  queue.push(pending);
+  await writeAlternativeQueue(storage, queue);
+}
+
+export async function removeAlternativePurchase(
+  storage: PurchaseQueueStorage,
+  intentId: string,
+): Promise<void> {
+  await writeAlternativeQueue(
+    storage,
+    (await readAlternativeQueue(storage)).filter((item) => item.intentId !== intentId),
+  );
+}
+
+export async function recoverAlternativePurchases(args: {
+  storage: PurchaseQueueStorage;
+  confirm(input: PendingAlternativePurchase): Promise<unknown>;
+}): Promise<{ recovered: number; pending: number }> {
+  const queue = await readAlternativeQueue(args.storage);
+  const remaining: PendingAlternativePurchase[] = [];
+  let recovered = 0;
+  for (const pending of queue) {
+    try {
+      await args.confirm(pending);
+      recovered += 1;
+    } catch {
+      remaining.push(pending);
+    }
+  }
+  await writeAlternativeQueue(args.storage, remaining);
+  return { recovered, pending: remaining.length };
 }
 
 export async function enqueuePendingPurchase(

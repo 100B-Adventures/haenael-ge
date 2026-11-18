@@ -1,9 +1,20 @@
+import * as SecureStore from "expo-secure-store";
 import { appConfig } from "./config";
 import { AppError } from "./errors";
 import { createRequestKey } from "./request-key";
 import { supabase } from "./supabase";
 import { unregisterPushToken } from "./notifications";
 import { canDeleteAccount } from "./policy";
+import {
+  clearAccountDeletionRequestKey,
+  getOrCreateAccountDeletionRequestKey,
+} from "./account-delete-recovery";
+
+const deletionStorage = {
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+};
 
 export type WithdrawalEligibility = {
   eligible: boolean;
@@ -25,10 +36,15 @@ export async function deleteAccountInApp() {
   if (appConfig.demoMode) throw new AppError("demo_write_blocked", "데모에서는 계정을 삭제하지 않아요.");
   const eligibility = await loadWithdrawalEligibility();
   if (!canDeleteAccount(eligibility)) throw new AppError("withdrawal_blocked", "남은 클로버나 진행 중인 환전을 먼저 정리해 주세요.");
+  const requestKey = await getOrCreateAccountDeletionRequestKey(
+    deletionStorage,
+    () => createRequestKey("account_delete"),
+  );
   const { error } = await supabase.functions.invoke("account-delete", {
-    body: { request_key: createRequestKey("account_delete") }
+    body: { request_key: requestKey }
   });
   if (error) throw error;
+  await clearAccountDeletionRequestKey(deletionStorage);
   await unregisterPushToken();
   await supabase.auth.signOut({ scope: "local" });
 }

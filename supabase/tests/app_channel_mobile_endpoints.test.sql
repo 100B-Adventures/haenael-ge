@@ -1,13 +1,20 @@
 BEGIN;
-SELECT plan(22);
+SELECT plan(32);
 
 SELECT has_table('public', 'account_deletion_request', 'APP-SRV-DB-01 계정 삭제 요청 원장이 있다');
+SELECT has_table('public', 'alternative_checkout_session', 'APP-SRV-DB-01-1 서버 체크아웃 세션 원장이 있다');
+SELECT has_table('public', 'apple_token_revocation', 'APP-SRV-DB-01-2 Apple 토큰 폐기 원장이 있다');
+SELECT hasnt_column('public', 'alternative_checkout_session', 'amount',
+  'APP-SRV-DB-01-3 체크아웃 세션은 클라이언트 금액을 저장하지 않는다');
 SELECT has_column('public', 'member', 'deleted_at', 'APP-SRV-DB-02 회원 삭제 시각이 있다');
 SELECT has_function('public', 'credit_alternative_store_purchase', ARRAY[
   'uuid','uuid','uuid','text','text','text','text','text','boolean','text','timestamp with time zone','bytea','text'
 ], 'APP-SRV-DB-03 대체결제 적립과 외부거래 보고를 묶는 RPC가 있다');
 SELECT has_function('public', 'prepare_account_deletion', ARRAY['uuid','text'],
   'APP-SRV-DB-04 계정 삭제 준비 RPC가 있다');
+SELECT has_function('public', 'record_alternative_payment_recovery',
+  ARRAY['uuid','uuid','text','text','text'],
+  'APP-SRV-DB-04-3 승인·취소 동시 실패 복구 RPC가 있다');
 SELECT has_function('public', 'claim_google_external_transaction_batch', ARRAY['integer'],
   'APP-SRV-DB-04-1 Google 외부 거래 보고 큐 claim RPC가 있다');
 SELECT has_function('public', 'settle_google_external_transaction', ARRAY['bigint','boolean','boolean','text'],
@@ -115,6 +122,41 @@ SELECT is((SELECT report_status FROM public.google_external_transaction
   WHERE external_transaction_id='alternative-order-0001'), 'REPORTED',
   'APP-SRV-DB-10-3 Google 보고 성공은 REPORTED 상태로 남는다');
 
+RESET ROLE;
+INSERT INTO auth.users(id, email) VALUES
+  ('00000000-0000-0000-0000-000000000105', 'alternative-recovery@example.test');
+INSERT INTO public.member(id, nickname) VALUES
+  ('00000000-0000-0000-0000-000000000105', '대체결제복구회원');
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.role', 'authenticated', true);
+SELECT set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000105', true);
+SELECT * FROM public.create_store_purchase_intent(
+  :alternative_goal_id, 'GOOGLE_ALTERNATIVE', 'haenael.cheer.clover.1', 1,
+  'alternative-recovery-0001'
+) \gset recovery_intent_
+RESET ROLE;
+SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claim.role', 'service_role', true);
+SELECT ok(public.record_alternative_payment_recovery(
+  :'recovery_intent_intent_id',
+  '00000000-0000-0000-0000-000000000105',
+  'alternative-payment-failed-0001',
+  'alternative-order-failed-0001',
+  'alternative-recovery-0001'
+) IS NOT NULL, 'APP-SRV-DB-10-4 보상 실패를 원자 복구 RPC로 기록한다');
+SELECT is((SELECT status FROM public.store_recovery_case
+  WHERE intent_id=:'recovery_intent_intent_id'), 'OPEN',
+  'APP-SRV-DB-10-5 보상 실패는 OPEN 복구 건으로 남는다');
+SELECT is((SELECT event_type FROM public.store_purchase_event
+  WHERE provider_event_id='compensation:alternative-payment-failed-0001'),
+  'PAYMENT_COMPENSATION_FAILED', 'APP-SRV-DB-10-6 보상 실패 결제 이벤트를 함께 남긴다');
+SELECT throws_ok(
+  $$SELECT * FROM public.prepare_account_deletion(
+    '00000000-0000-0000-0000-000000000105','account-delete-recovery-0001')$$,
+  '55000', 'account_settlement_pending',
+  'APP-SRV-DB-10-7 OPEN 대체결제 복구 건은 계정 삭제를 차단한다'
+);
+
 INSERT INTO public.clover_balance(member_id, clover_count)
 VALUES ('00000000-0000-0000-0000-000000000101', 3)
 ON CONFLICT (member_id) DO UPDATE SET clover_count = 3;
@@ -139,11 +181,21 @@ SELECT is((SELECT count(*)::integer FROM public.device_push_token
 SELECT ok((SELECT deleted_at IS NOT NULL AND nickname IS NULL AND provider_id IS NULL
   FROM public.member WHERE id='00000000-0000-0000-0000-000000000101'),
   'APP-SRV-DB-14 회원 개인정보를 비식별화한다');
+SELECT is(
+  (SELECT is_replay FROM public.prepare_account_deletion(
+    '00000000-0000-0000-0000-000000000101','account-delete-new-key-0002')),
+  true, 'APP-SRV-DB-14-1 새 request key도 기존 PREPARED 삭제를 재개한다'
+);
 
 RESET ROLE;
 DELETE FROM auth.users WHERE id='00000000-0000-0000-0000-000000000101';
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
+SELECT lives_ok(
+  $$SELECT public.complete_account_deletion(
+    '00000000-0000-0000-0000-000000000101','account-delete-new-key-0002')$$,
+  'APP-SRV-DB-14-2 새 request key로 재개한 삭제도 감사 완료 처리한다'
+);
 SELECT is((SELECT count(*)::integer FROM public.member
   WHERE id='00000000-0000-0000-0000-000000000101'), 1,
   'APP-SRV-DB-15 Auth 삭제 뒤 비식별 금융 회원 키를 보존한다');
@@ -154,7 +206,7 @@ SELECT throws_ok(
   'APP-SRV-DB-16 새 회원은 Auth 사용자 없이 생성할 수 없다'
 );
 SELECT is((SELECT status FROM public.account_deletion_request
-  WHERE member_id='00000000-0000-0000-0000-000000000101'), 'PREPARED',
+  WHERE member_id='00000000-0000-0000-0000-000000000101'), 'AUTH_DELETED',
   'APP-SRV-DB-17 삭제 요청 상태를 감사 원장에 남긴다');
 RESET ROLE;
 

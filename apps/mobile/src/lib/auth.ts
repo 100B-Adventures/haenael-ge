@@ -19,6 +19,19 @@ export async function signInWithApple() {
   if (!code) throw new AppError("apple_login_invalid", "로그인 응답을 확인하지 못했어요.");
   const exchanged = await supabase.auth.exchangeCodeForSession(code);
   if (exchanged.error) throw new AppError("apple_login_failed", "Apple 로그인을 완료하지 못했어요.");
+  const providerRefreshToken = exchanged.data.session?.provider_refresh_token;
+  if (providerRefreshToken) {
+    const registered = await supabase.functions.invoke("register-apple-revocation-token", {
+      body: { provider_refresh_token: providerRefreshToken },
+    });
+    if (registered.error) {
+      await supabase.auth.signOut({ scope: "local" });
+      throw new AppError(
+        "apple_token_registration_failed",
+        "Apple 로그인 보안 처리를 완료하지 못했어요. 다시 시도해 주세요.",
+      );
+    }
+  }
   return exchanged.data.session;
 }
 
