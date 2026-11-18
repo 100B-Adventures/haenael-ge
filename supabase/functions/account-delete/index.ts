@@ -18,21 +18,6 @@ function json(status: number, body: unknown): Response {
   });
 }
 
-export function parseAccountDeleteRequest(
-  value: unknown,
-): { requestKey: string } {
-  const body = value && typeof value === "object"
-    ? value as Record<string, unknown>
-    : {};
-  const requestKey = typeof body.request_key === "string"
-    ? body.request_key.trim()
-    : "";
-  if (!/^[A-Za-z0-9_-]{8,128}$/.test(requestKey)) {
-    throw new Error("invalid_request_key");
-  }
-  return { requestKey };
-}
-
 export function mapAccountDeletionError(
   error: unknown,
 ): { status: number; code: string } {
@@ -42,15 +27,14 @@ export function mapAccountDeletionError(
       "account_balance_remaining",
       "cashout_in_progress",
       "account_settlement_pending",
+      "account_deletion_in_progress",
+      "account_deletion_state_invalid",
     ]
   ) {
     if (message.includes(code)) return { status: 409, code };
   }
   if (message.includes("member_not_found")) {
     return { status: 404, code: "member_not_found" };
-  }
-  if (message.includes("account_deletion_in_progress")) {
-    return { status: 409, code: "account_deletion_in_progress" };
   }
   return { status: 503, code: "account_delete_failed" };
 }
@@ -60,11 +44,18 @@ type AppleRevokeFetcher = (
   init?: RequestInit,
 ) => Promise<Response>;
 
+export class AppleCredentialRejectedError extends Error {
+  constructor() {
+    super("apple_revoke_credential_invalid");
+    this.name = "AppleCredentialRejectedError";
+  }
+}
+
 export async function revokeAppleCredential(args: {
   clientId: string;
   clientSecret: string;
   token: string;
-  tokenTypeHint: "refresh_token" | "access_token";
+  tokenTypeHint: "refresh_token";
   fetcher?: AppleRevokeFetcher;
 }): Promise<void> {
   const body = new URLSearchParams({
@@ -81,25 +72,38 @@ export async function revokeAppleCredential(args: {
       body,
     },
   );
-  if (!response.ok) throw new Error(`apple_revoke_http_${response.status}`);
+  if (response.ok) return;
+  let providerCode = "";
+  try {
+    const payload = await response.clone().json() as { error?: string };
+    providerCode = payload.error ?? "";
+  } catch {
+    // The HTTP status remains the retry decision when Apple sends no JSON.
+  }
+  if (providerCode === "invalid_grant") {
+    throw new AppleCredentialRejectedError();
+  }
+  throw new Error(`apple_revoke_http_${response.status}`);
 }
+
+type AppleRevocationResult =
+  | "not_applicable"
+  | "revoked"
+  | "manual_required"
+  | "retry_required";
 
 async function prepareAppleRevocation(args: {
   admin: SupabaseClient;
   memberId: string;
   isAppleIdentity: boolean;
-}): Promise<
-  "not_applicable" | "revoked" | "manual_required" | "retry_required"
-> {
+}): Promise<AppleRevocationResult> {
   if (!args.isAppleIdentity) return "not_applicable";
   const { data: credential, error: credentialError } = await args.admin.from(
     "apple_token_revocation",
-  )
-    .select("token_enc,token_type_hint,status,attempt_count").eq(
-      "member_id",
-      args.memberId,
-    )
-    .maybeSingle();
+  ).select("token_enc,token_type_hint,status,attempt_count").eq(
+    "member_id",
+    args.memberId,
+  ).maybeSingle();
   if (credentialError) return "retry_required";
   if (credential?.status === "REVOKED") return "revoked";
   if (!credential?.token_enc) {
@@ -108,12 +112,11 @@ async function prepareAppleRevocation(args: {
       token_enc: null,
       status: "MANUAL_REQUIRED",
       attempt_count: credential?.attempt_count ?? 0,
-      last_error_code: "provider_token_missing",
+      last_error_code: "provider_refresh_token_missing",
       revoked_at: null,
       updated_at: new Date().toISOString(),
     }, { onConflict: "member_id" });
-    if (error) return "retry_required";
-    return "manual_required";
+    return error ? "retry_required" : "manual_required";
   }
   const encryptionKey = Deno.env.get("APPLE_REVOCATION_TOKEN_ENCRYPTION_KEY");
   const clientId = Deno.env.get("APPLE_REVOKE_CLIENT_ID");
@@ -127,17 +130,12 @@ async function prepareAppleRevocation(args: {
     return "retry_required";
   }
   try {
-    const token = await decryptSecret(
-      credential.token_enc,
-      encryptionKey,
-    );
+    const token = await decryptSecret(credential.token_enc, encryptionKey);
     await revokeAppleCredential({
       clientId,
       clientSecret,
       token,
-      tokenTypeHint: credential.token_type_hint === "access_token"
-        ? "access_token"
-        : "refresh_token",
+      tokenTypeHint: "refresh_token",
     });
     const { error: updateError } = await args.admin.from(
       "apple_token_revocation",
@@ -149,9 +147,18 @@ async function prepareAppleRevocation(args: {
       revoked_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }).eq("member_id", args.memberId);
-    if (updateError) return "retry_required";
-    return "revoked";
-  } catch {
+    return updateError ? "retry_required" : "revoked";
+  } catch (error) {
+    if (error instanceof AppleCredentialRejectedError) {
+      await args.admin.from("apple_token_revocation").update({
+        token_enc: null,
+        status: "MANUAL_REQUIRED",
+        attempt_count: (credential.attempt_count ?? 0) + 1,
+        last_error_code: error.message,
+        updated_at: new Date().toISOString(),
+      }).eq("member_id", args.memberId);
+      return "manual_required";
+    }
     await args.admin.from("apple_token_revocation").update({
       status: "RETRY_REQUIRED",
       attempt_count: (credential.attempt_count ?? 0) + 1,
@@ -162,29 +169,43 @@ async function prepareAppleRevocation(args: {
   }
 }
 
-export function blocksAuthDeletionForAppleRevocation(
-  result: "not_applicable" | "revoked" | "manual_required" | "retry_required",
-): boolean {
-  return result === "manual_required" || result === "retry_required";
-}
+type AccountDeletionState =
+  | "REQUESTED"
+  | "BLOCKED_PENDING_PAYMENT"
+  | "EXTERNAL_REVOKED"
+  | "DATA_DELETED"
+  | "AUTH_DELETED";
 
-export async function authorizeAccountDeletion(args: {
-  prepareAppleRevocation(): Promise<
-    "not_applicable" | "revoked" | "manual_required" | "retry_required"
-  >;
-  prepareDatabaseDeletion(): Promise<void>;
-}): Promise<
-  "prepared" | "manual_required" | "retry_required"
-> {
-  const appleRevocation = await args.prepareAppleRevocation();
-  if (
-    appleRevocation === "manual_required" ||
-    appleRevocation === "retry_required"
-  ) {
-    return appleRevocation;
+export async function advanceAccountDeletion(args: {
+  requestJob(): Promise<AccountDeletionState>;
+  revokeExternal(): Promise<AppleRevocationResult>;
+  markExternalRevoked(): Promise<AccountDeletionState>;
+  deleteStorage(): Promise<void>;
+  deleteData(): Promise<AccountDeletionState>;
+  deleteAuth(): Promise<void>;
+  completeAuth(): Promise<AccountDeletionState>;
+}): Promise<AccountDeletionState | "manual_required" | "retry_required"> {
+  let state = await args.requestJob();
+  if (state === "BLOCKED_PENDING_PAYMENT" || state === "AUTH_DELETED") {
+    return state;
   }
-  await args.prepareDatabaseDeletion();
-  return "prepared";
+  if (state === "REQUESTED") {
+    const revocation = await args.revokeExternal();
+    if (revocation === "manual_required" || revocation === "retry_required") {
+      return revocation;
+    }
+    state = await args.markExternalRevoked();
+    if (state === "BLOCKED_PENDING_PAYMENT") return state;
+  }
+  if (state === "EXTERNAL_REVOKED") {
+    await args.deleteStorage();
+    state = await args.deleteData();
+  }
+  if (state === "DATA_DELETED") {
+    await args.deleteAuth();
+    state = await args.completeAuth();
+  }
+  return state;
 }
 
 async function removeOwnedStorageObjects(
@@ -198,7 +219,6 @@ async function removeOwnedStorageObjects(
     if (!paths.includes(path)) paths.push(path);
     byBucket.set(bucket, paths);
   };
-
   const [{ data: owned, error }, { data: avatars }, { data: covers }] =
     await Promise.all([
       admin.schema("storage").from("objects").select("bucket_id,name")
@@ -213,14 +233,8 @@ async function removeOwnedStorageObjects(
       ),
     ]);
   if (error) throw new Error("account_storage_cleanup_failed");
-  for (const row of owned ?? []) {
-    const paths = byBucket.get(row.bucket_id) ?? [];
-    if (!paths.includes(row.name)) paths.push(row.name);
-    byBucket.set(row.bucket_id, paths);
-  }
-  for (const avatar of avatars ?? []) {
-    addPath("profile-avatars", avatar.object_path);
-  }
+  for (const row of owned ?? []) addPath(row.bucket_id, row.name);
+  for (const avatar of avatars ?? []) addPath("profile-avatars", avatar.object_path);
   for (const cover of covers ?? []) {
     addPath("goal-cover-quarantine", cover.quarantine_path);
     addPath("goal-cover-public", cover.public_path);
@@ -233,35 +247,24 @@ async function removeOwnedStorageObjects(
       if (removeError) throw new Error("account_storage_cleanup_failed");
     }
   }
-  const [{ error: avatarDeleteError }, { error: coverDeleteError }] =
-    await Promise.all([
-      admin.from("profile_avatar_asset").delete().eq(
-        "owner_member_id",
-        memberId,
-      ),
-      admin.from("goal_cover_asset").delete().eq("owner_member_id", memberId),
-    ]);
-  if (avatarDeleteError || coverDeleteError) {
-    throw new Error("account_storage_cleanup_failed");
-  }
+}
+
+async function rpcState(
+  admin: SupabaseClient,
+  name: string,
+  memberId: string,
+): Promise<AccountDeletionState> {
+  const { data, error } = await admin.rpc(name, { p_member_id: memberId });
+  if (error) throw new Error(error.message);
+  return data as AccountDeletionState;
 }
 
 export async function handleAccountDelete(req: Request): Promise<Response> {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: CORS });
-  }
-  if (req.method !== "POST") {
-    return json(405, { error: { code: "method_not_allowed" } });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+  if (req.method !== "POST") return json(405, { error: { code: "method_not_allowed" } });
   const authorization = req.headers.get("Authorization") ?? "";
   if (!authorization.startsWith("Bearer ")) {
     return json(401, { error: { code: "unauthorized" } });
-  }
-  let input: { requestKey: string };
-  try {
-    input = parseAccountDeleteRequest(await req.json());
-  } catch {
-    return json(400, { error: { code: "invalid_request" } });
   }
   const url = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -282,60 +285,41 @@ export async function handleAccountDelete(req: Request): Promise<Response> {
     (identity) => identity.provider === "apple",
   ) || userData.user.app_metadata?.provider === "apple";
 
-  let authorizationResult: Awaited<ReturnType<typeof authorizeAccountDeletion>>;
   try {
-    authorizationResult = await authorizeAccountDeletion({
-      prepareAppleRevocation: () =>
-        prepareAppleRevocation({
-          admin,
-          memberId,
-          isAppleIdentity,
-        }),
-      prepareDatabaseDeletion: async () => {
-        const { error } = await admin.rpc("prepare_account_deletion", {
-          p_member_id: memberId,
-          p_request_key: input.requestKey,
-        });
-        if (error) throw new Error(error.message);
+    const result = await advanceAccountDeletion({
+      requestJob: () => rpcState(admin, "request_account_deletion", memberId),
+      revokeExternal: () => prepareAppleRevocation({ admin, memberId, isAppleIdentity }),
+      markExternalRevoked: () =>
+        rpcState(admin, "mark_account_deletion_external_revoked", memberId),
+      deleteStorage: () => removeOwnedStorageObjects(admin, memberId),
+      deleteData: () => rpcState(admin, "delete_account_data", memberId),
+      deleteAuth: async () => {
+        const { error } = await admin.auth.admin.deleteUser(memberId);
+        if (error) throw new Error("account_auth_delete_failed");
       },
+      completeAuth: () =>
+        rpcState(admin, "complete_account_deletion_auth", memberId),
     });
+    if (result === "manual_required") {
+      return json(409, { error: { code: "apple_reauthentication_required" } });
+    }
+    if (result === "retry_required") {
+      return json(503, { error: { code: "apple_token_revocation_pending" } });
+    }
+    if (result === "BLOCKED_PENDING_PAYMENT") {
+      return json(409, { error: { code: "account_settlement_pending" } });
+    }
+    return json(200, { data: { deleted: result === "AUTH_DELETED", status: result } });
   } catch (error) {
+    if (error instanceof Error && error.message === "account_storage_cleanup_failed") {
+      return json(503, { error: { code: error.message } });
+    }
+    if (error instanceof Error && error.message === "account_auth_delete_failed") {
+      return json(503, { error: { code: error.message } });
+    }
     const mapped = mapAccountDeletionError(error);
     return json(mapped.status, { error: { code: mapped.code } });
   }
-  if (authorizationResult === "manual_required") {
-    return json(409, { error: { code: "apple_reauthentication_required" } });
-  }
-  if (authorizationResult === "retry_required") {
-    return json(503, { error: { code: "apple_token_revocation_pending" } });
-  }
-
-  try {
-    await removeOwnedStorageObjects(admin, memberId);
-  } catch {
-    return json(503, { error: { code: "account_storage_cleanup_failed" } });
-  }
-  const { error: settlementError } = await admin.rpc(
-    "assert_account_deletion_settled",
-    { p_member_id: memberId, p_request_key: input.requestKey },
-  );
-  if (settlementError) {
-    return json(409, { error: { code: "account_settlement_pending" } });
-  }
-  const { error: deleteError } = await admin.auth.admin.deleteUser(memberId);
-  if (deleteError) {
-    return json(503, { error: { code: "account_auth_delete_failed" } });
-  }
-
-  const { error: completeError } = await admin.rpc(
-    "complete_account_deletion",
-    {
-      p_member_id: memberId,
-      p_request_key: input.requestKey,
-    },
-  );
-  if (completeError) console.error("[account-delete] audit completion failed");
-  return json(200, { data: { deleted: true } });
 }
 
 if (import.meta.main) Deno.serve(handleAccountDelete);

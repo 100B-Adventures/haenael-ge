@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  clearAccountDeletionRequestKey,
-  getOrCreateAccountDeletionRequestKey,
+  beginAccountDeletionForMember,
+  getAccountDeletionMember,
   retryAccountDeletionAfterAppleReauthentication,
   type AccountDeletionStorage,
 } from "../lib/account-delete-recovery";
@@ -15,35 +15,50 @@ function memoryStorage(): AccountDeletionStorage {
   };
 }
 
-describe("계정 삭제 재개", () => {
-  it("TC-APP-09-7 실패 뒤 재시도는 성공 전까지 같은 request key를 보존한다", async () => {
+describe("계정 삭제 서버 작업 재개", () => {
+  it("TC-APP-09-3 클라이언트는 요청 키 없이 삭제를 시작한 회원 ID만 보관한다", async () => {
     const storage = memoryStorage();
-    const first = await getOrCreateAccountDeletionRequestKey(storage, () => "account-delete-fixed");
-    const retry = await getOrCreateAccountDeletionRequestKey(storage, () => "must-not-be-used");
-    expect(retry).toBe(first);
-    await clearAccountDeletionRequestKey(storage);
-    expect(await getOrCreateAccountDeletionRequestKey(storage, () => "account-delete-next"))
-      .toBe("account-delete-next");
+    await beginAccountDeletionForMember(storage, "member-A");
+    expect(await getAccountDeletionMember(storage)).toBe("member-A");
   });
 
-  it("TC-APP-09-13 Apple 토큰이 없으면 재인증 뒤 같은 삭제 요청을 재개한다", async () => {
+  it("TC-APP-09-10 Apple 재인증이 다른 회원으로 바뀌면 이전 삭제 정보를 폐기하고 재호출하지 않는다", async () => {
+    const storage = memoryStorage();
+    await beginAccountDeletionForMember(storage, "member-A");
     const calls: string[] = [];
+
+    await expect(retryAccountDeletionAfterAppleReauthentication({
+      memberId: "member-A",
+      storage,
+      invokeDelete: async () => {
+        calls.push("delete");
+        return { ok: false, code: "apple_reauthentication_required" };
+      },
+      reauthenticateApple: async () => {
+        calls.push("reauthenticate");
+        return { memberId: "member-B" };
+      },
+    })).rejects.toThrow("account_session_changed");
+
+    expect(calls).toEqual(["delete", "reauthenticate"]);
+    expect(await getAccountDeletionMember(storage)).toBeNull();
+  });
+
+  it("TC-APP-09-8 같은 회원 Apple 재인증은 서버 작업을 회원 ID로 재개한다", async () => {
+    const storage = memoryStorage();
+    await beginAccountDeletionForMember(storage, "member-A");
     let attempt = 0;
     await retryAccountDeletionAfterAppleReauthentication({
-      requestKey: "account-delete-fixed",
-      invokeDelete: async (requestKey) => {
-        calls.push(`delete:${requestKey}`);
+      memberId: "member-A",
+      storage,
+      invokeDelete: async () => {
         attempt += 1;
         return attempt === 1
           ? { ok: false, code: "apple_reauthentication_required" }
           : { ok: true };
       },
-      reauthenticateApple: async () => { calls.push("reauthenticate"); },
+      reauthenticateApple: async () => ({ memberId: "member-A" }),
     });
-    expect(calls).toEqual([
-      "delete:account-delete-fixed",
-      "reauthenticate",
-      "delete:account-delete-fixed",
-    ]);
+    expect(attempt).toBe(2);
   });
 });

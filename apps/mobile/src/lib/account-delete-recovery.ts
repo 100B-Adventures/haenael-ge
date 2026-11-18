@@ -4,24 +4,38 @@ export type AccountDeletionStorage = {
   removeItem(key: string): Promise<void>;
 };
 
-const REQUEST_KEY_STORAGE_KEY = "haenael.account-deletion-request.v1";
+const MEMBER_STORAGE_KEY = "haenael.account-deletion-member.v2";
 
-export async function getOrCreateAccountDeletionRequestKey(
+export async function getAccountDeletionMember(
   storage: AccountDeletionStorage,
-  create: () => string,
-): Promise<string> {
-  const existing = await storage.getItem(REQUEST_KEY_STORAGE_KEY);
-  if (existing && /^[A-Za-z0-9_-]{8,128}$/.test(existing)) return existing;
-  const next = create();
-  if (!/^[A-Za-z0-9_-]{8,128}$/.test(next)) throw new Error("invalid_request_key");
-  await storage.setItem(REQUEST_KEY_STORAGE_KEY, next);
-  return next;
+): Promise<string | null> {
+  const value = await storage.getItem(MEMBER_STORAGE_KEY);
+  return value?.trim() || null;
 }
 
-export async function clearAccountDeletionRequestKey(
+export async function beginAccountDeletionForMember(
+  storage: AccountDeletionStorage,
+  memberId: string,
+): Promise<void> {
+  const current = await getAccountDeletionMember(storage);
+  if (current && current !== memberId) await storage.removeItem(MEMBER_STORAGE_KEY);
+  await storage.setItem(MEMBER_STORAGE_KEY, memberId);
+}
+
+export async function clearAccountDeletionMember(
   storage: AccountDeletionStorage,
 ): Promise<void> {
-  await storage.removeItem(REQUEST_KEY_STORAGE_KEY);
+  await storage.removeItem(MEMBER_STORAGE_KEY);
+}
+
+export async function discardAccountDeletionIfSessionChanged(
+  storage: AccountDeletionStorage,
+  currentMemberId: string | null,
+): Promise<void> {
+  const deletionMemberId = await getAccountDeletionMember(storage);
+  if (deletionMemberId && deletionMemberId !== currentMemberId) {
+    await clearAccountDeletionMember(storage);
+  }
 }
 
 type AccountDeletionAttempt =
@@ -29,17 +43,22 @@ type AccountDeletionAttempt =
   | { ok: false; code?: string; error?: unknown };
 
 export async function retryAccountDeletionAfterAppleReauthentication(args: {
-  requestKey: string;
-  invokeDelete(requestKey: string): Promise<AccountDeletionAttempt>;
-  reauthenticateApple(): Promise<void>;
+  memberId: string;
+  storage: AccountDeletionStorage;
+  invokeDelete(): Promise<AccountDeletionAttempt>;
+  reauthenticateApple(): Promise<{ memberId: string }>;
 }): Promise<void> {
-  let result = await args.invokeDelete(args.requestKey);
+  let result = await args.invokeDelete();
   if (result.ok) return;
   if (result.code !== "apple_reauthentication_required") {
     throw result.error ?? new Error(result.code ?? "account_delete_failed");
   }
-  await args.reauthenticateApple();
-  result = await args.invokeDelete(args.requestKey);
+  const reauthenticated = await args.reauthenticateApple();
+  if (reauthenticated.memberId !== args.memberId) {
+    await clearAccountDeletionMember(args.storage);
+    throw new Error("account_session_changed");
+  }
+  result = await args.invokeDelete();
   if (!result.ok) {
     throw result.error ?? new Error(result.code ?? "account_delete_failed");
   }

@@ -57,6 +57,35 @@ export async function recordCompensationFailure(
   if (error) throw new Error("payment_recovery_record_failed");
 }
 
+export async function beginAlternativePaymentConfirmation(
+  admin: Pick<SupabaseClient, "rpc">,
+  input: { intentId: string; memberId: string; requestKey: string },
+): Promise<string> {
+  const { data, error } = await admin.rpc(
+    "begin_alternative_payment_confirmation",
+    {
+      p_intent_id: input.intentId,
+      p_member_id: input.memberId,
+      p_request_key: input.requestKey,
+    },
+  );
+  if (error) throw new Error(error.message);
+  return data as string;
+}
+
+async function settleAlternativeConfirmation(
+  admin: SupabaseClient,
+  input: { intentId: string; memberId: string },
+  status: "CANCELED" | "RECONCILIATION_REQUIRED",
+): Promise<void> {
+  const { error } = await admin.rpc("settle_alternative_payment_confirmation", {
+    p_intent_id: input.intentId,
+    p_member_id: input.memberId,
+    p_status: status,
+  });
+  if (error) throw new Error(error.message);
+}
+
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -273,6 +302,28 @@ export async function handleConfirmAlternativePayment(
     return json(503, { error: { code: "channel_release_disabled" } });
   }
 
+  let confirmationState: string;
+  try {
+    confirmationState = await beginAlternativePaymentConfirmation(admin, {
+      intentId: input.intentId,
+      memberId: userData.user.id,
+      requestKey: input.requestKey,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    const code = message.includes("account_deletion_in_progress")
+      ? "account_deletion_in_progress"
+      : message.includes("purchase_intent_invalid")
+      ? "purchase_intent_invalid"
+      : "payment_confirmation_unavailable";
+    return json(code === "payment_confirmation_unavailable" ? 503 : 409, {
+      error: { code },
+    });
+  }
+  if (confirmationState !== "CONFIRMING") {
+    return json(409, { error: { code: "payment_confirmation_state_invalid" } });
+  }
+
   const toss = new TossClient(tossSecret);
   let paymentApproved = false;
   try {
@@ -339,6 +390,10 @@ export async function handleConfirmAlternativePayment(
     if (paymentApproved) {
       try {
         await toss.cancelPayment(input.paymentKey, "해낼게 대체결제 적립 실패");
+        await settleAlternativeConfirmation(admin, {
+          intentId: input.intentId,
+          memberId: userData.user.id,
+        }, "CANCELED");
       } catch {
         try {
           await recordCompensationFailure(admin, {
@@ -358,6 +413,20 @@ export async function handleConfirmAlternativePayment(
         }
         return json(503, {
           error: { code: "payment_compensation_failed" },
+        });
+      }
+    } else {
+      try {
+        await settleAlternativeConfirmation(admin, {
+          intentId: input.intentId,
+          memberId: userData.user.id,
+        }, "RECONCILIATION_REQUIRED");
+      } catch {
+        console.error(
+          "[confirm-alternative-payment] reconciliation state write failed",
+        );
+        return json(503, {
+          error: { code: "payment_recovery_record_failed" },
         });
       }
     }

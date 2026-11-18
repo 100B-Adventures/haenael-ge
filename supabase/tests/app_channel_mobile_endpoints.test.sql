@@ -1,7 +1,7 @@
 BEGIN;
 SELECT plan(37);
 
-SELECT has_table('public', 'account_deletion_request', 'APP-SRV-DB-01 계정 삭제 요청 원장이 있다');
+SELECT has_table('public', 'account_deletion_job', 'APP-SRV-DB-01 회원당 서버 계정 삭제 작업이 있다');
 SELECT has_table('public', 'alternative_checkout_session', 'APP-SRV-DB-01-1 서버 체크아웃 세션 원장이 있다');
 SELECT has_table('public', 'apple_token_revocation', 'APP-SRV-DB-01-2 Apple 토큰 폐기 원장이 있다');
 SELECT has_column('public', 'apple_token_revocation', 'token_type_hint',
@@ -12,8 +12,8 @@ SELECT has_column('public', 'member', 'deleted_at', 'APP-SRV-DB-02 회원 삭제
 SELECT has_function('public', 'credit_alternative_store_purchase', ARRAY[
   'uuid','uuid','uuid','text','text','text','text','text','boolean','text','timestamp with time zone','bytea','text'
 ], 'APP-SRV-DB-03 대체결제 적립과 외부거래 보고를 묶는 RPC가 있다');
-SELECT has_function('public', 'prepare_account_deletion', ARRAY['uuid','text'],
-  'APP-SRV-DB-04 계정 삭제 준비 RPC가 있다');
+SELECT has_function('public', 'request_account_deletion', ARRAY['uuid'],
+  'APP-SRV-DB-04 JWT 회원 ID 기반 계정 삭제 요청 RPC가 있다');
 SELECT has_function('public', 'record_alternative_payment_recovery',
   ARRAY['uuid','uuid','text','text','text'],
   'APP-SRV-DB-04-3 승인·취소 동시 실패 복구 RPC가 있다');
@@ -21,15 +21,15 @@ SELECT has_function('public', 'claim_google_external_transaction_batch', ARRAY['
   'APP-SRV-DB-04-1 Google 외부 거래 보고 큐 claim RPC가 있다');
 SELECT has_function('public', 'settle_google_external_transaction', ARRAY['bigint','boolean','boolean','text'],
   'APP-SRV-DB-04-2 Google 외부 거래 보고 정산 RPC가 있다');
-SELECT has_function('public', 'assert_account_deletion_settled', ARRAY['uuid','text'],
-  'APP-SRV-DB-04-6 Auth 삭제 직전 정산 재검사 RPC가 있다');
+SELECT has_function('public', 'delete_account_data', ARRAY['uuid'],
+  'APP-SRV-DB-04-6 개인정보 삭제 직전 정산 재검사 RPC가 있다');
 SELECT matches(
   pg_get_functiondef('public.record_alternative_payment_recovery(uuid,uuid,text,text,text)'::regprocedure),
   'member_settlement:',
   'APP-SRV-DB-04-4 복구 건 생성은 회원 정산 advisory lock을 사용한다'
 );
 SELECT matches(
-  pg_get_functiondef('public.prepare_account_deletion(uuid,text)'::regprocedure),
+  pg_get_functiondef('public.request_account_deletion(uuid)'::regprocedure),
   'member_settlement:',
   'APP-SRV-DB-04-5 계정 삭제도 같은 회원 정산 advisory lock을 사용한다'
 );
@@ -83,6 +83,11 @@ RESET ROLE;
 
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
+SELECT public.begin_alternative_payment_confirmation(
+  :'alternative_intent_intent_id',
+  '00000000-0000-0000-0000-000000000103',
+  'alternative-request-0001'
+) \gset alternative_confirmation_
 CREATE TEMP TABLE alternative_credit AS
 SELECT * FROM public.credit_alternative_store_purchase(
   :'alternative_intent_intent_id',
@@ -151,6 +156,11 @@ SELECT * FROM public.create_store_purchase_intent(
 RESET ROLE;
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
+SELECT public.begin_alternative_payment_confirmation(
+  :'recovery_intent_intent_id',
+  '00000000-0000-0000-0000-000000000105',
+  'alternative-recovery-0001'
+) \gset recovery_confirmation_
 SELECT ok(public.record_alternative_payment_recovery(
   :'recovery_intent_intent_id',
   '00000000-0000-0000-0000-000000000105',
@@ -164,10 +174,9 @@ SELECT is((SELECT status FROM public.store_recovery_case
 SELECT is((SELECT event_type FROM public.store_purchase_event
   WHERE provider_event_id='compensation:alternative-payment-failed-0001'),
   'PAYMENT_COMPENSATION_FAILED', 'APP-SRV-DB-10-6 보상 실패 결제 이벤트를 함께 남긴다');
-SELECT throws_ok(
-  $$SELECT * FROM public.prepare_account_deletion(
-    '00000000-0000-0000-0000-000000000105','account-delete-recovery-0001')$$,
-  '55000', 'account_settlement_pending',
+SELECT is(public.request_account_deletion(
+    '00000000-0000-0000-0000-000000000105'),
+  'BLOCKED_PENDING_PAYMENT',
   'APP-SRV-DB-10-7 OPEN 대체결제 복구 건은 계정 삭제를 차단한다'
 );
 
@@ -181,10 +190,9 @@ SELECT * FROM public.create_store_purchase_intent(
 RESET ROLE;
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
-SELECT throws_ok(
-  $$SELECT * FROM public.prepare_account_deletion(
-    '00000000-0000-0000-0000-000000000101','account-delete-race-0001')$$,
-  '55000', 'account_settlement_pending',
+SELECT is(public.request_account_deletion(
+    '00000000-0000-0000-0000-000000000101'),
+  'BLOCKED_PENDING_PAYMENT',
   'APP-SRV-DB-10-8 진행 중 대체결제가 있으면 계정 삭제를 차단한다'
 );
 UPDATE public.store_purchase_intent SET status='CANCELED'
@@ -194,8 +202,8 @@ INSERT INTO public.clover_balance(member_id, clover_count)
 VALUES ('00000000-0000-0000-0000-000000000101', 3)
 ON CONFLICT (member_id) DO UPDATE SET clover_count = 3;
 SELECT throws_ok(
-  $$SELECT * FROM public.prepare_account_deletion(
-    '00000000-0000-0000-0000-000000000101','account-delete-0001')$$,
+  $$SELECT public.request_account_deletion(
+    '00000000-0000-0000-0000-000000000101')$$,
   '55000', 'account_balance_remaining',
   'APP-SRV-DB-11 클로버 잔액이 남으면 계정 삭제를 거절한다'
 );
@@ -204,10 +212,13 @@ UPDATE public.clover_balance SET clover_count = 0
 WHERE member_id = '00000000-0000-0000-0000-000000000101';
 
 SELECT is(
-  (SELECT status FROM public.prepare_account_deletion(
-    '00000000-0000-0000-0000-000000000101','account-delete-0001')),
-  'PREPARED', 'APP-SRV-DB-12 정산 항목이 없으면 삭제 준비를 완료한다'
+  public.request_account_deletion('00000000-0000-0000-0000-000000000101'),
+  'REQUESTED', 'APP-SRV-DB-12 정산 항목이 없으면 서버 삭제 작업을 시작한다'
 );
+SELECT public.mark_account_deletion_external_revoked(
+  '00000000-0000-0000-0000-000000000101') \gset deletion_external_
+SELECT public.delete_account_data(
+  '00000000-0000-0000-0000-000000000101') \gset deletion_data_
 SELECT is((SELECT count(*)::integer FROM public.device_push_token
   WHERE member_id='00000000-0000-0000-0000-000000000101'), 0,
   'APP-SRV-DB-13 삭제 준비가 푸시 토큰을 제거한다');
@@ -215,9 +226,8 @@ SELECT ok((SELECT deleted_at IS NOT NULL AND nickname IS NULL AND provider_id IS
   FROM public.member WHERE id='00000000-0000-0000-0000-000000000101'),
   'APP-SRV-DB-14 회원 개인정보를 비식별화한다');
 SELECT is(
-  (SELECT is_replay FROM public.prepare_account_deletion(
-    '00000000-0000-0000-0000-000000000101','account-delete-new-key-0002')),
-  true, 'APP-SRV-DB-14-1 새 request key도 기존 PREPARED 삭제를 재개한다'
+  public.request_account_deletion('00000000-0000-0000-0000-000000000101'),
+  'DATA_DELETED', 'APP-SRV-DB-14-1 새 클라이언트 키 없이 서버 삭제 작업을 재개한다'
 );
 
 RESET ROLE;
@@ -225,9 +235,9 @@ DELETE FROM auth.users WHERE id='00000000-0000-0000-0000-000000000101';
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
 SELECT lives_ok(
-  $$SELECT public.complete_account_deletion(
-    '00000000-0000-0000-0000-000000000101','account-delete-new-key-0002')$$,
-  'APP-SRV-DB-14-2 새 request key로 재개한 삭제도 감사 완료 처리한다'
+  $$SELECT public.complete_account_deletion_auth(
+    '00000000-0000-0000-0000-000000000101')$$,
+  'APP-SRV-DB-14-2 Auth 삭제 뒤 서버 작업을 완료 처리한다'
 );
 SELECT is((SELECT count(*)::integer FROM public.member
   WHERE id='00000000-0000-0000-0000-000000000101'), 1,
@@ -238,7 +248,7 @@ SELECT throws_ok(
   '23503', 'auth_user_not_found',
   'APP-SRV-DB-16 새 회원은 Auth 사용자 없이 생성할 수 없다'
 );
-SELECT is((SELECT status FROM public.account_deletion_request
+SELECT is((SELECT status FROM public.account_deletion_job
   WHERE member_id='00000000-0000-0000-0000-000000000101'), 'AUTH_DELETED',
   'APP-SRV-DB-17 삭제 요청 상태를 감사 원장에 남긴다');
 RESET ROLE;

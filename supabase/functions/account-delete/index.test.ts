@@ -1,114 +1,68 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert@1";
+import { assertEquals, assertRejects } from "jsr:@std/assert@1";
 import {
-  authorizeAccountDeletion,
-  blocksAuthDeletionForAppleRevocation,
+  AppleCredentialRejectedError,
+  advanceAccountDeletion,
   handleAccountDelete,
   mapAccountDeletionError,
-  parseAccountDeleteRequest,
   revokeAppleCredential,
 } from "./index.ts";
 
-Deno.test("TC-APP-09-3 인증 없는 계정 삭제는 준비 RPC 전에 거절한다", async () => {
+Deno.test("TC-APP-09-1 인증 없는 계정 삭제는 서버 작업 생성 전에 거절한다", async () => {
   const response = await handleAccountDelete(
     new Request("http://local", { method: "POST", body: "{}" }),
   );
   assertEquals(response.status, 401);
 });
 
-Deno.test("TC-APP-09-12 Apple 폐기 확인 전에는 DB 삭제 준비를 호출하지 않는다", async () => {
-  const blockedCalls: string[] = [];
-  const blocked = await authorizeAccountDeletion({
-    prepareAppleRevocation: () => {
-      blockedCalls.push("apple");
-      return Promise.resolve("manual_required" as const);
-    },
-    prepareDatabaseDeletion: () => {
-      blockedCalls.push("database");
-      return Promise.resolve();
-    },
+Deno.test("TC-APP-09-4 서버 상태 기계는 외부 폐기 뒤에만 데이터·Auth를 삭제한다", async () => {
+  const calls: string[] = [];
+  const result = await advanceAccountDeletion({
+    requestJob: async () => { calls.push("request"); return "REQUESTED"; },
+    revokeExternal: async () => { calls.push("revoke"); return "revoked"; },
+    markExternalRevoked: async () => { calls.push("mark-external"); return "EXTERNAL_REVOKED"; },
+    deleteStorage: async () => { calls.push("storage"); },
+    deleteData: async () => { calls.push("data"); return "DATA_DELETED"; },
+    deleteAuth: async () => { calls.push("auth"); },
+    completeAuth: async () => { calls.push("complete"); return "AUTH_DELETED"; },
   });
-  assertEquals(blocked, "manual_required");
-  assertEquals(blockedCalls, ["apple"]);
-
-  const allowedCalls: string[] = [];
-  const allowed = await authorizeAccountDeletion({
-    prepareAppleRevocation: () => {
-      allowedCalls.push("apple");
-      return Promise.resolve("revoked" as const);
-    },
-    prepareDatabaseDeletion: () => {
-      allowedCalls.push("database");
-      return Promise.resolve();
-    },
-  });
-  assertEquals(allowed, "prepared");
-  assertEquals(allowedCalls, ["apple", "database"]);
+  assertEquals(result, "AUTH_DELETED");
+  assertEquals(calls, ["request", "revoke", "mark-external", "storage", "data", "auth", "complete"]);
 });
 
-Deno.test("TC-APP-09-4 계정 삭제는 request_key만 받고 회원 ID를 무시한다", () => {
-  assertEquals(
-    parseAccountDeleteRequest({
-      request_key: "account-delete-0001",
-      member_id: "00000000-0000-0000-0000-000000000121",
+Deno.test("TC-APP-09-7 Apple 토큰이 없으면 외부 폐기 상태 전에 멈춘다", async () => {
+  const calls: string[] = [];
+  const result = await advanceAccountDeletion({
+    requestJob: async () => "REQUESTED",
+    revokeExternal: async () => "manual_required",
+    markExternalRevoked: async () => { calls.push("mark-external"); return "EXTERNAL_REVOKED"; },
+    deleteStorage: async () => { calls.push("storage"); },
+    deleteData: async () => { calls.push("data"); return "DATA_DELETED"; },
+    deleteAuth: async () => { calls.push("auth"); },
+    completeAuth: async () => "AUTH_DELETED",
+  });
+  assertEquals(result, "manual_required");
+  assertEquals(calls, []);
+});
+
+Deno.test("TC-APP-09-8 Apple invalid_grant는 사용자 재인증 대상으로 분류한다", async () => {
+  await assertRejects(
+    () => revokeAppleCredential({
+      clientId: "com.haenael.app",
+      clientSecret: "signed-client-secret",
+      token: "expired-apple-token",
+      tokenTypeHint: "refresh_token",
+      fetcher: () => Promise.resolve(new Response(
+        JSON.stringify({ error: "invalid_grant" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )),
     }),
-    { requestKey: "account-delete-0001" },
+    AppleCredentialRejectedError,
+    "apple_revoke_credential_invalid",
   );
 });
 
-Deno.test("TC-APP-09-5 짧은 멱등키는 삭제 준비 전에 거절한다", () => {
-  assertThrows(
-    () => parseAccountDeleteRequest({ request_key: "short" }),
-    Error,
-    "invalid_request_key",
-  );
-});
-
-Deno.test("TC-APP-09-6 잔액·환전·정산 보류를 안정적인 409 오류로 변환한다", () => {
-  assertEquals(
-    mapAccountDeletionError(new Error("account_balance_remaining")),
-    {
-      status: 409,
-      code: "account_balance_remaining",
-    },
-  );
-  assertEquals(mapAccountDeletionError(new Error("cashout_in_progress")), {
-    status: 409,
-    code: "cashout_in_progress",
-  });
-  assertEquals(
-    mapAccountDeletionError(new Error("account_settlement_pending")),
-    {
-      status: 409,
-      code: "account_settlement_pending",
-    },
-  );
-});
-
-Deno.test("TC-APP-09-8 Apple access token도 공식 revoke endpoint에서 폐기한다", async () => {
-  let capturedUrl = "";
-  let capturedType = "";
-  let capturedBody = "";
-  await revokeAppleCredential({
-    clientId: "com.haenael.app",
-    clientSecret: "signed-client-secret",
-    token: "apple-access-token",
-    tokenTypeHint: "access_token",
-    fetcher: (input, init) => {
-      const request = new Request(input, init);
-      capturedUrl = request.url;
-      capturedType = request.headers.get("content-type") ?? "";
-      capturedBody = String(init?.body ?? "");
-      return Promise.resolve(new Response(null, { status: 200 }));
-    },
-  });
-  assertEquals(capturedUrl, "https://appleid.apple.com/auth/revoke");
-  assertEquals(capturedType, "application/x-www-form-urlencoded");
-  assertEquals(capturedBody.includes("token_type_hint=access_token"), true);
-});
-
-Deno.test("TC-APP-09-11 Apple 토큰 폐기 대기 중에는 Auth 삭제를 차단한다", () => {
-  assertEquals(blocksAuthDeletionForAppleRevocation("manual_required"), true);
-  assertEquals(blocksAuthDeletionForAppleRevocation("retry_required"), true);
-  assertEquals(blocksAuthDeletionForAppleRevocation("revoked"), false);
-  assertEquals(blocksAuthDeletionForAppleRevocation("not_applicable"), false);
+Deno.test("TC-APP-09-2 잔액·환전·정산 보류를 안정적인 409 오류로 변환한다", () => {
+  assertEquals(mapAccountDeletionError(new Error("account_balance_remaining")), { status: 409, code: "account_balance_remaining" });
+  assertEquals(mapAccountDeletionError(new Error("cashout_in_progress")), { status: 409, code: "cashout_in_progress" });
+  assertEquals(mapAccountDeletionError(new Error("account_settlement_pending")), { status: 409, code: "account_settlement_pending" });
 });

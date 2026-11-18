@@ -7,7 +7,7 @@ STAMP: 2026-11-18 13:22 KST, GPT-5 Codex, code-builder, haenael-supabase-build. 
 
 - 인증: 모바일·웹은 Supabase JWT, 앱인토스는 토스 authorization code를 서버에서 교환한 Supabase JWT.
 - 성공 응답은 `data`, 실패 응답은 `{ "error": { "code": "stable_code" } }`다. 공급사 원문과 내부 메시지는 노출하지 않는다.
-- 모든 쓰기는 `request_key` 8~128자와 서버 유일키로 멱등 처리한다.
+- 일반 쓰기는 `request_key` 8~128자와 서버 유일키로 멱등 처리한다. 계정 삭제만 예외이며, JWT `sub`와 회원당 1행인 서버 작업을 재개 키로 사용해 클라이언트 요청 키를 받지 않는다.
 - 금액·상품·수취인·상점·환경은 서버가 재검증한다.
 
 ## POST RPC `create_store_purchase_intent`
@@ -63,6 +63,8 @@ STAMP: 2026-11-18 13:22 KST, GPT-5 Codex, code-builder, haenael-supabase-build. 
 
 Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요청은 `intent_id`, `account_binding`, `payment_key`, `order_id`, `external_transaction_token`, `request_key`다. `goal_id`, `product_id`, 회원은 요청에서 받지 않고 intent에서 파생한다. 서버가 Google 외부결제 토큰의 계정 결합값, 토스 승인 회원·주문 상품·금액을 intent와 대조한다. `provider=GOOGLE_ALTERNATIVE`의 sandbox/production release gate는 `credit_store_purchase` 트랜잭션 안에서 검사하며 OFF면 `503 channel_release_disabled`, 적립 0건이다. 응답 필드는 구매 확인과 같고 `report_status: PENDING|REPORTED`를 추가한다. 외부 거래 토큰 누락은 적립 전 `422 external_transaction_token_required`다. 소비는 `UPDATE store_purchase_intent SET status='CONSUMED', consumed_at=now() WHERE id=:id AND status='CREATED' AND expires_at>now()`의 영향 행 1건으로만 성공한다.
 
+공급자 호출 직전 `begin_alternative_payment_confirmation`이 `member_settlement:<member_id>` transaction advisory lock을 잡고 삭제 작업이 없는지 다시 검사한 뒤 `alternative_payment_confirmation(status=CONFIRMING)`을 만든다. 이 행이 있으면 intent 만료 뒤에도 미종결 결제로 취급한다. 적립 성공은 같은 잠금 안에서 `CREDITED`, 승인되지 않았음이 확정되면 `CANCELED`, 공급자 결과가 불명확하면 `RECONCILIATION_REQUIRED`, 승인 뒤 적립·취소가 모두 실패하면 `RECOVERY_REQUIRED`로 전이한다. 계정 삭제가 `REQUESTED` 이상이면 새 공급자 확인을 시작하지 않는다.
+
 보고 레코드는 `external_transaction_id`, 암호화 token, 거래시각, 세전액, 세액, 사용자 과세 지역, API 버전, `report_due_at`, `next_attempt_at`, Google 결과 상태를 가진다. 24시간 안 `REPORTED`가 아니면 경보하며 영구 실패는 `PERMANENT_FAILURE`로 격리한다. 환불도 ExternalTransaction API에 별도 보고한다. 프로그램 등록과 API 버전은 제출 전 콘솔에서 다시 핀한다.
 
 ## POST `/functions/v1/prepare-alternative-checkout`
@@ -75,7 +77,7 @@ Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요
 
 토스 승인 성공 뒤 앱은 `intent_id`, `account_binding`, `payment_key`, `order_id`, Google 외부 거래 token, `request_key`를 SecureStore 미완료 큐에 먼저 저장한다. `confirm-alternative-payment` 성공 응답을 받을 때만 항목별로 제거한다. 큐 쓰기는 앱 프로세스 안에서 직렬화하고 성공 뒤 최신 큐를 다시 읽으므로 복구 중 추가된 결제를 과거 스냅샷으로 덮지 않는다. 앱 시작 시 같은 요청을 재전송하며 새로운 주문이나 멱등키를 만들지 않는다.
 
-토스 승인 뒤 적립과 전액 취소가 모두 실패하면 `record_alternative_payment_recovery`가 `store_recovery_case(status=OPEN)`와 `store_purchase_event(event_type=PAYMENT_COMPENSATION_FAILED)`를 같은 DB 트랜잭션으로 기록한다. 복구 건 생성과 계정 삭제는 `member_settlement:<member_id>` advisory lock을 공유한다. 만료 전 `GOOGLE_ALTERNATIVE` 구매 intent 또는 OPEN 복구 건이 있으면 계정 삭제를 차단한다.
+토스 승인 뒤 적립과 전액 취소가 모두 실패하면 `record_alternative_payment_recovery`가 같은 회원 잠금 안에서 결제 확인 작업을 다시 검사하고 `store_recovery_case(status=OPEN)`, `store_purchase_event(event_type=PAYMENT_COMPENSATION_FAILED)`, 확인 상태 `RECOVERY_REQUIRED`를 한 트랜잭션으로 기록한다. intent 만료 여부와 무관하게 `CONFIRMING|RECONCILIATION_REQUIRED|RECOVERY_REQUIRED` 확인 작업 또는 OPEN 복구 건이 있으면 계정 삭제는 `BLOCKED_PENDING_PAYMENT`에 머문다.
 
 ## POST `/functions/v1/google-external-transaction-report`
 
@@ -91,19 +93,21 @@ pg_cron이 10분마다 내부 토큰으로 호출한다. `claim_google_external_
 
 ## POST `/functions/v1/account-delete`
 
-요청은 `{ "request_key": "8~128자" }`이며 회원 ID는 받지 않고 JWT `sub`에서만 파생한다. 서버는 회원 advisory lock을 잡고 다음 항목을 같은 시점에 다시 검사한다.
+요청 본문에는 회원 ID와 멱등키가 없다. 서버는 JWT `sub`로 `account_deletion_job`을 찾거나 만들며 `member_id` 기본키로 회원당 한 행만 유지한다. 상태는 `REQUESTED → BLOCKED_PENDING_PAYMENT → REQUESTED → EXTERNAL_REVOKED → DATA_DELETED → AUTH_DELETED`다. 앱 재설치·기기 변경·클라이언트 저장소 유실과 무관하게 같은 JWT 회원의 서버 작업을 재개한다.
+
+`request_account_deletion`, `mark_account_deletion_external_revoked`, `delete_account_data`, `complete_account_deletion_auth`는 모두 `member_settlement:<member_id>` transaction advisory lock 안에서 현재 작업 상태와 다음 항목을 다시 검사한다.
 
 - 클로버 잔액이 0이 아니면 `409 account_balance_remaining`.
 - `REQUESTED|KYC_PENDING|APPROVED|PAYOUT_SENT` 환전이 있으면 `409 cashout_in_progress`.
 - 아직 release 또는 reverse되지 않은 `clover_maturity`, 진행 중 기프티콘, 미해결 구매 회수 건이 있으면 `409 account_settlement_pending`.
 
-Apple 회원은 공급자 token 존재와 `/auth/revoke` 성공을 먼저 확인한다. 그 전에는 구매 intent, 회원·목표·친구·알림, Storage 객체를 변경하지 않는다. 외부 폐기와 정산 검사를 통과하면 생성 상태의 구매 intent를 취소하고 푸시 토큰을 삭제하며 목표·프로필·친구·알림 데이터를 삭제 또는 비식별화한다. 결제·적립·환전 원장은 법정 정산과 부정 사용 대응에 필요한 범위만 비식별 회원 키에 보존한다. 그 뒤 Storage 소유 객체를 삭제하고 `assert_account_deletion_settled`로 같은 회원 정산 잠금을 다시 잡아 OPEN 복구 건을 재검사한 다음, 서버 전용 `auth.admin.deleteUser(member_id)`를 호출한다. 이미 발급된 JWT의 남은 수명 동안 민감 쓰기는 `member.deleted_at IS NULL`과 Auth 사용자 존재를 함께 검사한다.
+Apple 회원은 로그인 때 암호화 저장한 refresh token으로 `/auth/revoke`를 호출한다. 토큰이 없거나 Apple이 `invalid_grant`로 거절하면 데이터 변경 없이 `409 apple_reauthentication_required`를 반환한다. 같은 회원 Apple OAuth가 새 폐기용 token을 등록하고 폐기가 성공한 뒤에만 `EXTERNAL_REVOKED`로 전이한다. 네트워크·Apple 서버 오류는 `503 apple_token_revocation_pending`이며 `REQUESTED`에 머문다.
 
-성공은 `200 { "data": { "deleted": true } }`다. 준비 단계 재시도는 `request_key`로 멱등 처리하며, Auth 삭제 전 Storage 삭제 실패는 `503 account_storage_cleanup_failed`, Auth 삭제 실패는 `503 account_auth_delete_failed`로 고정한다. 서비스 역할 키와 개인정보 원문은 응답·로그에 노출하지 않는다.
+`EXTERNAL_REVOKED` 뒤 Storage 객체를 먼저 삭제한다. 그 다음 `delete_account_data`가 같은 회원 잠금 안에서 미종결 결제·OPEN 복구 건을 다시 검사하고, 생성 상태 intent 취소, 푸시 토큰 삭제, 목표·프로필·친구·알림 삭제 또는 비식별화와 `DATA_DELETED` 전이를 한 DB 트랜잭션으로 수행한다. 결제·적립·환전 원장은 법정 정산과 부정 사용 대응에 필요한 범위만 비식별 회원 키에 보존한다. 이후 서버 전용 `auth.admin.deleteUser(member_id)`를 호출하고 Auth 사용자 부재를 확인한 `complete_account_deletion_auth`가 `AUTH_DELETED`를 기록한다. 삭제 작업이 `REQUESTED` 이상이면 새 대체결제 확인은 거절된다.
 
-회원별 `PREPARED|AUTH_DELETED` 요청이 있으면 클라이언트 request key가 달라도 기존 요청을 재개한다. 모바일은 성공 전까지 원 request key를 SecureStore에 유지하고 성공 뒤에만 제거한다.
+성공은 `200 { "data": { "deleted": true, "status": "AUTH_DELETED" } }`다. 미종결 결제는 `409 account_settlement_pending`, Storage 실패는 `503 account_storage_cleanup_failed`, Auth 삭제 실패는 `503 account_auth_delete_failed`로 고정한다. 서비스 역할 키와 개인정보 원문은 응답·로그에 노출하지 않는다.
 
-Apple OAuth 로그인에서 Supabase가 반환한 `provider_refresh_token`을 우선하고, 없으면 `provider_token`을 `/functions/v1/register-apple-revocation-token`으로 즉시 전송한다. 서버는 token과 `refresh_token|access_token` 종류를 AES-256-GCM 암호문과 함께 보관한다. Apple 회원 삭제는 `/auth/revoke` 성공을 `apple_token_revocation=REVOKED`에 기록한 뒤에만 DB 삭제 준비를 시작한다. 공급자 token이 없으면 데이터 변경 없이 `409 apple_reauthentication_required`를 반환하고, 모바일은 Apple OAuth를 다시 수행해 폐기용 token을 등록한 뒤 원 `request_key`로 삭제를 재개한다. Apple 또는 네트워크 오류는 `RETRY_REQUIRED`로 남기고 모든 데이터 삭제를 멈춘다.
+Apple OAuth 로그인에서 Supabase가 반환한 `provider_refresh_token`만 `/functions/v1/register-apple-revocation-token`으로 즉시 전송하고 서버가 AES-256-GCM 암호문으로 보관한다. 단기 access token은 저장하지 않는다. refresh token이 없거나 폐기 때 `invalid_grant`가 오면 반드시 사용자 재인증으로 돌아간다. 모바일 로컬 저장소에는 삭제를 시작한 회원 ID만 둔다. Apple 재인증 또는 일반 인증 상태 변경 뒤 현재 세션 회원 ID가 달라지면 이전 회원의 삭제 정보를 폐기하고 `account-delete`를 재호출하지 않는다.
 
 ## POST `/functions/v1/gift-exchange`
 
@@ -146,6 +150,7 @@ GET은 JWT `sub`의 `clover_eligibility`와 서버의 `cashout_enabled`, `gift_e
 - Apple·앱인토스 정책 충돌은 production gate OFF로 격리한다.
 - v0.1.0-retake1: 독립 리뷰의 구매자 결합, D-047, Google 보고, 환불 정규화, Toss identity, 기프티콘 재조정 반영.
 - v0.1.0-retake2: 대체결제 intent·account binding·release gate, 부분환불 정규화 필드, mobile-cashout 안정 계약 보강.
+- v0.1.0-retake4: 회원당 서버 삭제 작업, 공통 회원 정산 잠금, Apple refresh token 전용 폐기, 세션 교체 격리를 반영.
 
 RUBRIC_SCORE: 독립 리뷰 재검수 대기
 WEAKEST_LINE: 외부 공급자별 실제 응답 스키마는 sandbox 계정 등록 뒤 fixture로 고정해야 한다.

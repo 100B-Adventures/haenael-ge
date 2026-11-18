@@ -1,10 +1,34 @@
 import { assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
+  beginAlternativePaymentConfirmation,
   handleConfirmAlternativePayment,
   normalizeAlternativePayment,
   parseAlternativePaymentRequest,
   recordCompensationFailure,
 } from "./index.ts";
+
+Deno.test("TC-APP-09-5 공급자 호출 전 결제 확인 작업을 회원 잠금 RPC로 시작한다", async () => {
+  const calls: unknown[] = [];
+  const state = await beginAlternativePaymentConfirmation({
+    rpc: (name: string, args: unknown) => {
+      calls.push({ name, args });
+      return Promise.resolve({ data: "CONFIRMING", error: null });
+    },
+  } as never, {
+    intentId: "00000000-0000-0000-0000-000000000111",
+    memberId: "00000000-0000-0000-0000-000000000113",
+    requestKey: "request-key-0001",
+  });
+  assertEquals(state, "CONFIRMING");
+  assertEquals(calls, [{
+    name: "begin_alternative_payment_confirmation",
+    args: {
+      p_intent_id: "00000000-0000-0000-0000-000000000111",
+      p_member_id: "00000000-0000-0000-0000-000000000113",
+      p_request_key: "request-key-0001",
+    },
+  }]);
+});
 
 Deno.test("TC-APP-02-4 인증 없는 대체결제 승인은 공급자 호출 전에 거절한다", async () => {
   const response = await handleConfirmAlternativePayment(

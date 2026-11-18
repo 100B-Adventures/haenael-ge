@@ -1,10 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import NetInfo from "@react-native-community/netinfo";
 import * as Application from "expo-application";
 import type { Session } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from "react";
 import { appConfig } from "../lib/config";
 import { supabase } from "../lib/supabase";
+import { discardAccountDeletionIfSessionChanged } from "../lib/account-delete-recovery";
 import { decideUpdate, type UpdateDecision } from "../lib/update-policy";
 
 type AppState = {
@@ -29,14 +31,27 @@ export function AppProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     let mounted = true;
     Promise.all([supabase.auth.getSession(), AsyncStorage.getItem("haenael.intro-seen")]).then(
-      ([auth, seen]) => {
+      async ([auth, seen]) => {
+        if (!mounted) return;
+        await discardAccountDeletionIfSessionChanged({
+          getItem: (key) => SecureStore.getItemAsync(key),
+          setItem: (key, value) => SecureStore.setItemAsync(key, value),
+          removeItem: (key) => SecureStore.deleteItemAsync(key),
+        }, auth.data.session?.user.id ?? null);
         if (!mounted) return;
         setSession(auth.data.session);
         setIntroSeen(seen === "true");
         setLoading(false);
       }
     );
-    const auth = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
+    const auth = supabase.auth.onAuthStateChange((_event, next) => {
+      void discardAccountDeletionIfSessionChanged({
+        getItem: (key) => SecureStore.getItemAsync(key),
+        setItem: (key, value) => SecureStore.setItemAsync(key, value),
+        removeItem: (key) => SecureStore.deleteItemAsync(key),
+      }, next?.user.id ?? null);
+      setSession(next);
+    });
     const network = NetInfo.addEventListener((state) => setOnline(state.isConnected !== false));
     return () => {
       mounted = false;

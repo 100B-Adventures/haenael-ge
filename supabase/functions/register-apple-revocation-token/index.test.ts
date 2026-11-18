@@ -26,12 +26,13 @@ Deno.test("TC-APP-09-9 Apple 폐기 토큰은 요청 필드 하나만 받는다"
     Error,
     "invalid_token_type",
   );
-  assertEquals(
-    parseAppleRevocationToken({
+  assertThrows(
+    () => parseAppleRevocationToken({
       provider_token: "apple-access-token-value",
       token_type_hint: "access_token",
     }),
-    { token: "apple-access-token-value", tokenTypeHint: "access_token" },
+    Error,
+    "invalid_token_type",
   );
 });
 

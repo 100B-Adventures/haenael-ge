@@ -1,13 +1,11 @@
 import * as SecureStore from "expo-secure-store";
 import { appConfig } from "./config";
 import { AppError } from "./errors";
-import { createRequestKey } from "./request-key";
 import { supabase } from "./supabase";
-import { unregisterPushToken } from "./notifications";
 import { canDeleteAccount } from "./policy";
 import {
-  clearAccountDeletionRequestKey,
-  getOrCreateAccountDeletionRequestKey,
+  beginAccountDeletionForMember,
+  clearAccountDeletionMember,
   retryAccountDeletionAfterAppleReauthentication,
 } from "./account-delete-recovery";
 import { reauthenticateAppleForDeletion } from "./auth";
@@ -38,15 +36,16 @@ export async function deleteAccountInApp() {
   if (appConfig.demoMode) throw new AppError("demo_write_blocked", "데모에서는 계정을 삭제하지 않아요.");
   const eligibility = await loadWithdrawalEligibility();
   if (!canDeleteAccount(eligibility)) throw new AppError("withdrawal_blocked", "남은 클로버나 진행 중인 환전을 먼저 정리해 주세요.");
-  const requestKey = await getOrCreateAccountDeletionRequestKey(
-    deletionStorage,
-    () => createRequestKey("account_delete"),
-  );
+  const { data: sessionData } = await supabase.auth.getSession();
+  const memberId = sessionData.session?.user.id;
+  if (!memberId) throw new AppError("authentication_required", "다시 로그인해 주세요.");
+  await beginAccountDeletionForMember(deletionStorage, memberId);
   await retryAccountDeletionAfterAppleReauthentication({
-    requestKey,
-    invokeDelete: async (stableRequestKey) => {
+    memberId,
+    storage: deletionStorage,
+    invokeDelete: async () => {
       const { error } = await supabase.functions.invoke("account-delete", {
-        body: { request_key: stableRequestKey },
+        body: {},
       });
       if (!error) return { ok: true };
       let code: string | undefined;
@@ -61,7 +60,6 @@ export async function deleteAccountInApp() {
     },
     reauthenticateApple: reauthenticateAppleForDeletion,
   });
-  await clearAccountDeletionRequestKey(deletionStorage);
-  await unregisterPushToken();
+  await clearAccountDeletionMember(deletionStorage);
   await supabase.auth.signOut({ scope: "local" });
 }

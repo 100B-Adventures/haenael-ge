@@ -20,11 +20,10 @@ async function exchangeAppleSession(requireRevocationCredential: boolean) {
   const exchanged = await supabase.auth.exchangeCodeForSession(code);
   if (exchanged.error) throw new AppError("apple_login_failed", "Apple 로그인을 완료하지 못했어요.");
   const session = exchanged.data.session;
-  const providerToken = session?.provider_refresh_token ?? session?.provider_token;
-  const tokenTypeHint = session?.provider_refresh_token ? "refresh_token" : "access_token";
-  if (providerToken) {
+  const providerRefreshToken = session?.provider_refresh_token;
+  if (providerRefreshToken) {
     const registered = await supabase.functions.invoke("register-apple-revocation-token", {
-      body: { provider_token: providerToken, token_type_hint: tokenTypeHint },
+      body: { provider_token: providerRefreshToken, token_type_hint: "refresh_token" },
     });
     if (registered.error) {
       throw new AppError(
@@ -52,8 +51,12 @@ export async function signInWithApple() {
   }
 }
 
-export async function reauthenticateAppleForDeletion(): Promise<void> {
-  await exchangeAppleSession(true);
+export async function reauthenticateAppleForDeletion(): Promise<{ memberId: string }> {
+  const session = await exchangeAppleSession(true);
+  if (!session?.user.id) {
+    throw new AppError("apple_login_failed", "Apple 로그인을 완료하지 못했어요.");
+  }
+  return { memberId: session.user.id };
 }
 
 export async function sendMagicLink(email: string) {

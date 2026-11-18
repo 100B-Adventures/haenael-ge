@@ -28,7 +28,7 @@ export function parseAppleRevocationToken(value: unknown) {
   if (token.length < 16 || token.length > 4096) {
     throw new Error("invalid_token");
   }
-  if (tokenTypeHint !== "refresh_token" && tokenTypeHint !== "access_token") {
+  if (tokenTypeHint !== "refresh_token") {
     throw new Error("invalid_token_type");
   }
   return { token, tokenTypeHint };
@@ -80,7 +80,7 @@ export async function handleRegisterAppleRevocationToken(
   const { error } = await admin.from("apple_token_revocation").upsert({
     member_id: userData.user.id,
     token_enc: encrypted,
-    token_type_hint: credential.tokenTypeHint,
+    token_type_hint: "refresh_token",
     status: "READY",
     attempt_count: 0,
     last_error_code: null,
