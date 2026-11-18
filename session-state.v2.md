@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-19 04:18 KST] compact 마크 (auto)
+- 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: aaec3f2 docs(state): round 7 fix killed by host memory pressure
+- compact 직전 컨텍스트: 356794 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 6]: [handoff-freshness] 핸드오프 노트가 낡음(33m > 30m)인데 작업이 진행 중(dirty=0, tmux=5). '/Users/sj/sj_code_master/haenael-ge/session-state.v2.md' 에 지금까지 한 것·남은 이슈·다음 액션을 갱신하고 멈춰라. 우회=HANDOFF_OK=1.
+- 직전에 고친 파일: concept-Capacitor-vs-React-Native-vs-Expo-앱-기술선택.md report-2323.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## 2026-11-19 03:22 KST · 7회차 수정 Codex 가 메모리 부족으로 종료됨
 - 한 것: 02:50 발주한 Codex(7회차 MAJOR 4건 수정)와 대기 셸이 114 메모리 부족(34G 중 가용 1G)으로 Claude Code 가 종료. 마지막 커밋 fc34ed7 그대로, 미커밋 부분 변경 여부는 git status 가 멈춰 미확인. ops-issues 기록.
 - 검증 등급: 종료 사실 관찰됨, 작업트리 상태 미검증.
