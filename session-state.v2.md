@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-18 14:58 KST 인계 (앱 3채널 진행)
+- 13:10 예약 Codex 회차는 기본 제한 45분에 걸려 13:55 끊김(rc=124). 미커밋 변경(eng-design 6종·마이그레이션·Edge Function auth-toss/verify-store-purchase·miniapp·web cashout/consent)은 hotfix 작업트리에 남아 있음.
+- 이어가기(CODEX_RESUME 01a1ecd8…)는 스레드 잠금으로 실패 → 14:56 새 code-builder 워커가 그 변경 위에서 이어받음(제한 7000초, 로그 ~/.claude/harness/codex-logs/20261118-145620-3706844-code-builder.log). 회장 14:5x "qa후 배포까지 밀어보자".
+- 다음: 회수 뒤 .goal/summary.md·questions-app-channels.md 확인, 남은 단계 재발주(단계별로 쪼갬), 제출 직전 irreversible-approve.
+- BRAIN: cto/개발/concept-Capacitor-vs-React-Native-vs-Expo-앱-기술선택 신설(BRAIN 1d3755a4).
+
 ## [2026-11-18 14:53 KST] compact 마크 (auto)
 - 세션 f46c03f7 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: b5490a2 docs(state): app channel ship scheduled for Codex reset, handoff
