@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-19 01:52 KST · 앱 3채널 리뷰 7회차 BLOCK, 회장 결정 2건 대기
+- 회장 요청: 11-18 14:5x "qa후 배포까지 밀어보자", 11-19 01:4x 인사(현황 보고).
+- 한 것: Codex 개발·독립 리뷰 7회(차단 13→9→5→4→4→3→4, hotfix fc34ed7). 서버 원장·Expo apps/mobile·앱인토스·웹 D-054 구현. 운영 DB·main·실결제 0건.
+- 검증 등급: 로컬 시험 테스트됨(DB 541·웹 599). 실기기·샌드박스 결제·스토어 왕복 미검증.
+- 대기: open-decisions OD-haenael-20261119-app-v1-scope(대체결제 1차 제외 추천), OD-haenael-20261118-app-id(이름 해낼게·식별자 app.haenael).
+- 다음: 결정 받으면 Codex 수정→8회차 리뷰, 콘솔 앱 생성·샌드박스 QA, iOS 는 EAS 클라우드 빌드(VM 120 Xcode 16.2 부족).
+
 ## 2026-11-18 23:30 KST 인계 (앱 3채널 개발·리뷰 7회)
 - 개발 완료(로컬·staging 전): 서버 구매 원장·영수증 검증·환불 알림·재동기화, 모바일 API 3종, 웹 D-054 동의(Consent Mode 거부 기본값, 로그인 전 배너 0)·환전 보류 표시, 앱인토스 IAP, Expo apps/mobile(iOS·Android). hotfix 브랜치 session/haenael-ge-v2-hotfix-20261108 푸시됨(마지막 d7893a7 + 리뷰 7회차 문서).
 - 독립 리뷰 7회 모두 BLOCK(13→9→5→4→4→3→4). 7회차 남은 4건: 공통 적립 RPC 우회 권한(credit_alternative_store_purchase_v1), 탈퇴·결제 복구 회귀 2, 멱등 상태 1. 문서 docs/qa/review-app-channels-1258dfa-v0.1.0~v0.7.0.
