@@ -133,3 +133,19 @@ SOURCES/MODEL: GPT-5 Codex. 로컬 결정·요청·PRD·코드·시험, Apple De
 
 REVIEW_VERDICT: BLOCK
 
+## 4회차 수정 연결표, builder 기록
+
+> 이 표는 3회차 독립 판정을 덮지 않는다. 커밋 `db2ec71`의 수정과 builder 시험을 연결하며, BLOCK 해제는 별도 독립 재검토가 판정한다.
+
+| 3회차 항목 | 수정 커밋 | 먼저 실패한 시험 | 수정 뒤 통과 증거 |
+|---|---|---|---|
+| MAJOR 1, 토스 체크아웃 라우트 | `db2ec71` | `TC-APP-02-11`, `TC-APP-02-11-1`, `TC-APP-02-13~15`: 체크아웃 계약·Edge Function 모듈 부재 | 웹 599/599, Edge 표적 18/18, 프로덕션 빌드, 로컬 GET HTTP 200. HTML의 금액 1,100원·서버 주문 ID·상품 ID·계정 결합값 확인 |
+| MAJOR 2, 대체결제 미완료 큐 | `db2ec71` | `TC-APP-02-10`: `enqueueAlternativePurchase` 부재 | 모바일 20/20, TypeScript 검사. 같은 intent·request key·외부 거래 토큰·payment key·order ID를 성공 응답까지 보존·재전송 |
+| MAJOR 3, 보상 실패 복구 원장·삭제 차단 | `db2ec71` | `TC-APP-02-12`, `APP-SRV-DB-10-4~7`: 원자 복구 함수 부재 | Supabase DB 541/541, Edge 표적 18/18. OPEN 복구 건과 `PAYMENT_COMPENSATION_FAILED` 이벤트를 한 RPC에서 기록하고 삭제 준비를 차단 |
+| MAJOR 4, 계정 삭제 재개 | `db2ec71` | `TC-APP-09-7`, `APP-SRV-DB-14-1~2`: 클라이언트 영구 키·서버 재개 경로 부재 | 모바일 20/20, Supabase DB 541/541. 성공 전 키 보존과 회원별 열린 PREPARED/AUTH_DELETED 요청 재개 확인 |
+| MAJOR 5, Apple 토큰 폐기 | `db2ec71` | `TC-APP-09-8~11`: 폐기 함수·암호화 등록·Auth 삭제 차단 경로 부재 | Edge 표적 18/18, Supabase DB 541/541. Apple `/auth/revoke`, 폐기용 토큰 암호화 저장, READY/RETRY_REQUIRED/MANUAL_REQUIRED/REVOKED 원장, 폐기 전 Auth 삭제 차단 확인 |
+
+- NEXT_RELEASE의 푸시 토큰 fingerprint·소유권 이전과 실제 발송 worker는 사용자 지시대로 수정 범위에서 제외했다.
+- 3회차 문서에는 NEXT_RELEASE 외 별도 MINOR 지적이 없어 추가 수정 항목은 없다.
+- 실제 공급자 sandbox 결제, 외부 콘솔, staging·운영 DB, main push는 실행하지 않았다.
+
