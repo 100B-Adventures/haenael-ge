@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-18 14:53 KST] compact 마크 (auto)
+- 세션 f46c03f7 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: b5490a2 docs(state): app channel ship scheduled for Codex reset, handoff
+- compact 직전 컨텍스트: 361904 토큰
+- 마지막 회장 요청: Capacitor expo react native개념 기술원리 장단점 정리해보자 공부해서 brain 위키넣게 일단 qa후 배포까지 밀어보자. 궁금한건 다른 도네사이트나 후원 플랫폼 온리팬스 이런건 어떻게하냐 앱안쓰나
+- 직전에 고친 파일: report-0136.md brief-app-channels-v0.1.0.md report-1857.md report-2150.md app-channels-ship-20261118.md launch-app-channels-20261118.sh report-0158.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## 2026-11-18 01:57 KST · 회장 11-18 01:5x: Codex 충전 즉시 앱 3채널 출시 지시, 13:10 자동 시작 예약
 
 - 회장 요청(hotfix 요청.md 11행): 충전되면 바로 iOS·Android·앱인토스 전부 올려라. A1(Capacitor 오제안) 원인 설명. 돈을 벌어야 하고 받는 사람은 현금·기프티콘 등 실질 이득.
