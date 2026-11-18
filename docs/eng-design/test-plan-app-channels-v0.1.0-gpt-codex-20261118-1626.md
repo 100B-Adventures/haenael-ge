@@ -43,6 +43,7 @@ staging Supabase만 사용한다. 테스트 구매는 Apple sandbox와 Google li
 - 환전·환불·기프티콘 3경로 동시 실행. 공통 advisory lock 뒤 총 소비량이 지급가능을 넘지 않고 교착 0.
 - 기프티콘 공급사는 발송했지만 응답 유실. 잠금 유지, 상태조회 뒤 SENT, 재발송 0.
 - 공급자 이벤트 누락 뒤 일일 재동기화 복구.
+- Apple·Google Play·Toss IAP·Google 대체결제·웹 Toss 5개 채널 각각에서 결제자와 목표 소유자를 바꿔 `REQUESTED`, `EXTERNAL_REVOKED`, `DATA_DELETED` 직전 삭제 전이와 동시에 적립을 시작한다. 총 30개 조합 모두 같은 회원 잠금을 기다린 뒤 미종결 결제를 재검사하고 삭제를 차단해야 한다.
 
 ## 직접 관찰 증거
 

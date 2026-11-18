@@ -1501,6 +1501,81 @@ export type Database = {
           },
         ];
       };
+      purchase_credit_operation: {
+        Row: {
+          channel: string;
+          operation_key: string;
+          ownership_fingerprint: string;
+          payment_id: number | null;
+          recipient_member_id: string;
+          reference_id: string;
+          settled_at: string | null;
+          started_at: string;
+          status: string;
+          store_intent_id: string | null;
+          supporter_member_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          channel: string;
+          operation_key: string;
+          ownership_fingerprint: string;
+          payment_id?: number | null;
+          recipient_member_id: string;
+          reference_id: string;
+          settled_at?: string | null;
+          started_at?: string;
+          status?: string;
+          store_intent_id?: string | null;
+          supporter_member_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          channel?: string;
+          operation_key?: string;
+          ownership_fingerprint?: string;
+          payment_id?: number | null;
+          recipient_member_id?: string;
+          reference_id?: string;
+          settled_at?: string | null;
+          started_at?: string;
+          status?: string;
+          store_intent_id?: string | null;
+          supporter_member_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "purchase_credit_operation_payment_id_fkey";
+            columns: ["payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchase_credit_operation_recipient_member_id_fkey";
+            columns: ["recipient_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchase_credit_operation_store_intent_id_fkey";
+            columns: ["store_intent_id"];
+            isOneToOne: false;
+            referencedRelation: "store_purchase_intent";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "purchase_credit_operation_supporter_member_id_fkey";
+            columns: ["supporter_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       store_purchase: {
         Row: {
           cheer_id: number | null;
@@ -2191,6 +2266,27 @@ export type Database = {
           expires_at: string;
           intent_id: string;
           is_replay: boolean;
+        }[];
+      };
+      credit_purchase: {
+        Args: {
+          p_action: string;
+          p_channel: string;
+          p_payload?: Json;
+          p_reference: string;
+          p_secret?: string;
+        };
+        Returns: {
+          available_at: string | null;
+          cheer_id: number | null;
+          clover_amount: number | null;
+          display_name: string | null;
+          goal_title: string | null;
+          is_replay: boolean;
+          member_id: string | null;
+          operation_status: string;
+          purchase_id: number | null;
+          report_status: string | null;
         }[];
       };
       credit_store_purchase: {

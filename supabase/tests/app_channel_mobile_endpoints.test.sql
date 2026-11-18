@@ -83,26 +83,30 @@ RESET ROLE;
 
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
-SELECT public.begin_alternative_payment_confirmation(
-  :'alternative_intent_intent_id',
-  '00000000-0000-0000-0000-000000000103',
-  'alternative-request-0001'
+SELECT * FROM public.credit_purchase(
+  'BEGIN', 'GOOGLE_ALTERNATIVE', :'alternative_intent_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000103',
+    'account_binding',:'alternative_intent_account_binding',
+    'request_key','alternative-request-0001'
+  ), NULL
 ) \gset alternative_confirmation_
 CREATE TEMP TABLE alternative_credit AS
-SELECT * FROM public.credit_alternative_store_purchase(
-  :'alternative_intent_intent_id',
-  '00000000-0000-0000-0000-000000000103',
-  :'alternative_intent_account_binding',
-  'alternative-payment-key-0001',
-  'alternative-order-0001',
-  'haenael.cheer.clover.1',
-  'SANDBOX',
-  '대체결제 시험',
-  false,
-  'alternative-request-0001',
-  now(),
-  decode(repeat('ab', 32), 'hex'),
-  'KR'
+SELECT * FROM public.credit_purchase(
+  'CREDIT', 'GOOGLE_ALTERNATIVE', :'alternative_intent_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000103',
+    'account_binding',:'alternative_intent_account_binding',
+    'request_key','alternative-request-0001',
+    'payment_key','alternative-payment-key-0001',
+    'order_id','alternative-order-0001',
+    'product_id','haenael.cheer.clover.1',
+    'environment','SANDBOX',
+    'message','대체결제 시험',
+    'is_anonymous',false,
+    'purchased_at',now(),
+    'user_tax_region','KR'
+  ), decode(repeat('ab', 32), 'hex')
 );
 SELECT is((SELECT clover_amount FROM alternative_credit), 1,
   'APP-SRV-DB-07 대체결제는 서버 카탈로그 수량으로 적립한다');
@@ -112,20 +116,21 @@ SELECT is((SELECT gross_amount_minor FROM public.store_purchase
 SELECT is((SELECT report_status FROM public.google_external_transaction
   WHERE external_transaction_id='alternative-order-0001'), 'PENDING',
   'APP-SRV-DB-09 외부거래 보고를 같은 트랜잭션에 생성한다');
-SELECT is((SELECT is_replay FROM public.credit_alternative_store_purchase(
-  :'alternative_intent_intent_id',
-  '00000000-0000-0000-0000-000000000103',
-  :'alternative_intent_account_binding',
-  'alternative-payment-key-0001',
-  'alternative-order-0001',
-  'haenael.cheer.clover.1',
-  'SANDBOX',
-  '대체결제 시험',
-  false,
-  'alternative-request-0001',
-  now(),
-  decode(repeat('cd', 32), 'hex'),
-  'KR'
+SELECT is((SELECT is_replay FROM public.credit_purchase(
+  'CREDIT', 'GOOGLE_ALTERNATIVE', :'alternative_intent_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000103',
+    'account_binding',:'alternative_intent_account_binding',
+    'request_key','alternative-request-0001',
+    'payment_key','alternative-payment-key-0001',
+    'order_id','alternative-order-0001',
+    'product_id','haenael.cheer.clover.1',
+    'environment','SANDBOX',
+    'message','대체결제 시험',
+    'is_anonymous',false,
+    'purchased_at',now(),
+    'user_tax_region','KR'
+  ), decode(repeat('cd', 32), 'hex')
 )), true, 'APP-SRV-DB-10 같은 결제 승인 재전송은 멱등 재생된다');
 
 CREATE TEMP TABLE claimed_external AS
@@ -156,18 +161,24 @@ SELECT * FROM public.create_store_purchase_intent(
 RESET ROLE;
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
-SELECT public.begin_alternative_payment_confirmation(
-  :'recovery_intent_intent_id',
-  '00000000-0000-0000-0000-000000000105',
-  'alternative-recovery-0001'
+SELECT * FROM public.credit_purchase(
+  'BEGIN', 'GOOGLE_ALTERNATIVE', :'recovery_intent_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000105',
+    'account_binding',:'recovery_intent_account_binding',
+    'request_key','alternative-recovery-0001'
+  ), NULL
 ) \gset recovery_confirmation_
-SELECT ok(public.record_alternative_payment_recovery(
-  :'recovery_intent_intent_id',
-  '00000000-0000-0000-0000-000000000105',
-  'alternative-payment-failed-0001',
-  'alternative-order-failed-0001',
-  'alternative-recovery-0001'
-) IS NOT NULL, 'APP-SRV-DB-10-4 보상 실패를 원자 복구 RPC로 기록한다');
+SELECT is((SELECT operation_status FROM public.credit_purchase(
+  'RECOVERY_REQUIRED', 'GOOGLE_ALTERNATIVE', :'recovery_intent_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000105',
+    'account_binding',:'recovery_intent_account_binding',
+    'request_key','alternative-recovery-0001',
+    'payment_key','alternative-payment-failed-0001',
+    'order_id','alternative-order-failed-0001'
+  ), NULL
+)), 'RECOVERY_REQUIRED', 'APP-SRV-DB-10-4 보상 실패를 공통 적립 RPC로 기록한다');
 SELECT is((SELECT status FROM public.store_recovery_case
   WHERE intent_id=:'recovery_intent_intent_id'), 'OPEN',
   'APP-SRV-DB-10-5 보상 실패는 OPEN 복구 건으로 남는다');

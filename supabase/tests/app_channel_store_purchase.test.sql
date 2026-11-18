@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(24);
+SELECT plan(25);
 
 SELECT has_table('public', 'store_purchase', 'AP-DB-01 스토어 구매 원장이 있다');
 SELECT has_table('public', 'clover_maturity', 'AP-DB-02 환전 보류 원장이 있다');
@@ -10,9 +10,12 @@ SELECT has_table('public', 'gift_exchange', 'AP-DB-06 기프티콘 교환 테이
 SELECT has_table('public', 'store_purchase_intent', 'AP-DB-07 구매 의도와 계정 결합 테이블이 있다');
 SELECT has_table('public', 'app_channel_release_gate', 'AP-DB-08 채널 출시 게이트가 있다');
 
+SELECT has_function('public', 'credit_purchase', ARRAY[
+  'text','text','text','jsonb','bytea'
+], 'AP-DB-09 모든 채널이 사용하는 공통 적립 RPC가 있다');
 SELECT has_function('public', 'credit_store_purchase', ARRAY[
   'uuid','uuid','uuid','text','text','text','text','text','integer','integer','text','boolean','text','timestamp with time zone','text'
-], 'AP-DB-09 검증 후 적립 RPC가 있다');
+], 'AP-DB-09-1 공통 적립 RPC 내부의 스토어 적립 함수가 있다');
 SELECT has_function('public', 'reverse_store_purchase', ARRAY[
   'text','text','text','text','text','integer','integer','text','text','timestamp with time zone'
 ], 'AP-DB-10 환불 RPC가 있다');
@@ -50,10 +53,32 @@ SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
 
 CREATE TEMP TABLE first_credit AS
-SELECT * FROM public.credit_store_purchase(
-  :'purchase_intent_id', '00000000-0000-0000-0000-000000000071', :'purchase_account_binding',
-  'APPLE', 'sandbox-transaction-0001', 'SANDBOX', 'haenael.cheer.clover.3',
-  'KRW', 3600, 3, '같이 해낼게', false, 'app-request-0001', now(), NULL
+SELECT * FROM public.credit_purchase(
+  'BEGIN', 'APPLE', :'purchase_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000071',
+    'account_binding',:'purchase_account_binding',
+    'request_key','app-request-0001'
+  ), NULL
+);
+DROP TABLE first_credit;
+CREATE TEMP TABLE first_credit AS
+SELECT * FROM public.credit_purchase(
+  'CREDIT', 'APPLE', :'purchase_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000071',
+    'account_binding',:'purchase_account_binding',
+    'request_key','app-request-0001',
+    'provider_transaction_id','sandbox-transaction-0001',
+    'environment','SANDBOX',
+    'product_id','haenael.cheer.clover.3',
+    'currency','KRW',
+    'gross_amount_minor',3600,
+    'clover_amount',3,
+    'message','같이 해낼게',
+    'is_anonymous',false,
+    'purchased_at',now()
+  ), NULL
 );
 
 SELECT is((SELECT status FROM public.store_purchase_intent WHERE id=:'purchase_intent_id'), 'CONSUMED', 'AP-DB-11 구매 의도는 한 번 소비된다');
@@ -64,10 +89,22 @@ SELECT is((SELECT clover_count FROM public.clover_balance WHERE member_id='00000
 SELECT is((SELECT maturity_locked_amount FROM public.clover_eligibility('00000000-0000-0000-0000-000000000072')), 3, 'RF-DB-01 30일 보류 3');
 SELECT is((SELECT payable_amount FROM public.clover_eligibility('00000000-0000-0000-0000-000000000072')), 0, 'RF-DB-02 보류분은 지급가능 0');
 
-SELECT is((SELECT is_replay FROM public.credit_store_purchase(
-  :'purchase_intent_id', '00000000-0000-0000-0000-000000000071', :'purchase_account_binding',
-  'APPLE', 'sandbox-transaction-0001', 'SANDBOX', 'haenael.cheer.clover.3',
-  'KRW', 3600, 3, '같이 해낼게', false, 'app-request-0001', now(), NULL
+SELECT is((SELECT is_replay FROM public.credit_purchase(
+  'CREDIT', 'APPLE', :'purchase_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000071',
+    'account_binding',:'purchase_account_binding',
+    'request_key','app-request-0001',
+    'provider_transaction_id','sandbox-transaction-0001',
+    'environment','SANDBOX',
+    'product_id','haenael.cheer.clover.3',
+    'currency','KRW',
+    'gross_amount_minor',3600,
+    'clover_amount',3,
+    'message','같이 해낼게',
+    'is_anonymous',false,
+    'purchased_at',now()
+  ), NULL
 )), true, 'AP-DB-13 같은 거래는 멱등 재생');
 SELECT is((SELECT count(*)::integer FROM public.clover_ledger WHERE ref_type='store_purchase'), 1, 'AP-DB-14 재생 뒤 적립 원장 1건');
 

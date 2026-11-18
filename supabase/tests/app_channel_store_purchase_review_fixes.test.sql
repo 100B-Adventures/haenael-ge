@@ -53,10 +53,32 @@ RESET ROLE;
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
 CREATE TEMP TABLE review_credit AS
-SELECT * FROM public.credit_store_purchase(
-  :'review_intent_intent_id', '00000000-0000-0000-0000-000000000081', :'review_intent_account_binding',
-  'APPLE', 'review-apple-transaction-0001', 'SANDBOX', 'haenael.cheer.clover.10',
-  'KRW', 12000, 10, '리뷰 수정', false, 'review-request-0001', now(), NULL
+SELECT * FROM public.credit_purchase(
+  'BEGIN', 'APPLE', :'review_intent_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000081',
+    'account_binding',:'review_intent_account_binding',
+    'request_key','review-request-0001'
+  ), NULL
+);
+DROP TABLE review_credit;
+CREATE TEMP TABLE review_credit AS
+SELECT * FROM public.credit_purchase(
+  'CREDIT', 'APPLE', :'review_intent_intent_id',
+  jsonb_build_object(
+    'verified_member_id','00000000-0000-0000-0000-000000000081',
+    'account_binding',:'review_intent_account_binding',
+    'request_key','review-request-0001',
+    'provider_transaction_id','review-apple-transaction-0001',
+    'environment','SANDBOX',
+    'product_id','haenael.cheer.clover.10',
+    'currency','KRW',
+    'gross_amount_minor',12000,
+    'clover_amount',10,
+    'message','리뷰 수정',
+    'is_anonymous',false,
+    'purchased_at',now()
+  ), NULL
 );
 RESET ROLE;
 

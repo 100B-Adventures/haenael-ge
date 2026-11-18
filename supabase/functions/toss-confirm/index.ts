@@ -51,6 +51,21 @@ function sanitizedConfirmResponse(confirm: {
   };
 }
 
+export async function runWebCreditOperation(
+  supabase: Pick<SupabaseClient, "rpc">,
+  action: "BEGIN" | "CREDIT" | "CANCELED" | "RECOVERY_REQUIRED",
+  orderId: string,
+  payload: Record<string, unknown> = {},
+) {
+  return await supabase.rpc("credit_purchase", {
+    p_action: action,
+    p_channel: "WEB_TOSS",
+    p_reference: orderId,
+    p_payload: payload,
+    p_secret: null,
+  });
+}
+
 type ConversionLease = {
   leaseToken: string;
   eventId: string;
@@ -219,15 +234,23 @@ export async function handleTossConfirm(req: Request) {
   }
 
   if (existingPayment.status === "DONE") {
-    const { data, error } = await supabase.rpc("confirm_cheer_payment", {
-      p_order_id: orderId,
-      p_payment_key: paymentKey,
-      p_amount_krw: amount,
-      p_method: null,
-      p_approved_at: null,
-      p_receipt_url: null,
-      p_raw_response: { idempotent: true },
+    await runWebCreditOperation(supabase, "BEGIN", orderId, {
+      payment_key: paymentKey,
+      amount_krw: amount,
     });
+    const { data, error } = await runWebCreditOperation(
+      supabase,
+      "CREDIT",
+      orderId,
+      {
+        payment_key: paymentKey,
+        amount_krw: amount,
+        method: null,
+        approved_at: null,
+        receipt_url: null,
+        raw_response: { idempotent: true },
+      },
+    );
 
     if (error || !data?.[0]) {
       // 원문은 서버 로그에만 — 클라이언트엔 화이트리스트로 매핑된 안전한 코드만.
@@ -248,7 +271,7 @@ export async function handleTossConfirm(req: Request) {
       ? await leaseBrowserConversion(supabase, orderId, paymentKey)
       : { state: "unavailable" as const };
     return json(200, {
-      paymentId: data[0].payment_id,
+      paymentId: data[0].purchase_id,
       cheerId: data[0].cheer_id,
       memberId: data[0].member_id,
       goalTitle: data[0].goal_title,
@@ -280,10 +303,27 @@ export async function handleTossConfirm(req: Request) {
   }
 
   const toss = new TossClient(tossSecretKey);
+  const { data: beginData, error: beginError } = await runWebCreditOperation(
+    supabase,
+    "BEGIN",
+    orderId,
+    { payment_key: paymentKey, amount_krw: amount },
+  );
+  if (beginError || !beginData?.[0]) {
+    return json(409, {
+      error: { code: toPublicError(beginError?.message).code },
+    });
+  }
   let confirm;
   try {
     confirm = await toss.confirmPayment({ paymentKey, orderId, amount });
   } catch (e) {
+    await runWebCreditOperation(
+      supabase,
+      "RECOVERY_REQUIRED",
+      orderId,
+      { payment_key: paymentKey, amount_krw: amount },
+    ).catch(() => undefined);
     // 원문(Toss 벤더 예외 메시지)은 서버 로그에만 — 클라이언트엔 고정 공개 코드만.
     console.error("[toss-confirm] Toss confirm failed:", e);
     await sendSlackAlert({
@@ -372,18 +412,22 @@ export async function handleTossConfirm(req: Request) {
     receiptUrl?: string;
     raw?: unknown;
   };
-  const { data, error } = await supabase.rpc("confirm_cheer_payment", {
-    p_order_id: orderId,
-    p_payment_key: confirm.paymentKey,
-    p_amount_krw: amount,
-    p_method: confirm.method,
-    p_approved_at: confirm.approvedAt,
-    p_receipt_url: confirmExtended.receiptUrl ?? null,
-    p_raw_response: sanitizedConfirmResponse(confirm),
-  });
+  const { data, error } = await runWebCreditOperation(
+    supabase,
+    "CREDIT",
+    orderId,
+    {
+      payment_key: confirm.paymentKey,
+      amount_krw: amount,
+      method: confirm.method,
+      approved_at: confirm.approvedAt,
+      receipt_url: confirmExtended.receiptUrl ?? null,
+      raw_response: sanitizedConfirmResponse(confirm),
+    },
+  );
 
   if (error || !data?.[0]) {
-    console.error("[toss-confirm] confirm_cheer_payment failed:", error);
+    console.error("[toss-confirm] credit_purchase failed:", error);
     await sendSlackAlert({
       event: "payment_reconcile_started",
       severity: "critical",
@@ -431,6 +475,12 @@ export async function handleTossConfirm(req: Request) {
     if (recordErr) {
       console.error("[toss-confirm] compensation audit failed:", recordErr);
     }
+    await runWebCreditOperation(
+      supabase,
+      compensated ? "CANCELED" : "RECOVERY_REQUIRED",
+      orderId,
+      { payment_key: confirm.paymentKey, amount_krw: amount },
+    ).catch(() => undefined);
 
     // 클라이언트 응답은 화이트리스트 code 하나뿐이다. compensation 관련 세부와
     // Toss 벤더 원문은 응답 바디에 싣지 않고 서버 로그와 보상 감사 기록에만 남긴다.
@@ -484,7 +534,7 @@ export async function handleTossConfirm(req: Request) {
   );
 
   return json(200, {
-    paymentId: confirmed.payment_id,
+    paymentId: confirmed.purchase_id,
     cheerId: confirmed.cheer_id,
     memberId: confirmed.member_id,
     goalTitle: confirmed.goal_title,

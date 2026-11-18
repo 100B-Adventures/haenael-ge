@@ -12,20 +12,27 @@ Deno.test("TC-APP-09-5 공급자 호출 전 결제 확인 작업을 회원 잠�
   const state = await beginAlternativePaymentConfirmation({
     rpc: (name: string, args: unknown) => {
       calls.push({ name, args });
-      return Promise.resolve({ data: "CONFIRMING", error: null });
+      return Promise.resolve({ data: [{ operation_status: "VERIFYING" }], error: null });
     },
   } as never, {
     intentId: "00000000-0000-0000-0000-000000000111",
     memberId: "00000000-0000-0000-0000-000000000113",
+    accountBinding: "00000000-0000-0000-0000-000000000112",
     requestKey: "request-key-0001",
   });
-  assertEquals(state, "CONFIRMING");
+  assertEquals(state, "VERIFYING");
   assertEquals(calls, [{
-    name: "begin_alternative_payment_confirmation",
+    name: "credit_purchase",
     args: {
-      p_intent_id: "00000000-0000-0000-0000-000000000111",
-      p_member_id: "00000000-0000-0000-0000-000000000113",
-      p_request_key: "request-key-0001",
+      p_action: "BEGIN",
+      p_channel: "GOOGLE_ALTERNATIVE",
+      p_reference: "00000000-0000-0000-0000-000000000111",
+      p_payload: {
+        verified_member_id: "00000000-0000-0000-0000-000000000113",
+        account_binding: "00000000-0000-0000-0000-000000000112",
+        request_key: "request-key-0001",
+      },
+      p_secret: null,
     },
   }]);
 });
@@ -137,18 +144,25 @@ Deno.test("TC-APP-02-12 승인과 취소가 엇갈리면 복구 원장 RPC를 �
   await recordCompensationFailure(admin as never, {
     intentId: "00000000-0000-0000-0000-000000000111",
     memberId: "00000000-0000-0000-0000-000000000113",
+    accountBinding: "00000000-0000-0000-0000-000000000112",
     paymentKey: "payment-key-00000001",
     orderId: "order-00000001",
     requestKey: "request-key-0001",
   });
   assertEquals(calls, [{
-    name: "record_alternative_payment_recovery",
+    name: "credit_purchase",
     args: {
-      p_intent_id: "00000000-0000-0000-0000-000000000111",
-      p_member_id: "00000000-0000-0000-0000-000000000113",
-      p_payment_key: "payment-key-00000001",
-      p_order_id: "order-00000001",
-      p_request_key: "request-key-0001",
+      p_action: "RECOVERY_REQUIRED",
+      p_channel: "GOOGLE_ALTERNATIVE",
+      p_reference: "00000000-0000-0000-0000-000000000111",
+      p_payload: {
+        verified_member_id: "00000000-0000-0000-0000-000000000113",
+        account_binding: "00000000-0000-0000-0000-000000000112",
+        request_key: "request-key-0001",
+        payment_key: "payment-key-00000001",
+        order_id: "order-00000001",
+      },
+      p_secret: null,
     },
   }]);
 });

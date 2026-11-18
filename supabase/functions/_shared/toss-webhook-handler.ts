@@ -321,14 +321,39 @@ export async function handleTossWebhook(
         }),
       );
     }
-    const { error } = await supabase.rpc("confirm_cheer_payment", {
-      p_order_id: payment.orderId,
-      p_payment_key: payment.paymentKey,
-      p_amount_krw: payment.totalAmount,
-      p_method: payment.method,
-      p_approved_at: payment.approvedAt || null,
-      p_receipt_url: payment.receiptUrl ?? null,
-      p_raw_response: { source: "toss-webhook", status: payment.status },
+    const common = {
+      p_channel: "WEB_TOSS",
+      p_reference: payment.orderId,
+      p_secret: null,
+    };
+    const { error: beginError } = await supabase.rpc("credit_purchase", {
+      ...common,
+      p_action: "BEGIN",
+      p_payload: {
+        payment_key: payment.paymentKey,
+        amount_krw: payment.totalAmount,
+      },
+    });
+    if (beginError) {
+      await sendSlackAlert({
+        event: "payment_reconcile_failed",
+        severity: "critical",
+        summary: "DONE webhook credit operation could not start",
+        fields: { orderId: payment.orderId, code: beginError.code ?? "unknown" },
+      });
+      return finish(json(500, { error: "payment_reconcile_failed" }));
+    }
+    const { error } = await supabase.rpc("credit_purchase", {
+      ...common,
+      p_action: "CREDIT",
+      p_payload: {
+        payment_key: payment.paymentKey,
+        amount_krw: payment.totalAmount,
+        method: payment.method,
+        approved_at: payment.approvedAt || null,
+        receipt_url: payment.receiptUrl ?? null,
+        raw_response: { source: "toss-webhook", status: payment.status },
+      },
     });
     if (error) {
       console.error("[toss-webhook] DONE reconcile failed", error.code);

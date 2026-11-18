@@ -24,6 +24,7 @@ interface IntentRow {
   product_id: string;
   clover_amount: 1 | 3 | 5 | 10;
   account_binding: string;
+  request_key: string;
   status: string;
   expires_at: string;
 }
@@ -279,6 +280,28 @@ async function loadIntent(
   return intent;
 }
 
+export async function runCreditOperation(
+  admin: Pick<SupabaseClient, "rpc">,
+  action: "BEGIN" | "CREDIT" | "CANCELED" | "RECOVERY_REQUIRED",
+  provider: Provider,
+  intent: IntentRow,
+  memberId: string,
+  payload: Record<string, unknown> = {},
+) {
+  return await admin.rpc("credit_purchase", {
+    p_action: action,
+    p_channel: provider,
+    p_reference: intent.id,
+    p_payload: {
+      verified_member_id: memberId,
+      account_binding: intent.account_binding,
+      request_key: intent.request_key,
+      ...payload,
+    },
+    p_secret: null,
+  });
+}
+
 export async function handleVerifyStorePurchase(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return json(405, { error: { code: "method_not_allowed" } });
@@ -300,30 +323,45 @@ export async function handleVerifyStorePurchase(req: Request): Promise<Response>
   const { data: userData, error: userError } = await admin.auth.getUser(authHeader.slice(7));
   if (userError || !userData.user) return json(401, { error: { code: "unauthorized" } });
 
+  let intent: IntentRow | null = null;
+  let creditStarted = false;
   try {
-    const intent = await loadIntent(admin, parsed, userData.user.id);
+    intent = await loadIntent(admin, parsed, userData.user.id);
+    const begin = await runCreditOperation(
+      admin,
+      "BEGIN",
+      parsed.provider,
+      intent,
+      userData.user.id,
+    );
+    if (begin.error || !begin.data?.[0]) {
+      throw new Error(begin.error?.message ?? "credit_operation_start_failed");
+    }
+    creditStarted = true;
     const verified = parsed.provider === "APPLE"
       ? await verifyApple(parsed, intent)
       : parsed.provider === "GOOGLE_PLAY"
       ? await verifyGoogle(parsed, intent)
       : await verifyToss(parsed, intent, await loadTossUserKey(admin, userData.user.id));
-    const { data, error } = await admin.rpc("credit_store_purchase", {
-      p_intent_id: intent.id,
-      p_verified_member_id: userData.user.id,
-      p_account_binding: verified.accountBinding,
-      p_provider: parsed.provider,
-      p_provider_transaction_id: verified.providerTransactionId,
-      p_environment: verified.environment,
-      p_product_id: verified.productId,
-      p_currency: verified.currency,
-      p_gross_amount_minor: verified.grossAmountMinor,
-      p_clover_amount: intent.clover_amount,
-      p_message: parsed.message ?? "",
-      p_is_anonymous: parsed.anonymous === true,
-      p_request_key: parsed.request_key,
-      p_purchased_at: verified.purchasedAt,
-      p_policy_risk: parsed.provider === "TOSS_IAP" ? "INTOSS_CASH_EQUIVALENT" : null,
-    });
+    const { data, error } = await runCreditOperation(
+      admin,
+      "CREDIT",
+      parsed.provider,
+      intent,
+      userData.user.id,
+      {
+        provider_transaction_id: verified.providerTransactionId,
+        environment: verified.environment,
+        product_id: verified.productId,
+        currency: verified.currency,
+        gross_amount_minor: verified.grossAmountMinor,
+        clover_amount: intent.clover_amount,
+        message: parsed.message ?? "",
+        is_anonymous: parsed.anonymous === true,
+        purchased_at: verified.purchasedAt,
+        policy_risk: parsed.provider === "TOSS_IAP" ? "INTOSS_CASH_EQUIVALENT" : null,
+      },
+    );
     if (error || !data?.[0]) throw new Error(error?.message ?? "credit_failed");
     const row = data[0];
     if (verified.googleSettlement) {
@@ -345,6 +383,18 @@ export async function handleVerifyStorePurchase(req: Request): Promise<Response>
     } });
   } catch (error) {
     const message = error instanceof Error ? error.message : "provider_unavailable";
+    if (creditStarted && intent) {
+      const terminalAction = message.includes("receipt") || message.includes("mismatch")
+        ? "CANCELED"
+        : "RECOVERY_REQUIRED";
+      await runCreditOperation(
+        admin,
+        terminalAction,
+        parsed.provider,
+        intent,
+        userData.user.id,
+      ).catch(() => undefined);
+    }
     const code = message.includes("channel_release_disabled") ? "channel_release_disabled"
       : message.includes("owner") ? "transaction_owner_mismatch"
       : message.includes("binding") ? "transaction_binding_mismatch"

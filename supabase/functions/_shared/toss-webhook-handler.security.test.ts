@@ -44,9 +44,11 @@ function request(
 }
 
 function deps(overrides: Partial<TossWebhookDeps> = {}) {
-  const rpc = vi.fn(async (name: string) => {
-    if (name === "claim_toss_webhook") return { data: "claimed", error: null };
-    return { data: null, error: null };
+  const rpc = vi.fn((name: string) => {
+    if (name === "claim_toss_webhook") {
+      return Promise.resolve({ data: "claimed", error: null });
+    }
+    return Promise.resolve({ data: null, error: null });
   });
   const getPayment = vi.fn().mockResolvedValue(payment());
   const cancelPayment = vi.fn().mockResolvedValue({ status: "CANCELED" });
@@ -80,7 +82,7 @@ describe("Toss 웹훅 보안 경계", () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({ error: "payload_mismatch" });
     expect(test.rpc).not.toHaveBeenCalledWith(
-      "confirm_cheer_payment",
+      "credit_purchase",
       expect.anything(),
     );
     expect(test.rpc).toHaveBeenCalledWith("release_toss_webhook", {
@@ -115,7 +117,7 @@ describe("Toss 웹훅 보안 경계", () => {
     expect(await response.json()).toEqual({ processed: true, duplicate: true });
     expect(test.getPayment).not.toHaveBeenCalled();
     expect(test.rpc).not.toHaveBeenCalledWith(
-      "confirm_cheer_payment",
+      "credit_purchase",
       expect.anything(),
     );
   });
@@ -129,8 +131,12 @@ describe("Toss 웹훅 보안 경계", () => {
 
     expect(response.status).toBe(200);
     expect(test.rpc).toHaveBeenCalledWith(
-      "confirm_cheer_payment",
-      expect.objectContaining({ p_payment_key: PAYMENT_KEY }),
+      "credit_purchase",
+      expect.objectContaining({
+        p_action: "CREDIT",
+        p_channel: "WEB_TOSS",
+        p_reference: "order-security",
+      }),
     );
     expect(test.rpc).toHaveBeenCalledWith("complete_toss_webhook", {
       p_transmission_id: "transmission-security",

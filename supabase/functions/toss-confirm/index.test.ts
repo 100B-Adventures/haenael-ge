@@ -36,11 +36,11 @@ Deno.test(
           ),
         );
       }
-      if (url.includes("/rest/v1/rpc/confirm_cheer_payment")) {
+      if (url.includes("/rest/v1/rpc/credit_purchase")) {
         return Promise.resolve(
           new Response(
             JSON.stringify([{
-              payment_id: 1,
+              purchase_id: 1,
               cheer_id: 2,
               member_id: "member-1",
               goal_title: "목표 해낼게",
@@ -64,7 +64,7 @@ Deno.test(
         error: { code: "payments_disabled" },
       });
       assertEquals(
-        calledUrls.some((url) => url.includes("confirm_cheer_payment")),
+        calledUrls.some((url) => url.includes("credit_purchase")),
         false,
       );
 
@@ -176,7 +176,7 @@ Deno.test(
         false,
       );
       assertEquals(
-        calledUrls.some((url) => url.includes("confirm_cheer_payment")),
+        calledUrls.some((url) => url.includes("credit_purchase")),
         false,
       );
 
@@ -248,12 +248,12 @@ Deno.test(
           ),
         );
       }
-      if (url.includes("/rest/v1/rpc/confirm_cheer_payment")) {
+      if (url.includes("/rest/v1/rpc/credit_purchase")) {
         return Promise.resolve(
           new Response(
             JSON.stringify([
               {
-                payment_id: 1,
+                purchase_id: 1,
                 cheer_id: 2,
                 member_id: "m",
                 goal_title: "g",
@@ -491,6 +491,14 @@ Deno.test(
           }),
         );
       }
+      if (url.includes("/rest/v1/rpc/credit_purchase")) {
+        return Promise.resolve(
+          new Response(JSON.stringify([{ operation_status: "VERIFYING" }]), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        );
+      }
       if (url.includes("/rest/v1/rpc/record_payment_compensation")) {
         rpcBodies.push(JSON.parse(String(init?.body)));
         return Promise.resolve(
@@ -569,6 +577,14 @@ Deno.test(
         return Promise.resolve(
           new Response(JSON.stringify({ message: "vendor failure" }), {
             status: 500,
+            headers: { "content-type": "application/json" },
+          }),
+        );
+      }
+      if (url.includes("/rest/v1/rpc/credit_purchase")) {
+        return Promise.resolve(
+          new Response(JSON.stringify([{ operation_status: "VERIFYING" }]), {
+            status: 200,
             headers: { "content-type": "application/json" },
           }),
         );

@@ -42,10 +42,20 @@ SELECT is((SELECT phone FROM member WHERE id = 'fa11baac-0000-0000-0000-00000000
   '폴백 픽스처의 member.phone은 NULL이다');
 
 SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claim.role', 'service_role', true);
+SELECT * FROM credit_purchase(
+  'BEGIN', 'WEB_TOSS', 'hnl_alimtalk_fallback_01', '{}'::jsonb, NULL
+);
 SELECT lives_ok(
-  $$SELECT * FROM confirm_cheer_payment(
-    'hnl_alimtalk_fallback_01', 'payment_alimtalk_fallback_01', 1000,
-    'CARD', now(), NULL, '{"test":"alimtalk-fallback"}'::jsonb
+  $$SELECT * FROM credit_purchase(
+    'CREDIT', 'WEB_TOSS', 'hnl_alimtalk_fallback_01',
+    jsonb_build_object(
+      'payment_key','payment_alimtalk_fallback_01',
+      'amount_krw',1000,
+      'method','CARD',
+      'approved_at',now(),
+      'raw_response','{"test":"alimtalk-fallback"}'::jsonb
+    ), NULL
   )$$,
   '전화번호가 없어도 결제 확정 RPC는 성공한다'
 );

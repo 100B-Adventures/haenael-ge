@@ -3,9 +3,46 @@ import {
   googleConsumeEndpoint,
   handleVerifyStorePurchase,
   normalizeGoogleProductPurchase,
+  runCreditOperation,
   settleGoogleConsumablePurchase,
   tossIapEnvironment,
 } from "./index.ts";
+
+Deno.test("TC-APP-09-11 StoreKit·Play·Toss IAP는 공통 적립 RPC만 호출한다", async () => {
+  const calls: unknown[] = [];
+  const intent = {
+    id: "00000000-0000-0000-0000-000000000101",
+    supporter_member_id: "00000000-0000-0000-0000-000000000102",
+    goal_id: 1,
+    provider: "APPLE" as const,
+    product_id: "haenael.cheer.clover.1",
+    clover_amount: 1 as const,
+    account_binding: "00000000-0000-0000-0000-000000000103",
+    request_key: "credit-entry-test-0001",
+    status: "CREATED",
+    expires_at: "2026-11-19T00:00:00Z",
+  };
+  await runCreditOperation({
+    rpc: (name: string, args: unknown) => {
+      calls.push({ name, args });
+      return Promise.resolve({ data: [{ operation_status: "VERIFYING" }], error: null });
+    },
+  } as never, "BEGIN", "APPLE", intent, intent.supporter_member_id);
+  assertEquals(calls[0], {
+    name: "credit_purchase",
+    args: {
+      p_action: "BEGIN",
+      p_channel: "APPLE",
+      p_reference: intent.id,
+      p_payload: {
+        verified_member_id: intent.supporter_member_id,
+        account_binding: intent.account_binding,
+        request_key: intent.request_key,
+      },
+      p_secret: null,
+    },
+  });
+});
 
 Deno.test("TC-APP-01-3 인증 없는 영수증 검증은 DB 쓰기 전에 거절한다", async () => {
   const response = await handleVerifyStorePurchase(new Request("http://local/functions/v1/verify-store-purchase", {
@@ -78,9 +115,9 @@ Deno.test("TC-APP-02-3 Google 소모품 적립 후 호출할 consume URL은 SKU�
 Deno.test("TC-APP-02-4 적립 뒤 Google 소모품 consume을 서버에서 POST한다", async () => {
   let request: Request | undefined;
   await settleGoogleConsumablePurchase(
-    async (input, init) => {
+    (input, init) => {
       request = new Request(input, init);
-      return new Response(null, { status: 200 });
+      return Promise.resolve(new Response(null, { status: 200 }));
     },
     "com.haenael.app",
     "haenael.cheer.clover.3",

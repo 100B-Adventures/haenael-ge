@@ -42,46 +42,72 @@ export async function recordCompensationFailure(
   input: {
     intentId: string;
     memberId: string;
+    accountBinding: string;
     paymentKey: string;
     orderId: string;
     requestKey: string;
   },
 ): Promise<void> {
-  const { error } = await admin.rpc("record_alternative_payment_recovery", {
-    p_intent_id: input.intentId,
-    p_member_id: input.memberId,
-    p_payment_key: input.paymentKey,
-    p_order_id: input.orderId,
-    p_request_key: input.requestKey,
+  const { error } = await admin.rpc("credit_purchase", {
+    p_action: "RECOVERY_REQUIRED",
+    p_channel: "GOOGLE_ALTERNATIVE",
+    p_reference: input.intentId,
+    p_payload: {
+      verified_member_id: input.memberId,
+      account_binding: input.accountBinding,
+      request_key: input.requestKey,
+      payment_key: input.paymentKey,
+      order_id: input.orderId,
+    },
+    p_secret: null,
   });
   if (error) throw new Error("payment_recovery_record_failed");
 }
 
 export async function beginAlternativePaymentConfirmation(
   admin: Pick<SupabaseClient, "rpc">,
-  input: { intentId: string; memberId: string; requestKey: string },
+  input: {
+    intentId: string;
+    memberId: string;
+    accountBinding: string;
+    requestKey: string;
+  },
 ): Promise<string> {
-  const { data, error } = await admin.rpc(
-    "begin_alternative_payment_confirmation",
-    {
-      p_intent_id: input.intentId,
-      p_member_id: input.memberId,
-      p_request_key: input.requestKey,
+  const { data, error } = await admin.rpc("credit_purchase", {
+    p_action: "BEGIN",
+    p_channel: "GOOGLE_ALTERNATIVE",
+    p_reference: input.intentId,
+    p_payload: {
+      verified_member_id: input.memberId,
+      account_binding: input.accountBinding,
+      request_key: input.requestKey,
     },
-  );
+    p_secret: null,
+  });
   if (error) throw new Error(error.message);
-  return data as string;
+  return data?.[0]?.operation_status as string;
 }
 
 async function settleAlternativeConfirmation(
   admin: SupabaseClient,
-  input: { intentId: string; memberId: string },
+  input: {
+    intentId: string;
+    memberId: string;
+    accountBinding: string;
+    requestKey: string;
+  },
   status: "CANCELED" | "RECONCILIATION_REQUIRED",
 ): Promise<void> {
-  const { error } = await admin.rpc("settle_alternative_payment_confirmation", {
-    p_intent_id: input.intentId,
-    p_member_id: input.memberId,
-    p_status: status,
+  const { error } = await admin.rpc("credit_purchase", {
+    p_action: status === "CANCELED" ? "CANCELED" : "RECOVERY_REQUIRED",
+    p_channel: "GOOGLE_ALTERNATIVE",
+    p_reference: input.intentId,
+    p_payload: {
+      verified_member_id: input.memberId,
+      account_binding: input.accountBinding,
+      request_key: input.requestKey,
+    },
+    p_secret: null,
   });
   if (error) throw new Error(error.message);
 }
@@ -307,6 +333,7 @@ export async function handleConfirmAlternativePayment(
     confirmationState = await beginAlternativePaymentConfirmation(admin, {
       intentId: input.intentId,
       memberId: userData.user.id,
+      accountBinding: input.accountBinding,
       requestKey: input.requestKey,
     });
   } catch (error) {
@@ -320,7 +347,7 @@ export async function handleConfirmAlternativePayment(
       error: { code },
     });
   }
-  if (confirmationState !== "CONFIRMING") {
+  if (confirmationState !== "VERIFYING") {
     return json(409, { error: { code: "payment_confirmation_state_invalid" } });
   }
 
@@ -345,24 +372,25 @@ export async function handleConfirmAlternativePayment(
       input.externalTransactionToken,
       tokenKey,
     );
-    const { data, error } = await admin.rpc(
-      "credit_alternative_store_purchase",
-      {
-        p_intent_id: input.intentId,
-        p_verified_member_id: userData.user.id,
-        p_account_binding: input.accountBinding,
-        p_payment_key: input.paymentKey,
-        p_order_id: input.orderId,
-        p_product_id: catalog.product_id,
-        p_environment: environment,
-        p_message: input.message,
-        p_is_anonymous: input.anonymous,
-        p_request_key: input.requestKey,
-        p_purchased_at: confirmed.approvedAt,
-        p_external_transaction_token_enc: encryptedToken,
-        p_user_tax_region: "KR",
+    const { data, error } = await admin.rpc("credit_purchase", {
+      p_action: "CREDIT",
+      p_channel: "GOOGLE_ALTERNATIVE",
+      p_reference: input.intentId,
+      p_payload: {
+        verified_member_id: userData.user.id,
+        account_binding: input.accountBinding,
+        request_key: input.requestKey,
+        payment_key: input.paymentKey,
+        order_id: input.orderId,
+        product_id: catalog.product_id,
+        environment,
+        message: input.message,
+        is_anonymous: input.anonymous,
+        purchased_at: confirmed.approvedAt,
+        user_tax_region: "KR",
       },
-    );
+      p_secret: encryptedToken,
+    });
     if (error || !data?.[0]) throw new Error(error?.message ?? "credit_failed");
     const row = data[0];
     return json(row.is_replay ? 200 : 201, {
@@ -393,12 +421,15 @@ export async function handleConfirmAlternativePayment(
         await settleAlternativeConfirmation(admin, {
           intentId: input.intentId,
           memberId: userData.user.id,
+          accountBinding: input.accountBinding,
+          requestKey: input.requestKey,
         }, "CANCELED");
       } catch {
         try {
           await recordCompensationFailure(admin, {
             intentId: input.intentId,
             memberId: userData.user.id,
+            accountBinding: input.accountBinding,
             paymentKey: input.paymentKey,
             orderId: input.orderId,
             requestKey: input.requestKey,
@@ -420,6 +451,8 @@ export async function handleConfirmAlternativePayment(
         await settleAlternativeConfirmation(admin, {
           intentId: input.intentId,
           memberId: userData.user.id,
+          accountBinding: input.accountBinding,
+          requestKey: input.requestKey,
         }, "RECONCILIATION_REQUIRED");
       } catch {
         console.error(

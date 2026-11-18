@@ -10,6 +10,12 @@ STAMP: 2026-11-18 13:22 KST, GPT-5 Codex, code-builder, haenael-supabase-build. 
 - 일반 쓰기는 `request_key` 8~128자와 서버 유일키로 멱등 처리한다. 계정 삭제만 예외이며, JWT `sub`와 회원당 1행인 서버 작업을 재개 키로 사용해 클라이언트 요청 키를 받지 않는다.
 - 금액·상품·수취인·상점·환경은 서버가 재검증한다.
 
+## 서버 전용 RPC `credit_purchase`
+
+Apple StoreKit, Google Play, Google 사용자 선택 결제, Toss 인앱결제, 웹 Toss 결제의 적립은 모두 이 RPC만 호출한다. 동작은 `BEGIN|CREDIT|CANCELED|RECOVERY_REQUIRED`, 채널은 `APPLE|GOOGLE_PLAY|GOOGLE_ALTERNATIVE|TOSS_IAP|WEB_TOSS`, 참조는 스토어 `intent_id` 또는 웹 `order_id`다. `BEGIN`은 외부 공급자 조회 전에 `purchase_credit_operation(status=VERIFYING)`을 만들고, `CREDIT`은 같은 작업을 확인한 뒤 적립한다. 실패가 확정되면 `CANCELED`, 승인 뒤 자동 보상까지 실패하면 `RECOVERY_REQUIRED`로 종결한다.
+
+RPC는 참조 행에서 결제자와 목표 소유자를 서버 조회하고, 두 회원의 `member_settlement:<member_id>` PostgreSQL transaction advisory lock을 UUID 문자열 오름차순으로 잡는다. 잠금 안에서 결제 소유권, 계정 결합값, 목표 소유권, `account_deletion_job` 상태를 다시 확인한 뒤에만 채널별 내부 함수를 실행한다. 채널별 `credit_store_purchase`, `credit_alternative_store_purchase`, `confirm_cheer_payment`와 대체결제 확인·복구 함수는 `service_role` 직접 실행 권한이 없으며 `credit_purchase` 내부에서만 실행된다.
+
 ## POST RPC `create_store_purchase_intent`
 
 인증 회원이 결제창을 열기 직전 `goal_id`, `provider`, `product_id`, `clover_amount`, `request_key`를 보낸다. 서버는 자기 응원을 거부하고 `intent_id`, `account_binding`, `expires_at`을 반환한다. Apple은 `account_binding`을 `appAccountToken`, Google은 `obfuscatedExternalAccountId`로 사용한다. intent는 30분, 1회용이다.
@@ -61,9 +67,9 @@ STAMP: 2026-11-18 13:22 KST, GPT-5 Codex, code-builder, haenael-supabase-build. 
 
 ## POST `/functions/v1/confirm-alternative-payment`
 
-Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요청은 `intent_id`, `account_binding`, `payment_key`, `order_id`, `external_transaction_token`, `request_key`다. `goal_id`, `product_id`, 회원은 요청에서 받지 않고 intent에서 파생한다. 서버가 Google 외부결제 토큰의 계정 결합값, 토스 승인 회원·주문 상품·금액을 intent와 대조한다. `provider=GOOGLE_ALTERNATIVE`의 sandbox/production release gate는 `credit_store_purchase` 트랜잭션 안에서 검사하며 OFF면 `503 channel_release_disabled`, 적립 0건이다. 응답 필드는 구매 확인과 같고 `report_status: PENDING|REPORTED`를 추가한다. 외부 거래 토큰 누락은 적립 전 `422 external_transaction_token_required`다. 소비는 `UPDATE store_purchase_intent SET status='CONSUMED', consumed_at=now() WHERE id=:id AND status='CREATED' AND expires_at>now()`의 영향 행 1건으로만 성공한다.
+Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요청은 `intent_id`, `account_binding`, `payment_key`, `order_id`, `external_transaction_token`, `request_key`다. `goal_id`, `product_id`, 회원은 요청에서 받지 않고 intent에서 파생한다. 서버가 Google 외부결제 토큰의 계정 결합값, 토스 승인 회원·주문 상품·금액을 intent와 대조한다. `provider=GOOGLE_ALTERNATIVE`의 sandbox/production release gate는 `credit_purchase` 트랜잭션 안에서 검사하며 OFF면 `503 channel_release_disabled`, 적립 0건이다. 응답 필드는 구매 확인과 같고 `report_status: PENDING|REPORTED`를 추가한다. 외부 거래 토큰 누락은 적립 전 `422 external_transaction_token_required`다. 소비는 공통 RPC 안에서 `store_purchase_intent.status='CREATED'`인 한 행만 `CONSUMED`로 바꾸며 성공한다.
 
-공급자 호출 직전 `begin_alternative_payment_confirmation`이 `member_settlement:<member_id>` transaction advisory lock을 잡고 삭제 작업이 없는지 다시 검사한 뒤 `alternative_payment_confirmation(status=CONFIRMING)`을 만든다. 이 행이 있으면 intent 만료 뒤에도 미종결 결제로 취급한다. 적립 성공은 같은 잠금 안에서 `CREDITED`, 승인되지 않았음이 확정되면 `CANCELED`, 공급자 결과가 불명확하면 `RECONCILIATION_REQUIRED`, 승인 뒤 적립·취소가 모두 실패하면 `RECOVERY_REQUIRED`로 전이한다. 계정 삭제가 `REQUESTED` 이상이면 새 공급자 확인을 시작하지 않는다.
+공급자 호출 직전 `credit_purchase(action=BEGIN)`이 결제자와 목표 소유자 잠금을 잡고 삭제 작업이 없는지 다시 검사한 뒤 공통 확인 작업과 `alternative_payment_confirmation(status=CONFIRMING)`을 만든다. 이 행이 있으면 intent 만료 뒤에도 미종결 결제로 취급한다. 적립 성공은 같은 잠금 안에서 `CREDITED`, 승인되지 않았음이 확정되면 `CANCELED`, 공급자 결과가 불명확하면 `RECONCILIATION_REQUIRED`, 승인 뒤 적립·취소가 모두 실패하면 `RECOVERY_REQUIRED`로 전이한다. 계정 삭제가 `REQUESTED` 이상이면 새 공급자 확인을 시작하지 않는다.
 
 보고 레코드는 `external_transaction_id`, 암호화 token, 거래시각, 세전액, 세액, 사용자 과세 지역, API 버전, `report_due_at`, `next_attempt_at`, Google 결과 상태를 가진다. 24시간 안 `REPORTED`가 아니면 경보하며 영구 실패는 `PERMANENT_FAILURE`로 격리한다. 환불도 ExternalTransaction API에 별도 보고한다. 프로그램 등록과 API 버전은 제출 전 콘솔에서 다시 핀한다.
 
@@ -77,7 +83,7 @@ Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요
 
 토스 승인 성공 뒤 앱은 `intent_id`, `account_binding`, `payment_key`, `order_id`, Google 외부 거래 token, `request_key`를 SecureStore 미완료 큐에 먼저 저장한다. `confirm-alternative-payment` 성공 응답을 받을 때만 항목별로 제거한다. 큐 쓰기는 앱 프로세스 안에서 직렬화하고 성공 뒤 최신 큐를 다시 읽으므로 복구 중 추가된 결제를 과거 스냅샷으로 덮지 않는다. 앱 시작 시 같은 요청을 재전송하며 새로운 주문이나 멱등키를 만들지 않는다.
 
-토스 승인 뒤 적립과 전액 취소가 모두 실패하면 `record_alternative_payment_recovery`가 같은 회원 잠금 안에서 결제 확인 작업을 다시 검사하고 `store_recovery_case(status=OPEN)`, `store_purchase_event(event_type=PAYMENT_COMPENSATION_FAILED)`, 확인 상태 `RECOVERY_REQUIRED`를 한 트랜잭션으로 기록한다. intent 만료 여부와 무관하게 `CONFIRMING|RECONCILIATION_REQUIRED|RECOVERY_REQUIRED` 확인 작업 또는 OPEN 복구 건이 있으면 계정 삭제는 `BLOCKED_PENDING_PAYMENT`에 머문다.
+토스 승인 뒤 적립과 전액 취소가 모두 실패하면 `credit_purchase(action=RECOVERY_REQUIRED)`가 두 회원 잠금 안에서 결제 확인 작업을 다시 검사하고 `store_recovery_case(status=OPEN)`, `store_purchase_event(event_type=PAYMENT_COMPENSATION_FAILED)`, 확인 상태 `RECOVERY_REQUIRED`를 한 트랜잭션으로 기록한다. intent 만료 여부와 무관하게 `VERIFYING|CONFIRMING|RECONCILIATION_REQUIRED|RECOVERY_REQUIRED` 확인 작업 또는 OPEN 복구 건이 있으면 계정 삭제는 `BLOCKED_PENDING_PAYMENT`에 머문다.
 
 ## POST `/functions/v1/google-external-transaction-report`
 
@@ -103,7 +109,7 @@ pg_cron이 10분마다 내부 토큰으로 호출한다. `claim_google_external_
 
 Apple 회원은 로그인 때 암호화 저장한 refresh token으로 `/auth/revoke`를 호출한다. 토큰이 없거나 Apple이 `invalid_grant`로 거절하면 데이터 변경 없이 `409 apple_reauthentication_required`를 반환한다. 같은 회원 Apple OAuth가 새 폐기용 token을 등록하고 폐기가 성공한 뒤에만 `EXTERNAL_REVOKED`로 전이한다. 네트워크·Apple 서버 오류는 `503 apple_token_revocation_pending`이며 `REQUESTED`에 머문다.
 
-`EXTERNAL_REVOKED` 뒤 Storage 객체를 먼저 삭제한다. 그 다음 `delete_account_data`가 같은 회원 잠금 안에서 미종결 결제·OPEN 복구 건을 다시 검사하고, 생성 상태 intent 취소, 푸시 토큰 삭제, 목표·프로필·친구·알림 삭제 또는 비식별화와 `DATA_DELETED` 전이를 한 DB 트랜잭션으로 수행한다. 결제·적립·환전 원장은 법정 정산과 부정 사용 대응에 필요한 범위만 비식별 회원 키에 보존한다. 이후 서버 전용 `auth.admin.deleteUser(member_id)`를 호출하고 Auth 사용자 부재를 확인한 `complete_account_deletion_auth`가 `AUTH_DELETED`를 기록한다. 삭제 작업이 `REQUESTED` 이상이면 새 대체결제 확인은 거절된다.
+`EXTERNAL_REVOKED` 뒤 Storage 객체를 먼저 삭제한다. 그 다음 `delete_account_data`가 같은 회원 잠금 안에서 모든 채널의 미종결 `purchase_credit_operation`과 OPEN 복구 건을 다시 검사하고, 생성 상태 intent 취소, 푸시 토큰 삭제, 목표·프로필·친구·알림 삭제 또는 비식별화와 `DATA_DELETED` 전이를 한 DB 트랜잭션으로 수행한다. 결제·적립·환전 원장은 법정 정산과 부정 사용 대응에 필요한 범위만 비식별 회원 키에 보존한다. 이후 서버 전용 `auth.admin.deleteUser(member_id)`를 호출하고 Auth 사용자 부재를 확인한 `complete_account_deletion_auth`가 `AUTH_DELETED`를 기록한다. 삭제 작업이 `REQUESTED` 이상이면 모든 채널의 `credit_purchase(action=BEGIN)`이 거절된다.
 
 성공은 `200 { "data": { "deleted": true, "status": "AUTH_DELETED" } }`다. 미종결 결제는 `409 account_settlement_pending`, Storage 실패는 `503 account_storage_cleanup_failed`, Auth 삭제 실패는 `503 account_auth_delete_failed`로 고정한다. 서비스 역할 키와 개인정보 원문은 응답·로그에 노출하지 않는다.
 

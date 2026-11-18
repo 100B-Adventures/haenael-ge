@@ -137,7 +137,7 @@ describe("handleTossWebhook", () => {
     expect(deps.rpcMock).not.toHaveBeenCalled();
   });
 
-  it("4a. totalAmount 없는 이벤트 + authoritative DONE → confirm_cheer_payment RPC + 200", async () => {
+  it("4a. totalAmount 없는 이벤트 + authoritative DONE → 공통 적립 RPC + 200", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
       makePayment({
@@ -154,13 +154,13 @@ describe("handleTossWebhook", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ processed: true, status: "DONE" });
-    expect(deps.rpcMock).toHaveBeenCalledTimes(1);
+    expect(deps.rpcMock).toHaveBeenCalledTimes(2);
     expect(deps.rpcMock).toHaveBeenCalledWith(
-      "confirm_cheer_payment",
+      "credit_purchase",
       expect.objectContaining({
-        p_order_id: ORDER_ID,
-        p_payment_key: PAYMENT_KEY,
-        p_amount_krw: 3000,
+        p_action: "CREDIT",
+        p_channel: "WEB_TOSS",
+        p_reference: ORDER_ID,
       }),
     );
     expect(deps.slackMock).not.toHaveBeenCalled();
@@ -220,7 +220,7 @@ describe("handleTossWebhook", () => {
       expect.objectContaining({ p_target_status: "CANCELED" }),
     );
     expect(deps.rpcMock).not.toHaveBeenCalledWith(
-      "confirm_cheer_payment",
+      "credit_purchase",
       expect.anything(),
     );
   });
@@ -414,7 +414,7 @@ describe("handleTossWebhook", () => {
     expect(deps.slackMock).not.toHaveBeenCalled();
   });
 
-  it("7(선택). DONE 처리 중 confirm_cheer_payment RPC 실패 → 500 + Slack payment_reconcile_failed", async () => {
+  it("7(선택). DONE 처리 중 공통 적립 RPC 실패 → 500 + Slack payment_reconcile_failed", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
       makePayment({
@@ -424,7 +424,9 @@ describe("handleTossWebhook", () => {
         paymentKey: PAYMENT_KEY,
       }),
     );
-    deps.rpcMock.mockResolvedValueOnce({ error: { code: "P0001" } });
+    deps.rpcMock
+      .mockResolvedValueOnce({ error: null })
+      .mockResolvedValueOnce({ error: { code: "P0001" } });
 
     const req = makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY }));
     const res = await handleTossWebhook(req, deps);

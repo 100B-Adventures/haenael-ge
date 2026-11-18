@@ -115,6 +115,17 @@ STAMP: 2026-11-18 13:22 KST, GPT-5 Codex, code-builder, haenael-supabase-build.
 | TC-APP-08-4 | 최소 버전 미달 강제 업데이트 |
 | TC-APP-09-1 | 앱 안 탈퇴 접수·로그아웃·토큰 삭제 |
 | TC-APP-09-2 | 보류·환전 진행 중 안내와 차단 |
+| TC-APP-09-3 | JWT 회원 ID로 회원당 삭제 작업 1행 생성·재개 |
+| TC-APP-09-4 | 외부 토큰 폐기 전 데이터 삭제 0, 폐기 뒤 상태 전이 재개 |
+| TC-APP-09-5 | 결제 확인과 삭제 요청 동시 실행을 같은 회원 잠금으로 직렬화 |
+| TC-APP-09-6 | 개인정보 삭제 직전 모든 정산 항목 재검사 |
+| TC-APP-09-7 | Apple refresh token 없음·invalid_grant는 재인증 전 데이터 삭제 0 |
+| TC-APP-09-8 | 다른 회원 세션으로 변경되면 이전 회원 삭제 재개 정보 폐기 |
+| TC-APP-09-9 | 삭제 시작 뒤 새 결제 확인 시작 거절 |
+| TC-APP-09-10 | Auth 사용자 삭제 확인 뒤에만 AUTH_DELETED 전이 |
+| TC-APP-09-11 | Apple·Google Play·Toss IAP·Google 대체결제·웹 Toss가 공통 `credit_purchase`만 호출 |
+| TC-APP-09-12 | 5개 결제 채널 × 삭제 3단계 × 결제자·수령자 30개 동시 실행에서 삭제가 미종결 결제를 통과하지 않음 |
+| TC-APP-09-13 | 채널별 내부 적립 함수의 `service_role` 직접 실행 권한 0 |
 | TC-TOSS-01-1 | 인트로와 토스 로그인만 |
 | TC-TOSS-01-2 | 토스 identity→V2 회원 홈 |
 | TC-TOSS-01-3 | 동의 거부→인트로 오류 한 줄 |
