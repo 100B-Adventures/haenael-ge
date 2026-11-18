@@ -1,5 +1,12 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-18 앱 채널 독립 코드리뷰 🟡 수정 완료·독립 재검토 대기
+
+- source `1258dfa`의 결제·환불·개인정보·분석 동의 구현은 독립 코드리뷰에서 **MAJOR 9건·MINOR 4건**으로 BLOCK됐다.
+- 실패 범위: 서버 SKU 카탈로그, Google purchaseToken 멱등성·consume/acknowledge·testPurchaseContext, 환불 webhook·재동기화, 부분환불 비례 회수·scope, 원시 구매 RLS, 동시 intent 직렬화, Consent Mode Advanced, `purchaseCompletionTime`, 디자인 토큰.
+- 구현 커밋 `a2d9ca9`에서 13건을 모두 수정하고 DB 508건, Edge Function 122건, Web 597건, 분석 동의 Playwright 3건과 프로덕션 빌드를 통과했다. 독립 재검토 전에는 QA 승인이나 운영 배포로 승격하지 않는다.
+- 근거: `docs/qa/review-app-channels-1258dfa-v0.1.0-gpt-codex-20261118.md`.
+
 | 표지 | 값 |
 |---|---|
 | 현재 보고 버전 | v2.2.0 (2026-11-12, 업데이트 의견·회원 본 버전 동기화) |

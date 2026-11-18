@@ -61,3 +61,25 @@
 
 SKILLS_USED: `review`, 결제·인증·DB·프런트 독립 교차검토에 사용.  
 SKILLS_SKIPPED: 없음.
+
+## 수정 이력 (2026-11-18)
+
+구현 커밋 `a2d9ca9`에서 위 13건을 수정했다. 아래 표는 원 리뷰 번호와 실패를 고정한 시험을 연결한다. 원 리뷰의 `BLOCK` 판정은 보존하며, 독립 재검토가 통과하기 전에는 QA 승인이나 운영 배포로 승격하지 않는다.
+
+| 원 리뷰 항목 | 수정 커밋 | 실패를 고정한 시험·검사 |
+|---|---|---|
+| MAJOR 1. 서버 SKU 카탈로그 | `a2d9ca9` | `AP-RV-01`, `AP-RV-02`, `AP-RV-03` |
+| MAJOR 2. Google 멱등키 | `a2d9ca9` | `TC-APP-02-1 Google purchaseToken을 거래 멱등키로 쓴다` |
+| MAJOR 3. Google consume | `a2d9ca9` | `TC-APP-02-3`, `TC-APP-02-4 적립 뒤 Google 소모품 consume을 서버에서 POST한다` |
+| MAJOR 4. testPurchaseContext | `a2d9ca9` | `TC-APP-02-1`, `TC-APP-02-2 일반 Google 구매는 PRODUCTION이다` |
+| MAJOR 5. 환불 알림·일일 재동기화 | `a2d9ca9` | `TC-APP-03-1`부터 `TC-APP-03-4` |
+| MAJOR 6. 부분환불 비례 회수 | `a2d9ca9` | `RF-RV-01`부터 `RF-RV-03` |
+| MAJOR 7. 원시 구매 행 RLS | `a2d9ca9` | `AP-RV-05 목표 소유자는 응원자의 원시 구매 행을 조회하지 못한다` |
+| MAJOR 8. 동시 intent 직렬화 | `a2d9ca9` | `TC-APP-01-4 10개 동시 intent 요청이 1행으로 수렴한다` |
+| MAJOR 9. Consent Mode Advanced | `a2d9ca9` | `AN-CONSENT-01`, `AN-CONSENT-02`, `AN-CONSENT-03`, `analytics.test.ts` 동의 전 초기화 시험 |
+| MINOR 1. purchaseCompletionTime | `a2d9ca9` | `TC-APP-02-2 purchaseCompletionTime 누락은 거절한다` |
+| MINOR 2. 환불 scope 검증 | `a2d9ca9` | `RF-RV-04 부분 금액을 FULL scope로 제출하면 거절한다` |
+| MINOR 3. DB 경계·경합 시험 | `a2d9ca9` | `RF-RV-05`부터 `RF-RV-10`, `TC-APP-01-4` |
+| MINOR 4. 13px 디자인 토큰 | `a2d9ca9` | `npm run qa:design-tokens`, 검사 파일 320개·신규 위반 0건 |
+
+수정 후 직접 실행 결과: `supabase test db` 26파일·508건 PASS, Edge Function 20파일·122건 PASS, Web Vitest 98파일·597건 PASS, 분석 동의 Playwright 3건 PASS, 프로덕션 빌드 PASS, 홈 HTTP 200·헤드리스 Chromium 콘솔 오류 0건. 운영 DB 마이그레이션·main push·실결제는 실행하지 않았다.
