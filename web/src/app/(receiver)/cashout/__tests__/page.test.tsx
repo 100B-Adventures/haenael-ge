@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
 
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: vi.fn(),
@@ -18,6 +18,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import CashoutPage from "../page";
 
 function cashoutClient(failingDependency?: string) {
   const rpc = vi.fn().mockImplementation((name: string) => {
@@ -29,7 +30,15 @@ function cashoutClient(failingDependency?: string) {
         return Promise.resolve({ data: [], error: null });
       }
       return Promise.resolve({
-        data: [{ total_balance: 8, welcome_amount: 3, payable_amount: 5, min_cashout_clover: 30, reached_threshold: false }],
+        data: [{
+          total_balance: 11,
+          welcome_amount: 3,
+          payable_amount: 5,
+          maturity_locked_amount: 3,
+          next_maturity_at: "2026-12-18T00:00:00Z",
+          min_cashout_clover: 30,
+          reached_threshold: false,
+        }],
         error: null,
       });
     }
@@ -60,6 +69,8 @@ function cashoutClient(failingDependency?: string) {
 }
 
 describe("/cashout 미달 상태", () => {
+  afterEach(cleanup);
+
   beforeEach(() => {
     vi.clearAllMocks();
     isCashoutAllowedMember.mockReturnValue(true);
@@ -72,14 +83,16 @@ describe("/cashout 미달 상태", () => {
   it(
     "미달 안내와 분해 미리보기를 함께 보여주고 신청 버튼만 막는다",
     async () => {
-      const { default: CashoutPage } = await import("../page");
       render(await CashoutPage());
 
       expect(screen.getByTestId("cashout-below-threshold-banner")).toHaveTextContent(
-        "22개",
+        "19개",
       );
       expect(screen.getByTestId("cashout-breakdown-table")).toBeInTheDocument();
       expect(screen.getByTestId("cashout-net-preview")).toBeInTheDocument();
+      expect(screen.getByTestId("breakdown-maturity-lock")).toHaveTextContent("3개");
+      expect(screen.getByTestId("gift-exchange-card")).toHaveTextContent("기프티콘으로 받기");
+      expect(screen.getByTestId("gift-exchange-card")).toHaveTextContent("준비 중");
       expect(screen.getByTestId("cashout-confirm-disabled")).toBeInTheDocument();
       expect(screen.queryByTestId("cashout-confirm-button")).not.toBeInTheDocument();
     },
@@ -91,7 +104,6 @@ describe("/cashout 미달 상태", () => {
     const supabase = await createServerSupabaseClient();
     const rpc = supabase.rpc as ReturnType<typeof vi.fn>;
 
-    const { default: CashoutPage } = await import("../page");
     render(await CashoutPage());
 
     expect(screen.getByTestId("cashout-page")).toBeInTheDocument();
@@ -113,7 +125,6 @@ describe("/cashout 미달 상태", () => {
       cashoutClient(dependency).client as never,
     );
 
-    const { default: CashoutPage } = await import("../page");
     render(await CashoutPage());
 
     expect(screen.getByTestId("cashout-load-error")).toHaveTextContent(
@@ -127,7 +138,6 @@ describe("/cashout 미달 상태", () => {
       cashoutClient("member").client as never,
     );
 
-    const { default: CashoutPage } = await import("../page");
     render(await CashoutPage());
 
     expect(screen.queryByTestId("cashout-load-error")).not.toBeInTheDocument();

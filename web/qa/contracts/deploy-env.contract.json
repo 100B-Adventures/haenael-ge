@@ -42,6 +42,22 @@
     "PAYMENTS_ENABLED": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_SECRET_KEY": { "targets": ["supabase-production"], "features": ["payments"] },
     "TOSS_WEBHOOK_TOKEN": { "targets": ["supabase-production"], "features": ["payments"] },
+    "APPLE_APP_ID": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
+    "APPLE_BUNDLE_ID": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
+    "APPLE_IAP_ENVIRONMENT": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
+    "APPLE_IAP_ISSUER_ID": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
+    "APPLE_IAP_KEY_ID": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
+    "APPLE_IAP_PRIVATE_KEY": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
+    "APPLE_ROOT_CA_BASE64": { "targets": ["supabase-production"], "features": ["app-channel-apple"] },
+    "GOOGLE_PLAY_ENVIRONMENT": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
+    "GOOGLE_PLAY_PACKAGE_NAME": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
+    "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
+    "TOSS_IAP_PRICE_1": { "targets": ["supabase-production"], "features": ["app-channel-toss"] },
+    "TOSS_IAP_PRICE_3": { "targets": ["supabase-production"], "features": ["app-channel-toss"] },
+    "TOSS_IAP_PRICE_5": { "targets": ["supabase-production"], "features": ["app-channel-toss"] },
+    "TOSS_IAP_PRICE_10": { "targets": ["supabase-production"], "features": ["app-channel-toss"] },
+    "TOSS_PARTNER_MTLS_CERT": { "targets": ["supabase-production"], "features": ["app-channel-toss"] },
+    "TOSS_PARTNER_MTLS_KEY": { "targets": ["supabase-production"], "features": ["app-channel-toss"] },
     "SLACK_WEBHOOK_URL": { "targets": ["supabase-production"], "features": ["slack"] },
     "LEAD_RATE_LIMIT_SALT": { "targets": ["supabase-production"], "features": ["lead-capture"] },
     "KAKAO_CLIENT_ID": { "targets": ["supabase-production"], "features": ["kakao-auth"] },
@@ -64,7 +80,7 @@
     },
     "supabase-production": {
       "provider": "supabase",
-      "features": ["core", "profile", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
+      "features": ["core", "profile", "wordmap", "payments", "app-channel-apple", "app-channel-google", "app-channel-toss", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
     }
   }
 }

@@ -50,10 +50,15 @@ function verifyVercelPackageBoundary() {
       "--no-fund",
     ], { cwd: packageRoot, encoding: "utf8" });
     if (dependencies.status !== 0) {
+      const installOutput = `${dependencies.stdout ?? ""}\n${dependencies.stderr ?? ""}`
+        .trim()
+        .split(/\r?\n/)
+        .slice(-8)
+        .join(" | ");
       return [{
         id: "VERCEL-PACKAGE-DEPENDENCIES",
         passed: false,
-        detail: `expected_rc=0 actual_rc=${dependencies.status ?? 2}`,
+        detail: `expected_rc=0 actual_rc=${dependencies.status ?? 2} output=${installOutput || "none"}`,
       }];
     }
 

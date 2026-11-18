@@ -18,6 +18,8 @@ type Props = {
   cashoutEnabled: boolean;
   reachedThreshold: boolean;
   payableAmount: number;
+  maturityLockedAmount: number;
+  nextMaturityAt: string | null;
   totalBalance: number;
   welcomeAmount: number;
   minCashoutClover: number;
@@ -30,6 +32,8 @@ export function CashoutPageView({
   cashoutEnabled,
   reachedThreshold,
   payableAmount,
+  maturityLockedAmount,
+  nextMaturityAt,
   totalBalance,
   welcomeAmount,
   minCashoutClover,
@@ -103,6 +107,20 @@ export function CashoutPageView({
                   − 🍀 {welcomeAmount}{PRODUCT_COPY.TEXT_014}</span>
               </div>
               <div className="my-2 border-t border-border" />
+              {maturityLockedAmount > 0 ? (
+                <div
+                  className="flex items-center justify-between py-2"
+                  data-testid="breakdown-maturity-lock"
+                >
+                  <span className="text-[13px] text-[var(--muted-color)]">
+                    {PRODUCT_COPY.TEXT_023}
+                  </span>
+                  <span className="text-[13px] font-bold text-[var(--muted-color)]">
+                    − 🍀 {maturityLockedAmount}{PRODUCT_COPY.TEXT_014}
+                    {nextMaturityAt ? ` · ${new Intl.DateTimeFormat("ko-KR", { month: "numeric", day: "numeric" }).format(new Date(nextMaturityAt))}` : ""}
+                  </span>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between py-2">
                 <span className="text-[13px] font-bold text-foreground">{PRODUCT_COPY.TEXT_015}</span>
                 <span
@@ -145,6 +163,26 @@ export function CashoutPageView({
               </div>
               <p className="mt-2 text-[length:var(--text-meta-micro)]! leading-relaxed text-muted-foreground">{PRODUCT_COPY.TEXT_021}</p>
             </div>
+
+            <section
+              className="mb-4 rounded-md border border-border bg-card p-4 sm:p-6"
+              data-testid="gift-exchange-card"
+              aria-labelledby="gift-exchange-title"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 id="gift-exchange-title" className="text-sm font-extrabold text-foreground">
+                    {PRODUCT_COPY.TEXT_024}
+                  </h2>
+                  <p className="mt-1 text-[length:var(--text-label-small)]! leading-relaxed text-muted-foreground">
+                    {PRODUCT_COPY.TEXT_025}
+                  </p>
+                </div>
+                <span className="rounded-full bg-muted px-3 py-1 text-[length:var(--text-meta-micro)]! font-bold text-muted-foreground">
+                  {PRODUCT_COPY.TEXT_026}
+                </span>
+              </div>
+            </section>
           </section>
         )}
 

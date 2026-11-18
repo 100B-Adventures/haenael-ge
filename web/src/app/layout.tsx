@@ -5,7 +5,7 @@ import type { Metadata, Viewport } from "next";
 import { DEFAULT_OG_IMAGE } from "@/lib/og";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
-import { AnalyticsConsentBanner } from "@/components/analytics/AnalyticsConsentBanner";
+import { GoogleConsentDefaults } from "@/components/analytics/GoogleConsentDefaults";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
@@ -78,12 +78,12 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]!">
+        <GoogleConsentDefaults />
         <GoogleAnalytics />
         <MetaPixel />
         <MicrosoftClarity />
         <SensitiveNavigationBoundary />
         <SignupConversion />
-        <AnalyticsConsentBanner />
         <WhatsNewCard />
         <RegisterServiceWorker />
         <div className="flex-1 flex flex-col">{children}</div>

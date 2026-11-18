@@ -54,6 +54,8 @@ describe("CashoutRequestForm", () => {
         cashoutEnabled
         reachedThreshold
         payableAmount={40}
+        maturityLockedAmount={0}
+        nextMaturityAt={null}
         totalBalance={52}
         welcomeAmount={12}
         minCashoutClover={30}

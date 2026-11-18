@@ -4,8 +4,8 @@ import { extname, join, relative } from "node:path";
 const sourceRoot = new URL("../src/", import.meta.url).pathname;
 const forbidden = [
   { name: "SSR 또는 Next.js 의존", pattern: /react-dom\/server|renderToString|getServerSideProps|from\s+["']next\// },
-  { name: "결제 또는 환전 surface", pattern: /cheer-order|toss-confirm|cashout|checkoutPayment|TossPay/ },
-  { name: "외부 웹 이동", pattern: /openURL|href\s*=\s*["']https?:\/\// },
+  { name: "허용되지 않은 결제·환전 surface", pattern: /cheer-order|toss-confirm|cashout|gift-exchange|checkoutPayment|TossPay/ },
+  { name: "외부 웹 이동·원격 렌더", pattern: /openURL|window\.location\.(?:assign|replace)\s*\(|window\.location\s*=|location\.href\s*=|<iframe|WebView|href\s*=\s*["']https?:\/\// },
   { name: "카카오 로그인", pattern: /auth-kakao|kakaoLogin|Kakao\.Auth/ },
 ];
 
@@ -33,4 +33,4 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log("PASS: SSR, 외부 웹, 카카오 로그인, 결제·환전 의존 0건");
+console.log("PASS: CSR/SSG, 외부 웹·iframe·원격 WebView·카카오·현금환전 0건; Apps in Toss IAP만 허용");

@@ -530,3 +530,37 @@ input:active,
 textarea:active {
   opacity: 0.76;
 }
+.support-purchase {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 0.0625rem solid var(--line);
+  border-radius: var(--radius-sheet);
+  background: var(--surface);
+}
+
+.support-purchase h2,
+.support-purchase p {
+  margin: 0;
+}
+
+.support-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.support-options button {
+  min-height: var(--tap-size);
+  border: 0.0625rem solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  font: inherit;
+}
+
+.support-options button.is-selected {
+  border-color: var(--clover-ink);
+  background: var(--clover-soft);
+  color: var(--clover-ink);
+  font-weight: 700;
+}

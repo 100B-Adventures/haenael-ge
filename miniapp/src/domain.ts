@@ -37,6 +37,14 @@ export interface FriendInvite {
   expiresAt: string;
 }
 
+export interface SupportPurchaseResult {
+  purchaseId: number;
+  cheerId: number;
+  cloverAmount: number;
+  availableAt: string;
+  isReplay: boolean;
+}
+
 export interface AppGateway {
   signInWithToss(): Promise<SessionMember>;
   listFriendGoals(): Promise<FriendGoalGroup[]>;
@@ -44,6 +52,8 @@ export interface AppGateway {
   updateCover(goalId: number, preset: CoverPreset): Promise<void>;
   updatePreferences(preferences: MemberPreferences): Promise<MemberPreferences>;
   createInvite(goalId: number | null): Promise<FriendInvite>;
+  recoverPendingSupportPurchases(): Promise<SupportPurchaseResult[]>;
+  purchaseSupport(goalId: number, cloverAmount: 1 | 3 | 5): Promise<SupportPurchaseResult>;
 }
 
 export class GatewayError extends Error {

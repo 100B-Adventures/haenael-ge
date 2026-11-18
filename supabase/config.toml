@@ -393,6 +393,13 @@ verify_jwt = false
 # cron service-to-service 전용. handler가 STORAGE_CLEANUP_INTERNAL_TOKEN을 별도로 검증한다.
 verify_jwt = false
 
+[functions.auth-toss]
+# 토스 authorization code 자체가 1회용 인증 입력이다. 함수 안에서 mTLS 교환 후 세션을 발급한다.
+verify_jwt = false
+
+[functions.verify-store-purchase]
+verify_jwt = true
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

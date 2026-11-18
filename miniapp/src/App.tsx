@@ -100,14 +100,41 @@ function GoalPage({ gateway, navigate }: PageProps) {
   const slug = decodeURIComponent(window.location.pathname.split("/").filter(Boolean).at(-1) ?? "");
   const [goal, setGoal] = useState<GoalSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [supporting, setSupporting] = useState(false);
+  const [supportAmount, setSupportAmount] = useState<1 | 3 | 5>(1);
+  const [supportStatus, setSupportStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
     gateway.getFriendGoal(slug)
       .then((value) => { if (alive) setGoal(value); })
       .catch((cause: unknown) => { if (alive) setError(errorMessage(cause, "목표를 불러오지 못했어요.")); });
+    gateway.recoverPendingSupportPurchases()
+      .then((recovered) => {
+        if (alive && recovered.length > 0) setSupportStatus("중단됐던 응원 결제를 확인하고 적립을 마쳤어요.");
+      })
+      .catch(() => undefined);
     return () => { alive = false; };
   }, [gateway, slug]);
+
+  const purchaseSupport = async () => {
+    if (!goal) return;
+    setSupporting(true);
+    setSupportStatus(null);
+    try {
+      const result = await gateway.purchaseSupport(goal.goalId, supportAmount);
+      setGoal({ ...goal, cheerCount: goal.cheerCount + (result.isReplay ? 0 : 1) });
+      setSupportStatus(`${goal.ownerName}님에게 ${result.cloverAmount}클로버 응원을 보냈어요.`);
+    } catch (cause) {
+      if (cause instanceof Error && "code" in cause && cause.code === "login_required") {
+        navigate(`/login?next=${encodeURIComponent(`/goals/${goal.slug}`)}`);
+        return;
+      }
+      setSupportStatus(errorMessage(cause, "응원 결제를 마치지 못했어요."));
+    } finally {
+      setSupporting(false);
+    }
+  };
 
   return (
     <PageShell activePath="/friends" withTabs={false} onNavigate={navigate}>
@@ -125,6 +152,28 @@ function GoalPage({ gateway, navigate }: PageProps) {
           <section className="word-cloud" aria-label="친구들이 남긴 응원 단어">
             <h2>친구들이 건넨 말</h2>
             <div>{goal.words.length > 0 ? goal.words.map((word) => <span key={word}>{word}</span>) : <p>첫 응원 단어를 기다리고 있어요.</p>}</div>
+          </section>
+          <section className="support-purchase" aria-label="유료 응원 보내기">
+            <h2>실질적인 응원을 보낼까요?</h2>
+            <p>결제한 응원은 친구의 클로버로 적립되고, 30일 뒤 받을 수 있어요.</p>
+            <div className="support-options" role="radiogroup" aria-label="응원 클로버 수">
+              {([1, 3, 5] as const).map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  role="radio"
+                  aria-checked={supportAmount === amount}
+                  className={supportAmount === amount ? "is-selected" : ""}
+                  onClick={() => setSupportAmount(amount)}
+                >
+                  {amount}클로버
+                </button>
+              ))}
+            </div>
+            <Button fullWidth loading={supporting} onClick={() => void purchaseSupport()} data-testid="toss-iap-support-button">
+              토스 인앱결제로 응원하기
+            </Button>
+            {supportStatus ? <div className="status-message" role="status">{supportStatus}</div> : null}
           </section>
           <Button fullWidth onClick={() => navigate("/login?next=/friends")}>나도 목표를 선언하고 함께하기</Button>
           <p className="privacy-note">공개 화면에는 응원 횟수와 메시지만 보여요.</p>

@@ -7,6 +7,7 @@ import type {
   GoalSummary,
   MemberPreferences,
   SessionMember,
+  SupportPurchaseResult,
 } from "./domain";
 import { GatewayError } from "./domain";
 
@@ -49,6 +50,54 @@ const demoGoals: GoalSummary[] = [
   },
 ];
 
+const pendingSupportIntentsKey = "haenael-pending-support-intents";
+const pendingSupportIntentMaxAgeMs = 7 * 24 * 60 * 60 * 1_000;
+
+interface PendingSupportIntent {
+  intentId: string;
+  requestKey: string;
+  goalId: number;
+  sku: string;
+  cloverAmount: 1 | 3 | 5;
+  createdAt: string;
+  orderId?: string;
+}
+
+const readPendingSupportIntents = (): PendingSupportIntent[] => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(pendingSupportIntentsKey) ?? "[]") as unknown;
+    if (!Array.isArray(parsed)) return [];
+    const cutoff = Date.now() - pendingSupportIntentMaxAgeMs;
+    return parsed.filter((item): item is PendingSupportIntent => {
+      if (!item || typeof item !== "object") return false;
+      const candidate = item as Partial<PendingSupportIntent>;
+      return typeof candidate.intentId === "string"
+        && typeof candidate.requestKey === "string"
+        && typeof candidate.goalId === "number"
+        && typeof candidate.sku === "string"
+        && (candidate.cloverAmount === 1 || candidate.cloverAmount === 3 || candidate.cloverAmount === 5)
+        && typeof candidate.createdAt === "string"
+        && Date.parse(candidate.createdAt) >= cutoff
+        && (candidate.orderId === undefined || typeof candidate.orderId === "string");
+    });
+  } catch {
+    return [];
+  }
+};
+
+const writePendingSupportIntents = (intents: PendingSupportIntent[]) => {
+  localStorage.setItem(pendingSupportIntentsKey, JSON.stringify(intents));
+};
+
+const upsertPendingSupportIntent = (intent: PendingSupportIntent) => {
+  const intents = readPendingSupportIntents().filter((candidate) => candidate.intentId !== intent.intentId);
+  writePendingSupportIntents([...intents, intent]);
+};
+
+const removePendingSupportIntent = (intentId: string) => {
+  writePendingSupportIntents(readPendingSupportIntents().filter((candidate) => candidate.intentId !== intentId));
+};
+
 export const demoGateway: AppGateway = {
   async signInWithToss() {
     return { memberId: "demo-member", nickname: "해낼 사람", isNew: true };
@@ -77,6 +126,18 @@ export const demoGateway: AppGateway = {
       token: "demo-invite",
       intossPath: "intoss://haenael/invite?token=demo-invite",
       expiresAt: "2026-10-20T00:00:00Z",
+    };
+  },
+  async recoverPendingSupportPurchases() {
+    return [];
+  },
+  async purchaseSupport(goalId, cloverAmount) {
+    return {
+      purchaseId: goalId * 10 + cloverAmount,
+      cheerId: goalId * 100 + cloverAmount,
+      cloverAmount,
+      availableAt: "2026-12-18T00:00:00Z",
+      isReplay: false,
     };
   },
 };
@@ -135,6 +196,7 @@ class SupabaseGateway implements AppGateway {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         authorization_code: login.authorizationCode,
+        referrer: login.referrer,
         request_key: crypto.randomUUID(),
       }),
     });
@@ -202,6 +264,130 @@ class SupabaseGateway implements AppGateway {
     if (error) throw new GatewayError(error.code, "초대 링크를 만들지 못했어요.");
     const invite = data as { token: string; intoss_path: string; expires_at: string };
     return { token: invite.token, intossPath: invite.intoss_path, expiresAt: invite.expires_at };
+  }
+
+  private async verifyStorePurchase(
+    intent: PendingSupportIntent,
+    providerTransactionId: string,
+    token: string,
+  ): Promise<SupportPurchaseResult | null> {
+    const response = await fetch(`${this.functionsUrl}/functions/v1/verify-store-purchase`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        provider: "TOSS_IAP",
+        intent_id: intent.intentId,
+        provider_transaction_id: providerTransactionId,
+        request_key: intent.requestKey,
+        anonymous: false,
+      }),
+    });
+    if (!response.ok) return null;
+    const payload = await response.json() as { data: {
+      purchase_id: number;
+      cheer_id: number;
+      clover_amount: number;
+      available_at: string;
+      is_replay: boolean;
+    } };
+    return {
+      purchaseId: payload.data.purchase_id,
+      cheerId: payload.data.cheer_id,
+      cloverAmount: payload.data.clover_amount,
+      availableAt: payload.data.available_at,
+      isReplay: payload.data.is_replay,
+    };
+  }
+
+  async recoverPendingSupportPurchases(): Promise<SupportPurchaseResult[]> {
+    const { data: sessionData } = await this.client.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) return [];
+
+    const { IAP } = await import("@apps-in-toss/web-framework");
+    if (!IAP.getPendingOrders.isSupported() || !IAP.completeProductGrant.isSupported()) return [];
+
+    const { orders } = await IAP.getPendingOrders();
+    const recovered: SupportPurchaseResult[] = [];
+    for (const order of orders) {
+      const intents = readPendingSupportIntents();
+      const intent = intents.find((candidate) => candidate.orderId === order.orderId)
+        ?? intents.find((candidate) => candidate.sku === order.sku && !candidate.orderId);
+      if (!intent) continue;
+
+      const boundIntent = { ...intent, orderId: order.orderId };
+      upsertPendingSupportIntent(boundIntent);
+      const verified = await this.verifyStorePurchase(boundIntent, order.orderId, token);
+      if (!verified) continue;
+
+      const completed = await IAP.completeProductGrant({ params: { orderId: order.orderId } });
+      if (!completed) continue;
+      removePendingSupportIntent(boundIntent.intentId);
+      recovered.push(verified);
+    }
+    return recovered;
+  }
+
+  async purchaseSupport(goalId: number, cloverAmount: 1 | 3 | 5): Promise<SupportPurchaseResult> {
+    const { data: sessionData } = await this.client.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new GatewayError("login_required", "토스 로그인 후 응원할 수 있어요.");
+    const requestKey = crypto.randomUUID();
+    const sku = `haenael_cheer_clover_${cloverAmount}`;
+    const { data: intentRows, error: intentError } = await this.client.rpc("create_store_purchase_intent", {
+      p_goal_id: goalId,
+      p_provider: "TOSS_IAP",
+      p_product_id: sku,
+      p_clover_amount: cloverAmount,
+      p_request_key: requestKey,
+    });
+    const intent = (intentRows as Array<{ intent_id: string }> | null)?.[0];
+    if (intentError || !intent) throw new GatewayError("purchase_intent_failed", "응원 결제를 시작하지 못했어요.");
+
+    const pendingIntent: PendingSupportIntent = {
+      intentId: intent.intent_id,
+      requestKey,
+      goalId,
+      sku,
+      cloverAmount,
+      createdAt: new Date().toISOString(),
+    };
+    upsertPendingSupportIntent(pendingIntent);
+
+    const { IAP } = await import("@apps-in-toss/web-framework");
+    if (!IAP.createOneTimePurchaseOrder.isSupported()) {
+      throw new GatewayError("iap_not_supported", "토스 앱을 최신 버전으로 업데이트해 주세요.");
+    }
+    return await new Promise<SupportPurchaseResult>((resolve, reject) => {
+      let verified: SupportPurchaseResult | null = null;
+      let cleanup: () => void = () => undefined;
+      const finish = () => cleanup();
+      cleanup = IAP.createOneTimePurchaseOrder({
+        options: {
+          sku,
+          processProductGrant: async ({ orderId }) => {
+            const boundIntent = { ...pendingIntent, orderId };
+            upsertPendingSupportIntent(boundIntent);
+            verified = await this.verifyStorePurchase(boundIntent, orderId, token);
+            return verified !== null;
+          },
+        },
+        onEvent: async ({ type }) => {
+          if (type !== "success" || !verified) {
+            finish();
+            reject(new GatewayError("purchase_not_verified", "결제 확인이 끝나지 않았어요. 잠시 후 다시 확인해 주세요."));
+            return;
+          }
+          removePendingSupportIntent(pendingIntent.intentId);
+          finish();
+          resolve(verified);
+        },
+        onError: async () => {
+          finish();
+          reject(new GatewayError("purchase_failed", "결제가 취소됐거나 완료되지 않았어요."));
+        },
+      });
+    });
   }
 }
 

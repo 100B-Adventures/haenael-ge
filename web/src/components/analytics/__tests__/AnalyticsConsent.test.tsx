@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, expect, it } from "vitest";
 import { AnalyticsConsentBanner } from "../AnalyticsConsentBanner";
+import { GOOGLE_CONSENT_DEFAULTS_SCRIPT } from "../GoogleConsentDefaults";
 import {
   ANALYTICS_CONSENT_KEY,
   getAnalyticsConsent,
@@ -31,4 +32,13 @@ it("거부 선택을 저장하고 banner를 닫는다", async () => {
 it("동의 상태는 브라우저에 저장하고 다시 읽는다", () => {
   setAnalyticsConsent("granted");
   expect(getAnalyticsConsent()).toBe("granted");
+});
+
+it("CN-01 Consent Mode v2 기본값은 네 저장소 모두 denied다", () => {
+  expect(GOOGLE_CONSENT_DEFAULTS_SCRIPT).toContain('analytics_storage:"denied"');
+  expect(GOOGLE_CONSENT_DEFAULTS_SCRIPT).toContain('ad_storage:"denied"');
+  expect(GOOGLE_CONSENT_DEFAULTS_SCRIPT).toContain('ad_user_data:"denied"');
+  expect(GOOGLE_CONSENT_DEFAULTS_SCRIPT).toContain('ad_personalization:"denied"');
+  expect(GOOGLE_CONSENT_DEFAULTS_SCRIPT).not.toContain("clarity.ms");
+  expect(GOOGLE_CONSENT_DEFAULTS_SCRIPT).not.toContain("connect.facebook.net");
 });

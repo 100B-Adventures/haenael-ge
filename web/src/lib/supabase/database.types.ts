@@ -1,1755 +1,2341 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   graphql_public: {
     Tables: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
+        Args: { extensions?: Json; operationName?: string; query?: string; variables?: Json };
+        Returns: Json;
+      };
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       admin_member: {
         Row: {
-          created_at: string
-          member_id: string
-        }
+          created_at: string;
+          member_id: string;
+        };
+        ComputedFields: never;
         Insert: {
-          created_at?: string
-          member_id: string
-        }
+          created_at?: string;
+          member_id: string;
+        };
         Update: {
-          created_at?: string
-          member_id?: string
-        }
+          created_at?: string;
+          member_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "admin_member_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: true
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "admin_member_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: true;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
+      app_channel_release_gate: {
+        Row: {
+          approval_reference: string | null;
+          channel: string;
+          production_enabled: boolean;
+          sandbox_enabled: boolean;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          approval_reference?: string | null;
+          channel: string;
+          production_enabled?: boolean;
+          sandbox_enabled?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          approval_reference?: string | null;
+          channel?: string;
+          production_enabled?: boolean;
+          sandbox_enabled?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       cashout_account_access_log: {
         Row: {
-          accessed_at: string
-          actor_id: string
-          id: number
-          purpose: string
-          request_id: number
-        }
+          accessed_at: string;
+          actor_id: string;
+          id: number;
+          purpose: string;
+          request_id: number;
+        };
+        ComputedFields: never;
         Insert: {
-          accessed_at?: string
-          actor_id: string
-          id?: never
-          purpose: string
-          request_id: number
-        }
+          accessed_at?: string;
+          actor_id: string;
+          id?: never;
+          purpose: string;
+          request_id: number;
+        };
         Update: {
-          accessed_at?: string
-          actor_id?: string
-          id?: never
-          purpose?: string
-          request_id?: number
-        }
+          accessed_at?: string;
+          actor_id?: string;
+          id?: never;
+          purpose?: string;
+          request_id?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "cashout_account_access_log_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "cashout_account_access_log_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "cashout_account_access_log_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "cashout_request"
-            referencedColumns: ["id"]
+            foreignKeyName: "cashout_account_access_log_request_id_fkey";
+            columns: ["request_id"];
+            isOneToOne: false;
+            referencedRelation: "cashout_request";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       cashout_request: {
         Row: {
-          account_holder: string | null
-          account_masked: string | null
-          account_no_enc: string | null
-          account_purged_at: string | null
-          bank_code: string | null
-          clover_amount: number
-          contact: string | null
-          fee_krw: number
-          gross_krw: number
-          id: number
-          key_version: number
-          member_id: string
-          net_krw: number
-          paid_at: string | null
-          payout_id: string | null
-          processed_by: string | null
-          processing_note: string | null
-          rejected_at: string | null
-          request_fingerprint: Json | null
-          request_key: string | null
-          requested_at: string
-          risk_flag: Database["public"]["Enums"]["risk_flag_enum"]
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-          withholding_krw: number
-        }
+          account_holder: string | null;
+          account_masked: string | null;
+          account_no_enc: string | null;
+          account_purged_at: string | null;
+          bank_code: string | null;
+          clover_amount: number;
+          contact: string | null;
+          fee_krw: number;
+          gross_krw: number;
+          id: number;
+          key_version: number;
+          member_id: string;
+          net_krw: number;
+          paid_at: string | null;
+          payout_id: string | null;
+          processed_by: string | null;
+          processing_note: string | null;
+          rejected_at: string | null;
+          request_fingerprint: Json | null;
+          request_key: string | null;
+          requested_at: string;
+          risk_flag: Database["public"]["Enums"]["risk_flag_enum"];
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+          withholding_krw: number;
+        };
+        ComputedFields: never;
         Insert: {
-          account_holder?: string | null
-          account_masked?: string | null
-          account_no_enc?: string | null
-          account_purged_at?: string | null
-          bank_code?: string | null
-          clover_amount: number
-          contact?: string | null
-          fee_krw: number
-          gross_krw: number
-          id?: never
-          key_version?: number
-          member_id: string
-          net_krw: number
-          paid_at?: string | null
-          payout_id?: string | null
-          processed_by?: string | null
-          processing_note?: string | null
-          rejected_at?: string | null
-          request_fingerprint?: Json | null
-          request_key?: string | null
-          requested_at?: string
-          risk_flag?: Database["public"]["Enums"]["risk_flag_enum"]
-          status?: Database["public"]["Enums"]["cashout_status_enum"]
-          withholding_krw: number
-        }
+          account_holder?: string | null;
+          account_masked?: string | null;
+          account_no_enc?: string | null;
+          account_purged_at?: string | null;
+          bank_code?: string | null;
+          clover_amount: number;
+          contact?: string | null;
+          fee_krw: number;
+          gross_krw: number;
+          id?: never;
+          key_version?: number;
+          member_id: string;
+          net_krw: number;
+          paid_at?: string | null;
+          payout_id?: string | null;
+          processed_by?: string | null;
+          processing_note?: string | null;
+          rejected_at?: string | null;
+          request_fingerprint?: Json | null;
+          request_key?: string | null;
+          requested_at?: string;
+          risk_flag?: Database["public"]["Enums"]["risk_flag_enum"];
+          status?: Database["public"]["Enums"]["cashout_status_enum"];
+          withholding_krw: number;
+        };
         Update: {
-          account_holder?: string | null
-          account_masked?: string | null
-          account_no_enc?: string | null
-          account_purged_at?: string | null
-          bank_code?: string | null
-          clover_amount?: number
-          contact?: string | null
-          fee_krw?: number
-          gross_krw?: number
-          id?: never
-          key_version?: number
-          member_id?: string
-          net_krw?: number
-          paid_at?: string | null
-          payout_id?: string | null
-          processed_by?: string | null
-          processing_note?: string | null
-          rejected_at?: string | null
-          request_fingerprint?: Json | null
-          request_key?: string | null
-          requested_at?: string
-          risk_flag?: Database["public"]["Enums"]["risk_flag_enum"]
-          status?: Database["public"]["Enums"]["cashout_status_enum"]
-          withholding_krw?: number
-        }
+          account_holder?: string | null;
+          account_masked?: string | null;
+          account_no_enc?: string | null;
+          account_purged_at?: string | null;
+          bank_code?: string | null;
+          clover_amount?: number;
+          contact?: string | null;
+          fee_krw?: number;
+          gross_krw?: number;
+          id?: never;
+          key_version?: number;
+          member_id?: string;
+          net_krw?: number;
+          paid_at?: string | null;
+          payout_id?: string | null;
+          processed_by?: string | null;
+          processing_note?: string | null;
+          rejected_at?: string | null;
+          request_fingerprint?: Json | null;
+          request_key?: string | null;
+          requested_at?: string;
+          risk_flag?: Database["public"]["Enums"]["risk_flag_enum"];
+          status?: Database["public"]["Enums"]["cashout_status_enum"];
+          withholding_krw?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "cashout_request_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "cashout_request_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "cashout_request_processed_by_fkey"
-            columns: ["processed_by"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "cashout_request_processed_by_fkey";
+            columns: ["processed_by"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       cheer: {
         Row: {
-          clover_amount: number
-          created_at: string
-          deleted_at: string | null
-          display_name: string | null
-          goal_id: number
-          id: number
-          is_anonymous: boolean
-          is_welcome: boolean
-          message: string | null
-          payment_id: number | null
-          status: Database["public"]["Enums"]["cheer_status_enum"]
-          supporter_ci: string | null
-        }
+          clover_amount: number;
+          created_at: string;
+          deleted_at: string | null;
+          display_name: string | null;
+          goal_id: number;
+          id: number;
+          is_anonymous: boolean;
+          is_welcome: boolean;
+          message: string | null;
+          payment_id: number | null;
+          status: Database["public"]["Enums"]["cheer_status_enum"];
+          supporter_ci: string | null;
+        };
+        ComputedFields: never;
         Insert: {
-          clover_amount: number
-          created_at?: string
-          deleted_at?: string | null
-          display_name?: string | null
-          goal_id: number
-          id?: never
-          is_anonymous?: boolean
-          is_welcome?: boolean
-          message?: string | null
-          payment_id?: number | null
-          status?: Database["public"]["Enums"]["cheer_status_enum"]
-          supporter_ci?: string | null
-        }
+          clover_amount: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          display_name?: string | null;
+          goal_id: number;
+          id?: never;
+          is_anonymous?: boolean;
+          is_welcome?: boolean;
+          message?: string | null;
+          payment_id?: number | null;
+          status?: Database["public"]["Enums"]["cheer_status_enum"];
+          supporter_ci?: string | null;
+        };
         Update: {
-          clover_amount?: number
-          created_at?: string
-          deleted_at?: string | null
-          display_name?: string | null
-          goal_id?: number
-          id?: never
-          is_anonymous?: boolean
-          is_welcome?: boolean
-          message?: string | null
-          payment_id?: number | null
-          status?: Database["public"]["Enums"]["cheer_status_enum"]
-          supporter_ci?: string | null
-        }
+          clover_amount?: number;
+          created_at?: string;
+          deleted_at?: string | null;
+          display_name?: string | null;
+          goal_id?: number;
+          id?: never;
+          is_anonymous?: boolean;
+          is_welcome?: boolean;
+          message?: string | null;
+          payment_id?: number | null;
+          status?: Database["public"]["Enums"]["cheer_status_enum"];
+          supporter_ci?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "cheer_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
+            foreignKeyName: "cheer_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "cheer_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "cheer_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "cheer_payment_id_fkey"
-            columns: ["payment_id"]
-            isOneToOne: false
-            referencedRelation: "payment"
-            referencedColumns: ["id"]
+            foreignKeyName: "cheer_payment_id_fkey";
+            columns: ["payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payment";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       clover_balance: {
         Row: {
-          clover_count: number
-          member_id: string
-          updated_at: string
-        }
+          clover_count: number;
+          member_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
         Insert: {
-          clover_count?: number
-          member_id: string
-          updated_at?: string
-        }
+          clover_count?: number;
+          member_id: string;
+          updated_at?: string;
+        };
         Update: {
-          clover_count?: number
-          member_id?: string
-          updated_at?: string
-        }
+          clover_count?: number;
+          member_id?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "clover_balance_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: true
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "clover_balance_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: true;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       clover_ledger: {
         Row: {
-          balance_after: number
-          clover_delta: number
-          created_at: string
-          entry_type: Database["public"]["Enums"]["clover_entry_type_enum"]
-          id: number
-          member_id: string
-          ref_id: number | null
-          ref_type: string | null
-        }
+          balance_after: number;
+          clover_delta: number;
+          created_at: string;
+          entry_type: Database["public"]["Enums"]["clover_entry_type_enum"];
+          id: number;
+          member_id: string;
+          ref_id: number | null;
+          ref_type: string | null;
+        };
+        ComputedFields: never;
         Insert: {
-          balance_after: number
-          clover_delta: number
-          created_at?: string
-          entry_type: Database["public"]["Enums"]["clover_entry_type_enum"]
-          id?: never
-          member_id: string
-          ref_id?: number | null
-          ref_type?: string | null
-        }
+          balance_after: number;
+          clover_delta: number;
+          created_at?: string;
+          entry_type: Database["public"]["Enums"]["clover_entry_type_enum"];
+          id?: never;
+          member_id: string;
+          ref_id?: number | null;
+          ref_type?: string | null;
+        };
         Update: {
-          balance_after?: number
-          clover_delta?: number
-          created_at?: string
-          entry_type?: Database["public"]["Enums"]["clover_entry_type_enum"]
-          id?: never
-          member_id?: string
-          ref_id?: number | null
-          ref_type?: string | null
-        }
+          balance_after?: number;
+          clover_delta?: number;
+          created_at?: string;
+          entry_type?: Database["public"]["Enums"]["clover_entry_type_enum"];
+          id?: never;
+          member_id?: string;
+          ref_id?: number | null;
+          ref_type?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "clover_ledger_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "clover_ledger_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
+      clover_maturity: {
+        Row: {
+          available_at: string;
+          clover_amount: number;
+          created_at: string;
+          member_id: string;
+          purchase_id: number;
+          released_at: string | null;
+          reversed_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          available_at: string;
+          clover_amount: number;
+          created_at?: string;
+          member_id: string;
+          purchase_id: number;
+          released_at?: string | null;
+          reversed_at?: string | null;
+        };
+        Update: {
+          available_at?: string;
+          clover_amount?: number;
+          created_at?: string;
+          member_id?: string;
+          purchase_id?: number;
+          released_at?: string | null;
+          reversed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "clover_maturity_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "clover_maturity_purchase_id_fkey";
+            columns: ["purchase_id"];
+            isOneToOne: true;
+            referencedRelation: "store_purchase";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      device_push_token: {
+        Row: {
+          created_at: string;
+          device_id: string;
+          enabled: boolean;
+          id: number;
+          last_seen_at: string;
+          member_id: string;
+          platform: string;
+          token_enc: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          device_id: string;
+          enabled?: boolean;
+          id?: never;
+          last_seen_at?: string;
+          member_id: string;
+          platform: string;
+          token_enc: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          device_id?: string;
+          enabled?: boolean;
+          id?: never;
+          last_seen_at?: string;
+          member_id?: string;
+          platform?: string;
+          token_enc?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "device_push_token_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       friend_connection: {
         Row: {
-          blocked_by_member_id: string | null
-          connected_at: string
-          id: string
-          member_high_id: string
-          member_low_id: string
-          origin_invite_id: string | null
-          status: string
-          updated_at: string
-        }
+          blocked_by_member_id: string | null;
+          connected_at: string;
+          id: string;
+          member_high_id: string;
+          member_low_id: string;
+          origin_invite_id: string | null;
+          status: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
         Insert: {
-          blocked_by_member_id?: string | null
-          connected_at?: string
-          id?: string
-          member_high_id: string
-          member_low_id: string
-          origin_invite_id?: string | null
-          status?: string
-          updated_at?: string
-        }
+          blocked_by_member_id?: string | null;
+          connected_at?: string;
+          id?: string;
+          member_high_id: string;
+          member_low_id: string;
+          origin_invite_id?: string | null;
+          status?: string;
+          updated_at?: string;
+        };
         Update: {
-          blocked_by_member_id?: string | null
-          connected_at?: string
-          id?: string
-          member_high_id?: string
-          member_low_id?: string
-          origin_invite_id?: string | null
-          status?: string
-          updated_at?: string
-        }
+          blocked_by_member_id?: string | null;
+          connected_at?: string;
+          id?: string;
+          member_high_id?: string;
+          member_low_id?: string;
+          origin_invite_id?: string | null;
+          status?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "friend_connection_blocked_by_member_id_fkey"
-            columns: ["blocked_by_member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_connection_blocked_by_member_id_fkey";
+            columns: ["blocked_by_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "friend_connection_member_high_id_fkey"
-            columns: ["member_high_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_connection_member_high_id_fkey";
+            columns: ["member_high_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "friend_connection_member_low_id_fkey"
-            columns: ["member_low_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_connection_member_low_id_fkey";
+            columns: ["member_low_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "friend_connection_origin_invite_id_fkey"
-            columns: ["origin_invite_id"]
-            isOneToOne: false
-            referencedRelation: "friend_invite"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_connection_origin_invite_id_fkey";
+            columns: ["origin_invite_id"];
+            isOneToOne: false;
+            referencedRelation: "friend_invite";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       friend_invite: {
         Row: {
-          accepted_at: string | null
-          accepted_by: string | null
-          channel: string
-          created_at: string
-          expires_at: string
-          goal_id: number | null
-          id: string
-          inviter_member_id: string
-          revoked_at: string | null
-          token_hash: string
-        }
+          accepted_at: string | null;
+          accepted_by: string | null;
+          channel: string;
+          created_at: string;
+          expires_at: string;
+          goal_id: number | null;
+          id: string;
+          inviter_member_id: string;
+          revoked_at: string | null;
+          token_hash: string;
+        };
+        ComputedFields: never;
         Insert: {
-          accepted_at?: string | null
-          accepted_by?: string | null
-          channel: string
-          created_at?: string
-          expires_at: string
-          goal_id?: number | null
-          id?: string
-          inviter_member_id: string
-          revoked_at?: string | null
-          token_hash: string
-        }
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          channel: string;
+          created_at?: string;
+          expires_at: string;
+          goal_id?: number | null;
+          id?: string;
+          inviter_member_id: string;
+          revoked_at?: string | null;
+          token_hash: string;
+        };
         Update: {
-          accepted_at?: string | null
-          accepted_by?: string | null
-          channel?: string
-          created_at?: string
-          expires_at?: string
-          goal_id?: number | null
-          id?: string
-          inviter_member_id?: string
-          revoked_at?: string | null
-          token_hash?: string
-        }
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          channel?: string;
+          created_at?: string;
+          expires_at?: string;
+          goal_id?: number | null;
+          id?: string;
+          inviter_member_id?: string;
+          revoked_at?: string | null;
+          token_hash?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "friend_invite_accepted_by_fkey"
-            columns: ["accepted_by"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_invite_accepted_by_fkey";
+            columns: ["accepted_by"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "friend_invite_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_invite_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "friend_invite_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_invite_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "friend_invite_inviter_member_id_fkey"
-            columns: ["inviter_member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "friend_invite_inviter_member_id_fkey";
+            columns: ["inviter_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
+      gift_exchange: {
+        Row: {
+          catalog_item_id: string;
+          clover_amount: number;
+          created_at: string;
+          destination_enc: string;
+          destination_masked: string;
+          id: number;
+          last_status_checked_at: string | null;
+          member_id: string;
+          provider_idempotency_key: string;
+          provider_order_id: string | null;
+          request_key: string;
+          status: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          catalog_item_id: string;
+          clover_amount: number;
+          created_at?: string;
+          destination_enc: string;
+          destination_masked: string;
+          id?: never;
+          last_status_checked_at?: string | null;
+          member_id: string;
+          provider_idempotency_key: string;
+          provider_order_id?: string | null;
+          request_key: string;
+          status: string;
+          updated_at?: string;
+        };
+        Update: {
+          catalog_item_id?: string;
+          clover_amount?: number;
+          created_at?: string;
+          destination_enc?: string;
+          destination_masked?: string;
+          id?: never;
+          last_status_checked_at?: string | null;
+          member_id?: string;
+          provider_idempotency_key?: string;
+          provider_order_id?: string | null;
+          request_key?: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "gift_exchange_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      gift_exchange_event: {
+        Row: {
+          created_at: string;
+          event_type: string;
+          gift_exchange_id: number;
+          id: number;
+          result_code: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          event_type: string;
+          gift_exchange_id: number;
+          id?: never;
+          result_code: string;
+        };
+        Update: {
+          created_at?: string;
+          event_type?: string;
+          gift_exchange_id?: number;
+          id?: never;
+          result_code?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "gift_exchange_event_gift_exchange_id_fkey";
+            columns: ["gift_exchange_id"];
+            isOneToOne: false;
+            referencedRelation: "gift_exchange";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       goal: {
         Row: {
-          active_cover_asset_id: string | null
-          closed_at: string | null
-          cover_preset_key: string
-          cover_selection_mode: string
-          created_at: string
-          deleted_at: string | null
-          due_date: string
-          id: number
-          member_id: string
-          reason: string | null
-          slug: string
-          status: Database["public"]["Enums"]["goal_status_enum"]
-          title: string
-          visibility: string
-        }
+          active_cover_asset_id: string | null;
+          closed_at: string | null;
+          cover_preset_key: string;
+          cover_selection_mode: string;
+          created_at: string;
+          deleted_at: string | null;
+          due_date: string;
+          id: number;
+          member_id: string;
+          reason: string | null;
+          slug: string;
+          status: Database["public"]["Enums"]["goal_status_enum"];
+          title: string;
+          visibility: string;
+        };
+        ComputedFields: never;
         Insert: {
-          active_cover_asset_id?: string | null
-          closed_at?: string | null
-          cover_preset_key?: string
-          cover_selection_mode?: string
-          created_at?: string
-          deleted_at?: string | null
-          due_date: string
-          id?: never
-          member_id: string
-          reason?: string | null
-          slug?: string
-          status?: Database["public"]["Enums"]["goal_status_enum"]
-          title: string
-          visibility?: string
-        }
+          active_cover_asset_id?: string | null;
+          closed_at?: string | null;
+          cover_preset_key?: string;
+          cover_selection_mode?: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          due_date: string;
+          id?: never;
+          member_id: string;
+          reason?: string | null;
+          slug?: string;
+          status?: Database["public"]["Enums"]["goal_status_enum"];
+          title: string;
+          visibility?: string;
+        };
         Update: {
-          active_cover_asset_id?: string | null
-          closed_at?: string | null
-          cover_preset_key?: string
-          cover_selection_mode?: string
-          created_at?: string
-          deleted_at?: string | null
-          due_date?: string
-          id?: never
-          member_id?: string
-          reason?: string | null
-          slug?: string
-          status?: Database["public"]["Enums"]["goal_status_enum"]
-          title?: string
-          visibility?: string
-        }
+          active_cover_asset_id?: string | null;
+          closed_at?: string | null;
+          cover_preset_key?: string;
+          cover_selection_mode?: string;
+          created_at?: string;
+          deleted_at?: string | null;
+          due_date?: string;
+          id?: never;
+          member_id?: string;
+          reason?: string | null;
+          slug?: string;
+          status?: Database["public"]["Enums"]["goal_status_enum"];
+          title?: string;
+          visibility?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "goal_active_cover_asset_id_fkey"
-            columns: ["active_cover_asset_id"]
-            isOneToOne: false
-            referencedRelation: "goal_cover_asset"
-            referencedColumns: ["id"]
+            foreignKeyName: "goal_active_cover_asset_id_fkey";
+            columns: ["active_cover_asset_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_cover_asset";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "goal_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "goal_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       goal_cover_asset: {
         Row: {
-          byte_size: number
-          content_sha256: string
-          created_at: string
-          goal_id: number
-          id: string
-          mime_type: string
-          owner_member_id: string
-          public_path: string | null
-          quarantine_path: string
-          rejection_code: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: string
-        }
+          byte_size: number;
+          content_sha256: string;
+          created_at: string;
+          goal_id: number;
+          id: string;
+          mime_type: string;
+          owner_member_id: string;
+          public_path: string | null;
+          quarantine_path: string;
+          rejection_code: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          status: string;
+        };
+        ComputedFields: never;
         Insert: {
-          byte_size: number
-          content_sha256: string
-          created_at?: string
-          goal_id: number
-          id?: string
-          mime_type: string
-          owner_member_id: string
-          public_path?: string | null
-          quarantine_path: string
-          rejection_code?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status: string
-        }
+          byte_size: number;
+          content_sha256: string;
+          created_at?: string;
+          goal_id: number;
+          id?: string;
+          mime_type: string;
+          owner_member_id: string;
+          public_path?: string | null;
+          quarantine_path: string;
+          rejection_code?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          status: string;
+        };
         Update: {
-          byte_size?: number
-          content_sha256?: string
-          created_at?: string
-          goal_id?: number
-          id?: string
-          mime_type?: string
-          owner_member_id?: string
-          public_path?: string | null
-          quarantine_path?: string
-          rejection_code?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-        }
+          byte_size?: number;
+          content_sha256?: string;
+          created_at?: string;
+          goal_id?: number;
+          id?: string;
+          mime_type?: string;
+          owner_member_id?: string;
+          public_path?: string | null;
+          quarantine_path?: string;
+          rejection_code?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          status?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "goal_cover_asset_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
+            foreignKeyName: "goal_cover_asset_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "goal_cover_asset_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "goal_cover_asset_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "goal_cover_asset_owner_member_id_fkey"
-            columns: ["owner_member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "goal_cover_asset_owner_member_id_fkey";
+            columns: ["owner_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "goal_cover_asset_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "goal_cover_asset_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
+      google_external_transaction: {
+        Row: {
+          attempt_count: number;
+          created_at: string;
+          external_transaction_id: string;
+          external_transaction_token_enc: string;
+          last_error_code: string | null;
+          next_attempt_at: string;
+          pretax_amount_minor: number;
+          purchase_id: number;
+          report_due_at: string;
+          report_status: string;
+          reported_at: string | null;
+          tax_amount_minor: number;
+          transaction_time: string;
+          user_tax_region: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          attempt_count?: number;
+          created_at?: string;
+          external_transaction_id: string;
+          external_transaction_token_enc: string;
+          last_error_code?: string | null;
+          next_attempt_at?: string;
+          pretax_amount_minor: number;
+          purchase_id: number;
+          report_due_at: string;
+          report_status?: string;
+          reported_at?: string | null;
+          tax_amount_minor: number;
+          transaction_time: string;
+          user_tax_region: string;
+        };
+        Update: {
+          attempt_count?: number;
+          created_at?: string;
+          external_transaction_id?: string;
+          external_transaction_token_enc?: string;
+          last_error_code?: string | null;
+          next_attempt_at?: string;
+          pretax_amount_minor?: number;
+          purchase_id?: number;
+          report_due_at?: string;
+          report_status?: string;
+          reported_at?: string | null;
+          tax_amount_minor?: number;
+          transaction_time?: string;
+          user_tax_region?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "google_external_transaction_purchase_id_fkey";
+            columns: ["purchase_id"];
+            isOneToOne: true;
+            referencedRelation: "store_purchase";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       kyc_verification: {
         Row: {
-          birth_date: string | null
-          ci: string | null
-          di: string | null
-          id: number
-          is_adult: boolean
-          member_id: string
-          provider: string
-          real_name: string | null
-          verified_at: string
-        }
+          birth_date: string | null;
+          ci: string | null;
+          di: string | null;
+          id: number;
+          is_adult: boolean;
+          member_id: string;
+          provider: string;
+          real_name: string | null;
+          verified_at: string;
+        };
+        ComputedFields: never;
         Insert: {
-          birth_date?: string | null
-          ci?: string | null
-          di?: string | null
-          id?: never
-          is_adult?: boolean
-          member_id: string
-          provider?: string
-          real_name?: string | null
-          verified_at?: string
-        }
+          birth_date?: string | null;
+          ci?: string | null;
+          di?: string | null;
+          id?: never;
+          is_adult?: boolean;
+          member_id: string;
+          provider?: string;
+          real_name?: string | null;
+          verified_at?: string;
+        };
         Update: {
-          birth_date?: string | null
-          ci?: string | null
-          di?: string | null
-          id?: never
-          is_adult?: boolean
-          member_id?: string
-          provider?: string
-          real_name?: string | null
-          verified_at?: string
-        }
+          birth_date?: string | null;
+          ci?: string | null;
+          di?: string | null;
+          id?: never;
+          is_adult?: boolean;
+          member_id?: string;
+          provider?: string;
+          real_name?: string | null;
+          verified_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "kyc_verification_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "kyc_verification_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       lead: {
         Row: {
-          campaign: string | null
-          consented_at: string
-          content: string | null
-          created_at: string
-          email: string | null
-          id: number
-          instagram_handle: string | null
-          landing_path: string | null
-          medium: string | null
-          referrer: string | null
-          source: string
-          status: string
-          submitter_hash: string | null
-        }
+          campaign: string | null;
+          consented_at: string;
+          content: string | null;
+          created_at: string;
+          email: string | null;
+          id: number;
+          instagram_handle: string | null;
+          landing_path: string | null;
+          medium: string | null;
+          referrer: string | null;
+          source: string;
+          status: string;
+          submitter_hash: string | null;
+        };
+        ComputedFields: never;
         Insert: {
-          campaign?: string | null
-          consented_at: string
-          content?: string | null
-          created_at?: string
-          email?: string | null
-          id?: number
-          instagram_handle?: string | null
-          landing_path?: string | null
-          medium?: string | null
-          referrer?: string | null
-          source?: string
-          status?: string
-          submitter_hash?: string | null
-        }
+          campaign?: string | null;
+          consented_at: string;
+          content?: string | null;
+          created_at?: string;
+          email?: string | null;
+          id?: number;
+          instagram_handle?: string | null;
+          landing_path?: string | null;
+          medium?: string | null;
+          referrer?: string | null;
+          source?: string;
+          status?: string;
+          submitter_hash?: string | null;
+        };
         Update: {
-          campaign?: string | null
-          consented_at?: string
-          content?: string | null
-          created_at?: string
-          email?: string | null
-          id?: number
-          instagram_handle?: string | null
-          landing_path?: string | null
-          medium?: string | null
-          referrer?: string | null
-          source?: string
-          status?: string
-          submitter_hash?: string | null
-        }
-        Relationships: []
-      }
+          campaign?: string | null;
+          consented_at?: string;
+          content?: string | null;
+          created_at?: string;
+          email?: string | null;
+          id?: number;
+          instagram_handle?: string | null;
+          landing_path?: string | null;
+          medium?: string | null;
+          referrer?: string | null;
+          source?: string;
+          status?: string;
+          submitter_hash?: string | null;
+        };
+        Relationships: [];
+      };
       member: {
         Row: {
-          bio: string | null
-          birth_date: string | null
-          ci: string | null
-          created_at: string
-          id: string
-          kyc_status: Database["public"]["Enums"]["kyc_status_enum"]
-          nickname: string | null
-          phone: string | null
-          profile_image: string | null
-          provider: string | null
-          provider_id: string | null
-        }
+          bio: string | null;
+          birth_date: string | null;
+          ci: string | null;
+          created_at: string;
+          id: string;
+          kyc_status: Database["public"]["Enums"]["kyc_status_enum"];
+          nickname: string | null;
+          phone: string | null;
+          profile_image: string | null;
+          provider: string | null;
+          provider_id: string | null;
+        };
+        ComputedFields: never;
         Insert: {
-          bio?: string | null
-          birth_date?: string | null
-          ci?: string | null
-          created_at?: string
-          id: string
-          kyc_status?: Database["public"]["Enums"]["kyc_status_enum"]
-          nickname?: string | null
-          phone?: string | null
-          profile_image?: string | null
-          provider?: string | null
-          provider_id?: string | null
-        }
+          bio?: string | null;
+          birth_date?: string | null;
+          ci?: string | null;
+          created_at?: string;
+          id: string;
+          kyc_status?: Database["public"]["Enums"]["kyc_status_enum"];
+          nickname?: string | null;
+          phone?: string | null;
+          profile_image?: string | null;
+          provider?: string | null;
+          provider_id?: string | null;
+        };
         Update: {
-          bio?: string | null
-          birth_date?: string | null
-          ci?: string | null
-          created_at?: string
-          id?: string
-          kyc_status?: Database["public"]["Enums"]["kyc_status_enum"]
-          nickname?: string | null
-          phone?: string | null
-          profile_image?: string | null
-          provider?: string | null
-          provider_id?: string | null
-        }
-        Relationships: []
-      }
+          bio?: string | null;
+          birth_date?: string | null;
+          ci?: string | null;
+          created_at?: string;
+          id?: string;
+          kyc_status?: Database["public"]["Enums"]["kyc_status_enum"];
+          nickname?: string | null;
+          phone?: string | null;
+          profile_image?: string | null;
+          provider?: string | null;
+          provider_id?: string | null;
+        };
+        Relationships: [];
+      };
       member_preference: {
         Row: {
-          member_id: string
-          notify_cheer: boolean
-          notify_marketing: boolean
-          updated_at: string
-        }
+          member_id: string;
+          notify_cheer: boolean;
+          notify_marketing: boolean;
+          updated_at: string;
+        };
+        ComputedFields: never;
         Insert: {
-          member_id: string
-          notify_cheer?: boolean
-          notify_marketing?: boolean
-          updated_at?: string
-        }
+          member_id: string;
+          notify_cheer?: boolean;
+          notify_marketing?: boolean;
+          updated_at?: string;
+        };
         Update: {
-          member_id?: string
-          notify_cheer?: boolean
-          notify_marketing?: boolean
-          updated_at?: string
-        }
+          member_id?: string;
+          notify_cheer?: boolean;
+          notify_marketing?: boolean;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "member_preference_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: true
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "member_preference_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: true;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       notification: {
         Row: {
-          alimtalk_status:
-            | Database["public"]["Enums"]["alimtalk_status_enum"]
-            | null
-          channel: Database["public"]["Enums"]["notification_channel_enum"]
-          created_at: string
-          id: number
-          member_id: string
-          read: boolean
-          type: Database["public"]["Enums"]["notification_type_enum"]
-        }
+          alimtalk_status: Database["public"]["Enums"]["alimtalk_status_enum"] | null;
+          channel: Database["public"]["Enums"]["notification_channel_enum"];
+          created_at: string;
+          id: number;
+          member_id: string;
+          read: boolean;
+          type: Database["public"]["Enums"]["notification_type_enum"];
+        };
+        ComputedFields: never;
         Insert: {
-          alimtalk_status?:
-            | Database["public"]["Enums"]["alimtalk_status_enum"]
-            | null
-          channel: Database["public"]["Enums"]["notification_channel_enum"]
-          created_at?: string
-          id?: never
-          member_id: string
-          read?: boolean
-          type: Database["public"]["Enums"]["notification_type_enum"]
-        }
+          alimtalk_status?: Database["public"]["Enums"]["alimtalk_status_enum"] | null;
+          channel: Database["public"]["Enums"]["notification_channel_enum"];
+          created_at?: string;
+          id?: never;
+          member_id: string;
+          read?: boolean;
+          type: Database["public"]["Enums"]["notification_type_enum"];
+        };
         Update: {
-          alimtalk_status?:
-            | Database["public"]["Enums"]["alimtalk_status_enum"]
-            | null
-          channel?: Database["public"]["Enums"]["notification_channel_enum"]
-          created_at?: string
-          id?: never
-          member_id?: string
-          read?: boolean
-          type?: Database["public"]["Enums"]["notification_type_enum"]
-        }
+          alimtalk_status?: Database["public"]["Enums"]["alimtalk_status_enum"] | null;
+          channel?: Database["public"]["Enums"]["notification_channel_enum"];
+          created_at?: string;
+          id?: never;
+          member_id?: string;
+          read?: boolean;
+          type?: Database["public"]["Enums"]["notification_type_enum"];
+        };
         Relationships: [
           {
-            foreignKeyName: "notification_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "notification_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       ops_event: {
         Row: {
-          created_at: string
-          details: Json
-          event_type: string
-          id: number
-          severity: string
-        }
+          created_at: string;
+          details: NonNullable<Json>;
+          event_type: string;
+          id: number;
+          severity: string;
+        };
+        ComputedFields: never;
         Insert: {
-          created_at?: string
-          details?: Json
-          event_type: string
-          id?: never
-          severity: string
-        }
+          created_at?: string;
+          details?: NonNullable<Json>;
+          event_type: string;
+          id?: never;
+          severity: string;
+        };
         Update: {
-          created_at?: string
-          details?: Json
-          event_type?: string
-          id?: never
-          severity?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          details?: NonNullable<Json>;
+          event_type?: string;
+          id?: never;
+          severity?: string;
+        };
+        Relationships: [];
+      };
       payment: {
         Row: {
-          amount_krw: number
-          approved_at: string | null
-          cancel_reconcile_required_at: string | null
-          created_at: string
-          id: number
-          method: string | null
-          order_id: string
-          partial_cancel_reviewed_at: string | null
-          payment_key: string | null
-          pg_customer_key: string
-          raw_response: Json | null
-          receipt_url: string | null
-          request_fingerprint: Json | null
-          request_key: string | null
-          status: Database["public"]["Enums"]["payment_status_enum"]
-        }
+          amount_krw: number;
+          approved_at: string | null;
+          cancel_reconcile_required_at: string | null;
+          created_at: string;
+          id: number;
+          method: string | null;
+          order_id: string;
+          partial_cancel_reviewed_at: string | null;
+          payment_key: string | null;
+          pg_customer_key: string;
+          raw_response: Json | null;
+          receipt_url: string | null;
+          request_fingerprint: Json | null;
+          request_key: string | null;
+          status: Database["public"]["Enums"]["payment_status_enum"];
+        };
+        ComputedFields: never;
         Insert: {
-          amount_krw: number
-          approved_at?: string | null
-          cancel_reconcile_required_at?: string | null
-          created_at?: string
-          id?: never
-          method?: string | null
-          order_id: string
-          partial_cancel_reviewed_at?: string | null
-          payment_key?: string | null
-          pg_customer_key?: string
-          raw_response?: Json | null
-          receipt_url?: string | null
-          request_fingerprint?: Json | null
-          request_key?: string | null
-          status?: Database["public"]["Enums"]["payment_status_enum"]
-        }
+          amount_krw: number;
+          approved_at?: string | null;
+          cancel_reconcile_required_at?: string | null;
+          created_at?: string;
+          id?: never;
+          method?: string | null;
+          order_id: string;
+          partial_cancel_reviewed_at?: string | null;
+          payment_key?: string | null;
+          pg_customer_key?: string;
+          raw_response?: Json | null;
+          receipt_url?: string | null;
+          request_fingerprint?: Json | null;
+          request_key?: string | null;
+          status?: Database["public"]["Enums"]["payment_status_enum"];
+        };
         Update: {
-          amount_krw?: number
-          approved_at?: string | null
-          cancel_reconcile_required_at?: string | null
-          created_at?: string
-          id?: never
-          method?: string | null
-          order_id?: string
-          partial_cancel_reviewed_at?: string | null
-          payment_key?: string | null
-          pg_customer_key?: string
-          raw_response?: Json | null
-          receipt_url?: string | null
-          request_fingerprint?: Json | null
-          request_key?: string | null
-          status?: Database["public"]["Enums"]["payment_status_enum"]
-        }
-        Relationships: []
-      }
+          amount_krw?: number;
+          approved_at?: string | null;
+          cancel_reconcile_required_at?: string | null;
+          created_at?: string;
+          id?: never;
+          method?: string | null;
+          order_id?: string;
+          partial_cancel_reviewed_at?: string | null;
+          payment_key?: string | null;
+          pg_customer_key?: string;
+          raw_response?: Json | null;
+          receipt_url?: string | null;
+          request_fingerprint?: Json | null;
+          request_key?: string | null;
+          status?: Database["public"]["Enums"]["payment_status_enum"];
+        };
+        Relationships: [];
+      };
       payment_log: {
         Row: {
-          created_at: string
-          detail: Json | null
-          from_status: Database["public"]["Enums"]["payment_status_enum"] | null
-          id: number
-          payment_id: number
-          to_status: Database["public"]["Enums"]["payment_status_enum"]
-        }
+          created_at: string;
+          detail: Json | null;
+          from_status: Database["public"]["Enums"]["payment_status_enum"] | null;
+          id: number;
+          payment_id: number;
+          to_status: Database["public"]["Enums"]["payment_status_enum"];
+        };
+        ComputedFields: never;
         Insert: {
-          created_at?: string
-          detail?: Json | null
-          from_status?:
-            | Database["public"]["Enums"]["payment_status_enum"]
-            | null
-          id?: never
-          payment_id: number
-          to_status: Database["public"]["Enums"]["payment_status_enum"]
-        }
+          created_at?: string;
+          detail?: Json | null;
+          from_status?: Database["public"]["Enums"]["payment_status_enum"] | null;
+          id?: never;
+          payment_id: number;
+          to_status: Database["public"]["Enums"]["payment_status_enum"];
+        };
         Update: {
-          created_at?: string
-          detail?: Json | null
-          from_status?:
-            | Database["public"]["Enums"]["payment_status_enum"]
-            | null
-          id?: never
-          payment_id?: number
-          to_status?: Database["public"]["Enums"]["payment_status_enum"]
-        }
+          created_at?: string;
+          detail?: Json | null;
+          from_status?: Database["public"]["Enums"]["payment_status_enum"] | null;
+          id?: never;
+          payment_id?: number;
+          to_status?: Database["public"]["Enums"]["payment_status_enum"];
+        };
         Relationships: [
           {
-            foreignKeyName: "payment_log_payment_id_fkey"
-            columns: ["payment_id"]
-            isOneToOne: false
-            referencedRelation: "payment"
-            referencedColumns: ["id"]
+            foreignKeyName: "payment_log_payment_id_fkey";
+            columns: ["payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payment";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       profile_avatar_asset: {
         Row: {
-          activated_at: string | null
-          byte_size: number
-          content_sha256: string
-          created_at: string
-          id: string
-          mime_type: string
-          object_path: string
-          owner_member_id: string | null
-          public_url: string | null
-          status: string
-        }
+          activated_at: string | null;
+          byte_size: number;
+          content_sha256: string;
+          created_at: string;
+          id: string;
+          mime_type: string;
+          object_path: string;
+          owner_member_id: string | null;
+          public_url: string | null;
+          status: string;
+        };
+        ComputedFields: never;
         Insert: {
-          activated_at?: string | null
-          byte_size: number
-          content_sha256: string
-          created_at?: string
-          id?: string
-          mime_type: string
-          object_path: string
-          owner_member_id?: string | null
-          public_url?: string | null
-          status?: string
-        }
+          activated_at?: string | null;
+          byte_size: number;
+          content_sha256: string;
+          created_at?: string;
+          id?: string;
+          mime_type: string;
+          object_path: string;
+          owner_member_id?: string | null;
+          public_url?: string | null;
+          status?: string;
+        };
         Update: {
-          activated_at?: string | null
-          byte_size?: number
-          content_sha256?: string
-          created_at?: string
-          id?: string
-          mime_type?: string
-          object_path?: string
-          owner_member_id?: string | null
-          public_url?: string | null
-          status?: string
-        }
+          activated_at?: string | null;
+          byte_size?: number;
+          content_sha256?: string;
+          created_at?: string;
+          id?: string;
+          mime_type?: string;
+          object_path?: string;
+          owner_member_id?: string | null;
+          public_url?: string | null;
+          status?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "profile_avatar_asset_owner_member_id_fkey"
-            columns: ["owner_member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "profile_avatar_asset_owner_member_id_fkey";
+            columns: ["owner_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       report: {
         Row: {
-          created_at: string
-          id: number
-          reason: string
-          reporter_ref: string | null
-          status: Database["public"]["Enums"]["report_status_enum"]
-          target_id: number
-          target_type: Database["public"]["Enums"]["report_target_type_enum"]
-        }
+          created_at: string;
+          id: number;
+          reason: string;
+          reporter_ref: string | null;
+          status: Database["public"]["Enums"]["report_status_enum"];
+          target_id: number;
+          target_type: Database["public"]["Enums"]["report_target_type_enum"];
+        };
+        ComputedFields: never;
         Insert: {
-          created_at?: string
-          id?: never
-          reason: string
-          reporter_ref?: string | null
-          status?: Database["public"]["Enums"]["report_status_enum"]
-          target_id: number
-          target_type: Database["public"]["Enums"]["report_target_type_enum"]
-        }
+          created_at?: string;
+          id?: never;
+          reason: string;
+          reporter_ref?: string | null;
+          status?: Database["public"]["Enums"]["report_status_enum"];
+          target_id: number;
+          target_type: Database["public"]["Enums"]["report_target_type_enum"];
+        };
         Update: {
-          created_at?: string
-          id?: never
-          reason?: string
-          reporter_ref?: string | null
-          status?: Database["public"]["Enums"]["report_status_enum"]
-          target_id?: number
-          target_type?: Database["public"]["Enums"]["report_target_type_enum"]
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: never;
+          reason?: string;
+          reporter_ref?: string | null;
+          status?: Database["public"]["Enums"]["report_status_enum"];
+          target_id?: number;
+          target_type?: Database["public"]["Enums"]["report_target_type_enum"];
+        };
+        Relationships: [];
+      };
       risk_event: {
         Row: {
-          created_at: string
-          detail: Json | null
-          id: number
-          member_id: string
-          resolved: boolean
-          type: string
-        }
+          created_at: string;
+          detail: Json | null;
+          id: number;
+          member_id: string;
+          resolved: boolean;
+          type: string;
+        };
+        ComputedFields: never;
         Insert: {
-          created_at?: string
-          detail?: Json | null
-          id?: never
-          member_id: string
-          resolved?: boolean
-          type: string
-        }
+          created_at?: string;
+          detail?: Json | null;
+          id?: never;
+          member_id: string;
+          resolved?: boolean;
+          type: string;
+        };
         Update: {
-          created_at?: string
-          detail?: Json | null
-          id?: never
-          member_id?: string
-          resolved?: boolean
-          type?: string
-        }
+          created_at?: string;
+          detail?: Json | null;
+          id?: never;
+          member_id?: string;
+          resolved?: boolean;
+          type?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "risk_event_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "risk_event_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       share_event: {
         Row: {
-          channel: string
-          created_at: string
-          goal_id: number
-          id: number
-        }
+          channel: string;
+          created_at: string;
+          goal_id: number;
+          id: number;
+        };
+        ComputedFields: never;
         Insert: {
-          channel: string
-          created_at?: string
-          goal_id: number
-          id?: never
-        }
+          channel: string;
+          created_at?: string;
+          goal_id: number;
+          id?: never;
+        };
         Update: {
-          channel?: string
-          created_at?: string
-          goal_id?: number
-          id?: never
-        }
+          channel?: string;
+          created_at?: string;
+          goal_id?: number;
+          id?: never;
+        };
         Relationships: [
           {
-            foreignKeyName: "share_event_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
+            foreignKeyName: "share_event_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "share_event_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "share_event_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       social_cheer_member_attribution: {
         Row: {
-          cheer_id: number
-          created_at: string
-          supporter_member_id: string
-        }
+          cheer_id: number;
+          created_at: string;
+          supporter_member_id: string;
+        };
+        ComputedFields: never;
         Insert: {
-          cheer_id: number
-          created_at?: string
-          supporter_member_id: string
-        }
+          cheer_id: number;
+          created_at?: string;
+          supporter_member_id: string;
+        };
         Update: {
-          cheer_id?: number
-          created_at?: string
-          supporter_member_id?: string
-        }
+          cheer_id?: number;
+          created_at?: string;
+          supporter_member_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "social_cheer_member_attribution_cheer_id_fkey"
-            columns: ["cheer_id"]
-            isOneToOne: true
-            referencedRelation: "cheer"
-            referencedColumns: ["id"]
+            foreignKeyName: "social_cheer_member_attribution_cheer_id_fkey";
+            columns: ["cheer_id"];
+            isOneToOne: true;
+            referencedRelation: "cheer";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "social_cheer_member_attribution_cheer_id_fkey"
-            columns: ["cheer_id"]
-            isOneToOne: true
-            referencedRelation: "cheer_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "social_cheer_member_attribution_cheer_id_fkey";
+            columns: ["cheer_id"];
+            isOneToOne: true;
+            referencedRelation: "cheer_public";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "social_cheer_member_attribution_supporter_member_id_fkey"
-            columns: ["supporter_member_id"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
+            foreignKeyName: "social_cheer_member_attribution_supporter_member_id_fkey";
+            columns: ["supporter_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       storage_cleanup_queue: {
         Row: {
-          attempts: number
-          available_at: string
-          bucket_id: string
-          completed_at: string | null
-          created_at: string
-          goal_id: number | null
-          id: number
-          lease_until: string | null
-          lock_token: string | null
-          locked_at: string | null
-          object_path: string
-          profile_avatar_asset_id: string | null
-          reason: string
-          status: string
-        }
+          attempts: number;
+          available_at: string;
+          bucket_id: string;
+          completed_at: string | null;
+          created_at: string;
+          goal_id: number | null;
+          id: number;
+          lease_until: string | null;
+          lock_token: string | null;
+          locked_at: string | null;
+          object_path: string;
+          profile_avatar_asset_id: string | null;
+          reason: string;
+          status: string;
+        };
+        ComputedFields: never;
         Insert: {
-          attempts?: number
-          available_at?: string
-          bucket_id: string
-          completed_at?: string | null
-          created_at?: string
-          goal_id?: number | null
-          id?: never
-          lease_until?: string | null
-          lock_token?: string | null
-          locked_at?: string | null
-          object_path: string
-          profile_avatar_asset_id?: string | null
-          reason: string
-          status?: string
-        }
+          attempts?: number;
+          available_at?: string;
+          bucket_id: string;
+          completed_at?: string | null;
+          created_at?: string;
+          goal_id?: number | null;
+          id?: never;
+          lease_until?: string | null;
+          lock_token?: string | null;
+          locked_at?: string | null;
+          object_path: string;
+          profile_avatar_asset_id?: string | null;
+          reason: string;
+          status?: string;
+        };
         Update: {
-          attempts?: number
-          available_at?: string
-          bucket_id?: string
-          completed_at?: string | null
-          created_at?: string
-          goal_id?: number | null
-          id?: never
-          lease_until?: string | null
-          lock_token?: string | null
-          locked_at?: string | null
-          object_path?: string
-          profile_avatar_asset_id?: string | null
-          reason?: string
-          status?: string
-        }
+          attempts?: number;
+          available_at?: string;
+          bucket_id?: string;
+          completed_at?: string | null;
+          created_at?: string;
+          goal_id?: number | null;
+          id?: never;
+          lease_until?: string | null;
+          lock_token?: string | null;
+          locked_at?: string | null;
+          object_path?: string;
+          profile_avatar_asset_id?: string | null;
+          reason?: string;
+          status?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "storage_cleanup_queue_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
+            foreignKeyName: "storage_cleanup_queue_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "storage_cleanup_queue_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "storage_cleanup_queue_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "storage_cleanup_queue_profile_avatar_asset_id_fkey"
-            columns: ["profile_avatar_asset_id"]
-            isOneToOne: false
-            referencedRelation: "profile_avatar_asset"
-            referencedColumns: ["id"]
+            foreignKeyName: "storage_cleanup_queue_profile_avatar_asset_id_fkey";
+            columns: ["profile_avatar_asset_id"];
+            isOneToOne: false;
+            referencedRelation: "profile_avatar_asset";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
+      store_purchase: {
+        Row: {
+          cheer_id: number | null;
+          clover_amount: number;
+          created_at: string;
+          currency: string;
+          environment: string;
+          goal_id: number;
+          gross_amount_minor: number;
+          id: number;
+          intent_id: string;
+          payment_id: number | null;
+          policy_risk: string | null;
+          product_id: string;
+          provider: string;
+          provider_transaction_id: string;
+          purchased_at: string;
+          refunded_amount_minor: number;
+          refunded_at: string | null;
+          refunded_clover_amount: number;
+          request_key: string;
+          status: string;
+          supporter_member_id: string;
+          updated_at: string;
+          verified_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          cheer_id?: number | null;
+          clover_amount: number;
+          created_at?: string;
+          currency: string;
+          environment: string;
+          goal_id: number;
+          gross_amount_minor: number;
+          id?: never;
+          intent_id: string;
+          payment_id?: number | null;
+          policy_risk?: string | null;
+          product_id: string;
+          provider: string;
+          provider_transaction_id: string;
+          purchased_at: string;
+          refunded_amount_minor?: number;
+          refunded_at?: string | null;
+          refunded_clover_amount?: number;
+          request_key: string;
+          status?: string;
+          supporter_member_id: string;
+          updated_at?: string;
+          verified_at?: string;
+        };
+        Update: {
+          cheer_id?: number | null;
+          clover_amount?: number;
+          created_at?: string;
+          currency?: string;
+          environment?: string;
+          goal_id?: number;
+          gross_amount_minor?: number;
+          id?: never;
+          intent_id?: string;
+          payment_id?: number | null;
+          policy_risk?: string | null;
+          product_id?: string;
+          provider?: string;
+          provider_transaction_id?: string;
+          purchased_at?: string;
+          refunded_amount_minor?: number;
+          refunded_at?: string | null;
+          refunded_clover_amount?: number;
+          request_key?: string;
+          status?: string;
+          supporter_member_id?: string;
+          updated_at?: string;
+          verified_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "store_purchase_cheer_id_fkey";
+            columns: ["cheer_id"];
+            isOneToOne: false;
+            referencedRelation: "cheer";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_cheer_id_fkey";
+            columns: ["cheer_id"];
+            isOneToOne: false;
+            referencedRelation: "cheer_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_intent_id_fkey";
+            columns: ["intent_id"];
+            isOneToOne: true;
+            referencedRelation: "store_purchase_intent";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_payment_id_fkey";
+            columns: ["payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_supporter_member_id_fkey";
+            columns: ["supporter_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      store_purchase_event: {
+        Row: {
+          currency: string | null;
+          event_type: string;
+          id: number;
+          normalization_status: string;
+          occurred_at: string | null;
+          payload_hash: string;
+          processed_at: string;
+          provider: string;
+          provider_event_id: string;
+          provider_transaction_id: string;
+          purchase_id: number | null;
+          refund_amount_minor: number | null;
+          refund_scope: string | null;
+          refund_transaction_id: string | null;
+          result_code: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          currency?: string | null;
+          event_type: string;
+          id?: never;
+          normalization_status?: string;
+          occurred_at?: string | null;
+          payload_hash: string;
+          processed_at?: string;
+          provider: string;
+          provider_event_id: string;
+          provider_transaction_id: string;
+          purchase_id?: number | null;
+          refund_amount_minor?: number | null;
+          refund_scope?: string | null;
+          refund_transaction_id?: string | null;
+          result_code: string;
+        };
+        Update: {
+          currency?: string | null;
+          event_type?: string;
+          id?: never;
+          normalization_status?: string;
+          occurred_at?: string | null;
+          payload_hash?: string;
+          processed_at?: string;
+          provider?: string;
+          provider_event_id?: string;
+          provider_transaction_id?: string;
+          purchase_id?: number | null;
+          refund_amount_minor?: number | null;
+          refund_scope?: string | null;
+          refund_transaction_id?: string | null;
+          result_code?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "store_purchase_event_purchase_id_fkey";
+            columns: ["purchase_id"];
+            isOneToOne: false;
+            referencedRelation: "store_purchase";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      store_purchase_intent: {
+        Row: {
+          account_binding: string;
+          clover_amount: number;
+          consumed_at: string | null;
+          created_at: string;
+          expires_at: string;
+          goal_id: number;
+          id: string;
+          product_id: string;
+          provider: string;
+          request_key: string;
+          status: string;
+          supporter_member_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          account_binding?: string;
+          clover_amount: number;
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          goal_id: number;
+          id?: string;
+          product_id: string;
+          provider: string;
+          request_key: string;
+          status?: string;
+          supporter_member_id: string;
+        };
+        Update: {
+          account_binding?: string;
+          clover_amount?: number;
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          goal_id?: number;
+          id?: string;
+          product_id?: string;
+          provider?: string;
+          request_key?: string;
+          status?: string;
+          supporter_member_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "store_purchase_intent_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_intent_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_purchase_intent_supporter_member_id_fkey";
+            columns: ["supporter_member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      store_recovery_case: {
+        Row: {
+          clover_shortfall: number;
+          created_at: string;
+          id: number;
+          member_id: string;
+          purchase_id: number;
+          resolution_note: string | null;
+          resolved_at: string | null;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          clover_shortfall: number;
+          created_at?: string;
+          id?: never;
+          member_id: string;
+          purchase_id: number;
+          resolution_note?: string | null;
+          resolved_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          clover_shortfall?: number;
+          created_at?: string;
+          id?: never;
+          member_id?: string;
+          purchase_id?: number;
+          resolution_note?: string | null;
+          resolved_at?: string | null;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "store_recovery_case_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "member";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "store_recovery_case_purchase_id_fkey";
+            columns: ["purchase_id"];
+            isOneToOne: true;
+            referencedRelation: "store_purchase";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       toss_webhook_receipt: {
         Row: {
-          claimed_at: string
-          event_type: string
-          payment_key: string
-          processed_at: string | null
-          transmission_id: string
-        }
+          claimed_at: string;
+          event_type: string;
+          payment_key: string;
+          processed_at: string | null;
+          transmission_id: string;
+        };
+        ComputedFields: never;
         Insert: {
-          claimed_at?: string
-          event_type: string
-          payment_key: string
-          processed_at?: string | null
-          transmission_id: string
-        }
+          claimed_at?: string;
+          event_type: string;
+          payment_key: string;
+          processed_at?: string | null;
+          transmission_id: string;
+        };
         Update: {
-          claimed_at?: string
-          event_type?: string
-          payment_key?: string
-          processed_at?: string | null
-          transmission_id?: string
-        }
-        Relationships: []
-      }
+          claimed_at?: string;
+          event_type?: string;
+          payment_key?: string;
+          processed_at?: string | null;
+          transmission_id?: string;
+        };
+        Relationships: [];
+      };
       wordmap_render_cache: {
         Row: {
-          goal_id: number
-          id: number
-          image_url: string
-          rendered_at: string
-          word_count: number
-        }
+          goal_id: number;
+          id: number;
+          image_url: string;
+          rendered_at: string;
+          word_count: number;
+        };
+        ComputedFields: never;
         Insert: {
-          goal_id: number
-          id?: never
-          image_url: string
-          rendered_at?: string
-          word_count?: number
-        }
+          goal_id: number;
+          id?: never;
+          image_url: string;
+          rendered_at?: string;
+          word_count?: number;
+        };
         Update: {
-          goal_id?: number
-          id?: never
-          image_url?: string
-          rendered_at?: string
-          word_count?: number
-        }
+          goal_id?: number;
+          id?: never;
+          image_url?: string;
+          rendered_at?: string;
+          word_count?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "wordmap_render_cache_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
+            foreignKeyName: "wordmap_render_cache_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "wordmap_render_cache_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "wordmap_render_cache_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
       cheer_public: {
         Row: {
-          created_at: string | null
-          display_name: string | null
-          goal_id: number | null
-          id: number | null
-          is_anonymous: boolean | null
-          message: string | null
-        }
+          created_at: string;
+          display_name: string | null;
+          goal_id: number;
+          id: number;
+          is_anonymous: boolean;
+          message: string | null;
+        };
+        ComputedFields: never;
         Relationships: [
           {
-            foreignKeyName: "cheer_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
+            foreignKeyName: "cheer_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "cheer_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal_public"
-            referencedColumns: ["id"]
+            foreignKeyName: "cheer_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "goal_public";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       goal_public: {
         Row: {
-          cheer_count: number | null
-          closed_at: string | null
-          cover_preset_key: string | null
-          cover_public_path: string | null
-          created_at: string | null
-          due_date: string | null
-          id: number | null
-          reason: string | null
-          slug: string | null
-          status: Database["public"]["Enums"]["goal_status_enum"] | null
-          title: string | null
-        }
-        Relationships: []
-      }
-    }
+          cheer_count: number | null;
+          closed_at: string | null;
+          cover_preset_key: string;
+          cover_public_path: string | null;
+          created_at: string;
+          due_date: string;
+          id: number;
+          reason: string | null;
+          slug: string;
+          status: Database["public"]["Enums"]["goal_status_enum"];
+          title: string;
+        };
+        ComputedFields: never;
+        Relationships: [];
+      };
+    };
     Functions: {
-      accept_friend_invite: { Args: { token: string }; Returns: Json }
-      account_withdrawal_eligibility: { Args: never; Returns: Json }
-      activate_my_profile_avatar_service: {
-        Args: {
-          p_asset_id: string
-          p_owner_member_id: string
-          p_public_url: string
-        }
-        Returns: Json
-      }
-      admin_apply_goal_cover_review: {
-        Args: {
-          p_admin_id: string
-          p_asset_id: string
-          p_decision: string
-          p_public_path?: string
-          p_rejection_code?: string
-        }
-        Returns: Json
-      }
-      admin_list_cashouts: {
-        Args: { p_limit?: number }
-        Returns: {
-          clover_amount: number
-          fee_krw: number
-          gross_krw: number
-          id: number
-          member_id: string
-          net_krw: number
-          nickname: string
-          paid_at: string
-          requested_at: string
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-          withholding_krw: number
-        }[]
-      }
-      admin_list_cashouts_v2: {
-        Args: { p_limit?: number }
-        Returns: {
-          account_holder: string
-          account_masked: string
-          bank_code: string
-          clover_amount: number
-          fee_krw: number
-          gross_krw: number
-          id: number
-          member_id: string
-          net_krw: number
-          nickname: string
-          paid_at: string
-          processing_note: string
-          rejected_at: string
-          requested_at: string
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-          withholding_krw: number
-        }[]
-      }
-      admin_list_goal_covers: {
-        Args: { p_limit?: number }
-        Returns: {
-          asset_id: string
-          byte_size: number
-          content_sha256: string
-          created_at: string
-          goal_id: number
-          goal_title: string
-          mime_type: string
-          owner_nickname: string
-          quarantine_path: string
-        }[]
-      }
-      admin_list_ledger: {
-        Args: { p_limit?: number }
-        Returns: {
-          balance_after: number
-          clover_delta: number
-          created_at: string
-          entry_type: Database["public"]["Enums"]["clover_entry_type_enum"]
-          id: number
-          member_id: string
-          nickname: string
-          ref_id: number
-          ref_type: string
-        }[]
-      }
-      admin_list_members: {
-        Args: { p_limit?: number }
-        Returns: {
-          clover_count: number
-          created_at: string
-          goal_slug: string
-          id: string
-          kyc_status: Database["public"]["Enums"]["kyc_status_enum"]
-          nickname: string
-          provider: string
-        }[]
-      }
-      admin_mark_cashout_paid: {
-        Args: { p_processing_note?: string; p_request_id: number }
-        Returns: {
-          cashout_request_id: number
-          paid_at: string
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-        }[]
-      }
-      admin_reject_cashout: {
-        Args: { p_processing_note: string; p_request_id: number }
-        Returns: {
-          cashout_request_id: number
-          rejected_at: string
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-        }[]
-      }
-      admin_reveal_cashout_account: {
-        Args: { p_account_keys: Json; p_actor_id: string; p_request_id: number }
-        Returns: string
-      }
+      accept_friend_invite: { Args: { token: string }; Returns: Json };
+      account_withdrawal_eligibility: { Args: Record<PropertyKey, never>; Returns: Json };
       ack_payment_conversion: {
         Args: {
-          p_event_id: string
-          p_lease_token: string
-          p_order_id: string
-          p_payment_key: string
-        }
-        Returns: boolean
-      }
+          p_event_id: string;
+          p_lease_token: string;
+          p_order_id: string;
+          p_payment_key: string;
+        };
+        Returns: boolean;
+      };
+      activate_my_profile_avatar_service: {
+        Args: { p_asset_id: string; p_owner_member_id: string; p_public_url: string };
+        Returns: Json;
+      };
+      admin_apply_goal_cover_review: {
+        Args: {
+          p_admin_id: string;
+          p_asset_id: string;
+          p_decision: string;
+          p_public_path?: string;
+          p_rejection_code?: string;
+        };
+        Returns: Json;
+      };
+      admin_list_cashouts: {
+        Args: { p_limit?: number };
+        Returns: {
+          clover_amount: number;
+          fee_krw: number;
+          gross_krw: number;
+          id: number;
+          member_id: string;
+          net_krw: number;
+          nickname: string;
+          paid_at: string;
+          requested_at: string;
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+          withholding_krw: number;
+        }[];
+      };
+      admin_list_cashouts_v2: {
+        Args: { p_limit?: number };
+        Returns: {
+          account_holder: string;
+          account_masked: string;
+          bank_code: string;
+          clover_amount: number;
+          fee_krw: number;
+          gross_krw: number;
+          id: number;
+          member_id: string;
+          net_krw: number;
+          nickname: string;
+          paid_at: string;
+          processing_note: string;
+          rejected_at: string;
+          requested_at: string;
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+          withholding_krw: number;
+        }[];
+      };
+      admin_list_goal_covers: {
+        Args: { p_limit?: number };
+        Returns: {
+          asset_id: string;
+          byte_size: number;
+          content_sha256: string;
+          created_at: string;
+          goal_id: number;
+          goal_title: string;
+          mime_type: string;
+          owner_nickname: string;
+          quarantine_path: string;
+        }[];
+      };
+      admin_list_ledger: {
+        Args: { p_limit?: number };
+        Returns: {
+          balance_after: number;
+          clover_delta: number;
+          created_at: string;
+          entry_type: Database["public"]["Enums"]["clover_entry_type_enum"];
+          id: number;
+          member_id: string;
+          nickname: string;
+          ref_id: number;
+          ref_type: string;
+        }[];
+      };
+      admin_list_members: {
+        Args: { p_limit?: number };
+        Returns: {
+          clover_count: number;
+          created_at: string;
+          goal_slug: string;
+          id: string;
+          kyc_status: Database["public"]["Enums"]["kyc_status_enum"];
+          nickname: string;
+          provider: string;
+        }[];
+      };
+      admin_mark_cashout_paid: {
+        Args: { p_processing_note?: string; p_request_id: number };
+        Returns: {
+          cashout_request_id: number;
+          paid_at: string;
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+        }[];
+      };
+      admin_reject_cashout: {
+        Args: { p_processing_note: string; p_request_id: number };
+        Returns: {
+          cashout_request_id: number;
+          rejected_at: string;
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+        }[];
+      };
+      admin_reveal_cashout_account: {
+        Args: { p_account_keys: Json; p_actor_id: string; p_request_id: number };
+        Returns: string;
+      };
       capture_lead: {
         Args: {
-          p_campaign: string
-          p_consented_at: string
-          p_content: string
-          p_email: string
-          p_instagram_handle: string
-          p_landing_path: string
-          p_medium: string
-          p_referrer: string
-          p_source: string
-          p_submitter_hash: string
-        }
+          p_campaign: string;
+          p_consented_at: string;
+          p_content: string;
+          p_email: string;
+          p_instagram_handle: string;
+          p_landing_path: string;
+          p_medium: string;
+          p_referrer: string;
+          p_source: string;
+          p_submitter_hash: string;
+        };
         Returns: {
-          is_duplicate: boolean
-          lead_id: number
-        }[]
-      }
-      cashout_require_kyc: { Args: never; Returns: boolean }
-      lease_payment_conversion: {
-        Args: {
-          p_lease_seconds?: number
-          p_order_id: string
-          p_payment_key: string
-        }
-        Returns: {
-          delivery_state: string
-          eligible: boolean
-          event_id: string
-          expires_at: string
-          lease_token: string
-        }[]
-      }
+          is_duplicate: boolean;
+          lead_id: number;
+        }[];
+      };
+      cashout_require_kyc: { Args: Record<PropertyKey, never>; Returns: boolean };
       claim_storage_cleanup_batch: {
-        Args: { p_lease?: string; p_limit?: number }
+        Args: { p_lease?: string; p_limit?: number };
         Returns: {
-          bucket_id: string
-          id: number
-          lock_token: string
-          object_path: string
-        }[]
-      }
+          bucket_id: string;
+          id: number;
+          lock_token: string;
+          object_path: string;
+        }[];
+      };
       claim_toss_webhook: {
-        Args: {
-          p_event_type: string
-          p_payment_key: string
-          p_transmission_id: string
-        }
-        Returns: string
-      }
-      close_my_goal: { Args: { p_goal_id: number }; Returns: Json }
+        Args: { p_event_type: string; p_payment_key: string; p_transmission_id: string };
+        Returns: string;
+      };
+      close_my_goal: { Args: { p_goal_id: number }; Returns: Json };
       clover_eligibility: {
-        Args: { p_member_id: string }
+        Args: { p_member_id: string };
         Returns: {
-          available_amount: number
-          locked_amount: number
-          min_cashout_clover: number
-          payable_amount: number
-          reached_threshold: boolean
-          total_balance: number
-          welcome_amount: number
-        }[]
-      }
-      complete_toss_webhook: {
-        Args: { p_transmission_id: string }
-        Returns: undefined
-      }
+          available_amount: number;
+          gift_locked_amount: number;
+          locked_amount: number;
+          maturity_locked_amount: number;
+          min_cashout_clover: number;
+          next_maturity_at: string;
+          payable_amount: number;
+          reached_threshold: boolean;
+          total_balance: number;
+          welcome_amount: number;
+        }[];
+      };
+      complete_toss_webhook: { Args: { p_transmission_id: string }; Returns: undefined };
       confirm_cheer_payment: {
         Args: {
-          p_amount_krw: number
-          p_approved_at: string
-          p_method: string
-          p_order_id: string
-          p_payment_key: string
-          p_raw_response: Json
-          p_receipt_url: string
-        }
+          p_amount_krw: number;
+          p_approved_at: string;
+          p_method: string;
+          p_order_id: string;
+          p_payment_key: string;
+          p_raw_response: Json;
+          p_receipt_url: string;
+        };
         Returns: {
-          cheer_id: number
-          display_name: string
-          goal_title: string
-          member_id: string
-          payment_id: number
-        }[]
-      }
+          cheer_id: number;
+          display_name: string;
+          goal_title: string;
+          member_id: string;
+          payment_id: number;
+        }[];
+      };
       create_cashout_request: {
         Args: {
-          p_account_fingerprint_key: string
-          p_account_holder: string
-          p_account_key: string
-          p_account_key_version: number
-          p_account_no: string
-          p_bank_code: string
-          p_clover_amount: number
-          p_member_id: string
-          p_request_key: string
-        }
+          p_account_fingerprint_key: string;
+          p_account_holder: string;
+          p_account_key: string;
+          p_account_key_version: number;
+          p_account_no: string;
+          p_bank_code: string;
+          p_clover_amount: number;
+          p_member_id: string;
+          p_request_key: string;
+        };
         Returns: {
-          cashout_request_id: number
-          clover_amount: number
-          fee_krw: number
-          gross_krw: number
-          is_replay: boolean
-          net_krw: number
-          requested_at: string
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-          withholding_krw: number
-        }[]
-      }
+          cashout_request_id: number;
+          clover_amount: number;
+          fee_krw: number;
+          gross_krw: number;
+          is_replay: boolean;
+          net_krw: number;
+          requested_at: string;
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+          withholding_krw: number;
+        }[];
+      };
       create_cheer_order: {
         Args: {
-          p_amount_krw: number
-          p_clover_amount: number
-          p_display_name: string
-          p_goal_id: number
-          p_is_anonymous: boolean
-          p_message: string
-          p_order_id: string
-          p_pg_customer_key: string
-          p_request_key?: string
-        }
+          p_amount_krw: number;
+          p_clover_amount: number;
+          p_display_name: string;
+          p_goal_id: number;
+          p_is_anonymous: boolean;
+          p_message: string;
+          p_order_id: string;
+          p_pg_customer_key: string;
+          p_request_key?: string;
+        };
         Returns: {
-          cheer_id: number
-          is_replay: boolean
-          order_id: string
-          payment_id: number
-        }[]
-      }
-      create_friend_invite: {
-        Args: { channel?: string; goal_id?: number }
-        Returns: Json
-      }
+          cheer_id: number;
+          is_replay: boolean;
+          order_id: string;
+          payment_id: number;
+        }[];
+      };
+      create_friend_invite: { Args: { channel?: string; goal_id?: number }; Returns: Json };
       create_goal:
         | {
-            Args: { p_due_date: string; p_reason: string; p_title: string }
+            Args: { p_due_date: string; p_reason: string; p_title: string };
             Returns: {
-              slug: string
-            }[]
+              slug: string;
+            }[];
           }
         | {
             Args: {
-              p_cover_preset_key: string
-              p_due_date: string
-              p_reason: string
-              p_title: string
-            }
+              p_cover_preset_key: string;
+              p_due_date: string;
+              p_reason: string;
+              p_title: string;
+            };
             Returns: {
-              slug: string
-            }[]
-          }
-      expire_stale_cheer_payments: { Args: never; Returns: number }
-      friend_goal_detail: { Args: { goal_id: number }; Returns: Json }
-      friend_invite_preview: { Args: { token: string }; Returns: Json }
-      get_wordmap: {
-        Args: { p_goal_id: number }
+              slug: string;
+            }[];
+          };
+      create_store_purchase_intent: {
+        Args: {
+          p_clover_amount: number;
+          p_goal_id: number;
+          p_product_id: string;
+          p_provider: string;
+          p_request_key: string;
+        };
         Returns: {
-          word: string
-          word_count: number
-        }[]
-      }
+          account_binding: string;
+          expires_at: string;
+          intent_id: string;
+          is_replay: boolean;
+        }[];
+      };
+      credit_store_purchase: {
+        Args: {
+          p_account_binding: string;
+          p_clover_amount: number;
+          p_currency: string;
+          p_environment: string;
+          p_gross_amount_minor: number;
+          p_intent_id: string;
+          p_is_anonymous: boolean;
+          p_message: string;
+          p_policy_risk?: string;
+          p_product_id: string;
+          p_provider: string;
+          p_provider_transaction_id: string;
+          p_purchased_at: string;
+          p_request_key: string;
+          p_verified_member_id: string;
+        };
+        Returns: {
+          available_at: string;
+          cheer_id: number;
+          clover_amount: number;
+          is_replay: boolean;
+          purchase_id: number;
+        }[];
+      };
+      expire_stale_cheer_payments: { Args: Record<PropertyKey, never>; Returns: number };
+      friend_goal_detail: { Args: { goal_id: number }; Returns: Json };
+      friend_invite_preview: { Args: { token: string }; Returns: Json };
+      get_wordmap: {
+        Args: { p_goal_id: number };
+        Returns: {
+          word: string;
+          word_count: number;
+        }[];
+      };
       hydrate_kakao_profile_defaults_service: {
         Args: {
-          p_member_id: string
-          p_nickname: string
-          p_phone: string
-          p_profile_image: string
-          p_update_phone: boolean
-        }
-        Returns: Json
-      }
-      is_admin: { Args: never; Returns: boolean }
-      min_cashout_clover: { Args: never; Returns: number }
-      monitor_storage_cleanup_drain: {
-        Args: { p_stale_after?: string }
-        Returns: number
-      }
+          p_member_id: string;
+          p_nickname: string;
+          p_phone: string;
+          p_profile_image: string;
+          p_update_phone: boolean;
+        };
+        Returns: Json;
+      };
+      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      lease_payment_conversion: {
+        Args: { p_lease_seconds?: number; p_order_id: string; p_payment_key: string };
+        Returns: {
+          delivery_state: string;
+          eligible: boolean;
+          event_id: string;
+          expires_at: string;
+          lease_token: string;
+        }[];
+      };
+      min_cashout_clover: { Args: Record<PropertyKey, never>; Returns: number };
+      monitor_storage_cleanup_drain: { Args: { p_stale_after?: string }; Returns: number };
       my_cashout_history: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number };
         Returns: {
-          account_holder: string
-          account_masked: string
-          bank_code: string
-          clover_amount: number
-          id: number
-          net_krw: number
-          paid_at: string
-          processing_note: string
-          rejected_at: string
-          requested_at: string
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-        }[]
-      }
+          account_holder: string;
+          account_masked: string;
+          bank_code: string;
+          clover_amount: number;
+          id: number;
+          net_krw: number;
+          paid_at: string;
+          processing_note: string;
+          rejected_at: string;
+          requested_at: string;
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+        }[];
+      };
       my_cashout_status: {
-        Args: never
+        Args: Record<PropertyKey, never>;
         Returns: {
-          account_holder: string
-          account_masked: string
-          bank_code: string
-          clover_amount: number
-          id: number
-          net_krw: number
-          paid_at: string
-          processing_note: string
-          rejected_at: string
-          requested_at: string
-          settled_balance_after: number
-          settled_balance_before: number
-          status: Database["public"]["Enums"]["cashout_status_enum"]
-        }[]
-      }
-      my_friend_goals: { Args: never; Returns: Json }
+          account_holder: string;
+          account_masked: string;
+          bank_code: string;
+          clover_amount: number;
+          id: number;
+          net_krw: number;
+          paid_at: string;
+          processing_note: string;
+          rejected_at: string;
+          requested_at: string;
+          settled_balance_after: number;
+          settled_balance_before: number;
+          status: Database["public"]["Enums"]["cashout_status_enum"];
+        }[];
+      };
+      my_friend_goals: { Args: Record<PropertyKey, never>; Returns: Json };
+      my_friend_page: { Args: Record<PropertyKey, never>; Returns: Json };
       my_goal_cheer_summary: {
-        Args: { p_goal_id: number; p_limit?: number; p_search?: string }
-        Returns: Json
-      }
-      my_social_dashboard: { Args: never; Returns: Json }
-      purge_abandoned_goal_covers: {
-        Args: { p_older_than?: string }
-        Returns: number
-      }
-      purge_expired_cashout_accounts: {
-        Args: { p_limit?: number }
-        Returns: number
-      }
+        Args: { p_goal_id: number; p_limit?: number; p_search?: string };
+        Returns: Json;
+      };
+      my_social_dashboard: { Args: Record<PropertyKey, never>; Returns: Json };
+      my_unlinked_cheer_history: { Args: Record<PropertyKey, never>; Returns: Json };
+      purge_abandoned_goal_covers: { Args: { p_older_than?: string }; Returns: number };
+      purge_expired_cashout_accounts: { Args: { p_limit?: number }; Returns: number };
       reconcile_canceled_payment: {
-        Args: {
-          p_amount_krw: number
-          p_detail: Json
-          p_order_id: string
-          p_payment_key: string
-        }
+        Args: { p_amount_krw: number; p_detail: Json; p_order_id: string; p_payment_key: string };
         Returns: {
-          idempotent: boolean
-          payment_id: number
-          payment_status: Database["public"]["Enums"]["payment_status_enum"]
-          review_required: boolean
-        }[]
-      }
+          idempotent: boolean;
+          payment_id: number;
+          payment_status: Database["public"]["Enums"]["payment_status_enum"];
+          review_required: boolean;
+        }[];
+      };
       record_partial_cancel_review: {
-        Args: {
-          p_amount_krw: number
-          p_detail: Json
-          p_order_id: string
-          p_payment_key: string
-        }
-        Returns: boolean
-      }
+        Args: { p_amount_krw: number; p_detail: Json; p_order_id: string; p_payment_key: string };
+        Returns: boolean;
+      };
       record_payment_compensation: {
         Args: {
-          p_amount_krw: number
-          p_detail: Json
-          p_order_id: string
-          p_payment_key: string
-          p_target_status: Database["public"]["Enums"]["payment_status_enum"]
-        }
+          p_amount_krw: number;
+          p_detail: Json;
+          p_order_id: string;
+          p_payment_key: string;
+          p_target_status: Database["public"]["Enums"]["payment_status_enum"];
+        };
         Returns: {
-          payment_id: number
-          status: Database["public"]["Enums"]["payment_status_enum"]
-        }[]
-      }
+          payment_id: number;
+          status: Database["public"]["Enums"]["payment_status_enum"];
+        }[];
+      };
       record_storage_cleanup_schedule_failure: {
-        Args: { p_message: string; p_sqlstate: string; p_stage: string }
-        Returns: number
-      }
-      release_toss_webhook: {
-        Args: { p_transmission_id: string }
-        Returns: undefined
-      }
-      remove_friend: { Args: { friend_member_id: string }; Returns: Json }
-      requeue_orphan_cover_tombstones: {
-        Args: { p_older_than?: string }
-        Returns: number
-      }
-      set_goal_cover_preset: {
-        Args: { goal_id: number; preset_key: string }
-        Returns: Json
-      }
-      set_goal_visibility: {
-        Args: { goal_id: number; visibility: string }
-        Returns: Json
-      }
-      settle_storage_cleanup: {
-        Args: { p_id: number; p_lock_token: string; p_ok: boolean }
-        Returns: boolean
-      }
-      social_backfill_confirmed_cheer_friendships: {
-        Args: never
-        Returns: number
-      }
-      social_connect_cheer_members: {
-        Args: { p_cheer_id: number }
-        Returns: undefined
-      }
-      social_cover_preset_for_title: {
-        Args: { p_title: string }
-        Returns: string
-      }
-      social_has_confirmed_cheer: {
-        Args: { p_owner_member_id: string; p_supporter_member_id: string }
-        Returns: boolean
-      }
-      social_is_active_friend: {
-        Args: { p_member_a: string; p_member_b: string }
-        Returns: boolean
-      }
-      social_require_user: { Args: never; Returns: string }
-      social_validate_invite_token: {
-        Args: { p_token: string }
-        Returns: string
-      }
-      update_goal: {
+        Args: { p_message: string; p_sqlstate: string; p_stage: string };
+        Returns: number;
+      };
+      release_toss_webhook: { Args: { p_transmission_id: string }; Returns: undefined };
+      remove_friend: { Args: { friend_member_id: string }; Returns: Json };
+      requeue_orphan_cover_tombstones: { Args: { p_older_than?: string }; Returns: number };
+      reverse_store_purchase: {
         Args: {
-          p_due_date: string
-          p_goal_id: number
-          p_reason: string
-          p_title: string
-        }
-        Returns: undefined
-      }
+          p_currency?: string;
+          p_occurred_at?: string;
+          p_payload_hash: string;
+          p_provider: string;
+          p_provider_event_id: string;
+          p_provider_transaction_id: string;
+          p_refund_amount_minor?: number;
+          p_refund_clover_amount?: number;
+          p_refund_scope?: string;
+          p_refund_transaction_id?: string;
+        };
+        Returns: {
+          clover_recovered: number;
+          clover_shortfall: number;
+          is_replay: boolean;
+          purchase_id: number;
+          status: string;
+        }[];
+      };
+      set_goal_cover_preset: { Args: { goal_id: number; preset_key: string }; Returns: Json };
+      set_goal_visibility: { Args: { goal_id: number; visibility: string }; Returns: Json };
+      settle_storage_cleanup: {
+        Args: { p_id: number; p_lock_token: string; p_ok: boolean };
+        Returns: boolean;
+      };
+      social_backfill_confirmed_cheer_friendships: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      social_connect_cheer_members: { Args: { p_cheer_id: number }; Returns: undefined };
+      social_cover_preset_for_title: { Args: { p_title: string }; Returns: string };
+      social_has_confirmed_cheer: {
+        Args: { p_owner_member_id: string; p_supporter_member_id: string };
+        Returns: boolean;
+      };
+      social_is_active_friend: {
+        Args: { p_member_a: string; p_member_b: string };
+        Returns: boolean;
+      };
+      social_require_user: { Args: Record<PropertyKey, never>; Returns: string };
+      social_validate_invite_token: { Args: { p_token: string }; Returns: string };
+      update_goal: {
+        Args: { p_due_date: string; p_goal_id: number; p_reason: string; p_title: string };
+        Returns: undefined;
+      };
       update_member_preferences: {
-        Args: { notify_cheer: boolean; notify_marketing: boolean }
-        Returns: Json
-      }
+        Args: { notify_cheer: boolean; notify_marketing: boolean };
+        Returns: Json;
+      };
       update_my_profile: {
-        Args: { p_bio: string; p_nickname: string; p_profile_image: string }
-        Returns: Json
-      }
-      welcome_clover_amount: { Args: never; Returns: number }
-    }
+        Args: { p_bio: string; p_nickname: string; p_profile_image: string };
+        Returns: Json;
+      };
+      welcome_clover_amount: { Args: Record<PropertyKey, never>; Returns: number };
+    };
     Enums: {
-      alimtalk_status_enum: "SENT" | "FAILED"
+      alimtalk_status_enum: "SENT" | "FAILED";
       cashout_status_enum:
         | "REQUESTED"
         | "KYC_PENDING"
@@ -1757,8 +2343,8 @@ export type Database = {
         | "PAYOUT_SENT"
         | "PAID"
         | "REJECTED"
-        | "FAILED"
-      cheer_status_enum: "PENDING" | "CONFIRMED" | "REFUNDED" | "EXPIRED"
+        | "FAILED";
+      cheer_status_enum: "PENDING" | "CONFIRMED" | "REFUNDED" | "EXPIRED";
       clover_entry_type_enum:
         | "EARN"
         | "CASHOUT_HOLD"
@@ -1766,141 +2352,126 @@ export type Database = {
         | "CASHOUT_REVERSAL"
         | "REFUND_REVERSAL"
         | "WELCOME_GRANT"
-        | "WELCOME_REVERSAL"
-      goal_status_enum: "ACTIVE" | "CLOSED" | "DELETED"
-      kyc_status_enum: "NONE" | "VERIFIED"
-      notification_channel_enum: "ALIMTALK" | "INAPP"
-      notification_type_enum:
-        | "CHEER_RECEIVED"
-        | "CASHOUT_REQUESTED"
-        | "CASHOUT_PAID"
-      payment_status_enum: "READY" | "DONE" | "CANCELED" | "FAILED" | "EXPIRED"
-      report_status_enum: "OPEN" | "RESOLVED_DELETED" | "DISMISSED"
-      report_target_type_enum: "GOAL" | "CHEER"
-      risk_flag_enum: "CLEAR" | "REVIEW" | "BLOCKED"
-    }
+        | "WELCOME_REVERSAL";
+      goal_status_enum: "ACTIVE" | "CLOSED" | "DELETED";
+      kyc_status_enum: "NONE" | "VERIFIED";
+      notification_channel_enum: "ALIMTALK" | "INAPP";
+      notification_type_enum: "CHEER_RECEIVED" | "CASHOUT_REQUESTED" | "CASHOUT_PAID";
+      payment_status_enum: "READY" | "DONE" | "CANCELED" | "FAILED" | "EXPIRED";
+      report_status_enum: "OPEN" | "RESOLVED_DELETED" | "DISMISSED";
+      report_target_type_enum: "GOAL" | "CHEER";
+      risk_flag_enum: "CLEAR" | "REVIEW" | "BLOCKED";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   graphql_public: {
@@ -1931,16 +2502,11 @@ export const Constants = {
       goal_status_enum: ["ACTIVE", "CLOSED", "DELETED"],
       kyc_status_enum: ["NONE", "VERIFIED"],
       notification_channel_enum: ["ALIMTALK", "INAPP"],
-      notification_type_enum: [
-        "CHEER_RECEIVED",
-        "CASHOUT_REQUESTED",
-        "CASHOUT_PAID",
-      ],
+      notification_type_enum: ["CHEER_RECEIVED", "CASHOUT_REQUESTED", "CASHOUT_PAID"],
       payment_status_enum: ["READY", "DONE", "CANCELED", "FAILED", "EXPIRED"],
       report_status_enum: ["OPEN", "RESOLVED_DELETED", "DISMISSED"],
       report_target_type_enum: ["GOAL", "CHEER"],
       risk_flag_enum: ["CLEAR", "REVIEW", "BLOCKED"],
     },
   },
-} as const
-
+} as const;

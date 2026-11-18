@@ -61,6 +61,8 @@ export default async function CashoutPage() {
   const totalBalance = eligibility?.total_balance ?? 0;
   const welcomeAmount = eligibility?.welcome_amount ?? 0;
   const payableAmount = eligibility?.payable_amount ?? 0;
+  const maturityLockedAmount = eligibility?.maturity_locked_amount ?? 0;
+  const nextMaturityAt = eligibility?.next_maturity_at ?? null;
   const minCashoutClover = eligibility?.min_cashout_clover ?? 30;
   const reachedThreshold = eligibility?.reached_threshold ?? false;
   return (
@@ -68,6 +70,8 @@ export default async function CashoutPage() {
       cashoutEnabled={cashoutAllowed}
       reachedThreshold={reachedThreshold}
       payableAmount={payableAmount}
+      maturityLockedAmount={maturityLockedAmount}
+      nextMaturityAt={nextMaturityAt}
       totalBalance={totalBalance}
       welcomeAmount={welcomeAmount}
       minCashoutClover={minCashoutClover}

@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-18 앱 채널 서버·웹·앱인토스 개발 슬라이스
+
+- 앱 채널 공통 원장은 `store_purchase_intent`·`store_purchase`·`store_refund`·`clover_maturity`로 분리했다. 구매 검증은 서버 상품 카탈로그, 구매자 일치, 중복 거래·request key 충돌, 채널별 release gate를 적립 전에 검사한다. 전액 환불은 30일 보류분을 역전하고 이미 사용된 부족분은 회수 원장에 누적한다.
+- 앱인토스는 공식 Partner API 계약의 `x-toss-user-key`와 `purchaserMatched`를 적용했다. SDK 3.x의 미완료 주문을 `getPendingOrders` → 서버 멱등 검증 → `completeProductGrant` 순서로 복구하며, 실결제가 필요한 콘솔 QR 경로는 실행하지 않았다.
+- 웹은 로그인 전 GA4 Consent Mode 기본 거부 신호만 먼저 두고, 수신자 레이아웃에서만 분석 동의 UI를 노출한다. 환전 화면은 30일 보류액과 다음 해제 시각을 표시한다. Next.js 보안 차단에 따라 16.4.1을 같은 메이저 최신 패치 16.4.6으로 올렸다.
+- 로컬 검증은 Supabase pgTAP 25파일·493건, Edge Function 8/8, 웹 Vitest 98파일·596건, 앱인토스 2파일·11건, QA 계약 51건, 저장소 서버 계약 4종, 웹·앱인토스 production build, Apps in Toss 패키지 build가 통과했다. 헤드리스 Chromium에서 앱인토스 3클로버 선택·결과 상태와 웹 약관을 열어 console error 0을 관찰했다. 360·390·412·600·700·780·820·900·1000px에서 글자·44px 누름·active·가로 overflow 기준을 모두 통과했다.
+- 운영 Supabase migration, main push, 실제 결제, 앱인토스 업로드, 스토어 제출은 0건이다. Vercel provider 환경 조회는 CLI가 응답 없이 대기해 중단했다. iOS·Android 클라이언트, 공급자 sandbox 왕복, 결제 코드 독립 교차리뷰, qa-verifier 판정이 남아 있어 제출 준비 상태가 아니다.
+
+> STAMP: 2026-11-18 16:24 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=Apps in Toss 공식 IAP·Partner API, pgTAP·Deno·Vitest·계약 시험·production build·headless Chromium·9폭 실측 · 고민=실결제 없이도 선결제 release gate와 중단 주문 복구를 서버 멱등 계약으로 닫고, 공급자 실왕복은 미검증으로 분리했다.
+
 ## 2026-11-12 독립 검증 8차 F-3·F-4 보정
 
 - 성장 화면 목표 문맥 소제목의 강제 왼쪽 정렬을 제거해 승인 시안처럼 가운데 정렬하고, `SMOKE-01`에 computed `text-align:center` 단언을 추가했다.
