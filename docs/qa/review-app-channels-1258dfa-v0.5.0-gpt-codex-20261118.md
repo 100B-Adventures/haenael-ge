@@ -93,3 +93,31 @@ SOURCES/MODEL: GPT-5 Codex. 로컬 거버넌스·요청·PRD·코드·시험, Ap
 
 REVIEW_VERDICT: BLOCK
 
+## 2026-11-18 code-builder 수정 결과
+
+기반 포맷: 이 문서의 5회차 차단 항목 표. 설계는 `e59d0b5`, 구현은 `5b7321f`에서 계정 삭제를 회원당 서버 소유 작업 행 하나인 상태 기계로 교체했다. 운영 데이터베이스·main push·실제 결제·외부 콘솔은 실행하지 않았다.
+
+| 5회차 차단 항목 | 수정 커밋 | 먼저 실패한 시험 | 수정 뒤 통과한 시험·관찰 |
+|---|---|---|---|
+| Apple token 만료 뒤 삭제 재개 불능 | `e59d0b5`, `5b7321f` | `TC-APP-09-7 Apple 토큰이 없으면 외부 폐기 상태 전에 멈춘다`, `TC-APP-09-8 Apple invalid_grant는 사용자 재인증 대상으로 분류한다` | Apple refresh token만 암호화 보관하고, 누락·`invalid_grant`는 같은 회원 재인증으로 재개. Edge Function 표적 14/14 |
+| Apple 재인증 뒤 다른 회원 삭제 | `e59d0b5`, `5b7321f` | `TC-APP-09-10 Apple 재인증이 다른 회원으로 바뀌면 이전 삭제 정보를 폐기하고 재호출하지 않는다` | 모바일은 삭제 시작 회원 ID와 현재 JWT 회원 ID를 대조하고 불일치 시 이전 재개 정보를 삭제. 모바일 24/24 |
+| 클라이언트 요청 키 분실 시 삭제 재개 불능 | `e59d0b5`, `5b7321f` | `TC-APP-09-3 클라이언트는 요청 키 없이 삭제를 시작한 회원 ID만 보관한다` | `account_deletion_job.member_id`를 기본 키로 사용하고 서버가 JWT 회원 ID로 같은 작업을 재개. Supabase DB 568/568, Edge Function 표적 14/14 |
+| 결제 확인·복구 건 생성·탈퇴 경합 | `e59d0b5`, `5b7321f` | `TC-APP-09-5 공급자 확인 중인 대체결제를 서버가 추적한다`, `TC-APP-09-5 확인이 시작된 결제는 intent 만료 뒤에도 삭제를 차단한다`, 실제 2연결 경합 시험 | 결제 확인·적립·복구·삭제가 같은 회원 advisory transaction lock 안에서 상태를 재검사. 복구 건 생성은 1,888ms 대기했고 삭제 작업은 `BLOCKED_PENDING_PAYMENT`. Supabase DB 568/568, 동시성 시험 통과 |
+
+### 최종 검증
+
+- 설계 불변식: `AD-INV-01`부터 `AD-INV-06`까지 FDD 상태 다이어그램·시험 매핑 완료.
+- Supabase DB: 28파일, 568건 통과.
+- Edge Function 표적: 14건 통과. Deno lint 통과.
+- 모바일: 24건 통과. Web·Android export 통과.
+- 실제 렌더: Expo 개발 서버 `/settings/delete-account` HTTP 200, 탈퇴 안내 본문 존재, 브라우저 콘솔 오류 0.
+- 독립 재리뷰 전 상태: 수정 제출. `REVIEW_VERDICT: BLOCK`은 원 리뷰 판정이므로 유지한다.
+
+SKILLS_USED: `haenael-supabase-build`, Supabase 상태 기계·RLS·Edge Function·모바일 계약 구현과 검증에 사용.
+SKILLS_SKIPPED: 없음.
+KNOWLEDGE_QUERY: D-056·D-047, 요청 원장 9~20행, 앱 채널 PRD v0.2.0, FDD/API 계약, Apple 5.1.1(v), 5회차 리뷰.
+HITS_USED: 서버 소유 삭제 작업, Apple token 폐기 선행, 회원 단위 직렬화, 인증 세션 격리 계약에 반영.
+HITS_REJECTED: access token 장기 보관과 클라이언트 요청 키 재개 방식은 5회차 회귀 원인이므로 폐기.
+CONFLICTS: 없음.
+SOURCES/MODEL: GPT-5 Codex. 로컬 결정·요청·PRD·FDD·API 계약·코드·시험, Apple Developer 공식 지침.
+
