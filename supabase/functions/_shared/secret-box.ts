@@ -4,6 +4,17 @@ function bytesToHex(bytes: Uint8Array): string {
   );
 }
 
+function hexToBytes(value: string): Uint8Array {
+  const normalized = value.replace(/^\\x/, "");
+  if (!/^[a-f0-9]+$/i.test(normalized) || normalized.length % 2 !== 0) {
+    throw new Error("ciphertext_invalid");
+  }
+  return Uint8Array.from(
+    normalized.match(/.{2}/g) ?? [],
+    (byte) => Number.parseInt(byte, 16),
+  );
+}
+
 function decodeKey(value: string): Uint8Array {
   let bytes: Uint8Array;
   try {
@@ -45,4 +56,30 @@ export async function encryptSecret(
   packed.set(nonce);
   packed.set(ciphertext, nonce.length);
   return `\\x${bytesToHex(packed)}`;
+}
+
+export async function decryptSecret(
+  encrypted: string,
+  keyMaterial: string,
+): Promise<string> {
+  const packed = hexToBytes(encrypted);
+  if (packed.length <= 28) throw new Error("ciphertext_invalid");
+  const rawKey = decodeKey(keyMaterial);
+  const keyData = rawKey.buffer.slice(
+    rawKey.byteOffset,
+    rawKey.byteOffset + rawKey.byteLength,
+  ) as ArrayBuffer;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "AES-GCM" },
+    false,
+    ["decrypt"],
+  );
+  const plaintext = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: packed.slice(0, 12) },
+    key,
+    packed.slice(12),
+  );
+  return new TextDecoder().decode(plaintext);
 }

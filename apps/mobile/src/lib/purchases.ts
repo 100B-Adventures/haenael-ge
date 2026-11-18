@@ -82,6 +82,7 @@ export async function startTossAlternativePayment(args: {
   cloverAmount: number;
   message: string;
   anonymous: boolean;
+  externalTransactionToken: string;
 }) {
   if (!appConfig.tossCheckoutUrl) {
     throw new AppError("toss_checkout_unconfigured", "토스페이먼츠 결제 준비가 아직 끝나지 않았어요.");
@@ -103,8 +104,7 @@ export async function startTossAlternativePayment(args: {
   const returned = new URL(result.url);
   const paymentKey = returned.searchParams.get("paymentKey");
   const orderId = returned.searchParams.get("orderId");
-  const externalToken = returned.searchParams.get("externalTransactionToken");
-  if (!paymentKey || !orderId || !externalToken) {
+  if (!paymentKey || !orderId || !args.externalTransactionToken) {
     throw new AppError("alternative_result_invalid", "결제 승인 정보를 확인하지 못했어요.");
   }
   const { data, error } = await supabase.functions.invoke("confirm-alternative-payment", {
@@ -113,7 +113,7 @@ export async function startTossAlternativePayment(args: {
       account_binding: intent.account_binding,
       payment_key: paymentKey,
       order_id: orderId,
-      external_transaction_token: externalToken,
+      external_transaction_token: args.externalTransactionToken,
       request_key: requestKey,
       message: args.message || null,
       anonymous: args.anonymous

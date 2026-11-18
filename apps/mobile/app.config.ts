@@ -30,7 +30,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         action: "VIEW",
         autoVerify: true,
         data: [
-          { scheme: "https", host: "haenael.app", pathPrefix: "/g" },
           { scheme: "https", host: "haenael.app", pathPrefix: "/invite" }
         ],
         category: ["BROWSABLE", "DEFAULT"]

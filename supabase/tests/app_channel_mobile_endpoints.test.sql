@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(17);
+SELECT plan(22);
 
 SELECT has_table('public', 'account_deletion_request', 'APP-SRV-DB-01 계정 삭제 요청 원장이 있다');
 SELECT has_column('public', 'member', 'deleted_at', 'APP-SRV-DB-02 회원 삭제 시각이 있다');
@@ -8,6 +8,10 @@ SELECT has_function('public', 'credit_alternative_store_purchase', ARRAY[
 ], 'APP-SRV-DB-03 대체결제 적립과 외부거래 보고를 묶는 RPC가 있다');
 SELECT has_function('public', 'prepare_account_deletion', ARRAY['uuid','text'],
   'APP-SRV-DB-04 계정 삭제 준비 RPC가 있다');
+SELECT has_function('public', 'claim_google_external_transaction_batch', ARRAY['integer'],
+  'APP-SRV-DB-04-1 Google 외부 거래 보고 큐 claim RPC가 있다');
+SELECT has_function('public', 'settle_google_external_transaction', ARRAY['bigint','boolean','boolean','text'],
+  'APP-SRV-DB-04-2 Google 외부 거래 보고 정산 RPC가 있다');
 
 INSERT INTO auth.users(id, email) VALUES
   ('00000000-0000-0000-0000-000000000101', 'mobile-delete@example.test'),
@@ -97,6 +101,19 @@ SELECT is((SELECT is_replay FROM public.credit_alternative_store_purchase(
   decode(repeat('cd', 32), 'hex'),
   'KR'
 )), true, 'APP-SRV-DB-10 같은 결제 승인 재전송은 멱등 재생된다');
+
+CREATE TEMP TABLE claimed_external AS
+SELECT * FROM public.claim_google_external_transaction_batch(10);
+SELECT is((SELECT attempt_count FROM claimed_external
+  WHERE external_transaction_id='alternative-order-0001'), 1,
+  'APP-SRV-DB-10-1 외부 거래 보고 claim은 한 번의 시도만 예약한다');
+SELECT ok(public.settle_google_external_transaction(
+  (SELECT purchase_id FROM claimed_external WHERE external_transaction_id='alternative-order-0001'),
+  true, false, NULL
+), 'APP-SRV-DB-10-2 Google 보고 성공 정산이 큐 행 하나에 적용된다');
+SELECT is((SELECT report_status FROM public.google_external_transaction
+  WHERE external_transaction_id='alternative-order-0001'), 'REPORTED',
+  'APP-SRV-DB-10-3 Google 보고 성공은 REPORTED 상태로 남는다');
 
 INSERT INTO public.clover_balance(member_id, clover_count)
 VALUES ('00000000-0000-0000-0000-000000000101', 3)

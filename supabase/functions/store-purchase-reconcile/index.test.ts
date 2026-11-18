@@ -1,46 +1,47 @@
 import { assertEquals } from "jsr:@std/assert@1";
 import { handleStorePurchaseReconcile } from "../_shared/store-reconcile.ts";
 
-Deno.test("TC-APP-03-3 일일 재동기화는 인증 없는 호출을 거절한다", async () => {
-  const response = await handleStorePurchaseReconcile(new Request("http://local/functions/v1/store-purchase-reconcile", {
-    method: "POST",
-  }), {
+Deno.test("TC-APP-03-4 일일 재동기화는 인증 없는 호출을 거절한다", async () => {
+  const response = await handleStorePurchaseReconcile(new Request("http://local", { method: "POST" }), {
     internalToken: "daily-secret",
-    listPurchases: async () => [],
+    listPurchasePage: async () => ({ purchases: [], nextCursor: null }),
     inspectPurchase: async () => null,
     reverseRefund: async () => undefined,
   });
   assertEquals(response.status, 401);
 });
 
-Deno.test("TC-APP-03-4 누락된 공급자 환불을 재조회해 회수 RPC로 복구한다", async () => {
-  let reversed = 0;
-  const response = await handleStorePurchaseReconcile(new Request("http://local/functions/v1/store-purchase-reconcile", {
+Deno.test("TC-APP-03-5 cursor로 500건 뒤 구매까지 전량 재동기화한다", async () => {
+  const all = Array.from({ length: 501 }, (_, index) => ({
+    id: index + 1,
+    provider: "GOOGLE_PLAY" as const,
+    provider_transaction_id: `google-token-${String(index + 1).padStart(4, "0")}`,
+    product_id: "haenael.cheer.clover.1",
+    clover_amount: 1,
+    gross_amount_minor: 1200,
+    refunded_amount_minor: 0,
+    refunded_clover_amount: 0,
+    currency: "KRW",
+    supporter_member_id: "00000000-0000-0000-0000-000000000095",
+  }));
+  let pages = 0;
+  let inspected = 0;
+  const response = await handleStorePurchaseReconcile(new Request("http://local", {
     method: "POST",
     headers: { "x-reconcile-internal-token": "daily-secret" },
   }), {
     internalToken: "daily-secret",
-    listPurchases: async () => [{
-      provider: "GOOGLE_PLAY",
-      provider_transaction_id: "google-token-reconcile-0001",
-      product_id: "haenael.cheer.clover.3",
-      gross_amount_minor: 3600,
-      refunded_amount_minor: 0,
-      currency: "KRW",
-      supporter_member_id: "00000000-0000-0000-0000-000000000095",
-    }],
-    inspectPurchase: async (purchase) => ({
-      provider: purchase.provider,
-      provider_event_id: "daily-google-refund-0001",
-      provider_transaction_id: purchase.provider_transaction_id,
-      refund_amount_minor: 3600,
-      currency: "KRW",
-      refund_scope: "FULL",
-      occurred_at: "2026-11-18T06:00:00Z",
-    }),
-    reverseRefund: async () => { reversed += 1; },
+    listPurchasePage: async (cursor) => {
+      pages += 1;
+      const start = cursor ? Number(cursor) : 0;
+      const purchases = all.slice(start, start + 500);
+      return { purchases, nextCursor: start + purchases.length < all.length ? String(start + purchases.length) : null };
+    },
+    inspectPurchase: async () => { inspected += 1; return null; },
+    reverseRefund: async () => undefined,
   });
   assertEquals(response.status, 200);
-  assertEquals(reversed, 1);
-  assertEquals(await response.json(), { data: { scanned: 1, refunds: 1, failures: 0 } });
+  assertEquals(pages, 2);
+  assertEquals(inspected, 501);
+  assertEquals(await response.json(), { data: { scanned: 501, refunds: 0, failures: 0 } });
 });

@@ -333,7 +333,7 @@ class SupabaseGateway implements AppGateway {
     const token = sessionData.session?.access_token;
     if (!token) throw new GatewayError("login_required", "토스 로그인 후 응원할 수 있어요.");
     const requestKey = crypto.randomUUID();
-    const sku = `haenael_cheer_clover_${cloverAmount}`;
+    const sku = `haenael.cheer.clover.${cloverAmount}`;
     const { data: intentRows, error: intentError } = await this.client.rpc("create_store_purchase_intent", {
       p_goal_id: goalId,
       p_provider: "TOSS_IAP",

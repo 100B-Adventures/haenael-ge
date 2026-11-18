@@ -10,8 +10,18 @@ export const cloverProducts = [1, 3, 5, 10].map((cloverAmount) => ({
 export type StoreProvider = "APPLE" | "GOOGLE_PLAY";
 export type PurchaseProvider = StoreProvider | "GOOGLE_ALTERNATIVE";
 
-export function availableProviders(os: string): PurchaseProvider[] {
-  return os === "ios" ? ["APPLE"] : ["GOOGLE_PLAY", "GOOGLE_ALTERNATIVE"];
+export function clientFinishesStoreTransaction(provider: StoreProvider): boolean {
+  return provider === "APPLE";
+}
+
+export function availableProviders(
+  os: string,
+  googleUserChoiceBillingEnabled = false,
+): PurchaseProvider[] {
+  if (os === "ios") return ["APPLE"];
+  return googleUserChoiceBillingEnabled
+    ? ["GOOGLE_PLAY", "GOOGLE_ALTERNATIVE"]
+    : ["GOOGLE_PLAY"];
 }
 
 export function productForAmount(amount: number) {

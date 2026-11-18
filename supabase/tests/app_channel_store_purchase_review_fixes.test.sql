@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(15);
+SELECT plan(16);
 
 SELECT has_table('public', 'store_product_catalog', 'AP-RV-01 서버 상품 카탈로그가 있다');
 SELECT is(
@@ -74,8 +74,8 @@ SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
 SELECT is((SELECT clover_recovered FROM public.reverse_store_purchase(
   'APPLE', 'review-apple-transaction-0001', 'review-refund-event-0001', repeat('b',64),
-  'review-refund-transaction-0001', 1200, NULL, 'KRW', 'PARTIAL', now()
-)), 1, 'RF-RV-01 10퍼센트 부분환불은 10클로버 중 1클로버만 회수한다');
+  'review-refund-transaction-0001', 1199, 1, 'KRW', 'PARTIAL', now()
+)), 1, 'RF-RV-01 공급자가 확정한 부분환불 수량 1클로버만 회수한다');
 SELECT is(
   (SELECT refunded_clover_amount FROM public.store_purchase WHERE provider_transaction_id='review-apple-transaction-0001'),
   1,
@@ -89,32 +89,41 @@ SELECT is(
 SELECT throws_ok(
   $$SELECT * FROM public.reverse_store_purchase(
     'APPLE', 'review-apple-transaction-0001', 'review-refund-event-scope-0001', repeat('c',64),
-    'review-refund-transaction-scope-0001', 1200, NULL, 'KRW', 'FULL', now()
+    'review-refund-transaction-scope-0001', 1200, 1, 'KRW', 'FULL', now()
   )$$,
   '22023',
   'refund_scope_mismatch',
   'RF-RV-04 부분 금액을 FULL scope로 제출하면 거절한다'
+);
+SELECT throws_ok(
+  $$SELECT * FROM public.reverse_store_purchase(
+    'APPLE', 'review-apple-transaction-0001', 'review-refund-event-no-quantity-0001', repeat('f',64),
+    'review-refund-transaction-no-quantity-0001', 1200, NULL, 'KRW', 'PARTIAL', now()
+  )$$,
+  '22023',
+  'provider_refund_quantity_required',
+  'RF-RV-05 공급자가 확정한 환불 수량이 없으면 금액으로 클로버를 추정하지 않는다'
 );
 
 UPDATE public.clover_balance SET clover_count = 0
 WHERE member_id = '00000000-0000-0000-0000-000000000082';
 SELECT is((SELECT clover_shortfall FROM public.reverse_store_purchase(
   'APPLE', 'review-apple-transaction-0001', 'review-refund-event-0002', repeat('d',64),
-  'review-refund-transaction-0002', 1200, NULL, 'KRW', 'PARTIAL', now() - interval '2 days'
-)), 1, 'RF-RV-05 잔액 부족이면 비례 회수 부족분을 회수 큐에 남긴다');
+  'review-refund-transaction-0002', 1201, 1, 'KRW', 'PARTIAL', now() - interval '2 days'
+)), 1, 'RF-RV-06 잔액 부족이면 공급자 확정 수량의 회수 부족분을 회수 큐에 남긴다');
 SELECT is(
   (SELECT refunded_amount_minor FROM public.store_purchase WHERE provider_transaction_id='review-apple-transaction-0001'),
   2400,
-  'RF-RV-06 발생 시각이 역순이어도 서로 다른 이벤트의 누적 금액은 보존한다'
+  'RF-RV-07 발생 시각이 역순이어도 서로 다른 이벤트의 누적 금액은 보존한다'
 );
 SELECT is((SELECT is_replay FROM public.reverse_store_purchase(
   'APPLE', 'review-apple-transaction-0001', 'review-refund-event-0002', repeat('d',64),
-  'review-refund-transaction-0002', 1200, NULL, 'KRW', 'PARTIAL', now() - interval '2 days'
-)), true, 'RF-RV-07 같은 환불 이벤트 재전송은 멱등 재생된다');
+  'review-refund-transaction-0002', 1201, 1, 'KRW', 'PARTIAL', now() - interval '2 days'
+)), true, 'RF-RV-08 같은 환불 이벤트 재전송은 멱등 재생된다');
 SELECT is(
   (SELECT count(*)::integer FROM public.store_purchase_event WHERE provider_event_id='review-refund-event-0002'),
   1,
-  'RF-RV-08 환불 이벤트 재전송 뒤 원장 행은 1건이다'
+  'RF-RV-09 환불 이벤트 재전송 뒤 원장 행은 1건이다'
 );
 SELECT throws_ok(
   $$SELECT * FROM public.reverse_store_purchase(
@@ -122,13 +131,13 @@ SELECT throws_ok(
   )$$,
   'P0002',
   'purchase_not_found',
-  'RF-RV-09 공급자가 다른 거래 ID는 원 구매에 결합되지 않는다'
+  'RF-RV-10 공급자가 다른 거래 ID는 원 구매에 결합되지 않는다'
 );
 SELECT is(
   (SELECT clover_shortfall FROM public.store_recovery_case
    WHERE purchase_id=(SELECT id FROM public.store_purchase WHERE provider_transaction_id='review-apple-transaction-0001')),
   1,
-  'RF-RV-10 회수 큐에는 실제 부족 수량만 기록한다'
+  'RF-RV-11 회수 큐에는 실제 부족 수량만 기록한다'
 );
 
 RESET ROLE;

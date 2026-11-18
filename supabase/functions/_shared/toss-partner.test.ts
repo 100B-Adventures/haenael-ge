@@ -19,7 +19,7 @@ Deno.test("TC-TOSS-01-1 토스 authorization code는 서버에서 userKey로 교
 Deno.test("TC-TOSS-04-1 지급 전 orderId·sku·상태를 서버에서 검증한다", async () => {
   const order = await getTossOrderStatus("order-123", "12345678", queuedFetch([
     { resultType: "SUCCESS", success: {
-      orderId: "order-123", sku: "haenael_cheer_clover_1", status: "PAYMENT_COMPLETED",
+      orderId: "order-123", sku: "haenael.cheer.clover.1", status: "PAYMENT_COMPLETED",
       purchaserMatched: true, statusDeterminedAt: "2026-11-18T00:00:00Z",
     } },
   ]));
@@ -30,7 +30,7 @@ Deno.test("TC-TOSS-04-1 지급 전 orderId·sku·상태를 서버에서 검증�
 Deno.test("TC-TOSS-04-2 다른 orderId 응답은 지급을 거절한다", async () => {
   await assertRejects(() => getTossOrderStatus("order-123", "12345678", queuedFetch([
     { resultType: "SUCCESS", success: {
-      orderId: "other", sku: "haenael_cheer_clover_1", status: "PAYMENT_COMPLETED",
+      orderId: "other", sku: "haenael.cheer.clover.1", status: "PAYMENT_COMPLETED",
       purchaserMatched: true, statusDeterminedAt: "2026-11-18T00:00:00Z",
     } },
   ])), Error, "toss_order_invalid");
@@ -39,7 +39,7 @@ Deno.test("TC-TOSS-04-2 다른 orderId 응답은 지급을 거절한다", async 
 Deno.test("TC-TOSS-04-2 구매자가 일치하지 않으면 지급을 거절한다", async () => {
   await assertRejects(() => getTossOrderStatus("order-123", "87654321", queuedFetch([
     { resultType: "SUCCESS", success: {
-      orderId: "order-123", sku: "haenael_cheer_clover_1", status: "PAYMENT_COMPLETED",
+      orderId: "order-123", sku: "haenael.cheer.clover.1", status: "PAYMENT_COMPLETED",
       purchaserMatched: false, statusDeterminedAt: "2026-11-18T00:00:00Z",
     } },
   ])), Error, "toss_order_invalid");

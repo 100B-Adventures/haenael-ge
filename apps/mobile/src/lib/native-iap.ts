@@ -1,30 +1,76 @@
+import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import {
   endConnection,
   fetchProducts,
   finishTransaction,
+  getAvailablePurchases,
   initConnection,
+  isBillingProgramAvailableAndroid,
   purchaseErrorListener,
   purchaseUpdatedListener,
   requestPurchase,
+  userChoiceBillingListenerAndroid,
   type Purchase
 } from "expo-iap";
+import { appConfig } from "./config";
 import { AppError } from "./errors";
+import {
+  attachPendingReceipt,
+  enqueuePendingPurchase,
+  recoverPendingPurchases,
+  removePendingPurchase,
+} from "./purchase-recovery";
 import { createRequestKey } from "./request-key";
-import { createPurchaseIntent, verifyStorePurchase } from "./purchases";
-import { productForAmount, type StoreProvider } from "./purchase-catalog";
+import {
+  createPurchaseIntent,
+  startTossAlternativePayment,
+  verifyStorePurchase,
+} from "./purchases";
+import {
+  clientFinishesStoreTransaction,
+  productForAmount,
+  type StoreProvider,
+} from "./purchase-catalog";
 
-function waitForPurchase(productId: string, start: () => Promise<unknown>) {
-  return new Promise<Purchase>((resolve, reject) => {
+const purchaseQueueStorage = {
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+};
+
+type PurchaseChoice =
+  | { kind: "store"; purchase: Purchase }
+  | { kind: "alternative"; externalTransactionToken: string };
+
+function waitForPurchase(
+  productId: string,
+  userChoiceBillingEnabled: boolean,
+  start: () => Promise<unknown>,
+) {
+  return new Promise<PurchaseChoice>((resolve, reject) => {
     const timer = setTimeout(() => done(() => reject(new AppError("store_timeout", "스토어 응답이 늦어지고 있어요. 구매 내역에서 다시 확인해 주세요.", true))), 90_000);
     const updated = purchaseUpdatedListener((purchase) => {
-      if (purchase.productId === productId) done(() => resolve(purchase));
+      if (purchase.productId === productId) {
+        done(() => resolve({ kind: "store", purchase }));
+      }
     });
     const failed = purchaseErrorListener((error) => done(() => reject(new AppError(String(error.code ?? "purchase_error"), error.message))));
+    const alternative = userChoiceBillingEnabled
+      ? userChoiceBillingListenerAndroid((details) => {
+        if (details.products.includes(productId)) {
+          done(() => resolve({
+            kind: "alternative",
+            externalTransactionToken: details.externalTransactionToken,
+          }));
+        }
+      })
+      : { remove: () => undefined };
     function done(callback: () => void) {
       clearTimeout(timer);
       updated.remove();
       failed.remove();
+      alternative.remove();
       callback();
     }
     void start().catch((error) => done(() => reject(error)));
@@ -49,13 +95,42 @@ export async function completeNativePurchase(args: {
     cloverAmount: args.cloverAmount,
     requestKey
   });
-  await initConnection();
+  await enqueuePendingPurchase(purchaseQueueStorage, {
+    provider,
+    intentId: intent.intent_id,
+    accountBinding: intent.account_binding,
+    productId: product.productId,
+    requestKey,
+    goalId: args.goalId,
+    cloverAmount: args.cloverAmount,
+    message: args.message,
+    anonymous: args.anonymous,
+  });
+  const userChoiceBillingEnabled = Platform.OS === "android" &&
+    appConfig.googleUserChoiceBillingEnabled;
+  await initConnection(userChoiceBillingEnabled
+    ? { enableBillingProgramAndroid: "user-choice-billing" }
+    : undefined);
+  if (userChoiceBillingEnabled) {
+    const availability = await isBillingProgramAvailableAndroid(
+      "user-choice-billing",
+    );
+    if (!availability.isAvailable) {
+      throw new AppError(
+        "user_choice_billing_unavailable",
+        "Google Play 결제 선택 기능을 현재 사용할 수 없어요.",
+      );
+    }
+  }
   try {
     const products = await fetchProducts({ skus: [product.productId], type: "in-app" });
     if (!products?.some((item) => item.id === product.productId)) {
       throw new AppError("product_unavailable", "이 상품은 현재 스토어에서 살 수 없어요.");
     }
-    const purchase = await waitForPurchase(product.productId, () =>
+    const choice = await waitForPurchase(
+      product.productId,
+      userChoiceBillingEnabled,
+      () =>
       requestPurchase({
         request: {
           apple: {
@@ -71,9 +146,23 @@ export async function completeNativePurchase(args: {
         type: "in-app"
       })
     );
+    if (choice.kind === "alternative") {
+      await removePendingPurchase(purchaseQueueStorage, intent.intent_id);
+      return await startTossAlternativePayment({
+        ...args,
+        externalTransactionToken: choice.externalTransactionToken,
+      });
+    }
+    const purchase = choice.purchase;
     const receipt = purchase.purchaseToken;
     const transactionId = "transactionId" in purchase ? purchase.transactionId ?? purchase.id : purchase.id;
     if (!receipt || !transactionId) throw new AppError("receipt_missing", "스토어 영수증을 확인하지 못했어요.");
+    await attachPendingReceipt(
+      purchaseQueueStorage,
+      intent.intent_id,
+      receipt,
+      transactionId,
+    );
     const verified = await verifyStorePurchase({
       provider,
       intentId: intent.intent_id,
@@ -85,9 +174,46 @@ export async function completeNativePurchase(args: {
       anonymous: args.anonymous,
       requestKey
     });
-    await finishTransaction({ purchase, isConsumable: true });
+    if (clientFinishesStoreTransaction(provider)) {
+      await finishTransaction({ purchase, isConsumable: true });
+    }
+    await removePendingPurchase(purchaseQueueStorage, intent.intent_id);
     return verified;
-  } finally {
-    await endConnection().catch(() => undefined);
+  } catch (error) {
+    throw error;
   }
+}
+
+export function startNativePurchaseRecovery(): () => void {
+  if (Platform.OS !== "ios" && Platform.OS !== "android") return () => undefined;
+  let stopped = false;
+  let listener: { remove(): void } | undefined;
+  const recover = async (purchases: Purchase[]) => {
+    if (stopped) return;
+    await recoverPendingPurchases({
+      storage: purchaseQueueStorage,
+      availablePurchases: purchases,
+      verify: verifyStorePurchase,
+      finishIosTransaction: async (purchase) => {
+        await finishTransaction({ purchase: purchase as Purchase, isConsumable: true });
+      },
+    });
+  };
+  const ready = (async () => {
+    await initConnection(
+      Platform.OS === "android" && appConfig.googleUserChoiceBillingEnabled
+        ? { enableBillingProgramAndroid: "user-choice-billing" }
+        : undefined,
+    );
+    if (stopped) return;
+    listener = purchaseUpdatedListener((purchase) => {
+      void recover([purchase]);
+    });
+    await recover(await getAvailablePurchases());
+  })().catch(() => undefined);
+  return () => {
+    stopped = true;
+    listener?.remove();
+    void ready.finally(() => endConnection().catch(() => undefined));
+  };
 }

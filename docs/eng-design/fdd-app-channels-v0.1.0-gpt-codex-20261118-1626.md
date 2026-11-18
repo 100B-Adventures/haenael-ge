@@ -174,7 +174,7 @@ sequenceDiagram
 
 ### 8.1 D-047 모바일 환전 경로
 
-모바일은 DB 돈 함수를 직접 호출하지 않는다. `mobile-cashout` Edge Function이 JWT 회원을 확인하고, 서버 환경의 허용목록과 요청 origin·app channel을 검사한 뒤 기존 service-role 환전 RPC를 부른다. 실패 닫힘이며 허용목록이 없거나 환경이 production인데 승인 reference가 없으면 `cashout_channel_disabled`다. 서버 함수와 환불·기프티콘은 모두 `cashout_member:{member_id}` advisory lock을 먼저 잡고 잔액 행을 잠근다.
+모바일은 DB 돈 함수를 직접 호출하지 않는다. `mobile-cashout` Edge Function이 JWT 회원을 확인하고, 전역 환전 플래그·모바일 채널 플래그·승인 reference·D-047 공통 회원 허용목록을 모두 검사한 뒤 기존 service-role 환전 RPC를 부른다. 네 조건 중 하나라도 없으면 `cashout_channel_disabled`로 실패 닫힘이다. 서버 함수와 환불·기프티콘은 모두 `cashout_member:{member_id}` advisory lock을 먼저 잡고 잔액 행을 잠근다.
 
 ## 9. 미검증과 결정 경계
 

@@ -8,7 +8,10 @@
     { "name": "storage_cleanup_internal_token", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" },
     { "name": "store_purchase_reconcile_url", "feature": "app-channel-reconcile", "provisioner": "scripts/ops/provision-store-purchase-reconcile-vault.sql" },
     { "name": "edge_invoke_publishable_key", "feature": "app-channel-reconcile", "provisioner": "scripts/ops/provision-store-purchase-reconcile-vault.sql" },
-    { "name": "store_purchase_reconcile_internal_token", "feature": "app-channel-reconcile", "provisioner": "scripts/ops/provision-store-purchase-reconcile-vault.sql" }
+    { "name": "store_purchase_reconcile_internal_token", "feature": "app-channel-reconcile", "provisioner": "scripts/ops/provision-store-purchase-reconcile-vault.sql" },
+    { "name": "google_external_report_url", "feature": "app-channel-google-alternative-report", "provisioner": "scripts/ops/provision-google-external-report-vault.sql" },
+    { "name": "edge_invoke_publishable_key", "feature": "app-channel-google-alternative-report", "provisioner": "scripts/ops/provision-google-external-report-vault.sql" },
+    { "name": "google_external_report_internal_token", "feature": "app-channel-google-alternative-report", "provisioner": "scripts/ops/provision-google-external-report-vault.sql" }
   ],
   "variables": {
     "NEXT_PUBLIC_SUPABASE_URL": { "targets": ["vercel-production"], "features": ["core"] },
@@ -18,12 +21,15 @@
     "DEPLOY_SOURCE_SHA": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "SUPABASE_SERVICE_ROLE_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout", "core"] },
     "SERVICE_ROLE_KEY": { "targets": [], "features": ["local-supabase-cli"], "optional": true },
-    "CASHOUT_ENABLED": { "targets": ["vercel-production"], "features": ["cashout"] },
-    "CASHOUT_ALLOWED_MEMBER_IDS": { "targets": ["vercel-production"], "features": ["cashout"], "optional": true, "requiredWhen": "CASHOUT_ENABLED=true" },
-    "CASHOUT_ACCOUNT_ENCRYPTION_KEYS": { "targets": ["vercel-production"], "features": ["cashout"] },
+    "CASHOUT_ENABLED": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout"] },
+    "CASHOUT_ALLOWED_MEMBER_IDS": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout"], "optional": true, "requiredWhen": "CASHOUT_ENABLED=true" },
+    "CASHOUT_ACCOUNT_ENCRYPTION_KEYS": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout"] },
     "CASHOUT_ACCOUNT_ENCRYPTION_KEY": { "targets": ["vercel-production"], "features": ["cashout-legacy"], "optional": true },
-    "CASHOUT_ACCOUNT_ACTIVE_KEY_VERSION": { "targets": ["vercel-production"], "features": ["cashout"] },
-    "CASHOUT_ACCOUNT_FINGERPRINT_KEY": { "targets": ["vercel-production"], "features": ["cashout"] },
+    "CASHOUT_ACCOUNT_ACTIVE_KEY_VERSION": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout"] },
+    "CASHOUT_ACCOUNT_FINGERPRINT_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout"] },
+    "MOBILE_CASHOUT_ENABLED": { "targets": ["supabase-production"], "features": ["app-channel-mobile-cashout"] },
+    "MOBILE_CASHOUT_APPROVAL_REFERENCE": { "targets": ["supabase-production"], "features": ["app-channel-mobile-cashout"], "optional": true, "requiredWhen": "MOBILE_CASHOUT_ENABLED=true" },
+    "MOBILE_GIFT_EXCHANGE_ENABLED": { "targets": ["supabase-production"], "features": ["app-channel-mobile-cashout"] },
     "CASHOUT_STAGING_TEST_ENABLED": { "targets": [], "features": ["cashout-staging-test"], "optional": true },
     "CASHOUT_STAGING_TEST_ALLOWED_MEMBER_IDS": { "targets": [], "features": ["cashout-staging-test"], "optional": true },
     "CASHOUT_STAGING_TEST_ACCOUNT_ENCRYPTION_KEY": { "targets": [], "features": ["cashout-staging-test"], "optional": true },
@@ -59,6 +65,9 @@
     "GOOGLE_PLAY_ENVIRONMENT": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
     "GOOGLE_PLAY_PACKAGE_NAME": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
     "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
+    "GOOGLE_PUBSUB_AUDIENCE": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
+    "GOOGLE_PUBSUB_SERVICE_ACCOUNT_EMAIL": { "targets": ["supabase-production"], "features": ["app-channel-google"] },
+    "GOOGLE_EXTERNAL_REPORT_INTERNAL_TOKEN": { "targets": ["supabase-production"], "features": ["app-channel-google-alternative-report"] },
     "GOOGLE_REFUND_WEBHOOK_SECRET": { "targets": ["supabase-production"], "features": ["app-channel-reconcile"] },
     "GOOGLE_ALTERNATIVE_REFUND_WEBHOOK_SECRET": { "targets": ["supabase-production"], "features": ["app-channel-reconcile"] },
     "STORE_PURCHASE_RECONCILE_INTERNAL_TOKEN": { "targets": ["supabase-production"], "features": ["app-channel-reconcile"] },
@@ -91,7 +100,7 @@
     },
     "supabase-production": {
       "provider": "supabase",
-      "features": ["core", "profile", "wordmap", "payments", "app-channel-apple", "app-channel-google", "app-channel-google-alternative", "app-channel-push", "app-channel-toss", "app-channel-reconcile", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
+      "features": ["core", "profile", "wordmap", "payments", "app-channel-apple", "app-channel-google", "app-channel-google-alternative", "app-channel-google-alternative-report", "app-channel-mobile-cashout", "app-channel-push", "app-channel-toss", "app-channel-reconcile", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
     }
   }
 }

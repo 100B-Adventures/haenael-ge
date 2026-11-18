@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { parseDeepLink } from "../lib/deep-links";
-import { availableProviders, productForAmount } from "../lib/purchase-catalog";
+import { availableProviders, clientFinishesStoreTransaction, productForAmount } from "../lib/purchase-catalog";
 import { decideUpdate } from "../lib/update-policy";
 import { shouldRequestReview } from "../lib/review-policy";
 import { canDeleteAccount, isPushCopySafe } from "../lib/policy";
 import { validateGoalDraft } from "../lib/goal-validation";
 
 describe("모바일 앱 기능 계약", () => {
-  it("TC-APP-01-1 로그인 정상 경로: HTTPS 목표 딥링크를 목표 화면으로 해석한다", () => {
-    expect(parseDeepLink("https://haenael.app/g/run-fast")).toEqual({ kind: "goal", slug: "run-fast" });
+  it("TC-APP-06-2 /g 공개 목표는 앱으로 라우팅하지 않고 웹 결제를 보존한다", () => {
+    expect(parseDeepLink("https://haenael.app/g/run-fast")).toEqual({ kind: "external", url: "https://haenael.app/g/run-fast" });
   });
 
   it("TC-APP-01-2 로그인 거절 경로: 알 수 없는 링크는 홈으로 안전하게 보낸다", () => {
@@ -39,12 +39,18 @@ describe("모바일 앱 기능 계약", () => {
     expect(() => productForAmount(2)).toThrow("클로버 수량");
   });
 
-  it("TC-APP-03-1 Android 결제 정상 경로: Play와 대체결제를 함께 노출한다", () => {
-    expect(availableProviders("android")).toEqual(["GOOGLE_PLAY", "GOOGLE_ALTERNATIVE"]);
+  it("TC-APP-03-1 Google 프로그램 가입 전에는 Play만, 기능 플래그 후에만 User Choice Billing을 켠다", () => {
+    expect(availableProviders("android", false)).toEqual(["GOOGLE_PLAY"]);
+    expect(availableProviders("android", true)).toEqual(["GOOGLE_PLAY", "GOOGLE_ALTERNATIVE"]);
   });
 
   it("TC-APP-03-2 가격 경계: 3클로버의 스토어/토스 가격을 분리한다", () => {
     expect(productForAmount(3)).toMatchObject({ storePrice: 3600, tossPrice: 3300 });
+  });
+
+  it("TC-APP-02-5 Google consume은 서버만 수행하고 클라이언트는 Apple 거래만 finish한다", () => {
+    expect(clientFinishesStoreTransaction("GOOGLE_PLAY")).toBe(false);
+    expect(clientFinishesStoreTransaction("APPLE")).toBe(true);
   });
 
   it("TC-APP-07-1 리뷰 정상 경로: 응원 3건 이상 첫 워드맵에서 요청한다", () => {

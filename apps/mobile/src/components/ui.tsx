@@ -2,7 +2,7 @@ import { Link, usePathname } from "expo-router";
 import type { PropsWithChildren } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type PressableProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { colors, space } from "../lib/tokens";
+import { colors, radius, space, typeScale } from "../lib/tokens";
 import { useApp } from "../providers/AppProvider";
 
 export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?: boolean }>) {
@@ -69,11 +69,11 @@ export function BottomNav() {
 }
 
 export const typography = StyleSheet.create({
-  title: { color: colors.ink, fontSize: 30, lineHeight: 39, fontWeight: "800", letterSpacing: -0.8 },
-  heading: { color: colors.ink, fontSize: 22, lineHeight: 30, fontWeight: "800", letterSpacing: -0.4 },
-  body: { color: colors.ink, fontSize: 16, lineHeight: 24 },
-  muted: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  meta: { color: colors.muted, fontSize: 13, lineHeight: 18 }
+  title: { color: colors.ink, ...typeScale.title, fontWeight: "800", letterSpacing: -0.8 },
+  heading: { color: colors.ink, ...typeScale.heading, fontWeight: "800", letterSpacing: -0.4 },
+  body: { color: colors.ink, ...typeScale.body },
+  muted: { color: colors.muted, ...typeScale.muted },
+  meta: { color: colors.muted, ...typeScale.meta }
 });
 
 export const styles = StyleSheet.create({
@@ -84,17 +84,17 @@ export const styles = StyleSheet.create({
   bannerWarning: { backgroundColor: colors.warningSoft, color: colors.warning },
   brand: { color: colors.ink, fontSize: 18, fontWeight: "900", letterSpacing: -0.5 },
   brandDot: { color: colors.clover },
-  button: { minWidth: 44, minHeight: 52, borderRadius: 16, backgroundColor: colors.clover, alignItems: "center", justifyContent: "center", paddingHorizontal: space.lg },
+  button: { minWidth: 44, minHeight: 52, borderRadius: radius.button, backgroundColor: colors.clover, alignItems: "center", justifyContent: "center", paddingHorizontal: space.lg },
   buttonSecondary: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   buttonDanger: { backgroundColor: colors.danger },
   buttonDisabled: { opacity: 0.45 },
-  buttonText: { color: colors.card, fontSize: 16, fontWeight: "800" },
+  buttonText: { color: colors.card, ...typeScale.body, fontWeight: "800" },
   buttonTextSecondary: { color: colors.cloverDark },
   pressed: { opacity: 0.76 },
-  card: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 20, padding: space.lg, gap: space.md },
+  card: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.card, padding: space.lg, gap: space.md },
   nav: { position: "absolute", left: 0, right: 0, bottom: 0, minHeight: 76, paddingBottom: 10, backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border, flexDirection: "row", justifyContent: "space-around" },
   navItem: { flex: 1, minHeight: 60, alignItems: "center", justifyContent: "center", gap: 2 },
   navIcon: { color: colors.muted, fontSize: 22, fontWeight: "700" },
-  navLabel: { color: colors.muted, fontSize: 13, fontWeight: "600" },
+  navLabel: { color: colors.muted, ...typeScale.meta, fontWeight: "600" },
   navActive: { color: colors.cloverDark }
 });

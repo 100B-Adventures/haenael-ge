@@ -12,6 +12,8 @@ export const appConfig = {
     !supabaseAnonKey,
   minimumVersionUrl: process.env.EXPO_PUBLIC_MINIMUM_VERSION_URL?.trim() ?? "",
   tossCheckoutUrl: process.env.EXPO_PUBLIC_TOSS_CHECKOUT_URL?.trim() ?? "",
+  googleUserChoiceBillingEnabled:
+    process.env.EXPO_PUBLIC_GOOGLE_USER_CHOICE_BILLING_ENABLED === "true",
   storeUrl:
     Platform.OS === "ios"
       ? process.env.EXPO_PUBLIC_IOS_STORE_URL?.trim() ?? ""

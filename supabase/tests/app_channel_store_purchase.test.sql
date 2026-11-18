@@ -35,7 +35,7 @@ SELECT set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000071
 SELECT throws_ok(
   format(
     'SELECT * FROM public.create_store_purchase_intent(%s, %L, %L, %s, %L)',
-    :app_goal_id, 'TOSS_IAP', 'haenael_cheer_clover_1', 1, 'toss-gate-off-0001'
+    :app_goal_id, 'TOSS_IAP', 'haenael.cheer.clover.1', 1, 'toss-gate-off-0001'
   ),
   '55000',
   'channel_release_disabled',
@@ -72,12 +72,14 @@ SELECT is((SELECT is_replay FROM public.credit_store_purchase(
 SELECT is((SELECT count(*)::integer FROM public.clover_ledger WHERE ref_type='store_purchase'), 1, 'AP-DB-14 재생 뒤 적립 원장 1건');
 
 SELECT is((SELECT status FROM public.reverse_store_purchase(
-  'APPLE', 'sandbox-transaction-0001', 'refund-event-0001', repeat('a',64)
+  'APPLE', 'sandbox-transaction-0001', 'refund-event-0001', repeat('a',64),
+  'refund-transaction-0001', 3600, 3, 'KRW', 'FULL', now()
 )), 'REFUNDED', 'RF-DB-03 환불은 회수 완료');
 SELECT is((SELECT clover_count FROM public.clover_balance WHERE member_id='00000000-0000-0000-0000-000000000072'), 3, 'RF-DB-04 환불 뒤 구매분만 회수되고 웰컴 3 유지');
 SELECT is((SELECT maturity_locked_amount FROM public.clover_eligibility('00000000-0000-0000-0000-000000000072')), 0, 'RF-DB-04-1 전액 환불된 구매는 30일 보류에서 제외한다');
 SELECT is((SELECT is_replay FROM public.reverse_store_purchase(
-  'APPLE', 'sandbox-transaction-0001', 'refund-event-0001', repeat('a',64)
+  'APPLE', 'sandbox-transaction-0001', 'refund-event-0001', repeat('a',64),
+  'refund-transaction-0001', 3600, 3, 'KRW', 'FULL', now()
 )), true, 'RF-DB-05 같은 환불 이벤트는 멱등 재생');
 
 RESET ROLE;

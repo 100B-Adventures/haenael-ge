@@ -65,9 +65,13 @@ Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요
 
 보고 레코드는 `external_transaction_id`, 암호화 token, 거래시각, 세전액, 세액, 사용자 과세 지역, API 버전, `report_due_at`, `next_attempt_at`, Google 결과 상태를 가진다. 24시간 안 `REPORTED`가 아니면 경보하며 영구 실패는 `PERMANENT_FAILURE`로 격리한다. 환불도 ExternalTransaction API에 별도 보고한다. 프로그램 등록과 API 버전은 제출 전 콘솔에서 다시 핀한다.
 
+## POST `/functions/v1/google-external-transaction-report`
+
+pg_cron이 10분마다 내부 토큰으로 호출한다. `claim_google_external_transaction_batch`가 `FOR UPDATE SKIP LOCKED`로 만료되지 않은 `PENDING` 행을 한 worker에만 임대하고, worker는 암호화된 외부 거래 토큰을 메모리에서만 복호화해 Google `externaltransactions.createexternaltransaction`을 호출한다. HTTP 409는 같은 `external_transaction_id`를 GET으로 재확인해 멱등 성공으로 처리한다. 성공은 `REPORTED`, 재시도 가능한 실패는 지수 백오프, 잘못된 요청은 `PERMANENT_FAILURE`다. `report_due_at`을 넘긴 실패는 `ops_event`에 기록한다. 토큰 원문은 DB·로그·응답에 쓰지 않는다.
+
 ## POST `/functions/v1/store-refund-webhook`
 
-공급자 서명 검증 전 DB 쓰기 0건. Apple은 Notification V2 JWS chain, Google은 RTDN 서명 뒤 Developer API 재조회, Toss는 서명 이벤트와 구매 상태 조회를 거친다. 정규화 이벤트는 `provider_event_id`, `provider_transaction_id`, `refund_transaction_id`, `refund_amount_minor`, `currency`, `refund_scope=FULL|PARTIAL`, `occurred_at`, `normalization_status=VERIFIED|REJECTED|RETRY`, `payload_hash`를 가진다. 이벤트 유일키로 멱등 처리한다. 누적 환불액은 구매 금액을 넘을 수 없고, 부분환불은 서버 상품 카탈로그의 환불 대상 클로버를 비례가 아닌 공급자 확정 수량으로 계산한다. `CREDITED` 거래는 보류분 상쇄, 가용 잔액 회수, 부족 시 회수 큐 순서로 처리한다. 전액 환불일 때만 구매 상태를 `REFUNDED`로, 부분환불은 `PARTIALLY_REFUNDED`로 둔다. 일일 재동기화 작업이 최근 거래를 공급자 API에서 재조회해 누락 알림을 복구한다.
+공급자 서명 검증 전 DB 쓰기 0건. Apple은 Notification V2 `signedPayload` JWS chain, Google은 Pub/Sub push OIDC 토큰을 검증한 RTDN 뒤 Developer API를 재조회하고, Toss 계열은 서명 이벤트와 구매 상태 조회를 거친다. 정규화 이벤트는 `provider_event_id`, `provider_transaction_id`, `refund_transaction_id`, `refund_amount_minor`, `refund_clover_amount`, `currency`, `refund_scope=FULL|PARTIAL`, `occurred_at`, `normalization_status=VERIFIED|REJECTED|RETRY`, `payload_hash`를 가진다. 이벤트 유일키로 멱등 처리한다. 누적 환불액과 누적 환불 수량은 원 구매를 넘을 수 없고, 클로버 회수량은 금액으로 계산하지 않고 공급자가 확정한 수량만 사용한다. `CREDITED` 거래는 보류분 상쇄, 가용 잔액 회수, 부족 시 회수 큐 순서로 처리한다. 전액 환불일 때만 구매 상태를 `REFUNDED`로, 부분환불은 `PARTIALLY_REFUNDED`로 둔다. 일일 재동기화 작업은 `store_purchase.id` cursor로 대상 구매를 끝까지 순회해 누락 알림을 복구한다.
 
 ## POST `/functions/v1/register-push-token`
 
@@ -100,9 +104,9 @@ Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요
 
 공급자 기능 플래그 OFF 또는 계약 키 미설정은 `503 gift_provider_unavailable`이며 DB 쓰기 0건이다. 공급사 호출에는 해낼게 request key를 공급사 멱등키로 전달한다. 성공은 `202`와 `gift_exchange_id`, `status=PROVIDER_PENDING`, `masked_destination`을 반환한다. 타임아웃·5xx·연결 종료는 `PENDING_RECONCILIATION`이며 잠금을 유지한다. `GET provider-order-status`가 미발송을 확정한 경우만 `FAILED_CONFIRMED`로 바꾸고 잠금을 해제한다. 전화번호 원문은 암호화 저장하고 화면·로그에는 마스킹만 쓴다.
 
-## POST `/functions/v1/mobile-cashout`
+## GET·POST `/functions/v1/mobile-cashout`
 
-요청은 `{ "clover_amount": 30, "bank_code": "004", "account_number_token": "vault-token", "account_holder": "홍길동", "request_key": "uuid" }`다. 회원 ID는 받지 않고 JWT `sub`에서만 파생한다. 서버의 `channel=MOBILE`, environment 허용목록과 D-047 기본거부를 통과한 뒤 기존 환전 RPC를 service role로 호출한다. 응답 `201|200`은 `{ "data": { "cashout_request_id": 1, "status": "REQUESTED", "clover_amount": 30, "is_replay": false } }`다. 오류는 `cashout_channel_disabled`, `cashout_not_eligible`, `cashout_amount_invalid`, `cashout_account_invalid`, `request_key_conflict`, `cashout_in_progress`로 고정한다. DB 내부 잠금 순서는 기프티콘·환불과 동일하게 회원 advisory lock → `clover_balance FOR UPDATE`다. A14는 조회만 `clover_eligibility`, 제출은 이 endpoint만 사용하며 앱에서 service-role RPC 직접 호출은 금지한다.
+GET은 JWT `sub`의 `clover_eligibility`와 서버의 `cashout_enabled`, `gift_exchange_enabled`를 반환한다. POST 요청은 `{ "clover_amount": 30, "bank_code": "004", "account_number": "숫자 계좌번호", "account_holder": "홍길동", "request_key": "8~128자" }`다. 계좌번호는 TLS 요청 본문에서만 받고 로그·응답에 쓰지 않으며, 기존 환전 RPC가 서버 키로 암호화·지문 처리한 값만 저장한다. 회원 ID는 받지 않고 JWT `sub`에서만 파생한다. 서버의 `CASHOUT_ENABLED`, `MOBILE_CASHOUT_ENABLED`, `MOBILE_CASHOUT_APPROVAL_REFERENCE`, 공통 `CASHOUT_ALLOWED_MEMBER_IDS`를 모두 통과해야 하며 하나라도 없으면 기본 거부한다. 응답 `200`은 `{ "data": { "cashout_request_id": 1, "status": "REQUESTED", "clover_amount": 30, "is_replay": false } }`다. 오류는 `cashout_channel_disabled`, `cashout_not_eligible`, `cashout_amount_invalid`, `cashout_account_invalid`, `request_key_conflict`, `cashout_in_progress`로 고정한다. DB 내부 잠금 순서는 기프티콘·환불과 동일하게 회원 advisory lock → `clover_balance FOR UPDATE`다. A14는 조회·제출 모두 이 endpoint만 사용하며 앱에서 service-role RPC 직접 호출은 금지한다.
 
 ## POST `/functions/v1/auth-toss`
 
