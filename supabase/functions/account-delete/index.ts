@@ -63,14 +63,15 @@ type AppleRevokeFetcher = (
 export async function revokeAppleCredential(args: {
   clientId: string;
   clientSecret: string;
-  refreshToken: string;
+  token: string;
+  tokenTypeHint: "refresh_token" | "access_token";
   fetcher?: AppleRevokeFetcher;
 }): Promise<void> {
   const body = new URLSearchParams({
     client_id: args.clientId,
     client_secret: args.clientSecret,
-    token: args.refreshToken,
-    token_type_hint: "refresh_token",
+    token: args.token,
+    token_type_hint: args.tokenTypeHint,
   });
   const response = await (args.fetcher ?? fetch)(
     "https://appleid.apple.com/auth/revoke",
@@ -94,7 +95,10 @@ async function prepareAppleRevocation(args: {
   const { data: credential, error: credentialError } = await args.admin.from(
     "apple_token_revocation",
   )
-    .select("token_enc,status,attempt_count").eq("member_id", args.memberId)
+    .select("token_enc,token_type_hint,status,attempt_count").eq(
+      "member_id",
+      args.memberId,
+    )
     .maybeSingle();
   if (credentialError) return "retry_required";
   if (credential?.status === "REVOKED") return "revoked";
@@ -123,11 +127,18 @@ async function prepareAppleRevocation(args: {
     return "retry_required";
   }
   try {
-    const refreshToken = await decryptSecret(
+    const token = await decryptSecret(
       credential.token_enc,
       encryptionKey,
     );
-    await revokeAppleCredential({ clientId, clientSecret, refreshToken });
+    await revokeAppleCredential({
+      clientId,
+      clientSecret,
+      token,
+      tokenTypeHint: credential.token_type_hint === "access_token"
+        ? "access_token"
+        : "refresh_token",
+    });
     const { error: updateError } = await args.admin.from(
       "apple_token_revocation",
     ).update({
@@ -155,6 +166,25 @@ export function blocksAuthDeletionForAppleRevocation(
   result: "not_applicable" | "revoked" | "manual_required" | "retry_required",
 ): boolean {
   return result === "manual_required" || result === "retry_required";
+}
+
+export async function authorizeAccountDeletion(args: {
+  prepareAppleRevocation(): Promise<
+    "not_applicable" | "revoked" | "manual_required" | "retry_required"
+  >;
+  prepareDatabaseDeletion(): Promise<void>;
+}): Promise<
+  "prepared" | "manual_required" | "retry_required"
+> {
+  const appleRevocation = await args.prepareAppleRevocation();
+  if (
+    appleRevocation === "manual_required" ||
+    appleRevocation === "retry_required"
+  ) {
+    return appleRevocation;
+  }
+  await args.prepareDatabaseDeletion();
+  return "prepared";
 }
 
 async function removeOwnedStorageObjects(
@@ -252,21 +282,31 @@ export async function handleAccountDelete(req: Request): Promise<Response> {
     (identity) => identity.provider === "apple",
   ) || userData.user.app_metadata?.provider === "apple";
 
-  const { error: prepareError } = await admin.rpc("prepare_account_deletion", {
-    p_member_id: memberId,
-    p_request_key: input.requestKey,
-  });
-  if (prepareError) {
-    const mapped = mapAccountDeletionError(new Error(prepareError.message));
+  let authorizationResult: Awaited<ReturnType<typeof authorizeAccountDeletion>>;
+  try {
+    authorizationResult = await authorizeAccountDeletion({
+      prepareAppleRevocation: () =>
+        prepareAppleRevocation({
+          admin,
+          memberId,
+          isAppleIdentity,
+        }),
+      prepareDatabaseDeletion: async () => {
+        const { error } = await admin.rpc("prepare_account_deletion", {
+          p_member_id: memberId,
+          p_request_key: input.requestKey,
+        });
+        if (error) throw new Error(error.message);
+      },
+    });
+  } catch (error) {
+    const mapped = mapAccountDeletionError(error);
     return json(mapped.status, { error: { code: mapped.code } });
   }
-
-  const appleRevocation = await prepareAppleRevocation({
-    admin,
-    memberId,
-    isAppleIdentity,
-  });
-  if (blocksAuthDeletionForAppleRevocation(appleRevocation)) {
+  if (authorizationResult === "manual_required") {
+    return json(409, { error: { code: "apple_reauthentication_required" } });
+  }
+  if (authorizationResult === "retry_required") {
     return json(503, { error: { code: "apple_token_revocation_pending" } });
   }
 
@@ -274,6 +314,13 @@ export async function handleAccountDelete(req: Request): Promise<Response> {
     await removeOwnedStorageObjects(admin, memberId);
   } catch {
     return json(503, { error: { code: "account_storage_cleanup_failed" } });
+  }
+  const { error: settlementError } = await admin.rpc(
+    "assert_account_deletion_settled",
+    { p_member_id: memberId, p_request_key: input.requestKey },
+  );
+  if (settlementError) {
+    return json(409, { error: { code: "account_settlement_pending" } });
   }
   const { error: deleteError } = await admin.auth.admin.deleteUser(memberId);
   if (deleteError) {

@@ -57,4 +57,34 @@ describe("미완료 스토어 구매 복구", () => {
       paymentKey: "payment-key-0001",
     }));
   });
+
+  it("TC-APP-02-17 복구 중 새 결제를 추가해도 새 큐 항목을 보존한다", async () => {
+    const storage = memoryStorage();
+    const purchase = (suffix: string) => ({
+      intentId: `00000000-0000-0000-0000-0000000001${suffix}`,
+      accountBinding: `00000000-0000-0000-0000-0000000002${suffix}`,
+      requestKey: `toss-request-${suffix}`,
+      paymentKey: `payment-key-${suffix}`,
+      orderId: `order-${suffix}`,
+      externalTransactionToken: `external-token-${suffix}`,
+      message: "응원",
+      anonymous: false,
+    });
+    await enqueueAlternativePurchase(storage, purchase("11"));
+    let release!: () => void;
+    const delayed = new Promise<void>((resolve) => { release = resolve; });
+    const confirm = vi.fn(async () => delayed);
+    const recovering = recoverAlternativePurchases({ storage, confirm });
+    await vi.waitFor(() => expect(confirm).toHaveBeenCalledTimes(1));
+    await enqueueAlternativePurchase(storage, purchase("22"));
+    release();
+    await recovering;
+
+    const retry = vi.fn().mockRejectedValue(new Error("network"));
+    expect(await recoverAlternativePurchases({ storage, confirm: retry }))
+      .toEqual({ recovered: 0, pending: 1 });
+    expect(retry).toHaveBeenCalledWith(expect.objectContaining({
+      requestKey: "toss-request-22",
+    }));
+  });
 });

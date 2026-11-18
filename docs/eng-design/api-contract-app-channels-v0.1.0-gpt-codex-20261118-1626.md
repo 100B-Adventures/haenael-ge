@@ -71,11 +71,11 @@ Android 한국 사용자 선택 결제의 토스 승인 결과만 받는다. 요
 
 ## GET `/api/mobile/toss-checkout?checkout_token=...`
 
-Vercel 서버가 일회성 token SHA-256으로 세션을 찾고, `store_purchase_intent`와 `store_product_catalog`에서 상품·수량·1클로버당 1,100원 금액·계정 결합 metadata를 다시 계산한다. 유효한 세션만 Toss Payments 결제창을 열며 쿼리의 금액·상품·계정 값은 읽지 않는다. Toss success/fail callback은 같은 서버의 `/api/mobile/toss-checkout/return`이 주문 ID와 금액을 재대조한 뒤 앱 딥링크로 전달한다.
+운영 URL은 Vercel Production 별칭 `https://haenael-ge.vercel.app/api/mobile/toss-checkout`이다. Vercel 서버가 일회성 token SHA-256으로 세션을 찾고, `store_purchase_intent`와 `store_product_catalog`에서 상품·수량·1클로버당 1,100원 금액·계정 결합 metadata를 다시 계산한다. 유효한 세션만 Toss Payments 결제창을 열며 쿼리의 금액·상품·계정 값은 읽지 않는다. Toss success/fail callback은 같은 서버의 `/api/mobile/toss-checkout/return`이 주문 ID와 금액을 재대조한 뒤 앱 딥링크로 전달한다.
 
-토스 승인 성공 뒤 앱은 `intent_id`, `account_binding`, `payment_key`, `order_id`, Google 외부 거래 token, `request_key`를 SecureStore 미완료 큐에 먼저 저장한다. `confirm-alternative-payment` 성공 응답을 받을 때만 제거한다. 앱 시작 시 같은 요청을 재전송하며 새로운 주문이나 멱등키를 만들지 않는다.
+토스 승인 성공 뒤 앱은 `intent_id`, `account_binding`, `payment_key`, `order_id`, Google 외부 거래 token, `request_key`를 SecureStore 미완료 큐에 먼저 저장한다. `confirm-alternative-payment` 성공 응답을 받을 때만 항목별로 제거한다. 큐 쓰기는 앱 프로세스 안에서 직렬화하고 성공 뒤 최신 큐를 다시 읽으므로 복구 중 추가된 결제를 과거 스냅샷으로 덮지 않는다. 앱 시작 시 같은 요청을 재전송하며 새로운 주문이나 멱등키를 만들지 않는다.
 
-토스 승인 뒤 적립과 전액 취소가 모두 실패하면 `record_alternative_payment_recovery`가 `store_recovery_case(status=OPEN)`와 `store_purchase_event(event_type=PAYMENT_COMPENSATION_FAILED)`를 같은 DB 트랜잭션으로 기록한다. OPEN 복구 건은 계정 삭제를 차단한다.
+토스 승인 뒤 적립과 전액 취소가 모두 실패하면 `record_alternative_payment_recovery`가 `store_recovery_case(status=OPEN)`와 `store_purchase_event(event_type=PAYMENT_COMPENSATION_FAILED)`를 같은 DB 트랜잭션으로 기록한다. 복구 건 생성과 계정 삭제는 `member_settlement:<member_id>` advisory lock을 공유한다. 만료 전 `GOOGLE_ALTERNATIVE` 구매 intent 또는 OPEN 복구 건이 있으면 계정 삭제를 차단한다.
 
 ## POST `/functions/v1/google-external-transaction-report`
 
@@ -97,13 +97,13 @@ pg_cron이 10분마다 내부 토큰으로 호출한다. `claim_google_external_
 - `REQUESTED|KYC_PENDING|APPROVED|PAYOUT_SENT` 환전이 있으면 `409 cashout_in_progress`.
 - 아직 release 또는 reverse되지 않은 `clover_maturity`, 진행 중 기프티콘, 미해결 구매 회수 건이 있으면 `409 account_settlement_pending`.
 
-통과하면 생성 상태의 구매 intent를 취소하고 푸시 토큰을 삭제하며 목표·프로필·친구·알림 데이터를 삭제 또는 비식별화한다. 결제·적립·환전 원장은 법정 정산과 부정 사용 대응에 필요한 범위만 비식별 회원 키에 보존한다. 그 뒤 Storage 소유 객체를 삭제하고 서버 전용 `auth.admin.deleteUser(member_id)`를 호출해 Auth 사용자와 refresh token 발급 경로를 제거한다. 이미 발급된 JWT의 남은 수명 동안 민감 쓰기는 `member.deleted_at IS NULL`과 Auth 사용자 존재를 함께 검사한다.
+Apple 회원은 공급자 token 존재와 `/auth/revoke` 성공을 먼저 확인한다. 그 전에는 구매 intent, 회원·목표·친구·알림, Storage 객체를 변경하지 않는다. 외부 폐기와 정산 검사를 통과하면 생성 상태의 구매 intent를 취소하고 푸시 토큰을 삭제하며 목표·프로필·친구·알림 데이터를 삭제 또는 비식별화한다. 결제·적립·환전 원장은 법정 정산과 부정 사용 대응에 필요한 범위만 비식별 회원 키에 보존한다. 그 뒤 Storage 소유 객체를 삭제하고 `assert_account_deletion_settled`로 같은 회원 정산 잠금을 다시 잡아 OPEN 복구 건을 재검사한 다음, 서버 전용 `auth.admin.deleteUser(member_id)`를 호출한다. 이미 발급된 JWT의 남은 수명 동안 민감 쓰기는 `member.deleted_at IS NULL`과 Auth 사용자 존재를 함께 검사한다.
 
 성공은 `200 { "data": { "deleted": true } }`다. 준비 단계 재시도는 `request_key`로 멱등 처리하며, Auth 삭제 전 Storage 삭제 실패는 `503 account_storage_cleanup_failed`, Auth 삭제 실패는 `503 account_auth_delete_failed`로 고정한다. 서비스 역할 키와 개인정보 원문은 응답·로그에 노출하지 않는다.
 
 회원별 `PREPARED|AUTH_DELETED` 요청이 있으면 클라이언트 request key가 달라도 기존 요청을 재개한다. 모바일은 성공 전까지 원 request key를 SecureStore에 유지하고 성공 뒤에만 제거한다.
 
-Apple OAuth 로그인에서 Supabase가 반환한 `provider_refresh_token`은 `/functions/v1/register-apple-revocation-token`으로 즉시 전송해 AES-256-GCM 암호문으로만 보관한다. Apple 회원 삭제는 `/auth/revoke` 성공을 `apple_token_revocation=REVOKED`에 기록한 뒤 Auth 사용자를 삭제한다. Apple 또는 네트워크 오류는 `RETRY_REQUIRED`로 남기고 Auth 삭제를 멈춘다. 과거 회원처럼 공급자 token이 없으면 `MANUAL_REQUIRED` 감사 상태를 먼저 기록하고 Apple 공식 지침에 따라 자체 계정 삭제는 계속한다.
+Apple OAuth 로그인에서 Supabase가 반환한 `provider_refresh_token`을 우선하고, 없으면 `provider_token`을 `/functions/v1/register-apple-revocation-token`으로 즉시 전송한다. 서버는 token과 `refresh_token|access_token` 종류를 AES-256-GCM 암호문과 함께 보관한다. Apple 회원 삭제는 `/auth/revoke` 성공을 `apple_token_revocation=REVOKED`에 기록한 뒤에만 DB 삭제 준비를 시작한다. 공급자 token이 없으면 데이터 변경 없이 `409 apple_reauthentication_required`를 반환하고, 모바일은 Apple OAuth를 다시 수행해 폐기용 token을 등록한 뒤 원 `request_key`로 삭제를 재개한다. Apple 또는 네트워크 오류는 `RETRY_REQUIRED`로 남기고 모든 데이터 삭제를 멈춘다.
 
 ## POST `/functions/v1/gift-exchange`
 

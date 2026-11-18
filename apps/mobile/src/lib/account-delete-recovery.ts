@@ -23,3 +23,24 @@ export async function clearAccountDeletionRequestKey(
 ): Promise<void> {
   await storage.removeItem(REQUEST_KEY_STORAGE_KEY);
 }
+
+type AccountDeletionAttempt =
+  | { ok: true }
+  | { ok: false; code?: string; error?: unknown };
+
+export async function retryAccountDeletionAfterAppleReauthentication(args: {
+  requestKey: string;
+  invokeDelete(requestKey: string): Promise<AccountDeletionAttempt>;
+  reauthenticateApple(): Promise<void>;
+}): Promise<void> {
+  let result = await args.invokeDelete(args.requestKey);
+  if (result.ok) return;
+  if (result.code !== "apple_reauthentication_required") {
+    throw result.error ?? new Error(result.code ?? "account_delete_failed");
+  }
+  await args.reauthenticateApple();
+  result = await args.invokeDelete(args.requestKey);
+  if (!result.ok) {
+    throw result.error ?? new Error(result.code ?? "account_delete_failed");
+  }
+}

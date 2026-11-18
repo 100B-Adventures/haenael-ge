@@ -8,7 +8,9 @@ import { canDeleteAccount } from "./policy";
 import {
   clearAccountDeletionRequestKey,
   getOrCreateAccountDeletionRequestKey,
+  retryAccountDeletionAfterAppleReauthentication,
 } from "./account-delete-recovery";
+import { reauthenticateAppleForDeletion } from "./auth";
 
 const deletionStorage = {
   getItem: (key: string) => SecureStore.getItemAsync(key),
@@ -40,10 +42,25 @@ export async function deleteAccountInApp() {
     deletionStorage,
     () => createRequestKey("account_delete"),
   );
-  const { error } = await supabase.functions.invoke("account-delete", {
-    body: { request_key: requestKey }
+  await retryAccountDeletionAfterAppleReauthentication({
+    requestKey,
+    invokeDelete: async (stableRequestKey) => {
+      const { error } = await supabase.functions.invoke("account-delete", {
+        body: { request_key: stableRequestKey },
+      });
+      if (!error) return { ok: true };
+      let code: string | undefined;
+      const context = (error as { context?: unknown }).context;
+      if (context instanceof Response) {
+        try {
+          const body = await context.clone().json() as { error?: { code?: string } };
+          code = body.error?.code;
+        } catch { /* Use the original Supabase error below. */ }
+      }
+      return { ok: false, code, error };
+    },
+    reauthenticateApple: reauthenticateAppleForDeletion,
   });
-  if (error) throw error;
   await clearAccountDeletionRequestKey(deletionStorage);
   await unregisterPushToken();
   await supabase.auth.signOut({ scope: "local" });

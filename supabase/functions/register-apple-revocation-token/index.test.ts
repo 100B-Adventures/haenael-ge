@@ -7,14 +7,31 @@ import {
 Deno.test("TC-APP-09-9 Apple 폐기 토큰은 요청 필드 하나만 받는다", () => {
   assertEquals(
     parseAppleRevocationToken({
-      provider_refresh_token: "apple-refresh-token-value",
+      provider_token: "apple-refresh-token-value",
+      token_type_hint: "refresh_token",
     }),
-    "apple-refresh-token-value",
+    { token: "apple-refresh-token-value", tokenTypeHint: "refresh_token" },
   );
   assertThrows(
-    () => parseAppleRevocationToken({ provider_refresh_token: "short" }),
+    () => parseAppleRevocationToken({ provider_token: "short" }),
     Error,
     "invalid_token",
+  );
+  assertThrows(
+    () =>
+      parseAppleRevocationToken({
+        provider_token: "apple-access-token-value",
+        token_type_hint: "id_token",
+      }),
+    Error,
+    "invalid_token_type",
+  );
+  assertEquals(
+    parseAppleRevocationToken({
+      provider_token: "apple-access-token-value",
+      token_type_hint: "access_token",
+    }),
+    { token: "apple-access-token-value", tokenTypeHint: "access_token" },
   );
 });
 

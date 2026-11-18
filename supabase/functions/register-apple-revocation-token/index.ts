@@ -21,13 +21,17 @@ export function parseAppleRevocationToken(value: unknown) {
   const body = value && typeof value === "object"
     ? value as Record<string, unknown>
     : {};
-  const token = typeof body.provider_refresh_token === "string"
-    ? body.provider_refresh_token.trim()
+  const token = typeof body.provider_token === "string"
+    ? body.provider_token.trim()
     : "";
+  const tokenTypeHint = body.token_type_hint;
   if (token.length < 16 || token.length > 4096) {
     throw new Error("invalid_token");
   }
-  return token;
+  if (tokenTypeHint !== "refresh_token" && tokenTypeHint !== "access_token") {
+    throw new Error("invalid_token_type");
+  }
+  return { token, tokenTypeHint };
 }
 
 export async function handleRegisterAppleRevocationToken(
@@ -43,9 +47,9 @@ export async function handleRegisterAppleRevocationToken(
   if (!authorization.startsWith("Bearer ")) {
     return json(401, { error: { code: "unauthorized" } });
   }
-  let token: string;
+  let credential: ReturnType<typeof parseAppleRevocationToken>;
   try {
-    token = parseAppleRevocationToken(await req.json());
+    credential = parseAppleRevocationToken(await req.json());
   } catch {
     return json(400, { error: { code: "invalid_request" } });
   }
@@ -72,10 +76,11 @@ export async function handleRegisterAppleRevocationToken(
   if (!isApple) {
     return json(409, { error: { code: "apple_identity_required" } });
   }
-  const encrypted = await encryptSecret(token, encryptionKey);
+  const encrypted = await encryptSecret(credential.token, encryptionKey);
   const { error } = await admin.from("apple_token_revocation").upsert({
     member_id: userData.user.id,
     token_enc: encrypted,
+    token_type_hint: credential.tokenTypeHint,
     status: "READY",
     attempt_count: 0,
     last_error_code: null,

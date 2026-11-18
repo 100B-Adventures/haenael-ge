@@ -1,5 +1,6 @@
 import { assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
+  authorizeAccountDeletion,
   blocksAuthDeletionForAppleRevocation,
   handleAccountDelete,
   mapAccountDeletionError,
@@ -12,6 +13,36 @@ Deno.test("TC-APP-09-3 인증 없는 계정 삭제는 준비 RPC 전에 거절�
     new Request("http://local", { method: "POST", body: "{}" }),
   );
   assertEquals(response.status, 401);
+});
+
+Deno.test("TC-APP-09-12 Apple 폐기 확인 전에는 DB 삭제 준비를 호출하지 않는다", async () => {
+  const blockedCalls: string[] = [];
+  const blocked = await authorizeAccountDeletion({
+    prepareAppleRevocation: () => {
+      blockedCalls.push("apple");
+      return Promise.resolve("manual_required" as const);
+    },
+    prepareDatabaseDeletion: () => {
+      blockedCalls.push("database");
+      return Promise.resolve();
+    },
+  });
+  assertEquals(blocked, "manual_required");
+  assertEquals(blockedCalls, ["apple"]);
+
+  const allowedCalls: string[] = [];
+  const allowed = await authorizeAccountDeletion({
+    prepareAppleRevocation: () => {
+      allowedCalls.push("apple");
+      return Promise.resolve("revoked" as const);
+    },
+    prepareDatabaseDeletion: () => {
+      allowedCalls.push("database");
+      return Promise.resolve();
+    },
+  });
+  assertEquals(allowed, "prepared");
+  assertEquals(allowedCalls, ["apple", "database"]);
 });
 
 Deno.test("TC-APP-09-4 계정 삭제는 request_key만 받고 회원 ID를 무시한다", () => {
@@ -53,14 +84,15 @@ Deno.test("TC-APP-09-6 잔액·환전·정산 보류를 안정적인 409 오류�
   );
 });
 
-Deno.test("TC-APP-09-8 Apple refresh token을 공식 revoke endpoint에서 폐기한다", async () => {
+Deno.test("TC-APP-09-8 Apple access token도 공식 revoke endpoint에서 폐기한다", async () => {
   let capturedUrl = "";
   let capturedType = "";
   let capturedBody = "";
   await revokeAppleCredential({
     clientId: "com.haenael.app",
     clientSecret: "signed-client-secret",
-    refreshToken: "apple-refresh-token",
+    token: "apple-access-token",
+    tokenTypeHint: "access_token",
     fetcher: (input, init) => {
       const request = new Request(input, init);
       capturedUrl = request.url;
@@ -71,7 +103,7 @@ Deno.test("TC-APP-09-8 Apple refresh token을 공식 revoke endpoint에서 폐�
   });
   assertEquals(capturedUrl, "https://appleid.apple.com/auth/revoke");
   assertEquals(capturedType, "application/x-www-form-urlencoded");
-  assertEquals(capturedBody.includes("token_type_hint=refresh_token"), true);
+  assertEquals(capturedBody.includes("token_type_hint=access_token"), true);
 });
 
 Deno.test("TC-APP-09-11 Apple 토큰 폐기 대기 중에는 Auth 삭제를 차단한다", () => {

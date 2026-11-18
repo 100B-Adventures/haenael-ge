@@ -1,9 +1,11 @@
 BEGIN;
-SELECT plan(32);
+SELECT plan(37);
 
 SELECT has_table('public', 'account_deletion_request', 'APP-SRV-DB-01 계정 삭제 요청 원장이 있다');
 SELECT has_table('public', 'alternative_checkout_session', 'APP-SRV-DB-01-1 서버 체크아웃 세션 원장이 있다');
 SELECT has_table('public', 'apple_token_revocation', 'APP-SRV-DB-01-2 Apple 토큰 폐기 원장이 있다');
+SELECT has_column('public', 'apple_token_revocation', 'token_type_hint',
+  'APP-SRV-DB-01-4 Apple 폐기 토큰 종류를 함께 저장한다');
 SELECT hasnt_column('public', 'alternative_checkout_session', 'amount',
   'APP-SRV-DB-01-3 체크아웃 세션은 클라이언트 금액을 저장하지 않는다');
 SELECT has_column('public', 'member', 'deleted_at', 'APP-SRV-DB-02 회원 삭제 시각이 있다');
@@ -19,6 +21,18 @@ SELECT has_function('public', 'claim_google_external_transaction_batch', ARRAY['
   'APP-SRV-DB-04-1 Google 외부 거래 보고 큐 claim RPC가 있다');
 SELECT has_function('public', 'settle_google_external_transaction', ARRAY['bigint','boolean','boolean','text'],
   'APP-SRV-DB-04-2 Google 외부 거래 보고 정산 RPC가 있다');
+SELECT has_function('public', 'assert_account_deletion_settled', ARRAY['uuid','text'],
+  'APP-SRV-DB-04-6 Auth 삭제 직전 정산 재검사 RPC가 있다');
+SELECT matches(
+  pg_get_functiondef('public.record_alternative_payment_recovery(uuid,uuid,text,text,text)'::regprocedure),
+  'member_settlement:',
+  'APP-SRV-DB-04-4 복구 건 생성은 회원 정산 advisory lock을 사용한다'
+);
+SELECT matches(
+  pg_get_functiondef('public.prepare_account_deletion(uuid,text)'::regprocedure),
+  'member_settlement:',
+  'APP-SRV-DB-04-5 계정 삭제도 같은 회원 정산 advisory lock을 사용한다'
+);
 
 INSERT INTO auth.users(id, email) VALUES
   ('00000000-0000-0000-0000-000000000101', 'mobile-delete@example.test'),
@@ -156,6 +170,25 @@ SELECT throws_ok(
   '55000', 'account_settlement_pending',
   'APP-SRV-DB-10-7 OPEN 대체결제 복구 건은 계정 삭제를 차단한다'
 );
+
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.role', 'authenticated', true);
+SELECT set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
+SELECT * FROM public.create_store_purchase_intent(
+  :alternative_goal_id, 'GOOGLE_ALTERNATIVE', 'haenael.cheer.clover.1', 1,
+  'alternative-delete-race-0001'
+) \gset delete_race_intent_
+RESET ROLE;
+SET LOCAL ROLE service_role;
+SELECT set_config('request.jwt.claim.role', 'service_role', true);
+SELECT throws_ok(
+  $$SELECT * FROM public.prepare_account_deletion(
+    '00000000-0000-0000-0000-000000000101','account-delete-race-0001')$$,
+  '55000', 'account_settlement_pending',
+  'APP-SRV-DB-10-8 진행 중 대체결제가 있으면 계정 삭제를 차단한다'
+);
+UPDATE public.store_purchase_intent SET status='CANCELED'
+WHERE id=:'delete_race_intent_intent_id';
 
 INSERT INTO public.clover_balance(member_id, clover_count)
 VALUES ('00000000-0000-0000-0000-000000000101', 3)
