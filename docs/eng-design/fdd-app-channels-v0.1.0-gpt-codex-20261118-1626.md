@@ -160,12 +160,15 @@ stateDiagram-v2
 |---|---|---|
 | `AD-INV-01` 서버 단일 소유 | 회원당 삭제 작업은 1행이고 요청·재개는 JWT 회원 ID만 사용한다. 클라이언트 요청 키 컬럼과 입력은 없다. | `TC-APP-09-3` |
 | `AD-INV-02` 단방향 전이 | `REQUESTED → BLOCKED_PENDING_PAYMENT → REQUESTED → EXTERNAL_REVOKED → DATA_DELETED → AUTH_DELETED` 외 전이는 거절한다. `BLOCKED_PENDING_PAYMENT`는 재검사 통과 때만 `REQUESTED`로 돌아간다. | `TC-APP-09-4` |
-| `AD-INV-03` 회원 정산 직렬화 | 대체결제 확인 시작·적립·복구 건 생성과 삭제 작업의 모든 DB 전이는 `member_settlement:<member_id>` PostgreSQL transaction advisory lock을 잡고 잠금 안에서 결제 intent·확인 작업·OPEN 복구 건을 다시 검사한다. 만료 시각은 진행 중인 공급자 확인을 종결 상태로 만들지 않는다. | `TC-APP-09-5`, `TC-APP-09-6` |
+| `AD-INV-03` 회원 정산 직렬화 | 모든 결제의 공급자 확인 시작·적립·복구 건 생성과 삭제 작업의 모든 DB 전이는 `member_settlement:<member_id>` PostgreSQL transaction advisory lock을 잡는다. 결제자와 목표 소유자가 다르면 UUID 문자열 오름차순으로 두 회원 잠금을 잡고, 잠금 안에서 결제 intent·확인 작업·OPEN 복구 건을 다시 검사한다. 만료 시각은 진행 중인 공급자 확인을 종결 상태로 만들지 않는다. | `TC-APP-09-5`, `TC-APP-09-6`, `TC-APP-09-11` |
 | `AD-INV-04` 외부 폐기 선행 | Apple 회원은 로그인 때 서버가 refresh token을 암호화 저장한다. 토큰이 없거나 공급자가 무효로 거절하면 사용자 재인증으로 새 토큰을 받은 뒤 폐기한다. `EXTERNAL_REVOKED` 전에는 Storage·회원 데이터·Auth 사용자를 삭제하지 않는다. | `TC-APP-09-7`, `TC-APP-09-8` |
 | `AD-INV-05` 삭제 중 결제 금지 | 삭제 작업이 `REQUESTED` 이상이면 새 결제 확인 시작을 거절한다. 먼저 시작된 확인 작업이 있으면 삭제는 `BLOCKED_PENDING_PAYMENT`에 머문다. | `TC-APP-09-9` |
 | `AD-INV-06` 계정 세션 격리 | 모바일은 삭제를 시작한 회원 ID만 로컬에 저장한다. Apple 재인증 또는 일반 로그인 뒤 현재 세션 회원이 달라지면 이전 회원의 삭제 재개 정보를 즉시 폐기하고 서버 삭제를 재호출하지 않는다. | `TC-APP-09-10` |
+| `AD-INV-07` 모든 적립 경로의 단일 진입점 | StoreKit·Google Play·Google 대체결제·Toss 인앱결제·웹 Toss 결제는 공급자 확인 시작부터 적립 종결까지 `credit_purchase` RPC만 호출한다. 이 RPC는 결제 참조에서 결제자와 목표 소유자를 서버 조회하고, 두 회원 잠금 안에서 결제 소유권·삭제 작업 상태·목표 소유권을 재검사한 뒤에만 채널별 내부 적립 함수를 호출한다. 채널별 내부 함수의 `service_role` 직접 실행 권한은 제거한다. | `TC-APP-09-11`, `TC-APP-09-12`, `TC-APP-09-13` |
 
-삭제 실행 순서는 고정한다. `request_account_deletion`이 작업 행을 만들거나 재개하고 정산을 검사한다. Apple 폐기가 끝난 뒤 `mark_account_deletion_external_revoked`가 같은 회원 잠금 안에서 정산을 다시 검사한다. Storage 객체 삭제 뒤 `delete_account_data`가 같은 잠금 안에서 정산을 다시 검사하고 개인정보를 삭제하며 `DATA_DELETED`로 전이한다. 마지막으로 Auth 사용자를 삭제한 뒤 `complete_account_deletion_auth`가 `AUTH_DELETED`를 기록한다. 각 호출은 현재 상태를 읽어 멱등 재개한다.
+삭제 실행 순서는 고정한다. `request_account_deletion`이 작업 행을 만들거나 재개하고 잔액·환전·미성숙 적립·미종결 결제를 검사한다. Apple 폐기가 끝난 뒤 `mark_account_deletion_external_revoked`가 같은 회원 잠금 안에서 같은 정산 조건을 다시 검사한다. Storage 객체 삭제 뒤 `delete_account_data`가 같은 잠금 안에서 같은 조건을 다시 검사하고 개인정보를 삭제하며 `DATA_DELETED`로 전이한다. 마지막으로 Auth 사용자를 삭제한 뒤 `complete_account_deletion_auth`가 `AUTH_DELETED`를 기록한다. 각 호출은 현재 상태를 읽어 멱등 재개한다.
+
+`credit_purchase`는 `BEGIN`, `CREDIT`, `CANCELED`, `RECOVERY_REQUIRED` 네 동작을 같은 계약으로 처리한다. `BEGIN`은 외부 공급자 조회 전에 서버 작업을 `VERIFYING`으로 기록한다. 삭제가 먼저 시작됐으면 `BEGIN`을 거절하고, 확인이 먼저 시작됐으면 삭제 전이를 `BLOCKED_PENDING_PAYMENT`에 둔다. `CREDIT`은 기존 `VERIFYING` 작업과 결제 소유권을 잠금 안에서 대조하고 적립을 완료한다. 실패가 확정되면 `CANCELED`, 공급자 승인 뒤 보상 실패처럼 자동 종결할 수 없으면 `RECOVERY_REQUIRED`로 남겨 삭제를 계속 차단한다.
 
 ## 7. 요구 추적성
 
@@ -231,6 +234,7 @@ stateDiagram-v2
 | v0.1.0-retake1 | 2026-11-18 | 독립 리뷰 9/25 반려: 정책 게이트·구매자 결합·공통 잠금·기프티콘 재조정·PRD TC ID 복구 |
 | v0.1.0-retake2 | 2026-11-18 | 독립 재검수 12/25 반려: 대체결제 intent·gate, 전 채널 30일 보류, A14 서버 쓰기 경로, 정확한 TC 종단 추적성 보강 |
 | v0.1.0-retake3 | 2026-11-18 | 재검수 P0 0·P1 4건 반려: 부분환불 상태, intent DDL, 상류 요구 의미 매핑, 돈 경로 추가 테스트 보강 |
+| v0.1.0-retake5 | 2026-11-18 | 6회차 결제·탈퇴 경합 근본 수정: 모든 적립 채널의 `credit_purchase` 단일 진입점, 결제자·목표 소유자 이중 잠금, 삭제 단계별 정산 재검사 불변식 |
 | v0.1.0-retake4 | 2026-11-18 | 5회차 삭제 회귀 근본 수정: 회원당 서버 작업 1행, 공통 정산 잠금, Apple 폐기 선행, 클라이언트 세션 격리 불변식 |
 
 RUBRIC_SCORE: 독립 리뷰 재검수 대기
