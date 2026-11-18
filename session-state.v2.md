@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-18 23:30 KST 인계 (앱 3채널 개발·리뷰 7회)
+- 개발 완료(로컬·staging 전): 서버 구매 원장·영수증 검증·환불 알림·재동기화, 모바일 API 3종, 웹 D-054 동의(Consent Mode 거부 기본값, 로그인 전 배너 0)·환전 보류 표시, 앱인토스 IAP, Expo apps/mobile(iOS·Android). hotfix 브랜치 session/haenael-ge-v2-hotfix-20261108 푸시됨(마지막 d7893a7 + 리뷰 7회차 문서).
+- 독립 리뷰 7회 모두 BLOCK(13→9→5→4→4→3→4). 7회차 남은 4건: 공통 적립 RPC 우회 권한(credit_alternative_store_purchase_v1), 탈퇴·결제 복구 회귀 2, 멱등 상태 1. 문서 docs/qa/review-app-channels-1258dfa-v0.1.0~v0.7.0.
+- 이어가기: 빌더 CODEX_RESUME=01a1ed3a-48ee-7891-9b62-f6ba98beb509, 리뷰어 01a1ed99-43cd-7c91-9efd-6eee7d72587e. Claude 주간 리셋(11-21 19:00) 뒤 크로스모델 리뷰 1회.
+- 회장 결정 대기: OD-haenael-20261118-app-id(앱 이름·식별자 app.haenael), OD-haenael-20261118-android-altpay(1차에서 토스 대체결제 빼기). 외부 설정 대기: 토스 상품 ID, Google 대체결제 가입, 스토어 앱·상품 생성, 서버 시크릿, 실기 결제 왕복(.goal/questions-app-channels.md Q1~Q6).
+- iOS 빌드 환경: VM 120 Xcode 16.2 는 Expo 57 빌드 불가(ops-issues) → EAS 클라우드 빌드로.
+
 ## 2026-11-18 14:58 KST 인계 (앱 3채널 진행)
 - 13:10 예약 Codex 회차는 기본 제한 45분에 걸려 13:55 끊김(rc=124). 미커밋 변경(eng-design 6종·마이그레이션·Edge Function auth-toss/verify-store-purchase·miniapp·web cashout/consent)은 hotfix 작업트리에 남아 있음.
 - 이어가기(CODEX_RESUME 01a1ecd8…)는 스레드 잠금으로 실패 → 14:56 새 code-builder 워커가 그 변경 위에서 이어받음(제한 7000초, 로그 ~/.claude/harness/codex-logs/20261118-145620-3706844-code-builder.log). 회장 14:5x "qa후 배포까지 밀어보자".
