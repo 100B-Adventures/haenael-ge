@@ -24,11 +24,12 @@ function GtagInitializer({ measurementId }: { measurementId: string }) {
 
 export function GoogleAnalytics() {
   const pathname = usePathname();
-  const consent = useAnalyticsConsent();
+  // Consent changes rerender this boundary. The tag remains loaded in denied mode;
+  // consent.ts sends the update command without remounting the external script.
+  useAnalyticsConsent();
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   if (
     process.env.NODE_ENV !== "production" ||
-    consent !== "granted" ||
     !isAnalyticsProductionHost() ||
     !measurementId ||
     measurementId === "G-XXXXXXXXXX" ||

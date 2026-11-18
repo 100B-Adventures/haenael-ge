@@ -36,6 +36,18 @@ interface VerifiedPurchase {
   currency: string;
   grossAmountMinor: number;
   purchasedAt: string;
+  googleSettlement?: {
+    packageName: string;
+    purchaseToken: string;
+    accessToken: string;
+  };
+}
+
+interface GooglePurchaseBinding {
+  purchaseToken: string;
+  productId: string;
+  accountBinding: string;
+  cloverAmount: number;
 }
 
 export function tossIapEnvironment(): Environment {
@@ -78,6 +90,56 @@ function expectedAmount(provider: Provider, cloverAmount: number): number {
     return configured;
   }
   return 1200 * cloverAmount;
+}
+
+export function googleConsumeEndpoint(packageName: string, productId: string, purchaseToken: string): string {
+  return `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(packageName)}` +
+    `/purchases/products/${encodeURIComponent(productId)}/tokens/${encodeURIComponent(purchaseToken)}:consume`;
+}
+
+export function normalizeGoogleProductPurchase(
+  purchase: Record<string, unknown>,
+  binding: GooglePurchaseBinding,
+): VerifiedPurchase {
+  const state = (purchase.purchaseStateContext as Record<string, unknown> | undefined)?.purchaseState;
+  const lines = purchase.productLineItem as Array<Record<string, unknown>> | undefined;
+  const line = lines?.find((candidate) => candidate.productId === binding.productId);
+  const account = purchase.obfuscatedExternalAccountId;
+  if (state !== "PURCHASED" || !line || account !== binding.accountBinding) {
+    throw new Error("transaction_binding_mismatch");
+  }
+  if (typeof purchase.purchaseCompletionTime !== "string" || !purchase.purchaseCompletionTime) {
+    throw new Error("purchase_completion_time_missing");
+  }
+  return {
+    // Google documents purchaseToken as globally unique. orderId and any client ID are display data only.
+    providerTransactionId: binding.purchaseToken,
+    accountBinding: account as string,
+    productId: binding.productId,
+    environment: purchase.testPurchaseContext && typeof purchase.testPurchaseContext === "object"
+      ? "SANDBOX"
+      : "PRODUCTION",
+    currency: "KRW",
+    grossAmountMinor: expectedAmount("GOOGLE_PLAY", binding.cloverAmount),
+    purchasedAt: purchase.purchaseCompletionTime,
+  };
+}
+
+export async function settleGoogleConsumablePurchase(
+  fetcher: typeof fetch,
+  packageName: string,
+  productId: string,
+  purchaseToken: string,
+  accessToken: string,
+): Promise<void> {
+  const response = await fetcher(googleConsumeEndpoint(packageName, productId, purchaseToken), {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (response.ok || response.status === 409) return;
+  const errorBody = await response.text();
+  if (response.status === 400 && /already.?consum/i.test(errorBody)) return;
+  throw new Error("google_consume_failed");
 }
 
 function decodeBase64(value: string): Buffer {
@@ -154,22 +216,18 @@ async function verifyGoogle(
   const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
   if (!response.ok) throw new Error("invalid_receipt");
   const purchase = await response.json() as Record<string, unknown>;
-  const state = (purchase.purchaseStateContext as Record<string, unknown> | undefined)?.purchaseState;
-  const lines = purchase.productLineItem as Array<Record<string, unknown>> | undefined;
-  const line = lines?.find((candidate) => candidate.productId === intent.product_id);
-  const account = purchase.obfuscatedExternalAccountId;
-  if (state !== "PURCHASED" || !line || account !== intent.account_binding) {
-    throw new Error("transaction_binding_mismatch");
-  }
-  const orderId = typeof purchase.orderId === "string" ? purchase.orderId : input.provider_transaction_id;
   return {
-    providerTransactionId: orderId,
-    accountBinding: account as string,
-    productId: intent.product_id,
-    environment: Deno.env.get("GOOGLE_PLAY_ENVIRONMENT") === "PRODUCTION" ? "PRODUCTION" : "SANDBOX",
-    currency: "KRW",
-    grossAmountMinor: expectedAmount("GOOGLE_PLAY", intent.clover_amount),
-    purchasedAt: typeof purchase.startTime === "string" ? purchase.startTime : new Date().toISOString(),
+    ...normalizeGoogleProductPurchase(purchase, {
+      purchaseToken: input.receipt,
+      productId: intent.product_id,
+      accountBinding: intent.account_binding,
+      cloverAmount: intent.clover_amount,
+    }),
+    googleSettlement: {
+      packageName,
+      purchaseToken: input.receipt,
+      accessToken: token,
+    },
   };
 }
 
@@ -268,6 +326,15 @@ export async function handleVerifyStorePurchase(req: Request): Promise<Response>
     });
     if (error || !data?.[0]) throw new Error(error?.message ?? "credit_failed");
     const row = data[0];
+    if (verified.googleSettlement) {
+      await settleGoogleConsumablePurchase(
+        fetch,
+        verified.googleSettlement.packageName,
+        verified.productId,
+        verified.googleSettlement.purchaseToken,
+        verified.googleSettlement.accessToken,
+      );
+    }
     return json(row.is_replay ? 200 : 201, { data: {
       purchase_id: row.purchase_id,
       status: "CREDITED",

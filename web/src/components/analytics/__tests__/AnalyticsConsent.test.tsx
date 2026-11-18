@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, expect, it } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 import { AnalyticsConsentBanner } from "../AnalyticsConsentBanner";
 import { GOOGLE_CONSENT_DEFAULTS_SCRIPT } from "../GoogleConsentDefaults";
 import {
@@ -30,8 +30,16 @@ it("거부 선택을 저장하고 banner를 닫는다", async () => {
 });
 
 it("동의 상태는 브라우저에 저장하고 다시 읽는다", () => {
+  const gtag = vi.fn();
+  window.gtag = gtag;
   setAnalyticsConsent("granted");
   expect(getAnalyticsConsent()).toBe("granted");
+  expect(gtag).toHaveBeenCalledWith("consent", "update", {
+    analytics_storage: "granted",
+    ad_storage: "granted",
+    ad_user_data: "granted",
+    ad_personalization: "granted",
+  });
 });
 
 it("CN-01 Consent Mode v2 기본값은 네 저장소 모두 denied다", () => {

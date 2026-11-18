@@ -59,6 +59,13 @@ export function setAnalyticsConsent(consent: AnalyticsConsent): void {
       analytics_Storage: "denied",
     });
     clearAnalyticsCookies();
+  } else {
+    window.gtag?.("consent", "update", {
+      analytics_storage: "granted",
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "granted",
+    });
   }
   window.dispatchEvent(new CustomEvent(ANALYTICS_CONSENT_EVENT, { detail: consent }));
 }

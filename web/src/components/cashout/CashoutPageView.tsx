@@ -112,10 +112,10 @@ export function CashoutPageView({
                   className="flex items-center justify-between py-2"
                   data-testid="breakdown-maturity-lock"
                 >
-                  <span className="text-[13px] text-[var(--muted-color)]">
+                  <span className="text-[length:var(--text-meta-micro)]! text-[var(--muted-color)]">
                     {PRODUCT_COPY.TEXT_023}
                   </span>
-                  <span className="text-[13px] font-bold text-[var(--muted-color)]">
+                  <span className="text-[length:var(--text-meta-micro)]! font-bold text-[var(--muted-color)]">
                     − 🍀 {maturityLockedAmount}{PRODUCT_COPY.TEXT_014}
                     {nextMaturityAt ? ` · ${new Intl.DateTimeFormat("ko-KR", { month: "numeric", day: "numeric" }).format(new Date(nextMaturityAt))}` : ""}
                   </span>

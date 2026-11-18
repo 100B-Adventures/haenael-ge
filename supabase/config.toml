@@ -400,6 +400,14 @@ verify_jwt = false
 [functions.verify-store-purchase]
 verify_jwt = true
 
+[functions.store-refund-webhook]
+# 공급자별 HMAC 검증을 함수 안에서 수행한다.
+verify_jwt = false
+
+[functions.store-purchase-reconcile]
+# pg_cron service-to-service 전용. 함수가 별도 내부 토큰을 검증한다.
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

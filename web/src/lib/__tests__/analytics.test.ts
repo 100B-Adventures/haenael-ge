@@ -39,6 +39,19 @@ describe("GA4 page path privacy", () => {
     expect(window.dataLayer).toBeUndefined();
   });
 
+  it("CN-02 동의 선택 전에도 denied 기본값 아래 GA 태그를 초기화해 cookieless 측정을 준비한다", () => {
+    window.localStorage.removeItem(ANALYTICS_CONSENT_KEY);
+
+    expect(initGA("G-TEST123")).toBe(true);
+
+    const calls = window.dataLayer!.map((entry) => Array.from(entry as IArguments));
+    expect(calls.map((call) => call[0])).toEqual(["js", "config"]);
+    expect(calls[1]).toEqual(["config", "G-TEST123", {
+      send_page_view: false,
+      cookie_domain: "localhost",
+    }]);
+  });
+
   it("민감 경로 판정은 하위 경로만 막고 유사 접두어는 허용한다", () => {
     expect(isSensitiveAnalyticsPath("/payment/success?paymentKey=secret")).toBe(true);
     expect(isSensitiveAnalyticsPath("/invite/private-token")).toBe(true);

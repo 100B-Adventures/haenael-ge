@@ -10,7 +10,7 @@ function loadedProviders(urls: string[]) {
   ]).filter(Boolean));
 }
 
-test("AN-CONSENT-01 동의 전 무전송, 동의 후 로드, 철회 후 재차단", async ({ page }) => {
+test("AN-CONSENT-01 동의 전 Google 태그만 denied 기본값으로 적재하고 동의 후 전체 분석 도구를 로드한다", async ({ page }) => {
   // 비운영 호스트에서는 운영 측정 ID 를 싣지 않는다. 배선 확인용 명시 플래그를 켜고, 아래 route 가 모든 분석 요청을 abort 한다.
   await page.addInitScript(() => window.localStorage.setItem("haenael_analytics_e2e_intercepted_v1", "1"));
   const analyticsRequests: string[] = [];
@@ -24,26 +24,36 @@ test("AN-CONSENT-01 동의 전 무전송, 동의 후 로드, 철회 후 재차�
     await route.continue();
   });
 
-  await page.goto("/privacy");
-  await expect(page.getByTestId("analytics-consent-banner")).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByTestId("analytics-consent-banner")).toHaveCount(0);
   await page.waitForTimeout(700);
-  expect(analyticsRequests).toHaveLength(0);
+  expect([...loadedProviders(analyticsRequests)]).toEqual(["GA4"]);
+  await expect.poll(() => page.evaluate(() => {
+    const calls = (window.dataLayer ?? []) as Array<ArrayLike<unknown>>;
+    return calls.some((call) =>
+      call[0] === "consent" &&
+      call[1] === "default" &&
+      (call[2] as Record<string, unknown> | undefined)?.analytics_storage === "denied" &&
+      (call[2] as Record<string, unknown> | undefined)?.ad_storage === "denied"
+    );
+  })).toBe(true);
 
-  await page.getByTestId("analytics-consent-banner").getByRole("button", {
+  await page.goto("/privacy");
+  await page.getByTestId("analytics-consent-controls").getByRole("button", {
     name: "분석·국외 이전에 동의",
   }).click();
   await expect.poll(() => loadedProviders(analyticsRequests).size).toBe(3);
   await expect(page.getByTestId("analytics-consent-controls")).toContainText("동의됨");
 
+  analyticsRequests.length = 0;
   await Promise.all([
     page.waitForEvent("load"),
     page.getByTestId("analytics-consent-controls").getByRole("button", {
       name: "동의 철회",
     }).click(),
   ]);
-  analyticsRequests.length = 0;
   await page.waitForTimeout(700);
-  expect(analyticsRequests).toHaveLength(0);
+  expect([...loadedProviders(analyticsRequests)]).toEqual(["GA4"]);
   await expect(page.getByTestId("analytics-consent-controls")).toContainText("거부됨");
   await expect.poll(() => page.evaluate(() => localStorage.getItem("haenael_analytics_consent_v1")))
     .toBe("denied");
@@ -69,27 +79,16 @@ test("AN-CONSENT-02 동의 상태여도 민감 경로에서는 분석 도구를 
   expect(analyticsRequests).toHaveLength(0);
 });
 
-test("AN-CONSENT-03 모바일 배너와 하단 탭을 동시에 조작할 수 있다", async ({ page }) => {
+test("AN-CONSENT-03 비로그인 모바일에서는 동의 배너 없이 하단 탭을 조작할 수 있다", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
   await page.goto("/");
 
   const banner = page.getByTestId("analytics-consent-banner");
-  const detailLink = banner.getByRole("link", { name: "전송 항목과 국외 이전 상세 보기" });
   const bottomNav = page.getByTestId("receiver-bottom-nav");
-  await expect(banner).toBeVisible();
+  await expect(banner).toHaveCount(0);
   await expect(bottomNav).toBeVisible();
-
-  const detailBox = await detailLink.boundingBox();
-  expect(detailBox).not.toBeNull();
-  expect(detailBox!.width).toBeGreaterThanOrEqual(44);
-  expect(detailBox!.height).toBeGreaterThanOrEqual(44);
-
-  const [bannerBox, navBox] = await Promise.all([banner.boundingBox(), bottomNav.boundingBox()]);
-  expect(bannerBox).not.toBeNull();
-  expect(navBox).not.toBeNull();
-  expect(bannerBox!.y + bannerBox!.height).toBeLessThanOrEqual(navBox!.y);
 
   await bottomNav.getByRole("button", { name: "친구" }).click();
   await expect(page.getByTestId("guest-teaser-sheet")).toBeVisible();
-  await expect(banner).toBeVisible();
+  await expect(banner).toHaveCount(0);
 });
