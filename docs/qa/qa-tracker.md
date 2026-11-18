@@ -1,5 +1,12 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-18 앱 채널 독립 코드리뷰 4회차 🟡 수정 완료·독립 재검토 대기
+
+- 4회차 MAJOR 4건을 커밋 `39b1ff1`에서 수정했다. 기존 리뷰 판정은 독립 재검토 전까지 BLOCK으로 유지한다.
+- 수정 범위: 실제 Vercel Production 체크아웃 호스트, Apple 공급자 token 부재 시 데이터 삭제 전 재인증·같은 요청 재개, 대체결제 큐 동시 쓰기 보존, 보상 실패 복구와 계정 삭제의 공통 회원 정산 advisory lock 및 Auth 삭제 직전 재검사.
+- 검증: Supabase DB 546/546, Edge Function 85/85, 모바일 23/23, TypeScript·Deno lint, 모바일 Web·Android export. 공통 잠금 실제 대기 1,368ms·1,366ms, 시험 데이터 잔존 0건이다.
+- 운영 데이터베이스·main push·실제 결제·외부 콘솔·배포 변경은 0건이다. 근거는 `docs/qa/review-app-channels-1258dfa-v0.4.0-gpt-codex-20261118.md` 끝의 항목별 수정 표다.
+
 ## 2026-11-18 앱 채널 독립 코드리뷰 3회차 🟡 수정 완료·독립 재검토 대기
 
 - source `5ad2ade`·`0345b2a` 재리뷰의 대체결제·계정 삭제 MAJOR 5건을 커밋 `db2ec71`에서 수정했다. 기존 리뷰 판정은 독립 재검토 전까지 BLOCK으로 유지한다.

@@ -86,3 +86,16 @@ SOURCES/MODEL: GPT-5 Codex. 로컬 거버넌스·요청·PRD·코드·시험, Ap
 
 REVIEW_VERDICT: BLOCK
 
+## 5회차 수정 연결표, builder 기록
+
+> 이 표는 4회차 독립 판정을 덮지 않는다. 커밋 `39b1ff1`의 수정과 builder 시험을 연결하며, BLOCK 해제는 별도 독립 재검토가 판정한다.
+
+| 4회차 항목 | 수정 커밋 | 먼저 실패한 시험 | 수정 뒤 통과 증거 |
+|---|---|---|---|
+| MAJOR 1, 체크아웃 운영 호스트 | `39b1ff1` | `TC-APP-02-16`: `.env.example`이 `https://haenael.app`을 반환 | 모바일 23/23. `vercel inspect https://haenael-ge.vercel.app`에서 `haenael-ge` production 배포와 Production 별칭 일치 확인 |
+| MAJOR 2, Apple 공급자 token 부재 삭제 | `39b1ff1` | `TC-APP-09-12~13`: 삭제 순서·재인증 재개 함수 부재. Apple 등록 시험은 access token 계약 불일치 | Edge Function 85/85, 모바일 23/23. refresh token 부재 시 access token 저장·폐기, token 부재 시 데이터 변경 전 409, Apple OAuth 뒤 같은 request key 재개 확인 |
+| MAJOR 3, 대체결제 큐 동시성 | `39b1ff1` | `TC-APP-02-17`: 복구 A 대기 중 추가한 B가 삭제돼 `pending: 0` 관찰 | 모바일 23/23. 쓰기 직렬화와 최신 큐의 항목별 삭제 후 B가 `pending: 1`로 보존 |
+| MAJOR 4, 탈퇴·복구 건 경합 | `39b1ff1` | `APP-SRV-DB-04-4~6`, `APP-SRV-DB-10-8`: 공통 잠금·Auth 삭제 직전 재검사 함수 부재, 진행 중 대체결제가 삭제를 차단하지 못함 | Supabase DB 546/546. 양쪽 RPC가 같은 회원 정산 advisory lock에서 실제 1,368ms·1,366ms 대기, 만료 전 intent 차단, Auth 삭제 직전 OPEN 복구 건 재검사, 시험 데이터 잔존 0건 |
+
+- 운영 데이터베이스·main push·실제 결제·외부 콘솔·배포는 실행하지 않았다.
+
