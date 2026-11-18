@@ -141,6 +141,32 @@ sequenceDiagram
 
 `gift_exchange`: `CREATED → PROVIDER_PENDING → SENT`. 타임아웃·5xx·연결 종료는 `PENDING_RECONCILIATION`으로 가며 잠금을 유지한다. 공급사 주문 상태조회가 미발송을 확정한 경우만 `FAILED_CONFIRMED`로 전이하고 잠금을 해제한다. 모든 요청은 공급사 멱등키와 공급사 주문 ID를 가진다. 계약 미설정 상태에서는 `CREATED` 행 자체를 만들지 않는다.
 
+### 6.1 계정 삭제 상태 기계와 불변식
+
+계정 삭제의 정본은 서버 소유 `account_deletion_job` 한 행이다. 기본키는 JWT에서 확인한 `member_id`이며 회원당 최대 1행이다. 클라이언트 요청 키는 생성·재개·전이에 사용하지 않는다. 앱 재설치나 기기 변경 뒤에도 서버는 현재 JWT의 회원 ID로 같은 작업을 찾는다.
+
+```mermaid
+stateDiagram-v2
+  [*] --> REQUESTED: JWT 회원으로 삭제 요청
+  REQUESTED --> BLOCKED_PENDING_PAYMENT: 미종결 결제·복구 발견
+  BLOCKED_PENDING_PAYMENT --> REQUESTED: 같은 회원 잠금에서 재검사 통과
+  REQUESTED --> EXTERNAL_REVOKED: Apple 토큰 폐기 또는 비Apple 확인
+  EXTERNAL_REVOKED --> DATA_DELETED: Storage 삭제 후 DB 개인정보 삭제
+  DATA_DELETED --> AUTH_DELETED: auth.admin.deleteUser 성공
+  AUTH_DELETED --> [*]
+```
+
+| 불변식 | 계약 | 자동 시험 |
+|---|---|---|
+| `AD-INV-01` 서버 단일 소유 | 회원당 삭제 작업은 1행이고 요청·재개는 JWT 회원 ID만 사용한다. 클라이언트 요청 키 컬럼과 입력은 없다. | `TC-APP-09-3` |
+| `AD-INV-02` 단방향 전이 | `REQUESTED → BLOCKED_PENDING_PAYMENT → REQUESTED → EXTERNAL_REVOKED → DATA_DELETED → AUTH_DELETED` 외 전이는 거절한다. `BLOCKED_PENDING_PAYMENT`는 재검사 통과 때만 `REQUESTED`로 돌아간다. | `TC-APP-09-4` |
+| `AD-INV-03` 회원 정산 직렬화 | 대체결제 확인 시작·적립·복구 건 생성과 삭제 작업의 모든 DB 전이는 `member_settlement:<member_id>` PostgreSQL transaction advisory lock을 잡고 잠금 안에서 결제 intent·확인 작업·OPEN 복구 건을 다시 검사한다. 만료 시각은 진행 중인 공급자 확인을 종결 상태로 만들지 않는다. | `TC-APP-09-5`, `TC-APP-09-6` |
+| `AD-INV-04` 외부 폐기 선행 | Apple 회원은 로그인 때 서버가 refresh token을 암호화 저장한다. 토큰이 없거나 공급자가 무효로 거절하면 사용자 재인증으로 새 토큰을 받은 뒤 폐기한다. `EXTERNAL_REVOKED` 전에는 Storage·회원 데이터·Auth 사용자를 삭제하지 않는다. | `TC-APP-09-7`, `TC-APP-09-8` |
+| `AD-INV-05` 삭제 중 결제 금지 | 삭제 작업이 `REQUESTED` 이상이면 새 결제 확인 시작을 거절한다. 먼저 시작된 확인 작업이 있으면 삭제는 `BLOCKED_PENDING_PAYMENT`에 머문다. | `TC-APP-09-9` |
+| `AD-INV-06` 계정 세션 격리 | 모바일은 삭제를 시작한 회원 ID만 로컬에 저장한다. Apple 재인증 또는 일반 로그인 뒤 현재 세션 회원이 달라지면 이전 회원의 삭제 재개 정보를 즉시 폐기하고 서버 삭제를 재호출하지 않는다. | `TC-APP-09-10` |
+
+삭제 실행 순서는 고정한다. `request_account_deletion`이 작업 행을 만들거나 재개하고 정산을 검사한다. Apple 폐기가 끝난 뒤 `mark_account_deletion_external_revoked`가 같은 회원 잠금 안에서 정산을 다시 검사한다. Storage 객체 삭제 뒤 `delete_account_data`가 같은 잠금 안에서 정산을 다시 검사하고 개인정보를 삭제하며 `DATA_DELETED`로 전이한다. 마지막으로 Auth 사용자를 삭제한 뒤 `complete_account_deletion_auth`가 `AUTH_DELETED`를 기록한다. 각 호출은 현재 상태를 읽어 멱등 재개한다.
+
 ## 7. 요구 추적성
 
 기존 디자인 요구 R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, D-024, D-034, BACKLOG-CLAMP는 웹 정본 v1.2.5가 계속 소유한다.
@@ -155,7 +181,7 @@ sequenceDiagram
 | FR-APP-06 | Expo Router 링크 설정 | 기존 초대 RPC | 없음 | `TC-APP-06-1`, `TC-APP-06-2`, `TC-APP-06-3`, `TC-APP-06-4` |
 | FR-APP-07 | 리뷰 요청 정책 | 없음 | 기기 로컬 상태 | `TC-APP-07-1`, `TC-APP-07-2`, `TC-APP-07-3` |
 | FR-APP-08 | A1 소개·오프라인·A10 업데이트 | 최소버전 조회, 네트워크 자동 복구 | 기기 introSeen·세션·minimum_version | `TC-APP-08-1`, `TC-APP-08-2`, `TC-APP-08-3`, `TC-APP-08-4` |
-| FR-APP-09 | A11 앱 안 계정 삭제 | 삭제 접수·보류/진행 중 차단 | member·push token·cashout_request·maturity | `TC-APP-09-1`, `TC-APP-09-2` |
+| FR-APP-09 | A11 앱 안 계정 삭제 | 회원당 서버 삭제 작업·Apple 폐기·회원 정산 잠금·Auth 삭제 | account_deletion_job·member·push token·cashout_request·maturity | `TC-APP-09-1`~`TC-APP-09-10` |
 | FR-TOSS-01 | `miniapp/` 토스 로그인 | `auth-toss` | member identity | `TC-TOSS-01-1`, `TC-TOSS-01-2`, `TC-TOSS-01-3` |
 | FR-TOSS-02 | 번들 static guard·친구 목표 금지 surface | 정적 검사, 조회 API만 | cashout·잔액·외부 이동 데이터 0 | `TC-TOSS-02-1`, `TC-TOSS-02-2` |
 | FR-TOSS-03 | 초대·목표 공유 | Apps in Toss Share SDK | `intoss://` 링크 | `TC-TOSS-03-1` |
@@ -205,6 +231,7 @@ sequenceDiagram
 | v0.1.0-retake1 | 2026-11-18 | 독립 리뷰 9/25 반려: 정책 게이트·구매자 결합·공통 잠금·기프티콘 재조정·PRD TC ID 복구 |
 | v0.1.0-retake2 | 2026-11-18 | 독립 재검수 12/25 반려: 대체결제 intent·gate, 전 채널 30일 보류, A14 서버 쓰기 경로, 정확한 TC 종단 추적성 보강 |
 | v0.1.0-retake3 | 2026-11-18 | 재검수 P0 0·P1 4건 반려: 부분환불 상태, intent DDL, 상류 요구 의미 매핑, 돈 경로 추가 테스트 보강 |
+| v0.1.0-retake4 | 2026-11-18 | 5회차 삭제 회귀 근본 수정: 회원당 서버 작업 1행, 공통 정산 잠금, Apple 폐기 선행, 클라이언트 세션 격리 불변식 |
 
 RUBRIC_SCORE: 독립 리뷰 재검수 대기
 WEAKEST_LINE: Apple·앱인토스 정책 충돌은 기술로 합법화할 수 없으므로 production gate와 사실 기반 심사 결과가 필요하다.
