@@ -1,5 +1,31 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-19 04:18 KST] compact 마크 (auto)
+- 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: aaec3f2 docs(state): round 7 fix killed by host memory pressure
+- compact 직전 컨텍스트: 356794 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 6]: [handoff-freshness] 핸드오프 노트가 낡음(33m > 30m)인데 작업이 진행 중(dirty=0, tmux=5). '/Users/sj/sj_code_master/haenael-ge/session-state.v2.md' 에 지금까지 한 것·남은 이슈·다음 액션을 갱신하고 멈춰라. 우회=HANDOFF_OK=1.
+- 직전에 고친 파일: concept-Capacitor-vs-React-Native-vs-Expo-앱-기술선택.md report-2323.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
+## 2026-11-19 03:22 KST · 7회차 수정 Codex 가 메모리 부족으로 종료됨
+- 한 것: 02:50 발주한 Codex(7회차 MAJOR 4건 수정)와 대기 셸이 114 메모리 부족(34G 중 가용 1G)으로 Claude Code 가 종료. 마지막 커밋 fc34ed7 그대로, 미커밋 부분 변경 여부는 git status 가 멈춰 미확인. ops-issues 기록.
+- 검증 등급: 종료 사실 관찰됨, 작업트리 상태 미검증.
+- 다음: 메모리 회복 뒤 회장 지시로 같은 작업 재개(CODEX_RESUME 01a1ed3a-48ee-7891-9b62-f6ba98beb509, 과제 = review v0.7.0 MAJOR 4건) → Claude code-reviewer 교차 리뷰. 회장 결정 2건(app-id, android-altpay) 대기.
+
+## 2026-11-19 02:50 KST · 6609 계정 세션으로 인계받음, 7회차 반려 수정 착수
+- 회장 요청: 02:4x "이제부터 이 세션(6609jin 계정)이 진행 세션". 기본 계정 사본은 손 뗌.
+- 한 것: Codex code-builder(CODEX_RESUME 01a1ed3a…)에 7회차 MAJOR 4건 수정 발주(제한 4500초). 끝나면 Claude code-reviewer 로 크로스모델 리뷰(이 계정 주간 2%라 11-21 대기 불필요).
+- 검증 등급: 발주만, 결과 미검증.
+- 다음: 회수 → Claude 리뷰 → 회장 결정 2건(app-id, android-altpay) 받으면 콘솔·실기기 QA.
+
+## [2026-11-19 02:48 KST] compact 마크 (auto)
+- 세션 834fbf47 · 라인 미선언 · 브랜치 session/core-20261015
+- 직전 커밋: 2f11ab8 docs(state): acct2 copy session records checked
+- 마지막 회장 요청: Stop hook feedback: [command hook 6]: [handoff-freshness] 이번 턴에 파일을 고치거나 커밋했는데 상태파일을 안 썼다. '/Users/sj/sj_code_master/haenael-ge/session-state.v2.md' 맨 위에 '## YYYY-MM-DD HH:MM KST · 제목' 블록으로 회장 요청·한 것·검증 등급·다음을 적고, 최종 보고 부록에 '인계 기록: session-state.v2.md YYYY-MM-DD HH:MM' 줄을 넣어 다시 내라(회장 2026-10-06). 우회
+- 직전에 고친 파일: concept-Capacitor-vs-React-Native-vs-Expo-앱-기술선택.md report-2323.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## 2026-11-19 01:53 KST · 6609jin 사본 세션 기록 확인, 중복 결정 닫음
 - 회장 요청: "6609jin에서 세션에 기록 뭐 남김?"
 - 한 것: 사본 대화 bc7c31a6(~/.claude-acct2) 01:48~01:52 기록 확인 = 현황 보고 1, 이 파일 01:52 블록(6636325), open-decisions OD-haenael-20261119-app-v1-scope(7fccb65c). 그 OD 는 OD-haenael-20261118-android-altpay 와 중복이라 닫음. 코드·Codex·운영 변경 0.
