@@ -1,6 +1,20 @@
 # session-state.growth (해낼게 그로스 · 계정·스토어 브랜딩)
 
+## [2026-11-19 18:44 KST] compact 마크 (auto)
+- 세션 68837017 · 라인 growth · 브랜치 session/core-20261015
+- 직전 커밋: cf46b2c sync: joseongjin-ui-MacBookPro 에서 origin/session/core-20261015 병
+- compact 직전 컨텍스트: 321390 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 1]: [ui-evidence-gate] ⛔ 종료 차단: 이번 턴에 화면 코드를 고쳤는데 눌러본 증거가 없다. 고친 파일: - /Users/sj/sj_code_master/haenael-ge/docs/growth/branding/haenael-branding-review-v0.1.0-claude-opus-20261119-1745.html "렌더된다" 는 "동작한다" 가 아니다. 빌드 통과·타입체크·파일 존재는 증거가 아니다. 회장이 실제로 하는 조작을 헤드리스로 구동해라:
+- 직전에 고친 파일: haenael-branding-review-v0.1.0-claude-opus-20261119-1745.html
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 목적: 처음 들어온 사람이 해낼게 프로필·스토어 첫 화면만 보고 "친구 목표에 클로버(돈)로 조용히 응원하는 곳"임을 알게 만든다(회장 11-19 브랜딩 지시).
+
+## 2026-11-19 18:44 KST · GA4 내부 트래픽 필터 점검 (컨트롤러 19시 지시)
+- 결과: 이미 되어 있었음, 변경 0. 운영 속성 545972102(계정 384086046 "Default Account for Firebase", 측정 ID G-3QR2FB5BGC, 스트림 15270594731)에 내부 트래픽 규칙 "SJ 사무실(온프렘)" traffic_type=internal, IP 같음 121.138.196.20 존재, 데이터 필터 Internal Traffic 제외 "활성"(관찰, 캡처 ga4-internal-traffic-v0.1.0-claude-opus-20261119-1844/)
+- 접근 경로: 114 공용 크롬 9450 authuser=3(관리 권한). 해낼게 크롬 9342 의 구글 계정은 빈 속성 555093634(G-VMNWLHHE32, 데이터 0)만 보임
+- 별건 발견: GA4 Data API 일별 집계가 11-15 이후 0행(11-16~19 이벤트 0), 스트림 "48시간 수신 없음". 프로덕트 세션 몫이라 컨트롤러·제품에 전달
+- 9342 의 GA 이메일 수신 설정 창은 "모두 선택 해제 및 저장"으로 닫음(원래 전부 해제 상태, 변화 없음)
 
 ## 2026-11-19 17:40 KST · 검토 페이지 출고, 회장 선택 대기
 - 검토 페이지: https://claude.ai/artifact/6ew7vY9FQSgKFUfBmydxLZ · docs/growth/branding/haenael-branding-review-v0.1.0-claude-opus-20261119-1745.html (커밋 b023730·후속 이름 정정)
