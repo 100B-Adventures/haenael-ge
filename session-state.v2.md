@@ -1,5 +1,10 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-20 23:4x KST · D-057 Codex 2회 실행 종료(미커밋), 회장 결정 2건 등록
+- D-057: 서버 단위 5/5, DB 시험 12/12, 웹 변경 계약 49건·타입·lint 통과. 운영 빌드는 Next.js 16.4.1 보안 경고(SecurityFatalError)로 멈춤 + 재시도 2회 부하로 시간초과, 390px 미확인 → 커밋 안 함. 변경 20개 /mnt/hdd/haenael-ge-cheer-login 작업트리. Codex 이어가기 CODEX_RESUME=01a1f8c2-f2e9-7752-9c4f-64705e85070e.
+- 회장 결정 대기: open-decisions OD-haenael-20261120-kakao-csp-deploy, OD-haenael-20261120-invite-og.
+- 다음: D-057 빌드·화면 확인→커밋→Claude 교차 리뷰. Next.js 보안 업데이트 필요 여부 확인(운영 빌드 차단 위험).
+
 ## 2026-11-20 22:1x KST · 카카오 초대 "요청 실패" 원인 2개 확정, 1개 운영 반영·1개 브랜치, 초대 미리보기 시안 3안
 - 원인(재현 관찰): ①카카오 콘솔 [앱]>[제품 링크 관리] 웹 도메인 0건(에러 4002) → 21:0x 운영 주소 https://haenael-ge.vercel.app 등록(콘솔 관찰, 되돌리기 가능). ②사이트 CSP connect-src 에 kapi.kakao.com 없음(SDK 검증 요청이 csp 로 차단) → 브랜치 fix/kakao-share-csp-20261120 043203e(단위 시험 빨강→초록, 운영 페이지에 새 헤더 적용 시 카카오톡 앱 열기 단계까지 진행 관찰). 운영 반영은 회장 승인 대기.
 - 초대 미리보기 이미지: 시안 3안(추천 A 사진 전면) docs/design/invite-og-v0.1.0-claude-opus-20261120-2140, 아티팩트 https://claude.ai/artifact/BX7AT3JEsTLcRDUtnkkCrs. 회장 선택 대기 후 구현.
