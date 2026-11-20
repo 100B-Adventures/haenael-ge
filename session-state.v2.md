@@ -1,5 +1,18 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-21 01:21 KST] compact 마크 (auto)
+- 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 9d3388d docs(state): QA trust answers, alimtalk test, OG C
+- compact 직전 컨텍스트: 175612 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 30]: ⛔ 반려(capture-quality-gate): 이번 턴 저장 캡처 2장이 기준 미달인데 보고의 장수·파일명 고지가 불완전하다. ⛔ 폭 1080px (기준 1200) /mnt/hdd/haenael-ge-v2-hotfix/docs/design/refs-invite-og-20261120/31-boarding-pass-instagram.jpg ⛔ 폭 1024px (기준 1200) /mnt/hdd/haenael-ge-v2-hotfix/docs/design/refs-in
+- 직전에 고친 파일: report-2338.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
+## 2026-11-21 01:28 KST · 초대 미리보기 v0.2.0(C1 입장권) 완료, 최종 보고
+- 회장 요청: C 응원 티켓 기반으로 알아서 더 좋게. product-designer 가 C1 입장권·C2 탑승권·C3 도장판을 만들었고 C1 으로 정함(A-, verify PASS). hotfix e5ddcb5, 아티팩트 BX7AT3JEsTLcRDUtnkkCrs v2.
+- 검증: C1 정상·긴 글 렌더 직접 확인(관찰됨). 카톡 실제 미리보기는 미검증(CSP 운영 반영 전).
+- 다음: 사용자 여정 e2e(친구 응원·카카오 공유·결제) → D-057 빌드·390px·커밋 → Claude 교차 리뷰. C1 구현(RPC 확장·이미지 주소). CSP 운영 반영은 회장 승인 대기.
+
 ## 2026-11-21 01:15 KST · 회장 QA 신뢰 지적 답변 준비, 알림톡 시험 발송, C안 다듬기 위임
 - 친구 상세 응원 버튼: git 기록상 10-15 첫 구현부터 한 번도 없음, 승인 프로토타입 v3 belong 화면에도 없음(공개 목표 dopamine 화면에만 있음). 회귀가 아니라 시안 단계 누락이고, 사용자 여정 시험이 없어서 못 잡음. 실수원장 [QA-사용자여정누락].
 - 11-16 01:37 보고는 결론·표에 "운영 반영 완료", 부록에만 "공유창 미검증". 실수원장 [보고-완료과장].
