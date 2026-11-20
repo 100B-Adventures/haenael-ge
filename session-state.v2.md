@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-20 20:4x KST · 회장 질문 5건 조사, D-057(응원 로그인 필수) 구현 위임
+- 조사(운영 DB 읽기 전용·코드 관찰): 친구 상세 화면(FriendGoalDetail)에 응원 진입이 없음(마감 무관, 공개 /g/7vb3j7t 는 cheer-cta 있음, D+20). "공인중개숭이에요 🖐" 는 회장이 08-25 04:38 이다솔 목표에 보낸 응원(cheer 41, 24클로버). 주고받은 응원에 "이다솔에게 보낸 응원·보냄" 으로 정상 노출, 단 '최근 응원 메시지' 카드에 보낸 쪽 표시 없음. 알림톡은 받는 사람(목표 주인)에게만 CHEER_RECEIVED, 보낸 사람 알림 없음. 마지막 발송 08-25(SENT 4), 08-26 이후 유료 응원 0건이라 11-16 키 연장 뒤 실발송 미검증.
+- 결정: hotfix 결정.md D-057(6a7d183). 요청 원장 맨 위(로컬 전용 파일).
+- 위임: Codex code-builder, 작업트리 /mnt/hdd/haenael-ge-cheer-login(브랜치 session/haenael-cheer-login-20261120, main 610adf1 기준). 결과 미검증.
+- 다음: 회수 → Claude 교차 리뷰(결제·인증) → staging 시험 → 운영 반영은 회장 승인. 앱 채널 7회차 수정은 메모리 문제로 멈춘 채(재개 대기).
+
 ## [2026-11-19 04:18 KST] compact 마크 (auto)
 - 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: aaec3f2 docs(state): round 7 fix killed by host memory pressure
