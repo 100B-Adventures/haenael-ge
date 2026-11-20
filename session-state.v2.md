@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-21 00:37 KST] compact 마크 (auto)
+- 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 70566de sync: claude-dev-workstation 문서 자동 커밋
+- compact 직전 컨텍스트: 326501 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 23]: ⛔ 반려(record-gate): 같은 회장 발화에 대한 첫 최종 보고에 있던 것이 방금 낸 최종 보고에서 사라졌다: 앱 3채널 회장 화면 맨 끝 메시지가 유일한 보고다. 첫 보고 전문을 그대로 두고, 새로 생긴 것은 해당 자리에 추가하거나 고쳐서 다시 내라. 지우지 마라(standards/report-format.md §4.9). 우회 RECORD_OK=1
+- 직전에 고친 파일: report-2338.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-20 23:42 KST] compact 마크 (auto)
 - 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: 7925d9f docs(state): heading times
