@@ -39,6 +39,15 @@ describe("SEC-HEADERS 응답 보안 헤더 계약", () => {
     expect(CONTENT_SECURITY_POLICY).not.toContain("vercel-insights.com");
   });
 
+  it("SEC-HEADERS-07 연동: 카카오톡 공유 SDK 의 템플릿 검증 요청(kapi.kakao.com)을 connect-src 에 허용한다", () => {
+    // 2026-11-20 운영 사고: connect-src 에 kapi.kakao.com 이 없어 Kakao.Share.sendDefault 가
+    // KAPIError 로 실패하고 카카오 공유창이 "요청 실패"를 띄웠다.
+    const connectSrc = CONTENT_SECURITY_POLICY.split(";").map((d) => d.trim())
+      .find((d) => d.startsWith("connect-src")) ?? "";
+    expect(connectSrc).toContain("https://kapi.kakao.com");
+    expect(CONTENT_SECURITY_POLICY).toContain("https://t1.kakaocdn.net");
+  });
+
   it("SEC-HEADERS-04 환경 분리: 로컬 Supabase는 개발에서만 허용한다", () => {
     const developmentPolicy = buildContentSecurityPolicy(true, undefined);
     const productionPolicy = buildContentSecurityPolicy(

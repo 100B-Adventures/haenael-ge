@@ -69,6 +69,8 @@ export function buildContentSecurityPolicy(
     "https://*.clarity.ms",
     "https://connect.facebook.net",
     "https://www.facebook.com",
+    // 카카오톡 공유 SDK(Kakao.Share.sendDefault)가 템플릿 검증을 이 주소로 보낸다(2026-11-20 운영 "요청 실패" 사고).
+    "https://kapi.kakao.com",
   ].filter(Boolean).join(" "),
   "frame-src https://*.tosspayments.com https://*.toss.im",
   "worker-src 'self' blob:",
