@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>해낼게 초대 링크 미리보기 이미지 시안 v0.1.0</title>
+<style>
+@font-face{font-family:Pretendard;src:url(assets/PretendardVariable.woff2) format("woff2");font-weight:100 900;}
+:root{--paper:#fbfaf7;--ink:#16140f;--muted:#6f6a60;--line:#e8e4dc;--clover:#1b8a4f;--clover-ink:#14613a;--clover-soft:#e7f4ec;--warm:#f4efe6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Pretendard,sans-serif;font-size:15px;line-height:1.55;word-break:keep-all}
+.wrap{max-width:1240px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:-0.02em}
+h2{font-size:20px;margin:40px 0 12px;letter-spacing:-0.01em}
+.lead{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.lead p{margin:4px 0}
+.lead b{color:var(--clover-ink)}
+.pick{display:inline-block;background:var(--clover);color:#fff;border-radius:8px;padding:1px 10px;font-weight:700;font-size:13px}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+/* 카카오톡 채팅방 */
+.chat{width:360px;max-width:100%;background:#b2c7da;border-radius:18px;padding:16px 12px 20px;flex:0 0 auto}
+.chat .cap{font-size:13px;font-weight:700;color:#2b3a4a;margin:0 0 10px 4px}
+.msg{display:flex;gap:8px;align-items:flex-start}
+.msg .pf{width:38px;height:38px;border-radius:14px;object-fit:cover;flex:0 0 auto}
+.msg .nm{font-size:12px;color:#3d4a57;margin:0 0 4px}
+.bub{width:250px;background:#fff;border-radius:4px 14px 14px 14px;overflow:hidden}
+.bub .img{width:250px;height:125px;object-fit:cover;display:block}
+.bub .tx{padding:10px 12px 12px}
+.bub .tt{font-size:14px;font-weight:700;line-height:1.35;color:#191919}
+.bub .ds{font-size:12.5px;color:#7a7a7a;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bub .bt{margin:10px 12px 12px;background:#f2f2f2;border-radius:6px;text-align:center;font-size:13px;padding:8px 0;color:#191919}
+.bub .src{font-size:11px;color:#aaa;padding:0 12px 10px}
+.time{font-size:10px;color:#4a5866;align-self:flex-end;margin-left:4px}
+/* 갤러리 */
+.grid3{display:flex;flex-direction:column;gap:22px}
+.vrow h3{margin:0 0 8px;font-size:17px}
+.vrow .note{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+.cells{display:flex;gap:12px;flex-wrap:wrap}
+.cell{flex:1 1 360px;max-width:400px}
+.frame{position:relative;width:100%;aspect-ratio:1200/630;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.frame img{width:100%;height:100%;display:block}
+.safe .frame::before,.safe .frame::after{content:"";position:absolute;left:0;right:0;height:2.38%;background:rgba(217,72,59,.45)}
+.safe .frame::before{top:0}.safe .frame::after{bottom:0}
+.cell .lb{font-size:12.5px;color:var(--muted);margin-top:4px}
+.tog{display:inline-flex;gap:8px;align-items:center;font-size:14px;margin:0 0 10px;cursor:pointer}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--warm)}
+.board{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.board label{margin-right:18px;font-weight:700}
+.board textarea{width:100%;height:80px;margin-top:10px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px}
+.board button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--clover);background:var(--clover);color:#fff;margin-right:8px;margin-top:8px;min-height:44px}
+.board button.g{background:#fff;color:var(--clover-ink)}
+details{margin-top:28px;font-size:12.5px;color:var(--muted)}
+.refimg{width:160px;border-radius:6px;border:1px solid var(--line);display:block}
+@media (max-width:600px){h1{font-size:22px}.chat{width:100%}.bub{width:min(250px,calc(100vw - 110px))}.bub .img{width:100%;height:auto;aspect-ratio:2/1}}
+</style></head><body><div class="wrap">
+
+<h1>카카오톡 초대·응원 링크 미리보기 이미지 · 시안 3안</h1>
+<div class="lead">
+<p>고를 것: 세 안 중 하나 <span class="pick">추천 A 사진 전면</span>. 아래 말풍선이 실제 카톡방에서 보이는 크기(가로 250px)입니다.</p>
+<p>이 이미지가 하는 일: 카톡방에서 친구 얼굴·목표 문장·응원 수를 한눈에 보여 주고, 눌러서 목표 페이지로 들어오게 합니다.</p>
+<p>근거 비교: 지금 기본 이미지(00번)는 누가 보내도 같은 그림이라 말풍선 제목과 따로 놉니다. 세 안 모두 보낸 사람·목표·남은 기간·응원 수가 이미지 안에 들어갑니다.</p>
+<p>상태 3가지(정상·사진·기한·응원 없음·긴 이름과 긴 목표) 모두 글자 잘림·넘침 0 (기계 검사 + 눈 확인).</p>
+</div>
+
+<h2>1. 카톡방에서 보이는 모습 (실제 크기)</h2>
+<div class="row" id="chats"></div>
+
+<h2>2. 1200×630 원본 · 상태별</h2>
+<label class="tog"><input type="checkbox" id="safe" checked> 카카오 피드 2:1 자동 크롭으로 잘리는 띠 표시 (위아래 15px)</label>
+<div class="grid3 safe" id="gal"></div>
+
+<h2>3. 고르기</h2>
+<div class="board">
+<div><label><input type="radio" name="pick" value="A"> A 사진 전면</label><label><input type="radio" name="pick" value="B"> B 선언문</label><label><input type="radio" name="pick" value="C"> C 응원 티켓</label></div>
+<textarea id="memo" placeholder="고칠 점이 있으면 적어 주세요"></textarea>
+<button id="copy">결정 복사</button><button class="g" id="reset">초기화</button>
+<textarea id="out" readonly placeholder="결정 복사를 누르면 여기에 채워집니다"></textarea>
+</div>
+
+<h2>4. 추천과 이유</h2>
+<table>
+<tr><th style="width:110px">안</th><th>카톡방에서 손이 가는 이유</th><th>약점</th></tr>
+<tr><td><b>A 사진 전면 (추천)</b></td><td>250px 말풍선에서 목표 문장이 19px 상당으로 가장 크고, 사진이 칸 전체를 채워 회색 텍스트 말풍선 사이에서 가장 먼저 눈에 띕니다. 친구 얼굴 칩과 "12명이 응원 중"이 사회적 증거, D-23 이 마감 긴장을 만듭니다(셋 다 실제 값).</td><td>커버 사진은 프리셋 8장을 많은 사람이 같이 씁니다. 원본이 780×440 이라 1200 폭에서 약간 흐립니다. 구현 때 프리셋을 1600px 로 다시 내보내야 합니다. 사용자 사진 커버면 이 약점은 사라집니다.</td></tr>
+<tr><td>B 선언문</td><td>지금 기본 이미지(종이색·검은 굵은 글씨·워드마크)를 그대로 잇습니다. 따옴표 문장이 "선언"을 직접 보여 주고, 숫자 두 개가 GitHub 저장소 카드처럼 읽힙니다.</td><td>말풍선 크기에서 사진이 작아 첫눈에 덜 끌립니다. 목표가 짧으면 왼쪽 아래가 비어 보입니다.</td></tr>
+<tr><td>C 응원 티켓</td><td>초록 바탕이 카톡방에서 가장 튀고, 마감 도장이 재미를 줍니다. 얼굴이 가장 큽니다.</td><td>요소가 많아 250px 에서 목표 문장이 15px 상당으로 작아집니다. 긴 목표는 두 줄에서 일찍 잘립니다.</td></tr>
+</table>
+
+<h2>5. 구현 메모 (next/og ImageResponse 로 옮길 때)</h2>
+<table>
+<tr><th style="width:170px">항목</th><th>내용</th></tr>
+<tr><td>경로</td><td><code>/og/invite/[token]</code> 과 <code>/og/g/[slug]</code> route handler 가 PNG 를 냅니다. 초대 페이지 <code>generateMetadata</code> 의 <code>images</code> 와 카카오 공유 <code>imageUrl</code>(지금 <code>FriendInviteCard.tsx</code> 74행이 기본 이미지 고정)을 이 주소로 바꿉니다. 카카오는 이미지를 주소 기준으로 캐시하므로 <code>?v=응원수-마감일</code> 같은 값을 붙입니다.</td></tr>
+<tr><td>지금 없는 데이터</td><td><code>friend_invite_preview</code> RPC 는 이름·목표 제목·커버 키 3개만 돌려줍니다. 프로필 사진, 사용자 커버 사진, 마감일, 응원 수(goal_public.cheer_count 에는 있음)를 더해야 합니다. 응원은 인원수만, 금액은 넣지 않습니다(D-003).</td></tr>
+<tr><td>글꼴</td><td>Satori 는 woff2 를 못 읽습니다. Pretendard Bold·ExtraBold·Black 의 OTF/TTF 를 쓰는 글자만 남겨 서브셋한 뒤 넣습니다(한글 전체 파일은 용량이 큼).</td></tr>
+<tr><td>Satori 규칙</td><td><code>cards.js</code> 의 모든 상자는 flex 와 absolute 위치만 씁니다. grid·의사요소 없음. 제목 줄바꿈은 <code>wordBreak: keep-all</code>, 넘침은 서버의 <code>fitTitle()</code> 이 글자 크기 3단(예: 92/80/68)을 고르고 그래도 넘치면 말줄임으로 자릅니다. 이름은 8자 넘으면 말줄임.</td></tr>
+<tr><td>상태 규칙</td><td>응원 0명 = "첫 응원을 기다려요"(0명이라고 쓰지 않음). 마감일 없음 = D-day 칸 숨김. 마감일 오늘 = "오늘 마감". 마감 지남·달성 상태는 이번 범위 밖이며 같은 칸에 "해냈어요"를 넣는 방식을 권합니다. 프로필 사진 없음 = 이름 첫 글자 원(빈 상자 금지, 23번 레퍼런스가 실패 사례).</td></tr>
+<tr><td>크롭 안전영역</td><td>코드가 피드 템플릿에 1200×630 을 넘기는데 카카오가 허용하는 비율은 1:1·2:1·4:3 이고 그 밖이면 자동 크롭합니다. 1200×630 은 2:1 로 잘려 위아래 약 15px 가 빠집니다. 모든 글자가 y 15~615 안에 있음을 기계로 확인했습니다. 실제 카톡 전송 확인은 공유 실패(4002) 수정 뒤에 해야 합니다.</td></tr>
+</table>
+
+<h2>6. 레퍼런스 (실물)</h2>
+<table id="refs"><tr><th>실물</th><th>무엇을 가져오고 무엇을 버렸나</th></tr></table>
+
+<details><summary>STAMP</summary>
+<p>🏷 STAMP | line: v2 | 생성: 2026-11-20 21:40 KST | model: claude-opus-5-5 | agent: product-designer | skills: design-review</p>
+<p>근거: refs-invite-og-20261120 실물 11장 · 카카오 devtalk 이미지 비율 답변 · web/src/app/invite/[token]/page.tsx · web/src/lib/kakao-share.ts · globals.css 토큰 · goal-cover-presets.ts</p>
+<p>고민: 카톡 말풍선 250px 에서 읽히는 글자 하한(원본 40px = 말풍선 8px 상당)을 기준으로 정보를 덜어 냈다. 이전 계보: public/og/haenael-og.png (11-13 피드백 7번 처리분).</p>
+</details>
+</div>
+<script src="cards.js"></script>
+<script>
+const D = OG.DATA, V = OG.VARIANTS;
+const chats = document.getElementById("chats");
+V.forEach(v => {
+  const d = D.normal;
+  chats.insertAdjacentHTML("beforeend", `<div class="chat"><p class="cap">${v.id} ${v.name}</p>
+  <div class="msg"><img class="pf" src="${d.avatar}" alt=""><div><p class="nm">${d.name}</p>
+  <div style="display:flex"><div class="bub"><img class="img" src="png/${v.id}-normal.png" alt="${v.id}안 미리보기">
+  <div class="tx"><div class="tt">${d.name}님이 해낼게에 초대했어요</div><div class="ds">“${d.title}” 서로의 목표를 같이 응원해요. 들어가서 내 목표도 써 보세요.</div></div>
+  <div class="bt">들어가서 내 목표 쓰기</div><div class="src">해낼게</div></div><span class="time">오후 9:41</span></div></div></div></div>`);
+});
+// 기존 기본 이미지와 나란히 (지금 상태)
+chats.insertAdjacentHTML("afterbegin", `<div class="chat"><p class="cap">지금 (기본 이미지)</p>
+  <div class="msg"><img class="pf" src="${D.normal.avatar}" alt=""><div><p class="nm">${D.normal.name}</p>
+  <div style="display:flex"><div class="bub"><img class="img" src="../refs-invite-og-20261120/00-current-haenael-og.png" alt="지금 기본 이미지">
+  <div class="tx"><div class="tt">${D.normal.name}님이 해낼게에 초대했어요</div><div class="ds">“${D.normal.title}” 서로의 목표를 같이 응원해요. 들어가서 내 목표도 써 보세요.</div></div>
+  <div class="bt">들어가서 내 목표 쓰기</div><div class="src">해낼게</div></div><span class="time">오후 9:41</span></div></div></div></div>`);
+const notes = { A: "친구의 목표 사진이 주인공. 하단 어둡게 깔고 흰 글씨.", B: "지금 기본 이미지의 종이·워드마크를 잇고 목표 문장이 주인공.", C: "초록 바탕 입장권. 얼굴이 크고 마감일이 도장." };
+const gal = document.getElementById("gal");
+V.forEach(v => {
+  gal.insertAdjacentHTML("beforeend", `<div class="vrow"><h3>${v.id} ${v.name}</h3><p class="note">${notes[v.id]}</p><div class="cells">${
+    Object.values(D).map(d => `<div class="cell"><div class="frame"><img src="png/${v.id}-${d.key}.png" alt="${v.id} ${d.label}"></div><div class="lb">${d.label}</div></div>`).join("")}</div></div>`);
+});
+document.getElementById("safe").onchange = e => gal.classList.toggle("safe", e.target.checked);
+const refs = [
+ ["00-current-haenael-og.png","차용: 종이색 바탕, 검은 굵은 글씨, 워드마크 초록 점(B안 바탕). 버림: 누가 보내도 같은 그림, '응원은 돈으로 하는 겁니다' 문장(말풍선 제목과 겹침)."],
+ ["01-kakao-share-failed-now.png","차용: 없음. 확인: 지금 공유가 4002 로 실패 중이라 이 시안의 실제 카톡 전송 검증은 그 수정 뒤에만 가능."],
+ ["21-github-repo-og.png","차용: 소유자 이름 + 큰 제목 + 숫자 지표 줄(B안 D-23·12명 배치). 버림: 지표 5개 나열, 하단 언어 막대."],
+ ["15-buymeacoffee.com.png","차용: 후원자 얼굴과 이름을 카드 안에 넣는 사회적 증거(A안 이름 칩). 버림: 대시보드 화면 캡처형 구성."],
+ ["23-bmc-creator.png","차용: 없음(실패 사례). 프로필 사진이 없으면 빈 사각형이 남는다. 그래서 세 안 모두 이름 첫 글자 원으로 채움."],
+ ["22-patreon-creator-card.png","차용: 크리에이터 사진을 전면 배경으로 쓰는 개인화(A안 전면 사진). 버림: 이름·목표 글자가 하나도 없어 무엇인지 안 읽힘."],
+ ["13-daangn.com.png","차용: 따뜻한 단색 바탕 + 브랜드 초록 한 점(C안 단색 초록 바탕의 근거). 버림: 로고만 있는 구성."],
+ ["16-duolingo.com.jpg","차용: 연속 기록 달력 같은 마감·연속 장치를 그림 하나로(C안 D-day 도장). 버림: 캐릭터 일러스트(해낼게에 캐릭터 없음)."],
+ ["11-tumblbug.com.png","차용: 없음. 버림: 일러스트를 흩뿌린 브랜드 공통 이미지(개인화 0, 250px 에서 아무것도 안 읽힘)."],
+ ["12-toss.im.jpg","차용: 요소 하나만 크게 두는 절제. 버림: 로고 단독 구성."],
+ ["14-linktr.ee.jpg","차용: 사람 실루엣으로 '사람의 공간'임을 알림. 버림: 강한 원색 콜라주(해낼게 따뜻한 톤과 충돌)."],
+];
+const rt = document.getElementById("refs");
+refs.forEach(([f, t]) => rt.insertAdjacentHTML("beforeend", `<tr><td><img class="refimg" src="../refs-invite-og-20261120/${f}" alt="${f}"><div>${f}</div></td><td>${t}</td></tr>`));
+const out = document.getElementById("out");
+document.getElementById("copy").onclick = () => {
+  const p = document.querySelector('input[name=pick]:checked');
+  out.value = `초대 미리보기 이미지 v0.1.0 결정: ${p ? p.value : "(선택 없음)"}\n메모: ${document.getElementById("memo").value}`;
+  out.select(); try { navigator.clipboard.writeText(out.value); } catch (e) {}
+};
+document.getElementById("reset").onclick = () => { document.querySelectorAll('input[name=pick]').forEach(r => r.checked = false); document.getElementById("memo").value = ""; out.value = ""; };
+</script>
+</body></html>

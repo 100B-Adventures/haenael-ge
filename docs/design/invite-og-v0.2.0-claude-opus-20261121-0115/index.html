@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>해낼게 초대 미리보기 이미지 v0.2.0 · 응원 티켓 변형 3종</title>
+<style>
+@font-face{font-family:Pretendard;src:url(assets/PretendardVariable.woff2) format("woff2");font-weight:100 900;}
+:root{--paper:#fbfaf7;--ink:#16140f;--muted:#6f6a60;--line:#e8e4dc;--clover:#1b8a4f;--clover-ink:#14613a;--clover-soft:#e7f4ec;--warm:#f4efe6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Pretendard,sans-serif;font-size:15px;line-height:1.55;word-break:keep-all}
+.wrap{max-width:1240px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:-0.02em}
+h2{font-size:20px;margin:40px 0 12px;letter-spacing:-0.01em}
+.lead{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.lead p{margin:4px 0}
+.lead b{color:var(--clover-ink)}
+.pick{display:inline-block;background:var(--clover);color:#fff;border-radius:8px;padding:1px 10px;font-weight:700;font-size:13px}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+/* 카카오톡 채팅방 */
+.chat{width:360px;max-width:100%;background:#b2c7da;border-radius:18px;padding:16px 12px 20px;flex:0 0 auto}
+.chat .cap{font-size:13px;font-weight:700;color:#2b3a4a;margin:0 0 10px 4px}
+.msg{display:flex;gap:8px;align-items:flex-start}
+.msg .pf{width:38px;height:38px;border-radius:14px;object-fit:cover;flex:0 0 auto}
+.msg .nm{font-size:12px;color:#3d4a57;margin:0 0 4px}
+.bub{width:250px;background:#fff;border-radius:4px 14px 14px 14px;overflow:hidden}
+.bub .img{width:250px;height:125px;object-fit:cover;display:block}
+.bub .tx{padding:10px 12px 12px}
+.bub .tt{font-size:14px;font-weight:700;line-height:1.35;color:#191919}
+.bub .ds{font-size:12.5px;color:#7a7a7a;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bub .bt{margin:10px 12px 12px;background:#f2f2f2;border-radius:6px;text-align:center;font-size:13px;padding:8px 0;color:#191919}
+.bub .src{font-size:11px;color:#aaa;padding:0 12px 10px}
+.time{font-size:10px;color:#4a5866;align-self:flex-end;margin-left:4px}
+/* 갤러리 */
+.grid3{display:flex;flex-direction:column;gap:22px}
+.vrow h3{margin:0 0 8px;font-size:17px}
+.vrow .note{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+.cells{display:flex;gap:12px;flex-wrap:wrap}
+.cell{flex:1 1 360px;max-width:400px}
+.frame{position:relative;width:100%;aspect-ratio:1200/630;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.frame img{width:100%;height:100%;display:block}
+.safe .frame::before,.safe .frame::after{content:"";position:absolute;left:0;right:0;height:2.38%;background:rgba(217,72,59,.45)}
+.safe .frame::before{top:0}.safe .frame::after{bottom:0}
+.cell .lb{font-size:12.5px;color:var(--muted);margin-top:4px}
+.tog{display:inline-flex;gap:8px;align-items:center;font-size:14px;margin:0 0 10px;cursor:pointer}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--warm)}
+.board{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.board label{margin-right:18px;font-weight:700}
+.board textarea{width:100%;height:80px;margin-top:10px;font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px}
+.board button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--clover);background:var(--clover);color:#fff;margin-right:8px;margin-top:8px;min-height:44px}
+.board button.g{background:#fff;color:var(--clover-ink)}
+details{margin-top:28px;font-size:12.5px;color:var(--muted)}
+.refimg{width:160px;border-radius:6px;border:1px solid var(--line);display:block}
+@media (max-width:600px){h1{font-size:22px}.chat{width:100%}.bub{width:min(250px,calc(100vw - 110px))}.bub .img{width:100%;height:auto;aspect-ratio:2/1}}
+</style></head><body><div class="wrap">
+</head><body><div class="wrap">
+<h1>카카오톡 초대 미리보기 · 응원 티켓 변형 3종 (v0.2.0)</h1>
+<div class="lead">
+<p>고를 것: 티켓 변형 셋 중 하나 <span class="pick">추천 C1 입장권</span>. 아래 말풍선은 실제 카톡방 크기(가로 250px)입니다.</p>
+<p>이 판이 하는 일: 회장이 고른 v0.1.0 C안(응원 티켓)을 진짜 티켓처럼 다듬었습니다. 절취선, 펀치 구멍, 일련번호, 떼는 칸.</p>
+<p>받는 사람이 느낄 것: "친구가 나한테 표를 줬다", "내 번호가 정해져 있다". 번호는 실제 순번(지금 응원 수 + 1)이라 거짓이 아닙니다.</p>
+<p>상태 3가지(정상, 사진·기한·응원 없음, 긴 이름·긴 목표·큰 수) 9장 모두 잘림·줄 넘김·넘침 0 (기계 검사 + 눈 확인).</p>
+</div>
+<h2>1. 카톡방에서 보이는 모습 (실제 크기)</h2>
+<div class="row" id="chats"></div>
+<h2>2. 1200×630 원본 · 상태별</h2>
+<label class="tog"><input type="checkbox" id="safe" checked> 카카오 피드 2:1 자동 크롭으로 잘리는 띠 표시 (위아래 15px)</label>
+<div class="grid3 safe" id="gal"></div>
+<h2>3. 고르기</h2>
+<div class="board">
+<div><label><input type="radio" name="pick" value="C1"> C1 입장권</label><label><input type="radio" name="pick" value="C2"> C2 목표행 탑승권</label><label><input type="radio" name="pick" value="C3"> C3 응원 도장판</label></div>
+<textarea id="memo" placeholder="고칠 점이 있으면 적어 주세요"></textarea>
+<button id="copy">결정 복사</button><button class="g" id="reset">초기화</button>
+<textarea id="out" readonly placeholder="결정 복사를 누르면 여기에 채워집니다"></textarea>
+</div>
+<h2>4. 추천과 이유</h2>
+<table>
+<tr><th style="width:130px">변형</th><th>받는 사람이 느끼는 것</th><th>약점</th></tr>
+<tr><td><b>C1 입장권 (추천)</b></td><td>왼쪽 떼는 칸의 친구 얼굴이 세 변형 중 가장 큽니다(156px, 말풍선에서 약 32px). 펀치 구멍 두 개, 점선 절취선, 오른쪽 "No.13 번째 응원" 칸이 한눈에 입장권으로 읽힙니다. 번호가 "내가 누르면 13번째"라는 실제 순번이라 내 자리가 정해진 느낌을 줍니다. v0.1.0 C의 구조를 그대로 이어 회장이 고른 인상이 유지됩니다.</td><td>번호 칸이 좁아 1,000명을 넘으면 숫자가 작아집니다(40px). 실제로 그 수에 이르는 목표는 드뭅니다.</td></tr>
+<tr><td>C2 목표행 탑승권</td><td>"기장 지민님 · 목적지 토익 900점 · 도착 예정 2026.12.14 · 좌석 13번"이 말장난으로 웃음을 줍니다. 도착일이 날짜로 박혀 진짜 표 같습니다.</td><td>필드 라벨(24px)이 말풍선에서 5px 상당이라 안 읽힙니다. 재미의 절반이 작은 글씨에 있어 카톡방에서는 덜 전달됩니다.</td></tr>
+<tr><td>C3 응원 도장판</td><td>찍힌 클로버 도장 옆 점선 원 "내 자리"가 가장 직접적인 행동 유도입니다. 도장 수는 실제 응원 수입니다.</td><td>얼굴이 68px로 작고, 응원이 0이면 아래 칸이 비어 보입니다. 티켓보다 쿠폰에 가깝습니다.</td></tr>
+</table>
+<h2>5. 지난 판 대비 바뀐 것</h2>
+<table>
+<tr><th style="width:170px">항목</th><th>v0.1.0 C → v0.2.0</th></tr>
+<tr><td>티켓 문법</td><td>절취선만 있던 것에 펀치 구멍(바탕색 원), 점 절취선, 일련번호 칸, ADMIT ONE 띠를 더함</td></tr>
+<tr><td>응원 0명</td><td>"첫 응원을 기다려요" 규칙 유지. 변형 작업 중 "아직 0명"이 섞여 들어간 것을 렌더에서 발견해 "첫 응원 대기"·"첫 탑승 대기"로 바꿈</td></tr>
+<tr><td>머리 문구</td><td>"다음 응원석이 비어 있어요"는 자리가 한정된 것처럼 읽혀(응원 자리는 무제한) "지민님이 보낸 초대장"으로 바꿈</td></tr>
+<tr><td>검사</td><td>한 줄 라벨이 두 줄로 꺾이면 실패로 잡는 검사를 더함(글자 줄 수 측정). C3에서 "찍혔/어요", "내 자/리" 꺾임을 이 과정에서 찾아 고침</td></tr>
+</table>
+<h2>6. 구현 메모 (next/og ImageResponse 로 옮길 때)</h2>
+<table>
+<tr><th style="width:170px">항목</th><th>내용</th></tr>
+<tr><td>Satori 규칙</td><td>모든 상자 flex + border-box, 위치는 absolute 만. 펀치 구멍은 바탕색 원, 절취선은 점 div 줄, 클로버 마크는 원 4개. grid·의사요소·점선 테두리에 기대지 않음(C3 "내 자리" 원만 dashed 테두리, Satori 지원 범위). 제목은 서버 fitTitle() 3단 크기 + 말줄임.</td></tr>
+<tr><td>필요한 데이터</td><td>이름, 프로필 사진, 목표 제목, 마감일(D-day·도착일), 응원 수. 지금 <code>friend_invite_preview</code> RPC 는 이름·제목·커버 키만 줌. 프로필 사진·마감일·응원 수 추가 필요(응원 수는 goal_public.cheer_count). 금액은 넣지 않음(D-003).</td></tr>
+<tr><td>번호의 정직성</td><td>"No.13"은 cheer_count + 1. 받는 사람이 실제로 응원하면 받게 될 순번이다. 그 사이 다른 사람이 먼저 응원하면 실제 번호는 달라질 수 있으므로, 응원 완료 화면에서 실제 순번을 다시 보여 주는 것을 권함(거짓 약속 방지).</td></tr>
+<tr><td>카카오 크롭</td><td>1200×630 은 2:1 로 잘려 위아래 15px 가 빠짐. 모든 글자가 y 15~615 안(기계 확인). 실제 카톡 전송 확인은 공유 4002 오류 수정 뒤에만 가능(미검증).</td></tr>
+</table>
+<h2>7. 레퍼런스 (실물, 절대 경로)</h2>
+<table id="refs"><tr><th>실물</th><th>무엇을 가져오고 무엇을 버렸나</th></tr></table>
+<details><summary>STAMP</summary>
+<p>🏷 STAMP | line: v2 | 생성: 2026-11-21 01:15 KST | model: claude-opus-5-5 | agent: product-designer | skills: design-review</p>
+<p>근거: refs-invite-og-20261120 실물(31~33 티켓 신규 포함) · v0.1.0 C안(회장 선택) · globals.css 토큰 · goal-cover-presets.ts</p>
+<p>고민: 티켓 문법을 늘리면 글자가 작아진다. 말풍선 250px 기준으로 얼굴과 번호만 크게 두고 나머지 라벨은 장식으로 둠. 이전 판: invite-og-v0.1.0-claude-opus-20261120-2140 (C안 선택됨)</p>
+</details>
+</div>
+<script src="cards.js"></script>
+<script>
+const D = OG.DATA, V = OG.VARIANTS;
+const bubble = (cap, img, d) => `<div class="chat"><p class="cap">${cap}</p>
+  <div class="msg"><img class="pf" src="${d.avatar}" alt=""><div><p class="nm">${d.name}</p>
+  <div style="display:flex"><div class="bub"><img class="img" src="${img}" alt="${cap} 미리보기">
+  <div class="tx"><div class="tt">${d.name}님이 해낼게에 초대했어요</div><div class="ds">“${d.title}” 서로의 목표를 같이 응원해요. 들어가서 내 목표도 써 보세요.</div></div>
+  <div class="bt">들어가서 내 목표 쓰기</div><div class="src">해낼게</div></div><span class="time">오전 1:15</span></div></div></div></div>`;
+const chats = document.getElementById("chats");
+chats.insertAdjacentHTML("beforeend", bubble("이전 판 v0.1.0 C", "../invite-og-v0.1.0-claude-opus-20261120-2140/png/C-normal.png", D.normal));
+V.forEach(v => chats.insertAdjacentHTML("beforeend", bubble(`${v.id} ${v.name}`, `png/${v.id}-normal.png`, D.normal)));
+const notes = { C1: "크림색 입장권. 왼쪽 떼는 칸에 친구 얼굴, 오른쪽 칸에 일련번호.", C2: "목표행 탑승권. 기장·목적지·도착 예정·좌석.", C3: "응원 도장판. 찍힌 도장 = 실제 응원 수, 점선 원 = 내 자리." };
+const gal = document.getElementById("gal");
+V.forEach(v => gal.insertAdjacentHTML("beforeend", `<div class="vrow"><h3>${v.id} ${v.name}</h3><p class="note">${notes[v.id]}</p><div class="cells">${
+  Object.values(D).map(d => `<div class="cell"><div class="frame"><img src="png/${v.id}-${d.key}.png" alt="${v.id} ${d.label}"></div><div class="lb">${d.label}</div></div>`).join("")}</div></div>`));
+document.getElementById("safe").onchange = e => gal.classList.toggle("safe", e.target.checked);
+const R = "/mnt/hdd/haenael-ge-v2-hotfix/docs/design/refs-invite-og-20261120/";
+const refs = [
+ ["32-fillmore-ticket-stub.jpg","차용: 크게 박힌 일련번호와 세로 배치 칸(C1 오른쪽 No. 칸), 떼어 내는 칸 구분. 버림: 가격 표기($5.00, D-003 금액 금지), 낡은 종이 질감"],
+ ["31-boarding-pass-instagram.jpg","차용: 받는 사람 이름을 표 안에 넣어 '내 표'로 만드는 개인화, 목적지·좌석 필드(C2 전체 문법). 버림: QR·바코드(가짜 정보가 됨), 우주 배경"],
+ ["33-grateful-dead-ticket-stubs.jpg","차용: 모아 두고 싶은 기념 티켓의 색 띠(C3 상단 띠, 도장 모음). 버림: 빽빽한 작은 글씨"],
+ ["22-patreon-creator-card.png","차용: 만든 사람 얼굴을 카드의 중심에(C1 떼는 칸 얼굴). 버림: 글자 없는 구성"],
+ ["21-github-repo-og.png","차용: 숫자 지표를 라벨+큰 숫자 쌍으로(C1 마감·응원, C2 필드). 버림: 지표 5개 나열"],
+ ["23-bmc-creator.png","차용 없음(실패 사례): 사진이 없으면 빈 상자. 그래서 이름 첫 글자 원으로 채움"],
+ ["13-daangn.com.png","차용: 단색 브랜드 바탕(초록 바탕 유지 근거). 버림: 로고 단독 구성"],
+ ["00-current-haenael-og.png","차용: 워드마크와 초록 점. 버림: 개인화 없는 고정 그림"],
+];
+const rt = document.getElementById("refs");
+refs.forEach(([f, t]) => rt.insertAdjacentHTML("beforeend", `<tr><td><img class="refimg" src="../refs-invite-og-20261120/${f}" alt="${f}"><div style="word-break:break-all">${R}${f}</div></td><td>${t}</td></tr>`));
+const out = document.getElementById("out");
+document.getElementById("copy").onclick = () => { const p = document.querySelector('input[name=pick]:checked');
+  out.value = `초대 미리보기 이미지 v0.2.0 결정: ${p ? p.value : "(선택 없음)"}\n메모: ${document.getElementById("memo").value}`; out.select(); try { navigator.clipboard.writeText(out.value); } catch (e) {} };
+document.getElementById("reset").onclick = () => { document.querySelectorAll('input[name=pick]').forEach(r => r.checked = false); document.getElementById("memo").value = ""; out.value = ""; };
+</script>
+</body></html>
