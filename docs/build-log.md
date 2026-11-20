@@ -1,5 +1,13 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-21 2.3.2 카카오톡 초대 수정
+
+- web/next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가, security-headers 단위 시험 1건(043203e).
+- e2e QA-TC-INV-KAKAO-01 추가, VERSION·package 2.3.2, RELEASE.md 2.3.2 매니페스트, CHANGELOG 2.1.2~2.3.1 보충(34c3dd1). Vitest 98파일·596건, tsc 0.
+- staging 은 카카오 JS 키를 build-env 로 넣어 배포(공용 Preview env 미변경). 기록 공백: 이 로그는 11-12 이후 2.2.1~2.3.1 을 적지 않았다. 그 기간 기록은 RELEASE.md 와 session-state.v2.md 에 있다.
+
+> STAMP: 2026-11-21 KST · model=Claude Opus 5.5 · agent=controller · 근거=회장 11-20·11-21 카카오 초대 지적, vercel env ls, red run
+
 ## 2026-11-12 독립 검증 8차 F-3·F-4 보정
 
 - 성장 화면 목표 문맥 소제목의 강제 왼쪽 정렬을 제거해 승인 시안처럼 가운데 정렬하고, `SMOKE-01`에 computed `text-align:center` 단언을 추가했다.

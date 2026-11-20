@@ -10,22 +10,22 @@ pipeline_version: 1
 controller: claude  # 승인(qa 독립 검증) = Claude, 개발·QA 루프 = Codex Goal (회장 2026-11-08)
 current_stage: ship  # 2026-11-11 14:27 KST qa 승인(독립 검증 6차 PASS, source ad7dce4). 2026-11-11 15:2x 운영 2.1.3 반영(회장 11-11 정책 원문), 11-12 02시 문서 커밋 585ba55 를 staging 회귀 45/45 뒤 main 반영. 이전 주석: 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
 latest_preview_deployment:
-  version: 2.1.3
-  source_sha: a74f33ba132176f32003104ab3456406e7d99a0d  # 2026-11-12 F-3 성장 소제목 정렬·preview robots 전체 차단·privacy 누름 44px. 문서 커밋 fb096de(web·supabase diff 0)
+  version: 2.3.2  # release_tag 2.3.2+fix-kakao-share-csp (2026-11-21 갱신. 이전 머리말은 2.1.3/2.2.1 에 멈춰 있었다)
+  source_sha: 34c3dd1f0d424f82147e3e0766c2fa50f8f62532
   url: https://haenael-ge-v2-staging-100-b.vercel.app
-  deployment: dpl_5Uc8hTQ6Z2D3VSTShQaT9EF9HWtB
+  deployment: haenael-brnretgry-100-b.vercel.app (NEXT_PUBLIC_KAKAO_JS_KEY build-env 포함)
   supabase_project_ref: ezzklgotgydwxqebfoys
-  regression_evidence: .goal/runs/v2-f3-f4-regression-a74f33b/  # 45/45
-  qa_approved: true  # 2026-11-12 23:00 KST claude independent-verify 20261112-2253 (2.2.0 재확인)
-  production_deployed: false  # 운영은 아직 585ba55. 운영 반영은 회장 원문 필요
+  regression_evidence: .goal/runs/v2-2.3.2-regression-34c3dd1/
+  qa_approved: pending  # 독립 검증(Codex code-reviewer) + 회귀 결과로 갱신
+  production_deployed: false
 latest_production_deployment:
-  version: 2.2.1  # release_tag 2.2.1+fix-analytics-host
-  source_sha: cd49d84b631d5135a497a993a42db94d038a5689  # 제품 190f7e5 + 승인 기록 문서
+  version: 2.3.1  # release_tag 2.3.1+fix-cheer-sheet-height
+  source_sha: 610adf122730c45cab8f5e36d6899785c3c76761
   url: https://haenael-ge.vercel.app
   deployment: main push 자동배포
   supabase_project_ref: ossvejipdivgxzcqszbw
-  ci: "main CI 43289651132 success, 운영 읽기 전용 E2E 43290170725 success (cd49d84)"
-  approval: '회장 2026-11-11 04:40 정책 원문(컨트롤러 전달). STAGING_REPORT msg 11-13 03:0x 제품·하네스. 독립 검증 12차 .goal/verify-20261113-0300-pass.md'
+  ci: "main CI 43720418216 success (610adf1)"
+  approval: '2.3.0 결제 켬 회장 11-14 원문, 2.3.1 은 같은 승인 범위의 결함 수정. 상세 RELEASE.md'
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.

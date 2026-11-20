@@ -128,6 +128,7 @@ Provider와 secret이 필요한 명령은 값 원문을 로그에 출력하지 �
 - success confirms delivery and provides subtle onboarding transition.
 - failure provides retry and alternative method.
 - report sheet submits goal/cheer report without exposing secrets.
+- (2026-11-21) every external share button is clicked end to end: `/invite` 카카오톡 초대 opens the real Kakao share window with no "요청 실패" and no CSP violation (`QA-TC-INV-KAKAO-01`). staging must be built with the same `NEXT_PUBLIC_KAKAO_JS_KEY` path as production, otherwise the test fails on purpose.
 
 ## 7. Notification gate
 
