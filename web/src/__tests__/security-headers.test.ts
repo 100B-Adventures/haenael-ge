@@ -48,6 +48,16 @@ describe("SEC-HEADERS 응답 보안 헤더 계약", () => {
     expect(CONTENT_SECURITY_POLICY).toContain("https://t1.kakaocdn.net");
   });
 
+  it("SEC-HEADERS-08 연동: 카카오톡 공유창으로 가는 form POST 와 로그인 리다이렉트를 form-action 에 허용한다", () => {
+    // 2026-11-21 staging 실측: kapi 를 열어도 SDK 의 sharer.kakao.com/picker/link form POST 가
+    // form-action 에 막혀 공유창이 안 열렸다. 카카오 미로그인이면 accounts.kakao.com 으로 넘어간다.
+    const formAction = CONTENT_SECURITY_POLICY.split(";").map((d) => d.trim())
+      .find((d) => d.startsWith("form-action")) ?? "";
+    expect(formAction).toContain("https://sharer.kakao.com");
+    expect(formAction).toContain("https://accounts.kakao.com");
+    expect(formAction).not.toContain("https://*.kakao.com");
+  });
+
   it("SEC-HEADERS-04 환경 분리: 로컬 Supabase는 개발에서만 허용한다", () => {
     const developmentPolicy = buildContentSecurityPolicy(true, undefined);
     const productionPolicy = buildContentSecurityPolicy(

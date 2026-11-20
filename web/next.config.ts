@@ -38,7 +38,9 @@ export function buildContentSecurityPolicy(
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "form-action 'self' https://*.tosspayments.com https://*.toss.im",
+  // 카카오톡 공유: SDK 가 sharer.kakao.com 으로 form POST 하고, 카카오 미로그인이면 accounts.kakao.com 로그인으로
+  // 넘긴다. form-action 은 이 리다이렉트에도 걸린다(2026-11-21 staging 공유창 미열림 실측).
+  "form-action 'self' https://sharer.kakao.com https://accounts.kakao.com https://*.tosspayments.com https://*.toss.im",
   [
     "script-src 'self' 'unsafe-inline'",
     development ? "'unsafe-eval'" : "",

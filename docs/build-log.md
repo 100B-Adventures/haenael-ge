@@ -2,7 +2,7 @@
 
 ## 2026-11-21 2.3.2 카카오톡 초대 수정
 
-- web/next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가, security-headers 단위 시험 1건(043203e).
+- web/next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가(043203e), form-action 에 sharer.kakao.com·accounts.kakao.com 추가(11-21, staging 실측으로 043203e 만으로는 공유창 미열림 확인). security-headers 단위 시험 07·08.
 - e2e QA-TC-INV-KAKAO-01 추가, VERSION·package 2.3.2, RELEASE.md 2.3.2 매니페스트, CHANGELOG 2.1.2~2.3.1 보충(34c3dd1). Vitest 98파일·596건, tsc 0.
 - staging 은 카카오 JS 키를 build-env 로 넣어 배포(공용 Preview env 미변경). 기록 공백: 이 로그는 11-12 이후 2.2.1~2.3.1 을 적지 않았다. 그 기간 기록은 RELEASE.md 와 session-state.v2.md 에 있다.
 

@@ -8,7 +8,7 @@
 ## 2.3.2 (2026-11-21) · staging 후보, 운영 반영 전
 
 - 카카오톡으로 친구를 초대할 수 있어요. 초대 화면의 카카오톡 초대 버튼을 누르면 카카오톡 공유창이 바로 열려요.
-- 변경: next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가
+- 변경: next.config.ts CSP connect-src 에 https://kapi.kakao.com, form-action 에 https://sharer.kakao.com·https://accounts.kakao.com 추가
 
 ## 2.3.1 (2026-11-15)
 
