@@ -1,10 +1,42 @@
-# 릴리스 후보 매니페스트: 해낼게 2.3.1
+# 릴리스 후보 매니페스트: 해낼게 2.3.2
+
+```yaml
+release: 2.3.2
+release_tag: 2.3.2+fix-kakao-share-csp
+date: 2026-11-21
+status: staging-candidate
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.3.1 (610adf1)
+reason: 회장 2026-11-20 21:0x "카카오톡 초대 이거 눌러도 뭐 요청 실패 뜨는데". 원인 3가지. ①카카오 콘솔 [제품 링크 관리]에 운영 주소 없음(11-20 콘솔에서 등록, 코드 무관) ②사이트 보안 헤더 connect-src 에 kapi.kakao.com 이 없어 SDK 의 공유 템플릿 검증 요청이 막힘 ③staging(Vercel Preview)에 NEXT_PUBLIC_KAKAO_JS_KEY 가 없어 staging 에서는 이 버튼이 링크 복사로 빠졌고, 기존 시험은 링크 복사 버튼만 눌러 둘 다 못 잡음
+public_note:
+  title: "카카오톡으로 친구를 초대할 수 있어요"
+  summary: "초대 화면의 카카오톡 초대 버튼을 누르면 카카오톡 공유창이 바로 열려요."
+  notify: false
+  try_href: /invite
+  feedback_href: /updates#feedback
+ships:
+  code: next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가
+  tests: security-headers 단위 시험(kapi.kakao.com 허용), e2e QA-TC-INV-KAKAO-01(카카오톡 초대 버튼 클릭 → 카카오 공유창 열림, "요청 실패" 없음, CSP 차단 0)
+  migrations: none
+  edge_functions: none
+  env: none(운영 키는 2.3.0 때 설정). staging 배포는 --build-env 로 카카오 JS 키를 넣어 운영과 같은 경로를 시험
+qa_gate:
+  approved: false
+  evidence: 채움 예정(staging 회귀 + 독립 검증)
+```
+
+# 릴리스 매니페스트: 해낼게 2.3.1
 
 ```yaml
 release: 2.3.1
 release_tag: 2.3.1+fix-cheer-sheet-height
 date: 2026-11-15
-status: staging-candidate
+status: released
+released_at: 2026-11-15 22:5x KST (main 610adf1)
+ci: main CI 43720418216 success. 운영 결제창 390×664 e2e 통과, 주문 0
+post_release_defect: 2.3.0 에서 켠 카카오톡 초대 공유가 운영에서 "요청 실패(Error Code 4002)". 2.3.2 에서 수정
 line: v2
 delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app

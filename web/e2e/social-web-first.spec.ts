@@ -2843,6 +2843,43 @@ test.describe("V2 web-first social slice", () => {
       expect(invitation.pathname).toMatch(/^\/invite\/[A-Za-z0-9_-]+$/);
       await captureS3(ownerInvitePage, "02", "invite-link-created");
 
+      // QA-TC-INV-KAKAO-01 (2026-11-21): 카카오톡 초대 버튼을 실제로 눌러 카카오 공유창까지 간다.
+      // 2.3.0 운영에서 "요청 실패(Error Code 4002)"가 났는데 기존 시험은 링크 복사만 눌렀고,
+      // staging 에는 카카오 JS 키가 없어 이 버튼이 링크 복사로 빠졌다. 그래서 둘 다 못 잡았다.
+      // 이 단계는 키가 없으면(공유창이 안 뜨면) 실패하고, 사이트 보안 헤더(CSP) 차단과
+      // 카카오 콘솔 도메인 미등록(공유창의 "요청 실패")을 둘 다 잡는다. 공유창은 열기만 하고 보내지 않는다.
+      const cspViolations: string[] = [];
+      ownerInvitePage.on("console", (message) => {
+        if (/Content Security Policy|Refused to (connect|load|frame|execute)/i.test(message.text())) {
+          cspViolations.push(message.text());
+        }
+      });
+      await ownerInvitePage.evaluate(() => {
+        const store = window as unknown as { __cspViolations?: string[] };
+        store.__cspViolations = [];
+        document.addEventListener("securitypolicyviolation", (event) => {
+          store.__cspViolations?.push(`${event.violatedDirective} ${event.blockedURI}`);
+        });
+      });
+      const kakaoPopupPromise = ownerInviteContext.waitForEvent("page", { timeout: 20_000 });
+      await ownerInvitePage.getByRole("button", { name: "카카오톡 초대" }).click();
+      const kakaoPopup = await kakaoPopupPromise.catch(() => {
+        throw new Error("kakao_share_window_not_opened:카카오 공유창이 열리지 않음(카카오 JS 키 누락 또는 SDK 차단)");
+      });
+      await kakaoPopup.waitForLoadState("domcontentloaded");
+      await kakaoPopup.waitForLoadState("networkidle").catch(() => undefined);
+      expect(new URL(kakaoPopup.url()).hostname).toMatch(/(^|\.)kakao\.com$/);
+      await expect(kakaoPopup.locator("body")).not.toContainText("요청 실패", { timeout: 10_000 });
+      if (process.env.E2E_CAPTURE_DIR) {
+        await kakaoPopup.screenshot({ path: `${process.env.E2E_CAPTURE_DIR}/inv-kakao-01-share-window.png` }).catch(() => undefined);
+      }
+      await kakaoPopup.close();
+      await expect(ownerInvitePage.getByRole("status")).toHaveText("친구에게 초대를 보냈어요.");
+      expect(cspViolations).toEqual([]);
+      expect(await ownerInvitePage.evaluate(
+        () => (window as unknown as { __cspViolations?: string[] }).__cspViolations ?? [],
+      )).toEqual([]);
+
       acceptInviteContext = await authContext(browser, emails.acceptB);
       const acceptInvitePage = await acceptInviteContext.newPage();
       await acceptInvitePage.setViewportSize({ width: 390, height: 844 });

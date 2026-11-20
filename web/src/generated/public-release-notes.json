@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.3.2",
+      "releaseTag": "2.3.2+fix-kakao-share-csp",
+      "date": "2026-11-21",
+      "title": "카카오톡으로 친구를 초대할 수 있어요",
+      "summary": "초대 화면의 카카오톡 초대 버튼을 누르면 카카오톡 공유창이 바로 열려요.",
+      "notify": false,
+      "tryHref": "/invite",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.3.1",
       "releaseTag": "2.3.1+fix-cheer-sheet-height",
       "date": "2026-11-15",
@@ -19,16 +29,6 @@
       "summary": "초대 링크에 미리보기 사진과 내 목표가 함께 보이고, 업데이트 화면에서 한 줄 의견을 바로 보낼 수 있어요. 마감이 지난 목표도 홈에서 바로 보여요.",
       "notify": true,
       "tryHref": "/invite",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.2.1",
-      "releaseTag": "2.2.1+fix-analytics-host",
-      "date": "2026-11-13",
-      "title": "시험 방문이 이용 통계에 섞이지 않게 했어요",
-      "summary": "개발과 시험에 쓰는 화면의 방문은 이용 통계에 넣지 않아요. 쓰는 방법은 그대로예요.",
-      "notify": false,
-      "tryHref": "/updates",
       "feedbackHref": "/updates#feedback"
     }
   ]
