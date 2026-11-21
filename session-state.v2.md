@@ -16,6 +16,13 @@
 - 직전에 고친 파일: report-2338.md
 - ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 
+## 2026-11-21 09:3x KST · 카카오 초대 2.3.2 핫픽스 QA·SSOT, worktree 복구 (회장 08:4x "QA 다 했고 SSOT 업데이트 했으면 메인 올리고 CI 확인")
+- 원인 확정(관찰): ①CSP connect-src kapi 누락(043203e) ②CSP form-action 에 sharer.kakao.com·accounts.kakao.com 누락(4ca3396, 043203e 만으로는 staging 에서 공유창 미열림 실측) ③staging(Preview)에 NEXT_PUBLIC_KAKAO_JS_KEY 없음 + 시험이 링크 복사만 클릭. 운영 아이폰 재현: sharer.kakao.com/picker/failed(KAPIError) = 회장 화면과 같음. staging 수정 헤더 아이폰: kakaolink(카카오톡 앱 호출) 도달.
+- 한 것(브랜치 fix/kakao-share-csp-20261120, /mnt/hdd/haenael-ge-kakao-csp): e2e QA-TC-INV-KAKAO-01(데스크톱)·02(아이폰), 레드 확인(옛 staging 실패), 2.3.2 매니페스트·VERSION·package, CHANGELOG 2.1.2~2.3.1 보충, qa-tracker·test-plan·build-log·인프라·pipeline-state 머리말 갱신, 안내 문구 "보냈어요"→"공유창을 열었어요". Codex 교차 리뷰 1차 BLOCK(지적 4건) 반영(23d0a33).
+- 진행 중: 34c3dd1 staging 회귀(카카오 단계 실패 예상) 종료 대기 → 23d0a33 staging 재배포(카카오 키 build-env) → 전체 회귀 → Codex 재리뷰 → 회장 원문으로 irreversible-approve → main push·CI → 운영 아이폰 공유창 확인.
+- 사고: 114 재부팅 07:36 직후 state-archive 의 worktree prune 이 /mnt/hdd 마운트 전에 돌아 .git/worktrees 3개 삭제 → 재생성 복구(미커밋 보존). 하네스 우편함·ops-issues 기록.
+- 단위 시험: 전량 실행 중 회귀와 겹쳐 5초 시간 초과 3건(결제·목표 화면, 변경 무관), 단독 재실행 5/5. 회귀 끝난 뒤 전량 재실행 예정.
+
 ## 2026-11-21 03:40 KST · 회장 QA 토큰·카카오 공유 질문 답변, C1 확정
 - 회장 요청(02:2x): 친구 응원이 원래 없던 기능인지 확인, QA에서 AI가 토큰을 낭비하는지, 카카오 공유는 왜 못 잡았나, "C1 괜찮네".
 - 한 것: 근거 확인. 회귀 45건·운영 e2e는 Playwright(CI), 토큰은 시험 작성(Codex)·실패 원인·독립 검증(Claude)에만. 카카오 공유는 11-15 2.3.0 신규(90ba1e9), 단위 시험 CT-INVITE-01~04에 카카오 버튼 0건, e2e 14개에 카카오 공유 0건. 요청 원장(hotfix wiki, gitignored)에 원문 기록.
