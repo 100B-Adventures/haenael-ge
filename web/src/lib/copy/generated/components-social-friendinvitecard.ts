@@ -17,7 +17,7 @@ export const PRODUCT_COPY = {
   TEXT_014: "준비 중", // source line 132
   TEXT_015: "초대 링크 복사", // source line 132
   TEXT_016: "초대 링크를 복사했어요.", // source line 134
-  TEXT_017: "친구에게 초대를 보냈어요.", // source line 135
+  TEXT_017: "카카오톡 공유창을 열었어요. 친구를 골라 보내 주세요.", // source line 135
   TEXT_018: "잠시 뒤에 새 초대 링크를 만들어 주세요.", // source line 136
   TEXT_019: "초대 링크를 만들지 못했어요. 다시 시도해 주세요.", // source line 137
   TEXT_020: "님이 초대를 받고 들어왔어요. 이제 친구 목록에서 서로의 목표를 볼 수 있어요.", // source line 148

@@ -18,7 +18,8 @@ public_note:
   feedback_href: /updates#feedback
 ships:
   code: next.config.ts CSP connect-src 에 https://kapi.kakao.com, form-action 에 https://sharer.kakao.com·https://accounts.kakao.com 추가(공유창 form POST 와 카카오 로그인 리다이렉트)
-  tests: security-headers 단위 시험 SEC-HEADERS-07(kapi)·08(form-action), e2e QA-TC-INV-KAKAO-01(카카오톡 초대 버튼 클릭 → 카카오 공유창 열림, "요청 실패" 없음, CSP 차단 0)
+  copy: 카카오톡 공유창을 연 뒤 안내 "친구에게 초대를 보냈어요." → "카카오톡 공유창을 열었어요. 친구를 골라 보내 주세요."(공유창을 연 것이지 보낸 것이 아니다. Codex 독립 리뷰 지적)
+  tests: security-headers 단위 시험 SEC-HEADERS-07(kapi)·08(form-action). e2e QA-TC-INV-KAKAO-01(데스크톱: 버튼 클릭 → 공유창이 sharer picker 또는 카카오 로그인에 도착, /picker/failed·오류 문구·kapi 4xx·CSP 차단 0), QA-TC-INV-KAKAO-02(아이폰: 버튼 클릭 → 카카오톡 앱 호출 kakaolink 도착, /picker/failed 0. 회장 사고와 같은 환경)
   migrations: none
   edge_functions: none
   env: none(운영 키는 2.3.0 때 설정). staging 배포는 --build-env 로 카카오 JS 키를 넣어 운영과 같은 경로를 시험

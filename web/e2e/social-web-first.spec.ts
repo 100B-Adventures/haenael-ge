@@ -20,6 +20,7 @@ import {
 } from "./support/staging-fixture-sql";
 import { waitForVisualAssets } from "./support/visual-ready";
 import {
+  devices,
   type Browser,
   type BrowserContext,
   type Locator,
@@ -816,6 +817,7 @@ async function authContext(
   browser: Browser,
   email: string,
   deviceScaleFactor?: number,
+  contextOptions: Parameters<Browser["newContext"]>[0] = {},
 ): Promise<BrowserContext> {
   const jar = new Map<string, CookieRow>();
   const client = createBrowserClient(SUPABASE_URL, ANON_KEY, {
@@ -839,6 +841,7 @@ async function authContext(
   const { error } = await client.auth.signInWithPassword({ email, password });
   if (error) throw error;
   const context = await browser.newContext({
+    ...contextOptions,
     ...(deviceScaleFactor ? { deviceScaleFactor } : {}),
   });
   await initializeSocialAnalyticsConsent(context);
@@ -2861,24 +2864,60 @@ test.describe("V2 web-first social slice", () => {
           store.__cspViolations?.push(`${event.violatedDirective} ${event.blockedURI}`);
         });
       });
+      const desktopKakaoNavigations: string[] = [];
+      ownerInviteContext.on("request", (request) => {
+        if (request.isNavigationRequest() && /kakao\.com/.test(request.url())) desktopKakaoNavigations.push(request.url());
+      });
+      const kakaoApiFailures: string[] = [];
+      ownerInviteContext.on("response", (response) => {
+        if (/kapi\.kakao\.com/.test(response.url()) && response.status() >= 400) kakaoApiFailures.push(`${response.status()} ${response.url()}`);
+      });
       const kakaoPopupPromise = ownerInviteContext.waitForEvent("page", { timeout: 20_000 });
       await ownerInvitePage.getByRole("button", { name: "카카오톡 초대" }).click();
       const kakaoPopup = await kakaoPopupPromise.catch(() => {
-        throw new Error("kakao_share_window_not_opened:카카오 공유창이 열리지 않음(카카오 JS 키 누락 또는 SDK 차단)");
+        throw new Error("kakao_share_window_not_opened:카카오 공유창이 열리지 않음(카카오 JS 키 누락 또는 CSP 차단)");
       });
       await kakaoPopup.waitForLoadState("domcontentloaded");
-      await kakaoPopup.waitForLoadState("networkidle").catch(() => undefined);
-      expect(new URL(kakaoPopup.url()).hostname).toMatch(/(^|\.)kakao\.com$/);
-      await expect(kakaoPopup.locator("body")).not.toContainText("요청 실패", { timeout: 10_000 });
+      // 긍정 판정: 공유창이 카카오 공유 화면(sharer picker) 또는 카카오 로그인(미로그인 브라우저)에 도착해야 한다.
+      // 부정 판정: 실패 화면 경로(/picker/failed), 오류 문구, kapi 4xx.
+      await expect.poll(() => kakaoPopup.url(), { timeout: 20_000 })
+        .toMatch(/^https:\/\/(sharer\.kakao\.com\/picker\/link|accounts\.kakao\.com\/login)/);
+      expect(desktopKakaoNavigations.filter((url) => url.includes("/picker/failed"))).toEqual([]);
+      await expect(kakaoPopup.locator("body")).not.toContainText(/요청 실패|Error Code|잘못된 요청/, { timeout: 5_000 });
+      expect(kakaoApiFailures).toEqual([]);
       if (process.env.E2E_CAPTURE_DIR) {
         await kakaoPopup.screenshot({ path: `${process.env.E2E_CAPTURE_DIR}/inv-kakao-01-share-window.png` }).catch(() => undefined);
       }
       await kakaoPopup.close();
-      await expect(ownerInvitePage.getByRole("status")).toHaveText("친구에게 초대를 보냈어요.");
+      // 공유창을 연 것이지 보낸 것이 아니다(카카오는 전송 완료를 웹훅 없이 알려주지 않는다). 문구도 그렇게 말해야 한다.
+      await expect(ownerInvitePage.getByRole("status")).toHaveText("카카오톡 공유창을 열었어요. 친구를 골라 보내 주세요.");
       expect(cspViolations).toEqual([]);
       expect(await ownerInvitePage.evaluate(
         () => (window as unknown as { __cspViolations?: string[] }).__cspViolations ?? [],
       )).toEqual([]);
+
+      // QA-TC-INV-KAKAO-02: 휴대폰(회장 사고 환경)에서는 공유창이 로그인 없이 템플릿·도메인을 검증하고
+      // 실패하면 sharer.kakao.com/picker/failed("요청 실패"), 성공하면 카카오톡 앱 호출(kakaolink)로 간다.
+      // 데스크톱은 카카오 웹 로그인 화면에서 멈춰 도메인 검증까지 못 가므로 이 단계가 4002 류를 잡는다.
+      const kakaoMobileContext = await authContext(browser, emails.owner, undefined, { ...devices["iPhone 13"] });
+      try {
+        const kakaoMobilePage = await kakaoMobileContext.newPage();
+        const kakaoNavigations: string[] = [];
+        kakaoMobileContext.on("request", (request) => {
+          if (request.isNavigationRequest() && /kakao\.com/.test(request.url())) kakaoNavigations.push(request.url());
+        });
+        await kakaoMobilePage.goto("/invite");
+        await waitForVisualReady(kakaoMobilePage, ["[data-testid=friend-invite-card]"]);
+        await kakaoMobilePage.getByRole("button", { name: "카카오톡 초대" }).click();
+        await expect.poll(
+          () => kakaoNavigations.some((url) => /\/picker\/failed|kakaolink/.test(url)),
+          { timeout: 20_000, message: `kakao_mobile_share_no_result:${kakaoNavigations.join(" ")}` },
+        ).toBe(true);
+        expect(kakaoNavigations.filter((url) => url.includes("/picker/failed")), "카카오 공유 요청 실패(picker/failed)").toEqual([]);
+        expect(kakaoNavigations.some((url) => url.includes("kakaolink"))).toBe(true);
+      } finally {
+        await kakaoMobileContext.close();
+      }
 
       acceptInviteContext = await authContext(browser, emails.acceptB);
       const acceptInvitePage = await acceptInviteContext.newPage();
