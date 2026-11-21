@@ -16,6 +16,11 @@
 - 직전에 고친 파일: report-2338.md
 - ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 
+## 2026-11-21 09:35 KST · 2.3.2 staging 그린 확인 중
+- 한 것: 4ca3396 form-action 수정 → 23d0a33 staging 배포, 회귀 44/45(카카오 통과, LG-02 30초 초과 단독 통과), Codex 2차 리뷰: 카카오 경로 해소, 남은 것 LG-02·SHA 기록 → 7e1e6cb 반영(제품 코드 diff 0).
+- 검증 등급: 관찰됨(staging 실제 헤더 아이폰 kakaolink, 데스크톱 카카오 로그인 도달, CSP 차단 0).
+- 다음: 23d0a33-r2 전체 회귀 → 45/45 면 irreversible-approve(회장 08:4x 원문) → main push·CI → 운영 아이폰 공유창 확인.
+
 ## 2026-11-21 09:3x KST · 카카오 초대 2.3.2 핫픽스 QA·SSOT, worktree 복구 (회장 08:4x "QA 다 했고 SSOT 업데이트 했으면 메인 올리고 CI 확인")
 - 원인 확정(관찰): ①CSP connect-src kapi 누락(043203e) ②CSP form-action 에 sharer.kakao.com·accounts.kakao.com 누락(4ca3396, 043203e 만으로는 staging 에서 공유창 미열림 실측) ③staging(Preview)에 NEXT_PUBLIC_KAKAO_JS_KEY 없음 + 시험이 링크 복사만 클릭. 운영 아이폰 재현: sharer.kakao.com/picker/failed(KAPIError) = 회장 화면과 같음. staging 수정 헤더 아이폰: kakaolink(카카오톡 앱 호출) 도달.
 - 한 것(브랜치 fix/kakao-share-csp-20261120, /mnt/hdd/haenael-ge-kakao-csp): e2e QA-TC-INV-KAKAO-01(데스크톱)·02(아이폰), 레드 확인(옛 staging 실패), 2.3.2 매니페스트·VERSION·package, CHANGELOG 2.1.2~2.3.1 보충, qa-tracker·test-plan·build-log·인프라·pipeline-state 머리말 갱신, 안내 문구 "보냈어요"→"공유창을 열었어요". Codex 교차 리뷰 1차 BLOCK(지적 4건) 반영(23d0a33).
