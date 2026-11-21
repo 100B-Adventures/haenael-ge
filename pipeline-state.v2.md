@@ -15,8 +15,8 @@ latest_preview_deployment:
   url: https://haenael-ge-v2-staging-100-b.vercel.app
   deployment: haenael-hse9rjh7i-100-b.vercel.app (NEXT_PUBLIC_KAKAO_JS_KEY build-env 포함)
   supabase_project_ref: ezzklgotgydwxqebfoys
-  regression_evidence: .goal/runs/v2-2.3.2-regression-23d0a33/ (r1 44/45, LG-02 30초 초과 → 단독 통과, 90초로 조정 후 재실행)
-  qa_approved: pending  # 독립 검증(Codex code-reviewer) + 회귀 결과로 갱신
+  regression_evidence: .goal/runs/v2-2.3.2-regression-23d0a33/ (r1 44/45 LG-02 30초 초과, r2 45/45 retries 0)
+  qa_approved: true  # 2026-11-21 회귀 23d0a33-r2 45/45, Codex 2회 리뷰 지적 반영
   production_deployed: false
 latest_production_deployment:
   version: 2.3.1  # release_tag 2.3.1+fix-cheer-sheet-height

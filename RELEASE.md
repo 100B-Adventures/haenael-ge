@@ -24,8 +24,8 @@ ships:
   edge_functions: none
   env: none(운영 키는 2.3.0 때 설정). staging 배포는 --build-env 로 카카오 JS 키를 넣어 운영과 같은 경로를 시험
 qa_gate:
-  approved: false
-  evidence: 채움 예정(staging 회귀 + 독립 검증)
+  approved: true
+  evidence: staging 23d0a33 전체 회귀 45/45 retries 0(.goal/runs/v2-2.3.2-regression-23d0a33-r2, 결제 복구 503). 레드 2회(a713b7b 키 없음, 34c3dd1 form-action 차단). Codex 교차 리뷰 1차 BLOCK 4건·2차 BLOCK 3건 반영(7e1e6cb, 제품 코드 diff 0). 단위 98파일·597건, 디자인 토큰 신규 0, tsc 0. staging 실제 헤더 아이폰 → kakaolink, 데스크톱 → 카카오 로그인, CSP 차단 0. 운영 2.3.1 아이폰 재현 sharer.kakao.com/picker/failed(KAPIError)
 ```
 
 # 릴리스 매니페스트: 해낼게 2.3.1
