@@ -17,15 +17,15 @@ latest_preview_deployment:
   supabase_project_ref: ezzklgotgydwxqebfoys
   regression_evidence: .goal/runs/v2-2.3.2-regression-23d0a33/ (r1 44/45 LG-02 30초 초과, r2 45/45 retries 0)
   qa_approved: true  # 2026-11-21 회귀 23d0a33-r2 45/45, Codex 2회 리뷰 지적 반영
-  production_deployed: false
+  production_deployed: true  # 2026-11-21 07bb848
 latest_production_deployment:
-  version: 2.3.1  # release_tag 2.3.1+fix-cheer-sheet-height
-  source_sha: 610adf122730c45cab8f5e36d6899785c3c76761
+  version: 2.3.2  # release_tag 2.3.2+fix-kakao-share-csp
+  source_sha: 07bb8483ddc02801a4bf5e5c909044b2a9e741d6
   url: https://haenael-ge.vercel.app
   deployment: main push 자동배포
   supabase_project_ref: ossvejipdivgxzcqszbw
-  ci: "main CI 43720418216 success (610adf1)"
-  approval: '2.3.0 결제 켬 회장 11-14 원문, 2.3.1 은 같은 승인 범위의 결함 수정. 상세 RELEASE.md'
+  ci: "main CI 44868163675 success, 운영 읽기 전용 E2E 44868602347 success (07bb848)"
+  approval: '회장 2026-11-21 08:4x "QA도 했고 ... SSOT 업데이트 했어 ... 그랬으면은 메인 올리고 CI 확인하고". staging 결과 우편함 송부'
 stage_timestamps:
   plan:       { completed: 2026-10-13 10:20 }
   # 2026-10-19 04:1x design 승격. 회장 1차 조건부 승인(D-036)의 조건이 충족됐다.

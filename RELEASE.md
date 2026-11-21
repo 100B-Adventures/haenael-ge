@@ -1,10 +1,13 @@
-# 릴리스 후보 매니페스트: 해낼게 2.3.2
+# 릴리스 매니페스트: 해낼게 2.3.2
 
 ```yaml
 release: 2.3.2
 release_tag: 2.3.2+fix-kakao-share-csp
 date: 2026-11-21
-status: staging-candidate
+status: released
+released_at: 2026-11-21 13:5x KST (main 07bb848, 운영 health 2.3.2)
+ci: main CI 44868163675 success, 운영 읽기 전용 E2E 44868602347 success
+prod_check: 운영 아이폰 카카오 공유 → talk-apps.kakao.com kakaolink(배포 전 같은 시험은 sharer.kakao.com/picker/failed), 데스크톱 → 카카오 로그인, CSP 차단 0
 line: v2
 delivery: vercel (main push 자동배포)
 canonical_url: https://haenael-ge.vercel.app
