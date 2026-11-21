@@ -2885,6 +2885,7 @@ test.describe("V2 web-first social slice", () => {
       expect(desktopKakaoNavigations.filter((url) => url.includes("/picker/failed"))).toEqual([]);
       await expect(kakaoPopup.locator("body")).not.toContainText(/요청 실패|Error Code|잘못된 요청/, { timeout: 5_000 });
       expect(kakaoApiFailures).toEqual([]);
+      await kakaoPopup.waitForLoadState("load").catch(() => undefined);
       if (process.env.E2E_CAPTURE_DIR) {
         await kakaoPopup.screenshot({ path: `${process.env.E2E_CAPTURE_DIR}/inv-kakao-01-share-window.png` }).catch(() => undefined);
       }
@@ -3776,6 +3777,8 @@ test.describe("V2 web-first social slice", () => {
   });
 
   test("QA-TC-LG-02 마이페이지를 제외한 하단탭 화면에 법적 고지 블록과 링크 나열이 0개다", async ({ browser }) => {
+    // 하단 탭 화면 여러 개를 차례로 연다. 단독 32.7초, 전체 회귀에서 30초 초과(11-13·11-21). 독립 검증 12차 조건대로 90초.
+    test.setTimeout(90_000);
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });

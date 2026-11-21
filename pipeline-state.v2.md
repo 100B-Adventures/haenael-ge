@@ -11,11 +11,11 @@ controller: claude  # 승인(qa 독립 검증) = Claude, 개발·QA 루프 = Cod
 current_stage: ship  # 2026-11-11 14:27 KST qa 승인(독립 검증 6차 PASS, source ad7dce4). 2026-11-11 15:2x 운영 2.1.3 반영(회장 11-11 정책 원문), 11-12 02시 문서 커밋 585ba55 를 staging 회귀 45/45 뒤 main 반영. 이전 주석: 2026-11-08 재개방: 2.1.1 은 qa 독립 승인 없이 운영 배포됨. 04:30 QA 회귀 37/45·디자인 9/9 불일치. 회장 "추가 커밋으로 오류잡고"
 latest_preview_deployment:
   version: 2.3.2  # release_tag 2.3.2+fix-kakao-share-csp (2026-11-21 갱신. 이전 머리말은 2.1.3/2.2.1 에 멈춰 있었다)
-  source_sha: 34c3dd1f0d424f82147e3e0766c2fa50f8f62532
+  source_sha: 23d0a33d91614b24fa6db9950867c06bee5f8792  # 전체 회귀 대상. 다음 커밋은 e2e·문서만(제품 코드 diff 0)
   url: https://haenael-ge-v2-staging-100-b.vercel.app
-  deployment: haenael-brnretgry-100-b.vercel.app (NEXT_PUBLIC_KAKAO_JS_KEY build-env 포함)
+  deployment: haenael-hse9rjh7i-100-b.vercel.app (NEXT_PUBLIC_KAKAO_JS_KEY build-env 포함)
   supabase_project_ref: ezzklgotgydwxqebfoys
-  regression_evidence: .goal/runs/v2-2.3.2-regression-34c3dd1/
+  regression_evidence: .goal/runs/v2-2.3.2-regression-23d0a33/ (r1 44/45, LG-02 30초 초과 → 단독 통과, 90초로 조정 후 재실행)
   qa_approved: pending  # 독립 검증(Codex code-reviewer) + 회귀 결과로 갱신
   production_deployed: false
 latest_production_deployment:
