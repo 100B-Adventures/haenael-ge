@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-21 09:30 KST] compact 마크 (auto)
+- 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 6097d20 docs(state): 11-21 09:35 2.3.2 staging status
+- compact 직전 컨텍스트: 320571 토큰
+- 마지막 회장 요청: <task-notification> <task-id>bfi0z0e06</task-id> <tool-use-id>toolu_015qrBhJYbzMZcm9kmvLfkEH</tool-use-id> <output-file>/tmp/claude-1000/-Users-sj-sj-code-master-haenael-ge/834fbf47-f57a-4f61-8d46-9b65b194e079/tasks/bfi0z0e06.output</output-file> <status>completed</status> <summary>Background comman
+- 직전에 고친 파일: report-0126.md social-web-first.spec.ts
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-21 02:22 KST] compact 마크 (auto)
 - 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: 242fa6e sync: joseongjin-ui-MacBookPro 에서 origin/session/core-20261015 병
