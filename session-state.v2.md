@@ -3,7 +3,10 @@
 ## [2026-11-23 02:4x KST] 2.3.2 릴리스 기록 main 반영 완료
 - 2.3.2 기록 문서 커밋 a560df4 를 main 에 push(회장 11-21 원문 "메인 올리고 CIM 확인하고", irreversible-approve 기록). 6609 사본은 이 push 권한 창에서 멈췄었고 실행 안 됐음 → 이 세션이 실행.
 - CI 45050653851 success. 운영 health 2.3.2 sourceSha a560df4, /invite CSP form-action 에 sharer·accounts.kakao.com 있음(관찰됨).
-- 남은 것: 2.3.2 커밋을 hotfix·D-057 브랜치에 합치기, 친구 응원·응원 결제 여정 e2e(D-057), OG C1 구현, 제품·하네스에 운영/Preview 환경변수 대조 요청(보냄).
+- 무엇을 어디까지: 2.3.2 코드(07bb848)·기록(a560df4) 모두 main·운영 반영.
+- 남은 이슈·블로커: 2.3.2 커밋을 hotfix·D-057 브랜치에 합치기 / 친구 응원·응원 결제 여정 e2e(D-057) / OG C1 구현 / 제품·하네스에 운영·Preview 환경변수 대조 요청(보냄, 회신 대기). 블로커 없음.
+- 다음에 칠 명령: cd /mnt/hdd/haenael-ge-kakao-csp && git log --oneline 610adf1..a560df4 → D-057 워크트리에서 cherry-pick 후 회귀.
+- 검증했나: CI 45050653851 success, 운영 health sourceSha a560df4 관찰. 브랜치 합치기는 미착수.
 
 ## [2026-11-21 09:30 KST] compact 마크 (auto)
 - 세션 834fbf47 · 라인 v2 · 브랜치 session/core-20261015
