@@ -1546,7 +1546,7 @@ test.describe("V2 web-first social slice", () => {
     // 3) 마이페이지 보낸 응원: 익명 표시와 공개로 바꾸기, 누르면 DB 가 공개로 바뀌고 버튼이 사라진다.
     await page.goto("/my", { waitUntil: "domcontentloaded", timeout: 400_000 });
     await page.getByRole("tab", { name: "보낸 응원" }).click();
-    const anonRow = page.locator("li, article, div").filter({ hasText: anonMessage }).last();
+    const anonRow = page.locator(".my-cheer-list article").filter({ hasText: anonMessage });
     await expect(anonRow).toBeVisible();
     await expect(anonRow.getByText("익명으로 보냄")).toBeVisible();
     const reveal = anonRow.getByRole("button", { name: "공개로 바꾸기" });
@@ -1576,11 +1576,13 @@ test.describe("V2 web-first social slice", () => {
     // 비회원이 서버에 직접 주문을 만들 수 없다(401 login_required).
     const orderResponse = await fetch(`${SUPABASE_URL}/functions/v1/cheer-order`, {
       method: "POST",
-      headers: { "content-type": "application/json", apikey: ANON_KEY, authorization: `Bearer ${ANON_KEY}` },
+      // 로그인 토큰 없이(Authorization 없음) 부르면 결제 스위치와 무관하게 401. 위조 토큰 401 은 Deno 단위 시험이 본다.
+      headers: { "content-type": "application/json", apikey: ANON_KEY },
       body: JSON.stringify({ slug: friendSlug, amount: 1, message: "비회원 시도" }),
     });
     expect(orderResponse.status).toBe(401);
-    expect(JSON.stringify(await orderResponse.json())).toContain("login_required");
+    // Supabase 게이트웨이(JWT 검사)나 함수 자체가 막는다. 어느 쪽이든 비회원 주문은 401.
+    expect(JSON.stringify(await orderResponse.json())).toMatch(/login_required|UNAUTHORIZED_NO_AUTH_HEADER/);
     await guest.close();
   });
 
