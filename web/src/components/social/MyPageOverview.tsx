@@ -82,6 +82,11 @@ export function MyPageOverview({
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [revealedCheerIds, setRevealedCheerIds] = useState<Set<number>>(
+    () => new Set(),
+  );
+  const [revealingCheerId, setRevealingCheerId] = useState<number | null>(null);
+  const [revealError, setRevealError] = useState<string | null>(null);
   const profileFileRef = useRef<HTMLInputElement>(null);
   const activeGoalCount = dashboard.goals.filter((goal) =>
     goal.status === "ACTIVE"
@@ -210,6 +215,27 @@ export function MyPageOverview({
     if (!result.ok) {
       setPreferences(previous);
       setSaveError(true);
+    }
+  }
+
+  async function revealAnonymousCheer(cheerId: number) {
+    if (revealingCheerId !== null) return;
+    setRevealingCheerId(cheerId);
+    setRevealError(null);
+    try {
+      const { error } = await createClient().rpc("reveal_my_anonymous_cheer", {
+        p_cheer_id: cheerId,
+      });
+      if (error) throw error;
+      setRevealedCheerIds((current) => {
+        const next = new Set(current);
+        next.add(cheerId);
+        return next;
+      });
+    } catch {
+      setRevealError("공개로 바꾸지 못했어요. 다시 시도해 주세요.");
+    } finally {
+      setRevealingCheerId(null);
     }
   }
 
@@ -392,6 +418,8 @@ export function MyPageOverview({
               dashboard.sent_cheers.length > 0
                 ? dashboard.sent_cheers.slice(0, 3).map((cheer) => {
                     const name = cheer.target_name?.trim() || PRODUCT_COPY.TEXT_034;
+                    const remainsAnonymous = cheer.is_anonymous &&
+                      !revealedCheerIds.has(cheer.id);
                     return (
                       <article key={cheer.id}>
                         <span className="my-cheer-avatar">
@@ -399,8 +427,27 @@ export function MyPageOverview({
                             ? <Image src={cheer.profile_image} alt={`${name} 프로필`} fill sizes="44px" unoptimized />
                             : <span aria-hidden="true">{Array.from(name)[0]}</span>}
                         </span>
-                        <div><strong>{name}{PRODUCT_COPY.TEXT_035}</strong><ClampText className="my-cheer-message">{`💬 ${cheer.message || PRODUCT_COPY.TEXT_036}`}</ClampText></div>
-                        <div className="my-cheer-status"><strong>{PRODUCT_COPY.TEXT_037}</strong><small>{formatCheerDate(cheer.created_at)}</small></div>
+                        <div>
+                          <strong>{name}{PRODUCT_COPY.TEXT_035}</strong>
+                          {remainsAnonymous && (
+                            <small className="my-cheer-anonymous-label">익명으로 보냄</small>
+                          )}
+                          <ClampText className="my-cheer-message">{`💬 ${cheer.message || PRODUCT_COPY.TEXT_036}`}</ClampText>
+                        </div>
+                        <div className="my-cheer-status">
+                          <strong>{PRODUCT_COPY.TEXT_037}</strong>
+                          <small>{formatCheerDate(cheer.created_at)}</small>
+                          {remainsAnonymous && (
+                            <button
+                              type="button"
+                              className="my-cheer-reveal-button"
+                              disabled={revealingCheerId !== null}
+                              onClick={() => void revealAnonymousCheer(cheer.id)}
+                            >
+                              {revealingCheerId === cheer.id ? "바꾸는 중" : "공개로 바꾸기"}
+                            </button>
+                          )}
+                        </div>
                       </article>
                     );
                   })
@@ -412,6 +459,7 @@ export function MyPageOverview({
                 )
             )}
         </div>
+        {revealError && <p className="social-error" role="alert">{revealError}</p>}
       </section>
 
       <section aria-labelledby="my-settings-heading">

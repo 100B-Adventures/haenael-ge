@@ -66,7 +66,9 @@ describe("CheerPaymentButton Toss v2 request", () => {
       },
       destroy: mockPaymentWindowDestroy,
     });
-    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: "member-access-token" } },
+    });
     mockLoadTossPayments.mockResolvedValue({
       payment: () => ({
         requestPayment: mockRequestPayment,
@@ -139,28 +141,22 @@ describe("CheerPaymentButton Toss v2 request", () => {
     });
   });
 
-  it("AUTH-CHEER-02 비로그인은 기존 anon token으로 주문한다", async () => {
+  it("AUTH-CHEER-02 비로그인은 같은 목표로 복귀하는 로그인 링크만 제공한다", () => {
     render(
       <CheerPaymentButton
         goalId={11}
         goalTitle="편입 합격 해낼게"
         goalSlug="goal-slug"
+        isAuthenticated={false}
       />,
     );
 
-    fireEvent.click(screen.getByTestId("cheer-cta"));
-    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
-
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "https://example.supabase.co/functions/v1/cheer-order",
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: "Bearer anon-key",
-          }),
-        }),
+    expect(screen.getByRole("link", { name: "카카오 로그인 후 응원하기" }))
+      .toHaveAttribute(
+        "href",
+        "/auth/kakao/start?redirect=%2Fg%2Fgoal-slug%23cheer",
       );
-    });
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("VO-04 code-only 주문 오류는 클라이언트 카피로 표시한다", async () => {

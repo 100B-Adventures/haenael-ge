@@ -3314,6 +3314,26 @@
     font-weight: 700;
     white-space: nowrap;
   }
+  .my-cheer-anonymous-label {
+    display: block;
+    margin-top: var(--sp-1);
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+    font-weight: 800;
+  }
+  .my-cheer-reveal-button {
+    display: inline-flex;
+    min-height: var(--tap-min-size);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-control);
+    padding: 0 var(--sp-2);
+    color: var(--clover-ink);
+    background: var(--clover-soft);
+    font-size: var(--text-label-small);
+    font-weight: 850;
+    white-space: nowrap;
+  }
   .my-cheer-list article > div:not(.my-cheer-status) > strong {
     font-size: 0.9375rem;
   }
@@ -4111,6 +4131,14 @@
     border-radius: var(--radius-card);
     background: var(--card);
   }
+  .friend-recent-cheer-direction,
+  .friend-cheer-anonymous {
+    display: block;
+    margin-bottom: var(--sp-1);
+    color: var(--clover-ink);
+    font-size: var(--text-label-small);
+    font-weight: 850;
+  }
   .friend-cheer-history {
     margin-top: var(--sp-4);
   }
@@ -4386,6 +4414,18 @@
     margin-top: 0.1875rem;
     color: var(--muted-color);
     font-size: 0.8125rem;
+  }
+  .friend-goal-cheer-action {
+    display: flex;
+    min-height: var(--tap-min-size);
+    align-items: center;
+    justify-content: center;
+    margin-top: var(--sp-2);
+    border-radius: var(--radius-control);
+    color: var(--primary-foreground);
+    background: var(--primary);
+    font-size: var(--text-body);
+    font-weight: 900;
   }
   .friend-wordmap-card {
     margin-top: 1rem;

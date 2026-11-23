@@ -35,6 +35,7 @@ export type SocialFriend = {
   profile_image: string | null;
   relationship_direction: RelationshipDirection;
   recent_message: string | null;
+  recent_message_direction?: "SENT" | "RECEIVED" | null;
   goals: SocialGoal[];
 };
 
@@ -67,6 +68,7 @@ export type FriendCheerHistoryItem = {
   message: string | null;
   created_at: string;
   direction: "SENT" | "RECEIVED";
+  is_anonymous?: boolean;
 };
 
 export type InvitePreview = {
@@ -129,6 +131,7 @@ export type SentCheer = {
   profile_image: string | null;
   message: string | null;
   created_at: string;
+  is_anonymous?: boolean;
 };
 
 export type GoalCheerSummary = {

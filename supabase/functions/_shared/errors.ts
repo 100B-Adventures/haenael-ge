@@ -17,6 +17,8 @@ const KNOWN_ERRORS: Record<string, PublicError> = {
   message_too_long: { code: "invalid_message" },
   invalid_request_key: { code: "invalid_request_key" },
   request_key_conflict: { code: "request_key_conflict" },
+  login_required: { code: "login_required" },
+  cheer_attribution_conflict: { code: "cheer_attribution_conflict" },
   goal_not_found: { code: "goal_not_found" },
   rate_limited: { code: "rate_limited" },
 
@@ -68,6 +70,8 @@ export function toPublicHttpStatus(
   rawMessage: string | null | undefined,
 ): number {
   switch (rawMessage) {
+    case "login_required":
+      return 401;
     case "goal_not_found":
     case "payment_not_found":
     case "cheer_not_found":
@@ -75,6 +79,7 @@ export function toPublicHttpStatus(
     case "rate_limited":
       return 429;
     case "request_key_conflict":
+    case "cheer_attribution_conflict":
     case "invalid_payment_status":
     case "payment_already_done":
     case "payment_key_mismatch":

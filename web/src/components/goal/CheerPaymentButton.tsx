@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Clover, X } from "lucide-react";
 import { loadTossPayments } from "@/lib/toss";
 import { trackEvent } from "@/lib/analytics";
@@ -18,6 +19,7 @@ interface CheerPaymentButtonProps {
   goalId: number;
   goalTitle: string;
   goalSlug: string;
+  isAuthenticated?: boolean;
 }
 
 interface CheerOrderResponse {
@@ -90,6 +92,7 @@ export function CheerPaymentButton({
   goalId,
   goalTitle,
   goalSlug,
+  isAuthenticated = true,
 }: CheerPaymentButtonProps) {
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
   const [open, setOpen] = useState(false);
@@ -110,6 +113,7 @@ export function CheerPaymentButton({
   const sheetOpenRef = useRef(false);
   const paymentAttemptRef = useRef(0);
   const paymentWindowRef = useRef<DestroyablePaymentSurface | null>(null);
+  const loginHref = `/auth/kakao/start?redirect=${encodeURIComponent(`/g/${goalSlug}#cheer`)}`;
 
   useEffect(
     () => () => {
@@ -181,7 +185,10 @@ export function CheerPaymentButton({
     const {
       data: { session },
     } = await createClient().auth.getSession();
-    const accessToken = session?.access_token ?? anonKey;
+    if (!session?.access_token) {
+      throw new Error("cheer_order:login_required");
+    }
+    const accessToken = session.access_token;
 
     const res = await fetch(`${supabaseUrl}/functions/v1/cheer-order`, {
       method: "POST",
@@ -336,6 +343,10 @@ export function CheerPaymentButton({
       }
     } catch (e) {
       if (paymentAttemptRef.current === paymentAttempt) {
+        if (e instanceof Error && e.message === "cheer_order:login_required") {
+          window.location.assign(loginHref);
+          return;
+        }
         setError(paymentErrorMessage(e));
         setLoading(false);
       }
@@ -344,17 +355,32 @@ export function CheerPaymentButton({
 
   return (
     <div>
-      <button
-        type="button"
-        className="w-full flex items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]! transition-transform active:translate-y-px disabled:active:translate-y-0"
-        data-testid="cheer-cta"
-        aria-label="조용히 응원 결제하기"
-        onClick={openSheet}
-        disabled={!paymentsEnabled}
-      >
-        <span aria-hidden="true">🍀</span>
-        {paymentsEnabled ? PRODUCT_COPY.TEXT_001 : PRODUCT_COPY.TEXT_002}
-      </button>
+      {isAuthenticated
+        ? (
+          <button
+            type="button"
+            className="w-full flex items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]! transition-transform active:translate-y-px disabled:active:translate-y-0"
+            data-testid="cheer-cta"
+            aria-label="조용히 응원 결제하기"
+            onClick={openSheet}
+            disabled={!paymentsEnabled}
+          >
+            <span aria-hidden="true">🍀</span>
+            {paymentsEnabled ? PRODUCT_COPY.TEXT_001 : PRODUCT_COPY.TEXT_002}
+          </button>
+        )
+        : (
+          <Link
+            href={loginHref}
+            prefetch={false}
+            className="w-full flex min-h-[var(--tap-min-size)] items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]! transition-transform active:translate-y-px"
+            data-testid="cheer-cta"
+            aria-label="카카오 로그인 후 응원하기"
+          >
+            <span aria-hidden="true">🍀</span>
+            카카오 로그인 후 응원하기
+          </Link>
+        )}
 
       {open && (
         <div

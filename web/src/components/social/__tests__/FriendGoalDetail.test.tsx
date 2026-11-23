@@ -26,6 +26,7 @@ it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-onl
       nickname="서연"
       relationshipDirection="MUTUAL"
       recentMessage="긴 응원 메시지는 두 줄에서 접히고 꺾쇠 하나로 다시 펼칠 수 있어요."
+      recentMessageDirection="SENT"
       detail={primary}
       friendGoals={[primary, {
         ...primary,
@@ -47,6 +48,8 @@ it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-onl
   ).toBeInTheDocument();
   expect(screen.queryByText("응원자에게만 보이는 근황")).not.toBeInTheDocument();
   expect(screen.queryByText("함께한 자취 타임라인")).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "이 목표 응원하기" }))
+    .toHaveAttribute("href", "/g/run#cheer");
   expect(screen.getByText("꾸준함")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "전체 보기 ›" }))
     .toHaveAttribute("href", "/friends/friend-a/wordmap?goal=1");
@@ -54,6 +57,7 @@ it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-onl
     .toHaveAttribute("href", "/friends/friend-a?goal=2");
   const wordmap = screen.getByTestId("wordmap");
   const recentCheer = screen.getByLabelText("최근 응원 메시지");
+  expect(recentCheer).toHaveTextContent("내가 보냄");
   const reinvite = screen.getByRole("link", { name: /다른 친구도 초대할까요/ });
   expect(wordmap.compareDocumentPosition(recentCheer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   expect(recentCheer.compareDocumentPosition(reinvite) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -82,6 +86,7 @@ it("G4-FRIEND-HISTORY 친구 상세는 회원끼리 주고받은 문구·날짜�
           message: "오늘도 한 걸음 가자",
           created_at: "2026-11-07T12:00:00Z",
           direction: "SENT",
+          is_anonymous: true,
         },
       ]}
     />,
@@ -95,6 +100,7 @@ it("G4-FRIEND-HISTORY 친구 상세는 회원끼리 주고받은 문구·날짜�
   expect(history).toHaveTextContent("2026년 11월 8일");
   expect(history).toHaveTextContent("서연에게 보낸 응원");
   expect(history).toHaveTextContent("오늘도 한 걸음 가자");
+  expect(history).toHaveTextContent("익명으로 보냄");
   expect(history).toHaveTextContent("2026년 11월 7일");
   expect(history.querySelectorAll('[data-direction="RECEIVED"]')).toHaveLength(1);
   expect(history.querySelectorAll('[data-direction="SENT"]')).toHaveLength(1);

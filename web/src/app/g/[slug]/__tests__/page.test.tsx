@@ -143,7 +143,11 @@ describe("/g/[slug] owner bar 노출 스코프", () => {
     const link = screen.getByTestId("relogin-link");
     expect(link).toBeInTheDocument();
     // 로그인 뒤 보던 목표로 돌아온다(회장 2026-11-14 Q14).
-    expect(link.getAttribute("href")).toBe("/auth/kakao/start?redirect=%2Fg%2Fdogyeong");
+    expect(link.getAttribute("href")).toBe("/auth/kakao/start?redirect=%2Fg%2Fdogyeong%23cheer");
+    expect(screen.getByTestId("cheer-cta")).toHaveAttribute(
+      "href",
+      "/auth/kakao/start?redirect=%2Fg%2Fdogyeong%23cheer",
+    );
   });
 
   it("갭B: 로그인+본인(owner)이면 owner bar만 뜨고 footer 재로그인 링크는 없다(상호배타)", async () => {

@@ -12,6 +12,10 @@ const updatePreferences = vi.fn(
   }),
 );
 const profileInvoke = vi.fn(async (): Promise<{ data: any; error: any }> => ({ data: { profile_image: "/images/social-viral/dogyeong.png" }, error: null }));
+const socialRpc = vi.fn(async (): Promise<{ data: any; error: any }> => ({
+  data: { cheer_id: 21, is_anonymous: false },
+  error: null,
+}));
 vi.mock("@/app/(receiver)/social-actions", () => ({
   updateMemberPreferencesAction: (notifyCheer: boolean, notifyMarketing: boolean) =>
     updatePreferences(notifyCheer, notifyMarketing),
@@ -19,6 +23,7 @@ vi.mock("@/app/(receiver)/social-actions", () => ({
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
     functions: { invoke: profileInvoke },
+    rpc: socialRpc,
   }),
 }));
 
@@ -58,6 +63,7 @@ describe("MyPageOverview", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     profileInvoke.mockResolvedValue({ data: { profile_image: "/images/social-viral/dogyeong.png" }, error: null });
+    socialRpc.mockResolvedValue({ data: { cheer_id: 21, is_anonymous: false }, error: null });
     vi.stubGlobal("crypto", { subtle: { digest: vi.fn(async () => new Uint8Array([1, 2]).buffer) } });
     vi.stubGlobal("fetch", vi.fn());
   });
@@ -122,6 +128,7 @@ describe("MyPageOverview", () => {
         profile_image: "/images/social-viral/jimin.png",
         message: "오늘도 한 걸음, 꾸준히 가자",
         created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        is_anonymous: true,
       }] }} initialPreferences={preferences} />,
     );
     expect(screen.getByTestId("received-cheers-empty")).toHaveTextContent("첫 응원을 받아볼까요?");
@@ -130,6 +137,12 @@ describe("MyPageOverview", () => {
     expect(screen.getByText("민서에게")).toBeInTheDocument();
     expect(screen.getByText(/오늘도 한 걸음, 꾸준히 가자/)).toBeInTheDocument();
     expect(screen.getByText("응원 보냄")).toBeInTheDocument();
+    expect(screen.getByText("익명으로 보냄")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "공개로 바꾸기" }));
+    expect(socialRpc).toHaveBeenCalledWith("reveal_my_anonymous_cheer", {
+      p_cheer_id: 21,
+    });
+    expect(screen.queryByRole("button", { name: "공개로 바꾸기" })).not.toBeInTheDocument();
   });
 
   it("MY-UI-05 목표 0개여도 중복 목표 목록 없이 응원 빈 상태의 다음 행동만 보여준다", () => {
@@ -143,6 +156,36 @@ describe("MyPageOverview", () => {
     expect(screen.queryByTestId("my-goals-empty")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "해낼게 만들기" }))
       .toHaveAttribute("href", "/onboarding");
+  });
+
+  it("D057-UI-02 익명 공개 전환 실패는 익명 상태와 재시도 버튼을 보존한다", async () => {
+    socialRpc.mockRejectedValueOnce(new Error("network"));
+    render(
+      <MyPageOverview
+        dashboard={{
+          ...dashboard,
+          sent_cheers: [{
+            id: 22,
+            target_name: "민서",
+            profile_image: null,
+            message: "조용히 응원해요",
+            created_at: "2026-11-20T00:00:00Z",
+            is_anonymous: true,
+          }],
+        }}
+        initialPreferences={preferences}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("tab", { name: "보낸 응원" }));
+    await userEvent.click(screen.getByRole("button", { name: "공개로 바꾸기" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "공개로 바꾸지 못했어요",
+    );
+    expect(screen.getByText("익명으로 보냄")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "공개로 바꾸기" }))
+      .toBeInTheDocument();
   });
 
   it("MY-UI-03 알림 설정은 실제 RPC 액션에 연결된다", async () => {

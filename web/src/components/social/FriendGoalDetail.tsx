@@ -27,12 +27,13 @@ function objectParticle(name: string) {
 }
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, relationshipDirection, recentMessage, detail, friendGoals, cheerHistory = [] }: {
+  { friendId, nickname, profileImage, relationshipDirection, recentMessage, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
     relationshipDirection: RelationshipDirection;
     recentMessage?: string | null;
+    recentMessageDirection?: "SENT" | "RECEIVED" | null;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
     cheerHistory?: FriendCheerHistoryItem[];
@@ -98,6 +99,12 @@ export function FriendGoalDetail(
           <strong>{detail.cheer_count}{PRODUCT_COPY.TEXT_004}{displayName}{objectParticle(displayName)}{PRODUCT_COPY.TEXT_005}</strong>
         </div>
       </section>
+      <Link
+        href={`/g/${detail.slug}#cheer`}
+        className="friend-goal-cheer-action"
+      >
+        이 목표 응원하기
+      </Link>
       <section className="friend-wordmap-card">
         <div className="friend-wordmap-heading">
           <h2>{displayName}{PRODUCT_COPY.TEXT_007}</h2>
@@ -115,6 +122,13 @@ export function FriendGoalDetail(
       </section>
       {recentMessage && (
         <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
+          <strong className="friend-recent-cheer-direction">
+            {recentMessageDirection === "SENT"
+              ? "내가 보냄"
+              : recentMessageDirection === "RECEIVED"
+                ? "친구가 보냄"
+                : "응원 메시지"}
+          </strong>
           <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>
             {recentMessage}
           </ClampText>
@@ -141,6 +155,9 @@ export function FriendGoalDetail(
                         ? `${displayName}${PRODUCT_COPY.TEXT_018}`
                         : `${displayName}${PRODUCT_COPY.TEXT_019}`}
                     </strong>
+                    {sent && cheer.is_anonymous && (
+                      <small className="friend-cheer-anonymous">익명으로 보냄</small>
+                    )}
                     <ClampText className="my-cheer-message">
                       {`💬 ${cheer.message || PRODUCT_COPY.TEXT_020}`}
                     </ClampText>

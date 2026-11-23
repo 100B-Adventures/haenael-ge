@@ -176,7 +176,7 @@ export default async function GoalPublicPage({ params }: Props) {
                 data-testid="relogin-hint"
               >{PRODUCT_COPY.TEXT_006}{" "}
                 <Link
-                  href={`/auth/kakao/start?redirect=${encodeURIComponent(`/g/${slug}`)}`}
+                  href={`/auth/kakao/start?redirect=${encodeURIComponent(`/g/${slug}#cheer`)}`}
                   prefetch={false}
                   className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
                   data-testid="relogin-link"
@@ -230,6 +230,7 @@ export default async function GoalPublicPage({ params }: Props) {
             goalId={goal.id!}
             goalTitle={rawTitle}
             goalSlug={slug}
+            isAuthenticated={Boolean(user)}
           />
 
           {/* role-transition: "나도 해낼게 만들래" */}

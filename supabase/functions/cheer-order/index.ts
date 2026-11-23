@@ -65,7 +65,18 @@ function normalizeRequestKey(
   return { ok: false };
 }
 
-export async function handleCheerOrder(req: Request) {
+type CheerOrderDependencies = {
+  createSupabaseClient: typeof createClient;
+};
+
+const DEFAULT_DEPENDENCIES: CheerOrderDependencies = {
+  createSupabaseClient: createClient,
+};
+
+export async function handleCheerOrder(
+  req: Request,
+  dependencies: CheerOrderDependencies = DEFAULT_DEPENDENCIES,
+) {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -79,6 +90,13 @@ export async function handleCheerOrder(req: Request) {
     });
   }
 
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (!authHeader.startsWith("Bearer ")) {
+    return json(401, {
+      error: { code: "login_required" },
+    });
+  }
+
   if (Deno.env.get("PAYMENTS_ENABLED") !== "true") {
     return json(503, {
       error: {
@@ -87,10 +105,32 @@ export async function handleCheerOrder(req: Request) {
     });
   }
 
-  const authHeader = req.headers.get("Authorization") ?? "";
-  if (!authHeader.startsWith("Bearer ")) {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) {
+    await sendSlackAlert({
+      event: "cheer_order_missing_env",
+      severity: "critical",
+      summary: "cheer-order missing Supabase service env",
+    });
+    return json(503, {
+      error: {
+        code: "missing_supabase_env",
+      },
+    });
+  }
+
+  const supabase = dependencies.createSupabaseClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const accessToken = authHeader.slice("Bearer ".length);
+  const {
+    data: { user: supporter },
+    error: supporterError,
+  } = await supabase.auth.getUser(accessToken);
+  if (supporterError || !supporter) {
     return json(401, {
-      error: { code: "unauthorized" },
+      error: { code: "login_required" },
     });
   }
 
@@ -150,35 +190,8 @@ export async function handleCheerOrder(req: Request) {
   }
   const requestKey = requestKeyResult.value;
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !serviceKey) {
-    await sendSlackAlert({
-      event: "cheer_order_missing_env",
-      severity: "critical",
-      summary: "cheer-order missing Supabase service env",
-    });
-    return json(503, {
-      error: {
-        code: "missing_supabase_env",
-      },
-    });
-  }
-
-  const supabase = createClient(supabaseUrl, serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  // 로그인한 회원이 공개 목표에서 결제하는 경우에만 회원-응원 귀속을 남긴다.
-  // anon key 호출은 기존 비회원 결제와 동일하게 귀속 없이 진행한다. 원문 JWT나
-  // 사용자 식별자는 payment/cheer 공개 계약과 응답에 포함하지 않는다.
-  const accessToken = authHeader.slice("Bearer ".length);
-  const {
-    data: { user: supporter },
-  } = await supabase.auth.getUser(accessToken);
-
   const orderId = makeOrderId();
-  const { data, error } = await supabase.rpc("create_cheer_order", {
+  const { data, error } = await supabase.rpc("create_member_cheer_order", {
     p_goal_id: goalId,
     p_order_id: orderId,
     p_amount_krw: amountKrw,
@@ -187,13 +200,14 @@ export async function handleCheerOrder(req: Request) {
     p_is_anonymous: isAnonymous,
     p_message: message,
     p_pg_customer_key: customerKey,
+    p_supporter_member_id: supporter.id,
     p_request_key: requestKey,
   });
 
   if (error || !data?.[0]) {
     // 원문(error.message/error.code)은 Postgres 내부 라벨·SQLSTATE — 클라이언트엔
     // 화이트리스트로 매핑된 안전한 코드만 보낸다. 상세는 서버 로그에만.
-    console.error("[cheer-order] create_cheer_order failed:", error);
+    console.error("[cheer-order] create_member_cheer_order failed:", error);
     await sendSlackAlert({
       event: "cheer_order_failed",
       severity: "warning",
@@ -212,32 +226,6 @@ export async function handleCheerOrder(req: Request) {
     is_replay: boolean;
   };
 
-  // replay는 최초 주문의 호출자 신원을 증명하지 못한다. 다른 로그인 사용자가 같은
-  // fingerprint를 재현해 attribution을 선점하지 못하도록 신규 주문에만 귀속한다.
-  if (supporter && !row.is_replay) {
-    const { error: attributionError } = await supabase
-      .from("social_cheer_member_attribution")
-      .upsert(
-        {
-          cheer_id: row.cheer_id,
-          supporter_member_id: supporter.id,
-        },
-        { onConflict: "cheer_id", ignoreDuplicates: true },
-      );
-    if (attributionError) {
-      console.error(
-        "[cheer-order] supporter attribution failed:",
-        attributionError.code,
-      );
-      await sendSlackAlert({
-        event: "cheer_supporter_attribution_failed",
-        severity: "warning",
-        summary: "Authenticated cheer attribution failed",
-        fields: { code: attributionError.code ?? "unknown" },
-      });
-    }
-  }
-
   return json(row.is_replay ? 200 : 201, {
     orderId: row.order_id,
     amountKrw,
@@ -251,5 +239,5 @@ export async function handleCheerOrder(req: Request) {
 }
 
 if (import.meta.main) {
-  Deno.serve(handleCheerOrder);
+  Deno.serve((request) => handleCheerOrder(request));
 }

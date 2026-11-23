@@ -66,6 +66,7 @@ export default async function FriendDetailPage(
         profileImage={friend.profile_image}
         relationshipDirection={friend.relationship_direction}
         recentMessage={friend.recent_message}
+        recentMessageDirection={friend.recent_message_direction}
         detail={detail}
         friendGoals={friend.goals}
         cheerHistory={cheerHistory}

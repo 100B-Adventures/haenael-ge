@@ -217,6 +217,8 @@ function historyServiceFixture({ active = true }: { active?: boolean } = {}) {
             data: [
               { cheer_id: 101, supporter_member_id: VIEWER_ID },
               { cheer_id: 102, supporter_member_id: FRIEND_ID },
+              { cheer_id: 103, supporter_member_id: VIEWER_ID },
+              { cheer_id: 104, supporter_member_id: FRIEND_ID },
             ],
             error: null,
           }),
@@ -226,6 +228,8 @@ function historyServiceFixture({ active = true }: { active?: boolean } = {}) {
     if (table === "cheer") {
       const result = {
         data: [
+          { id: 104, goal_id: 18, message: "받은 익명 응원", created_at: "2026-11-10T12:00:00Z", is_anonymous: true },
+          { id: 103, goal_id: 17, message: "보낸 익명 응원", created_at: "2026-11-09T12:00:00Z", is_anonymous: true },
           { id: 102, goal_id: 18, message: "받은 응원", created_at: "2026-11-08T12:00:00Z", is_anonymous: false },
           { id: 101, goal_id: 17, message: "보낸 응원", created_at: "2026-11-07T12:00:00Z", is_anonymous: false },
         ],
@@ -260,20 +264,30 @@ describe("친구 응원 이력 서버 경계", () => {
 
     expect(result).toEqual([
       {
+        cheer_id: 103,
+        message: "보낸 익명 응원",
+        created_at: "2026-11-09T12:00:00Z",
+        direction: "SENT",
+        is_anonymous: true,
+      },
+      {
         cheer_id: 102,
         message: "받은 응원",
         created_at: "2026-11-08T12:00:00Z",
         direction: "RECEIVED",
+        is_anonymous: false,
       },
       {
         cheer_id: 101,
         message: "보낸 응원",
         created_at: "2026-11-07T12:00:00Z",
         direction: "SENT",
+        is_anonymous: false,
       },
     ]);
     expect(fixture.goalIn).toHaveBeenCalledWith("visibility", ["PUBLIC", "FRIENDS"]);
-    expect(fixture.cheerEq).toHaveBeenCalledWith("is_anonymous", false);
+    expect(fixture.cheerEq).not.toHaveBeenCalledWith("is_anonymous", false);
+    expect(result).not.toContainEqual(expect.objectContaining({ cheer_id: 104 }));
     expect(JSON.stringify(result)).not.toMatch(/supporter_member_id|clover_amount|payment/);
   });
 

@@ -1666,6 +1666,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      reveal_my_anonymous_cheer: {
+        Args: { p_cheer_id: number }
+        Returns: Json
+      }
       record_payment_compensation: {
         Args: {
           p_amount_krw: number

@@ -215,7 +215,6 @@ export async function resolveFriendCheerHistory(
     .eq("status", "CONFIRMED")
     .is("deleted_at", null)
     .eq("is_welcome", false)
-    .eq("is_anonymous", false)
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .limit(20);
@@ -230,14 +229,19 @@ export async function resolveFriendCheerHistory(
         message: cheer.message,
         created_at: cheer.created_at,
         direction: "SENT",
+        is_anonymous: cheer.is_anonymous,
       }];
     }
-    if (supporterId === friendMemberId && ownerId === viewerMemberId) {
+    if (
+      supporterId === friendMemberId && ownerId === viewerMemberId &&
+      !cheer.is_anonymous
+    ) {
       return [{
         cheer_id: cheer.id,
         message: cheer.message,
         created_at: cheer.created_at,
         direction: "RECEIVED",
+        is_anonymous: false,
       }];
     }
     return [];
