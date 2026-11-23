@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-24 07:28 KST] compact 마크 (auto)
+- 세션 85d16232 · 라인 미선언 · 브랜치 session/core-20261015
+- 직전 커밋: 9627c40 docs(state): web 402 suspension, app channels stalled since 11-1
+- compact 직전 컨텍스트: 320857 토큰
+- 마지막 회장 요청: 내가 지적한거 아직도 반영 안했냐? 웹 쳐올리고 앱 생각해
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-24 KST] 현황 실측: 웹 402 정지, 앱 11-19 부터 멈춤
 - 무엇을 어디까지: 운영·staging HTTP 402(Vercel 100B hobby 한도 초과, 11-23 09:15~, 자동 해제 12-23). OD-haenael-20261124-vercel-402 등록. 카카오 2.3.2 운영 반영 완료. D-057 친구 응원은 /mnt/hdd/haenael-ge-cheer-login 미커밋 17파일.
 - 남은 이슈·블로커: Vercel 결정(돈), 앱 결정 2건(android-altpay, app-id), Codex 한도 11-25 13:10, hotfix 워크트리 7회차 수정 미커밋.
