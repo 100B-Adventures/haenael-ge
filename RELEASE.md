@@ -1,3 +1,32 @@
+# 릴리스 매니페스트: 해낼게 2.4.0
+
+```yaml
+release: 2.4.0
+release_tag: 2.4.0+d057-cheer-login
+date: 2026-11-24
+status: qa
+line: v2
+delivery: vercel (main push 자동배포)
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.3.2 (a560df4)
+reason: 회장 2026-11-20 20:1x "조성진 계정으로 이다솔 가보면 뭐 더 응원할 수 있는 UI가 없는데 … 주고받은 응원에 내가 보낸 메시지가 잘 확인이 되는 거 맞아? … 로그인을 해야 응원할 수 있도록 하고, 대신에 익명으로 보낼 수 있는 거는 선택사항으로 남겨서 내가 응원한 사람들 목록은 보이도록 … 나중에 공개 전환을 하는 방법도 필요하고." 결정 D-057. 11-24 "내가 지적한거 아직도 반영 안했냐? 웹 쳐올리고"
+public_note:
+  title: "친구 화면에서 바로 응원하고, 익명 응원도 내 기록에 남아요"
+  summary: "친구 목표 화면에 응원하기 버튼이 생겼어요. 응원은 카카오 로그인 뒤에 보내고, 익명으로 보낸 응원도 마이페이지 보낸 응원에서 보고 언제든 공개로 바꿀 수 있어요."
+  notify: true
+  try_href: /my
+  feedback_href: /updates#feedback
+ships:
+  code: 응원 주문은 로그인 회원만(cheer-order 401 login_required, 회원 귀속을 주문과 한 트랜잭션 RPC create_member_cheer_order), 비로그인 응원 버튼은 카카오 로그인 뒤 같은 목표 응원 자리로 복귀, 친구 목표 화면 "이 목표 응원하기" 버튼, 친구 최근 응원 카드에 "내가 보냄/친구가 보냄", 마이페이지 보낸 응원에 "익명으로 보냄"과 "공개로 바꾸기"(reveal_my_anonymous_cheer, 공개→익명 경로 없음)
+  migrations: 20261120010000_d057_cheer_login_anonymous.sql (함수만 추가·교체, 테이블 변경 없음)
+  edge_functions: cheer-order
+  env: none
+  tests: e2e QA-TC-D057-01(친구 화면 응원 진입 → 응원 자리, 최근 응원 방향, 익명 표시·공개 전환 후 DB is_anonymous=false, 비로그인 응원 버튼 → 카카오 로그인 링크에 복귀 주소, 비회원 주문 401), pgTAP d057 12건, Deno cheer-order 5건
+qa_gate:
+  approved: false
+  evidence: 작성 중
+```
+
 # 릴리스 매니페스트: 해낼게 2.3.2
 
 ```yaml

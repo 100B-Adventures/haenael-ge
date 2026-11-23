@@ -1538,6 +1538,24 @@ test.describe("V2 web-first social slice", () => {
     await expect(page).toHaveURL(new RegExp(`/g/${friendSlug}#cheer$`));
     await expect(page.getByTestId("cheer-cta")).toBeVisible();
     await expect(page.getByTestId("cheer-cta")).not.toHaveAttribute("aria-label", "카카오 로그인 후 응원하기");
+    // 1-b) 로그인 회원은 결제창을 열고 주문을 만든다(201). 주문은 이 회원에게 귀속된다. 결제는 진행하지 않는다.
+    if (process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true") {
+      await page.getByTestId("cheer-cta").click();
+      await expect(page.getByTestId("cheer-payment-sheet")).toBeVisible();
+      await page.getByTestId("cheer-preset-1").click();
+      const memberOrderPromise = page.waitForResponse((r) =>
+        r.url().includes("/functions/v1/cheer-order") && r.request().method() === "POST");
+      await page.getByTestId("cheer-payment-submit").click();
+      const memberOrder = await memberOrderPromise;
+      const memberOrderBody = await memberOrder.json() as { paymentId?: number; cheerId?: number; error?: { code?: string } };
+      expect(memberOrder.status(), `member cheer-order:${memberOrderBody.error?.code ?? ""}`).toBe(201);
+      if (memberOrderBody.paymentId) paymentIds.push(memberOrderBody.paymentId);
+      const { data: memberAttr } = await admin.from("social_cheer_member_attribution")
+        .select("supporter_member_id").eq("cheer_id", memberOrderBody.cheerId ?? -1).single();
+      expect(memberAttr?.supporter_member_id).toBe(ids.owner);
+      await admin.from("social_cheer_member_attribution").delete().eq("cheer_id", memberOrderBody.cheerId ?? -1);
+      await admin.from("cheer").delete().eq("id", memberOrderBody.cheerId ?? -1);
+    }
 
     // 2) 최근 응원 카드에 방향이 보인다(보낸 본인에게는 익명 응원도 내가 보냄으로).
     await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`, { waitUntil: "domcontentloaded", timeout: 400_000 });
@@ -1584,6 +1602,9 @@ test.describe("V2 web-first social slice", () => {
     // Supabase 게이트웨이(JWT 검사)나 함수 자체가 막는다. 어느 쪽이든 비회원 주문은 401.
     expect(JSON.stringify(await orderResponse.json())).toMatch(/login_required|UNAUTHORIZED_NO_AUTH_HEADER/);
     await guest.close();
+    // 뒤 시험(MY-01 등)이 보는 보낸 응원 목록을 원래대로 돌린다.
+    await admin.from("social_cheer_member_attribution").delete().eq("cheer_id", anonCheer.id);
+    await admin.from("cheer").delete().eq("id", anonCheer.id);
   });
 
   test("OPS-ALERT-01 관리자 화면이 ops_event 경보를 실제 수신한다", async ({ browser }) => {
@@ -5081,7 +5102,12 @@ test.describe("V2 web-first social slice", () => {
     ).toBe(201);
     paymentIds.push(freshBody.paymentId);
     const replayResponse = await createOrder(authB.session.access_token);
-    expect(replayResponse.status).toBe(200);
+    // D-057(2.4.0): 다른 회원이 같은 requestKey 로 다시 부르면 남의 주문 정보를 돌려주지 않고 409 로 막는다.
+    // 같은 회원의 재시도는 200(idempotent). 귀속이 바뀌지 않는다는 불변식은 아래에서 그대로 본다.
+    expect(replayResponse.status).toBe(409);
+    expect(JSON.stringify(await replayResponse.json())).toContain("cheer_attribution_conflict");
+    const sameMemberReplay = await createOrder(authA.session.access_token);
+    expect(sameMemberReplay.status).toBe(200);
     const { data: attribution, error: attributionError } = await admin
       .from("social_cheer_member_attribution")
       .select("supporter_member_id")

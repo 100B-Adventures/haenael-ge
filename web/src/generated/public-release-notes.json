@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.4.0",
+      "releaseTag": "2.4.0+d057-cheer-login",
+      "date": "2026-11-24",
+      "title": "친구 화면에서 바로 응원하고, 익명 응원도 내 기록에 남아요",
+      "summary": "친구 목표 화면에 응원하기 버튼이 생겼어요. 응원은 카카오 로그인 뒤에 보내고, 익명으로 보낸 응원도 마이페이지 보낸 응원에서 보고 언제든 공개로 바꿀 수 있어요.",
+      "notify": true,
+      "tryHref": "/my",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.3.2",
       "releaseTag": "2.3.2+fix-kakao-share-csp",
       "date": "2026-11-21",
@@ -19,16 +29,6 @@
       "summary": "휴대폰 화면이 작아도 응원 결제창을 끝까지 볼 수 있고, 결제 버튼이 아래 메뉴에 가리지 않아요.",
       "notify": false,
       "tryHref": "/updates",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.3.0",
-      "releaseTag": "2.3.0+chairman-feedback-1114",
-      "date": "2026-11-15",
-      "title": "초대하기와 의견 보내기가 쉬워졌어요",
-      "summary": "초대 링크에 미리보기 사진과 내 목표가 함께 보이고, 업데이트 화면에서 한 줄 의견을 바로 보낼 수 있어요. 마감이 지난 목표도 홈에서 바로 보여요.",
-      "notify": true,
-      "tryHref": "/invite",
       "feedbackHref": "/updates#feedback"
     }
   ]

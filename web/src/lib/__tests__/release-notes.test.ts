@@ -27,8 +27,8 @@ describe("새로운 기능 카드가 가리키는 버전", () => {
   it("안내할 버전이 없으면 null 이라 카드를 띄우지 않는다", () => {
     expect(findLatestAnnouncedRelease([note("2.2.1", false), note("2.1.4", false)])).toBeNull();
   });
-  it("현재 생성물: 기록 최신은 2.3.2(수정판), 안내는 2.3.0", () => {
-    expect(latestPublicRelease.version).toBe("2.3.2");
-    expect(latestAnnouncedRelease?.version).toBe("2.3.0");
+  it("현재 생성물: 기록 최신은 2.4.0, 안내도 2.4.0", () => {
+    expect(latestPublicRelease.version).toBe("2.4.0");
+    expect(latestAnnouncedRelease?.version).toBe("2.4.0");
   });
 });
