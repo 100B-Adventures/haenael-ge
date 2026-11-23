@@ -3950,6 +3950,9 @@ test.describe("V2 web-first social slice", () => {
       "이메일",
       "개인정보보호책임자",
     ]);
+    // 진행 중인 세션 확인 요청이 끝나기 전에 떠나면 브라우저가 그 요청을 끊고 "Failed to fetch"를 콘솔에 남긴다.
+    // 사용자 화면 결함이 아니라 시험의 이동 시점 문제라, 요청이 끝난 뒤 다음 화면으로 간다.
+    await page.waitForLoadState("networkidle");
     await page.goto("/how", { waitUntil: "domcontentloaded" });
     await expect(page.getByTestId("business-information")).toHaveCount(0);
     await expect(page.locator(".my-policy-links")).toHaveCount(0);

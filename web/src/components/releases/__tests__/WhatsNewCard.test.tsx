@@ -53,7 +53,7 @@ describe("버전별 새로운 기능 카드", () => {
     const first = render(<WhatsNewCard />);
 
     expect(await screen.findByTestId("whats-new-card")).toBeInTheDocument();
-    expect(window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY)).toBe("2.3.0");
+    expect(window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY)).toBe("2.4.0");
     fireEvent.click(screen.getByRole("button", { name: "새로운 기능 안내 닫기" }));
     expect(screen.queryByTestId("whats-new-card")).toBeNull();
 
@@ -70,8 +70,8 @@ describe("버전별 새로운 기능 카드", () => {
     fireEvent.click(screen.getByRole("link", { name: "써 보기" }));
     fireEvent.click(screen.getByRole("link", { name: "의견 남기기" }));
 
-    expect(window.gtag).toHaveBeenNthCalledWith(1, "event", "whats_new_view", { release: "2.3.0" });
-    expect(window.gtag).toHaveBeenNthCalledWith(2, "event", "whats_new_try", { release: "2.3.0" });
+    expect(window.gtag).toHaveBeenNthCalledWith(1, "event", "whats_new_view", { release: "2.4.0" });
+    expect(window.gtag).toHaveBeenNthCalledWith(2, "event", "whats_new_try", { release: "2.4.0" });
     expect(window.gtag).toHaveBeenCalledTimes(2);
     expect(screen.getByRole("link", { name: "의견 남기기" })).toHaveAttribute("href", "/updates#feedback");
   });
@@ -97,9 +97,9 @@ describe("버전별 새로운 기능 카드", () => {
     render(<WhatsNewCard />);
 
     expect(await screen.findByTestId("whats-new-card")).toBeInTheDocument();
-    expect(window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY)).toBe("2.3.0");
+    expect(window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY)).toBe("2.4.0");
     expect(mockUpdateUser).toHaveBeenCalledWith({
-      data: { [WHATS_NEW_USER_METADATA_KEY]: "2.3.0" },
+      data: { [WHATS_NEW_USER_METADATA_KEY]: "2.4.0" },
     });
   });
 
@@ -109,21 +109,21 @@ describe("버전별 새로운 기능 카드", () => {
     mockGetUser.mockResolvedValue({
       data: {
         user: {
-          user_metadata: { [WHATS_NEW_USER_METADATA_KEY]: "2.3.0" },
+          user_metadata: { [WHATS_NEW_USER_METADATA_KEY]: "2.4.0" },
         },
       },
       error: null,
     });
     render(<WhatsNewCard />);
 
-    await waitFor(() => expect(window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY)).toBe("2.3.0"));
+    await waitFor(() => expect(window.localStorage.getItem(WHATS_NEW_LAST_SEEN_KEY)).toBe("2.4.0"));
     expect(screen.queryByTestId("whats-new-card")).toBeNull();
     expect(mockUpdateUser).not.toHaveBeenCalled();
   });
 
   it("localStorage가 회원 메타데이터보다 최신이면 회원 메타데이터를 올리고 카드를 다시 띄우지 않는다", async () => {
     window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
-    window.localStorage.setItem(WHATS_NEW_LAST_SEEN_KEY, "2.3.0");
+    window.localStorage.setItem(WHATS_NEW_LAST_SEEN_KEY, "2.4.0");
     mockGetUser.mockResolvedValue({
       data: {
         user: {
@@ -135,7 +135,7 @@ describe("버전별 새로운 기능 카드", () => {
     render(<WhatsNewCard />);
 
     await waitFor(() => expect(mockUpdateUser).toHaveBeenCalledWith({
-      data: { [WHATS_NEW_USER_METADATA_KEY]: "2.3.0" },
+      data: { [WHATS_NEW_USER_METADATA_KEY]: "2.4.0" },
     }));
     expect(screen.queryByTestId("whats-new-card")).toBeNull();
   });

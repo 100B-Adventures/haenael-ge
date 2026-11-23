@@ -30,10 +30,10 @@ describe("공개 업데이트 기록", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "좋아요" }));
 
-    expect(window.gtag).toHaveBeenCalledWith("event", "whats_new_feedback", { release: "2.3.0", rating: "like" });
+    expect(window.gtag).toHaveBeenCalledWith("event", "whats_new_feedback", { release: "2.4.0", rating: "like" });
     expect(await screen.findByRole("status")).toHaveTextContent("의견을 보냈어요");
     expect(fetchMock).toHaveBeenCalledWith("/api/feedback", expect.objectContaining({ method: "POST" }));
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ rating: "like", release: "2.3.0" });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ rating: "like", release: "2.4.0" });
     expect(screen.getByRole("link", { name: "사진을 붙이거나 길게 쓰려면 이메일로 보내기" })).toHaveAttribute(
       "href",
       expect.stringContaining("mailto:haenaelge.official@gmail.com"),
