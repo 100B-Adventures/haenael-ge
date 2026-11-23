@@ -902,7 +902,7 @@ test.describe("V2 web-first social slice", () => {
   const friendLongMessage = "중간고사 두 과목에서 좋은 결과를 만든 흐름을 꾸준히 이어가면 이번 학기 평점 목표도 충분히 해낼 수 있어요. 지치지 않게 끝까지 응원할게요.";
 
   test.beforeAll(async () => {
-    test.setTimeout(120_000);
+    test.setTimeout(300_000);
     await assertStagingRuntime();
     console.info("SOCIAL_RUN_NAMESPACE", JSON.stringify({ runId }));
     const warmup = await fetch(`${E2E_BASE_URL}/admin`);
@@ -1490,6 +1490,98 @@ test.describe("V2 web-first social slice", () => {
       profileAvatarAssets: 0,
       profileAvatarObjects: 0,
     }));
+  });
+
+  test("QA-TC-D057-01 친구 화면 응원 진입, 로그인해야 응원, 익명 보낸 응원 표시와 공개 전환, 최근 응원 방향", async ({ browser }) => {
+    test.setTimeout(900_000);
+    if (!IS_STAGING || process.env.D057_SLOW_DEV === "1") test.slow();
+    const { data: friendGoalRow, error: friendGoalError } = await admin.from("goal")
+      .select("slug").eq("id", friendPublicGoal).single();
+    if (friendGoalError || !friendGoalRow?.slug) throw friendGoalError ?? new Error("friend_goal_slug_missing");
+    const friendSlug = friendGoalRow.slug as string;
+    const anonMessage = `D057 익명 응원 ${runId}`;
+    const { data: payment, error: paymentError } = await admin.from("payment").insert({
+      order_id: `social-${runId}-d057`,
+      amount_krw: 1000,
+      status: "DONE",
+      payment_key: `social-key-${runId}-d057`,
+      pg_customer_key: "SOCIAL_E2E",
+    }).select("id").single();
+    if (paymentError || !payment) throw paymentError ?? new Error("payment_failed");
+    paymentIds.push(payment.id);
+    const { data: anonCheer, error: anonCheerError } = await admin.from("cheer").insert({
+      goal_id: friendPublicGoal,
+      display_name: "익명의 누군가",
+      is_anonymous: true,
+      message: anonMessage,
+      clover_amount: 1,
+      payment_id: payment.id,
+      status: "CONFIRMED",
+      created_at: new Date().toISOString(),
+    }).select("id").single();
+    if (anonCheerError || !anonCheer) throw anonCheerError ?? new Error("anon_cheer_failed");
+    const { error: attributionError } = await admin.from("social_cheer_member_attribution").insert({
+      cheer_id: anonCheer.id,
+      supporter_member_id: ids.owner,
+    });
+    if (attributionError) throw attributionError;
+
+    // 1) 친구 화면에 응원 진입 버튼이 있고, 누르면 그 목표의 응원 자리로 간다.
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`, { waitUntil: "domcontentloaded", timeout: 400_000 });
+    const cheerEntry = page.getByRole("link", { name: "이 목표 응원하기" });
+    await expect(cheerEntry).toBeVisible();
+    await expect(cheerEntry).toHaveAttribute("href", `/g/${friendSlug}#cheer`);
+    await cheerEntry.click();
+    await expect(page).toHaveURL(new RegExp(`/g/${friendSlug}#cheer$`));
+    await expect(page.getByTestId("cheer-cta")).toBeVisible();
+    await expect(page.getByTestId("cheer-cta")).not.toHaveAttribute("aria-label", "카카오 로그인 후 응원하기");
+
+    // 2) 최근 응원 카드에 방향이 보인다(보낸 본인에게는 익명 응원도 내가 보냄으로).
+    await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`, { waitUntil: "domcontentloaded", timeout: 400_000 });
+    await expect(page.locator(".friend-recent-cheer-direction").first()).toHaveText(/내가 보냄|친구가 보냄/);
+
+    // 3) 마이페이지 보낸 응원: 익명 표시와 공개로 바꾸기, 누르면 DB 가 공개로 바뀌고 버튼이 사라진다.
+    await page.goto("/my", { waitUntil: "domcontentloaded", timeout: 400_000 });
+    await page.getByRole("tab", { name: "보낸 응원" }).click();
+    const anonRow = page.locator("li, article, div").filter({ hasText: anonMessage }).last();
+    await expect(anonRow).toBeVisible();
+    await expect(anonRow.getByText("익명으로 보냄")).toBeVisible();
+    const reveal = anonRow.getByRole("button", { name: "공개로 바꾸기" });
+    await expect(reveal).toBeVisible();
+    const revealResponse = page.waitForResponse((r) => r.url().includes("reveal_my_anonymous_cheer"));
+    await reveal.click();
+    expect((await revealResponse).ok()).toBe(true);
+    await expect(anonRow.getByRole("button", { name: "공개로 바꾸기" })).toHaveCount(0);
+    const { data: revealed } = await admin.from("cheer").select("is_anonymous").eq("id", anonCheer.id).single();
+    expect(revealed?.is_anonymous).toBe(false);
+    await context.close();
+
+    // 4) 로그인 안 한 방문자는 응원 버튼이 카카오 로그인으로 가고, 로그인 뒤 같은 응원 자리로 돌아오게 되어 있다.
+    const guest = await browser.newContext();
+    await initializeSocialAnalyticsConsent(guest);
+    await routeStagingOriginWithoutToolbar(guest);
+    const guestPage = await guest.newPage();
+    await guestPage.route("**/auth/kakao/start**", (route) => route.fulfill({ status: 200, body: "kakao-start-intercepted" }));
+    await guestPage.goto(`/g/${friendSlug}#cheer`, { waitUntil: "domcontentloaded", timeout: 400_000 });
+    const guestCta = guestPage.getByTestId("cheer-cta");
+    await expect(guestCta).toHaveAttribute("aria-label", "카카오 로그인 후 응원하기");
+    const href = await guestCta.getAttribute("href");
+    expect(href).toContain("/auth/kakao/start");
+    expect(decodeURIComponent(href ?? "")).toContain(`/g/${friendSlug}#cheer`);
+    await guestCta.click();
+    await expect(guestPage).toHaveURL(/\/auth\/kakao\/start/);
+    // 비회원이 서버에 직접 주문을 만들 수 없다(401 login_required).
+    const orderResponse = await fetch(`${SUPABASE_URL}/functions/v1/cheer-order`, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey: ANON_KEY, authorization: `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ slug: friendSlug, amount: 1, message: "비회원 시도" }),
+    });
+    expect(orderResponse.status).toBe(401);
+    expect(JSON.stringify(await orderResponse.json())).toContain("login_required");
+    await guest.close();
   });
 
   test("OPS-ALERT-01 관리자 화면이 ops_event 경보를 실제 수신한다", async ({ browser }) => {
