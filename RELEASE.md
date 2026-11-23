@@ -23,8 +23,8 @@ ships:
   env: none
   tests: e2e QA-TC-D057-01(친구 화면 응원 진입 → 응원 자리, 최근 응원 방향, 익명 표시·공개 전환 후 DB is_anonymous=false, 비로그인 응원 버튼 → 카카오 로그인 링크에 복귀 주소, 비회원 주문 401), pgTAP d057 12건, Deno cheer-order 5건
 qa_gate:
-  approved: false
-  evidence: 작성 중
+  approved: true
+  evidence: 브랜치 CI 45280945238 success(06c6f07, 단위·빌드·pgTAP·서버 계약·환전 E2E). staging Supabase(마이그레이션·cheer-order 반영) + 로컬 운영 빌드(Next 16.4.6, staging 웹은 Vercel 팀 정지로 402라 로컬 next start 로 대체) 소셜 회귀 46건 중 43 통과 + LG-03 시험 이동 시점 보정 뒤 단독 3/3. 남은 2건은 환경 한정(QA-REVERIFY-FLOW-01A 카카오 공유가 localhost 도메인 미등록으로 picker/failed, QA-TC-GT-02 GITHUB_SHA 미설정). QA-TC-D057-01 통과(친구 화면 "이 목표 응원하기" → /g/<slug>#cheer, 로그인 회원 결제창→주문 201·회원 귀속, 최근 응원 "내가 보냄", 마이페이지 "익명으로 보냄"→"공개로 바꾸기"→DB is_anonymous=false, 비로그인 응원 버튼→카카오 로그인 링크에 복귀 주소, 비회원 주문 401). ORDER-ATTR-01 은 D-057 설계대로 다른 회원 재사용 409·같은 회원 200 으로 계약 갱신. Next.js 16.4.1→16.4.6(보안 권고 7건, 빌드 보안 검사가 16.4.1 빌드를 막음)
 ```
 
 # 릴리스 매니페스트: 해낼게 2.3.2
