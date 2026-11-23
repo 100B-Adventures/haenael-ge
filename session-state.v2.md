@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-24 KST] 현황 실측: 웹 402 정지, 앱 11-19 부터 멈춤
+- 무엇을 어디까지: 운영·staging HTTP 402(Vercel 100B hobby 한도 초과, 11-23 09:15~, 자동 해제 12-23). OD-haenael-20261124-vercel-402 등록. 카카오 2.3.2 운영 반영 완료. D-057 친구 응원은 /mnt/hdd/haenael-ge-cheer-login 미커밋 17파일.
+- 남은 이슈·블로커: Vercel 결정(돈), 앱 결정 2건(android-altpay, app-id), Codex 한도 11-25 13:10, hotfix 워크트리 7회차 수정 미커밋.
+- 다음에 칠 명령: cd /mnt/hdd/haenael-ge-cheer-login && git diff --stat → 단위 시험 → 커밋.
+- 검증했나: 402 는 curl 실측. 친구 응원·앱은 미검증.
+
 ## [2026-11-23 02:4x KST] 2.3.2 릴리스 기록 main 반영 완료
 - 2.3.2 기록 문서 커밋 a560df4 를 main 에 push(회장 11-21 원문 "메인 올리고 CIM 확인하고", irreversible-approve 기록). 6609 사본은 이 push 권한 창에서 멈췄었고 실행 안 됐음 → 이 세션이 실행.
 - CI 45050653851 success. 운영 health 2.3.2 sourceSha a560df4, /invite CSP form-action 에 sharer·accounts.kakao.com 있음(관찰됨).
