@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-24 17:06 KST] 그로스 위키 준비물 지시 취소 수신, 진행 중 작업 그대로
+- 무엇을 어디까지: growth 의 "해낼게 마케팅 위키 정리 준비물" 작업지시를 받아 서브에이전트에 맡겼다가 중단, growth 가 "그로스 레인 일, 잘못 보냄"으로 취소. docs/growth/ 에 생성 파일 없음(관찰). 2.4.0 운영 반영(14:20 블록)은 그대로.
+- 남은 이슈: 운영 읽기 전용 E2E 진입 주소 haenaelge.vercel.app(옛 팀 402) 교체, 수동 결제 시험 2개 로그인 기준 수정, Vercel 운영 방식(사업별 무료 vs Pro 통합) 회장 결정 대기, 앱은 11-25 13:10 Codex 해제 뒤.
+- 다음에 칠 명령: grep -n APP_ENTRY_ORIGIN web/e2e/production-auth-readonly.spec.ts → 새 도메인으로 수정 → gh workflow run "Production Read-only E2E"
+- 검증했나: 취소 지시 반영(파일 0건 관찰). 운영 회원 응원 화면은 미검증.
+
 ## [2026-11-24 13:58 KST] 2.4.0(D-057 친구 응원·로그인 응원·익명 공개 전환) QA 통과, 운영 웹 배포는 Vercel 팀 정지로 막힘
 - 무엇을 어디까지: 브랜치 feat/d057-cheer-login-20261124 → main b69177e push(CI 45282136614 green). 운영 DB 마이그레이션 20261120010000_d057 반영(함수만 추가·교체). 운영 웹 배포 실패: Vercel 팀 100B 정지로 git 자동 배포·CLI --prod 모두 "Your Team exceeded our fair use limits and has been blocked". cheer-order 는 2.4.0 배포 뒤 운영 웹(2.3.2)과 맞추려고 2.3.2(a560df4)로 되돌림(비회원 응원 400 invalid_goal 관찰 = 옛 경로). 운영 지금 = 웹 2.3.2 + 함수 2.3.2 + DB D-057 함수 추가.
 - 남은 이슈·블로커: Vercel 결정(OD-haenael-20261124-vercel-402). 해제되면 같은 턴에 ①cheer-order 를 b69177e 로 다시 배포 ②main 재배포(vercel deploy --prod 또는 빈 커밋 push) ③운영 health sourceSha b69177e ④운영 읽기 전용 E2E. haenaelge.vercel.app 별칭은 402(정지 영향). 운영 읽기 전용 E2E 45329798432 는 그 별칭 402 로 실패. 수동 결제 시험(cheer-payment.spec·v2-live-payment.spec)은 비회원 결제창 전제라 2.4.0 뒤 로그인 회원으로 고쳐야 함.
