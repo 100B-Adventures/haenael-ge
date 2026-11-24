@@ -1,6 +1,6 @@
 # 해낼게 V2 개발·QA·배포 상태
 
-## [2026-11-24 14:0x KST] 2.4.0(D-057 친구 응원·로그인 응원·익명 공개 전환) QA 통과, 운영 웹 배포는 Vercel 팀 정지로 막힘
+## [2026-11-24 13:58 KST] 2.4.0(D-057 친구 응원·로그인 응원·익명 공개 전환) QA 통과, 운영 웹 배포는 Vercel 팀 정지로 막힘
 - 무엇을 어디까지: 브랜치 feat/d057-cheer-login-20261124 → main b69177e push(CI 45282136614 green). 운영 DB 마이그레이션 20261120010000_d057 반영(함수만 추가·교체). 운영 웹 배포 실패: Vercel 팀 100B 정지로 git 자동 배포·CLI --prod 모두 "Your Team exceeded our fair use limits and has been blocked". cheer-order 는 2.4.0 배포 뒤 운영 웹(2.3.2)과 맞추려고 2.3.2(a560df4)로 되돌림(비회원 응원 400 invalid_goal 관찰 = 옛 경로). 운영 지금 = 웹 2.3.2 + 함수 2.3.2 + DB D-057 함수 추가.
 - 남은 이슈·블로커: Vercel 결정(OD-haenael-20261124-vercel-402). 해제되면 같은 턴에 ①cheer-order 를 b69177e 로 다시 배포 ②main 재배포(vercel deploy --prod 또는 빈 커밋 push) ③운영 health sourceSha b69177e ④운영 읽기 전용 E2E. haenaelge.vercel.app 별칭은 402(정지 영향). 운영 읽기 전용 E2E 45329798432 는 그 별칭 402 로 실패. 수동 결제 시험(cheer-payment.spec·v2-live-payment.spec)은 비회원 결제창 전제라 2.4.0 뒤 로그인 회원으로 고쳐야 함.
 - 다음에 칠 명령: Vercel 해제 확인 → cd /Users/sj/sj_code_master/haenael-ge-d057 && SUPABASE_ACCESS_TOKEN=… npx supabase functions deploy cheer-order --project-ref ossvejipdivgxzcqszbw --yes && vercel deploy --prod --yes --force --scope 100-b
