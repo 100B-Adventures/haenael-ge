@@ -68,6 +68,17 @@ function pendingRedirect(request: NextRequest, redirectPath: string) {
   return NextResponse.redirect(pendingUrl);
 }
 
+function authErrorRedirect(
+  request: NextRequest,
+  reason: string,
+  redirectPath?: string,
+) {
+  const errorUrl = new URL("/", request.url);
+  errorUrl.searchParams.set("auth_error", reason);
+  if (redirectPath) errorUrl.searchParams.set("redirect", redirectPath);
+  return NextResponse.redirect(errorUrl);
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -88,9 +99,7 @@ export async function GET(request: NextRequest) {
 
   if (!nonceValid) {
     console.warn("[auth/kakao/callback] state nonce mismatch");
-    const invalidStateResponse = NextResponse.redirect(
-      new URL("/?auth_error=invalid_state", request.url),
-    );
+    const invalidStateResponse = authErrorRedirect(request, "invalid_state");
     invalidStateResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     logCallbackResult(request, "not_attempted", "auth_error_redirect", "invalid_state");
     return invalidStateResponse;
@@ -105,9 +114,7 @@ export async function GET(request: NextRequest) {
       reason,
       hasDescription: Boolean(errorDescription),
     });
-    const errResponse = NextResponse.redirect(
-      new URL(`/?auth_error=${reason}`, request.url),
-    );
+    const errResponse = authErrorRedirect(request, reason, redirectTo);
     errResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     logCallbackResult(request, "not_attempted", "auth_error_redirect", reason);
     return errResponse;
@@ -121,7 +128,7 @@ export async function GET(request: NextRequest) {
 
   if (!supabaseUrl || !anonKey || !appUrl) {
     console.error("[auth/kakao/callback] missing env vars");
-    const response = NextResponse.redirect(new URL("/?auth_error=config_error", request.url));
+    const response = authErrorRedirect(request, "config_error", redirectTo);
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     logCallbackResult(request, "not_attempted", "auth_error_redirect", "config_error");
     return response;
@@ -175,9 +182,7 @@ export async function GET(request: NextRequest) {
         status: efResponse.status,
         errorCode: errCode,
       });
-      const response = NextResponse.redirect(
-        new URL(`/?auth_error=${errCode}`, request.url),
-      );
+      const response = authErrorRedirect(request, errCode, redirectTo);
       response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
       logCallbackResult(request, claimResult, "auth_error_redirect", errCode);
       return response;
@@ -186,9 +191,7 @@ export async function GET(request: NextRequest) {
     console.error("[auth/kakao/callback] edge function network error", {
       errorName: networkErr instanceof Error ? networkErr.name : "unknown",
     });
-    const response = NextResponse.redirect(
-      new URL("/?auth_error=ef_network_error", request.url),
-    );
+    const response = authErrorRedirect(request, "ef_network_error", redirectTo);
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     logCallbackResult(request, claimResult, "auth_error_redirect", "ef_network_error");
     return response;
@@ -196,9 +199,7 @@ export async function GET(request: NextRequest) {
 
   if (!efData?.hashed_token || !efData?.type) {
     console.error("[auth/kakao/callback] edge function response missing session token fields");
-    const response = NextResponse.redirect(
-      new URL("/?auth_error=missing_token", request.url),
-    );
+    const response = authErrorRedirect(request, "missing_token", redirectTo);
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     logCallbackResult(request, claimResult, "auth_error_redirect", "missing_token");
     return response;
@@ -222,9 +223,7 @@ export async function GET(request: NextRequest) {
     console.error("[auth/kakao/callback] session verification failed", {
       errorName: verifyError.name ?? "unknown",
     });
-    const response = NextResponse.redirect(
-      new URL("/?auth_error=session_failed", request.url),
-    );
+    const response = authErrorRedirect(request, "session_failed", redirectTo);
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     logCallbackResult(request, claimResult, "auth_error_redirect", "session_failed");
     return response;

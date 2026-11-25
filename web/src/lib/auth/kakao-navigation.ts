@@ -2,6 +2,7 @@ import { KAKAO_NAVIGATION_COPY } from "@/lib/copy/generated/lib-auth-kakao-navig
 
 export const KAKAO_EXTERNAL_BROWSER_QUERY = "external_browser";
 export const KAKAO_EXTERNAL_BROWSER_FALLBACK_MS = 1_200;
+export const KAKAO_MANUAL_FALLBACK_DELAY_MS = 5_000;
 
 export function buildKakaoStartUrl(redirectPath: string): string {
   return `/auth/kakao/start?redirect=${encodeURIComponent(redirectPath)}`;

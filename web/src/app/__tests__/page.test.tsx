@@ -81,7 +81,10 @@ describe("루트 / 세션 리다이렉트", () => {
     );
 
     const element = await LandingPage({
-      searchParams: Promise.resolve({ auth_error: "session_failed" }),
+      searchParams: Promise.resolve({
+        auth_error: "session_failed",
+        redirect: "/onboarding",
+      }),
     });
     render(element);
 
@@ -90,8 +93,9 @@ describe("루트 / 세션 리다이렉트", () => {
     );
     expect(screen.getByTestId("auth-error-retry")).toHaveAttribute(
       "href",
-      "/auth/kakao/start?redirect=%2Fme",
+      "/auth/kakao/start?redirect=%2Fonboarding",
     );
+    expect(screen.queryByTestId("landing-relogin-link")).not.toBeInTheDocument();
   });
 
   it("로그인했지만 goal 없음 → 리다이렉트 없이 랜딩 렌더(온보딩 유도는 기존 CTA)", async () => {

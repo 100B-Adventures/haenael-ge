@@ -41,9 +41,10 @@ export async function GET(request: NextRequest) {
 
   if (!kakaoClientId) {
     console.warn("[auth/kakao/start] NEXT_PUBLIC_KAKAO_REST_API_KEY 미설정");
-    return NextResponse.redirect(
-      new URL("/?auth_error=config_error", request.url),
-    );
+    const errorUrl = new URL("/", request.url);
+    errorUrl.searchParams.set("auth_error", "config_error");
+    errorUrl.searchParams.set("redirect", redirectPath);
+    return NextResponse.redirect(errorUrl);
   }
 
   const nonce = generateOAuthNonce();

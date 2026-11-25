@@ -1,21 +1,26 @@
 # QA Tracker — haenael-ge
 
+> ❌ NG (2026-11-25 22:33 KST): `087dd96` 재리뷰에서 JavaScript가 실행되지 않으면 `/auth/kakao/pending`이 세션을 확인하지 못하고, `/auth/kakao/external`의 외부 브라우저 링크도 생성되지 않는 막다른 화면을 확인했다. 서버 세션 판정·서버 렌더 링크·`<noscript>` 일반 링크와 JavaScript 비활성 Playwright가 통과하기 전에는 출고하지 않는다.
+
+> 🔧 로컬 보정 (2026-11-25 23:00 KST): pending 서버 세션 판정과 redirect, external 서버 렌더 링크, `<noscript>` 일반 링크를 구현했다. JavaScript 비활성 Playwright를 포함한 카카오 범위 6/6, 전체 Vitest 623/623, production build 종료코드 0을 확인했다. iOS·Android 실기기 항목과 운영 반영은 계속 열어 둔다.
+
 > ❌ NG (2026-11-25 18:47 KST): 카카오 로그인 세션 2건이 발급됐지만 이후 사용이 0건이어서 인앱 브라우저에 세션이 적용되지 않은 재발로 판정했다. `16f37df` 독립 리뷰도 callback 응답 경쟁, 조용한 인앱 fallback, 진단 로그 부족, 초안 이관 안내 부족, claim 장애 차단을 배포 차단 결함으로 판정했다. 아래 실기기 항목과 callback 세션 확인이 닫히기 전에는 카카오 인앱 로그인 수정을 운영에 배포하지 않는다.
 
 ## 카카오 인앱 로그인 열린 항목
 
 - [ ] `KAKAO-LIVE-IOS-01` iOS 카카오톡 최신 버전에서 목표 작성, 외부 Safari 전환, 카카오 로그인, callback 뒤 로그인 상태, 목표 저장까지 확인.
 - [ ] `KAKAO-LIVE-ANDROID-01` Android 카카오톡 최신 버전에서 목표 작성, 외부 기본 브라우저 전환, 카카오 로그인, callback 뒤 로그인 상태, 목표 저장까지 확인.
-- [ ] `KAKAO-FALLBACK-IOS-01` iOS에서 외부 전환 스킴 실패 시 안내 화면에 머물고 `··· → Safari로 열기` 수동 절차가 보이는지 확인.
+- [ ] `KAKAO-FALLBACK-IOS-01` iOS에서 외부 전환 스킴 실패 시 안내 화면에 머물고 `공유 버튼 → Safari로 열기` 수동 절차가 보이는지 확인.
 - [ ] `KAKAO-FALLBACK-ANDROID-01` Android에서 외부 전환 스킴 실패 시 안내 화면에 머물고 `⋮ → 다른 브라우저로 열기` 수동 절차가 보이는지 확인.
 - [ ] `KAKAO-DIAG-01` 운영 로그에 브라우저 요청 특성, callback claim 결과, 최종 응답 종류가 남고 code·token 원문은 남지 않는지 확인.
+- [ ] `KAKAO-COPY-IOS-01` iOS 카카오톡 실기기에서 `공유 버튼 → Safari로 열기` 안내가 실제 메뉴와 일치하는지 확인. 현재 문구는 실기기 미검증.
 
 ### 카카오톡 실기기 확인 절차
 
 1. iOS와 Android 각각 카카오톡 최신 버전에서 새 목표 제목과 마감일을 입력하고 `저장하고 내 링크 받기`를 누른다.
 2. 카카오 로그인 버튼을 누른 직후 초안이 외부 브라우저로 옮겨지지 않을 수 있다는 안내를 확인한다.
 3. 자동 전환 성공 경로는 iOS Safari 또는 Android 기본 브라우저에서 카카오 로그인을 마치고, callback 세션 확인 화면을 거쳐 로그인 상태가 적용되는지 확인한다.
-4. 자동 전환 실패 경로는 인앱 OAuth로 자동 이동하지 않고 안내 화면에 머무는지 확인한다. iOS는 `··· → Safari로 열기`, Android는 `⋮ → 다른 브라우저로 열기` 문구와 5초 뒤 보조 링크를 확인한다.
+4. 자동 전환 실패 경로는 인앱 OAuth로 자동 이동하지 않고 안내 화면에 머무는지 확인한다. iOS는 `공유 버튼 → Safari로 열기`, Android는 `⋮ → 다른 브라우저로 열기` 문구와 잠시 뒤 나타나는 보조 링크를 확인한다.
 5. 목표 저장은 한 건만 생성되는지 확인하고, 다른 탭을 함께 열어도 중복 목표가 생기지 않는지 확인한다.
 6. 실패 경로는 `/?auth_error=...`에서 로그인 실패와 미진행 사실, 재시도 행동이 보이는지 확인한다.
 7. 같은 시각 서버 로그에서 user-agent, `sec-fetch-*`, `sec-purpose`, `x-requested-with`, claim 결과, 최종 응답 종류를 대조한다. OAuth code와 session token 원문은 로그에 없어야 한다.

@@ -67,7 +67,7 @@ test("KAKAO-E2E-01: iOS KAKAOTALK UA는 외부 링크와 수동 전환 안내를
   await expect(page.getByTestId("kakao-external-fallback-countdown")).toBeVisible();
   await expect(page.getByTestId("kakao-external-fallback-link")).toHaveAttribute(
     "href",
-    "/auth/kakao/start?redirect=%2Fonboarding&external_browser=1",
+    `${APP_ORIGIN}/auth/kakao/start?redirect=%2Fonboarding&external_browser=1`,
     { timeout: 7_000 },
   );
   expect(consoleErrors).toEqual([]);
@@ -88,6 +88,38 @@ test("KAKAO-E2E-02: Android KAKAOTALK UA는 다른 브라우저 열기 절차를
   await expect(page.getByTestId("kakao-device-instruction")).toContainText(
     "다른 브라우저로 열기",
   );
+  await context.close();
+});
+
+test("KAKAO-E2E-NOJS-01: JavaScript 비활성 외부 안내도 실행 가능한 링크를 제공한다", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    baseURL: APP_ORIGIN,
+    userAgent: KAKAOTALK_UA,
+    javaScriptEnabled: false,
+  });
+  const page = await context.newPage();
+  await page.route("**/auth/kakao/start?**", async (route) => {
+    await route.fulfill({ status: 200, body: "oauth-start-link-reached" });
+  });
+
+  await page.goto("/auth/kakao/external?redirect=%2Fonboarding&auto=0");
+
+  await expect(page.getByTestId("kakao-external-browser-link")).toHaveAttribute(
+    "href",
+    /^kakaotalk:\/\/web\/openExternal\?url=/,
+  );
+  await expect(page.getByTestId("kakao-device-instruction")).toContainText(
+    "공유 버튼",
+  );
+  const noScriptLink = page.getByTestId("kakao-external-noscript-link");
+  await expect(noScriptLink).toHaveAttribute(
+    "href",
+    `${APP_ORIGIN}/auth/kakao/start?redirect=%2Fonboarding&external_browser=1`,
+  );
+  await noScriptLink.click();
+  await expect(page.locator("body")).toContainText("oauth-start-link-reached");
   await context.close();
 });
 
@@ -113,14 +145,15 @@ test("KAKAO-E2E-03: 비공식 스킴 fallback은 인앱 OAuth로 가지 않고 �
 test("KAKAO-E2E-04: auth_error 복귀 화면은 실패 사실과 재시도 행동을 보여 준다", async ({
   page,
 }) => {
-  await page.goto("/?auth_error=session_failed");
+  await page.goto("/?auth_error=session_failed&redirect=%2Fonboarding");
   await expect(page.getByTestId("auth-error-notice")).toContainText(
     "로그인을 마치지 못했어요",
   );
   await expect(page.getByTestId("auth-error-retry")).toHaveAttribute(
     "href",
-    "/auth/kakao/start?redirect=%2Fme",
+    "/auth/kakao/start?redirect=%2Fonboarding",
   );
+  await expect(page.getByTestId("landing-relogin-link")).toHaveCount(0);
 });
 
 test.describe("외부 로그인 후 온보딩 복귀", () => {
@@ -129,7 +162,7 @@ test.describe("외부 로그인 후 온보딩 복귀", () => {
     "RUN_LOCAL_SUPABASE_E2E=1 로컬 Supabase 계약 시험",
   );
 
-  test("KAKAO-E2E-05: callback 세션 확인 화면과 다른 탭 복귀가 로그인 상태를 확인하고 한 번만 저장한다", async ({
+  test("KAKAO-E2E-05: callback 서버 세션과 다른 탭 복귀가 JavaScript 유무와 관계없이 한 번만 저장한다", async ({
     browser,
   }) => {
     test.setTimeout(90_000);
@@ -150,6 +183,7 @@ test.describe("외부 로그인 후 온보딩 복귀", () => {
     }
     const userId = created.user.id;
     const context = await browser.newContext({ baseURL: APP_ORIGIN });
+    let noJsContext: Awaited<ReturnType<typeof browser.newContext>> | null = null;
     await context.addInitScript(() => {
       window.localStorage.setItem("haenael_analytics_consent_v1", "denied");
     });
@@ -208,7 +242,7 @@ test.describe("외부 로그인 후 온보딩 복귀", () => {
       if (signInError) throw new Error(`QA 로그인 실패: ${signInError.message}`);
 
       const nowSeconds = Math.floor(Date.now() / 1000);
-      await context.addCookies([...cookieJar.values()].map(({ name, value, options }) => ({
+      const browserCookies = [...cookieJar.values()].map(({ name, value, options }) => ({
         name,
         value,
         url: APP_ORIGIN,
@@ -216,7 +250,20 @@ test.describe("외부 로그인 후 온보딩 복귀", () => {
         secure: false,
         sameSite: "Lax" as const,
         expires: nowSeconds + (options?.maxAge ?? 60 * 60),
-      })));
+      }));
+      await context.addCookies(browserCookies);
+
+      noJsContext = await browser.newContext({
+        baseURL: APP_ORIGIN,
+        javaScriptEnabled: false,
+      });
+      await noJsContext.addCookies(browserCookies);
+      const noJsPending = await noJsContext.newPage();
+      await noJsPending.goto("/auth/kakao/pending?redirect=%2Ffriends");
+      await expect(noJsPending).toHaveURL(`${APP_ORIGIN}/friends`);
+      await expect(noJsPending.locator("body")).not.toContainText("로그인 상태를 확인하고 있어요");
+      await noJsContext.close();
+      noJsContext = null;
 
       const loginTab = await context.newPage();
       loginTab.on("console", (message) => {
@@ -245,6 +292,7 @@ test.describe("외부 로그인 후 온보딩 복귀", () => {
       expect(count).toBe(1);
       expect(consoleErrors).toEqual([]);
     } finally {
+      if (noJsContext) await noJsContext.close();
       await admin.from("goal").delete().eq("member_id", userId);
       await admin.from("member").delete().eq("id", userId);
       await admin.auth.admin.deleteUser(userId);

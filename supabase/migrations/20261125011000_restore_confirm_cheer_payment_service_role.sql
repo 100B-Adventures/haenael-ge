@@ -1,6 +1,6 @@
--- confirm_cheer_payment was replaced after its original privilege grant.
--- Reassert the production contract: only the Toss confirmation Edge Function's
--- service role may execute the payment finalization transaction.
+-- The cause of the missing execute grant is not confirmed. Reassert the
+-- production contract: only the Toss confirmation Edge Function's service
+-- role may execute the payment finalization transaction.
 
 BEGIN;
 

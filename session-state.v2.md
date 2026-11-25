@@ -5,6 +5,12 @@
 - 이번 기능 목표: iOS·Android 카카오톡에서 외부 브라우저 로그인을 주 경로로 사용하고, callback 뒤 실제 세션 적용을 확인하며, 실패 시 안내 화면에 머물고 목표 저장 의도를 한 번만 소비한다.
 - 완료 증거: build, 전체 Vitest, pgTAP, callback 세션·fallback·`auth_error` Playwright, 디자인 토큰 검사. 운영 배포와 운영 데이터 쓰기는 범위 밖이다.
 
+## 2026-11-25 23:00 KST · 카카오 로그인 JavaScript 비활성 경로 보정
+
+- `087dd96` 재리뷰의 MAJOR 2건과 MINOR 전부를 보정했다. pending은 서버 세션을 먼저 판정해 redirect하고, external은 서버 렌더링 단계부터 외부 전환 링크와 일반 보조 링크를 제공한다. 카카오톡 외 브라우저 재시도, iOS 안내, `auth_error` 원래 redirect 보존과 중복 버튼 제거, 권한 마이그레이션 원인 미확인 주석도 반영했다.
+- 로컬 production build 종료코드 0, 전체 Vitest 103파일 623건, 헤드리스 Playwright 6/6, JavaScript 비활성 external 링크 클릭과 세션 있는 pending 서버 redirect를 확인했다. 운영 배포, push, 운영 DB 쓰기는 하지 않았다.
+- 남은 이슈는 iOS·Android 카카오톡 실기기에서 외부 브라우저 전환, 안내 문구, callback 뒤 목표 저장을 확인하는 QA다.
+
 ## 2026-11-15 16:25 KST · 2.3.1 qa 독립 검증 14차(Claude qa-verifier) VERDICT PASS
 - 한 것: 1f90c0f..a713b7b 결제창 높이 수정 판정. 6개 뷰포트 직접 재현(닫기 화면 안, 시트 탭 위, 시트 내 스크롤 후 결제 버튼 가려짐 없음, 주문 0), 단위 103/103, staging 회귀 44/45(SP-02 시험결함, 단독 재실행 통과). 3311 dev 종료, web/.next 는 /mnt/hdd/.trash-114/ 로 이동.
 - 남은 이슈: iOS 실기기 safe-area·운영 렌더 미검증, 닫기 버튼이 시트와 같이 스크롤돼 사라짐, TC 번호 미등록, summarize.mjs SHA 라벨 낡음, RELEASE.md qa_gate.approved 갱신 필요. 참고: 루트 레포 pipeline-state.v2.md 는 11-08 판으로 낡았고 실제 최신 로그는 hotfix 작업트리 것이라 여기에 기록함.

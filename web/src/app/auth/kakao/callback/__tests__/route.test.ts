@@ -99,6 +99,21 @@ describe("GET /auth/kakao/callback", () => {
     expect(mockVerifyOtp).toHaveBeenCalledOnce();
   });
 
+  it("KAKAO-CALLBACK-NEG-03: 세션 검증 실패도 원래 redirect 경로를 재시도 링크에 남긴다", async () => {
+    mockClaim.mockResolvedValue({ data: true, error: null });
+    mockVerifyOtp.mockResolvedValue({
+      data: { user: null },
+      error: { name: "AuthApiError" },
+    });
+    const { GET } = await import("../route");
+
+    const response = await GET(callbackRequest());
+
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/?auth_error=session_failed&redirect=%2Fonboarding",
+    );
+  });
+
   it("KAKAO-CALLBACK-DIAG-01: 진단 로그는 요청 특성과 응답 종류만 남기고 code·token 원문을 남기지 않는다", async () => {
     mockClaim.mockResolvedValue({ data: true, error: null });
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
