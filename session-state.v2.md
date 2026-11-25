@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 17:00 KST] 카카오 로그인 피드백 조사, C1 초대 이미지 검증·CI 통과(미배포)
+- 무엇을 어디까지: 카카오 로그인 운영 재현 = 시작 307→카카오 정상, 콜백(가짜 code)→auth_error=kakao_error 정상, 오늘 운영 로그인 성공 11·13·16시 각 1건(auth.users). 옛 주소 haenaelge.vercel.app/auth/kakao/start 402. Vercel Hobby 런타임 로그 보존 30분이라 사용자 실패 로그 없음, Supabase 로그 API 표 이름 변경으로 조회 실패. C1: Codex 010ba38 + main 병합 73af93e, 빌드 통과·staging 초대로 이미지 확인(이름·목표 반영, 사진·D-day·응원 수는 공개 RPC 에 없어 빠짐), CI 45572205436 success. 운영 미배포.
+- 남은 이슈: 옛 별칭 이전(옛 팀 별칭 삭제 = 회장 원문), 오류 수집 도구(Sentry 무료 계정 생성 = 회장), C1 운영 배포(2.4.1 버전·릴리스 노트 필요), 알림톡 조성진 계정 시험.
+- 다음에 칠 명령: haenael-ge-og 에서 2.4.1 버전·RELEASE 매니페스트 → CI → 승인 기록 → vercel deploy --prod(해낼게 계정)
+- 검증했나: 로그인 경로 관찰, 실제 사용자 실패 원인은 미검증. C1 이미지 관찰(로컬+staging).
+
 ## [2026-11-25 16:52 KST] compact 마크 (auto)
 - 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: be1c910 docs(state): goal map, prod E2E entry fix on main, C1 OG delegat
