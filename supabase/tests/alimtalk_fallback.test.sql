@@ -4,7 +4,16 @@
 
 BEGIN;
 
-SELECT plan(7);
+SELECT plan(8);
+
+SELECT ok(
+  has_function_privilege(
+    'service_role',
+    'public.confirm_cheer_payment(text,text,integer,text,timestamp with time zone,text,jsonb)',
+    'EXECUTE'
+  ),
+  'service_role은 결제 확정 RPC를 실행할 수 있다'
+);
 
 INSERT INTO auth.users (
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,

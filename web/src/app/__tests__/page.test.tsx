@@ -75,6 +75,25 @@ describe("루트 / 세션 리다이렉트", () => {
     expect(screen.queryByTestId("lead-form")).not.toBeInTheDocument();
   });
 
+  it("AUTH-ERROR-UI-01: callback 실패로 돌아오면 실패 사실과 재시도 행동을 안내한다", async () => {
+    vi.mocked(createServerSupabaseClient).mockResolvedValue(
+      buildSupabase(null, []) as never,
+    );
+
+    const element = await LandingPage({
+      searchParams: Promise.resolve({ auth_error: "session_failed" }),
+    });
+    render(element);
+
+    expect(screen.getByTestId("auth-error-notice")).toHaveTextContent(
+      "로그인을 마치지 못했어요",
+    );
+    expect(screen.getByTestId("auth-error-retry")).toHaveAttribute(
+      "href",
+      "/auth/kakao/start?redirect=%2Fme",
+    );
+  });
+
   it("로그인했지만 goal 없음 → 리다이렉트 없이 랜딩 렌더(온보딩 유도는 기존 CTA)", async () => {
     vi.mocked(createServerSupabaseClient).mockResolvedValue(
       buildSupabase({ id: "owner-uid" }, []) as never,

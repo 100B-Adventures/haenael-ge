@@ -8,6 +8,8 @@ import {
   savePendingSlug,
   loadPendingSlug,
   clearPendingSlug,
+  saveSaveIntent,
+  consumeSaveIntent,
 } from "../draft";
 
 // jsdom 환경에서 localStorage 사용 가능
@@ -42,5 +44,16 @@ describe("draft utils", () => {
     expect(loadPendingSlug()).toBe("abc123");
     clearPendingSlug();
     expect(loadPendingSlug()).toBeNull();
+  });
+
+  it("SAVE-INTENT-01: 동시에 소비해도 한 호출만 저장 의도를 얻는다", async () => {
+    saveSaveIntent();
+
+    const results = await Promise.all([
+      consumeSaveIntent(),
+      consumeSaveIntent(),
+    ]);
+
+    expect(results.filter(Boolean)).toHaveLength(1);
   });
 });

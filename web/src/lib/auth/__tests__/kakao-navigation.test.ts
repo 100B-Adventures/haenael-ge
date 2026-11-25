@@ -57,12 +57,15 @@ describe("kakao navigation", () => {
     startKakaoLogin(startUrl, { environment: harness.environment });
 
     expect(harness.notify).toHaveBeenCalledOnce();
+    expect(harness.notify).toHaveBeenCalledWith(
+      expect.stringContaining("외부 브라우저로 옮겨지지 않아요"),
+    );
     expect(harness.assign).toHaveBeenCalledWith(
       buildKakaoOpenExternalUrl("https://haenael.ge", startUrl),
     );
   });
 
-  it("KAKAO-NAV-NEG-01: 비공식 스킴이 페이지를 떠나지 못하면 기존 흐름으로 fallback한다", () => {
+  it("KAKAO-NAV-NEG-01: 비공식 스킴이 페이지를 떠나지 못하면 안내 화면으로 fallback한다", () => {
     const harness = navigationEnvironment("KAKAOTALK 11.4.2 iOS");
     const startUrl = buildKakaoStartUrl("/onboarding");
 
@@ -70,7 +73,7 @@ describe("kakao navigation", () => {
     harness.runFallback();
 
     expect(harness.assign).toHaveBeenLastCalledWith(
-      "https://haenael.ge/auth/kakao/start?redirect=%2Fonboarding&external_browser=1",
+      "https://haenael.ge/auth/kakao/external?redirect=%2Fonboarding&auto=0",
     );
   });
 

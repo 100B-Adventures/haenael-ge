@@ -34,6 +34,40 @@ async function sha256Hex(value: string): Promise<string> {
   ).join("");
 }
 
+type ClaimResult = "not_attempted" | "claimed" | "duplicate" | "error_fail_open";
+
+function callbackDiagnostics(request: NextRequest) {
+  const header = (name: string, maxLength = 180) =>
+    (request.headers.get(name) ?? "").slice(0, maxLength);
+  return {
+    userAgent: header("user-agent", 300),
+    secFetchDest: header("sec-fetch-dest"),
+    secFetchMode: header("sec-fetch-mode"),
+    secPurpose: header("sec-purpose"),
+    requestedWith: header("x-requested-with"),
+  };
+}
+
+function logCallbackResult(
+  request: NextRequest,
+  claimResult: ClaimResult,
+  finalResponseKind: string,
+  reason?: string,
+) {
+  console.info("[auth/kakao/callback]", JSON.stringify({
+    ...callbackDiagnostics(request),
+    claimResult,
+    finalResponseKind,
+    ...(reason ? { reason } : {}),
+  }));
+}
+
+function pendingRedirect(request: NextRequest, redirectPath: string) {
+  const pendingUrl = new URL("/auth/kakao/pending", request.url);
+  pendingUrl.searchParams.set("redirect", redirectPath);
+  return NextResponse.redirect(pendingUrl);
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -53,11 +87,12 @@ export async function GET(request: NextRequest) {
     timingSafeEqualString(cookieNonce, parsedState.nonce);
 
   if (!nonceValid) {
-    console.warn("[auth/kakao/callback] state nonce 불일치 — CSRF/재사용 의심");
+    console.warn("[auth/kakao/callback] state nonce mismatch");
     const invalidStateResponse = NextResponse.redirect(
       new URL("/?auth_error=invalid_state", request.url),
     );
     invalidStateResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    logCallbackResult(request, "not_attempted", "auth_error_redirect", "invalid_state");
     return invalidStateResponse;
   }
 
@@ -66,11 +101,15 @@ export async function GET(request: NextRequest) {
   // 카카오가 에러를 반환한 경우 (예: 사용자 취소)
   if (error || !code) {
     const reason = error === "access_denied" ? "cancelled" : "kakao_failed";
-    console.warn(`[auth/kakao/callback] Kakao error: ${error} — ${errorDescription}`);
+    console.warn("[auth/kakao/callback] provider returned error", {
+      reason,
+      hasDescription: Boolean(errorDescription),
+    });
     const errResponse = NextResponse.redirect(
       new URL(`/?auth_error=${reason}`, request.url),
     );
     errResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    logCallbackResult(request, "not_attempted", "auth_error_redirect", reason);
     return errResponse;
   }
 
@@ -84,31 +123,33 @@ export async function GET(request: NextRequest) {
     console.error("[auth/kakao/callback] missing env vars");
     const response = NextResponse.redirect(new URL("/?auth_error=config_error", request.url));
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    logCallbackResult(request, "not_attempted", "auth_error_redirect", "config_error");
     return response;
   }
 
   // 카카오톡 인앱 브라우저가 같은 callback을 동시에 여러 번 요청해도 EF의
   // generate_link는 한 번만 실행한다. code 원문은 저장하지 않고 SHA-256만
-  // 15분 claim하며, claim 장애는 세션 경쟁을 재발시키지 않도록 fail closed한다.
+  // 15분 claim한다. claim 저장소 장애는 OAuth 자체를 막지 않고 경고 뒤 기존
+  // 흐름을 계속한다. 중복 요청은 브라우저 세션 확인 화면에서 최종 판정한다.
+  let claimResult: ClaimResult = "not_attempted";
   try {
     const codeHash = await sha256Hex(code);
     const { data: claimed, error: claimError } = await createServiceRoleClient()
       .rpc("claim_kakao_oauth_callback", { p_code_hash: codeHash });
     if (claimError) throw claimError;
     if (!claimed) {
-      const duplicateResponse = NextResponse.redirect(
-        new URL(redirectTo, request.url),
-      );
+      claimResult = "duplicate";
+      const duplicateResponse = pendingRedirect(request, redirectTo);
       duplicateResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+      logCallbackResult(request, claimResult, "pending_session_check");
       return duplicateResponse;
     }
+    claimResult = "claimed";
   } catch (claimError) {
-    console.error("[auth/kakao/callback] callback claim failed", claimError);
-    const response = NextResponse.redirect(
-      new URL("/?auth_error=callback_claim_failed", request.url),
-    );
-    response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
-    return response;
+    claimResult = "error_fail_open";
+    console.warn("[auth/kakao/callback] callback claim unavailable; continuing", {
+      errorName: claimError instanceof Error ? claimError.name : "unknown",
+    });
   }
 
   const callbackUri = `${appUrl}/auth/kakao/callback`;
@@ -130,28 +171,36 @@ export async function GET(request: NextRequest) {
 
     if (!efResponse.ok) {
       const errCode = efData?.error?.code ?? "ef_error";
-      console.error(`[auth/kakao/callback] EF error (${efResponse.status}):`, efData);
+      console.error("[auth/kakao/callback] edge function rejected callback", {
+        status: efResponse.status,
+        errorCode: errCode,
+      });
       const response = NextResponse.redirect(
         new URL(`/?auth_error=${errCode}`, request.url),
       );
       response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+      logCallbackResult(request, claimResult, "auth_error_redirect", errCode);
       return response;
     }
   } catch (networkErr) {
-    console.error("[auth/kakao/callback] EF network error:", networkErr);
+    console.error("[auth/kakao/callback] edge function network error", {
+      errorName: networkErr instanceof Error ? networkErr.name : "unknown",
+    });
     const response = NextResponse.redirect(
       new URL("/?auth_error=ef_network_error", request.url),
     );
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    logCallbackResult(request, claimResult, "auth_error_redirect", "ef_network_error");
     return response;
   }
 
   if (!efData?.hashed_token || !efData?.type) {
-    console.error("[auth/kakao/callback] EF missing hashed_token:", efData);
+    console.error("[auth/kakao/callback] edge function response missing session token fields");
     const response = NextResponse.redirect(
       new URL("/?auth_error=missing_token", request.url),
     );
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    logCallbackResult(request, claimResult, "auth_error_redirect", "missing_token");
     return response;
   }
 
@@ -160,9 +209,7 @@ export async function GET(request: NextRequest) {
   // createRouteHandlerClient 는 response.cookies 에 직접 세팅하므로
   // redirect response 에 세션 쿠키가 포함된다.
 
-  const successResponse = NextResponse.redirect(
-    new URL(redirectTo, request.url),
-  );
+  const successResponse = pendingRedirect(request, redirectTo);
 
   const supabase = createRouteHandlerClient(request, successResponse);
 
@@ -172,11 +219,14 @@ export async function GET(request: NextRequest) {
   });
 
   if (verifyError) {
-    console.error("[auth/kakao/callback] verifyOtp error:", verifyError);
+    console.error("[auth/kakao/callback] session verification failed", {
+      errorName: verifyError.name ?? "unknown",
+    });
     const response = NextResponse.redirect(
       new URL("/?auth_error=session_failed", request.url),
     );
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    logCallbackResult(request, claimResult, "auth_error_redirect", "session_failed");
     return response;
   }
 
@@ -185,6 +235,8 @@ export async function GET(request: NextRequest) {
   // nonce는 1회용 — 성공 경로에서도 삭제(재사용 방지)
   successResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
 
-  // 세션 쿠키가 successResponse.cookies 에 세팅된 상태로 리다이렉트
+  logCallbackResult(request, claimResult, "pending_session_check");
+
+  // 세션 쿠키가 successResponse.cookies 에 세팅된 상태로 확인 화면에 리다이렉트
   return successResponse;
 }

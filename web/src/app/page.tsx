@@ -54,7 +54,13 @@ function WordmapPreview() {
   );
 }
 
-export default async function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ auth_error?: string }>;
+} = {}) {
+  const params = searchParams ? await searchParams : {};
+  const hasAuthError = typeof params.auth_error === "string";
   // user-flow.md §1.3 (a) 세션 라우팅: 세션 有 + 본인 goal 有 → /me 리다이렉트(재방문 편의).
   // 비로그인은 SSR·OG 무변경 — 아래에서 return하지 않고 그대로 통과.
   const supabase = await createServerSupabaseClient();
@@ -80,6 +86,23 @@ export default async function LandingPage() {
   return (
     <ReceiverAppShell locked currentPath="/">
     <main className="landing-approved">
+      {hasAuthError && (
+        <section
+          className="mx-auto mb-4 flex w-full max-w-sm flex-col gap-2 rounded-md border border-destructive/30 bg-danger-soft p-4 text-left"
+          role="alert"
+          data-testid="auth-error-notice"
+        >
+          <p className="font-bold text-danger-ink">{PRODUCT_COPY.TEXT_016}</p>
+          <p className="text-sm leading-relaxed text-danger-ink">{PRODUCT_COPY.TEXT_017}</p>
+          <KakaoLoginLink
+            redirectPath="/me"
+            className="flex min-h-11 items-center justify-center rounded-md bg-primary px-4 font-bold text-primary-foreground"
+            data-testid="auth-error-retry"
+          >
+            {PRODUCT_COPY.TEXT_018}
+          </KakaoLoginLink>
+        </section>
+      )}
       {/* BrandMark — 클릭 시 홈(로그인 상태면 /me, 비로그인이면 랜딩 자기 자신) */}
       <div className="landing-approved-wordmark">
         <Link

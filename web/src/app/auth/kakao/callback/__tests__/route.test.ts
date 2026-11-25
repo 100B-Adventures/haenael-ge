@@ -55,7 +55,9 @@ describe("GET /auth/kakao/callback", () => {
 
     const response = await GET(callbackRequest());
 
-    expect(response.headers.get("location")).toBe("http://localhost:3000/onboarding");
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/auth/kakao/pending?redirect=%2Fonboarding",
+    );
     expect(mockClaim).toHaveBeenCalledOnce();
     expect(fetch).toHaveBeenCalledOnce();
     expect(mockVerifyOtp).toHaveBeenCalledOnce();
@@ -73,15 +75,15 @@ describe("GET /auth/kakao/callback", () => {
     ]);
 
     expect(responses.map((response) => response.headers.get("location"))).toEqual([
-      "http://localhost:3000/onboarding",
-      "http://localhost:3000/onboarding",
+      "http://localhost:3000/auth/kakao/pending?redirect=%2Fonboarding",
+      "http://localhost:3000/auth/kakao/pending?redirect=%2Fonboarding",
     ]);
     expect(mockClaim).toHaveBeenCalledTimes(2);
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(mockVerifyOtp).toHaveBeenCalledTimes(1);
   });
 
-  it("KAKAO-CALLBACK-NEG-02: claim 저장소 장애 시 EF를 호출하지 않고 실패를 격리한다", async () => {
+  it("KAKAO-CALLBACK-02: claim 저장소 장애 시 경고 뒤 기존 세션 발급을 계속한다", async () => {
     mockClaim.mockResolvedValue({
       data: null,
       error: { message: "database unavailable" },
@@ -91,9 +93,30 @@ describe("GET /auth/kakao/callback", () => {
     const response = await GET(callbackRequest());
 
     expect(response.headers.get("location")).toBe(
-      "http://localhost:3000/?auth_error=callback_claim_failed",
+      "http://localhost:3000/auth/kakao/pending?redirect=%2Fonboarding",
     );
-    expect(fetch).not.toHaveBeenCalled();
-    expect(mockVerifyOtp).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(mockVerifyOtp).toHaveBeenCalledOnce();
+  });
+
+  it("KAKAO-CALLBACK-DIAG-01: 진단 로그는 요청 특성과 응답 종류만 남기고 code·token 원문을 남기지 않는다", async () => {
+    mockClaim.mockResolvedValue({ data: true, error: null });
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const { GET } = await import("../route");
+    const request = callbackRequest("sensitive-kakao-code");
+    request.headers.set("user-agent", "KAKAOTALK 11.4.2 iOS");
+    request.headers.set("sec-fetch-dest", "document");
+    request.headers.set("sec-fetch-mode", "navigate");
+    request.headers.set("sec-purpose", "prefetch");
+    request.headers.set("x-requested-with", "com.kakao.talk");
+
+    await GET(request);
+
+    const logs = info.mock.calls.flat().join(" ");
+    expect(logs).toContain('"claimResult":"claimed"');
+    expect(logs).toContain('"finalResponseKind":"pending_session_check"');
+    expect(logs).toContain('"secFetchDest":"document"');
+    expect(logs).not.toContain("sensitive-kakao-code");
+    expect(logs).not.toContain("token-hash");
   });
 });

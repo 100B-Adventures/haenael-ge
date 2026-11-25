@@ -29,6 +29,7 @@ import {
   clearPendingSlug,
   saveSaveIntent,
   hasSaveIntent,
+  consumeSaveIntent,
   clearSaveIntent,
   saveDraftCoverFile,
   loadDraftCoverFile,
@@ -203,6 +204,11 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     const draft = loadDraft();
     if (!draft) return;
 
+    // 탭 간 Web Lock 안에서 localStorage 의도를 먼저 소비한다. 저장이 시작된
+    // 뒤 다른 탭이 같은 draft를 읽어 두 번째 목표를 만드는 경로를 닫는다.
+    const claimedIntent = await consumeSaveIntent();
+    if (!claimedIntent) return;
+
     // INITIAL_SESSION, SIGNED_IN, focus, visibilitychange가 연달아 와도 동일한
     // 저장 의도는 한 번만 소비한다.
     autoSaveStartedRef.current = true;
@@ -219,7 +225,6 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
       restoredCoverFile,
     );
     setIsSaving(false);
-    clearSaveIntent();
     if ("goalLimitReached" in result) {
       setSaveError(
         "진행 중인 목표가 이미 3개예요. 하나를 마무리한 뒤 새로 만들어 주세요.",

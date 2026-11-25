@@ -29,6 +29,20 @@ export function buildKakaoOpenExternalUrl(
   )}`;
 }
 
+export function buildKakaoExternalGuideUrl(
+  origin: string,
+  startUrl: string,
+): string {
+  const requestedStart = new URL(startUrl, origin);
+  const guideUrl = new URL("/auth/kakao/external", origin);
+  guideUrl.searchParams.set(
+    "redirect",
+    requestedStart.searchParams.get("redirect") ?? "/onboarding",
+  );
+  guideUrl.searchParams.set("auto", "0");
+  return guideUrl.href;
+}
+
 interface KakaoNavigationEnvironment {
   userAgent: string;
   origin: string;
@@ -60,11 +74,9 @@ function browserEnvironment(): KakaoNavigationEnvironment {
         if (document.visibilityState === "hidden") callback();
       };
       window.addEventListener("pagehide", callback, { once: true });
-      window.addEventListener("blur", callback, { once: true });
       document.addEventListener("visibilitychange", handleVisibility);
       return () => {
         window.removeEventListener("pagehide", callback);
-        window.removeEventListener("blur", callback);
         document.removeEventListener("visibilitychange", handleVisibility);
       };
     },
@@ -72,9 +84,9 @@ function browserEnvironment(): KakaoNavigationEnvironment {
 }
 
 /**
- * KakaoTalk's `openExternal` scheme is not a documented web API. Keep the
- * ordinary `/auth/kakao/start` navigation as a timed fallback whenever the
- * scheme does not move the current page out of the foreground.
+ * KakaoTalk's `openExternal` scheme is not a documented web API. If it fails,
+ * move to an instruction page instead of silently retrying OAuth in the same
+ * in-app browser where session cookies may not be applied.
  */
 export function startKakaoLogin(
   startUrl: string,
@@ -90,11 +102,13 @@ export function startKakaoLogin(
   }
 
   if (options.notifyUser !== false) {
-    environment.notify(KAKAO_NAVIGATION_COPY.EXTERNAL_BROWSER_NOTICE);
+    environment.notify(
+      `${KAKAO_NAVIGATION_COPY.EXTERNAL_BROWSER_NOTICE}\n\n${KAKAO_NAVIGATION_COPY.DRAFT_WARNING}`,
+    );
   }
 
   let leftCurrentPage = false;
-  const fallbackUrl = buildExternalKakaoStartUrl(environment.origin, startUrl);
+  const fallbackUrl = buildKakaoExternalGuideUrl(environment.origin, startUrl);
   let fallbackTimer: number | null = null;
   let removeExitListeners: () => void = () => {};
   const cancelFallback = () => {

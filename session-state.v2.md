@@ -1,3 +1,10 @@
+## 목표 지도
+
+- 최상위 목표: 목표를 선언한 사람이 로그인 뒤 목표를 안전하게 저장하고 응원 링크를 발급받는 해낼게 V2 소셜 루프. 정본 `docs/plan/haenael-v2-blueprint-v1.0.0-opus48.md`.
+- 현재 단계 목표: `build` 단계에서 카카오톡 인앱 브라우저 로그인 재발 결함을 수정하고, 운영 반영 전 로컬 계약과 실기기 QA 절차를 고정한다.
+- 이번 기능 목표: iOS·Android 카카오톡에서 외부 브라우저 로그인을 주 경로로 사용하고, callback 뒤 실제 세션 적용을 확인하며, 실패 시 안내 화면에 머물고 목표 저장 의도를 한 번만 소비한다.
+- 완료 증거: build, 전체 Vitest, pgTAP, callback 세션·fallback·`auth_error` Playwright, 디자인 토큰 검사. 운영 배포와 운영 데이터 쓰기는 범위 밖이다.
+
 ## 2026-11-15 16:25 KST · 2.3.1 qa 독립 검증 14차(Claude qa-verifier) VERDICT PASS
 - 한 것: 1f90c0f..a713b7b 결제창 높이 수정 판정. 6개 뷰포트 직접 재현(닫기 화면 안, 시트 탭 위, 시트 내 스크롤 후 결제 버튼 가려짐 없음, 주문 0), 단위 103/103, staging 회귀 44/45(SP-02 시험결함, 단독 재실행 통과). 3311 dev 종료, web/.next 는 /mnt/hdd/.trash-114/ 로 이동.
 - 남은 이슈: iOS 실기기 safe-area·운영 렌더 미검증, 닫기 버튼이 시트와 같이 스크롤돼 사라짐, TC 번호 미등록, summarize.mjs SHA 라벨 낡음, RELEASE.md qa_gate.approved 갱신 필요. 참고: 루트 레포 pipeline-state.v2.md 는 11-08 판으로 낡았고 실제 최신 로그는 hotfix 작업트리 것이라 여기에 기록함.
