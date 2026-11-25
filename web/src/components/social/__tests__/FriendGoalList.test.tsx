@@ -156,3 +156,24 @@ it("QA-TC-FD-05 카카오 http 아바타는 https로 렌더하고 실패하면 �
   fireEvent.error(image);
   expect(screen.getByTestId("friend-list-avatar-fallback")).toHaveTextContent("이");
 });
+
+it("QA-TC-FL-03 친구 활성 목표가 없어도 내 목표에 보낸 최근 응원을 숨기지 않는다", () => {
+  render(
+    <FriendGoalList friends={[{
+      friend_member_id: "friend-received",
+      nickname: "윤도경",
+      profile_image: null,
+      relationship_direction: "CHEERED_ME",
+      recent_message: "900점까지 같이 가자",
+      recent_message_goal_id: 99,
+      recent_message_goal_title: "토익 900 넘길게",
+      recent_message_direction: "RECEIVED",
+      goals: [],
+    }]} />,
+  );
+
+  expect(screen.getByTestId("friend-card")).toHaveTextContent(
+    "친구가 보냄 · 내 목표 ‘토익 900 넘길게’ · 900점까지 같이 가자",
+  );
+  expect(screen.queryByTestId("friend-goal-link")).not.toBeInTheDocument();
+});

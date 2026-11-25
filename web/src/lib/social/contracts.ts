@@ -36,6 +36,7 @@ export type SocialFriend = {
   relationship_direction: RelationshipDirection;
   recent_message: string | null;
   recent_message_goal_id?: number | null;
+  recent_message_goal_title?: string | null;
   recent_message_direction?: "SENT" | "RECEIVED" | null;
   goals: SocialGoal[];
 };

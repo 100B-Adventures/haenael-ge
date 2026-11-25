@@ -29,13 +29,14 @@ function objectParticle(name: string) {
 }
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, relationshipDirection, recentMessage, recentMessageGoalId, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
+  { friendId, nickname, profileImage, relationshipDirection, recentMessage, recentMessageGoalId, recentMessageGoalTitle, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
     relationshipDirection: RelationshipDirection;
     recentMessage?: string | null;
     recentMessageGoalId?: number | null;
+    recentMessageGoalTitle?: string | null;
     recentMessageDirection?: "SENT" | "RECEIVED" | null;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
@@ -127,13 +128,14 @@ export function FriendGoalDetail(
         />
         <p className="social-muted">{PRODUCT_COPY.TEXT_009}</p>
       </section>
-      {recentMessage && recentMessageGoalId === detail.goal_id && (
+      {recentMessage &&
+          (recentMessageDirection === "RECEIVED" || recentMessageGoalId === detail.goal_id) && (
         <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
           <strong className="friend-recent-cheer-direction">
             {recentMessageDirection === "SENT"
               ? "내가 보냄"
               : recentMessageDirection === "RECEIVED"
-                ? "친구가 보냄"
+                ? `친구가 보냄 · 내 목표 ‘${recentMessageGoalTitle ?? "목표"}’`
                 : "응원 메시지"}
           </strong>
           <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>

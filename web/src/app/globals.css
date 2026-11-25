@@ -108,11 +108,11 @@
   --violet-soft: #efecf7;
   --violet-line: #d6ceec;
   --violet-ink: #5b4b8a;
-
   /* shape · spacing · typography: DESIGN.md v2.0.0 YAML frontmatter */
   --radius-control: 12px;
   --radius-card: 14px;
   --radius-sheet: 20px;
+  --radius-full: 9999px;
   --space-mobile-gutter: 1.375rem;
   --space-page-y: 40px;
   --space-bottom-safe: 80px;
@@ -125,6 +125,7 @@
   --text-input-label: 13px;
   --text-label-small: 13px;
   --text-meta-micro: 13px;
+  --text-avatar-initial: 2rem;
   --shadow-sheet: 0 0.5rem 1.875rem rgb(0 0 0 / 12%);
   --tabbar-height: 64px;
   --tabbar-icon-size: 23px;
@@ -144,6 +145,7 @@
      이 값은 셸 밖 공개 화면(랜딩·법적 고지·공개 목표 본문·초대 수락 카드)에만 쓴다. */
   --receiver-native-width: 390px;
   --profile-avatar-size: 52px;
+  --friend-detail-avatar-size: 5.5rem;
   --wordmap-text-small: 1rem;
   --wordmap-text-medium: 1.25rem;
   --wordmap-text-large: 1.625rem;
@@ -4320,7 +4322,6 @@
     font-size: 0.875rem;
     line-height: 1.5;
   }
-
   .friend-detail-profile {
     display: flex;
     align-items: center;
@@ -4333,16 +4334,16 @@
   .friend-detail-avatar-large {
     position: relative;
     display: flex;
-    width: 5.5rem;
-    height: 5.5rem;
+    width: var(--friend-detail-avatar-size);
+    height: var(--friend-detail-avatar-size);
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     color: var(--clover-ink);
     background: var(--clover-soft);
-    font-size: 2rem;
+    font-size: var(--text-avatar-initial);
     font-weight: 950;
   }
   .friend-detail-avatar-large img {
@@ -4351,11 +4352,10 @@
   .friend-detail-profile > strong {
     min-width: 0;
     overflow: hidden;
-    font-size: 1rem;
+    font-size: var(--text-body);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
   .friend-cheer-goal-title {
     display: block;
     margin-top: var(--sp-1);

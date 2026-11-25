@@ -67,6 +67,26 @@ it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-onl
     .toHaveAttribute("href", "/invite");
 });
 
+it("QA-TC-FD-09 친구가 내 목표에 보낸 최근 응원은 다른 친구 목표 상세에서도 보인다", () => {
+  render(
+    <FriendGoalDetail
+      friendId="friend-a"
+      nickname="서연"
+      relationshipDirection="CHEERED_ME"
+      recentMessage="900점까지 같이 가자"
+      recentMessageGoalId={99}
+      recentMessageGoalTitle="토익 900 넘길게"
+      recentMessageDirection="RECEIVED"
+      detail={primary}
+      friendGoals={[primary]}
+    />,
+  );
+
+  const recent = screen.getByLabelText("최근 응원 메시지");
+  expect(recent).toHaveTextContent("친구가 보냄 · 내 목표 ‘토익 900 넘길게’");
+  expect(recent).toHaveTextContent("900점까지 같이 가자");
+});
+
 it("G4-FRIEND-HISTORY 친구 상세는 회원끼리 주고받은 문구·날짜·방향을 표시한다", () => {
   render(
     <FriendGoalDetail

@@ -9,6 +9,8 @@ type ScenarioArgs = {
   browser: Browser;
   email: string;
   ids: { owner: string; friend: string };
+  ownerGoal: number;
+  ownerGoalTitle: string;
   friendPublicGoal: number;
   friendFriendsGoal: number;
   runId: number;
@@ -29,12 +31,15 @@ export async function runFriendGoalAlignmentScenario({
   browser,
   email,
   ids,
+  ownerGoal,
+  ownerGoalTitle,
   friendPublicGoal,
   friendFriendsGoal,
   runId,
   isoDateFromNow,
 }: ScenarioArgs) {
   const message = `새 목표 전용 응원 ${runId}`;
+  const receivedMessage = `친구가 내 목표에 보낸 응원 ${runId}`;
   const captureDir = process.env.E2E_CAPTURE_DIR ??
     "test-results/friend-goal-alignment";
   const capturePath = `${captureDir}/friend-detail-vertical-avatar-390.png`;
@@ -43,6 +48,8 @@ export async function runFriendGoalAlignmentScenario({
   const kakaoHttpAvatar = "http://k.kakaocdn.net/e2e/avatar.png";
   let paymentId = 0;
   let cheerId = 0;
+  let receivedPaymentId = 0;
+  let receivedCheerId = 0;
   let welcomeOnlyGoal = 0;
   const context = await authContext(browser, email);
   await context.route("https://k.kakaocdn.net/e2e/avatar.png", async (route) => {
@@ -110,8 +117,50 @@ export async function runFriendGoalAlignmentScenario({
     expect(listAvatar.naturalWidth).toBeGreaterThan(0);
     expect(listAvatar.currentSrc.startsWith("https://")).toBe(true);
 
+    const { data: receivedPayment, error: receivedPaymentError } = await admin.from("payment")
+      .insert({
+        order_id: `friend-received-${runId}`,
+        amount_krw: 1000,
+        status: "DONE",
+        payment_key: `friend-received-key-${runId}`,
+        pg_customer_key: "SOCIAL_E2E",
+      }).select("id").single();
+    if (receivedPaymentError || !receivedPayment) {
+      throw receivedPaymentError ?? new Error("received_payment_failed");
+    }
+    receivedPaymentId = receivedPayment.id;
+    const { data: receivedCheer, error: receivedCheerError } = await admin.from("cheer")
+      .insert({
+        goal_id: ownerGoal,
+        display_name: "윤도경",
+        is_anonymous: false,
+        message: receivedMessage,
+        clover_amount: 1,
+        payment_id: receivedPaymentId,
+        status: "CONFIRMED",
+        created_at: new Date(Date.now() + 120_000).toISOString(),
+      }).select("id").single();
+    if (receivedCheerError || !receivedCheer) {
+      throw receivedCheerError ?? new Error("received_cheer_failed");
+    }
+    receivedCheerId = receivedCheer.id;
+    const { error: receivedAttributionError } = await admin
+      .from("social_cheer_member_attribution")
+      .insert({ cheer_id: receivedCheerId, supporter_member_id: ids.friend });
+    if (receivedAttributionError) throw receivedAttributionError;
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const receivedCard = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+    await expect(receivedCard.locator(".friend-list-news-message")).toContainText(
+      `친구가 보냄 · 내 목표 ‘${ownerGoalTitle}’ · ${receivedMessage}`,
+    );
+
     await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`, { waitUntil: "domcontentloaded" });
     await expect(page.locator(".friend-recent-cheer").filter({ hasText: message })).toHaveCount(0);
+    await expect(page.locator(".friend-recent-cheer")).toContainText(
+      `친구가 보냄 · 내 목표 ‘${ownerGoalTitle}’`,
+    );
+    await expect(page.locator(".friend-recent-cheer")).toContainText(receivedMessage);
     const historyItem = page.getByTestId("friend-cheer-history-item").filter({ hasText: message });
     await expect(historyItem).toContainText("매달 책 한 권 읽을게");
     const detailAvatar = await waitForLoadedImage(page.getByTestId("friend-detail-avatar-image"));
@@ -135,6 +184,7 @@ export async function runFriendGoalAlignmentScenario({
     await expect(page.locator(".friend-supporter-stack")).toHaveCount(0);
     console.info("FRIEND_REGRESSION_RESULTS", JSON.stringify({
       "QA-TC-FL-02": { passed: 3, failed: 0 },
+      "QA-TC-FL-03": { passed: 1, failed: 0 },
       "QA-TC-FD-04": { passed: 2, failed: 0 },
       "QA-TC-FD-05": { passed: 4, failed: 0 },
       "QA-TC-FD-06": { passed: 4, failed: 0 },
@@ -154,8 +204,13 @@ export async function runFriendGoalAlignmentScenario({
     await admin.from("member").update({ profile_image: originalProfile }).eq("id", ids.friend);
     await admin.from("goal").update({ cover_preset_key: "c3" }).eq("id", friendFriendsGoal);
     if (cheerId) await admin.from("social_cheer_member_attribution").delete().eq("cheer_id", cheerId);
+    if (receivedCheerId) {
+      await admin.from("social_cheer_member_attribution").delete().eq("cheer_id", receivedCheerId);
+    }
     if (cheerId) await admin.from("cheer").delete().eq("id", cheerId);
+    if (receivedCheerId) await admin.from("cheer").delete().eq("id", receivedCheerId);
     if (paymentId) await admin.from("payment").delete().eq("id", paymentId);
+    if (receivedPaymentId) await admin.from("payment").delete().eq("id", receivedPaymentId);
     if (welcomeOnlyGoal) await admin.from("goal").delete().eq("id", welcomeOnlyGoal);
   }
 }

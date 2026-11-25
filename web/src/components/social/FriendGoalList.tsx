@@ -57,9 +57,14 @@ export function FriendGoalList({
           const primaryGoal = friend.goals.find((goal) =>
             goal.goal_id === friend.recent_message_goal_id
           ) ?? friend.goals[0];
-          const recentMessage = primaryGoal?.goal_id === friend.recent_message_goal_id
-            ? friend.recent_message
+          const receivedMessage = friend.recent_message_direction === "RECEIVED" &&
+              friend.recent_message
+            ? `${PRODUCT_COPY.TEXT_018} ‘${friend.recent_message_goal_title ?? PRODUCT_COPY.TEXT_019}’ · ${friend.recent_message}`
             : null;
+          const recentMessage = receivedMessage ??
+            (primaryGoal?.goal_id === friend.recent_message_goal_id
+              ? friend.recent_message
+              : null);
           const nickname = friend.nickname ?? PRODUCT_COPY.TEXT_012;
           const progress = primaryGoal
             ? primaryGoal.cheer_count >= 10
@@ -109,15 +114,6 @@ export function FriendGoalList({
                       </span>
                     </span>
                   </Link>
-                  <div className="friend-list-news">
-                    <MessageCircle aria-hidden="true" />
-                    <ClampText
-                      className="friend-list-news-message"
-                      toggleLabel={`${nickname}의 최근 응원 내용`}
-                    >
-                      {recentMessage || PRODUCT_COPY.TEXT_013}
-                    </ClampText>
-                  </div>
                 </>
               ) : (
                 <div className="friend-list-main">
@@ -135,6 +131,17 @@ export function FriendGoalList({
                       direction={friend.relationship_direction}
                     />
                   </span>
+                </div>
+              )}
+              {(primaryGoal || recentMessage) && (
+                <div className="friend-list-news">
+                  <MessageCircle aria-hidden="true" />
+                  <ClampText
+                    className="friend-list-news-message"
+                    toggleLabel={`${nickname}의 최근 응원 내용`}
+                  >
+                    {recentMessage || PRODUCT_COPY.TEXT_013}
+                  </ClampText>
                 </div>
               )}
             </article>
