@@ -7,6 +7,12 @@
 - 마지막 회장 요청: <task-notification> <task-id>ac46cebaabcf19937</task-id> <tool-use-id>toolu_017EkLSRijvCU9NYNC2pPdqz</tool-use-id> <output-file>/tmp/claude-1000/-Users-sj-sj-code-master-haenael-ge/962fde97-b9b2-4a5c-9ce9-7be7ef3778ca/tasks/ac46cebaabcf19937.output</output-file> <status>completed</status> <summary>A
 - ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 
+## [2026-11-25 23:20 KST] 이다솔 재시도 성공 · iOS 가설 철회 · QA 구멍 보강 위임
+- 관찰: 22:14 이다솔 로그인 후 iPhone 요청 28건, UA "iPhone OS 18_7 … KAKAOTALK/26." → static block 가설 틀림(철회, mistake-ledger 23:1x). 앞선 실패 원인은 미확정(회장 추정 = 옛 배포 화면 캐시).
+- Supabase 로그 보관: edge_logs 가장 오래된 기록 = 조회 시점 24시간 전(11-24 14:20Z) → 1일. Vercel 런타임 30분.
+- QA 구멍 관찰: check-deploy-env 는 이름만 확인(암호문 값 통과), Production Read-only E2E 11-24 04:56·05:18(402)·11-25 04:10 실패 알림 없음, 범위는 환전 읽기 화면뿐. iOS(VM 120)·Android(LXC 115) QA 기계는 꺼져 있음.
+- 위임: Codex(haenael-ge-ios 브랜치) 환경값 값 검사, 운영 E2E 확장(버전·결제 버튼·카카오 SDK·모바일 UA), 실패 Slack 알림, 브라우저 요청에 x-app-version 헤더, qa-tracker 배포 직후 목록. 로그 scratchpad/codex-qa.log.
+
 ## [2026-11-25 23:05 KST] 로그인 수정 7856fe2 3회차 리뷰 중
 - Codex fix4 → 7856fe2(JS 없이도 pending 서버 redirect, external 서버 렌더 링크). build 0, Vitest 623, Playwright 6/6 주장(로그 review2-*.log). 같은 리뷰어 3회차 진행.
 - 회장 답 대기: "운영 배포해"(iOS c5bd7d7, 미리보기 dpl_AcA34Nkgpkg8hHUigZ1FDxx3FXUS), "환불해"(주문 29 API 취소), "결제 꺼". 이다솔 iOS 버전.
