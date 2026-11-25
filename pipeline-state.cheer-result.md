@@ -27,17 +27,21 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 # Pipeline State — haenael-ge · cheer-result(응원 결과 공유)
 
 ## 산출물 체크리스트
-### plan  ⏳ (todo)
-- [ ] docs/prd-*-v*.md
-- [ ] docs/one-thing.md
-- [ ] docs/persona.md
-- [ ] docs/bm.md
-- [ ] docs/risks.md
+### plan  ⏳ (in-progress, 미승인)
+<!-- 경로는 product-lane.yaml stages.plan.artifacts 기준(docs/plan/…)으로 바로잡음. 템플릿의 docs/ 바로 아래 경로는 이 저장소 구조와 다르다 -->
+- [x] docs/plan/prd-haenael-ge-v0.5.0-claude-opus-20261125-2344.md — §15 응원 결과 공유(기반 v0.4.0). 초안, plan-critic 비평 전
+- [ ] docs/plan/one-thing.md — v0.5.0 §15.12 대로 "해냄 인증 범위 밖" 줄 개정 필요(미착수)
+- [ ] docs/plan/persona.md — B-1 결핍 한 줄 추가 필요(미착수)
+- [ ] docs/plan/bm.md — 변경 없음 판정(§15.12), 승인 시 v0.4 계승 핀으로 처리
+- [ ] docs/plan/risks.md — R-1 알림톡 영구 중지·R-3 실패 수치심 신설 필요(미착수)
+- [x] docs/plan/references/cheer-result/refs.json — 벤치마크 7건 + 캡처 7장
+- [ ] 회장 결정 3건(PRD §15.14) 회수 · plan-critic 비평 사이클 · feature-drop-check
 
 <!-- design/eng-design/build/qa/ship 체크리스트는 /pipeline 이 단계 진입 시 stages.yaml artifacts 로 자동 생성 -->
 
 ## 승인 로그 (append-only)
 <!-- /approve 가 한 줄씩 추가: "YYYY-MM-DD HH:MM KST — <stage> APPROVED — <note> (artifacts: <pinned>)" -->
+2026-11-25 23:5x KST — plan DRAFT SUBMITTED(미승인) — prd-architect(claude-opus-5-5)가 PRD v0.5.0 §15 응원 결과 공유 초안과 레퍼런스 팩 7건을 냈다. 추천 = 안 A(결과 화면 + 공유 카드, 알림톡 텍스트 1종 신청자 한정 1회). 회장 결정 3건(기존 응원자 알림톡, 실패 결과 공개 기본값, 템플릿 심사 제출) 대기. 다음 = plan-critic 비평. (artifacts: docs/plan/prd-haenael-ge-v0.5.0-claude-opus-20261125-2344.md, docs/plan/references/cheer-result/refs.json)
 
 ## Blocked / Notes
 <!-- 막힌 사유·다음 액션. 다른 세션이 30초 안에 재개 가능하게. -->
