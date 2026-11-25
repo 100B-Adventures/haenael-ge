@@ -16,12 +16,23 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@/lib/supabase/route-handler";
+import { createServiceRoleClient } from "@/lib/supabase/service";
 import { markAuthConversion } from "@/lib/auth/signup-mark";
 import {
   KAKAO_OAUTH_NONCE_COOKIE,
   parseOAuthState,
   timingSafeEqualString,
 } from "@/lib/auth/kakao-state";
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
+  );
+  return Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+}
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -72,6 +83,30 @@ export async function GET(request: NextRequest) {
   if (!supabaseUrl || !anonKey || !appUrl) {
     console.error("[auth/kakao/callback] missing env vars");
     const response = NextResponse.redirect(new URL("/?auth_error=config_error", request.url));
+    response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+    return response;
+  }
+
+  // 카카오톡 인앱 브라우저가 같은 callback을 동시에 여러 번 요청해도 EF의
+  // generate_link는 한 번만 실행한다. code 원문은 저장하지 않고 SHA-256만
+  // 15분 claim하며, claim 장애는 세션 경쟁을 재발시키지 않도록 fail closed한다.
+  try {
+    const codeHash = await sha256Hex(code);
+    const { data: claimed, error: claimError } = await createServiceRoleClient()
+      .rpc("claim_kakao_oauth_callback", { p_code_hash: codeHash });
+    if (claimError) throw claimError;
+    if (!claimed) {
+      const duplicateResponse = NextResponse.redirect(
+        new URL(redirectTo, request.url),
+      );
+      duplicateResponse.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
+      return duplicateResponse;
+    }
+  } catch (claimError) {
+    console.error("[auth/kakao/callback] callback claim failed", claimError);
+    const response = NextResponse.redirect(
+      new URL("/?auth_error=callback_claim_failed", request.url),
+    );
     response.cookies.delete(KAKAO_OAUTH_NONCE_COOKIE);
     return response;
   }

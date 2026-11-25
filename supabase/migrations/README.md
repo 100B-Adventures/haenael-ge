@@ -21,6 +21,7 @@
 | `20260714130000_release_review_fixes.sql` | 리드 IP 해시 제한·부분취소 검토 마커·멱등 리스크 이벤트 |
 | `20261107010000_payment_conversion_claim.sql` | 결제 브라우저 전환 원자 claim. 웹훅 선확정 첫 callback 허용·이후 replay 차단 |
 | `20261107020000_payment_conversion_delivery_lease.sql` | 영구 claim을 만료 가능한 pending lease로 교체. 브라우저는 ack하지 않고 stable event id로 at-least-once 재시도·provider dedupe |
+| `20261125010000_kakao_oauth_callback_claim.sql` | 카카오 authorization code SHA-256을 15분간 원자 claim해 중복 callback의 EF·세션 발급 경쟁 차단 |
 
 ## 명령어
 

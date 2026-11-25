@@ -16,6 +16,7 @@ import { CheerPaymentButton } from "@/components/goal/CheerPaymentButton";
 import { OwnerBar } from "@/components/goal/OwnerBar";
 import { GoalCover } from "@/components/social/GoalCover";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
+import { KakaoLoginLink } from "@/components/auth";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-g-slug-page";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -175,12 +176,11 @@ export default async function GoalPublicPage({ params }: Props) {
                 className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
                 data-testid="relogin-hint"
               >{PRODUCT_COPY.TEXT_006}{" "}
-                <Link
-                  href={`/auth/kakao/start?redirect=${encodeURIComponent(`/g/${slug}#cheer`)}`}
-                  prefetch={false}
+                <KakaoLoginLink
+                  redirectPath={`/g/${slug}#cheer`}
                   className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
                   data-testid="relogin-link"
-                >{PRODUCT_COPY.TEXT_007}</Link>
+                >{PRODUCT_COPY.TEXT_007}</KakaoLoginLink>
               </p>
             )}
           </div>

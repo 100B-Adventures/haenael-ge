@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
 import { WordmapCloudLayout } from "@/components/goal/WordmapCloudLayout";
+import { KakaoLoginLink } from "@/components/auth";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-page";
 
 export const metadata: Metadata = {
@@ -136,12 +137,11 @@ export default async function LandingPage() {
               kauth.kakao.com 을 가리키고, 그 크로스 오리진 요청이 우리 CSP
               connect-src 에 막혀 모든 방문자 콘솔에 에러가 찍힌다. 카카오는
               최상위 리다이렉트로만 쓰므로 CSP 를 여는 대신 prefetch 를 끈다. */}
-          <Link
-            href="/auth/kakao/start?redirect=/me"
-            prefetch={false}
+          <KakaoLoginLink
+            redirectPath="/me"
             className="landing-approved-relogin-link"
             data-testid="landing-relogin-link"
-          >{PRODUCT_COPY.TEXT_014}</Link>
+          >{PRODUCT_COPY.TEXT_014}</KakaoLoginLink>
         </p>
       </div>
     </main>

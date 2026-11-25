@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { Clover, X } from "lucide-react";
 import { loadTossPayments } from "@/lib/toss";
 import { trackEvent } from "@/lib/analytics";
 import { KRW_PER_CLOVER, krwFromClover } from "@/lib/clover";
 import { createClient } from "@/lib/supabase/client";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-cheerpaymentbutton";
+import { KakaoLoginLink } from "@/components/auth/KakaoLoginLink";
+import { buildKakaoStartUrl, startKakaoLogin } from "@/lib/auth/kakao-navigation";
 
 // 클로버 개수 프리셋(2026-07-21, 회장 지시: "1000개가 아니고 1개, 더 큰 금액 예
 // 1만개도 보낼수있게") — 프리셋은 1/3/5/10클로버(=1천~1만원), 그 외엔 직접입력으로
@@ -113,7 +114,8 @@ export function CheerPaymentButton({
   const sheetOpenRef = useRef(false);
   const paymentAttemptRef = useRef(0);
   const paymentWindowRef = useRef<DestroyablePaymentSurface | null>(null);
-  const loginHref = `/auth/kakao/start?redirect=${encodeURIComponent(`/g/${goalSlug}#cheer`)}`;
+  const loginRedirectPath = `/g/${goalSlug}#cheer`;
+  const loginHref = buildKakaoStartUrl(loginRedirectPath);
 
   useEffect(
     () => () => {
@@ -344,7 +346,7 @@ export function CheerPaymentButton({
     } catch (e) {
       if (paymentAttemptRef.current === paymentAttempt) {
         if (e instanceof Error && e.message === "cheer_order:login_required") {
-          window.location.assign(loginHref);
+          startKakaoLogin(loginHref);
           return;
         }
         setError(paymentErrorMessage(e));
@@ -370,16 +372,15 @@ export function CheerPaymentButton({
           </button>
         )
         : (
-          <Link
-            href={loginHref}
-            prefetch={false}
+          <KakaoLoginLink
+            redirectPath={loginRedirectPath}
             className="w-full flex min-h-[var(--tap-min-size)] items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]! transition-transform active:translate-y-px"
             data-testid="cheer-cta"
             aria-label="카카오 로그인 후 응원하기"
           >
             <span aria-hidden="true">🍀</span>
             카카오 로그인 후 응원하기
-          </Link>
+          </KakaoLoginLink>
         )}
 
       {open && (

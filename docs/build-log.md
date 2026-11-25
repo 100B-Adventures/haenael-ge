@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-25 2.4.x 카카오톡 인앱 로그인 복귀
+
+- 카카오 로그인 진입을 `KakaoLoginLink`·`startKakaoLogin`으로 통합했다. `KAKAOTALK` UA는 외부 브라우저 안내 뒤 `openExternal` 스킴을 시도하며, 실패 시 `external_browser=1` 기존 OAuth로 진행한다. `/auth/kakao/start`도 직접 접근을 외부 안내 화면으로 보낸다.
+- `claim_kakao_oauth_callback` service-role RPC와 SHA-256 claim 테이블을 추가했다. 동일 code의 두 번째 callback은 EF·`verifyOtp`를 호출하지 않고 원래 화면으로 복귀한다.
+- 온보딩은 Auth 초기·갱신 이벤트와 focus·visibility 복귀에 세션을 재조회하고, 기존 save intent 자동 저장을 정확히 한 번 실행한다.
+- 증거: TypeScript·전체 Vitest 101파일 609건, pgTAP 8건, DB 동시 claim 8건 중 true 1·false 7, Playwright 2건, design-token 신규 위반 0, lint exit 0, Next production build exit 0. 운영 배포·main push는 하지 않았다.
+
+> STAMP: 2026-11-25 17:57 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=운영 edge_logs 원인 증거, Supabase Auth 공식 문서, Kakao UA 공식 문서, 로컬 pgTAP·동시성·헤드리스 E2E · 고민=공식 문서에 없는 스킴을 단독 성공 경로로 두지 않고 기존 OAuth fallback을 보존했다.
+
 ## 2026-11-21 2.3.2 카카오톡 초대 수정
 
 - web/next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가(043203e), form-action 에 sharer.kakao.com·accounts.kakao.com 추가(11-21, staging 실측으로 043203e 만으로는 공유창 미열림 확인). security-headers 단위 시험 07·08.

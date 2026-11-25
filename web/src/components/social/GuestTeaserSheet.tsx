@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { X } from "lucide-react";
 import { GUEST_PREVIEW } from "@/lib/copy/guest-preview";
+import { KakaoLoginLink } from "@/components/auth/KakaoLoginLink";
 
 export function GuestTeaserSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
@@ -26,20 +26,14 @@ export function GuestTeaserSheet({ open, onClose }: { open: boolean; onClose: ()
           <strong>{GUEST_PREVIEW.sampleGoal}</strong>
         </div>
         <p className="social-description">{GUEST_PREVIEW.description}</p>
-        <Link
-          href="/auth/kakao/start?redirect=%2Fme"
+        <KakaoLoginLink
+          redirectPath="/me"
+          resolveRedirectPath={() =>
+            window.location.pathname === "/" ? "/me" : window.location.pathname}
           className="social-primary-action"
-          prefetch={false}
-          onClick={(event) => {
-            // 로그인 뒤에는 보던 화면(예: 친구의 공개 목표)으로 돌아온다. 홈(/)에서 열었을 때만 내 화면(/me).
-            const current = window.location.pathname;
-            const back = current === "/" ? "/me" : current;
-            event.preventDefault();
-            window.location.assign(`/auth/kakao/start?redirect=${encodeURIComponent(back)}`);
-          }}
         >
           {GUEST_PREVIEW.primaryAction}
-        </Link>
+        </KakaoLoginLink>
         <button type="button" className="social-secondary-action" onClick={onClose}>
           {GUEST_PREVIEW.secondaryAction}
         </button>

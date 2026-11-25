@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { KakaoLoginLink } from "@/components/auth/KakaoLoginLink";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-auth-phoneconsentnotice";
 
 const PHONE_CONSENT_PENDING_KEY = "haenael_phone_consent_pending";
@@ -71,10 +71,9 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
       <p className="mt-1 text-balance text-[length:var(--text-meta-micro)]! leading-relaxed text-accent-foreground">
         {description}
       </p>
-      <Link
-        href={`/auth/kakao/start?redirect=${encodeURIComponent(redirectPath)}`}
-        prefetch={false}
-        onClick={() => {
+      <KakaoLoginLink
+        redirectPath={redirectPath}
+        onBeforeNavigate={() => {
           window.sessionStorage.setItem(
             PHONE_CONSENT_PENDING_KEY,
             redirectPath,
@@ -82,7 +81,7 @@ export function PhoneConsentNotice({ hasPhone, redirectPath, context }: Props) {
         }}
         className="mt-3 block rounded-[12px] bg-[#FEE500] px-4 py-3 text-center text-[13px] font-extrabold text-[#191600]"
         data-testid="phone-consent-cta"
-      >{PRODUCT_COPY.TEXT_004}</Link>
+      >{PRODUCT_COPY.TEXT_004}</KakaoLoginLink>
     </section>
   );
 }

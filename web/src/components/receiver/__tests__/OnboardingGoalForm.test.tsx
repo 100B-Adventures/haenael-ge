@@ -14,7 +14,7 @@
 // 오류로 오고, 온보딩 폼은 /me로 쫓아내지 않고 draft를 보존한 채 인라인 안내만 한다.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { User } from "@supabase/supabase-js";
 import { OnboardingGoalForm } from "../OnboardingGoalForm";
 
@@ -29,9 +29,14 @@ const mockInvoke = vi.fn();
 const mockGoalLookup = vi.fn();
 const mockFetch = vi.fn();
 const mockTrackEvent = vi.fn();
-const mockOnAuthStateChange = vi.fn(() => ({
-  data: { subscription: { unsubscribe: vi.fn() } },
-}));
+const mockGetUser = vi.fn();
+let authStateCallback: ((event: string, session: { user: User } | null) => void) | null = null;
+const mockOnAuthStateChange = vi.fn((
+  callback: (event: string, session: { user: User } | null) => void,
+) => {
+  authStateCallback = callback;
+  return { data: { subscription: { unsubscribe: vi.fn() } } };
+});
 
 // 기본값은 성공(slug 반환). 상한 초과 테스트만 이 값을 override.
 let mockRpcResult: { data: unknown; error: { message: string } | null } = {
@@ -45,7 +50,10 @@ vi.mock("@/lib/analytics", () => ({
 
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
-    auth: { onAuthStateChange: mockOnAuthStateChange },
+    auth: {
+      onAuthStateChange: mockOnAuthStateChange,
+      getUser: mockGetUser,
+    },
     from: () => ({
       select: () => ({
         eq: () => ({ single: () => mockGoalLookup() }),
@@ -73,6 +81,11 @@ function fillForm() {
 describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장 2026-07-19)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authStateCallback = null;
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: "test_session_unavailable" },
+    });
     localStorage.clear();
     mockRpcResult = { data: [{ slug: "test-slug" }], error: null };
     mockGoalLookup.mockResolvedValue({ data: { id: 101 }, error: null });
@@ -169,6 +182,54 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
 
     // 커밋 후 draft/의도 플래그는 정리돼 재커밋되지 않아야 함
     expect(hasSaveIntent()).toBe(false);
+  });
+
+  it("⑧ INITIAL_SESSION·TOKEN_REFRESHED가 겹쳐도 저장 의도를 한 번만 커밋한다", async () => {
+    localStorage.setItem(
+      "haenael_goal_draft",
+      JSON.stringify({
+        title: "편입 평점 4.0",
+        reason: "",
+        due_date: "2026-12-31",
+        savedAt: new Date().toISOString(),
+      }),
+    );
+    localStorage.setItem("haenael_save_intent", "1");
+    render(<OnboardingGoalForm initialUser={null} />);
+
+    await waitFor(() => expect(authStateCallback).not.toBeNull());
+    act(() => {
+      authStateCallback?.("INITIAL_SESSION", { user: fakeUser });
+      authStateCallback?.("TOKEN_REFRESHED", { user: fakeUser });
+    });
+
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledTimes(1));
+  });
+
+  it("⑨ 다른 탭 로그인 후 focus 복귀 시 getUser 재조회로 자동 저장한다", async () => {
+    localStorage.setItem(
+      "haenael_goal_draft",
+      JSON.stringify({
+        title: "편입 평점 4.0",
+        reason: "",
+        due_date: "2026-12-31",
+        savedAt: new Date().toISOString(),
+      }),
+    );
+    localStorage.setItem("haenael_save_intent", "1");
+    mockGetUser
+      .mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: "not_signed_in" },
+      })
+      .mockResolvedValue({ data: { user: fakeUser }, error: null });
+    render(<OnboardingGoalForm initialUser={null} />);
+
+    await waitFor(() => expect(mockGetUser).toHaveBeenCalledTimes(1));
+    fireEvent.focus(window);
+
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledTimes(1));
+    expect(mockGetUser).toHaveBeenCalledTimes(2);
   });
 
   it("이미 로그인된 사용자가 저장 버튼을 누르면 즉시 저장(정상 유지)", async () => {

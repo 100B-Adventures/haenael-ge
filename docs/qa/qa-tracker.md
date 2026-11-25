@@ -1,5 +1,7 @@
 # QA Tracker — haenael-ge
 
+> 🔧 로컬 보정 (2026-11-25): iOS 카카오톡 인앱 브라우저의 외부 브라우저 전환+fallback, callback code 원자 claim, `/onboarding` focus·visibility 세션 재조회와 저장 의도 1회 소비를 구현했다. 로컬 DB 동시성 true 1/false 7, pgTAP 8/8, 헤드리스 Chromium 2/2, 전체 Vitest 609/609, build 0을 확인했다. 운영 반영·실사용자 이다솔 재검증은 범위 밖이므로 QA 완료로 전환하지 않는다.
+
 | 표지 | 값 |
 |---|---|
 | 현재 보고 버전 | v2.2.0 (2026-11-12, 업데이트 의견·회원 본 버전 동기화) |

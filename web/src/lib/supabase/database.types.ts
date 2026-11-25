@@ -1295,6 +1295,10 @@ export type Database = {
     Functions: {
       accept_friend_invite: { Args: { token: string }; Returns: Json }
       account_withdrawal_eligibility: { Args: never; Returns: Json }
+      claim_kakao_oauth_callback: {
+        Args: { p_code_hash: string }
+        Returns: boolean
+      }
       activate_my_profile_avatar_service: {
         Args: {
           p_asset_id: string

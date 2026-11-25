@@ -18,6 +18,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isSafeRedirectPath } from "@/lib/auth/redirect-path";
+import { buildKakaoStartUrl, startKakaoLogin } from "@/lib/auth/kakao-navigation";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-auth-loginsheet";
 // useAppStore: draft 상태 읽기 용도 (이 컴포넌트에서 직접 사용하진 않으나 향후 확장점)
 // import { useAppStore } from "@/store";
@@ -42,10 +43,6 @@ export interface LoginSheetProps {
 // /auth/kakao/start 를 경유한다. 그 라우트가 암호학적 nonce를 생성해
 // httpOnly 쿠키에 저장하고 state에 실어 카카오로 리다이렉트한다.
 // callback은 쿠키의 nonce와 state의 nonce를 대조(CSRF 방지).
-
-function buildKakaoStartUrl(redirectAfterLogin: string): string {
-  return `/auth/kakao/start?redirect=${encodeURIComponent(redirectAfterLogin)}`;
-}
 
 // ─── 구글/애플 OAuth (Supabase 네이티브) ────────────────────────────────────
 //
@@ -124,7 +121,7 @@ export function LoginSheet({
       );
       return;
     }
-    window.location.href = buildKakaoStartUrl(redirectAfterLogin);
+    startKakaoLogin(buildKakaoStartUrl(redirectAfterLogin));
   };
 
   // 배경 클릭으로 닫기

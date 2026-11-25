@@ -39,6 +39,7 @@ Object.defineProperty(window, "location", {
     set href(url: string) {
       mockAssign(url);
     },
+    assign: mockAssign,
   },
   writable: true,
 });

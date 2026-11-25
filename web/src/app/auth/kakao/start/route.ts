@@ -15,6 +15,10 @@ import {
   generateOAuthNonce,
 } from "@/lib/auth/kakao-state";
 import { isSafeRedirectPath } from "@/lib/auth/redirect-path";
+import {
+  KAKAO_EXTERNAL_BROWSER_QUERY,
+  isKakaoTalkInAppBrowser,
+} from "@/lib/auth/kakao-navigation";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -22,6 +26,15 @@ export async function GET(request: NextRequest) {
   const redirectPath = isSafeRedirectPath(requestedRedirect)
     ? requestedRedirect
     : "/onboarding";
+
+  if (
+    isKakaoTalkInAppBrowser(request.headers.get("user-agent") ?? "") &&
+    url.searchParams.get(KAKAO_EXTERNAL_BROWSER_QUERY) !== "1"
+  ) {
+    const externalPage = new URL("/auth/kakao/external", request.url);
+    externalPage.searchParams.set("redirect", redirectPath);
+    return NextResponse.redirect(externalPage);
+  }
 
   const kakaoClientId = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? url.origin;

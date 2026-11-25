@@ -8,7 +8,7 @@
 //  idle → filling (사용자 입력) → login-required (미인증) → saving (DB insert) → done (SlinkCard)
 //  로그인 후 복귀: 마운트 시 user 있고 draft 있으면 → auto-save
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Check } from "lucide-react";
 import { LoginSheet } from "@/components/auth";
@@ -181,7 +181,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
-  const [autoSaveDone, setAutoSaveDone] = useState(false);
+  const autoSaveStartedRef = useRef(false);
   const [coverPreset, setCoverPreset] = useState<GoalCoverPresetKey | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
@@ -192,6 +192,49 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
   useEffect(() => () => {
     if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl);
   }, [coverPreviewUrl]);
+
+  const commitPendingDraft = useCallback(async (authenticatedUser: User | null) => {
+    if (
+      !authenticatedUser ||
+      autoSaveStartedRef.current ||
+      !hasSaveIntent()
+    ) return;
+
+    const draft = loadDraft();
+    if (!draft) return;
+
+    // INITIAL_SESSION, SIGNED_IN, focus, visibilitychange가 연달아 와도 동일한
+    // 저장 의도는 한 번만 소비한다.
+    autoSaveStartedRef.current = true;
+    setIsSaving(true);
+    setSaveError(null);
+    const restoredCoverFile = await loadDraftCoverFile().catch(() => null);
+    const result = await saveGoalToDB(
+      {
+        title: draft.title,
+        reason: draft.reason ?? "",
+        due_date: draft.due_date || defaultDueDate(),
+      },
+      coverKeyOrNull(draft.cover_preset_key),
+      restoredCoverFile,
+    );
+    setIsSaving(false);
+    clearSaveIntent();
+    if ("goalLimitReached" in result) {
+      setSaveError(
+        "진행 중인 목표가 이미 3개예요. 하나를 마무리한 뒤 새로 만들어 주세요.",
+      );
+    } else if ("error" in result) {
+      setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
+    } else {
+      clearDraft();
+      await clearDraftCoverFile().catch(() => undefined);
+      savePendingSlug(result.slug);
+      setCoverUploadWarning(result.coverUploadWarning ?? null);
+      setSavedSlug(result.slug);
+      trackEvent("goal_created", { source: "oauth_return" });
+    }
+  }, []);
 
   // ── 마운트: draft 복원 + 로그인 후 자동저장 ─────────────────────────────────
   useEffect(() => {
@@ -219,50 +262,56 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         due_date: draft.due_date || defaultDueDate(),
       });
 
-      // 링크는 로그인 이후에만 발급(회장 2026-07-19): 세션(user)만으로는 자동
-      // 커밋하지 않는다. 저장 의도가 있는 draft만 OAuth 복귀 뒤 한 번 저장한다.
-      if (user && !autoSaveDone && hasSaveIntent()) {
-        setAutoSaveDone(true);
-        setIsSaving(true);
-        const result = await saveGoalToDB(
-          {
-            title: draft.title,
-            reason: draft.reason ?? "",
-            due_date: draft.due_date || defaultDueDate(),
-          },
-          restoredPreset,
-          restoredCoverFile,
-        );
-        setIsSaving(false);
-        clearSaveIntent();
-        if ("goalLimitReached" in result) {
-          setSaveError(
-            "진행 중인 목표가 이미 3개예요. 하나를 마무리한 뒤 새로 만들어 주세요.",
-          );
-        } else if ("error" in result) {
-          setSaveError("저장 중 오류가 발생했어요. 다시 시도해 주세요.");
-        } else {
-          clearDraft();
-          await clearDraftCoverFile().catch(() => undefined);
-          savePendingSlug(result.slug);
-          setCoverUploadWarning(result.coverUploadWarning ?? null);
-          setSavedSlug(result.slug);
-          trackEvent("goal_created", { source: "oauth_return" });
-        }
-      }
+      // 링크는 로그인 이후에만 발급(회장 2026-07-19): 저장 의도가 있는
+      // draft만 OAuth 복귀 뒤 한 번 저장한다.
+      await commitPendingDraft(initialUser);
     })();
-    // user 상태 변화도 감지 (Supabase 세션 변화)
+
+  }, [commitPendingDraft, initialUser]);
+
+  // 다른 탭·외부 브라우저에서 로그인한 뒤 돌아오는 경로도 세션을 다시 읽는다.
+  useEffect(() => {
     const supabase = createClient();
+    let active = true;
+
+    const applyAuthenticatedUser = (nextUser: User | null) => {
+      if (!active) return;
+      setUser(nextUser);
+      void commitPendingDraft(nextUser);
+    };
+
+    const refreshUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (!active || error) return;
+      applyAuthenticatedUser(data.user);
+    };
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (session?.user && event === "SIGNED_IN") {
-          setUser(session.user);
+        if (
+          event === "INITIAL_SESSION" ||
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED"
+        ) {
+          applyAuthenticatedUser(session?.user ?? null);
         }
       },
     );
-    return () => authListener.subscription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const handleFocus = () => void refreshUser();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") void refreshUser();
+    };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+    void refreshUser();
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [commitPendingDraft]);
 
   // ── 입력 처리 ────────────────────────────────────────────────────────────────
   const handleChange = useCallback(
