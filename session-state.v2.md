@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-26 05:12 KST] compact 마크 (auto)
+- 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 417f9a2 sync: claude-dev-workstation 에서 origin/session/core-20261015 병합
+- compact 직전 컨텍스트: 275851 토큰
+- 마지막 회장 요청: ㄱㄱ
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-26 00:27 KST] compact 마크 (auto)
 - 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: c0703bf sync: claude-dev-workstation 문서 자동 커밋
