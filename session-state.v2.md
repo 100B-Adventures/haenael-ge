@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 20:0x KST] 16f37df 독립 리뷰 BLOCK · 이다솔 18:47 재실패 · 원장 기록
+- 이다솔 18:47~18:48 재실패 관찰: auth.users 이다솔(d2cd1564), auth.sessions 18:47:59·18:48:00 생성 뒤 사용 0, edge_logs 동일 callback 3회·verify 403 1·200 2. 11:31 과 같은 양상, 16f37df 미배포.
+- 원장: 저장소 wiki/거버넌스/실수.md 맨 위 19:3x 블록(9010cb5), 하네스 mistake-ledger [운영결제-QA미종결], eval ev-20261125-11.
+- 위임 진행: Codex fix2(배경 b7nlt2i3c, CODEX_RESUME 01a211d8, 브랜치 fix/kakao-inapp-login-20261125) — 간편결제 수용·화면/서버 오류 처리·보상 실패 알림·응원 이름 고정·결제 뒤 복귀·친구 카드·초대 문구·qa-tracker. 로그 scratchpad/codex-fix2.log.
+- 16f37df 리뷰 BLOCK(code-reviewer Opus): 배포 전 필수 6건(진 callback 쿠키 없음, 진단 로그, openExternal fallback 이 같은 실패 경로, 외부 전환 시 초안 유실, claim fail-closed, 실기기 증거). 전문 scratchpad/review-16f37df.md.
+- 다음: fix2 회수 → 같은 Codex 에 리뷰 6건 → 재리뷰 → staging 실기기(이다솔 기기 종류 회장에게 질문) → 2.4.1(C1 병합 충돌 없음 확인) → 회장 승인 뒤 운영.
+- 대기: 토스 상점 로그인(9450 noVNC 6450 화면 띄움, 감시 b8bauazfq 30분) → 주문 hnl_274a00c4 1,000원 취소·API 키 IP 제한 해제. 회장 "결제 꺼" 답.
+
 ## [2026-11-25 19:04 KST] compact 마크 (auto)
 - 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: 761b18c docs(state): prod payment incident (easy-pay approved, non-card 
