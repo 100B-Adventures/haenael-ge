@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 19:04 KST] compact 마크 (auto)
+- 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 761b18c docs(state): prod payment incident (easy-pay approved, non-card 
+- compact 직전 컨텍스트: 277967 토큰
+- 마지막 회장 요청: Stop hook feedback: [command hook 5]: [report-lint] ⛔ 반려: 아래 위반을 **한 번에 모두** 고쳐라. 보고 초안 파일을 고쳐 전문을 그대로 다시 내라. 맨 아래 덧붙이기는 최종 보고를 가린다(회장 2026-10-18). 다음부터는 내기 전에 stop-preflight.sh <초안> 으로 미리 돌려라. [report-lint] BLOCK: 정의 없이 쓴 비표준 용어 — 제한시간(→timeout). 표준 용어로 바꾸거나 그 자리에서 괄호로 한 번 풀어 써라(헌법 §3). 목록 = harnes
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-25 18:09 KST] 운영 결제 사고: 카카오페이 승인 후 비카드 거절·자동취소 IP 제한 실패
 - 무엇을 어디까지: 주문 29(1,000원, 회장) 토스 간편결제 승인 → toss-confirm 카드 전용 거절 → cancel 이 토스 API 키 IP 제한("요청 IP: 100.53.121.150")에 막힘 → payment FAILED·manual_reconcile_required, cheer 43 PENDING. 주문 30 READY(미결제). 원인 2: 위젯 CARD 선택 안의 간편결제 통과(CheerPaymentButton.tsx:278), 토스 키 IP 허용목록. QA 7-27 보고서 82행 미검증 항목 미종결. 운영 재배포(dpl_73oLrcDq) 완료·결제 버튼 켜짐 관찰. Codex 카톡 로그인 수정 16f37df(d057 fix/kakao-inapp-login-20261125) 검수 전.
 - 남은 이슈: 결제 임시 끄기(회장 "결제 꺼" 대기), 1,000원 수동 취소(토스 상점 관리자 로그인 필요), 간편결제 수용·IP 제한 해제, 응원 이름 고정, 결제 뒤 복귀 꺼짐, 친구 카드 전체 링크, 초대 안내 문구 음수 여백(globals.css 3801).
