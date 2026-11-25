@@ -5058,7 +5058,7 @@ test.describe("V2 web-first social slice", () => {
     });
   });
 
-  test("QA-TC-FL-02·03·FD-04~08 친구 목표·메시지·아바타·커버 계약", async ({ browser }) => {
+  test("QA-TC-FL-02~04·FD-04~08 친구 목표·메시지·아바타·커버 계약", async ({ browser }) => {
     test.setTimeout(120_000); await runFriendGoalAlignmentScenario({ admin, authContext, browser, email: emails.owner, ids, ownerGoal, ownerGoalTitle: "토익 900 넘길게", friendPublicGoal, friendFriendsGoal, runId, isoDateFromNow });
   });
 

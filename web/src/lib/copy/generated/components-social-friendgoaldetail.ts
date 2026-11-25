@@ -23,6 +23,9 @@ export const PRODUCT_COPY = {
   TEXT_020: "응원했어요.",
   TEXT_021: "보냄",
   TEXT_022: "받음",
+  TEXT_023: "내가 보냄",
+  TEXT_024: "친구가 보냄 · 내 목표",
+  TEXT_025: "목표",
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/social/FriendGoalDetail.tsx";

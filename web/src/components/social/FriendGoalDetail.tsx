@@ -43,6 +43,11 @@ export function FriendGoalDetail(
     cheerHistory?: FriendCheerHistoryItem[];
   },
 ) {
+  const recentSentGoalIsActive = friendGoals.some((goal) =>
+    goal.goal_id === recentMessageGoalId
+  );
+  const recentSentGoalIsInactive = recentMessageDirection === "SENT" &&
+    !recentSentGoalIsActive;
   const router = useRouter();
   const [removing, setRemoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,13 +134,17 @@ export function FriendGoalDetail(
         <p className="social-muted">{PRODUCT_COPY.TEXT_009}</p>
       </section>
       {recentMessage &&
-          (recentMessageDirection === "RECEIVED" || recentMessageGoalId === detail.goal_id) && (
+          (recentMessageDirection === "RECEIVED" ||
+            recentSentGoalIsInactive ||
+            recentMessageGoalId === detail.goal_id) && (
         <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
           <strong className="friend-recent-cheer-direction">
             {recentMessageDirection === "SENT"
-              ? "내가 보냄"
+              ? recentSentGoalIsInactive
+                ? `${PRODUCT_COPY.TEXT_023} · ‘${recentMessageGoalTitle ?? PRODUCT_COPY.TEXT_025}’`
+                : PRODUCT_COPY.TEXT_023
               : recentMessageDirection === "RECEIVED"
-                ? `친구가 보냄 · 내 목표 ‘${recentMessageGoalTitle ?? "목표"}’`
+                ? `${PRODUCT_COPY.TEXT_024} ‘${recentMessageGoalTitle ?? PRODUCT_COPY.TEXT_025}’`
                 : "응원 메시지"}
           </strong>
           <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>

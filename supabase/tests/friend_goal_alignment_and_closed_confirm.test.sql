@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(11);
+SELECT plan(12);
 
 INSERT INTO auth.users(
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -82,6 +82,26 @@ SELECT is(
 );
 SELECT diag('QA-TC-FL-01 passed=4 failed=0');
 RESET ROLE;
+
+UPDATE public.goal SET status = 'CLOSED', closed_at = now() WHERE id = 991002;
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"f1000000-0000-0000-0000-000000000001"}',
+  true
+);
+SELECT is(
+  jsonb_build_object(
+    'direction', public.my_friend_goals()->'friends'->0->>'recent_message_direction',
+    'goal_title', public.my_friend_goals()->'friends'->0->>'recent_message_goal_title',
+    'message', public.my_friend_goals()->'friends'->0->>'recent_message'
+  ),
+  '{"direction":"SENT","goal_title":"새 목표","message":"새 목표 응원"}'::jsonb,
+  'QA-TC-FL-04 내가 응원한 목표가 마감돼도 목표 제목과 메시지를 반환한다'
+);
+SELECT diag('QA-TC-FL-04 passed=1 failed=0');
+RESET ROLE;
+UPDATE public.goal SET status = 'ACTIVE', closed_at = NULL WHERE id = 991002;
 
 INSERT INTO public.cheer(
   id, goal_id, payment_id, display_name, is_anonymous, message,

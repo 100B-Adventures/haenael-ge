@@ -20,6 +20,7 @@ export const PRODUCT_COPY = {
   TEXT_017: "친구 초대하기", // source line 160
   TEXT_018: "친구가 보냄 · 내 목표",
   TEXT_019: "목표",
+  TEXT_020: "내가 보냄",
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/social/FriendGoalList.tsx";

@@ -1,5 +1,13 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-26 2.4.x 마감된 친구 목표의 최근 응원 복원
+
+- 내가 응원한 친구 목표가 `CLOSED`로 바뀌어 활성 목표 배열에서 사라져도 최근 응원을 없다고 표시하지 않는다. 목록과 상세 모두 `내가 보냄 · ‘목표명’`과 메시지를 표시한다.
+- 상세의 `친구가 보냄 · 내 목표` 문구를 `PRODUCT_COPY`로 옮겼다. 기본 `npm run test:e2e`는 Chromium만 실행하고 WebKit은 CI의 명시적 프로젝트 실행으로 유지한다.
+- 증거: production build 종료코드 0, Vitest 105파일·642건, pgTAP 28파일·511건, Chromium Playwright 1/1. `QA-TC-FL-04` 수치는 pgTAP 1/1, Playwright 2/2이다. push·배포·운영 DB 쓰기는 실행하지 않았다.
+
+> STAMP: 2026-11-26 01:55 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=독립 리뷰 e75ac29, 로컬 Vitest·pgTAP·Chromium Playwright·build · 고민=활성 목표의 기존 표시는 유지하고 마감된 최근 응원일 때만 목표명 맥락을 복원했다.
+
 ## 2026-11-26 2.4.x 친구가 보낸 최근 응원 맥락 복원
 
 - `my_friend_goals`가 최근 응원의 목표 제목을 반환한다. 방향이 `RECEIVED`면 응원 목표가 친구의 활성 목표 목록에 없어도 카드와 상세에 `친구가 보냄 · 내 목표 ‘목표명’`을 표시한다.

@@ -87,6 +87,26 @@ it("QA-TC-FD-09 친구가 내 목표에 보낸 최근 응원은 다른 친구 �
   expect(recent).toHaveTextContent("900점까지 같이 가자");
 });
 
+it("QA-TC-FD-10 내가 응원한 목표가 마감돼도 다른 친구 목표 상세에서 보인다", () => {
+  render(
+    <FriendGoalDetail
+      friendId="friend-a"
+      nickname="서연"
+      relationshipDirection="I_CHEERED"
+      recentMessage="마지막까지 함께 가자"
+      recentMessageGoalId={99}
+      recentMessageGoalTitle="매일 스무 쪽 읽을게"
+      recentMessageDirection="SENT"
+      detail={primary}
+      friendGoals={[primary]}
+    />,
+  );
+
+  const recent = screen.getByLabelText("최근 응원 메시지");
+  expect(recent).toHaveTextContent("내가 보냄 · ‘매일 스무 쪽 읽을게’");
+  expect(recent).toHaveTextContent("마지막까지 함께 가자");
+});
+
 it("G4-FRIEND-HISTORY 친구 상세는 회원끼리 주고받은 문구·날짜·방향을 표시한다", () => {
   render(
     <FriendGoalDetail

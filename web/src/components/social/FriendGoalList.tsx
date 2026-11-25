@@ -61,7 +61,12 @@ export function FriendGoalList({
               friend.recent_message
             ? `${PRODUCT_COPY.TEXT_018} ‘${friend.recent_message_goal_title ?? PRODUCT_COPY.TEXT_019}’ · ${friend.recent_message}`
             : null;
-          const recentMessage = receivedMessage ??
+          const sentToInactiveGoalMessage = friend.recent_message_direction === "SENT" &&
+              friend.recent_message &&
+              !friend.goals.some((goal) => goal.goal_id === friend.recent_message_goal_id)
+            ? `${PRODUCT_COPY.TEXT_020} · ‘${friend.recent_message_goal_title ?? PRODUCT_COPY.TEXT_019}’ · ${friend.recent_message}`
+            : null;
+          const recentMessage = receivedMessage ?? sentToInactiveGoalMessage ??
             (primaryGoal?.goal_id === friend.recent_message_goal_id
               ? friend.recent_message
               : null);

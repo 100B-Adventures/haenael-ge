@@ -234,7 +234,7 @@ jobs:
         run: npx playwright install --with-deps chromium  # 호스팅 러너는 시스템 의존성도 받아야 한다
 
       - name: 환전 E2E 실행
-        run: npx playwright test e2e/cashout-manual.spec.ts --reporter=line
+        run: npx playwright test e2e/cashout-manual.spec.ts --project=chromium --reporter=line
 
       - name: 실패 시 리포트 보관
         if: failure()

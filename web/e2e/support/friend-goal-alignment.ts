@@ -117,6 +117,29 @@ export async function runFriendGoalAlignmentScenario({
     expect(listAvatar.naturalWidth).toBeGreaterThan(0);
     expect(listAvatar.currentSrc.startsWith("https://")).toBe(true);
 
+    const { error: closeSentGoalError } = await admin.from("goal").update({
+      status: "CLOSED",
+      closed_at: new Date().toISOString(),
+    }).eq("id", friendFriendsGoal);
+    if (closeSentGoalError) throw closeSentGoalError;
+    const sentToClosedGoalContext = `내가 보냄 · ‘매달 책 한 권 읽을게’`;
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("friend-card").filter({ hasText: "윤도경" })
+      .locator(".friend-list-news-message")).toContainText(
+        `${sentToClosedGoalContext} · ${message}`,
+      );
+    await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(page.locator(".friend-recent-cheer")).toContainText(sentToClosedGoalContext);
+    await expect(page.locator(".friend-recent-cheer")).toContainText(message);
+    const { error: reopenSentGoalError } = await admin.from("goal").update({
+      status: "ACTIVE",
+      closed_at: null,
+    }).eq("id", friendFriendsGoal);
+    if (reopenSentGoalError) throw reopenSentGoalError;
+    await page.goto("/friends", { waitUntil: "domcontentloaded" });
+
     const { data: receivedPayment, error: receivedPaymentError } = await admin.from("payment")
       .insert({
         order_id: `friend-received-${runId}`,
@@ -185,6 +208,7 @@ export async function runFriendGoalAlignmentScenario({
     console.info("FRIEND_REGRESSION_RESULTS", JSON.stringify({
       "QA-TC-FL-02": { passed: 3, failed: 0 },
       "QA-TC-FL-03": { passed: 1, failed: 0 },
+      "QA-TC-FL-04": { passed: 2, failed: 0 },
       "QA-TC-FD-04": { passed: 2, failed: 0 },
       "QA-TC-FD-05": { passed: 4, failed: 0 },
       "QA-TC-FD-06": { passed: 4, failed: 0 },
@@ -202,7 +226,11 @@ export async function runFriendGoalAlignmentScenario({
   } finally {
     await context.close();
     await admin.from("member").update({ profile_image: originalProfile }).eq("id", ids.friend);
-    await admin.from("goal").update({ cover_preset_key: "c3" }).eq("id", friendFriendsGoal);
+    await admin.from("goal").update({
+      cover_preset_key: "c3",
+      status: "ACTIVE",
+      closed_at: null,
+    }).eq("id", friendFriendsGoal);
     if (cheerId) await admin.from("social_cheer_member_attribution").delete().eq("cheer_id", cheerId);
     if (receivedCheerId) {
       await admin.from("social_cheer_member_attribution").delete().eq("cheer_id", receivedCheerId);

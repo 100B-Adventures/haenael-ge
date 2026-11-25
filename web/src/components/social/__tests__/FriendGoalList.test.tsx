@@ -177,3 +177,23 @@ it("QA-TC-FL-03 친구 활성 목표가 없어도 내 목표에 보낸 최근 �
   );
   expect(screen.queryByTestId("friend-goal-link")).not.toBeInTheDocument();
 });
+
+it("QA-TC-FL-04 내가 응원한 목표가 마감돼도 목표명과 최근 응원을 숨기지 않는다", () => {
+  render(
+    <FriendGoalList friends={[{
+      friend_member_id: "friend-sent-closed",
+      nickname: "윤도경",
+      profile_image: null,
+      relationship_direction: "I_CHEERED",
+      recent_message: "마지막까지 함께 가자",
+      recent_message_goal_id: 99,
+      recent_message_goal_title: "매일 스무 쪽 읽을게",
+      recent_message_direction: "SENT",
+      goals,
+    }]} />,
+  );
+
+  expect(screen.getByTestId("friend-card")).toHaveTextContent(
+    "내가 보냄 · ‘매일 스무 쪽 읽을게’ · 마지막까지 함께 가자",
+  );
+});

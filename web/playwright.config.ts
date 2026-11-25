@@ -22,7 +22,7 @@ export default defineConfig({
     },
     {
       name: "webkit-friend-avatar",
-      grep: /QA-TC-FL-02·03·FD-04~08/,
+      grep: /QA-TC-FL-02~04·FD-04~08/,
       use: { ...devices["Desktop Safari"] },
     },
   ],
