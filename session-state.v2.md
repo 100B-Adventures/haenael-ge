@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 16:52 KST] compact 마크 (auto)
+- 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: be1c910 docs(state): goal map, prod E2E entry fix on main, C1 OG delegat
+- compact 직전 컨텍스트: 320300 토큰
+- 마지막 회장 요청: 지금 카카오 로그인이 안된다는 피드백 있는데 로그 살펴봐 그리고 이런 유저 에러 로그 수집 어떻게 하지 센트리같은거
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-25 15:42 KST] 운영 자동 시험 진입 주소 고침, C1 초대 이미지 Codex 착수
 - 무엇을 어디까지: production-auth-readonly.spec 진입 주소를 haenael-ge.vercel.app 으로(옛 별칭은 정지된 옛 팀 402). 브랜치 fix/prod-e2e-entry-20261125 에서 운영 읽기 전용 E2E 45539852447 success, CI 45540069265 success → main 34cd06e(시험 코드만, Vercel 은 git 미연결이라 배포 영향 없음). C1 초대 OG 이미지 Codex code-builder 위임(제한 2시간, 로그 scratchpad codex-og.log).
 - 남은 이슈: 옛 별칭 haenaelge.vercel.app 을 새 계정으로 옮길지(옛 팀 별칭 삭제 = 회장 원문 필요), 수동 결제 시험 2개 로그인 기준 수정, Vercel 운영 방식 회장 결정.
