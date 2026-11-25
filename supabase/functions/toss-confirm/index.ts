@@ -200,7 +200,7 @@ export async function handleTossConfirm(req: Request) {
   if (
     !paymentsEnabled && (
       paymentLookupErr || !existingPayment ||
-      existingPayment.status !== "DONE" ||
+      !["DONE", "FAILED", "CANCELED"].includes(existingPayment.status) ||
       existingPayment.amount_krw !== amount ||
       typeof existingPayment.payment_key !== "string" ||
       existingPayment.payment_key !== paymentKey
@@ -218,6 +218,15 @@ export async function handleTossConfirm(req: Request) {
     return json(400, {
       error: { code: "amount_mismatch" },
     });
+  }
+
+  // 이미 보상 처리된 결제를 성공 URL 새로고침이 다시 Toss 승인 API로 보내지 않는다.
+  // 브라우저에는 저장된 최종 상태만 코드로 돌려주고, 화면이 고정 문구로 안내한다.
+  if (existingPayment.status === "FAILED") {
+    return json(409, { error: { code: "payment_failed" } });
+  }
+  if (existingPayment.status === "CANCELED") {
+    return json(409, { error: { code: "payment_canceled" } });
   }
 
   if (existingPayment.status === "DONE") {

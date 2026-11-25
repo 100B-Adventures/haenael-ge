@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChevronLeft, Clover } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { ReceiverBottomNavView } from "@/components/social/ReceiverBottomNav";
 import { GoalCover } from "@/components/social/GoalCover";
@@ -36,6 +36,9 @@ export function PaymentSuccessFlow({
   growth,
 }: PaymentSuccessFlowProps) {
   const [stage, setStage] = useState<"success" | "growth">("success");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => setHydrated(true), []);
 
   if (stage === "growth") {
     return <DopamineGrowthOverlay {...growth} />;
@@ -46,6 +49,7 @@ export function PaymentSuccessFlow({
       className="payment-success-card"
       data-status="success"
       data-testid="payment-success-state"
+      data-hydrated={hydrated ? "true" : "false"}
     >
       <div className="payment-success-icon" aria-hidden="true">
         <Clover size={28} strokeWidth={2.5} />
@@ -60,17 +64,13 @@ export function PaymentSuccessFlow({
           href={backHref}
           className="payment-success-primary"
           data-testid="payment-success-back"
+          onClick={(event) => {
+            event.preventDefault();
+            setStage("growth");
+          }}
         >
           {backLabel}
         </a>
-        <button
-          type="button"
-          className="payment-success-secondary"
-          data-testid="payment-success-growth"
-          onClick={() => setStage("growth")}
-        >
-          {PRODUCT_COPY.SHOW_RESULT}
-        </button>
         <Link href="/" className="payment-success-secondary">
           {homeLabel}
         </Link>

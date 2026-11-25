@@ -2615,7 +2615,7 @@ test.describe("V2 web-first social slice", () => {
       }
     }
     await paymentPage.setViewportSize({ width: 1024, height: 844 });
-    await paymentPage.getByTestId("payment-success-growth").click();
+    await paymentPage.getByTestId("payment-success-back").click();
     const feedback = paymentPage.getByTestId("payment-growth-feedback");
     await expect(feedback).toBeVisible();
     const growthKicker = paymentPage.locator(".wordmap-growth-kicker");
@@ -4129,18 +4129,13 @@ test.describe("V2 web-first social slice", () => {
     await context.close();
   });
 
-  test("QA-TC-CL-03 친구 목록의 긴 응원은 카드 전체 링크 안에서 2줄로 고정된다", async ({ browser }) => {
+  test("QA-TC-CL-03 친구 목록의 긴 응원은 2줄에서 펼치고 다시 접힌다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/friends", { waitUntil: "domcontentloaded" });
     const card = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
-    const message = card.locator(".friend-list-news-message").filter({ hasText: friendLongMessage });
-    await expect(message).toHaveCSS("-webkit-line-clamp", "2");
-    await expect(message.locator("xpath=ancestor::a[1]")).toHaveAttribute(
-      "href",
-      `/friends/${ids.friend}?goal=${friendPublicGoal}`,
-    );
+    await expectTwoLineClamp(card.locator(".friend-list-news-message").filter({ hasText: friendLongMessage }));
     await context.close();
   });
 
@@ -4153,6 +4148,10 @@ test.describe("V2 web-first social slice", () => {
       permissions: ["clipboard-read", "clipboard-write"],
     });
     const page = await context.newPage();
+    const consoleErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/g/friend-public-${runId}#cheer`, {
@@ -4162,7 +4161,9 @@ test.describe("V2 web-first social slice", () => {
       (key) => window.localStorage.getItem(key),
       ANALYTICS_CONSENT_KEY,
     )).toBe("denied");
-    await expect(page.getByTestId("analytics-consent-banner")).toHaveCount(0);
+    await expect(page.getByTestId("analytics-consent-banner")).toHaveCount(0, {
+      timeout: 15_000,
+    });
     await page.getByTestId("cheer-cta").click();
     await expect(page.getByTestId("cheer-supporter-name")).toHaveText("서연");
     await expect(page.getByTestId("cheer-payment-sheet").locator('input[type="text"]'))
@@ -4189,15 +4190,24 @@ test.describe("V2 web-first social slice", () => {
         `&amount=1000&goalSlug=friend-public-${runId}`,
       { waitUntil: "domcontentloaded" },
     );
+    await expect(page.getByTestId("payment-success-state")).toHaveAttribute(
+      "data-hydrated",
+      "true",
+    );
     await page.getByTestId("payment-success-back").click();
+    await expect(page.getByTestId("payment-dopamine-overlay")).toBeVisible();
+    await page.getByRole("link", { name: "친구 목표로 돌아가기" }).click();
     await expect(page).toHaveURL(new RegExp(`/g/friend-public-${runId}$`));
     await expect(page.getByTestId("goal-public-page")).toBeVisible();
 
     await page.goto("/friends", { waitUntil: "domcontentloaded" });
     const friendCard = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+    await expectTwoLineClamp(
+      friendCard.locator(".friend-list-news-message").filter({ hasText: friendLongMessage }),
+    );
     await Promise.all([
       page.waitForURL(new RegExp(`/friends/${ids.friend}\\?goal=${friendPublicGoal}$`)),
-      friendCard.locator(".friend-list-news").click(),
+      friendCard.getByTestId("friend-goal-link").click(),
     ]);
     await expect(page.getByTestId("friend-detail-page")).toBeVisible();
 
@@ -4223,6 +4233,7 @@ test.describe("V2 web-first social slice", () => {
         fullPage: true,
       });
     }
+    expect(consoleErrors, "D057 브라우저 콘솔 오류").toEqual([]);
     await context.close();
   });
 

@@ -320,7 +320,7 @@ export async function handleTossWebhook(
             compensationRecorded: !compensationError,
           },
         });
-        return finish(json(500, { error: "non_card_compensation_failed" }));
+        return finish(json(500, { error: "manual_reconcile_required" }));
       }
       return finish(
         json(200, {

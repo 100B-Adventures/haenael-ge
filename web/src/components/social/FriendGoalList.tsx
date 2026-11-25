@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, UserPlus } from "lucide-react";
+import { ClampText } from "@/components/common/ClampText";
 import type { SocialFriend } from "@/lib/social/contracts";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoallist";
@@ -70,12 +71,12 @@ export function FriendGoalList({
               data-testid="friend-card"
             >
               {primaryGoal ? (
-                <Link
-                  href={`/friends/${friend.friend_member_id}?goal=${primaryGoal.goal_id}`}
-                  className="friend-list-card-link"
-                  data-testid="friend-goal-link"
-                >
-                  <span className="friend-list-main friend-list-main--with-news">
+                <>
+                  <Link
+                    href={`/friends/${friend.friend_member_id}?goal=${primaryGoal.goal_id}`}
+                    className="friend-list-main friend-list-main--with-news"
+                    data-testid="friend-goal-link"
+                  >
                     <span className="friend-list-avatar">
                       {friend.profile_image ? (
                         <Image
@@ -111,14 +112,17 @@ export function FriendGoalList({
                         ›
                       </span>
                     </span>
-                  </span>
-                  <span className="friend-list-news">
+                  </Link>
+                  <div className="friend-list-news">
                     <MessageCircle aria-hidden="true" />
-                    <span className="friend-list-news-message">
+                    <ClampText
+                      className="friend-list-news-message"
+                      toggleLabel={`${nickname}의 최근 응원 내용`}
+                    >
                       {recentMessage || PRODUCT_COPY.TEXT_013}
-                    </span>
-                  </span>
-                </Link>
+                    </ClampText>
+                  </div>
+                </>
               ) : (
                 <div className="friend-list-main">
                   <span className="friend-list-avatar" aria-hidden="true">

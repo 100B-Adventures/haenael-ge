@@ -530,8 +530,65 @@ Deno.test("PAY-METHOD-02 카카오페이 간편결제 승인은 응원과 원장
   });
 });
 
+Deno.test("PAY-METHOD-03 네이버페이 간편결제 승인은 응원과 원장에 확정한다", async () => {
+  await assertAcceptedPayment("간편결제", {
+    provider: "네이버페이",
+    amount: 3000,
+    discountAmount: 0,
+  });
+});
+
+Deno.test("PAY-METHOD-04 토스페이 간편결제 승인은 응원과 원장에 확정한다", async () => {
+  await assertAcceptedPayment("EASY_PAY", {
+    provider: "TOSS_PAY",
+    amount: 3000,
+    discountAmount: 0,
+  });
+});
+
+Deno.test("PAY-STATE-01 FAILED·CANCELED 새로고침은 Toss 승인을 다시 호출하지 않는다", async () => {
+  for (const [status, code] of [
+    ["FAILED", "payment_failed"],
+    ["CANCELED", "payment_canceled"],
+  ] as const) {
+    setPaymentTestEnv();
+    const realFetch = globalThis.fetch;
+    const calledUrls: string[] = [];
+    globalThis.fetch = ((input: Request | URL | string) => {
+      const url = typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
+      calledUrls.push(url);
+      if (url.includes("/rest/v1/payment?")) {
+        return Promise.resolve(new Response(JSON.stringify({
+          id: 7,
+          amount_krw: 3000,
+          status,
+          payment_key: `payment-key-${status.toLowerCase()}`,
+        }), { status: 200, headers: { "content-type": "application/json" } }));
+      }
+      return Promise.resolve(new Response("{}", { status: 404 }));
+    }) as typeof fetch;
+
+    try {
+      const response = await handleTossConfirm(paymentRequest(
+        `order-${status.toLowerCase()}`,
+        `payment-key-${status.toLowerCase()}`,
+        3000,
+      ));
+      assertEquals(response.status, 409);
+      assertEquals(await response.json(), { error: { code } });
+      assertEquals(calledUrls.some((url) => url.endsWith("/v1/payments/confirm")), false);
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  }
+});
+
 Deno.test(
-  "비카드 승인 취소 성공 → CANCELED 감사 기록 후 unsupported_payment_method",
+  "PAY-METHOD-05 허용 목록 밖 간편결제는 취소하고 CANCELED로 기록한다",
   async () => {
     setPaymentTestEnv();
     const realFetch = globalThis.fetch;
@@ -564,7 +621,12 @@ Deno.test(
               orderId,
               status: "DONE",
               totalAmount: 2000,
-              method: "계좌이체",
+              method: "간편결제",
+              easyPay: {
+                provider: "PAYCO",
+                amount: 2000,
+                discountAmount: 0,
+              },
               approvedAt: "2026-10-30T00:00:00Z",
             }),
             { status: 200, headers: { "content-type": "application/json" } },
@@ -616,7 +678,8 @@ Deno.test(
   "PAY-COMP-01 미지원 수단 취소 실패 → 감사 기록과 즉시 운영 알림",
   async () => {
     setPaymentTestEnv();
-    Deno.env.set("SLACK_FEEDBACK_WEBHOOK_URL", "https://hooks.slack.test/payment");
+    Deno.env.set("SLACK_FEEDBACK_WEBHOOK_URL", "https://hooks.slack.test/feedback");
+    Deno.env.set("SLACK_WEBHOOK_URL", "https://hooks.slack.test/payment");
     const realFetch = globalThis.fetch;
     const rpcBodies: Record<string, unknown>[] = [];
     const slackBodies: Record<string, unknown>[] = [];
@@ -698,6 +761,7 @@ Deno.test(
     } finally {
       globalThis.fetch = realFetch;
       Deno.env.delete("SLACK_FEEDBACK_WEBHOOK_URL");
+      Deno.env.delete("SLACK_WEBHOOK_URL");
     }
   },
 );

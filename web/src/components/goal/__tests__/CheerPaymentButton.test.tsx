@@ -196,7 +196,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     expect(mockRequestPayment).not.toHaveBeenCalled();
   });
 
-  it("G4-PAY-01 결제창형 키에서 EASY_PAY 선택도 승인 요청한다", async () => {
+  it("G4-PAY-01 결제창형 키에서 provider 없는 EASY_PAY 선택도 서버 검증으로 보낸다", async () => {
     vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
     render(
       <CheerPaymentButton
@@ -210,7 +210,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     fireEvent.click(screen.getByTestId("cheer-payment-submit"));
     await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalled());
     paymentWindowHandlers.get("paymentRequest")?.({
-      paymentMethod: { method: "EASY_PAY", easyPay: { provider: "KAKAOPAY" } },
+      paymentMethod: { method: "EASY_PAY" },
     });
     await waitFor(() => {
       expect(mockWidgetRequestPayment).toHaveBeenCalledWith(
@@ -451,6 +451,30 @@ describe("CheerPaymentButton Toss v2 request", () => {
         "결제를 완료하지 못했어요. 돈이 빠져나갔다면 다시 결제하지 말고 결제 내역을 먼저 확인해 주세요.",
       ),
     ).toBeVisible();
+  });
+
+  it("PAY-FAIL-06 USER_CANCEL은 출금되지 않은 취소로 안내한다", async () => {
+    mockRequestPayment.mockRejectedValue({ code: "USER_CANCEL" });
+
+    render(<CheerPaymentButton goalId={11} goalTitle="편입 합격 해낼게" goalSlug="goal-slug" />);
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "결제를 취소했어요. 돈은 빠져나가지 않았어요. 다시 시도할 수 있어요.",
+    );
+  });
+
+  it("PAY-FAIL-07 주문 생성 전 네트워크 오류는 안전하게 재시도를 안내한다", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+
+    render(<CheerPaymentButton goalId={11} goalTitle="편입 합격 해낼게" goalSlug="goal-slug" />);
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "응원 주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.",
+    );
   });
 
   it("PAY-FAIL-05 네트워크 오류는 출금 여부 확인과 중복 결제 방지를 안내한다", async () => {

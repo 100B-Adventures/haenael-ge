@@ -36,9 +36,9 @@ export default async function PaymentFailPage({ searchParams }: Props) {
   const rawSlug = params.goalSlug ?? "";
   const goalSlug = /^[a-z0-9-]{1,80}$/.test(rawSlug) ? rawSlug : "";
   const failure = FAILURE_COPY[params.code ?? ""] ?? {
-    title: PRODUCT_COPY.UNKNOWN_TITLE,
-    message: PRODUCT_COPY.UNKNOWN_MESSAGE,
-    canRetry: false,
+    title: PRODUCT_COPY.UNLISTED_TITLE,
+    message: PRODUCT_COPY.UNLISTED_MESSAGE,
+    canRetry: true,
   };
 
   return (
@@ -58,7 +58,7 @@ export default async function PaymentFailPage({ searchParams }: Props) {
         <p className="mt-3 text-[14px] leading-relaxed [color:var(--muted-foreground)]!">{failure.message}</p>
         {!failure.canRetry && params.orderId && (
           <p className="mt-2 text-[13px] [color:var(--muted-foreground)]!">
-            주문번호 {params.orderId}
+            {PRODUCT_COPY.ORDER_NUMBER} {params.orderId}
           </p>
         )}
         {goalSlug && (
@@ -70,7 +70,7 @@ export default async function PaymentFailPage({ searchParams }: Props) {
         <Link
           href="/"
           className={`${goalSlug ? "mt-2" : "mt-6"} flex min-h-11 items-center justify-center rounded-[16px] text-[14px] font-bold [color:var(--muted-foreground)]!`}
-        >해낼게 홈으로</Link>
+        >{PRODUCT_COPY.HOME}</Link>
       </div>
     </main>
   );

@@ -69,6 +69,7 @@ const CHEER_ORDER_ERROR_COPY: Record<string, string> = {
 };
 
 const TOSS_ERROR_COPY: Record<string, string> = {
+  USER_CANCEL: PRODUCT_COPY.ERROR_CANCELED,
   PAY_PROCESS_CANCELED: PRODUCT_COPY.ERROR_CANCELED,
   PAY_PROCESS_ABORTED: PRODUCT_COPY.ERROR_ABORTED,
   REJECT_CARD_COMPANY: PRODUCT_COPY.ERROR_REJECTED,
@@ -79,11 +80,9 @@ function isSupportedWidgetPaymentMethod(paymentMethod: {
   easyPay?: { provider?: string | null } | null;
 }) {
   if (paymentMethod.method === "CARD") return true;
-  return (
-    paymentMethod.method === "EASY_PAY" &&
-    typeof paymentMethod.easyPay?.provider === "string" &&
-    paymentMethod.easyPay.provider.length > 0
-  );
+  // 위젯 이벤트는 간편결제 provider를 생략할 수 있다. 화면은 EASY_PAY 선택을
+  // 허용하고 최종 업체 화이트리스트는 Toss 승인 응답을 받은 서버에서 강제한다.
+  return paymentMethod.method === "EASY_PAY";
 }
 
 type DestroyablePaymentSurface = {
@@ -236,6 +235,7 @@ export function CheerPaymentButton({
 
   async function handlePayment() {
     const paymentAttempt = ++paymentAttemptRef.current;
+    let orderCreated = false;
     setError(null);
     setLoading(true);
     try {
@@ -247,6 +247,7 @@ export function CheerPaymentButton({
         throw new Error("카드 결제용 Toss Payments API 키가 필요합니다.");
       }
       const order = await createOrder();
+      orderCreated = true;
       trackEvent("cheer_started", {
         goal_id: String(goalId),
         amount: order.amountKrw,
@@ -363,7 +364,11 @@ export function CheerPaymentButton({
           startKakaoLogin(loginHref);
           return;
         }
-        setError(paymentErrorMessage(e));
+        setError(
+          e instanceof TypeError && !orderCreated
+            ? PRODUCT_COPY.ERROR_GENERIC
+            : paymentErrorMessage(e),
+        );
         setLoading(false);
       }
     }

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
 import PaymentFailPage from "../page";
 
-it("PAY-FAIL-01 외부 결제 오류 원문을 사용자 화면에 노출하지 않는다", async () => {
+it("PAY-FAIL-01 표에 없는 오류는 출금되지 않았음과 재시도를 안내한다", async () => {
   const element = await PaymentFailPage({
     searchParams: Promise.resolve({
       code: "PG_INTERNAL_ERROR",
@@ -12,14 +12,13 @@ it("PAY-FAIL-01 외부 결제 오류 원문을 사용자 화면에 노출하지 
   });
   render(element);
 
-  expect(screen.getByText(/돈이 빠져나갔다면 다시 결제하지 말고/))
+  expect(screen.getByText(/승인되지 않아 돈은 빠져나가지 않았어요/))
     .toBeInTheDocument();
   expect(document.body.textContent).not.toMatch(
     /sensitive upstream database error|PG_INTERNAL_ERROR/,
   );
-  expect(screen.getByText("주문번호 order-secret")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "해낼게 홈으로" })).toHaveAttribute("href", "/");
-  expect(screen.queryByRole("link", { name: "다시 응원하기" })).not.toBeInTheDocument();
+  expect(screen.queryByText("주문번호 order-secret")).not.toBeInTheDocument();
 });
 
 it("PAY-FAIL-02 유효한 목표 slug가 있을 때만 재응원 경로를 제공한다", async () => {
@@ -61,4 +60,16 @@ it("PAY-FAIL-04 카드사 거절은 출금되지 않았음과 다른 수단 재�
     "data-payment-state",
     "not-approved",
   );
+});
+
+it("PAY-FAIL-05 결과 불명 상태의 주문번호는 중앙 카피 규약으로 표시한다", async () => {
+  const element = await PaymentFailPage({
+    searchParams: Promise.resolve({
+      code: "PAY_PROCESS_ABORTED",
+      orderId: "order-review",
+    }),
+  });
+  render(element);
+
+  expect(screen.getByText("주문번호 order-review")).toBeInTheDocument();
 });

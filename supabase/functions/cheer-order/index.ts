@@ -191,7 +191,7 @@ export async function handleCheerOrder(
   const supporterName = typeof supporterMember?.nickname === "string"
     ? supporterMember.nickname.trim()
     : "";
-  if (supporterMemberError || !supporterName) {
+  if (supporterMemberError || (!isAnonymous && !supporterName)) {
     return json(409, {
       error: { code: "profile_name_required" },
     });

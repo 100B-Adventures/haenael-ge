@@ -6,8 +6,7 @@ export interface SlackAlert {
 }
 
 export async function sendSlackAlert(alert: SlackAlert): Promise<boolean> {
-  const webhookUrl = Deno.env.get("SLACK_FEEDBACK_WEBHOOK_URL") ??
-    Deno.env.get("SLACK_WEBHOOK_URL");
+  const webhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
   if (!webhookUrl) return false;
 
   const escape = (value: unknown) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").slice(0, 300);
@@ -25,6 +24,7 @@ export async function sendSlackAlert(alert: SlackAlert): Promise<boolean> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
+      signal: AbortSignal.timeout(3000),
     });
     if (!response.ok) {
       console.error("[slack] webhook failed", response.status);

@@ -12,6 +12,8 @@ export const PRODUCT_COPY = {
   GROWTH_FEEDBACK: "보낸 응원이 워드맵과 \"내가 응원한 목표\"에 기록됐어요.",
   ERROR_PAYMENTS_DISABLED: "응원 결제를 준비하고 있어요.",
   ERROR_PAYMENT_NOT_FOUND: "결제 주문을 찾을 수 없어요.",
+  ERROR_PAYMENT_FAILED: "결제 승인 또는 응원 반영에 실패했어요. 다시 결제하지 말고 주문 내역을 확인해 주세요.",
+  ERROR_PAYMENT_CANCELED: "결제가 취소됐어요. 금액이 보이면 취소 반영까지 잠시 기다려 주세요.",
   ERROR_AMOUNT_MISMATCH: "결제 금액이 일치하지 않아요.",
   ERROR_TOSS_CONFIRM_FAILED: "승인 결과를 확인하지 못했어요. 돈이 빠져나갔다면 다시 결제하지 말고 결제 내역을 먼저 확인해 주세요.",
   ERROR_INVALID_TOSS_STATUS: "승인 상태를 확인하지 못했어요. 돈이 빠져나갔다면 다시 결제하지 말고 결제 내역을 먼저 확인해 주세요.",

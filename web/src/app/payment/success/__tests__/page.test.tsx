@@ -57,6 +57,14 @@ it("VO-04 비카드 보상 실패는 server message 없이 client copy로 표시
   expect(screen.getByText(/결제 금액이 빠져나갔을 수 있지만/)).toHaveTextContent("주문번호 order");
 });
 
+it.each([
+  ["payment_failed", "결제 승인 또는 응원 반영에 실패했어요"],
+  ["payment_canceled", "결제가 취소됐어요"],
+])("PAY-STATE-02 %s 최종 상태를 사용자 안내로 표시한다", async (code, copy) => {
+  await renderCodeOnlyFailure(code);
+  expect(screen.getByText(new RegExp(copy))).toBeInTheDocument();
+});
+
 it("최초 서버 승인은 pending lease를 브라우저 전달 컴포넌트에 넘긴다", async () => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
@@ -146,10 +154,14 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
   }));
 
   expect(screen.getByTestId("payment-success-state")).toBeInTheDocument();
+  expect(screen.getByTestId("payment-success-state")).toHaveAttribute(
+    "data-hydrated",
+    "true",
+  );
   expect(screen.queryByTestId("payment-dopamine-overlay")).not.toBeInTheDocument();
   const backLink = screen.getByRole("link", { name: "친구 목표로 돌아가기" });
   expect(backLink).toHaveAttribute("href", "/g/friend-goal");
-  fireEvent.click(screen.getByRole("button", { name: "응원 결과 보기" }));
+  fireEvent.click(backLink);
 
   expect(screen.queryByTestId("payment-success-state")).not.toBeInTheDocument();
   expect(screen.getByTestId("payment-dopamine-overlay")).toBeInTheDocument();

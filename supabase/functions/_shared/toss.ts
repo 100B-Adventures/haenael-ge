@@ -35,7 +35,20 @@ export interface TossPaymentResponse extends TossConfirmResponse {
   canceledAt?: string;
 }
 
-/** 응원에 허용한 카드·간편결제만 승인한다. 간편결제는 provider가 있는 응답만 허용한다. */
+const ALLOWED_EASY_PAY_PROVIDERS = new Set([
+  "KAKAOPAY",
+  "NAVERPAY",
+  "TOSSPAY",
+  "카카오페이",
+  "네이버페이",
+  "토스페이",
+]);
+
+function normalizeEasyPayProvider(provider: string): string {
+  return provider.replace(/[\s_-]/g, "").toUpperCase();
+}
+
+/** FDD 결제 정책에 명시된 카드·카카오페이·네이버페이·토스페이만 승인한다. */
 export function isSupportedCheerPaymentMethod(
   payment: Pick<TossConfirmResponse, "method" | "easyPay">,
 ): boolean {
@@ -43,7 +56,10 @@ export function isSupportedCheerPaymentMethod(
   if (payment.method !== "간편결제" && payment.method !== "EASY_PAY") {
     return false;
   }
-  return Boolean(payment.easyPay?.provider.trim());
+  const provider = payment.easyPay?.provider.trim();
+  return Boolean(
+    provider && ALLOWED_EASY_PAY_PROVIDERS.has(normalizeEasyPayProvider(provider)),
+  );
 }
 
 function parseEasyPay(body: Record<string, unknown>): TossConfirmResponse["easyPay"] {

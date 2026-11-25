@@ -262,7 +262,7 @@ describe("handleTossWebhook", () => {
     );
 
     expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: "non_card_compensation_failed" });
+    expect(await res.json()).toEqual({ error: "manual_reconcile_required" });
     expect(deps.rpcMock).toHaveBeenCalledWith(
       "record_payment_compensation",
       expect.objectContaining({ p_target_status: "FAILED" }),

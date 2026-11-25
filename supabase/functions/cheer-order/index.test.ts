@@ -184,3 +184,62 @@ Deno.test("D057-NAME-01 비익명 표시 이름은 요청값이 아니라 로그
   assertEquals(response.status, 201);
   assertEquals(calledArgs.p_display_name, "이다솔");
 });
+
+Deno.test("D057-NAME-03 이름 없는 로그인 회원도 익명 응원은 주문할 수 있다", async () => {
+  Deno.env.set("PAYMENTS_ENABLED", "true");
+  setSupabaseEnv();
+  let calledArgs: Record<string, unknown> = {};
+
+  const response = await handleCheerOrder(
+    new Request("https://f.test/cheer-order", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        goalId: 1,
+        amountKrw: 1000,
+        isAnonymous: true,
+      }),
+    }),
+    dependencies({
+      nickname: null,
+      rpc: async (_name, args) => {
+        calledArgs = args;
+        return {
+          data: [{ payment_id: 1, cheer_id: 2, order_id: "hnl_test_order", is_replay: false }],
+          error: null,
+        };
+      },
+    }),
+  );
+
+  assertEquals(response.status, 201);
+  assertEquals(calledArgs.p_is_anonymous, true);
+  assertEquals(calledArgs.p_display_name, "");
+});
+
+Deno.test("D057-NAME-04 이름 없는 로그인 회원의 비익명 응원은 거절한다", async () => {
+  Deno.env.set("PAYMENTS_ENABLED", "true");
+  setSupabaseEnv();
+
+  const response = await handleCheerOrder(
+    new Request("https://f.test/cheer-order", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer valid",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        goalId: 1,
+        amountKrw: 1000,
+        isAnonymous: false,
+      }),
+    }),
+    dependencies({ nickname: null }),
+  );
+
+  assertEquals(response.status, 409);
+  assertEquals(await response.json(), { error: { code: "profile_name_required" } });
+});

@@ -26,6 +26,8 @@ const TOSS_CONFIRM_ERROR_COPY: Record<string, string> = {
   missing_supabase_env: PRODUCT_COPY.ERROR_GENERIC,
   missing_toss_secret: PRODUCT_COPY.ERROR_GENERIC,
   payment_not_found: PRODUCT_COPY.ERROR_PAYMENT_NOT_FOUND,
+  payment_failed: PRODUCT_COPY.ERROR_PAYMENT_FAILED,
+  payment_canceled: PRODUCT_COPY.ERROR_PAYMENT_CANCELED,
   amount_mismatch: PRODUCT_COPY.ERROR_AMOUNT_MISMATCH,
   invalid_payment_status: PRODUCT_COPY.ERROR_GENERIC,
   invalid_payment_key: PRODUCT_COPY.ERROR_GENERIC,
