@@ -29,7 +29,8 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 ## 산출물 체크리스트
 ### plan  ⏳ (in-progress, 미승인)
 <!-- 경로는 product-lane.yaml stages.plan.artifacts 기준(docs/plan/…)으로 바로잡음. 템플릿의 docs/ 바로 아래 경로는 이 저장소 구조와 다르다 -->
-- [x] docs/plan/prd-haenael-ge-v0.5.0-claude-opus-20261125-2344.md — §15 응원 결과 공유(기반 v0.4.0). 초안, plan-critic 비평 전
+- [x] docs/plan/prd-haenael-ge-v0.5.1-claude-opus-20261126-0010.md — 비평 사이클 1 반영판(F1~F11). 재비평(사이클 2) 대기. one-thing·persona·risks 개정안은 이 PRD 부록 A~C
+- [x] docs/plan/prd-haenael-ge-v0.5.0-claude-opus-20261125-2344.md — 이력(사이클 1 GO-with-changes)
 - [ ] docs/plan/one-thing.md — v0.5.0 §15.12 대로 "해냄 인증 범위 밖" 줄 개정 필요(미착수)
 - [ ] docs/plan/persona.md — B-1 결핍 한 줄 추가 필요(미착수)
 - [ ] docs/plan/bm.md — 변경 없음 판정(§15.12), 승인 시 v0.4 계승 핀으로 처리
@@ -42,6 +43,7 @@ override_expires: ""          # ISO8601; 지나면 게이트 자동 재무장
 ## 승인 로그 (append-only)
 <!-- /approve 가 한 줄씩 추가: "YYYY-MM-DD HH:MM KST — <stage> APPROVED — <note> (artifacts: <pinned>)" -->
 2026-11-25 23:5x KST — plan DRAFT SUBMITTED(미승인) — prd-architect(claude-opus-5-5)가 PRD v0.5.0 §15 응원 결과 공유 초안과 레퍼런스 팩 7건을 냈다. 추천 = 안 A(결과 화면 + 공유 카드, 알림톡 텍스트 1종 신청자 한정 1회). 회장 결정 3건(기존 응원자 알림톡, 실패 결과 공개 기본값, 템플릿 심사 제출) 대기. 다음 = plan-critic 비평. (artifacts: docs/plan/prd-haenael-ge-v0.5.0-claude-opus-20261125-2344.md, docs/plan/references/cheer-result/refs.json)
+2026-11-26 00:1x KST — plan REVISION SUBMITTED(미승인) — prd-architect(claude-opus-5-5)가 비평문 critic-cheer-result-prd-v0.5.0-claude-opus-20261126-0010.md(GO-with-changes, MAJOR 8·MINOR 7) 필수 수정 F1~F11 을 반영한 v0.5.1 을 냈다. 컨트롤러 결정 1=A·2=A 반영, 안 E(주인 직접 카톡 공유) 1차 추천 후보, 알림톡 3단 켜기, 운영 실측 분모(진행 중 3, 8주 안 마감 1)로 kill-criteria 재작성, 앱 푸시 향후 채널. 회장 질문 Q1(1차 전달 수단)·Q2(정지 위험 수용·단계 켜기·지금 심사 제출). 다음 = 재비평 사이클 2. feature-drop-check OK. (artifacts: docs/plan/prd-haenael-ge-v0.5.1-claude-opus-20261126-0010.md)
 
 ## Blocked / Notes
 <!-- 막힌 사유·다음 액션. 다른 세션이 30초 안에 재개 가능하게. -->
