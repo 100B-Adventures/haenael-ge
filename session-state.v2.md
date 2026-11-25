@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-26 00:27 KST] compact 마크 (auto)
+- 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: c0703bf sync: claude-dev-workstation 문서 자동 커밋
+- compact 직전 컨텍스트: 225771 토큰
+- 마지막 회장 요청: This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation. <system-reminder> <tools-used-before-summary>Agent, Artifact, Bash, CrossSessionMessage, Edit, ListAgents, Monitor, Read, ReadMcpResourceTool, SendM
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-26 00:15 KST] compact 마크 (auto)
 - 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: 31c5967 docs(plan): cheer-result PRD v0.5.0 critique (GO-with-changes)
