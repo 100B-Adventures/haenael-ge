@@ -1,5 +1,10 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 23:05 KST] 로그인 수정 7856fe2 3회차 리뷰 중
+- Codex fix4 → 7856fe2(JS 없이도 pending 서버 redirect, external 서버 렌더 링크). build 0, Vitest 623, Playwright 6/6 주장(로그 review2-*.log). 같은 리뷰어 3회차 진행.
+- 회장 답 대기: "운영 배포해"(iOS c5bd7d7, 미리보기 dpl_AcA34Nkgpkg8hHUigZ1FDxx3FXUS), "환불해"(주문 29 API 취소), "결제 꺼". 이다솔 iOS 버전.
+- 다음: 3회차 PASS 면 7856fe2+684f807 결제 수정(리뷰 필수 4건 남음) 정리 → 결제 수정 4건 Codex → 2.4.x 릴리스 묶음.
+
 ## [2026-11-25 22:45 KST] iOS 구형 Safari 수정 미리보기 배포 · 로그인 수정 2회차 BLOCK
 - iOS: Codex c5bd7d7(fix/ios-legacy-safari-20261125, worktree haenael-ge-ios) browserslist safari/ios_saf 15 + postbuild 문법 검사. Vercel 미리보기 dpl_AcA34Nkgpkg8hHUigZ1FDxx3FXUS(haenael-fvesbj64d-…) READY, 빌드 로그 "BROWSER_SYNTAX_OK files=36 forbidden=0". 미리보기는 보호(302)라 화면 상호작용 미검증, 실제 구형 아이폰 미검증. 운영 배포 = 회장 승인 대기.
 - 로그인: 087dd96 Playwright 5/5·build 0. 재리뷰 2회차 BLOCK(JS 미동작 시 pending·external 막다른 화면) → Codex fix4 진행(scratchpad/codex-fix4.log, review-087dd96.md).
