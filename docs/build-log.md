@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-26 2.4.x 친구 목표·응원·프로필 이미지 정합
+
+- `my_friend_goals`가 `recent_message_goal_id`를 반환하고 해당 목표를 대표 카드 첫 항목으로 정렬한다. 최근 메시지가 없는 경우 최근 확정 응원 시각, 목표 생성 시각 순으로 대표 목표를 고른다. `my_friend_page`도 같은 계약을 상속한다.
+- 상세 최근 응원은 현재 목표와 같은 경우에만 표시하고, 양방향 응원 이력에 `goal_id`와 `goal_title`을 추가했다. 응원 수, 아바타, 워드맵은 모두 환영 응원을 제외한다.
+- 카카오 `http` 프로필 주소는 OAuth 저장, 웹 렌더, 기존 데이터 백필에서 `https`로 바꾼다. 이미지 로드 오류는 이니셜로 대체한다. 시안 이탈 사유: 실사용자 세로 사진. 상세 가로 띠를 88px 원형 아바타와 이름으로 교체했다.
+- PRD v0.5.1 E18은 Deno에서 목표 재조회 없이 승인 RPC 호출, pgTAP에서 주문 뒤 목표 `CLOSED` 전환 뒤 payment `DONE`, cheer `CONFIRMED`, 원장 `EARN` 1건으로 고정했다.
+- 증거: 로컬 production 모드 build 종료코드 0, Vitest 105파일 632건, Deno 15파일 119건, pgTAP 28파일 509건, Playwright 1/1과 아바타 `naturalWidth=480`, `currentSrc https=true`, 디자인 토큰 336파일·신규 위반 0. 운영 배포·운영 DB 쓰기·push·실결제는 실행하지 않았다.
+
+> STAMP: 2026-11-26 00:40 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=운영 DB 재현 독립 조사, 승인 시안 belong clean frame, PRD v0.5.1 E18, 로컬 pgTAP·Vitest·Deno·Playwright·build · 고민=친구 단위 최근 메시지를 목표 단위 카드에 섞지 않고, 실사용자 세로 사진을 잘라 보이는 시안 구조만 승인 사유를 남겨 교체했다.
+
 ## 2026-11-25 2.4.x 간편결제·응원 신뢰 경계와 소셜 화면 보정
 
 - `TossClient`가 결제수단 원문과 `easyPay`를 보존하고, `toss-confirm`·webhook이 카드와 provider가 확인된 간편결제를 같은 응원 확정 경로로 처리한다. 미지원 수단의 자동 취소·감사 기록은 유지하고, 취소 또는 감사 기록 실패는 `SLACK_FEEDBACK_WEBHOOK_URL` 우선 운영 알림에 주문번호·금액·사유를 보낸다.

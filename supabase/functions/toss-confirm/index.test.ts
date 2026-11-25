@@ -513,6 +513,10 @@ async function assertAcceptedPayment(
       requestedUrls.some((url) => url.endsWith(`/v1/payments/${paymentKey}/cancel`)),
       false,
     );
+    assertEquals(
+      requestedUrls.some((url) => /\/rest\/v1\/goal(?:\?|$)/.test(url)),
+      false,
+    );
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -545,6 +549,13 @@ Deno.test("PAY-METHOD-04 토스페이 간편결제 승인은 응원과 원장에
     discountAmount: 0,
   });
 });
+
+Deno.test(
+  "PAY-CONFIRM-CLOSED-GOAL-01 목표 마감 여부를 재조회하지 않고 승인된 READY 주문을 확정한다",
+  async () => {
+    await assertAcceptedPayment("카드");
+  },
+);
 
 Deno.test("PAY-STATE-01 FAILED·CANCELED 새로고침은 Toss 승인을 다시 호출하지 않는다", async () => {
   for (const [status, code] of [

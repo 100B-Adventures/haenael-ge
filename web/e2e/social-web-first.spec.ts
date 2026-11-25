@@ -6,14 +6,8 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import sharp from "sharp";
-import {
-  ANALYTICS_CONSENT_KEY,
-  type AnalyticsConsent,
-} from "../src/lib/analytics/consent";
-import {
-  latestPublicRelease,
-  WHATS_NEW_LAST_SEEN_KEY,
-} from "../src/lib/release-notes";
+import { ANALYTICS_CONSENT_KEY, type AnalyticsConsent } from "../src/lib/analytics/consent";
+import { latestPublicRelease, WHATS_NEW_LAST_SEEN_KEY } from "../src/lib/release-notes";
 import {
   runStagingFixtureSql,
   STAGING_PROJECT_REF,
@@ -23,6 +17,7 @@ import {
   verifyWordmapMotionEnvelope,
   waitForVisualReady,
 } from "./support/visual-assertions";
+import { runFriendGoalAlignmentScenario } from "./support/friend-goal-alignment";
 import {
   devices,
   type Browser,
@@ -5061,6 +5056,10 @@ test.describe("V2 web-first social slice", () => {
       connected_at: originalConnection!.connected_at,
       updated_at: originalConnection!.updated_at,
     });
+  });
+
+  test("QA-TC-FL-02·FD-04~08 친구 목표·메시지·아바타·커버 계약", async ({ browser }) => {
+    test.setTimeout(120_000); await runFriendGoalAlignmentScenario({ admin, authContext, browser, email: emails.owner, ids, friendPublicGoal, friendFriendsGoal, runId, isoDateFromNow });
   });
 
   test("ORDER-ATTR-01 replay는 최초 회원 응원 귀속을 다른 사용자로 바꾸지 않는다", async () => {

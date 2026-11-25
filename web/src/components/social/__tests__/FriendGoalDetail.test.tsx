@@ -26,6 +26,7 @@ it("CL-04 친구 상세의 최근 응원은 ClampText의 2줄 정책과 read-onl
       nickname="서연"
       relationshipDirection="MUTUAL"
       recentMessage="긴 응원 메시지는 두 줄에서 접히고 꺾쇠 하나로 다시 펼칠 수 있어요."
+      recentMessageGoalId={1}
       recentMessageDirection="SENT"
       detail={primary}
       friendGoals={[primary, {
@@ -77,12 +78,16 @@ it("G4-FRIEND-HISTORY 친구 상세는 회원끼리 주고받은 문구·날짜�
       cheerHistory={[
         {
           cheer_id: 11,
+          goal_id: 1,
+          goal_title: "이번 달에는 세 번씩 달릴게",
           message: "끝까지 같이 해내자",
           created_at: "2026-11-08T12:00:00Z",
           direction: "RECEIVED",
         },
         {
           cheer_id: 10,
+          goal_id: 2,
+          goal_title: "매일 스무 쪽 읽을게",
           message: "오늘도 한 걸음 가자",
           created_at: "2026-11-07T12:00:00Z",
           direction: "SENT",
@@ -101,6 +106,8 @@ it("G4-FRIEND-HISTORY 친구 상세는 회원끼리 주고받은 문구·날짜�
   expect(history).toHaveTextContent("서연에게 보낸 응원");
   expect(history).toHaveTextContent("오늘도 한 걸음 가자");
   expect(history).toHaveTextContent("익명으로 보냄");
+  expect(history).toHaveTextContent("이번 달에는 세 번씩 달릴게");
+  expect(history).toHaveTextContent("매일 스무 쪽 읽을게");
   expect(history).toHaveTextContent("2026년 11월 7일");
   expect(history.querySelectorAll('[data-direction="RECEIVED"]')).toHaveLength(1);
   expect(history.querySelectorAll('[data-direction="SENT"]')).toHaveLength(1);

@@ -23,6 +23,7 @@
 | `20261107020000_payment_conversion_delivery_lease.sql` | 영구 claim을 만료 가능한 pending lease로 교체. 브라우저는 ack하지 않고 stable event id로 at-least-once 재시도·provider dedupe |
 | `20261125010000_kakao_oauth_callback_claim.sql` | 카카오 authorization code SHA-256을 15분간 원자 claim해 중복 callback의 EF·세션 발급 경쟁 차단 |
 | `20261125011000_restore_confirm_cheer_payment_service_role.sql` | 후속 함수 교체 뒤 누락된 결제 확정 RPC의 service_role 실행 권한 복원 |
+| `20261126010000_friend_goal_message_and_avatar_alignment.sql` | 친구 대표 목표와 최근 응원 메시지를 같은 목표로 정렬하고, 환영 응원 집계와 카카오 프로필 HTTPS 값을 보정 |
 
 ## 명령어
 

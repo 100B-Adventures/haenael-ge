@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { FriendGoalList } from "../FriendGoalList";
 import type { SocialGoal } from "@/lib/social/contracts";
@@ -34,6 +34,7 @@ it("CL-03 친구 카드 본문은 상세 링크이고 최근 응원 토글은 �
           profile_image: null,
           relationship_direction: "I_CHEERED",
           recent_message: "3주째 도서관 개근, 진짜 대단하다",
+          recent_message_goal_id: 1,
           goals,
         },
       ]}
@@ -85,6 +86,7 @@ it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전
     relationship_direction:
       index % 2 === 0 ? ("MUTUAL" as const) : ("CHEERED_ME" as const),
     recent_message: null,
+    recent_message_goal_id: null,
     goals,
   }));
   render(<FriendGoalList friends={friends} />);
@@ -125,6 +127,7 @@ it("G4-FRIEND-HISTORY 친구 목록에는 별도 과거 응원 섹션이 없다"
         profile_image: null,
         relationship_direction: "MUTUAL",
         recent_message: "끝까지 응원할게",
+        recent_message_goal_id: 1,
         goals,
       }]}
     />,
@@ -134,4 +137,22 @@ it("G4-FRIEND-HISTORY 친구 목록에는 별도 과거 응원 섹션이 없다"
   expect(screen.queryByTestId("unlinked-cheer-record")).not.toBeInTheDocument();
   expect(screen.queryByTestId("friends-empty")).not.toBeInTheDocument();
   expect(screen.getByTestId("friend-card")).toBeInTheDocument();
+});
+
+it("QA-TC-FD-05 카카오 http 아바타는 https로 렌더하고 실패하면 이니셜로 바꾼다", () => {
+  render(
+    <FriendGoalList friends={[{
+      friend_member_id: "friend-kakao",
+      nickname: "이다솔",
+      profile_image: "http://k.kakaocdn.net/avatar.jpg",
+      relationship_direction: "MUTUAL",
+      recent_message: null,
+      recent_message_goal_id: null,
+      goals,
+    }]} />,
+  );
+  const image = screen.getByTestId("friend-list-avatar-image");
+  expect(image).toHaveAttribute("src", "https://k.kakaocdn.net/avatar.jpg");
+  fireEvent.error(image);
+  expect(screen.getByTestId("friend-list-avatar-fallback")).toHaveTextContent("이");
 });

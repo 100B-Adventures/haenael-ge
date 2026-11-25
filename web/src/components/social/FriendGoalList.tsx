@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, UserPlus } from "lucide-react";
 import { ClampText } from "@/components/common/ClampText";
 import type { SocialFriend } from "@/lib/social/contracts";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoallist";
+import { ProfileAvatar } from "./ProfileAvatar";
 
 export function FriendGoalList({
   friends,
@@ -54,8 +54,12 @@ export function FriendGoalList({
       </p>
       {friends.length > 0 && <div className="friends-list-card">
         {friends.map((friend) => {
-          const [primaryGoal] = friend.goals;
-          const recentMessage = friend.recent_message;
+          const primaryGoal = friend.goals.find((goal) =>
+            goal.goal_id === friend.recent_message_goal_id
+          ) ?? friend.goals[0];
+          const recentMessage = primaryGoal?.goal_id === friend.recent_message_goal_id
+            ? friend.recent_message
+            : null;
           const nickname = friend.nickname ?? PRODUCT_COPY.TEXT_012;
           const progress = primaryGoal
             ? primaryGoal.cheer_count >= 10
@@ -77,21 +81,13 @@ export function FriendGoalList({
                     className="friend-list-main friend-list-main--with-news"
                     data-testid="friend-goal-link"
                   >
-                    <span className="friend-list-avatar">
-                      {friend.profile_image ? (
-                        <Image
-                          src={friend.profile_image}
-                          alt={`${nickname} 프로필`}
-                          fill
-                          sizes="48px"
-                          unoptimized
-                        />
-                      ) : (
-                        <span aria-hidden="true">
-                          {Array.from(nickname)[0]}
-                        </span>
-                      )}
-                    </span>
+                    <ProfileAvatar
+                      className="friend-list-avatar"
+                      name={nickname}
+                      imageUrl={friend.profile_image}
+                      sizes="48px"
+                      testId="friend-list-avatar"
+                    />
                     <span className="friend-list-copy">
                       <span className="friend-list-name" title={nickname}>
                         {nickname}

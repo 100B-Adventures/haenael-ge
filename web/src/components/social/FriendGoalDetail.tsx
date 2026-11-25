@@ -18,6 +18,8 @@ import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { ClampText } from "@/components/common/ClampText";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoaldetail";
 import { formatDate } from "@/lib/utils/format";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { normalizeProfileImageUrl } from "@/lib/profile-image";
 
 function objectParticle(name: string) {
   const code = name.codePointAt(name.length - 1) ?? 0;
@@ -27,12 +29,13 @@ function objectParticle(name: string) {
 }
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, relationshipDirection, recentMessage, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
+  { friendId, nickname, profileImage, relationshipDirection, recentMessage, recentMessageGoalId, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
     relationshipDirection: RelationshipDirection;
     recentMessage?: string | null;
+    recentMessageGoalId?: number | null;
     recentMessageDirection?: "SENT" | "RECEIVED" | null;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
@@ -71,10 +74,14 @@ export function FriendGoalDetail(
         <FriendRelationshipBadge direction={relationshipDirection} />
         <p>{displayName}{PRODUCT_COPY.TEXT_003}</p>
       </section>
-      <div className="friend-detail-portrait">
-        {profileImage
-          ? <Image src={profileImage} alt={displayName} fill sizes="346px" unoptimized />
-          : <span aria-hidden="true">{Array.from(displayName)[0]}</span>}
+      <div className="friend-detail-profile">
+        <ProfileAvatar
+          className="friend-detail-avatar-large"
+          name={displayName}
+          imageUrl={profileImage}
+          sizes="88px"
+          testId="friend-detail-avatar"
+        />
         <strong>{displayName}</strong>
       </div>
       <section className="friend-together-card">
@@ -85,7 +92,7 @@ export function FriendGoalDetail(
               return (
                 <span key={index} data-testid={supporter?.profile_image ? "supporter-avatar" : "neutral-supporter"}>
                   {supporter?.profile_image && !supporter.is_anonymous
-                    ? <Image src={supporter.profile_image} alt="" width={32} height={32} unoptimized />
+                    ? <Image src={normalizeProfileImageUrl(supporter.profile_image) ?? supporter.profile_image} alt="" width={32} height={32} unoptimized />
                     : <Clover aria-hidden="true" />}
                 </span>
               );
@@ -120,7 +127,7 @@ export function FriendGoalDetail(
         />
         <p className="social-muted">{PRODUCT_COPY.TEXT_009}</p>
       </section>
-      {recentMessage && (
+      {recentMessage && recentMessageGoalId === detail.goal_id && (
         <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
           <strong className="friend-recent-cheer-direction">
             {recentMessageDirection === "SENT"
@@ -158,6 +165,7 @@ export function FriendGoalDetail(
                     {sent && cheer.is_anonymous && (
                       <small className="friend-cheer-anonymous">익명으로 보냄</small>
                     )}
+                    <small className="friend-cheer-goal-title">{cheer.goal_title}</small>
                     <ClampText className="my-cheer-message">
                       {`💬 ${cheer.message || PRODUCT_COPY.TEXT_020}`}
                     </ClampText>

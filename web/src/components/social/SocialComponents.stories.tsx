@@ -16,6 +16,7 @@ export const Normal: Story = {
       profile_image: null,
       relationship_direction: "I_CHEERED",
       recent_message: "이번 주도 꾸준히 해낼 수 있어요.",
+      recent_message_goal_id: 1,
       goals: [{
         goal_id: 1,
         slug: "run",
@@ -50,6 +51,7 @@ export const Normal: Story = {
       profile_image: null,
       relationship_direction: "CHEERED_ME",
       recent_message: "모의고사 820점, 조금만 더 가보자.",
+      recent_message_goal_id: 4,
       goals: [{
         goal_id: 4,
         slug: "grade",
@@ -66,6 +68,7 @@ export const Normal: Story = {
       profile_image: null,
       relationship_direction: "MUTUAL",
       recent_message: null,
+      recent_message_goal_id: null,
       goals: [{
         goal_id: 5,
         slug: "fitness",

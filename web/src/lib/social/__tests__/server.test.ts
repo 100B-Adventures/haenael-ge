@@ -194,8 +194,8 @@ function historyServiceFixture({ active = true }: { active?: boolean } = {}) {
     if (table === "goal") {
       const result = {
         data: [
-          { id: 17, member_id: FRIEND_ID },
-          { id: 18, member_id: VIEWER_ID },
+          { id: 17, member_id: FRIEND_ID, title: "친구 목표" },
+          { id: 18, member_id: VIEWER_ID, title: "내 목표" },
         ],
         error: null,
       };
@@ -265,6 +265,8 @@ describe("친구 응원 이력 서버 경계", () => {
     expect(result).toEqual([
       {
         cheer_id: 103,
+        goal_id: 17,
+        goal_title: "친구 목표",
         message: "보낸 익명 응원",
         created_at: "2026-11-09T12:00:00Z",
         direction: "SENT",
@@ -272,6 +274,8 @@ describe("친구 응원 이력 서버 경계", () => {
       },
       {
         cheer_id: 102,
+        goal_id: 18,
+        goal_title: "내 목표",
         message: "받은 응원",
         created_at: "2026-11-08T12:00:00Z",
         direction: "RECEIVED",
@@ -279,6 +283,8 @@ describe("친구 응원 이력 서버 경계", () => {
       },
       {
         cheer_id: 101,
+        goal_id: 17,
+        goal_title: "친구 목표",
         message: "보낸 응원",
         created_at: "2026-11-07T12:00:00Z",
         direction: "SENT",
