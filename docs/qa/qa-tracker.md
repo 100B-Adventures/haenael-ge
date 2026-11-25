@@ -11,6 +11,24 @@
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
 | 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.2.0 |
 
+## 2026-11-25 · PROD-DEPLOY-OBS-01 · 🔧 로컬 구현·검증 완료, 운영 반영 전
+
+| 대상 | 환경 | 판정 | 증거·해소 조건 |
+|---|---|---|---|
+| 배포 환경값의 실제 유효성 | Vercel provider 조회 | 🔧 구현 완료·provider 미검증 | `env pull` 값의 빈 문자열·암호문 블롭을 원문 없이 거절한다. 변조 계약 1/1 PASS. 현재 worktree에 Vercel project link가 없어 provider 실조회는 미검증이다. |
+| 운영 공개 화면 스모크 | production read-only E2E | ✅ 관찰됨 | 운영 health 2.4.0, 결제 CTA 활성·시트 반응, Kakao SDK 초기화, iPhone·Android KakaoTalk UA hydration, 환전 무쓰기 3/3 PASS. 실결제·제품 쓰기 0건. |
+| 자동 실패 통지 | GitHub Actions | 🔧 구현 완료·전송 미검증 | `failure()` 단계가 `SLACK_WEBHOOK_URL`로 실행 SHA·URL을 보낸다. GitHub secret 목록은 현재 토큰 권한 403으로 존재 여부를 확인하지 못했고 workflow 미배포라 실제 전송은 미검증이다. |
+| Supabase 요청 배포 식별 | 브라우저 → Supabase | 🔧 로컬 검증 | `x-app-version`·`x-app-deploy` global header 단위 시험 2/2 PASS. 운영 REST·Auth·Storage CORS preflight 허용 관찰, goal-cover·profile Edge Function CORS Deno 12/12 PASS. 배포 후 edge_logs 표시는 미검증이다. |
+| 배포 직후 수동 확인 | 운영 runbook | ✅ 문서화 | 환경값 유효성, 결제 CTA, 카카오 공유, iOS·Android KakaoTalk 실기기 로그인 1회를 아래 필수 목록으로 고정했다. |
+
+### 배포(호스팅 이전 포함) 직후 필수 확인
+
+- [ ] `check-deploy-env` provider 값 검사: 필수값 누락·빈 값·암호문 블롭 0건
+- [ ] 운영 공개 목표: `PAYMENTS_ENABLED` 기대값과 결제 버튼 활성/비활성·문구 일치, 실결제 0건
+- [ ] 운영 카카오 공유: 실제 Kakao SDK 초기화와 공유창 오류 0건
+- [ ] iOS KakaoTalk 실기기: 로그인 → 원래 공개 목표 복귀 1회
+- [ ] Android KakaoTalk 실기기: 로그인 → 원래 공개 목표 복귀 1회
+
 ## 2026-11-25 22:03 KST · IOS-SAFARI-LEGACY-01 · 🔧 로컬 수정·검증 완료, 운영 미반영
 
 | 대상 | 환경 | 판정 | 증거 |

@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-25 운영 배포 관측·읽기 전용 회귀 계약
+
+- Vercel provider 검사는 `env pull`로 Production 값을 임시 메모리 경로에 받아 필수값의 빈 문자열과 암호문 블롭 형태를 이름·사유만으로 거절한다. Kakao JS 키도 필수 계약에 편입했고 변조 시험은 암호문 샘플을 `INVALID ... reason=encrypted_blob`으로 검출했다.
+- 운영 읽기 전용 E2E는 `/api/health` 2.4.0, 공개 목표의 결제 CTA 활성·결제 시트 반응, Kakao SDK 초기화, iPhone·Android KakaoTalk UA hydration, 기존 환전 무쓰기 경로를 한 회차에서 검사한다. 최종 운영 실행은 3/3 통과했고 실결제·제품 쓰기는 없었다.
+- 브라우저 Supabase 요청에 `x-app-version`과 `x-app-deploy`를 붙였다. REST·Auth·Storage gateway preflight가 두 헤더를 허용함을 운영에서 관찰했고, 브라우저가 호출하는 goal-cover·profile Edge Function 공용 CORS와 회귀 시험을 함께 갱신했다.
+- GitHub Actions 실패 시 `SLACK_WEBHOOK_URL`로 실행 SHA·URL을 알리는 단계를 추가했다. 현재 권한으로 저장소 secret 목록 조회가 403이라 실제 secret 존재와 알림 전송은 미검증이며, push·배포는 하지 않았다.
+- 검증: production build·Safari 15 postbuild PASS, Vitest 99파일·600건, QA mutation 52/52, Deno CORS 12/12, 운영 E2E 3/3, 로컬 dev `/how` HTTP 200·console error 0. Vercel provider 실조회는 이 worktree에 `.vercel/project.json`이 없어 미검증이다.
+
+> STAMP: 2026-11-25 23:43 KST · model=gpt-codex/GPT-5 · agent=code-builder · skill=haenael-supabase-build · 근거=Vercel env pull 계약·운영 Playwright·Supabase CORS preflight·Vitest·Deno·headless smoke·Supabase/Playwright 공식 문서 · 고민=비밀값을 출력하지 않으면서 값 손상과 배포 식별을 자동 검출하고, 실제 결제 없이 운영 공개 경로의 반응만 관찰했다.
+
 ## 2026-11-25 iOS Safari 15 번들 호환성
 
 - Next.js 16.4.6 기본 타깃 Safari 16.4+를 유지하던 수정 전 production 번들에서 class static block `static{` 1건을 재현했다. 이 구문은 Safari 16.4 미만에서 파싱 실패하여 hydration 전체를 막는다.

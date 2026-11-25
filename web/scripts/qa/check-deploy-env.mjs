@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -94,18 +102,54 @@ function requiredVaultForTarget(targetName) {
     .sort();
 }
 
-function parseProviderNames(targetName) {
+function parseDotenvValues(source) {
+  const values = new Map();
+  for (const line of source.split(/\r?\n/)) {
+    const normalized = line.trim().replace(/^export\s+/, "");
+    if (!normalized || normalized.startsWith("#")) continue;
+    const separator = normalized.indexOf("=");
+    if (separator < 1) continue;
+    const name = normalized.slice(0, separator).trim();
+    if (!/^[A-Z][A-Z0-9_]*$/.test(name)) continue;
+    let value = normalized.slice(separator + 1).trim();
+    if (
+      value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'")))
+    ) {
+      value = value.slice(1, -1);
+    }
+    values.set(name, value);
+  }
+  return values;
+}
+
+function parseProviderEnvironment(targetName) {
   const provider = contract.targets[targetName].provider;
   try {
     if (provider === "vercel") {
       const binary = join(projectRoot, "node_modules/.bin/vercel");
-      const raw = execFileSync(binary, ["env", "ls", "production", "--format", "json", "--cwd", workspaceRoot], {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-      const parsed = JSON.parse(raw);
-      const rows = Array.isArray(parsed) ? parsed : parsed.envs ?? parsed.variables ?? [];
-      return new Set(rows.map((row) => row.key ?? row.name).filter(Boolean));
+      const tempDirectory = mkdtempSync(join(tmpdir(), "haenael-vercel-env-"));
+      const outputPath = join(tempDirectory, "production.env");
+      try {
+        execFileSync(binary, [
+          "env",
+          "pull",
+          outputPath,
+          "--environment",
+          "production",
+          "--yes",
+          "--cwd",
+          workspaceRoot,
+        ], {
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "pipe"],
+        });
+        const values = parseDotenvValues(readFileSync(outputPath, "utf8"));
+        return { names: new Set(values.keys()), values, valueCheck: "pulled" };
+      } finally {
+        rmSync(tempDirectory, { recursive: true, force: true });
+      }
     }
     if (provider === "supabase") {
       const raw = execFileSync("supabase", ["secrets", "list", "--output-format", "json"], {
@@ -115,7 +159,8 @@ function parseProviderNames(targetName) {
       });
       const parsed = JSON.parse(raw);
       const rows = Array.isArray(parsed) ? parsed : parsed.secrets ?? [];
-      return new Set(rows.map((row) => row.name ?? row.key).filter(Boolean));
+      const names = new Set(rows.map((row) => row.name ?? row.key).filter(Boolean));
+      return { names, values: new Map(), valueCheck: "unavailable" };
     }
   } catch {
     console.error(`ENV_PROVIDER_QUERY_FAILED target=${targetName}`);
@@ -126,6 +171,17 @@ function parseProviderNames(targetName) {
 
 function namesFromFile(path) {
   return new Set(readFileSync(resolve(process.cwd(), path), "utf8").split(/\r?\n/).map((line) => line.trim()).filter(Boolean));
+}
+
+function invalidValueReason(value) {
+  const normalized = value.trim();
+  if (!normalized) return "empty";
+  if (
+    /^eyJ2Ijoid[A-Za-z0-9_=-]{24,}$/.test(normalized) ||
+    /^\{\s*"v"\s*:\s*"[A-Za-z0-9_=-]{24,}"/.test(normalized) ||
+    /^vercel:encrypted:[A-Za-z0-9_=-]{24,}$/i.test(normalized)
+  ) return "encrypted_blob";
+  return null;
 }
 
 async function parseVaultNames(source) {
@@ -188,26 +244,59 @@ if (!targetName) {
 }
 
 const source = argValue("--source", "provider");
-let present;
-if (source === "provider") present = parseProviderNames(targetName);
-else if (source === "runtime") present = new Set(Object.keys(process.env));
-else if (source === "file") present = namesFromFile(argValue("--names-file"));
+let snapshot;
+if (source === "provider") snapshot = parseProviderEnvironment(targetName);
+else if (source === "runtime") {
+  snapshot = {
+    names: new Set(Object.keys(process.env)),
+    values: new Map(Object.entries(process.env).filter((entry) => entry[1] !== undefined)),
+    valueCheck: "runtime",
+  };
+} else if (source === "file") {
+  const valuesFile = argValue("--values-file");
+  const values = valuesFile
+    ? parseDotenvValues(readFileSync(resolve(process.cwd(), valuesFile), "utf8"))
+    : new Map();
+  snapshot = {
+    names: valuesFile ? new Set(values.keys()) : namesFromFile(argValue("--names-file")),
+    values,
+    valueCheck: valuesFile ? "file" : "unavailable",
+  };
+}
 else throw new Error(`unsupported source: ${source}`);
 
 const mutation = argValue("--mutation");
-if (mutation?.startsWith("drop:")) present.delete(mutation.slice("drop:".length));
+if (mutation?.startsWith("drop:")) snapshot.names.delete(mutation.slice("drop:".length));
+if (mutation?.startsWith("blob:")) {
+  const name = mutation.slice("blob:".length);
+  snapshot.names.add(name);
+  snapshot.values.set(name, "eyJ2IjoidGVzdC1lbmNyeXB0ZWQtYmxvYi1zYW1wbGUtMTIzNDU2Nzg5MCJ9");
+  snapshot.valueCheck = "mutation";
+}
 
 const required = requiredForTarget(targetName);
-const missing = required.filter(({ name }) => !present.has(name));
+const missing = required.filter(({ name }) => !snapshot.names.has(name));
+const invalid = required.flatMap(({ name }) => {
+  if (!snapshot.names.has(name) || !snapshot.values.has(name)) return [];
+  const reason = invalidValueReason(snapshot.values.get(name));
+  return reason ? [{ name, reason }] : [];
+});
 console.log(`ENV_TARGET target=${targetName} source=${source} required=${required.length} present=${required.length - missing.length} missing=${missing.length}`);
 for (const { name, features } of required) {
-  console.log(`${present.has(name) ? "PRESENT" : "MISSING"} ${name} feature=${features.join("+")}`);
+  const invalidEntry = invalid.find((entry) => entry.name === name);
+  const status = !snapshot.names.has(name) ? "MISSING" : invalidEntry ? "INVALID" : "PRESENT";
+  console.log(`${status} ${name} feature=${features.join("+")}${invalidEntry ? ` reason=${invalidEntry.reason}` : ""}`);
 }
 if (missing.length) {
   console.error(`ENV_TARGET_FAIL missing_names=${missing.map(({ name }) => name).join(",")}`);
   ok = false;
-} else {
-  console.log("ENV_TARGET_PASS missing=0");
+}
+if (invalid.length) {
+  console.error(`ENV_TARGET_FAIL invalid=${invalid.map(({ name, reason }) => `${name}:${reason}`).join(",")}`);
+  ok = false;
+}
+if (!missing.length && !invalid.length) {
+  console.log(`ENV_TARGET_PASS missing=0 invalid=0 value_check=${snapshot.valueCheck}`);
 }
 
 const requiredVault = requiredVaultForTarget(targetName);

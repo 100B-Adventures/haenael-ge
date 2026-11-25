@@ -101,7 +101,7 @@ export const COVER_CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-app-version, x-app-deploy",
 };
 
 export function coverJson(status: number, body: unknown): Response {
