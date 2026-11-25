@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 23:07 KST] compact 마크 (auto)
+- 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 911576d docs(state): Kakao fix round 3 review pending
+- compact 직전 컨텍스트: 316407 토큰
+- 마지막 회장 요청: <task-notification> <task-id>ac46cebaabcf19937</task-id> <tool-use-id>toolu_017EkLSRijvCU9NYNC2pPdqz</tool-use-id> <output-file>/tmp/claude-1000/-Users-sj-sj-code-master-haenael-ge/962fde97-b9b2-4a5c-9ce9-7be7ef3778ca/tasks/ac46cebaabcf19937.output</output-file> <status>completed</status> <summary>A
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## [2026-11-25 23:05 KST] 로그인 수정 7856fe2 3회차 리뷰 중
 - Codex fix4 → 7856fe2(JS 없이도 pending 서버 redirect, external 서버 렌더 링크). build 0, Vitest 623, Playwright 6/6 주장(로그 review2-*.log). 같은 리뷰어 3회차 진행.
 - 회장 답 대기: "운영 배포해"(iOS c5bd7d7, 미리보기 dpl_AcA34Nkgpkg8hHUigZ1FDxx3FXUS), "환불해"(주문 29 API 취소), "결제 꺼". 이다솔 iOS 버전.
