@@ -9,7 +9,8 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
-const APP_ENTRY_ORIGIN = "https://haenaelge.vercel.app";
+// 11-24 해낼게 전용 Vercel 계정 이전 뒤 옛 별칭 haenaelge.vercel.app 은 정지된 옛 팀에 남아 402 다. 진입은 운영 정식 주소로 한다.
+const APP_ENTRY_ORIGIN = "https://haenael-ge.vercel.app";
 const ALLOWED_APP_ORIGINS = new Set([
   APP_ENTRY_ORIGIN,
   "https://haenael-ge.vercel.app",
