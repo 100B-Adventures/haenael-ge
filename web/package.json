@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/qa/generate-public-release-notes.mjs && node scripts/qa/check-web-package-boundary.mjs && node scripts/qa/check-deploy-env.mjs --target vercel-production --source runtime --only-if-vercel",
     "build": "next build",
+    "postbuild": "node scripts/qa/check-browser-syntax.mjs",
     "lint": "oxlint .",
     "qa:predeploy-production": "node scripts/qa/check-web-package-boundary.mjs && node scripts/qa/check-deploy-env.mjs --target vercel-production --source provider && node scripts/qa/check-deploy-env.mjs --target supabase-production --source provider --vault-source provider",
     "test:qa-contracts": "node ../scripts/qa/check-deploy-env.mjs --static-only && node ../scripts/qa/check-cashout-layer-contract.mjs && node ../scripts/qa/check-cashout-raise-coverage.mjs && node ../scripts/qa/check-cashout-notification-contract.mjs && node ../scripts/qa/lint-protected-routes.mjs && node ../scripts/qa/lint-web-custom-classes.mjs && node ../scripts/qa/run-contract-mutations.mjs",
@@ -22,6 +23,13 @@
     "qa:verify-production:auth": "playwright test --config=playwright.production.config.ts",
     "qa:design-tokens": "node ../scripts/qa/design-token-lint.mjs"
   },
+  "browserslist": [
+    "chrome 111",
+    "edge 111",
+    "firefox 111",
+    "safari 15",
+    "ios_saf 15"
+  ],
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "@supabase/ssr": "^0.12.0",

@@ -11,6 +11,12 @@
 | 승인 시안 핀 | `docs/design/prototypes/social-viral-loop-v3-opus5.html` v3.0.0, SHA-256 `afca1c03…`(`pipeline-state.v2.md:52`). 작업트리 파일과 SHA 다름(이번 2화면 판정과 별도 추적), [O-1](#t-open) |
 | 디자인 상세 | [design-conformance-matrix.md](design-conformance-matrix.md) v2.2.0 |
 
+## 2026-11-25 22:03 KST · IOS-SAFARI-LEGACY-01 · 🔧 로컬 수정·검증 완료, 운영 미반영
+
+| 대상 | 환경 | 판정 | 증거 |
+|---|---|---|---|
+| iOS Safari 15+ / KakaoTalk WKWebView에서 로그인 버튼과 응원 목록 hydration | `origin/main` `34cd06e` 로컬 production build | 🔧 수정 전 `static{` 1개를 재현했다. `browserslist`를 Safari 15·iOS Safari 15로 낮춘 뒤 36개 청크에서 `static{`·`(?<=`·`(?<!` 각 0건, build·postbuild exit 0, Vitest 98파일 598건, typecheck 2종, lint exit 0, `/how` headless Chromium HTTP 200·console error 0이다. 실제 iOS Safari 15와 운영 반영은 미검증이다. | `.goal/runs/ios-safari-legacy-20261125/{build-before.log,static-before.txt,build-after.log,forbidden-syntax-after.log,vitest.log,typecheck-unit.log,typecheck-security.log,lint.log,headless-smoke.log}` |
+
 ## 목차 <a id="t-toc"></a>
 
 **현재 보고 (source `617b084` 2.2.0 업데이트 의견·회원 본 버전 동기화 · 독립 qa 재승인 대기)**

@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-25 iOS Safari 15 번들 호환성
+
+- Next.js 16.4.6 기본 타깃 Safari 16.4+를 유지하던 수정 전 production 번들에서 class static block `static{` 1건을 재현했다. 이 구문은 Safari 16.4 미만에서 파싱 실패하여 hydration 전체를 막는다.
+- Next.js 공식 Supported Browsers 방식대로 `web/package.json` `browserslist`를 Chrome 111·Edge 111·Firefox 111·Safari 15·iOS Safari 15로 고정했다. 런타임 폴리필이 필요한 신규 API는 없어 공식 폴리필 진입점은 추가하지 않았다.
+- `postbuild` 문법 계약을 추가해 `.next/static` 전체에 `static{`·정규식 lookbehind가 다시 들어오면 빌드를 실패시킨다. 검사기는 수정 전 번들을 대상으로 exit 1, 수정 후 36개 청크를 대상으로 forbidden 0·exit 0을 냈다.
+- 검증: production build·postbuild exit 0, Vitest 98파일·598건, 단위·보안 typecheck, oxlint exit 0. 로컬 dev `/how`는 HTTP 200·headless Chromium console error 0. 로컬 랜딩 `/`는 Supabase public 환경변수 미설정으로 HTTP 500이어서 실제 로그인·응원 화면과 iOS Safari 15 실기기는 미검증이다. push·배포는 하지 않았다.
+
+> STAMP: 2026-11-25 22:22 KST · model=gpt-codex/GPT-5 · agent=code-builder · skills=investigate·verify · 근거=Next.js Supported Browsers(https://nextjs.org/docs/architecture/supported-browsers)·WebKit Safari 15 JS 기능(https://webkit.org/blog/11989/new-webkit-features-in-safari-15/)·수정 전후 번들·Vitest·headless smoke · 고민=Next 공식 타깃 설정만으로 문법을 낮추고, 재발은 산출 청크 전수 계약으로 차단했다.
+
 ## 2026-11-21 2.3.2 카카오톡 초대 수정
 
 - web/next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가(043203e), form-action 에 sharer.kakao.com·accounts.kakao.com 추가(11-21, staging 실측으로 043203e 만으로는 공유창 미열림 확인). security-headers 단위 시험 07·08.
