@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 22:05 KST] 이다솔 아이폰 JS 미동작 유력 · iOS 수정 위임 · 토스 로그인 완료
+- 관찰: 이다솔 21:12 로그인 verify 200(단일 callback). 11-25 하루 Supabase edge_logs 에 iPhone UA 0건(안드로이드는 다수) → 아이폰에서 화면 JS 가 안 돎. 운영 청크 1vkbvs5cv4r1l.js 에 class static block(Safari 16.4 미만 문법 오류). 이다솔 iOS 버전 미확인.
+- 위임: Codex code-builder, worktree /Users/sj/sj_code_master/haenael-ge-ios 브랜치 fix/ios-legacy-safari-20261125(34cd06e 기준), browserslist iOS 15+. 로그 scratchpad/codex-ios.log. 로그인 수정 fix3(d057)도 진행 중.
+- 토스: 회장 로그인 완료(9450 business.toss.im 대시보드 관찰). 하네스 정정: TAUTH 는 크롬 종료에도 남음, 재로그인 원인 = 토스 서버 세션 만료(우편 21:30). 토스 조회·취소는 온프렘 API(허용 IP 121.138.196.20)로.
+- Vercel 런타임 로그는 Hobby 30분 보관이라 21:12 요청은 22:00 에 이미 없음.
+
 ## [2026-11-25 20:55 KST] 684f807 리뷰 BLOCK · 운영 Supabase SLACK_WEBHOOK_URL 설정
 - 원인 관찰: 운영 Supabase 시크릿에 SLACK_WEBHOOK_URL 없음 → sendSlackAlert 가 조용히 false, 주문 29 보상 실패 경보 유실(function_logs 에 [slack] 줄 0, 취소 실패 줄만 09:04:19Z).
 - 조치: SLACK_WEBHOOK_HAENAEL_GE 값으로 운영 Supabase 시크릿 SLACK_WEBHOOK_URL 설정(API 201, 목록 확인 True), 같은 주소로 시험 메시지 200. 함수 경유 실제 수신은 미검증(QA PAY-COMP-ALERT-01).
