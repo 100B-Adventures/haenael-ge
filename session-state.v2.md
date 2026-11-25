@@ -1,6 +1,6 @@
 # 해낼게 V2 개발·QA·배포 상태
 
-## [2026-11-25 20:0x KST] 16f37df 독립 리뷰 BLOCK · 이다솔 18:47 재실패 · 원장 기록
+## [2026-11-25 20:00 KST] 16f37df 독립 리뷰 BLOCK · 이다솔 18:47 재실패 · 원장 기록
 - 이다솔 18:47~18:48 재실패 관찰: auth.users 이다솔(d2cd1564), auth.sessions 18:47:59·18:48:00 생성 뒤 사용 0, edge_logs 동일 callback 3회·verify 403 1·200 2. 11:31 과 같은 양상, 16f37df 미배포.
 - 원장: 저장소 wiki/거버넌스/실수.md 맨 위 19:3x 블록(9010cb5), 하네스 mistake-ledger [운영결제-QA미종결], eval ev-20261125-11.
 - 위임 진행: Codex fix2(배경 b7nlt2i3c, CODEX_RESUME 01a211d8, 브랜치 fix/kakao-inapp-login-20261125) — 간편결제 수용·화면/서버 오류 처리·보상 실패 알림·응원 이름 고정·결제 뒤 복귀·친구 카드·초대 문구·qa-tracker. 로그 scratchpad/codex-fix2.log.
