@@ -1,11 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import PrivacyPage from "../page";
 
 describe("개인정보처리방침", () => {
-  it("P1-16 카카오·솔라피 알림 처리를 비활성으로 잘못 고지하지 않는다", () => {
+  it("P1-16 카카오·솔라피 알림 처리를 비활성으로 잘못 고지하지 않는다", async () => {
     render(<PrivacyPage />);
+    await waitFor(() => expect(screen.getByTestId("analytics-consent-controls")).toHaveTextContent("선택 전"));
 
     const page = screen.getByTestId("privacy-page");
     expect(page).toHaveTextContent("카카오톡 알림톡 발송");
@@ -19,22 +20,25 @@ describe("개인정보처리방침", () => {
     ).not.toHaveTextContent("비활성");
   });
 
-  it("GA4·Clarity·Meta의 동의, 국외 이전, 보유기간과 철회 경로를 고지한다", () => {
+  it("GA4·Clarity의 동의, 국외 이전, 보유기간과 철회 경로를 고지하고 Meta는 제거한다", async () => {
     render(<PrivacyPage />);
+    await waitFor(() => expect(screen.getByTestId("analytics-consent-controls")).toHaveTextContent("선택 전"));
     const page = screen.getByTestId("privacy-page");
 
     expect(page).toHaveTextContent("transaction_id: 주문번호");
     expect(page).toHaveTextContent("clarityMS@microsoft.com");
     expect(page).toHaveTextContent("최대 14개월");
     expect(page).toHaveTextContent("재생 데이터 30일");
-    expect(page).toHaveTextContent("Event Data 최대 2년");
+    expect(page).not.toHaveTextContent("Meta Platforms");
+    expect(screen.queryByText("Meta 픽셀")).toBeNull();
     expect(page).toHaveTextContent("국외 이전 별도 동의");
     expect(page).toHaveTextContent("동의 철회");
     expect(screen.getByTestId("analytics-consent-controls")).toBeInTheDocument();
   });
 
-  it("목차와 본문 외부 링크에 44px 누름 영역 계약을 적용한다", () => {
+  it("목차와 본문 외부 링크에 44px 누름 영역 계약을 적용한다", async () => {
     render(<PrivacyPage />);
+    await waitFor(() => expect(screen.getByTestId("analytics-consent-controls")).toHaveTextContent("선택 전"));
 
     const toc = screen.getByRole("navigation", { name: "개인정보처리방침 목차" });
     expect(toc.querySelectorAll("a")).toHaveLength(4);
@@ -42,6 +46,6 @@ describe("개인정보처리방침", () => {
 
     const bodyLinks = screen.getByTestId("privacy-page")
       .querySelectorAll("a.legal-document-link");
-    expect(bodyLinks).toHaveLength(4);
+    expect(bodyLinks).toHaveLength(2);
   });
 });

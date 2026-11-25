@@ -1,5 +1,13 @@
 # QA Tracker — haenael-ge
 
+> 🔧 로컬 보정 (2026-11-26 00:20 KST): 분석 정보 국외 이전 동의 UI를 작은 하단 띠로 줄이고 로그인 회원 선택을 `member` 계정에 저장했다. Meta 픽셀 로드·전환 경로는 광고 집행 전까지 제거했다. production Playwright 4/4에서 선택 뒤 배너 소멸, 재방문·새 브라우저 계정 복원, 동의 전 Google 0·Microsoft 0·Facebook 0 요청과 동의 뒤 Facebook 0 요청을 확인했다. pgTAP 9/9, 순차 Deno 117/117, 전체 Vitest 630/630, build 종료코드 0, 디자인 토큰 신규 위반 0이다. 개인정보·마이그레이션 독립 리뷰와 운영 반영은 열어 둔다.
+
+## 분석 정보 국외 이전 동의 열린 항목
+
+- [ ] `AN-CONSENT-REVIEW-01` 다른 모델이 동의 계정 저장 마이그레이션, RLS, 동의 전 무전송 계약을 독립 리뷰한다.
+- [ ] `AN-CONSENT-STAGING-01` staging 로그인 계정으로 선택 뒤 다른 브라우저에서 배너가 다시 뜨지 않고 Google·Microsoft·Facebook 동의 전 요청이 0인지 확인한다.
+- [ ] `AN-CONSENT-PRODUCTION-01` 운영 반영 뒤 실제 호스트에서 미선택·거부·허용·철회 네 상태와 Meta 요청 0을 확인한다.
+
 > ❌ NG (2026-11-25 23:1x KST): `684f807` 독립 리뷰에서 결제 경보의 잘못된 Slack 환경변수, 사용자 취소의 출금 가능성 오안내, 친구 응원 메시지 펼치기 기능 삭제, 전역 CSS 비대화를 확인했다. 권고 항목을 포함한 회귀 시험과 build, Vitest, Deno, Playwright, 디자인 토큰 검사가 통과하기 전에는 결제·친구 화면 보정을 출고하지 않는다.
 
 > 🔧 로컬 보정 (2026-11-25 23:44 KST): 결제 경보를 운영 `SLACK_WEBHOOK_URL`과 3초 제한시간으로 고정하고, 허용 간편결제·terminal 주문 재진입·오류 문구·익명 이름 예외·성장 결과 뒤 복귀·친구 카드 접기·초대 안내 회귀 시험을 추가했다. production build 종료코드 0, 전체 Vitest 628/628, Deno 20/20, 헤드리스 Playwright 1/1, 디자인 토큰 신규 위반 0, fixture 잔존 0을 확인했다. 실결제와 운영 Slack 수신 항목은 계속 열어 둔다.

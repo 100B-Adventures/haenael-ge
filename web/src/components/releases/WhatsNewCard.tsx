@@ -29,7 +29,7 @@ export function WhatsNewCard() {
 
   useEffect(() => {
     const announced = latestAnnouncedRelease;
-    if (consent === null || !announced || isWhatsNewExcludedPath(pathname)) {
+    if (consent == null || !announced || isWhatsNewExcludedPath(pathname)) {
       setVisible(false);
       return;
     }

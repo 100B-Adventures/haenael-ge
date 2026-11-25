@@ -693,6 +693,8 @@ export type Database = {
       }
       member: {
         Row: {
+          analytics_consent: string | null
+          analytics_consent_updated_at: string | null
           bio: string | null
           birth_date: string | null
           ci: string | null
@@ -706,6 +708,8 @@ export type Database = {
           provider_id: string | null
         }
         Insert: {
+          analytics_consent?: string | null
+          analytics_consent_updated_at?: string | null
           bio?: string | null
           birth_date?: string | null
           ci?: string | null
@@ -719,6 +723,8 @@ export type Database = {
           provider_id?: string | null
         }
         Update: {
+          analytics_consent?: string | null
+          analytics_consent_updated_at?: string | null
           bio?: string | null
           birth_date?: string | null
           ci?: string | null

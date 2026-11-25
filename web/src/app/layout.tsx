@@ -7,7 +7,6 @@ import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { AnalyticsConsentBanner } from "@/components/analytics/AnalyticsConsentBanner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
-import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { SensitiveNavigationBoundary } from "@/components/analytics/SensitiveNavigationBoundary";
 import { SignupConversion } from "@/components/analytics/SignupConversion";
@@ -79,7 +78,6 @@ export default function RootLayout({
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]!">
         <GoogleAnalytics />
-        <MetaPixel />
         <MicrosoftClarity />
         <SensitiveNavigationBoundary />
         <SignupConversion />
