@@ -1,5 +1,10 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 20:55 KST] 684f807 리뷰 BLOCK · 운영 Supabase SLACK_WEBHOOK_URL 설정
+- 원인 관찰: 운영 Supabase 시크릿에 SLACK_WEBHOOK_URL 없음 → sendSlackAlert 가 조용히 false, 주문 29 보상 실패 경보 유실(function_logs 에 [slack] 줄 0, 취소 실패 줄만 09:04:19Z).
+- 조치: SLACK_WEBHOOK_HAENAEL_GE 값으로 운영 Supabase 시크릿 SLACK_WEBHOOK_URL 설정(API 201, 목록 확인 True), 같은 주소로 시험 메시지 200. 함수 경유 실제 수신은 미검증(QA PAY-COMP-ALERT-01).
+- 684f807(Codex 결제·화면 수정) 독립 리뷰 BLOCK 필수 4건: Slack 변수 우선순위, USER_CANCEL 이 "돈이 빠져나갔다면" 경고, 친구 메시지 펼치기 무기록 삭제(시안 이탈), globals.css 증가. 전문 scratchpad/review-684f807.md. 다음 Codex 라운드에 16f37df 리뷰 수정(fix3 진행 중) 뒤 이어서 넣음.
+
 ## [2026-11-25 20:00 KST] 16f37df 독립 리뷰 BLOCK · 이다솔 18:47 재실패 · 원장 기록
 - 이다솔 18:47~18:48 재실패 관찰: auth.users 이다솔(d2cd1564), auth.sessions 18:47:59·18:48:00 생성 뒤 사용 0, edge_logs 동일 callback 3회·verify 403 1·200 2. 11:31 과 같은 양상, 16f37df 미배포.
 - 원장: 저장소 wiki/거버넌스/실수.md 맨 위 19:3x 블록(9010cb5), 하네스 mistake-ledger [운영결제-QA미종결], eval ev-20261125-11.
