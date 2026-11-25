@@ -7,6 +7,16 @@
 - 마지막 회장 요청: <task-notification> <task-id>ac46cebaabcf19937</task-id> <tool-use-id>toolu_017EkLSRijvCU9NYNC2pPdqz</tool-use-id> <output-file>/tmp/claude-1000/-Users-sj-sj-code-master-haenael-ge/962fde97-b9b2-4a5c-9ce9-7be7ef3778ca/tasks/ac46cebaabcf19937.output</output-file> <status>completed</status> <summary>A
 - ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
 
+## [2026-11-26 00:15 KST] 회장 피드백 추적표 · 친구 화면 원인 · QA 보강 회수 · 새 라인 cheer-result
+- 추적표 v0.2.0 15건(커밋 9927684). 실수: 11-20 이름·익명 지시, 11-13 배너 지시 운영 미반영(mistake-ledger 00:1x).
+- 친구 화면 원인(scratchpad review-friends-20261125.md, 운영 DB 재현): my_friend_goals 대표 목표 = 마감 이른 순(옛 목표 16) vs 최근 메시지 = 목표 무관 → 카드 불일치. 상세 사진 띠 346x148 세로 사진 자름. 이다솔 profile_image http:// × CSP https:(WebKit 미검증). cheer_count 환영 응원 포함. → 결제 Codex(pay3) 끝나면 같은 Codex 에 위임.
+- QA 보강 c4f7548(haenael-ge-ios 브랜치) 회수 PASS: 운영 E2E 3 passed, vitest 600, 블롭 검출 시험. Slack 수신 미검증(GitHub secret 403).
+- 결제 리뷰 수정 51e462d 회수 FAIL(standard-dev 미독) → codex-pay3 재위임(+분석 동의 배너 축소·계정 저장·Meta 픽셀 제거).
+- 새 라인 pipeline-state.cheer-result.md(2.5). PRD v0.5.0 초안(64f2e5b) → plan-critic 진행 중.
+- 알림톡: Solapi 11-25 10:47Z ATA 수신 완료(4000). 도착 확인 자동화 없음 → PRD §15 에 포함.
+- 공통 기준(오류 수집·배포 버전·업데이트 팝업·동의 저장·운영 E2E 알림·환경값 값 검사·실기기 QA): harness-rebuild 우편함 작업지시.
+- 회장 대기: 환불해 · 결제 꺼 · 오류 수집 방식(Sentry vs 온프렘).
+
 ## [2026-11-25 23:20 KST] 이다솔 재시도 성공 · iOS 가설 철회 · QA 구멍 보강 위임
 - 관찰: 22:14 이다솔 로그인 후 iPhone 요청 28건, UA "iPhone OS 18_7 … KAKAOTALK/26." → static block 가설 틀림(철회, mistake-ledger 23:1x). 앞선 실패 원인은 미확정(회장 추정 = 옛 배포 화면 캐시).
 - Supabase 로그 보관: edge_logs 가장 오래된 기록 = 조회 시점 24시간 전(11-24 14:20Z) → 1일. Vercel 런타임 30분.
