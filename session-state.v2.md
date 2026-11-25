@@ -1,5 +1,9 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 22:45 KST] iOS 구형 Safari 수정 미리보기 배포 · 로그인 수정 2회차 BLOCK
+- iOS: Codex c5bd7d7(fix/ios-legacy-safari-20261125, worktree haenael-ge-ios) browserslist safari/ios_saf 15 + postbuild 문법 검사. Vercel 미리보기 dpl_AcA34Nkgpkg8hHUigZ1FDxx3FXUS(haenael-fvesbj64d-…) READY, 빌드 로그 "BROWSER_SYNTAX_OK files=36 forbidden=0". 미리보기는 보호(302)라 화면 상호작용 미검증, 실제 구형 아이폰 미검증. 운영 배포 = 회장 승인 대기.
+- 로그인: 087dd96 Playwright 5/5·build 0. 재리뷰 2회차 BLOCK(JS 미동작 시 pending·external 막다른 화면) → Codex fix4 진행(scratchpad/codex-fix4.log, review-087dd96.md).
+
 ## [2026-11-25 22:05 KST] 이다솔 아이폰 JS 미동작 유력 · iOS 수정 위임 · 토스 로그인 완료
 - 관찰: 이다솔 21:12 로그인 verify 200(단일 callback). 11-25 하루 Supabase edge_logs 에 iPhone UA 0건(안드로이드는 다수) → 아이폰에서 화면 JS 가 안 돎. 운영 청크 1vkbvs5cv4r1l.js 에 class static block(Safari 16.4 미만 문법 오류). 이다솔 iOS 버전 미확인.
 - 위임: Codex code-builder, worktree /Users/sj/sj_code_master/haenael-ge-ios 브랜치 fix/ios-legacy-safari-20261125(34cd06e 기준), browserslist iOS 15+. 로그 scratchpad/codex-ios.log. 로그인 수정 fix3(d057)도 진행 중.
