@@ -125,6 +125,7 @@
   --text-input-label: 13px;
   --text-label-small: 13px;
   --text-meta-micro: 13px;
+  --shadow-sheet: 0 0.5rem 1.875rem rgb(0 0 0 / 12%);
   --tabbar-height: 64px;
   --tabbar-icon-size: 23px;
   --tabbar-label-size: 13px;
@@ -426,122 +427,11 @@
     align-items: center;
     justify-content: center;
   }
-
   .receiver-tabbar-icon svg {
     width: var(--tabbar-icon-size);
     height: var(--tabbar-icon-size);
     stroke-width: 1.9;
   }
-
-  .receiver-analytics-consent-banner {
-    position: fixed;
-    right: var(--sp-3);
-    bottom: var(--sp-4);
-    left: var(--sp-3);
-    z-index: 50;
-    display: flex;
-    width: min(calc(100% - (var(--sp-3) * 2)), 40rem);
-    min-height: var(--tap-min-size);
-    align-items: center;
-    gap: var(--sp-2);
-    margin-inline: auto;
-    padding: var(--sp-2) var(--sp-3);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-control);
-    background: var(--card);
-    box-shadow: 0 0.5rem 1.5rem rgb(31 28 24 / 14%);
-  }
-
-  .receiver-analytics-consent-copy {
-    display: flex;
-    min-width: 0;
-    flex: 1;
-    align-items: center;
-    gap: var(--sp-2);
-    font-size: var(--text-meta);
-    line-height: 1.35;
-  }
-
-  .receiver-analytics-consent-copy p {
-    overflow: hidden;
-    flex: 1;
-    font-weight: 700;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .receiver-analytics-consent-copy a {
-    display: inline-flex;
-    min-width: var(--tap-min-size);
-    min-height: var(--tap-min-size);
-    align-items: center;
-    justify-content: center;
-    color: var(--muted-color);
-    text-decoration: underline;
-  }
-
-  .receiver-analytics-consent-actions {
-    display: flex;
-    flex: 0 0 auto;
-    gap: var(--sp-1);
-  }
-
-  .receiver-analytics-consent-actions button {
-    min-width: var(--tap-min-size);
-    min-height: var(--tap-min-size);
-    padding-inline: var(--sp-2);
-    border-radius: var(--radius-control);
-    font-size: var(--text-meta);
-    font-weight: 800;
-  }
-
-  .receiver-analytics-consent-deny {
-    border: 1px solid var(--line);
-    color: var(--foreground);
-    background: var(--background);
-  }
-
-  .receiver-analytics-consent-grant {
-    color: var(--primary-foreground);
-    background: var(--primary);
-  }
-
-  .receiver-analytics-consent-error {
-    position: absolute;
-    right: 0;
-    bottom: calc(100% + var(--sp-1));
-    left: 0;
-    padding: var(--sp-2) var(--sp-3);
-    border: 1px solid var(--destructive);
-    border-radius: var(--radius-control);
-    color: var(--destructive);
-    font-size: var(--text-meta);
-    background: var(--card);
-  }
-
-  body:has(.receiver-tabbar) .receiver-analytics-consent-banner {
-    bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px) + var(--sp-4));
-  }
-
-  @media (max-width: 30rem) {
-    .receiver-analytics-consent-banner {
-      align-items: stretch;
-      flex-direction: column;
-      gap: 0;
-      padding-block: var(--sp-1);
-    }
-
-    .receiver-analytics-consent-actions {
-      position: absolute;
-      top: var(--sp-1);
-      right: var(--sp-2);
-    }
-
-    .receiver-analytics-consent-copy {
-      padding-right: calc((var(--tap-min-size) * 2) + var(--sp-6));
-    }
-  }
-
   .whats-new-card {
     position: fixed;
     right: var(--sp-4);
@@ -556,7 +446,6 @@
     background: var(--card);
     box-shadow: 0 1rem 2.5rem rgb(31 28 24 / 16%);
   }
-
   body:has(.receiver-tabbar) .whats-new-card {
     bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px) + var(--sp-4));
   }

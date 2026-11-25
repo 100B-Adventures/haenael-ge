@@ -2,10 +2,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import PrivacyPage from "../page";
+import { AnalyticsConsentProvider } from "@/components/analytics/AnalyticsConsentProvider";
+
+function renderPrivacyPage() {
+  return render(<AnalyticsConsentProvider><PrivacyPage /></AnalyticsConsentProvider>);
+}
 
 describe("개인정보처리방침", () => {
   it("P1-16 카카오·솔라피 알림 처리를 비활성으로 잘못 고지하지 않는다", async () => {
-    render(<PrivacyPage />);
+    renderPrivacyPage();
     await waitFor(() => expect(screen.getByTestId("analytics-consent-controls")).toHaveTextContent("선택 전"));
 
     const page = screen.getByTestId("privacy-page");
@@ -21,7 +26,7 @@ describe("개인정보처리방침", () => {
   });
 
   it("GA4·Clarity의 동의, 국외 이전, 보유기간과 철회 경로를 고지하고 Meta는 제거한다", async () => {
-    render(<PrivacyPage />);
+    renderPrivacyPage();
     await waitFor(() => expect(screen.getByTestId("analytics-consent-controls")).toHaveTextContent("선택 전"));
     const page = screen.getByTestId("privacy-page");
 
@@ -37,7 +42,7 @@ describe("개인정보처리방침", () => {
   });
 
   it("목차와 본문 외부 링크에 44px 누름 영역 계약을 적용한다", async () => {
-    render(<PrivacyPage />);
+    renderPrivacyPage();
     await waitFor(() => expect(screen.getByTestId("analytics-consent-controls")).toHaveTextContent("선택 전"));
 
     const toc = screen.getByRole("navigation", { name: "개인정보처리방침 목차" });

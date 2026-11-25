@@ -22,6 +22,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 
+vi.mock("@/lib/analytics/useAnalyticsConsent", () => ({
+  useAnalyticsConsent: () => window.localStorage.getItem("haenael_analytics_consent_v1"),
+}));
+
 vi.mock("next/link", () => ({
   default: ({ children, href, onClick, prefetch: _prefetch, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string; prefetch?: boolean }) => (
     <a

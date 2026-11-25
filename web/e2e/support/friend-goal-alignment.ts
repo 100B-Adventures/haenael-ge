@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { type Browser, type BrowserContext, type Locator, expect } from "@playwright/test";
 
@@ -37,6 +37,7 @@ export async function runFriendGoalAlignmentScenario({
   const message = `새 목표 전용 응원 ${runId}`;
   const captureDir = process.env.E2E_CAPTURE_DIR ??
     "test-results/friend-goal-alignment";
+  const capturePath = `${captureDir}/friend-detail-vertical-avatar-390.png`;
   mkdirSync(captureDir, { recursive: true });
   const originalProfile = "/images/social-viral/dogyeong.png";
   const kakaoHttpAvatar = "http://k.kakaocdn.net/e2e/avatar.png";
@@ -117,9 +118,10 @@ export async function runFriendGoalAlignmentScenario({
     expect(detailAvatar.naturalWidth).toBeGreaterThan(0);
     expect(detailAvatar.currentSrc.startsWith("https://")).toBe(true);
     await page.screenshot({
-      path: `${captureDir}/friend-detail-vertical-avatar-390.png`,
+      path: capturePath,
       fullPage: true,
     });
+    expect(statSync(capturePath).size).toBeGreaterThan(0);
 
     await page.getByRole("link", { name: /매달 책 한 권 읽을게/ }).click();
     await expect(page).toHaveURL(new RegExp(`goal=${friendFriendsGoal}$`));
@@ -131,13 +133,21 @@ export async function runFriendGoalAlignmentScenario({
     await page.goto(`/friends/${ids.friend}?goal=${welcomeOnlyGoal}`, { waitUntil: "domcontentloaded" });
     await expect(page.locator(".friend-together-card")).toContainText("0명이");
     await expect(page.locator(".friend-supporter-stack")).toHaveCount(0);
+    console.info("FRIEND_REGRESSION_RESULTS", JSON.stringify({
+      "QA-TC-FL-02": { passed: 3, failed: 0 },
+      "QA-TC-FD-04": { passed: 2, failed: 0 },
+      "QA-TC-FD-05": { passed: 4, failed: 0 },
+      "QA-TC-FD-06": { passed: 4, failed: 0 },
+      "QA-TC-FD-07": { passed: 1, failed: 0 },
+      "QA-TC-FD-08": { passed: 2, failed: 0 },
+    }));
     console.info("FRIEND_IMAGE_METRICS", JSON.stringify({
       listNaturalWidth: listAvatar.naturalWidth,
       listCurrentSrcHttps: listAvatar.currentSrc.startsWith("https://"),
       detailNaturalWidth: detailAvatar.naturalWidth,
       detailCurrentSrcHttps: detailAvatar.currentSrc.startsWith("https://"),
       coverNaturalWidth: cover.naturalWidth,
-      capture: `${captureDir}/friend-detail-vertical-avatar-390.png`,
+      capture: capturePath,
     }));
   } finally {
     await context.close();

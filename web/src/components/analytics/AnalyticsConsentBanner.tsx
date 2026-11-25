@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useAnalyticsConsentState } from "./AnalyticsConsentProvider";
 import { persistAnalyticsConsent } from "@/lib/analytics/account-consent";
-import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-analytics-analyticsconsentbanner";
 
 export function AnalyticsConsentBanner() {
-  const consent = useAnalyticsConsent();
+  const { consent, isAuthenticated } = useAnalyticsConsentState();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
-  if (consent !== null) return null;
+  if (isAuthenticated !== true || consent !== null) return null;
 
   const choose = async (nextConsent: "granted" | "denied") => {
     setSaving(true);

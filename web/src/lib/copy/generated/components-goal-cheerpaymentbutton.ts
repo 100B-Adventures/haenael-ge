@@ -23,6 +23,8 @@ export const PRODUCT_COPY = {
   TEXT_020: "결제창 여는 중...", // source line 501
   TEXT_021: "결제하고 응원하기", // source line 501
   TEXT_022: "로그인한 프로필 이름으로 표시돼요.",
+  TEXT_023: "프로필 이름을 정하면 이름으로 보낼 수 있어요.",
+  TEXT_024: "프로필 이름이 없어 이번 응원은 익명으로만 보낼 수 있어요.",
   ERROR_PAYMENTS_DISABLED: "응원 결제를 준비하고 있어요.",
   ERROR_INVALID_AMOUNT: "응원 금액을 다시 확인해 주세요.",
   ERROR_PROFILE_NAME_REQUIRED: "프로필 이름을 확인한 뒤 다시 응원해 주세요.",

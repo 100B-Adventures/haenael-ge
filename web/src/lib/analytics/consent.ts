@@ -39,6 +39,31 @@ export function clearAnalyticsCookies(): void {
   }
 }
 
+export function clearAnalyticsConsent(): void {
+  if (typeof window === "undefined") return;
+  const hadStoredConsent = getAnalyticsConsent() !== null;
+  window.haenaelGtagPending = [];
+  window.gtag?.("consent", "update", {
+    analytics_storage: "denied",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+  });
+  window.clarity?.("consentv2", {
+    ad_Storage: "denied",
+    analytics_Storage: "denied",
+  });
+  clearAnalyticsCookies();
+  try {
+    window.localStorage.removeItem(ANALYTICS_CONSENT_KEY);
+  } catch {
+    return;
+  }
+  if (hadStoredConsent) {
+    window.dispatchEvent(new CustomEvent(ANALYTICS_CONSENT_EVENT, { detail: null }));
+  }
+}
+
 export function setAnalyticsConsent(consent: AnalyticsConsent): void {
   if (typeof window === "undefined") return;
   try {

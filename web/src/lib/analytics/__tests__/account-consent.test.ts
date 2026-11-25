@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics/consent";
+import { ANALYTICS_CONSENT_KEY, setAnalyticsConsent } from "@/lib/analytics/consent";
 
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
@@ -63,5 +63,23 @@ describe("계정 분석 동의", () => {
     await persistAnalyticsConsent("denied");
     expect(window.localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("denied");
     expect(mocks.updateMaybeSingle).not.toHaveBeenCalled();
+  });
+
+  it("AN-CONSENT-UNIT-05 계정 선택 전 다른 회원의 로컬 동의는 이관하지 않는다", async () => {
+    setAnalyticsConsent("granted");
+    mocks.readMaybeSingle.mockResolvedValue({ data: { analytics_consent: null }, error: null });
+
+    await expect(resolveAnalyticsConsentFromAccount()).resolves.toBeNull();
+    expect(mocks.updateMaybeSingle).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBeNull();
+  });
+
+  it("AN-CONSENT-UNIT-06 로컬 거부만 선택 전 계정에 안전하게 이관한다", async () => {
+    setAnalyticsConsent("denied");
+    mocks.readMaybeSingle.mockResolvedValue({ data: { analytics_consent: null }, error: null });
+    mocks.updateMaybeSingle.mockResolvedValue({ data: { analytics_consent: "denied" }, error: null });
+
+    await expect(resolveAnalyticsConsentFromAccount()).resolves.toBe("denied");
+    expect(mocks.updateMaybeSingle).toHaveBeenCalledTimes(1);
   });
 });

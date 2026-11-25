@@ -477,6 +477,19 @@ describe("CheerPaymentButton Toss v2 request", () => {
     );
   });
 
+  it("PAY-FAIL-08 주문 생성 전 일반 오류도 출금 가능성 문구 없이 재시도를 안내한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "");
+
+    render(<CheerPaymentButton goalId={11} goalTitle="편입 합격 해낼게" goalSlug="goal-slug" />);
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "응원 주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.",
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent("돈이 빠져나갔다면");
+  });
+
   it("PAY-FAIL-05 네트워크 오류는 출금 여부 확인과 중복 결제 방지를 안내한다", async () => {
     mockRequestPayment.mockRejectedValue(new TypeError("Failed to fetch"));
 
@@ -514,5 +527,23 @@ describe("CheerPaymentButton Toss v2 request", () => {
     expect(screen.getByTestId("cheer-supporter-name")).toHaveTextContent(
       "익명으로 보낼게요",
     );
+  });
+
+  it("D057-NAME-03 빈 프로필 이름은 안내하고 익명 선택을 강제한다", () => {
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+        supporterName="  "
+      />,
+    );
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    expect(screen.getByTestId("cheer-supporter-name")).toHaveTextContent(
+      "프로필 이름을 정하면 이름으로 보낼 수 있어요.",
+    );
+    expect(screen.getByText("프로필 이름이 없어 이번 응원은 익명으로만 보낼 수 있어요.")).toBeVisible();
+    expect(screen.getByTestId("cheer-anonymous-toggle")).toBeChecked();
+    expect(screen.getByTestId("cheer-anonymous-toggle")).toBeDisabled();
   });
 });

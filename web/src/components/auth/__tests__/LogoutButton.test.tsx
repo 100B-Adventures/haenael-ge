@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { LogoutButton } from "../LogoutButton";
+import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics/consent";
 
 const mockAssign = vi.fn();
 
@@ -36,6 +37,7 @@ describe("LogoutButton", () => {
       url: "http://localhost:3000/",
     });
     vi.stubGlobal("fetch", fetchMock);
+    window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
 
     render(<LogoutButton />);
     fireEvent.click(screen.getByTestId("logout-button"));
@@ -49,6 +51,7 @@ describe("LogoutButton", () => {
     await waitFor(() => {
       expect(mockAssign).toHaveBeenCalledWith("http://localhost:3000/");
     });
+    expect(window.localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBeNull();
   });
 
   it("fetch 실패해도 \"/\"로 이동(dead-end 방지)", async () => {

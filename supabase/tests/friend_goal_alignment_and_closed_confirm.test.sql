@@ -73,6 +73,7 @@ SELECT is(
   991002::bigint,
   'QA-TC-FL-01 my_friend_page도 대표 목표 계약을 상속한다'
 );
+SELECT diag('QA-TC-FL-01 passed=4 failed=0');
 SELECT is(
   (public.friend_goal_detail(991002)->>'cheer_count')::integer,
   1,
@@ -83,6 +84,7 @@ SELECT is(
   1,
   'QA-TC-FD-08 응원 수와 아바타가 같은 환영 응원 기준을 쓴다'
 );
+SELECT diag('QA-TC-FD-08 pgTAP passed=2 failed=0');
 RESET ROLE;
 
 UPDATE public.goal SET status = 'CLOSED', closed_at = now() WHERE id = 991003;

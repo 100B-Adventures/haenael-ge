@@ -108,13 +108,15 @@ export function CheerPaymentButton({
   supporterName = null,
 }: CheerPaymentButtonProps) {
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
+  const normalizedSupporterName = supporterName?.trim() || null;
+  const hasSupporterName = normalizedSupporterName !== null;
   const [open, setOpen] = useState(false);
   // 클로버 개수(개)가 진실원 — 결제 금액(원)은 항상 cloverAmount * KRW_PER_CLOVER로 파생.
   const [cloverAmount, setCloverAmount] = useState<number>(3);
   // 프리셋 밖 값을 직접 입력 중인지(프리셋 버튼 활성 표시와 분리하기 위함).
   const [customInput, setCustomInput] = useState<string>("");
   const [message, setMessage] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(!hasSupporterName);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   // 결제 시트가 열려 있는 동안(같은 결제 의도) 재시도가 같은 requestKey를 재사용하게
@@ -127,7 +129,7 @@ export function CheerPaymentButton({
   const paymentWindowRef = useRef<DestroyablePaymentSurface | null>(null);
   const loginRedirectPath = `/g/${goalSlug}#cheer`;
   const loginHref = buildKakaoStartUrl(loginRedirectPath);
-  const fixedSupporterName = supporterName?.trim() || PRODUCT_COPY.TEXT_016;
+  const fixedSupporterName = normalizedSupporterName ?? PRODUCT_COPY.TEXT_016;
 
   useEffect(
     () => () => {
@@ -144,8 +146,9 @@ export function CheerPaymentButton({
       !loading &&
       Number.isInteger(cloverAmount) &&
       cloverAmount >= 1 &&
-      cloverAmount <= MAX_CLOVER,
-    [cloverAmount, loading],
+      cloverAmount <= MAX_CLOVER &&
+      (hasSupporterName || isAnonymous),
+    [cloverAmount, hasSupporterName, isAnonymous, loading],
   );
 
   const amountKrw = krwFromClover(cloverAmount);
@@ -175,7 +178,7 @@ export function CheerPaymentButton({
     sheetOpenRef.current = true;
     setCloverAmount(3);
     setCustomInput("");
-    setIsAnonymous(false);
+    setIsAnonymous(!hasSupporterName);
     setError(null);
     setOpen(true);
   }
@@ -365,7 +368,9 @@ export function CheerPaymentButton({
           return;
         }
         setError(
-          e instanceof TypeError && !orderCreated
+          e instanceof Error && e.message.startsWith("cheer_order:")
+            ? paymentErrorMessage(e)
+            : !orderCreated
             ? PRODUCT_COPY.ERROR_GENERIC
             : paymentErrorMessage(e),
         );
@@ -509,10 +514,14 @@ export function CheerPaymentButton({
                 className="mt-1 rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]! [background-color:var(--background)]!"
                 data-testid="cheer-supporter-name"
               >
-                {isAnonymous ? PRODUCT_COPY.TEXT_015 : fixedSupporterName}
+                {!hasSupporterName
+                  ? PRODUCT_COPY.TEXT_023
+                  : isAnonymous
+                    ? PRODUCT_COPY.TEXT_015
+                    : fixedSupporterName}
               </div>
               <p className="mt-1 text-[13px] font-medium [color:var(--muted-foreground)]!">
-                {PRODUCT_COPY.TEXT_022}
+                {hasSupporterName ? PRODUCT_COPY.TEXT_022 : PRODUCT_COPY.TEXT_024}
               </p>
             </div>
 
@@ -521,6 +530,7 @@ export function CheerPaymentButton({
                 type="checkbox"
                 data-testid="cheer-anonymous-toggle"
                 checked={isAnonymous}
+                disabled={!hasSupporterName}
                 onChange={(e) => setIsAnonymous(e.target.checked)}
               />{PRODUCT_COPY.TEXT_017}</label>
 

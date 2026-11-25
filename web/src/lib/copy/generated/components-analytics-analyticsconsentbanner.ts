@@ -1,6 +1,6 @@
 // Centralized user-facing copy extracted from AnalyticsConsentBanner.tsx.
 export const PRODUCT_COPY = {
-  PROMPT: "분석 정보 국외 이전 동의",
+  PROMPT: "Google·Microsoft(미국) 분석 정보 국외 이전 동의",
   DETAIL: "상세",
   DENY: "안 함",
   GRANT: "동의",

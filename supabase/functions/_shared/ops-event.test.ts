@@ -77,8 +77,13 @@ Deno.test("hashId: 결정적이고 원문을 포함하지 않는다", async () =
 });
 
 Deno.test("fireSignup / firePay 는 EdgeRuntime.waitUntil 에 작업을 등록한다", async () => {
+  const originalOpsUrl = Deno.env.get("OPS_EVENT_URL");
+  const originalOpsToken = Deno.env.get("OPS_EVENT_TOKEN");
+  const originalTossSecretKey = Deno.env.get("TOSS_SECRET_KEY");
+  const originalEdgeRuntime = (globalThis as unknown as { EdgeRuntime?: unknown }).EdgeRuntime;
   Deno.env.set("OPS_EVENT_URL", "https://ops-external-watchdog.rosemallow95.workers.dev/v1/event");
   Deno.env.set("OPS_EVENT_TOKEN", "t0k");
+  Deno.env.delete("TOSS_SECRET_KEY");
   const keys: string[] = [];
   const realFetch = globalThis.fetch;
   globalThis.fetch = ((_u: string, init?: RequestInit) => {
@@ -97,6 +102,17 @@ Deno.test("fireSignup / firePay 는 EdgeRuntime.waitUntil 에 작업을 등록�
     assertEquals(keys.includes("pay:haenael-ge:order-1"), true);
   } finally {
     globalThis.fetch = realFetch;
+    if (originalOpsUrl === undefined) Deno.env.delete("OPS_EVENT_URL");
+    else Deno.env.set("OPS_EVENT_URL", originalOpsUrl);
+    if (originalOpsToken === undefined) Deno.env.delete("OPS_EVENT_TOKEN");
+    else Deno.env.set("OPS_EVENT_TOKEN", originalOpsToken);
+    if (originalTossSecretKey === undefined) Deno.env.delete("TOSS_SECRET_KEY");
+    else Deno.env.set("TOSS_SECRET_KEY", originalTossSecretKey);
+    if (originalEdgeRuntime === undefined) {
+      delete (globalThis as unknown as { EdgeRuntime?: unknown }).EdgeRuntime;
+    } else {
+      (globalThis as unknown as { EdgeRuntime?: unknown }).EdgeRuntime = originalEdgeRuntime;
+    }
   }
 });
 
