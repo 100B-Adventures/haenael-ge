@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 17:20 KST] 운영 결제 꺼짐·카카오 공유 오류 원인 = 11-24 Vercel 이전 때 환경변수 이중 암호화, 카톡 로그인 원인 로그 확인
+- 무엇을 어디까지: 새 프로젝트 환경변수 5개가 암호문을 값으로 복사(길이 ~4000): NEXT_PUBLIC_PAYMENTS_ENABLED(prod·preview), NEXT_PUBLIC_KAKAO_JS_KEY, NEXT_PUBLIC_APP_VERSION, VERCEL_PREVIEW_FEEDBACK_ENABLED, DEPLOY_SOURCE_SHA. 운영 번들 결제 버튼 disabled 상수 관찰. prod PAYMENTS=true·KAKAO_JS_KEY 를 API PATCH(길이 980·1072, 옛 프로젝트와 동일). 운영 재배포 전이라 미반영. 이다솔 11:31 로그: 카카오 콜백이 한 번에 2~3건 동시 도착→generate_link 가 앞 토큰 무효화(verify 403)→성공분도 이후 GET /auth/v1/user 0건(정상 로그인 16:48 은 수십 건). Supabase 로그는 9342 크롬 대시보드 토큰으로 조회 가능.
+- 남은 이슈: 운영 재배포(회장 원문), preview 값 3개 미수정, 카톡 인앱 로그인 수정(외부 브라우저 전환·재확인), 그로스에 이전 결함 통보.
+- 다음에 칠 명령: irreversible-approve 후 vercel deploy --prod(해낼게 계정), 운영 번들에서 결제 버튼 활성·Kakao.init 확인
+- 검증했나: 환경변수 길이·운영 번들 관찰. 재배포 뒤 화면은 미검증.
+
 ## [2026-11-25 17:00 KST] 카카오 로그인 피드백 조사, C1 초대 이미지 검증·CI 통과(미배포)
 - 무엇을 어디까지: 카카오 로그인 운영 재현 = 시작 307→카카오 정상, 콜백(가짜 code)→auth_error=kakao_error 정상, 오늘 운영 로그인 성공 11·13·16시 각 1건(auth.users). 옛 주소 haenaelge.vercel.app/auth/kakao/start 402. Vercel Hobby 런타임 로그 보존 30분이라 사용자 실패 로그 없음, Supabase 로그 API 표 이름 변경으로 조회 실패. C1: Codex 010ba38 + main 병합 73af93e, 빌드 통과·staging 초대로 이미지 확인(이름·목표 반영, 사진·D-day·응원 수는 공개 RPC 에 없어 빠짐), CI 45572205436 success. 운영 미배포.
 - 남은 이슈: 옛 별칭 이전(옛 팀 별칭 삭제 = 회장 원문), 오류 수집 도구(Sentry 무료 계정 생성 = 회장), C1 운영 배포(2.4.1 버전·릴리스 노트 필요), 알림톡 조성진 계정 시험.
