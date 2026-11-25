@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { isCardPaymentMethod, TossClient } from "./toss";
+import { isSupportedCheerPaymentMethod, TossClient } from "./toss";
 import {
   handleTossWebhook,
   type TossPaymentResponse,
@@ -56,7 +56,7 @@ function deps(overrides: Partial<TossWebhookDeps> = {}) {
     requireTransmissionId: true,
     supabase: { rpc },
     toss: { getPayment, cancelPayment },
-    isCardPaymentMethod,
+    isSupportedCheerPaymentMethod,
     sendSlackAlert: vi.fn().mockResolvedValue(true),
     ...overrides,
   };
@@ -243,9 +243,13 @@ describe("TossClient Payment 객체", () => {
     expect(result.mId).toBe(MID);
   });
 
-  it("G4-PAY-01 승인 응답은 공식 카드 method만 허용한다", () => {
-    expect(isCardPaymentMethod("카드")).toBe(true);
-    expect(isCardPaymentMethod("계좌이체")).toBe(false);
-    expect(isCardPaymentMethod("간편결제")).toBe(false);
+  it("G4-PAY-01 승인 응답은 카드와 provider가 확인된 간편결제만 허용한다", () => {
+    expect(isSupportedCheerPaymentMethod({ method: "카드" })).toBe(true);
+    expect(isSupportedCheerPaymentMethod({ method: "계좌이체" })).toBe(false);
+    expect(isSupportedCheerPaymentMethod({ method: "간편결제" })).toBe(false);
+    expect(isSupportedCheerPaymentMethod({
+      method: "간편결제",
+      easyPay: { provider: "카카오페이", amount: 3000, discountAmount: 0 },
+    })).toBe(true);
   });
 });

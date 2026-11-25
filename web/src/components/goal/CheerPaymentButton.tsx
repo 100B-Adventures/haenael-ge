@@ -21,6 +21,7 @@ interface CheerPaymentButtonProps {
   goalTitle: string;
   goalSlug: string;
   isAuthenticated?: boolean;
+  supporterName?: string | null;
 }
 
 interface CheerOrderResponse {
@@ -52,27 +53,38 @@ function paymentErrorMessage(error: unknown) {
     const code = error.message.slice("cheer_order:".length);
     return CHEER_ORDER_ERROR_COPY[code] ?? PRODUCT_COPY.ERROR_GENERIC;
   }
-  if (typeof error === "string") return error;
   if (typeof error === "object" && error !== null) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "message" in error && typeof error.message === "string"
-          ? error.message
-          : null;
     const code =
       "code" in error && typeof error.code === "string" ? error.code : null;
-    if (code && message) return `${message} (${code})`;
-    if (message) return message;
-    if (code) return code;
+    if (code) return TOSS_ERROR_COPY[code] ?? PRODUCT_COPY.ERROR_PAYMENT_UNKNOWN;
   }
-  return PRODUCT_COPY.ERROR_GENERIC;
+  if (error instanceof TypeError) return PRODUCT_COPY.ERROR_NETWORK_UNKNOWN;
+  return PRODUCT_COPY.ERROR_PAYMENT_UNKNOWN;
 }
 
 const CHEER_ORDER_ERROR_COPY: Record<string, string> = {
   payments_disabled: PRODUCT_COPY.ERROR_PAYMENTS_DISABLED,
   invalid_amount: PRODUCT_COPY.ERROR_INVALID_AMOUNT,
+  profile_name_required: PRODUCT_COPY.ERROR_PROFILE_NAME_REQUIRED,
 };
+
+const TOSS_ERROR_COPY: Record<string, string> = {
+  PAY_PROCESS_CANCELED: PRODUCT_COPY.ERROR_CANCELED,
+  PAY_PROCESS_ABORTED: PRODUCT_COPY.ERROR_ABORTED,
+  REJECT_CARD_COMPANY: PRODUCT_COPY.ERROR_REJECTED,
+};
+
+function isSupportedWidgetPaymentMethod(paymentMethod: {
+  method: string;
+  easyPay?: { provider?: string | null } | null;
+}) {
+  if (paymentMethod.method === "CARD") return true;
+  return (
+    paymentMethod.method === "EASY_PAY" &&
+    typeof paymentMethod.easyPay?.provider === "string" &&
+    paymentMethod.easyPay.provider.length > 0
+  );
+}
 
 type DestroyablePaymentSurface = {
   destroy: () => void | Promise<unknown>;
@@ -94,6 +106,7 @@ export function CheerPaymentButton({
   goalTitle,
   goalSlug,
   isAuthenticated = true,
+  supporterName = null,
 }: CheerPaymentButtonProps) {
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
   const [open, setOpen] = useState(false);
@@ -101,7 +114,6 @@ export function CheerPaymentButton({
   const [cloverAmount, setCloverAmount] = useState<number>(3);
   // 프리셋 밖 값을 직접 입력 중인지(프리셋 버튼 활성 표시와 분리하기 위함).
   const [customInput, setCustomInput] = useState<string>("");
-  const [displayName, setDisplayName] = useState("");
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +128,7 @@ export function CheerPaymentButton({
   const paymentWindowRef = useRef<DestroyablePaymentSurface | null>(null);
   const loginRedirectPath = `/g/${goalSlug}#cheer`;
   const loginHref = buildKakaoStartUrl(loginRedirectPath);
+  const fixedSupporterName = supporterName?.trim() || PRODUCT_COPY.TEXT_016;
 
   useEffect(
     () => () => {
@@ -163,6 +176,8 @@ export function CheerPaymentButton({
     sheetOpenRef.current = true;
     setCloverAmount(3);
     setCustomInput("");
+    setIsAnonymous(false);
+    setError(null);
     setOpen(true);
   }
 
@@ -204,7 +219,6 @@ export function CheerPaymentButton({
         // cloverAmount는 참고용 전송치일 뿐 서버(EF/RPC)가 amountKrw/1000으로 재계산해
         // 검증한다 — 클라이언트 입력은 신뢰하지 않는다(cheer-order EF 주석 참조).
         cloverAmount,
-        displayName,
         isAnonymous,
         message,
         customerKey: getCustomerKey(),
@@ -244,7 +258,7 @@ export function CheerPaymentButton({
         amount: { value: order.amountKrw, currency: "KRW" },
         orderId: order.orderId,
         orderName: order.orderName,
-        customerName: isAnonymous ? "익명 응원자" : displayName || "응원자",
+        customerName: isAnonymous ? "익명 응원자" : fixedSupporterName,
         successUrl: `${appUrl}/payment/success?goalSlug=${encodeURIComponent(goalSlug)}`,
         failUrl: `${appUrl}/payment/fail?goalSlug=${encodeURIComponent(goalSlug)}`,
         metadata: {
@@ -277,13 +291,13 @@ export function CheerPaymentButton({
           }
           if (paymentRequestStarted) return;
           paymentRequestStarted = true;
-          if (paymentMethod.method !== "CARD") {
+          if (!isSupportedWidgetPaymentMethod(paymentMethod)) {
             if (paymentWindowRef.current === paymentWindow) {
               paymentWindowRef.current = null;
             }
             await destroyPaymentSurface(paymentWindow);
             if (paymentAttemptRef.current !== paymentAttempt) return;
-            setError("카드를 선택해야 응원 결제를 계속할 수 있어요.");
+            setError(PRODUCT_COPY.ERROR_UNSUPPORTED_METHOD);
             setLoading(false);
             return;
           }
@@ -318,7 +332,7 @@ export function CheerPaymentButton({
           }
           void destroyPaymentSurface(paymentWindow);
           if (paymentAttemptRef.current === paymentAttempt) {
-            setError("결제를 취소했어요. 다시 시도할 수 있어요.");
+            setError(PRODUCT_COPY.ERROR_CANCELED);
             setLoading(false);
           }
         });
@@ -484,21 +498,23 @@ export function CheerPaymentButton({
               🍀 {cloverAmount.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_012}{" "}
               {amountKrw.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_013}</p>
 
-            <label className="mt-4 block text-[13px] font-bold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_014}<input
-                className="mt-1 w-full rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
-                maxLength={30}
-                value={displayName}
-                disabled={isAnonymous}
-                placeholder={
-                  isAnonymous ? PRODUCT_COPY.TEXT_015 : PRODUCT_COPY.TEXT_016
-                }
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
-            </label>
+            <div className="mt-4 text-[13px] font-bold [color:var(--foreground)]!">
+              <span>{PRODUCT_COPY.TEXT_014}</span>
+              <div
+                className="mt-1 rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]! [background-color:var(--background)]!"
+                data-testid="cheer-supporter-name"
+              >
+                {isAnonymous ? PRODUCT_COPY.TEXT_015 : fixedSupporterName}
+              </div>
+              <p className="mt-1 text-[13px] font-medium [color:var(--muted-foreground)]!">
+                {PRODUCT_COPY.TEXT_022}
+              </p>
+            </div>
 
             <label className="mt-3 flex items-center gap-2 text-[13px] [color:var(--muted-foreground)]!">
               <input
                 type="checkbox"
+                data-testid="cheer-anonymous-toggle"
                 checked={isAnonymous}
                 onChange={(e) => setIsAnonymous(e.target.checked)}
               />{PRODUCT_COPY.TEXT_017}</label>

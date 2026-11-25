@@ -428,7 +428,10 @@ function setPaymentTestEnv() {
   Deno.env.set("SUPABASE_URL", "https://sb.test");
   Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "svc");
   Deno.env.set("TOSS_SECRET_KEY", "test_sk_contract");
+  Deno.env.delete("SLACK_FEEDBACK_WEBHOOK_URL");
   Deno.env.delete("SLACK_WEBHOOK_URL");
+  Deno.env.delete("OPS_EVENT_URL");
+  Deno.env.delete("OPS_EVENT_TOKEN");
 }
 
 function paymentRequest(orderId: string, paymentKey: string, amount: number) {
@@ -441,6 +444,91 @@ function paymentRequest(orderId: string, paymentKey: string, amount: number) {
     body: JSON.stringify({ orderId, paymentKey, amount }),
   });
 }
+
+async function assertAcceptedPayment(
+  method: string,
+  easyPay?: { provider: string; amount: number; discountAmount: number },
+) {
+  setPaymentTestEnv();
+  const realFetch = globalThis.fetch;
+  const rpcBodies: Record<string, unknown>[] = [];
+  const requestedUrls: string[] = [];
+  const orderId = `hnl_${method === "카드" ? "card" : "easy_pay"}`;
+  const paymentKey = `payment_key_${method === "카드" ? "card" : "easy_pay"}`;
+
+  globalThis.fetch = ((input: Request | URL | string, init?: RequestInit) => {
+    const url = typeof input === "string"
+      ? input
+      : input instanceof URL
+      ? input.href
+      : input.url;
+    requestedUrls.push(url);
+    if (url.includes("/rest/v1/payment?")) {
+      return Promise.resolve(new Response(
+        JSON.stringify({ id: 10, amount_krw: 3000, status: "READY" }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ));
+    }
+    if (url.endsWith("/v1/payments/confirm")) {
+      return Promise.resolve(new Response(JSON.stringify({
+        paymentKey,
+        orderId,
+        status: "DONE",
+        totalAmount: 3000,
+        method,
+        ...(easyPay ? { easyPay } : {}),
+        approvedAt: "2026-11-25T18:00:00+09:00",
+      }), { status: 200, headers: { "content-type": "application/json" } }));
+    }
+    if (url.includes("/rest/v1/rpc/confirm_cheer_payment")) {
+      rpcBodies.push(JSON.parse(String(init?.body)));
+      return Promise.resolve(new Response(JSON.stringify([{
+        payment_id: 10,
+        cheer_id: 43,
+        member_id: "member-owner",
+        goal_title: "운동 해낼게",
+        display_name: "이다솔",
+      }]), { status: 200, headers: { "content-type": "application/json" } }));
+    }
+    if (url.includes("/rest/v1/rpc/lease_payment_conversion")) {
+      return Promise.resolve(new Response(JSON.stringify([{
+        eligible: false,
+        delivery_state: "sent",
+        lease_token: null,
+        event_id: null,
+        expires_at: null,
+      }]), { status: 200, headers: { "content-type": "application/json" } }));
+    }
+    return Promise.resolve(new Response("{}", { status: 404 }));
+  }) as typeof fetch;
+
+  try {
+    const response = await handleTossConfirm(
+      paymentRequest(orderId, paymentKey, 3000),
+    );
+    assertEquals(response.status, 200);
+    assertEquals(rpcBodies.length, 1);
+    assertEquals(rpcBodies[0].p_method, method);
+    assertEquals(
+      requestedUrls.some((url) => url.endsWith(`/v1/payments/${paymentKey}/cancel`)),
+      false,
+    );
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}
+
+Deno.test("PAY-METHOD-01 카드 승인은 응원과 원장에 확정한다", async () => {
+  await assertAcceptedPayment("카드");
+});
+
+Deno.test("PAY-METHOD-02 카카오페이 간편결제 승인은 응원과 원장에 확정한다", async () => {
+  await assertAcceptedPayment("간편결제", {
+    provider: "카카오페이",
+    amount: 3000,
+    discountAmount: 0,
+  });
+});
 
 Deno.test(
   "비카드 승인 취소 성공 → CANCELED 감사 기록 후 unsupported_payment_method",
@@ -525,11 +613,13 @@ Deno.test(
 );
 
 Deno.test(
-  "비카드 승인 취소 실패 → FAILED 감사 기록 후 non_card_compensation_failed",
+  "PAY-COMP-01 미지원 수단 취소 실패 → 감사 기록과 즉시 운영 알림",
   async () => {
     setPaymentTestEnv();
+    Deno.env.set("SLACK_FEEDBACK_WEBHOOK_URL", "https://hooks.slack.test/payment");
     const realFetch = globalThis.fetch;
     const rpcBodies: Record<string, unknown>[] = [];
+    const slackBodies: Record<string, unknown>[] = [];
     const orderId = "hnl_non_card_failed";
     const paymentKey = "payment_key_non_card_failed";
 
@@ -582,6 +672,10 @@ Deno.test(
           }),
         );
       }
+      if (url === "https://hooks.slack.test/payment") {
+        slackBodies.push(JSON.parse(String(init?.body)));
+        return Promise.resolve(new Response("ok", { status: 200 }));
+      }
       return Promise.resolve(new Response("{}", { status: 404 }));
     }) as typeof fetch;
 
@@ -591,13 +685,19 @@ Deno.test(
       );
       assertEquals(response.status, 502);
       assertEquals(await response.json(), {
-        error: { code: "non_card_compensation_failed" },
+        error: { code: "manual_reconcile_required" },
       });
       assertEquals(rpcBodies.length, 1);
       assertEquals(rpcBodies[0].p_target_status, "FAILED");
       assertEquals(rpcBodies[0].p_payment_key, paymentKey);
+      assertEquals(slackBodies.length, 1);
+      const alertText = String(slackBodies[0].text);
+      assertEquals(alertText.includes(orderId), true);
+      assertEquals(alertText.includes("3000"), true);
+      assertEquals(alertText.includes("payment_reconcile_failed"), true);
     } finally {
       globalThis.fetch = realFetch;
+      Deno.env.delete("SLACK_FEEDBACK_WEBHOOK_URL");
     }
   },
 );

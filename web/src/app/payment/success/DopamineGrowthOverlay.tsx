@@ -56,17 +56,21 @@ export function PaymentSuccessFlow({
         <span>{PRODUCT_COPY.SUCCESS_WORDMAP}</span>
       </p>
       <div className="payment-success-actions">
-        <Link
+        <a
           href={backHref}
           className="payment-success-primary"
           data-testid="payment-success-back"
-          onClick={(event) => {
-            event.preventDefault();
-            setStage("growth");
-          }}
         >
           {backLabel}
-        </Link>
+        </a>
+        <button
+          type="button"
+          className="payment-success-secondary"
+          data-testid="payment-success-growth"
+          onClick={() => setStage("growth")}
+        >
+          {PRODUCT_COPY.SHOW_RESULT}
+        </button>
         <Link href="/" className="payment-success-secondary">
           {homeLabel}
         </Link>
@@ -98,9 +102,9 @@ export function DopamineGrowthOverlay({
       aria-labelledby="payment-growth-title"
     >
       <header className="social-detail-head wordmap-growth-head">
-        <Link href={backHref} aria-label="친구 목표로 돌아가기">
+        <a href={backHref} aria-label="친구 목표로 돌아가기">
           <ChevronLeft aria-hidden="true" />
-        </Link>
+        </a>
         <strong>친구의 해낼게</strong>
         <span aria-hidden="true" />
       </header>

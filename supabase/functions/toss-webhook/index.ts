@@ -4,7 +4,7 @@
 // 이 파일의 책임은 env 읽기 + 실 client(supabase/toss/slack) 준비 + 핸들러 호출뿐이다.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { isCardPaymentMethod, TossClient } from "../_shared/toss.ts";
+import { isSupportedCheerPaymentMethod, TossClient } from "../_shared/toss.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
 import { firePay } from "../_shared/ops-event.ts";
 import { handleTossWebhook } from "../_shared/toss-webhook-handler.ts";
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     requireTransmissionId: true,
     supabase,
     toss,
-    isCardPaymentMethod,
+    isSupportedCheerPaymentMethod,
     sendSlackAlert,
     reportPaid: firePay,
   });

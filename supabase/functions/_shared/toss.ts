@@ -13,6 +13,11 @@ export interface TossConfirmResponse {
   status: string;
   totalAmount: number;
   method: string;
+  easyPay?: {
+    provider: string;
+    amount: number;
+    discountAmount: number;
+  };
   approvedAt: string;
   receiptUrl?: string;
   raw?: unknown;
@@ -30,9 +35,29 @@ export interface TossPaymentResponse extends TossConfirmResponse {
   canceledAt?: string;
 }
 
-/** Toss Payment 객체의 카드 승인 응답만 허용한다. 공식 응답 enum은 한국어 "카드"다. */
-export function isCardPaymentMethod(method: string): boolean {
-  return method === "카드";
+/** 응원에 허용한 카드·간편결제만 승인한다. 간편결제는 provider가 있는 응답만 허용한다. */
+export function isSupportedCheerPaymentMethod(
+  payment: Pick<TossConfirmResponse, "method" | "easyPay">,
+): boolean {
+  if (payment.method === "카드" || payment.method === "CARD") return true;
+  if (payment.method !== "간편결제" && payment.method !== "EASY_PAY") {
+    return false;
+  }
+  return Boolean(payment.easyPay?.provider.trim());
+}
+
+function parseEasyPay(body: Record<string, unknown>): TossConfirmResponse["easyPay"] {
+  if (!body.easyPay || typeof body.easyPay !== "object") return undefined;
+  const easyPay = body.easyPay as Record<string, unknown>;
+  const provider = typeof easyPay.provider === "string"
+    ? easyPay.provider.trim()
+    : "";
+  if (!provider) return undefined;
+  return {
+    provider,
+    amount: Number(easyPay.amount ?? 0),
+    discountAmount: Number(easyPay.discountAmount ?? 0),
+  };
 }
 
 export class TossClient {
@@ -70,7 +95,8 @@ export class TossClient {
       mId,
       status: String(body.status ?? ""),
       totalAmount,
-      method: String(body.method ?? body.easyPay?.provider ?? "UNKNOWN"),
+      method: String(body.method ?? "UNKNOWN"),
+      easyPay: parseEasyPay(body),
       approvedAt: typeof body.approvedAt === "string" ? body.approvedAt : "",
       receiptUrl: typeof body.receipt?.url === "string"
         ? body.receipt.url
@@ -125,7 +151,8 @@ export class TossClient {
       orderId,
       status: String(body.status ?? ""),
       totalAmount,
-      method: String(body.method ?? body.easyPay?.provider ?? "UNKNOWN"),
+      method: String(body.method ?? "UNKNOWN"),
+      easyPay: parseEasyPay(body),
       approvedAt,
       receiptUrl: typeof body.receipt?.url === "string"
         ? body.receipt.url

@@ -18,12 +18,15 @@ import {
   runStagingFixtureSql,
   STAGING_PROJECT_REF,
 } from "./support/staging-fixture-sql";
-import { waitForVisualAssets } from "./support/visual-ready";
+import {
+  expectTwoLineClamp,
+  verifyWordmapMotionEnvelope,
+  waitForVisualReady,
+} from "./support/visual-assertions";
 import {
   devices,
   type Browser,
   type BrowserContext,
-  type Locator,
   type Page,
   expect,
   test,
@@ -33,109 +36,6 @@ function requiredEnv(name: string) {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} 미설정`);
   return value;
-}
-
-async function waitForVisualReady(page: Page, selectors: string[]) {
-  for (const selector of selectors) {
-    await expect(page.locator(selector).first()).toBeVisible({ timeout: 15_000 });
-  }
-  await expect(page.locator("body")).not.toContainText(/(?:로딩|불러오는) 중/);
-  await waitForVisualAssets(page);
-  await page.waitForFunction(() => Array.from(
-    document.querySelectorAll<HTMLElement>("[data-wordmap-layout]"),
-  ).every((wordmap) => wordmap.dataset.layoutReady === "true"));
-  const wordmapCollisions = await page.evaluate(() => Array.from(
-    document.querySelectorAll<HTMLElement>("[data-wordmap-layout]"),
-  ).flatMap((wordmap) => {
-    const items = Array.from(wordmap.querySelectorAll<HTMLElement>("[data-wordmap-item]"));
-    return items.flatMap((item, index) => {
-      const first = item.getBoundingClientRect();
-      return items.slice(index + 1).flatMap((other) => {
-        const second = other.getBoundingClientRect();
-        const overlaps = !(
-          first.right <= second.left || second.right <= first.left
-          || first.bottom <= second.top || second.bottom <= first.top
-        );
-        return overlaps ? [`${item.textContent}:${other.textContent}`] : [];
-      });
-    });
-  }));
-  expect(wordmapCollisions, "D-027-E 워드맵 단어 겹침").toEqual([]);
-}
-
-async function expectTwoLineClamp(target: Locator) {
-  await expect(target).toBeVisible();
-  await expect.poll(
-    () => target.evaluate((element) => getComputedStyle(element).webkitLineClamp),
-    { message: "같은 텍스트 요소에 2줄 clamp CSS가 적용될 때까지 기다린다" },
-  ).toBe("2");
-  const collapsed = await target.evaluate((element) => ({
-    lineClamp: getComputedStyle(element).webkitLineClamp,
-    clientHeight: element.clientHeight,
-    scrollHeight: element.scrollHeight,
-  }));
-  expect(collapsed.lineClamp).toBe("2");
-  expect(collapsed.scrollHeight).toBeGreaterThan(collapsed.clientHeight + 1);
-  const wrapper = target.locator("xpath=..");
-  await expect(wrapper).toHaveAttribute("data-collapsible", "enabled");
-  const toggle = wrapper.locator("button.collapse-chevron");
-  await expect(toggle).toHaveCount(1);
-  await expect(toggle).toHaveAttribute("aria-expanded", "false");
-  await expect(toggle.locator("svg")).toHaveCount(1);
-  expect((await toggle.textContent())?.trim()).toBe("");
-  await toggle.click();
-  const liveToggle = target.page().locator("button.collapse-chevron[aria-expanded='true']");
-  await expect(liveToggle).toHaveCount(1);
-  await expect(liveToggle).toHaveAttribute("aria-expanded", "true");
-  const expanded = await target.evaluate((element) => ({
-    lineClamp: getComputedStyle(element).webkitLineClamp,
-    clientHeight: element.clientHeight,
-    scrollHeight: element.scrollHeight,
-  }));
-  expect(expanded.lineClamp).toBe("none");
-  expect(expanded.clientHeight + 1).toBeGreaterThanOrEqual(expanded.scrollHeight);
-  await liveToggle.click();
-  await expect(target.page().locator("button.collapse-chevron[aria-expanded='true']")).toHaveCount(0);
-}
-
-async function verifyWordmapMotionEnvelope(page: Page) {
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  const snapshot = () => page.evaluate(() => {
-    const items = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-wordmap-layout] [data-wordmap-item]"),
-    );
-    const positions = items.map((item) => {
-      const rect = item.getBoundingClientRect();
-      return { text: item.textContent ?? "", x: rect.x, y: rect.y };
-    });
-    const collisions = items.flatMap((item, index) => {
-      const first = item.getBoundingClientRect();
-      return items.slice(index + 1).flatMap((other) => {
-        const second = other.getBoundingClientRect();
-        const overlaps = !(
-          first.right <= second.left || second.right <= first.left
-          || first.bottom <= second.top || second.bottom <= first.top
-        );
-        return overlaps ? [`${item.textContent}:${other.textContent}`] : [];
-      });
-    });
-    return { positions, collisions };
-  });
-  const samples = [await snapshot()];
-  await page.waitForTimeout(1_500);
-  samples.push(await snapshot());
-  await page.waitForTimeout(1_500);
-  samples.push(await snapshot());
-  for (const [index, sample] of samples.entries()) {
-    expect(sample.collisions, `D-027-E 모션 ${index}차 단어 겹침`).toEqual([]);
-  }
-  const moved = samples[0].positions.some((start, index) => {
-    const later = samples.slice(1).map((sample) => sample.positions[index]);
-    return later.some((point) => point && (
-      Math.abs(point.x - start.x) >= 0.5 || Math.abs(point.y - start.y) >= 0.5
-    ));
-  });
-  expect(moved, "D-027-E no-preference 워드맵 모션").toBe(true);
 }
 
 async function captureApprovedPrototype(browser: Browser, evidenceDir: string) {
@@ -2715,7 +2615,7 @@ test.describe("V2 web-first social slice", () => {
       }
     }
     await paymentPage.setViewportSize({ width: 1024, height: 844 });
-    await paymentPage.getByTestId("payment-success-back").click();
+    await paymentPage.getByTestId("payment-success-growth").click();
     const feedback = paymentPage.getByTestId("payment-growth-feedback");
     await expect(feedback).toBeVisible();
     const growthKicker = paymentPage.locator(".wordmap-growth-kicker");
@@ -4229,13 +4129,100 @@ test.describe("V2 web-first social slice", () => {
     await context.close();
   });
 
-  test("QA-TC-CL-03 친구 목록의 긴 응원은 2줄에서 펼치고 다시 접힌다", async ({ browser }) => {
+  test("QA-TC-CL-03 친구 목록의 긴 응원은 카드 전체 링크 안에서 2줄로 고정된다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/friends", { waitUntil: "domcontentloaded" });
     const card = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
-    await expectTwoLineClamp(card.locator(".friend-list-news-message").filter({ hasText: friendLongMessage }));
+    const message = card.locator(".friend-list-news-message").filter({ hasText: friendLongMessage });
+    await expect(message).toHaveCSS("-webkit-line-clamp", "2");
+    await expect(message.locator("xpath=ancestor::a[1]")).toHaveAttribute(
+      "href",
+      `/friends/${ids.friend}?goal=${friendPublicGoal}`,
+    );
+    await context.close();
+  });
+
+  test("D057 결제 이름·실패·복귀와 친구·초대 화면 회귀", async ({ browser }) => {
+    test.setTimeout(120_000);
+    const captureDir = process.env.E2E_CAPTURE_DIR ??
+      "test-results/d057-payment-social-regression";
+    mkdirSync(captureDir, { recursive: true });
+    const context = await authContext(browser, emails.owner, undefined, {
+      permissions: ["clipboard-read", "clipboard-write"],
+    });
+    const page = await context.newPage();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/g/friend-public-${runId}#cheer`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect.poll(() => page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      ANALYTICS_CONSENT_KEY,
+    )).toBe("denied");
+    await expect(page.getByTestId("analytics-consent-banner")).toHaveCount(0);
+    await page.getByTestId("cheer-cta").click();
+    await expect(page.getByTestId("cheer-supporter-name")).toHaveText("서연");
+    await expect(page.getByTestId("cheer-payment-sheet").locator('input[type="text"]'))
+      .toHaveCount(1);
+    await page.getByTestId("cheer-anonymous-toggle").check();
+    await expect(page.getByTestId("cheer-supporter-name")).toHaveText(
+      "익명으로 보낼게요",
+    );
+
+    await page.goto(
+      "/payment/fail?code=PAY_PROCESS_ABORTED&orderId=d057-order&goalSlug=" +
+        `friend-public-${runId}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await expect(page.getByTestId("payment-fail-page")).toContainText(
+      "돈이 빠져나갔다면 다시 결제하지 말고",
+    );
+    await expect(page.getByTestId("payment-fail-page")).toContainText(
+      "주문번호 d057-order",
+    );
+
+    await page.goto(
+      `/payment/success?paymentKey=${layoutPaymentKey}&orderId=${layoutPaymentOrderId}` +
+        `&amount=1000&goalSlug=friend-public-${runId}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await page.getByTestId("payment-success-back").click();
+    await expect(page).toHaveURL(new RegExp(`/g/friend-public-${runId}$`));
+    await expect(page.getByTestId("goal-public-page")).toBeVisible();
+
+    await page.goto("/friends", { waitUntil: "domcontentloaded" });
+    const friendCard = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+    await Promise.all([
+      page.waitForURL(new RegExp(`/friends/${ids.friend}\\?goal=${friendPublicGoal}$`)),
+      friendCard.locator(".friend-list-news").click(),
+    ]);
+    await expect(page.getByTestId("friend-detail-page")).toBeVisible();
+
+    await page.goto("/invite", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: /링크 복사/ }).click();
+    const status = page.getByRole("status");
+    await expect(status).toBeVisible();
+    for (const width of [360, 390, 430] as const) {
+      await page.setViewportSize({ width, height: 844 });
+      const geometry = await page.locator(".invite-share-row").evaluate((row) => {
+        const buttons = [...row.querySelectorAll("button")];
+        const notice = row.querySelector<HTMLElement>('[role="status"]');
+        return {
+          buttonBottom: Math.max(...buttons.map((button) => button.getBoundingClientRect().bottom)),
+          noticeTop: notice?.getBoundingClientRect().top ?? 0,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+      expect(geometry.noticeTop).toBeGreaterThanOrEqual(geometry.buttonBottom);
+      expect(geometry.overflow).toBe(0);
+      await page.screenshot({
+        path: `${captureDir}/invite-status-${width}.png`,
+        fullPage: true,
+      });
+    }
     await context.close();
   });
 

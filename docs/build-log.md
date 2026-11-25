@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-25 2.4.x 간편결제·응원 신뢰 경계와 소셜 화면 보정
+
+- `TossClient`가 결제수단 원문과 `easyPay`를 보존하고, `toss-confirm`·webhook이 카드와 provider가 확인된 간편결제를 같은 응원 확정 경로로 처리한다. 미지원 수단의 자동 취소·감사 기록은 유지하고, 취소 또는 감사 기록 실패는 `SLACK_FEEDBACK_WEBHOOK_URL` 우선 운영 알림에 주문번호·금액·사유를 보낸다.
+- `cheer-order`는 요청 본문의 표시 이름을 폐기하고 인증 회원의 `member.nickname`만 RPC에 전달한다. 화면은 이름 입력 대신 고정 이름과 익명 체크박스를 렌더링한다.
+- 결제 오류 문구는 승인 전 취소·거절, 승인 상태 불명·네트워크, 자동 취소 완료, 수동 대사가 필요한 상태를 구분한다. 결제 성공 주소가 이미 목표 URL로 정리된 뒤 Next.js 내부 링크가 같은 URL 이동을 생략하던 원인을 확인해 목표 복귀를 문서 이동 링크로 바꿨다.
+- 친구 목록은 최근 응원 메시지까지 단일 상세 링크다. 초대 공유 안내의 `margin-top:-2.5625rem`을 제거했다. social E2E의 시각 검증 도우미를 `e2e/support/visual-assertions.ts`로 분리해 5천 줄 파일은 19줄 줄였다.
+- 증거: `npm test` 101파일·613건, Deno 15/15, `npm run build` 종료코드 0, design-token 검사 파일 327개·신규 위반 0, 로컬 Playwright 1/1, 360·390·430px 캡처 3장, fixture DB·Auth·Storage 잔존 0. 운영 결제·운영 DB·배포·push는 실행하지 않았다.
+
+> STAMP: 2026-11-25 20:47 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=운영 주문 29 관찰, 토스페이먼츠 결제 승인·간편결제 공식 문서, 로컬 단위·Deno·build·헤드리스 Chromium · 고민=승인 완료와 응원 확정을 분리해 보상 실패를 숨기지 않고, 표시 이름 신뢰 경계를 서버 회원 데이터로 닫았다.
+
 ## 2026-11-25 2.4.x 카카오톡 인앱 로그인 복귀
 
 - 카카오 로그인 진입을 `KakaoLoginLink`·`startKakaoLogin`으로 통합했다. `KAKAOTALK` UA는 외부 브라우저 안내 뒤 `openExternal` 스킴을 시도하며, 실패 시 `external_browser=1` 기존 OAuth로 진행한다. `/auth/kakao/start`도 직접 접근을 외부 안내 화면으로 보낸다.

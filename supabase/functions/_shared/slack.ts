@@ -6,7 +6,8 @@ export interface SlackAlert {
 }
 
 export async function sendSlackAlert(alert: SlackAlert): Promise<boolean> {
-  const webhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
+  const webhookUrl = Deno.env.get("SLACK_FEEDBACK_WEBHOOK_URL") ??
+    Deno.env.get("SLACK_WEBHOOK_URL");
   if (!webhookUrl) return false;
 
   const escape = (value: unknown) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").slice(0, 300);

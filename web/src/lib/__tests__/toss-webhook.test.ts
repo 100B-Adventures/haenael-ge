@@ -59,7 +59,9 @@ function makeDeps(overrides: Partial<TossWebhookDeps> = {}): TossWebhookDeps & {
     expectedToken: TOKEN,
     supabase: { rpc: rpcMock },
     toss: { getPayment: getPaymentMock, cancelPayment: cancelPaymentMock },
-    isCardPaymentMethod: (method) => method === "카드",
+    isSupportedCheerPaymentMethod: (payment) =>
+      payment.method === "카드" ||
+      (payment.method === "간편결제" && Boolean(payment.easyPay?.provider)),
     sendSlackAlert: slackMock,
     rpcMock,
     getPaymentMock,
@@ -166,6 +168,28 @@ describe("handleTossWebhook", () => {
     expect(deps.slackMock).not.toHaveBeenCalled();
   });
 
+  it("4a-2. authoritative 간편결제 DONE도 원장에 확정한다", async () => {
+    const deps = makeDeps();
+    deps.getPaymentMock.mockResolvedValueOnce(
+      makePayment({
+        method: "간편결제",
+        easyPay: { provider: "카카오페이", amount: 3000, discountAmount: 0 },
+      }),
+    );
+
+    const res = await handleTossWebhook(
+      makeRequest(TOKEN, eventBody({ paymentKey: PAYMENT_KEY })),
+      deps,
+    );
+
+    expect(res.status).toBe(200);
+    expect(deps.rpcMock).toHaveBeenCalledWith(
+      "confirm_cheer_payment",
+      expect.objectContaining({ p_method: "간편결제" }),
+    );
+    expect(deps.cancelPaymentMock).not.toHaveBeenCalled();
+  });
+
   it("4b. totalAmount 없는 이벤트 + authoritative CANCELED → reconcile_canceled_payment RPC + 200", async () => {
     const deps = makeDeps();
     deps.getPaymentMock.mockResolvedValueOnce(
@@ -213,7 +237,7 @@ describe("handleTossWebhook", () => {
     });
     expect(deps.cancelPaymentMock).toHaveBeenCalledWith(
       PAYMENT_KEY,
-      expect.stringContaining("카드 전용"),
+      expect.stringContaining("허용되지 않은 결제수단"),
     );
     expect(deps.rpcMock).toHaveBeenCalledWith(
       "record_payment_compensation",

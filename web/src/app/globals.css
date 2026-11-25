@@ -3801,7 +3801,7 @@
   .invite-share-row > [role="status"],
   .invite-share-row > [role="alert"] {
     grid-column: 1 / -1;
-    margin-top: -2.5625rem;
+    margin-top: 0;
     text-align: center;
   }
 
@@ -3957,7 +3957,7 @@
 
   /* 눌림 상태: 받는사람 조작 요소는 모두 :active 피드백을 갖는다(DESIGN.md 상호작용 규칙, 독립 검증 측정 active_ratio). */
   .friends-page-head a:active,
-  .friend-list-main:active,
+  .friend-list-card-link:active,
   .invite-share-row button:active:not(:disabled) {
     transform: scale(0.98);
   }
@@ -4040,6 +4040,11 @@
     color: var(--foreground);
     text-decoration: none;
   }
+  .friend-list-card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
   .friend-list-main--with-news {
     padding-bottom: 0;
   }
@@ -4117,12 +4122,14 @@
     width: 0.875rem;
     height: 0.875rem;
   }
-  .friend-list-news > [data-collapsible] {
+  .friend-list-news-message {
+    display: -webkit-box;
     min-width: 0;
     flex: 1;
-  }
-  .friend-list-news-message {
+    overflow: hidden;
     margin: 0;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     white-space: normal;
     word-break: keep-all;
   }

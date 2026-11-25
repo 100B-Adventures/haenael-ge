@@ -31,6 +31,11 @@ export interface TossPaymentResponse {
   status: string;
   totalAmount: number;
   method: string;
+  easyPay?: {
+    provider: string;
+    amount: number;
+    discountAmount: number;
+  };
   approvedAt: string;
   receiptUrl?: string;
   canceledAt?: string;
@@ -63,7 +68,9 @@ export interface TossWebhookDeps {
   /** 미주입(undefined)이면 503 missing_server_env. */
   toss: TossWebhookTossClient | undefined;
   /** ./toss.ts의 단일 결제수단 판정기를 런타임에서 주입한다. */
-  isCardPaymentMethod: (method: string) => boolean;
+  isSupportedCheerPaymentMethod: (
+    payment: Pick<TossPaymentResponse, "method" | "easyPay">,
+  ) => boolean;
   sendSlackAlert: (alert: SlackAlert) => Promise<boolean>;
   /**
    * 결제 확정(DB 커밋) 직후 관제 송신. 로컬 import 금지 규칙 때문에 index.ts 가 주입한다.
@@ -268,18 +275,18 @@ export async function handleTossWebhook(
   }
 
   if (payment.status === "DONE") {
-    if (!deps.isCardPaymentMethod(payment.method)) {
+    if (!deps.isSupportedCheerPaymentMethod(payment)) {
       let canceled = false;
       let cancelError: string | null = null;
       try {
         await toss.cancelPayment(
           payment.paymentKey,
-          "해낼게 카드 전용 주문에 허용되지 않은 결제수단",
+          "해낼게 응원 주문에 허용되지 않은 결제수단",
         );
         canceled = true;
       } catch (error) {
         cancelError = error instanceof Error ? error.message : "cancel_failed";
-        console.error("[toss-webhook] non-card cancellation failed", error);
+        console.error("[toss-webhook] unsupported-method cancellation failed", error);
       }
 
       const { error: compensationError } = await supabase.rpc(
@@ -304,9 +311,11 @@ export async function handleTossWebhook(
         await sendSlackAlert({
           event: "payment_reconcile_failed",
           severity: "critical",
-          summary: "Non-card webhook payment could not be safely canceled",
+          summary: "Unsupported webhook payment could not be safely canceled",
           fields: {
             orderId: payment.orderId,
+            amount: payment.totalAmount,
+            reason: "unsupported_payment_method",
             method: payment.method,
             compensationRecorded: !compensationError,
           },

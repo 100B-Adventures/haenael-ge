@@ -24,7 +24,7 @@ const goals: SocialGoal[] = [
   },
 ];
 
-it("CL-03 친구 목록의 최근 응원은 ClampText의 2줄 정책을 쓰고 대표 목표 동선을 보존한다", () => {
+it("CL-03 친구 목록의 최근 응원까지 하나의 상세 링크로 묶는다", () => {
   render(
     <FriendGoalList
       friends={[
@@ -62,14 +62,8 @@ it("CL-03 친구 목록의 최근 응원은 ClampText의 2줄 정책을 쓰고 �
   expect(
     screen
       .getByText("3주째 도서관 개근, 진짜 대단하다")
-      .closest("[data-collapsible]"),
-  ).toBeInTheDocument();
-  expect(
-    screen
-      .getByText("3주째 도서관 개근, 진짜 대단하다")
-      .closest("[data-collapsible]")
-      ?.closest("a"),
-  ).toBeNull();
+      .closest("a"),
+  ).toHaveAttribute("href", "/friends/friend-a?goal=1");
   expect(document.body).not.toHaveTextContent("번 함께");
   expect(screen.getByTestId("friends-sparse-next-step")).toHaveTextContent(
     "한 명 더 함께 응원해볼까요?",

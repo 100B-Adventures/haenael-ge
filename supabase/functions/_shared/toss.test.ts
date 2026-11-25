@@ -50,3 +50,35 @@ describe("TossClient.cancelPayment", () => {
     ).rejects.toThrow("잘못된 요청");
   });
 });
+
+describe("TossClient.confirmPayment", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("PAY-METHOD-03 간편결제 응답의 method와 provider를 보존한다", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({
+        paymentKey: "payment_key_easy",
+        orderId: "order_easy",
+        status: "DONE",
+        totalAmount: 3000,
+        method: "간편결제",
+        easyPay: {
+          provider: "카카오페이",
+          amount: 3000,
+          discountAmount: 0,
+        },
+        approvedAt: "2026-11-25T18:00:00+09:00",
+      }), { status: 200, headers: { "Content-Type": "application/json" } })),
+    );
+
+    await expect(new TossClient("test_sk_fixture").confirmPayment({
+      paymentKey: "payment_key_easy",
+      orderId: "order_easy",
+      amount: 3000,
+    })).resolves.toMatchObject({
+      method: "간편결제",
+      easyPay: { provider: "카카오페이", amount: 3000, discountAmount: 0 },
+    });
+  });
+});
