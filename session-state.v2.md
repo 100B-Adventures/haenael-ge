@@ -1,5 +1,18 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-25 15:42 KST] 운영 자동 시험 진입 주소 고침, C1 초대 이미지 Codex 착수
+- 무엇을 어디까지: production-auth-readonly.spec 진입 주소를 haenael-ge.vercel.app 으로(옛 별칭은 정지된 옛 팀 402). 브랜치 fix/prod-e2e-entry-20261125 에서 운영 읽기 전용 E2E 45539852447 success, CI 45540069265 success → main 34cd06e(시험 코드만, Vercel 은 git 미연결이라 배포 영향 없음). C1 초대 OG 이미지 Codex code-builder 위임(제한 2시간, 로그 scratchpad codex-og.log).
+- 남은 이슈: 옛 별칭 haenaelge.vercel.app 을 새 계정으로 옮길지(옛 팀 별칭 삭제 = 회장 원문 필요), 수동 결제 시험 2개 로그인 기준 수정, Vercel 운영 방식 회장 결정.
+- 다음에 칠 명령: Codex 회수 → cd /Users/sj/sj_code_master/haenael-ge-og/web && npm run build → opengraph-image 받아 확인 → CI → 승인 기록 → vercel deploy --prod(해낼게 계정 토큰)
+- 검증했나: 운영 E2E·CI 통과(관찰). C1 미착수 상태 관찰(운영 og:image = /og/haenael-og.png).
+
+## 목표 지도
+- 목표 정본: RELEASE.md 2.4.0 매니페스트(reason·public_note) + 회장 요청 원장 /mnt/hdd/haenael-ge-v2-hotfix/wiki/거버넌스/요청.md 11-20~11-21
+- 응원 로그인·익명·공개 전환·친구 화면 응원(D-057): 운영 2.4.0 반영(관찰). 다음 걸음 = 운영 회원 응원·공개 전환 화면 확인.
+- 카카오 초대 미리보기 C1 입장권: Codex 구현 중(브랜치 feat/invite-og-c1-20261125, 작업트리 haenael-ge-og). 다음 걸음 = 회수 → 빌드·이미지 확인 → 해낼게 전용 계정으로 운영 배포.
+- 응원 알림톡: 운영 notification CHEER_RECEIVED SENT 11-21 01:10 1건. 다음 걸음 = 조성진 계정으로 보내고 받기 시험.
+- 앱(iOS·Android·앱인토스): 7회차 결함 수정 미커밋(hotfix). 다음 걸음 = Codex 로 수정 커밋 → 8회차 리뷰. 회장 결정 2건(앱 식별자, Android 대체결제) 대기.
+
 ## [2026-11-24 17:06 KST] 그로스 위키 준비물 지시 취소 수신, 진행 중 작업 그대로
 - 무엇을 어디까지: growth 의 "해낼게 마케팅 위키 정리 준비물" 작업지시를 받아 서브에이전트에 맡겼다가 중단, growth 가 "그로스 레인 일, 잘못 보냄"으로 취소. docs/growth/ 에 생성 파일 없음(관찰). 2.4.0 운영 반영(14:20 블록)은 그대로.
 - 남은 이슈: 운영 읽기 전용 E2E 진입 주소 haenaelge.vercel.app(옛 팀 402) 교체, 수동 결제 시험 2개 로그인 기준 수정, Vercel 운영 방식(사업별 무료 vs Pro 통합) 회장 결정 대기, 앱은 11-25 13:10 Codex 해제 뒤.
