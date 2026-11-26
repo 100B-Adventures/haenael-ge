@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-27 02:59 KST · 2.4.4 운영(친구 새 목표 앱 안 알림), 앱 채널 7회차 차단 커밋
+- 운영 health 2.4.4·24166f9, main 24166f9, CI 45870277015 success, 마이그레이션 20261127010000 적용. /g/ym7gh6kb 실측: 표지 object-position 50% 0%, 응원 단어 3개 opacity 보임, 단 y 509~516px 로 첫 화면 하단 고정 응원 버튼 뒤에 가림(다음 수정).
+- 친구 새 목표 앱 안 알림: 운영 실발화 미검증(다음 친구 목표 생성 때 notification 표 확인). 로컬 Playwright 는 heavy-slot 대기로 미실행.
+- 앱 채널(haenael-ge-v2-hotfix): Codex 94d1459·c407d13 7회차 차단 4건 수정, Deno 11/11, 표적 pgTAP 17/17, 전체 pgTAP 601/604(소셜 집계 3건 실패), main 7d0a6e4 이관 충돌 지도 docs/qa/v2-app-channels-main-7d0a6e4-port-conflicts-v1-gpt-codex-20261127-0159.md. 회장 결정 2건(app-id, android-altpay) 대기, 독립 리뷰 8회차 필요. Codex resume 01a218b1-e8f1-7001-9dc8-da432dd78edb.
+- 하네스 회신(11-26 23:42): standards/notification-roi.md(검증 PASS), standards/requirements/error-tracking.md(설치 보류, 자리 회장 결정).
+
 ## [2026-11-27 01:29 KST] compact 마크 (auto)
 - 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: 10bf6e3 docs(ops): 2.4.3 deploy record
