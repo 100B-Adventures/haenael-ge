@@ -1,0 +1,29 @@
+.page {
+  --public-goal-cover-height: 3.5rem;
+  --public-wordmap-min-height: 7rem;
+}
+
+.page :global(.goal-public-content) {
+  padding-top: var(--sp-4) !important;
+}
+
+.page :global(.goal-cover--banner) {
+  height: var(--public-goal-cover-height);
+}
+
+.page :global(.public-goal-why) {
+  margin-top: var(--sp-2);
+  padding: var(--sp-2);
+}
+
+.page :global(.public-goal-why > p) {
+  margin-top: 0;
+}
+
+.page :global(.public-cheer-wrap) {
+  margin-top: var(--sp-1);
+}
+
+.wordmapViewport :global(.wordmap-cloud) {
+  min-height: var(--public-wordmap-min-height);
+}

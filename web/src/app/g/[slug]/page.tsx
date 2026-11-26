@@ -18,6 +18,7 @@ import { GoalCover } from "@/components/social/GoalCover";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
 import { KakaoLoginLink } from "@/components/auth";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-g-slug-page";
+import styles from "./GoalPublicPage.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -164,7 +165,7 @@ export default async function GoalPublicPage({ params }: Props) {
   return (
     <ReceiverAppShell locked={!user} currentPath={`/g/${slug}`}>
       <main
-        className="goal-public-approved [background-color:var(--background)]!"
+        className={`goal-public-approved ${styles.page} [background-color:var(--background)]!`}
         data-testid="goal-public-page"
         data-cta
       >
@@ -226,7 +227,7 @@ export default async function GoalPublicPage({ params }: Props) {
           </div>
 
           {/* Wordmap */}
-          <div className="mb-4">
+          <div className={`${styles.wordmapViewport} mb-4`}>
             <Wordmap words={words} showOverflowDisclosure={false} />
           </div>
 

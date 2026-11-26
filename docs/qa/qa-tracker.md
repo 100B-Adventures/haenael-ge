@@ -1,5 +1,11 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-27 2.4.5 공개 목표 응원 문구·GlitchTip (❌ NG 등록 · builder 진행 중)
+
+- **❌ NG 등록 — 응원 문구 가림**: 운영 2.4.4의 `/g/ym7gh6kb`를 390×664에서 관찰했을 때 응원 문구 3개가 하단 고정 `카카오 로그인 후 응원하기` 버튼 뒤에 가려졌다. 390×664와 360×640에서 모든 `[data-wordmap-item]`의 `bottom`이 고정 액션의 `top`보다 작아야 한다.
+- **❌ NG 등록 — 운영 오류 수집 공백**: Next.js 브라우저·서버와 Supabase Edge Functions에 공통 GlitchTip SDK 초기화가 없어 운영 예외의 릴리스·환경·스택을 자동 수집하지 못한다. DSN 미설정 시 비활성, 개인정보 제거, 오류 표본 비율, `production`·`preview` 환경과 `2.4.5` 릴리스 태그 계약을 구현·시험하기 전에는 2.4.5를 출고하지 않는다.
+- 운영 배포·push·운영 DB 쓰기·GlitchTip 프로젝트 생성은 이번 builder 범위 밖이다. 수정 뒤 이 절을 `🔧` 증거로 갱신하되 독립 QA 전 단계 판정은 NG로 유지한다.
+
 ## 2026-11-27 2.4.4 친구 목표 앱 안 알림 (builder PASS · 독립 QA 대기)
 
 - **✅ INAPP 생성 계약**: `PUBLIC`·`FRIENDS` 목표는 ACTIVE 친구에게 목표당 한 번, `PRIVATE` 목표는 0건이다. 공개범위는 생성 화면·draft·5인자 `create_goal`의 같은 INSERT에서 확정해 비공개 전환 전 알림 누출을 막았다. 알림 저장 실패는 목표 INSERT를 되돌리지 않는다.
