@@ -3,11 +3,13 @@ import {
   buildCashoutPaidMessage,
   buildCashoutRequestedMessage,
   buildCheerReceivedMessage,
+  buildGoalCreatedMessage,
 } from "./alimtalk.ts";
 import type { SlackAlert } from "./slack.ts";
 
 export const NOTIFY_TYPES = [
   "CHEER_RECEIVED",
+  "GOAL_CREATED",
   "CASHOUT_REQUESTED",
   "CASHOUT_PAID",
 ] as const;
@@ -20,6 +22,7 @@ export interface NotifyInput {
   phone?: string;
   displayName?: string;
   goalTitle?: string;
+  goalSlug?: string;
   bankName?: string;
   cashoutRequestId?: number;
   cloverAmount?: number;
@@ -72,6 +75,24 @@ export function validateNotifyInput(
     }
     if (typeof input.goalTitle !== "string" || !input.goalTitle.trim()) {
       return { error: "goalTitle required (string) for CHEER_RECEIVED" };
+    }
+  }
+  if (type === "GOAL_CREATED") {
+    if (typeof input.displayName !== "string" || !input.displayName.trim()) {
+      return {
+        error: "displayName required (string) for GOAL_CREATED",
+      };
+    }
+    if (typeof input.goalTitle !== "string" || !input.goalTitle.trim()) {
+      return { error: "goalTitle required (string) for GOAL_CREATED" };
+    }
+    if (
+      typeof input.goalSlug !== "string" ||
+      !/^[a-z0-9]{1,32}$/.test(input.goalSlug.trim())
+    ) {
+      return {
+        error: "goalSlug required (safe goal slug) for GOAL_CREATED",
+      };
     }
   }
   if (
@@ -128,6 +149,9 @@ export function validateNotifyInput(
       goalTitle: typeof input.goalTitle === "string"
         ? input.goalTitle.trim()
         : undefined,
+      goalSlug: typeof input.goalSlug === "string"
+        ? input.goalSlug.trim()
+        : undefined,
       bankName: typeof input.bankName === "string"
         ? input.bankName.trim()
         : undefined,
@@ -174,6 +198,12 @@ export function buildNotifyMessage(
       return buildCheerReceivedMessage(phone, {
         displayName: input.displayName!,
         goalTitle: input.goalTitle!,
+      });
+    case "GOAL_CREATED":
+      return buildGoalCreatedMessage(phone, {
+        displayName: input.displayName!,
+        goalTitle: input.goalTitle!,
+        goalSlug: input.goalSlug!,
       });
     case "CASHOUT_REQUESTED":
       return buildCashoutRequestedMessage(phone);

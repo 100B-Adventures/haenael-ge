@@ -186,12 +186,12 @@ describe("NotificationBadge", () => {
   });
 
   // 2026-07-21 회장 지시: 알림 클릭 → 해당 링크(받는사람 홈)로 라우팅.
-  it("알림 클릭 시 /me로 라우팅한다", async () => {
+  it("GOAL_CREATED INAPP은 목표 등록 문구를 표시하고 /me로 라우팅한다", async () => {
     const fakeNotifs = [
       {
         id: 1,
         member_id: "uuid-1",
-        type: "CHEER_RECEIVED",
+        type: "GOAL_CREATED",
         channel: "INAPP",
         alimtalk_status: null,
         read: false,
@@ -213,6 +213,7 @@ describe("NotificationBadge", () => {
     await waitFor(() => {
       expect(screen.getAllByTestId("notification-item").length).toBe(1);
     });
+    expect(screen.getByText("목표가 등록됐어요. 해낼게가 첫 응원을 보냈어요 🍀")).toBeTruthy();
 
     fireEvent.click(screen.getAllByTestId("notification-item")[0]);
 

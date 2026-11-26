@@ -8,7 +8,7 @@
 |---|---|
 | `auth-kakao` | 카카오 OAuth 인가코드 → 액세스 토큰 교환 → Supabase Auth 세션 발급 |
 | `wordmap-render` | 응원 메시지를 SVG 워드클라우드로 렌더링 → Storage 업로드 → URL 반환 |
-| `notify` | 카카오 알림톡 발송(응원·환전 정보성) + 환전 신청 Slack 관리자 통지 |
+| `notify` | 카카오 알림톡 발송(목표 등록·응원·환전 정보성) + 환전 신청 Slack 관리자 통지 |
 | `report` | 목표·응원 메시지 신고 접수 → report 테이블 INSERT |
 | `cheer-order` | 구현됨: 응원 주문 생성 (cheer=PENDING + payment READY) |
 | `toss-confirm` | 구현됨: 토스 서버 승인 + payment DONE + cheer CONFIRMED + 원장 EARN, DB 반영 실패 보상 기록 |
@@ -43,6 +43,8 @@ supabase secrets set KAKAO_CLIENT_ID=your-value
 `notify`는 gateway JWT 검증 대신 `NOTIFY_INTERNAL_TOKEN`을 검증한다. 같은 32자
 이상 무작위 값을 Supabase secret과 Vercel Production env var 양쪽에 등록한다.
 일반 로그인 사용자 JWT만으로는 호출할 수 없다.
+목표 등록 알림은 `KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED`를 별도로 읽는다.
+이 키가 없으면 `GOAL_CREATED`만 INAPP으로 강등하고 기존 응원·환전 타입은 유지한다.
 
 ## 결제 배포 주의
 

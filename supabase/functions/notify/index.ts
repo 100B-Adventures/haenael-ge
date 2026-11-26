@@ -7,11 +7,15 @@
 //   x-notify-internal-token: <NOTIFY_INTERNAL_TOKEN>
 //   Body: {
 //     memberId: string,        // 받는사람 uuid
-//     type: "CHEER_RECEIVED" | "CASHOUT_REQUESTED" | "CASHOUT_PAID",
+//     type: "CHEER_RECEIVED" | "GOAL_CREATED" | "CASHOUT_REQUESTED" | "CASHOUT_PAID",
 //     phone?: string,          // 없으면 INAPP 폴백
 //     // CHEER_RECEIVED 전용:
 //     displayName?: string,    // 응원자 이름 ("익명의 누군가" 등)
 //     goalTitle?: string,      // 목표 제목
+//     // GOAL_CREATED 전용(모두 필수):
+//     displayName?: string,    // 회원 닉네임
+//     goalTitle?: string,      // 목표 제목
+//     goalSlug?: string,       // 공개 목표 링크 치환값
 //     // CASHOUT_PAID 전용 (필수):
 //     bankName?: string,       // 은행명만 — 계좌번호는 절대 싣지 않는다(회장 결정)
 //   }

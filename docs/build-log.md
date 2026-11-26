@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-26 2.4.2 목표 등록 전용 알림톡
+
+- 구현: 목표 생성 알림을 `CHEER_RECEIVED`에서 `GOAL_CREATED`로 교체했다. 인증된 원자 claim RPC가 회원 닉네임·전화번호와 목표 slug를 함께 반환하며 기존 목표당 1회 claim과 실패 흡수를 유지한다.
+- 회귀 경계: 전용 템플릿 환경 변수가 없으면 목표 등록 타입만 INAPP으로 강등한다. 기존 응원 도착·환전 템플릿 설정 판정은 바꾸지 않았다.
+- 검증: 표적 Deno 21건·Vitest 16건·pgTAP 13건, 전체 Deno 111건, 전체 TypeScript·Vitest 100파일/607건, 환경 계약 변이 51건, Deno check, 로컬 typegen, Next 2.4.2 production build를 통과했다. 헤드리스 `/onboarding`은 HTTP 200·console/page error 0, 비로그인 신규 API는 401이다. 증거는 `.goal/runs/2.4.2-goal-created/`에 있다.
+- 로컬 전체 pgTAP은 기존 stack migration 이력 불일치와 잔존 social fixture 때문에 3건이 실패했다. 이번 목표 등록 2파일 13건은 base migration을 로컬에 직접 적용한 뒤 별도 실행해 전부 통과했다. 운영 DB에는 쓰지 않았다.
+- 경계: 운영 배포·시크릿 등록·운영 migration·실 알림톡 수신은 하지 않았다. 독립 QA 판정 전 build 증거다.
+
+> STAMP: 2026-11-26 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=standard-dev, 승인된 GOAL_CREATED_V1 계약, 기존 notify·welcome claim 경로 · 고민=한 통 원칙과 기존 타입 회귀 방지를 함께 지키도록 템플릿 설정을 타입별로 격리했다.
+
 ## 2026-11-26 2.4.1 목표 생성 웰컴 응원 알림톡
 
 - 목적: 목표를 만든 회원이 시스템 첫 응원을 즉시 알림톡으로 받되, 알림 장애가 목표 생성을 막지 않게 한다. 이웃 영향 후보는 `create_goal`·웰컴 응원 트리거·기존 결제 응원 알림·notification 폴백이었고, 기존 결제 경로는 변경하지 않았다.

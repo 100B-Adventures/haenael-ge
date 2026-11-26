@@ -3,7 +3,7 @@ title: 해낼게 카카오 알림톡 운영 런북
 type: log
 owner: "@sj"
 policy: living
-updated: '2026-08-28'
+updated: '2026-11-26'
 author: Codex
 change: A안 구조로 이동하고 상대 링크를 갱신. 기존 본문 보존
 source:
@@ -14,7 +14,7 @@ visibility: private
 
 # 해낼게 카카오 알림톡 운영 런북
 
-> **현재 정본, 2026-08-28**: 환전 신청 접수(`CASHOUT_REQUESTED`)와 지급 완료(`CASHOUT_PAID`) 알림톡은 운영에서 각각 1건 실발송이 관찰됐다. 카카오 전화번호 동의항목과 환전 템플릿 2종 등록도 해소됐다. 아래 2026-08-08 표와 “실발송 불가” 문장은 당시 스냅샷으로만 보존하며 현재 판정에 사용하지 않는다. 응원 도착(`CHEER_RECEIVED`)의 최신 실수신은 별도 증거가 없어 미검증이다. 근거는 `pipeline-state.core.md`의 2026-08-28 plan·build 승인 로그와 `session-state.core.md` 최상단이다.
+> **현재 정본, 2026-11-26**: 응원 도착(`CHEER_RECEIVED`)은 운영 7건, 환전 신청 접수(`CASHOUT_REQUESTED`)와 지급 완료(`CASHOUT_PAID`)는 각각 1건 실발송이 관찰됐다. 목표 등록 안내 `GOAL_CREATED_V1`도 카카오 검수를 통과했다. 운영 2.4.1은 목표 생성 때 기존 응원 도착 템플릿을 한 통 보내며, 2.4.2 후보가 이를 전용 `GOAL_CREATED` 한 통으로 교체한다. 운영 시크릿·migration·Edge Function 반영과 실 수신은 미검증이다. 아래 2026-08-08 표와 “실발송 불가” 문장은 당시 스냅샷으로만 보존한다.
 
 > 상태 기준시각: 2026-08-08 21:40 KST\
 > 모델: GPT-5 Codex\
@@ -25,7 +25,7 @@ visibility: private
 
 ## 한 줄 상태
 
-**환전 신청 접수와 지급 완료 알림톡은 운영 실발송이 확인됐다. 응원 도착 알림톡의 최신 실수신은 미검증이다.**
+**응원 도착과 환전 알림톡은 운영 실발송이 확인됐다. 목표 등록 전용 알림톡은 검수 승인·코드 후보 상태이며 운영 실수신은 미검증이다.**
 
 ### 2026-08-08 재점검 보강
 
@@ -77,18 +77,17 @@ visibility: private
 
 ## 템플릿 계획
 
-현재 문구 초안은 아래 3종이나, 코드가 실제 참조하는 것은 환경변수
-`KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED` 하나뿐이다.
+현재 코드는 아래 승인 템플릿 4종을 용도별 환경 변수로 참조한다.
 
 | 코드                                     | 용도                | 구현                    | 심사                     |
 | ---------------------------------------- | ------------------- | ----------------------- | ------------------------ |
-| `KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED` | 응원 도착 즉시 알림 | 환경변수 주입 코드 있음 | 미접수·templateId 미발급 |
-| `CHEER_DIGEST_V1`                        | 30분 응원 묶음      | 초안만 있음             | 미접수                   |
-| `CASHOUT_PAID_V1`                        | 환전 지급 완료      | 초안만 있음             | 미접수                   |
+| `KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED` | 응원 도착 즉시 알림 | 운영 코드·시크릿 있음 | 승인·운영 실발송 확인 |
+| `KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED`   | 목표 등록·공유 링크 | 2.4.2 후보 코드 있음 | `GOAL_CREATED_V1` 승인, 운영 반영 미검증 |
+| `KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED` | 환전 신청 접수 | 운영 코드·시크릿 있음 | 승인·운영 실발송 확인 |
+| `KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID` | 환전 지급 완료 | 운영 코드·시크릿 있음 | 승인·운영 실발송 확인 |
 
-등록 우선순위는 응원 도착 템플릿 한 건이다. 나머지 두 건은 호출 코드가 없어 먼저
-심사받아도 실사용되지 않는다. 템플릿 본문은 금액·클로버 수를 넣지 않고 응원자
-표시명과 목표 제목만 변수로 쓴다. 광고·혜택·긴급성 문구는 넣지 않는다.
+목표 등록 안내는 회원 닉네임, 30자로 자른 목표 제목, 목표 slug만 변수로 쓴다.
+버튼 URL은 `/g/#{링크}`와 `/me`다. 광고·혜택·긴급성 문구는 넣지 않는다.
 
 ## 호출 코드 & 비밀값 역할(운영 증빙 기준)
 
@@ -104,6 +103,9 @@ visibility: private
     시도
 - 실제 템플릿 바인딩은 `_shared/alimtalk.ts`의 `TEMPLATE_CODES.CHEER_RECEIVED`가
   `KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED`를 읽는 한 경로뿐이다.
+- 목표 등록은 `/api/notifications/welcome-cheer`가 로그인 회원의 닉네임과 claim된
+  목표 slug를 서버에서 조회한 뒤 `GOAL_CREATED`로 `notify`를 한 번 호출한다.
+  `TEMPLATE_CODES.GOAL_CREATED`는 `KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED`만 읽는다.
 - 발송되지 못하면 `notification.channel = INAPP`으로 자동 강등되며 결제 자체는
   영향 없음.
 
@@ -117,6 +119,7 @@ visibility: private
 | `KAKAO_ALIMTALK_PFID`                    | Solapi 채널 연동 ID(`kakaoOptions.pfId`)                                    |
 | `KAKAO_ALIMTALK_FROM`                    | Solapi에 사전 등록된 발신번호(`message.from`)                               |
 | `KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED` | 검수 승인된 응원 도착 템플릿 ID(`kakaoOptions.templateId`)                  |
+| `KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED`   | 검수 승인된 목표 등록 안내 템플릿 ID(`kakaoOptions.templateId`)            |
 
 `KAKAO_ALIMTALK_SENDER_KEY`는 Solapi 현재 발송 계약에서 사용하지 않으므로
 제거했다. `pfId`를 채널 식별자로 사용한다.
@@ -126,8 +129,8 @@ visibility: private
 - 원문 값은 위키/채팅에 쓰지 않고, 회장 승인 환경(운영 계정) + 로컬
   `~/.sj-agent-harness/secrets/*.env`에 분리 보관
 - 로컬/운영은 동일한 키 세트를 보유하되, 용도별 접근 권한을 분리
-- 정합성 점검은 결제 후 `notify` 호출 전 필수 `KAKAO_ALIMTALK_*` 6개 모두의 존재
-  여부를 판별하며, 1개라도 비면 notify 외부 호출 없이 INAPP을 유지
+- 공통 API·채널·발신번호가 없으면 외부 발송 없이 INAPP을 유지한다. 템플릿 환경
+  변수가 없으면 해당 알림 타입만 INAPP으로 강등하고 다른 승인 타입은 계속 발송한다.
 - `notify`가 직접 호출돼도 `sendAlimtalk`가 동일 필수값과 templateId를 다시
   확인하고 `FAILED`를 반환해 INAPP으로 강등
 - 배포/검수 전에는 템플릿 본문·변수 수(현재 `#{응원자}`, `#{목표}`)와 실제

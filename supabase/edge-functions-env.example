@@ -29,14 +29,16 @@ KAKAO_CLIENT_ID=
 KAKAO_CLIENT_SECRET=
 
 # ─── 카카오 알림톡 (솔라피 → API 키 / 채널 / 템플릿) ─────────────────────────
-# _shared/alimtalk.ts가 읽는 이름과 일치해야 한다. 아래 6개 중 하나라도 없으면
-# 외부 발송을 건너뛰고 기존 INAPP으로 강등한다.
+# _shared/alimtalk.ts가 읽는 이름과 일치해야 한다. 공통 API·채널·발신번호가
+# 없으면 모든 외부 발송을 건너뛴다. 템플릿 키가 없으면 해당 알림 타입만
+# 기존 INAPP으로 강등하며 다른 승인 템플릿은 계속 발송한다.
 KAKAO_ALIMTALK_API_URL=
 KAKAO_ALIMTALK_API_KEY=
 KAKAO_ALIMTALK_API_SECRET=
 KAKAO_ALIMTALK_PFID=
 KAKAO_ALIMTALK_FROM=
 KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED=
+KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED=
 KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED=
 KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID=
 

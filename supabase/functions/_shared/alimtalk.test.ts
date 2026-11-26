@@ -97,12 +97,13 @@ Deno.test("Solapi 알림톡 payload — 등록 발신번호와 pfId/templateId�
   });
 });
 
-Deno.test("Solapi 필수 ENV — 6종 중 하나라도 없거나 비면 미설정", () => {
+Deno.test("Solapi 기존 응원 필수 ENV — GOAL_CREATED env 추가와 무관하게 판정", () => {
   const configured = new Map<string, string>(
     ALIMTALK_REQUIRED_ENV_NAMES.map((name) => [name, `${name}-value`]),
   );
 
   assertEquals(isAlimtalkConfigured((name) => configured.get(name)), true);
+  assertEquals(configured.has("KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED"), false);
 
   configured.delete("KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED");
   assertEquals(isAlimtalkConfigured((name) => configured.get(name)), false);

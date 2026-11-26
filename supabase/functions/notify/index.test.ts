@@ -5,6 +5,7 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   buildCheerReceivedMessage,
+  buildGoalCreatedMessage,
   sendAlimtalk,
   TEMPLATE_CODES,
 } from "../_shared/alimtalk.ts";
@@ -55,6 +56,33 @@ Deno.test("buildCheerReceivedMessage — goalTitle 30자 초과 시 truncate", (
   assertEquals(msg.variables["#{목표}"].length, 30);
 });
 
+Deno.test("GOAL_CREATED — 회원·목표·버튼 링크 변수 3개만 전달", () => {
+  const msg = buildGoalCreatedMessage("01012345678", {
+    displayName: "다솔",
+    goalTitle: "편입 평점 4.0 해낼게",
+    goalSlug: "abc123",
+  });
+
+  assertEquals(msg.templateId, TEMPLATE_CODES.GOAL_CREATED);
+  assertEquals(msg.variables, {
+    "#{이름}": "다솔",
+    "#{목표}": "편입 평점 4.0 해낼게",
+    "#{링크}": "abc123",
+  });
+  assertEquals(Object.keys(msg.variables).length, 3);
+});
+
+Deno.test("GOAL_CREATED — 목표는 30자로 자르고 공개 목표 버튼 slug는 보존", () => {
+  const msg = buildGoalCreatedMessage("01012345678", {
+    displayName: "회원",
+    goalTitle: "가".repeat(40),
+    goalSlug: "goalbutton123",
+  });
+
+  assertEquals(msg.variables["#{목표}"].length, 30);
+  assertEquals(msg.variables["#{링크}"], "goalbutton123");
+});
+
 Deno.test("sendAlimtalk — templateId 미발급 시 FAILED(placeholder) 반환", async () => {
   const result = await sendAlimtalk({
     to: "01099999999",
@@ -69,22 +97,33 @@ Deno.test("sendAlimtalk — templateId 미발급 시 FAILED(placeholder) 반환"
   );
 });
 
-Deno.test("TEMPLATE_CODES — 승인된 templateId를 환경변수로 주입", () => {
+Deno.test("TEMPLATE_CODES — 응원·목표 등록 templateId를 각 환경변수로 주입", () => {
   assertEquals(
     TEMPLATE_CODES.CHEER_RECEIVED,
     Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED")?.trim() ?? "",
+  );
+  assertEquals(
+    TEMPLATE_CODES.GOAL_CREATED,
+    Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED")?.trim() ?? "",
   );
 });
 
 // ─── notify EF 입력 검증·타입별 빌더 단위 테스트 ─────────────────────────────
 
-Deno.test("validateNotifyInput — 알림 3종 타입과 각 필수 입력을 받는다", () => {
+Deno.test("validateNotifyInput — 알림 4종 타입과 각 필수 입력을 받는다", () => {
   const inputs = [
     {
       memberId: "member-1",
       type: "CHEER_RECEIVED",
       displayName: "응원자",
       goalTitle: "편입 해낼게",
+    },
+    {
+      memberId: "member-1",
+      type: "GOAL_CREATED",
+      displayName: "다솔",
+      goalTitle: "편입 해낼게",
+      goalSlug: "abc123",
     },
     cashoutRequestedInput,
     { memberId: "member-1", type: "CASHOUT_PAID", bankName: "KB국민은행" },
@@ -98,6 +137,13 @@ Deno.test("validateNotifyInput — 알림 3종 타입과 각 필수 입력을 �
 });
 
 Deno.test("buildNotifyMessage — 타입별 템플릿과 최소 변수만 선택한다", () => {
+  const goalCreated = buildNotifyMessage({
+    memberId: "member-1",
+    type: "GOAL_CREATED",
+    displayName: "다솔",
+    goalTitle: "편입 해낼게",
+    goalSlug: "abc123",
+  }, "01012345678");
   const requested = buildNotifyMessage({
     ...cashoutRequestedInput,
   }, "01012345678");
@@ -107,6 +153,12 @@ Deno.test("buildNotifyMessage — 타입별 템플릿과 최소 변수만 선택
     bankName: "KB국민은행",
   }, "01012345678");
 
+  assertEquals(goalCreated.templateId, TEMPLATE_CODES.GOAL_CREATED);
+  assertEquals(goalCreated.variables, {
+    "#{이름}": "다솔",
+    "#{목표}": "편입 해낼게",
+    "#{링크}": "abc123",
+  });
   assertEquals(requested.templateId, TEMPLATE_CODES.CASHOUT_REQUESTED);
   assertEquals(requested.variables, {});
   assertEquals(paid.templateId, TEMPLATE_CODES.CASHOUT_PAID);
@@ -172,9 +224,24 @@ Deno.test("validateNotifyInput — 타입별 필수 입력 누락을 거부한�
     memberId: "member-1",
     type: "CASHOUT_PAID",
   });
+  const goalCreated = validateNotifyInput({
+    memberId: "member-1",
+    type: "GOAL_CREATED",
+    displayName: "회원",
+    goalTitle: "목표",
+  });
+  const unsafeGoalSlug = validateNotifyInput({
+    memberId: "member-1",
+    type: "GOAL_CREATED",
+    displayName: "회원",
+    goalTitle: "목표",
+    goalSlug: "../other",
+  });
 
   assertEquals("error" in cheer, true);
   assertEquals("error" in paid, true);
+  assertEquals("error" in goalCreated, true);
+  assertEquals("error" in unsafeGoalSlug, true);
 });
 
 Deno.test("ALT-AUTH-01 내부 공유 토큰은 허용하고 일반 로그인 사용자 토큰은 거부한다", async () => {

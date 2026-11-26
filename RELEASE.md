@@ -1,10 +1,40 @@
-# 릴리스 후보 매니페스트: 해낼게 2.4.1
+# 릴리스 후보 매니페스트: 해낼게 2.4.2
+
+```yaml
+release: 2.4.2
+release_tag: 2.4.2+goal-created-alimtalk
+date: 2026-11-26
+status: build
+line: v2
+delivery: vercel (main push 자동배포) + Supabase migration + notify Edge Function
+deployment_order: 1) 20261126020000 migration 적용·GOAL_CREATED enum과 claim_goal_created_notification 확인 2) notify Edge Function 배포·GOAL_CREATED 검증 확인 3) Vercel 웹 배포
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.4.1 (7098039, 운영 배포됨)
+reason: 검수 승인된 목표 등록 안내 GOAL_CREATED_V1을 목표 생성 알림 한 통에 적용
+public_note:
+  title: "목표 링크를 친구에게 바로 보낼 수 있어요"
+  summary: "목표를 등록하면 해낼게의 첫 응원과 친구에게 보낼 목표 링크를 카카오 알림톡 한 통으로 받아요."
+  notify: false
+  try_href: /onboarding
+  feedback_href: /updates#feedback
+ships:
+  code: 목표당 원자 claim은 유지하고 notify 타입만 GOAL_CREATED로 교체. 회원 닉네임·전화번호와 목표 slug는 claim RPC가 로그인 사용자 기준으로 원자 조회
+  migrations: 20261126020000_goal_created_notification_type.sql (GOAL_CREATED 비파괴 추가 + 서버 metadata 포함 원자 claim RPC)
+  edge_functions: notify GOAL_CREATED 입력 검증과 승인 템플릿 변수 이름·목표·링크 배선
+  env: KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED (없으면 GOAL_CREATED만 INAPP 폴백)
+qa_gate:
+  approved: false
+  evidence: 표적 Deno 21건·Vitest 16건·pgTAP 13건, 전체 Deno 111건, 전체 TypeScript·Vitest 100파일/607건, 환경 계약 변이 51건, Deno check, 로컬 typegen, Next 2.4.2 production build 통과. 헤드리스 `/onboarding` HTTP 200·console/page error 0, 비로그인 신규 API 401. 독립 QA 승인·운영 배포·실 알림톡 수신은 미검증
+```
+
+# 릴리스 매니페스트: 해낼게 2.4.1
 
 ```yaml
 release: 2.4.1
 release_tag: 2.4.1+welcome-cheer-alimtalk
 date: 2026-11-26
-status: build
+status: released
+released_at: 2026-11-26 (source 7098039, 컨트롤러 운영 배포 관찰)
 line: v2
 delivery: vercel (main push 자동배포) + Supabase migration
 canonical_url: https://haenael-ge.vercel.app

@@ -8,6 +8,7 @@
 //   KAKAO_ALIMTALK_PFID         — Solapi 채널 연동 ID
 //   KAKAO_ALIMTALK_FROM         — Solapi에 사전 등록한 발신번호
 //   KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED    — 검수 승인된 응원 도착 templateId
+//   KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED      — 검수 승인된 목표 등록 templateId
 //   KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED — 검수 승인된 환전 신청 접수 templateId
 //   KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID      — 검수 승인된 환전 지급 완료 templateId
 
@@ -175,6 +176,9 @@ export const TEMPLATE_CODES = {
   /** 응원 도착 (정보성) — Solapi 검수 승인 후 환경변수로 주입 */
   CHEER_RECEIVED:
     Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CHEER_RECEIVED")?.trim() ?? "",
+  /** 목표 등록 안내(정보성) — 회원 자신의 목표 생성 직후 1회 */
+  GOAL_CREATED:
+    Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED")?.trim() ?? "",
   /** 환전 신청 접수 (정보성) — Solapi 검수 승인 후 환경변수로 주입 */
   CASHOUT_REQUESTED:
     Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CASHOUT_REQUESTED")?.trim() ?? "",
@@ -182,6 +186,26 @@ export const TEMPLATE_CODES = {
   CASHOUT_PAID:
     Deno.env.get("KAKAO_ALIMTALK_TEMPLATE_CASHOUT_PAID")?.trim() ?? "",
 } as const;
+
+/**
+ * 목표 등록 안내 알림톡 메시지 빌더.
+ * 검수 템플릿의 버튼 URL은 `/g/#{링크}`와 `/me`를 쓰며,
+ * Solapi에는 템플릿 변수만 전달한다.
+ */
+export function buildGoalCreatedMessage(
+  to: string,
+  opts: { displayName: string; goalTitle: string; goalSlug: string },
+): AlimtalkMessage {
+  return {
+    to,
+    templateId: TEMPLATE_CODES.GOAL_CREATED,
+    variables: {
+      "#{이름}": opts.displayName,
+      "#{목표}": opts.goalTitle.slice(0, 30),
+      "#{링크}": opts.goalSlug,
+    },
+  };
+}
 
 /** 응원 도착 알림톡 메시지 빌더 */
 export function buildCheerReceivedMessage(

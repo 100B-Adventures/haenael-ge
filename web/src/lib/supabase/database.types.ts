@@ -1576,6 +1576,16 @@ export type Database = {
           goal_title: string
         }[]
       }
+      claim_goal_created_notification: {
+        Args: { p_goal_slug: string }
+        Returns: {
+          goal_id: number
+          goal_slug: string
+          goal_title: string
+          member_nickname: string
+          member_phone: string
+        }[]
+      }
       expire_stale_cheer_payments: { Args: never; Returns: number }
       friend_goal_detail: { Args: { goal_id: number }; Returns: Json }
       friend_invite_preview: { Args: { token: string }; Returns: Json }
@@ -1783,6 +1793,7 @@ export type Database = {
       notification_channel_enum: "ALIMTALK" | "INAPP"
       notification_type_enum:
         | "CHEER_RECEIVED"
+        | "GOAL_CREATED"
         | "CASHOUT_REQUESTED"
         | "CASHOUT_PAID"
       payment_status_enum: "READY" | "DONE" | "CANCELED" | "FAILED" | "EXPIRED"
@@ -1944,6 +1955,7 @@ export const Constants = {
       notification_channel_enum: ["ALIMTALK", "INAPP"],
       notification_type_enum: [
         "CHEER_RECEIVED",
+        "GOAL_CREATED",
         "CASHOUT_REQUESTED",
         "CASHOUT_PAID",
       ],

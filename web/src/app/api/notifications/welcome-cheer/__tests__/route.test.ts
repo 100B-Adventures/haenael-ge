@@ -31,24 +31,22 @@ vi.mock("@/lib/welcome-cheer-notification", () => ({
 
 import { POST } from "../route";
 
-const CLAIM = { goal_id: 42, goal_title: "첫 목표 해낼게" };
-const post = () => POST(new Request(
+const CLAIM = {
+  goal_id: 42,
+  goal_title: "첫 목표 해낼게",
+  goal_slug: "servergoal123",
+  member_nickname: "서버닉네임",
+  member_phone: "01012345678",
+};
+const post = (body: Record<string, unknown> = { goalSlug: "abc123" }) => POST(new Request(
   "https://haenael-ge.com/api/notifications/welcome-cheer",
-  { method: "POST", body: JSON.stringify({ goalSlug: "abc123" }) },
+  { method: "POST", body: JSON.stringify(body) },
 ));
 
 function serviceClient() {
   return {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          maybeSingle: vi.fn().mockResolvedValue({
-            data: { phone: "01012345678" },
-            error: null,
-          }),
-        })),
-      })),
-    })),
+    from: vi.fn(),
+    functions: { invoke: vi.fn() },
   };
 }
 
@@ -89,10 +87,32 @@ describe("POST /api/notifications/welcome-cheer", () => {
     expect((await post()).status).toBe(202);
 
     expect(rpc).toHaveBeenCalledWith(
-      "claim_welcome_cheer_notification",
+      "claim_goal_created_notification",
       { p_goal_slug: "abc123" },
     );
     expect(afterMock).not.toHaveBeenCalled();
     expect(deliverWelcomeCheerNotificationMock).not.toHaveBeenCalled();
+  });
+
+  it("WCN-U07 닉네임·버튼 slug는 클라이언트 값을 버리고 서버 조회 값을 쓴다", async () => {
+    rpc.mockResolvedValue({ data: [CLAIM], error: null });
+
+    expect((await post({
+      goalSlug: "abc123",
+      displayName: "공격자",
+      notificationGoalSlug: "othergoal",
+    })).status).toBe(202);
+
+    expect(deliverWelcomeCheerNotificationMock).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        memberId: "11111111-1111-4111-8111-111111111111",
+        goalId: 42,
+        displayName: "서버닉네임",
+        goalTitle: "첫 목표 해낼게",
+        goalSlug: "servergoal123",
+        phone: "01012345678",
+      },
+    );
   });
 });

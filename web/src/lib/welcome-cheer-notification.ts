@@ -3,14 +3,15 @@ import type { createServiceRoleClient } from "@/lib/supabase/service";
 type ServiceClient = ReturnType<typeof createServiceRoleClient>;
 
 export const WELCOME_CHEER_NOTIFICATION = {
-  type: "CHEER_RECEIVED",
-  displayName: "해낼게",
+  type: "GOAL_CREATED",
 } as const;
 
 interface WelcomeCheerNotificationInput {
   memberId: string;
   goalId: number;
+  displayName: string;
   goalTitle: string;
+  goalSlug: string;
   phone?: string;
 }
 
@@ -51,6 +52,9 @@ export async function deliverWelcomeCheerNotification(
   try {
     const token = process.env.NOTIFY_INTERNAL_TOKEN?.trim() ?? "";
     if (token.length < 32) throw new Error("notify_internal_token_unavailable");
+    if (!input.displayName.trim() || !/^[a-z0-9]{1,32}$/.test(input.goalSlug)) {
+      throw new Error("welcome_goal_metadata_unavailable");
+    }
 
     const { error } = await serviceClient.functions.invoke("notify", {
       headers: { "x-notify-internal-token": token },
@@ -58,8 +62,9 @@ export async function deliverWelcomeCheerNotification(
         memberId: input.memberId,
         type: WELCOME_CHEER_NOTIFICATION.type,
         phone: input.phone,
-        displayName: WELCOME_CHEER_NOTIFICATION.displayName,
+        displayName: input.displayName,
         goalTitle: input.goalTitle,
+        goalSlug: input.goalSlug,
       },
     });
     if (error) throw error;

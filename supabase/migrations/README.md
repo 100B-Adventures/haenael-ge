@@ -22,6 +22,7 @@
 | `20261107010000_payment_conversion_claim.sql` | 결제 브라우저 전환 원자 claim. 웹훅 선확정 첫 callback 허용·이후 replay 차단 |
 | `20261107020000_payment_conversion_delivery_lease.sql` | 영구 claim을 만료 가능한 pending lease로 교체. 브라우저는 ack하지 않고 stable event id로 at-least-once 재시도·provider dedupe |
 | `20261126010000_welcome_cheer_notification.sql` | 본인의 최근 목표·웰컴 응원을 확인하고 목표당 1회만 알림 전달을 claim하는 표식·RPC |
+| `20261126020000_goal_created_notification_type.sql` | 목표 등록 전용 `GOAL_CREATED` enum 비파괴 추가 + 닉네임·전화번호·목표 slug를 함께 반환하는 원자 claim RPC |
 
 ## 명령어
 

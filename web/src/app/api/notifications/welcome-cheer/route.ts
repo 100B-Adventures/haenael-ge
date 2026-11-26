@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   }
 
   const { data: claims, error: claimError } = await supabase.rpc(
-    "claim_welcome_cheer_notification",
+    "claim_goal_created_notification",
     { p_goal_slug: goalSlug },
   );
   if (claimError) {
@@ -51,24 +51,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ accepted: true }, { status: 202 });
   }
 
-  const { data: member, error: phoneError } = await serviceClient
-    .from("member")
-    .select("phone")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (phoneError) {
-    console.error("[welcome-cheer-notification] phone lookup failed", {
-      goalId: claim.goal_id,
-      dbCode: phoneError.code ?? "unknown",
-    });
-  }
-
   after(async () => {
     await deliverWelcomeCheerNotification(serviceClient, {
       memberId: user.id,
       goalId: claim.goal_id,
+      displayName: claim.member_nickname,
       goalTitle: claim.goal_title,
-      phone: typeof member?.phone === "string" ? member.phone : undefined,
+      goalSlug: claim.goal_slug,
+      phone: typeof claim.member_phone === "string"
+        ? claim.member_phone
+        : undefined,
     });
   });
 

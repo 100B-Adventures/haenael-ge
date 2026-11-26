@@ -1,5 +1,12 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-26 2.4.2 목표 등록 알림톡 템플릿 교체 (독립 QA 미수행)
+
+- **❌ NG 등록**: 운영 2.4.1의 목표 생성 경로는 `CHEER_RECEIVED` 템플릿과 “해낼게” 표시명을 쓴다. 2026-11-26 검수 승인된 목표 등록 전용 `GOAL_CREATED_V1`의 회원 닉네임·목표 slug·공개 목표 링크 계약과 다르다.
+- **🔧 builder 보정**: 2.4.2 후보에서 `GOAL_CREATED` 한 통으로 교체하고 닉네임·전화번호·slug를 인증된 원자 claim RPC 반환값으로 고정했다. 표적 Deno 21건·Vitest 16건·pgTAP 13건, 전체 Deno 111건, 전체 TypeScript·Vitest 607건, 환경 계약 변이 51건, Deno check, 로컬 typegen, build, 헤드리스 렌더 200·콘솔 오류 0을 확인했다.
+- 현재 판정: build 증거는 충족했다. 독립 QA PASS·운영 시크릿·migration·Edge Function 적용과 실 수신은 미검증이다.
+- 증거: `.goal/runs/2.4.2-goal-created/{deno-targeted.log,vitest-targeted.log,pgtap-targeted.log,deno-full.log,deno-check.log,full-vitest.log,qa-contracts.log,typegen.log,build.log,dev-server.log,headless-smoke.json,api-unauth.log}`. 전체 pgTAP은 기존 stack migration 이력 불일치와 잔존 social fixture 3건 때문에 실패했으며 이번 2파일 13건과 분리해 기록했다.
+
 ## 2026-11-26 2.4.1 build 결함 등록·보정 (독립 QA 미수행)
 
 - **NG 등록**: 운영 2.4.0은 응원 도착 `CHEER_RECEIVED` 알림톡은 보내지만, 목표 생성 시 DB가 웰컴 응원을 만들어도 notify 호출이 없어 알림톡은 0건이었다.

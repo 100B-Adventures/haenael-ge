@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.4.2",
+      "releaseTag": "2.4.2+goal-created-alimtalk",
+      "date": "2026-11-26",
+      "title": "목표 링크를 친구에게 바로 보낼 수 있어요",
+      "summary": "목표를 등록하면 해낼게의 첫 응원과 친구에게 보낼 목표 링크를 카카오 알림톡 한 통으로 받아요.",
+      "notify": false,
+      "tryHref": "/onboarding",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.4.1",
       "releaseTag": "2.4.1+welcome-cheer-alimtalk",
       "date": "2026-11-26",
@@ -19,16 +29,6 @@
       "summary": "친구 목표 화면에 응원하기 버튼이 생겼어요. 응원은 카카오 로그인 뒤에 보내고, 익명으로 보낸 응원도 마이페이지 보낸 응원에서 보고 언제든 공개로 바꿀 수 있어요.",
       "notify": true,
       "tryHref": "/my",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.3.2",
-      "releaseTag": "2.3.2+fix-kakao-share-csp",
-      "date": "2026-11-21",
-      "title": "카카오톡으로 친구를 초대할 수 있어요",
-      "summary": "초대 화면의 카카오톡 초대 버튼을 누르면 카카오톡 공유창이 바로 열려요.",
-      "notify": false,
-      "tryHref": "/invite",
       "feedbackHref": "/updates#feedback"
     }
   ]

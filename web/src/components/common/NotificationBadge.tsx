@@ -64,17 +64,19 @@ export function NotificationBadge({ className }: NotificationBadgeProps) {
     if (n.type === "CHEER_RECEIVED") {
       return "조용한 응원이 도착했어요 🍀";
     }
+    if (n.type === "GOAL_CREATED") {
+      return "목표가 등록됐어요. 해낼게가 첫 응원을 보냈어요 🍀";
+    }
     return "새 알림이 있어요";
   }
 
   // 알림 타입 → 라우팅 대상. notification 테이블엔 target/link 컬럼이 없고(스키마
-  // 20260705163137_init_schema.sql notification 정의 참조) 현재 유일 타입인
-  // CHEER_RECEIVED는 받는사람(goal 소유자) 전용 알림 — 소유자의 활성 목표는 항상 1개
-  // (goal_one_active_per_member 제약)라 goalId 없이도 /me로 결정 라우팅 가능하다.
-  // 타입이 늘면 이 스위치에 분기만 추가하면 됨.
+  // 20260705163137_init_schema.sql notification 정의 참조) 목표·응원 알림은
+  // 소유자 전용이며 goalId 없이도 목표 목록이 있는 /me로 라우팅한다.
   function notifTarget(n: NotificationRow): string {
     switch (n.type) {
       case "CHEER_RECEIVED":
+      case "GOAL_CREATED":
         return "/me";
       default:
         return "/me";
