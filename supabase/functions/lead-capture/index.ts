@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { withRegionHeader } from "../_shared/region.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -141,5 +142,5 @@ export async function handleLeadCapture(req: Request) {
 }
 
 if (import.meta.main) {
-  Deno.serve(handleLeadCapture);
+  serveWithGlitchTip("lead-capture", handleLeadCapture);
 }

@@ -13,6 +13,7 @@ import { sendSlackAlert } from "../_shared/slack.ts";
 import { dispatchCheerReceivedNotification } from "../_shared/cheer-notification.ts";
 import { isAlimtalkConfigured } from "../_shared/alimtalk.ts";
 import { firePay } from "../_shared/ops-event.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -524,5 +525,5 @@ export async function handleTossConfirm(req: Request) {
 }
 
 if (import.meta.main) {
-  Deno.serve(handleTossConfirm);
+  serveWithGlitchTip("toss-confirm", handleTossConfirm);
 }

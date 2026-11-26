@@ -4,6 +4,7 @@
 // 이 함수는 기존 배포 URL이 남아 있어도 계좌 body를 읽거나 DB를 호출하지 않는다.
 
 import { withRegionHeader } from "../_shared/region.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -38,5 +39,5 @@ export function handleCashoutRequest(req: Request) {
 }
 
 if (import.meta.main) {
-  Deno.serve(handleCashoutRequest);
+  serveWithGlitchTip("cashout", handleCashoutRequest);
 }

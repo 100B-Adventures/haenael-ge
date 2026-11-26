@@ -8,8 +8,9 @@ import { isSupportedCheerPaymentMethod, TossClient } from "../_shared/toss.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
 import { firePay } from "../_shared/ops-event.ts";
 import { handleTossWebhook } from "../_shared/toss-webhook-handler.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
-Deno.serve(async (req) => {
+serveWithGlitchTip("toss-webhook", async (req) => {
   const expectedToken = Deno.env.get("TOSS_WEBHOOK_TOKEN");
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");

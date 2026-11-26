@@ -26,6 +26,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
 import { sendAlimtalk } from "../_shared/alimtalk.ts";
 import { authorizeNotifyRequest } from "../_shared/notify-auth.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 import {
   buildCashoutRequestedSlackAlert,
   buildNotifyMessage,
@@ -58,7 +59,7 @@ function err(status: number, code: string, message: string): Response {
 }
 
 // ─── 메인 핸들러 ────────────────────────────────────────────────────────────
-Deno.serve(async (req: Request) => {
+serveWithGlitchTip("notify", async (req: Request) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, {

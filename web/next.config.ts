@@ -74,6 +74,7 @@ export function buildContentSecurityPolicy(
     "https://*.clarity.ms",
     "https://connect.facebook.net",
     "https://www.facebook.com",
+    "https://glitchtip.sj-onpremise-cloudflare-tunnel.cloud",
     // 카카오톡 공유 SDK(Kakao.Share.sendDefault)가 템플릿 검증을 이 주소로 보낸다(2026-11-20 운영 "요청 실패" 사고).
     "https://kapi.kakao.com",
   ].filter(Boolean).join(" "),
@@ -120,6 +121,8 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: APP_VERSION,
     NEXT_PUBLIC_APP_DEPLOY: APP_DEPLOY,
+    NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT:
+      process.env.VERCEL_ENV === "production" ? "production" : "preview",
   },
   typescript: {
     tsconfigPath: isDevelopment ? "tsconfig.json" : "tsconfig.build.json",

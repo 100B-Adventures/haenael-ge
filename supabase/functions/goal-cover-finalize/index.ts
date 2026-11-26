@@ -12,8 +12,9 @@ import {
   goalCoverAdminUrl,
   notifyGoalCoverPublished,
 } from "../_shared/goal-cover-alert.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
-Deno.serve(async (req) => {
+serveWithGlitchTip("goal-cover-finalize", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: COVER_CORS_HEADERS });
   }

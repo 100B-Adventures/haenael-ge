@@ -3,8 +3,9 @@
 // ⛔ 정산주기 D+n 실값 = legal·BM 확정 후.
 
 import { withRegionHeader } from "../_shared/region.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
-Deno.serve(async (_req: Request) => {
+serveWithGlitchTip("cashout-payout", async (_req: Request) => {
   // TODO(slice-8)[강모델·리뷰]: TossPayoutClient.requestPayout → SETTLED → 지급명세 기록
   return new Response(
     JSON.stringify({ error: "Not implemented — 슬라이스 #8 [강모델·리뷰] 에서 구현" }),

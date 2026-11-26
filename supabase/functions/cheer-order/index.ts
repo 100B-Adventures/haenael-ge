@@ -5,6 +5,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { withRegionHeader } from "../_shared/region.ts";
 import { toPublicError, toPublicHttpStatus } from "../_shared/errors.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -247,5 +248,5 @@ export async function handleCheerOrder(
 }
 
 if (import.meta.main) {
-  Deno.serve((request) => handleCheerOrder(request));
+  serveWithGlitchTip("cheer-order", (request) => handleCheerOrder(request));
 }

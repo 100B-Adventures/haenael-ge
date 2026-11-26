@@ -20,6 +20,7 @@ import {
 } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRegionHeader } from "../_shared/region.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 // 버그 수정(2026-07-20): OPTIONS 프리플라이트에만 CORS를 붙이고 실제 POST 응답
@@ -114,7 +115,7 @@ async function targetExists(
 }
 
 // ─── 메인 핸들러 ────────────────────────────────────────────────────────────
-Deno.serve(async (req: Request) => {
+serveWithGlitchTip("report", async (req: Request) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, {

@@ -8,8 +8,9 @@ import {
   extensionForMime,
   parseCoverUploadInput,
 } from "../_shared/goal-cover.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
-Deno.serve(async (req) => {
+serveWithGlitchTip("goal-cover-sign-upload", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: COVER_CORS_HEADERS });
   }

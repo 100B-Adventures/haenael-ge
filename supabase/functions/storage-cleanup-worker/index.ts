@@ -7,6 +7,7 @@ import {
   removeCleanupClaims,
   splitStoragePath,
 } from "../_shared/storage-cleanup.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
@@ -105,4 +106,6 @@ export async function handleStorageCleanup(req: Request): Promise<Response> {
   });
 }
 
-if (import.meta.main) Deno.serve(handleStorageCleanup);
+if (import.meta.main) {
+  serveWithGlitchTip("storage-cleanup-worker", handleStorageCleanup);
+}

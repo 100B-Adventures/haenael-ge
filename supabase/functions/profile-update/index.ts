@@ -14,6 +14,7 @@ import {
   profileErrorStatus,
   profileJson,
 } from "../_shared/profile.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -46,7 +47,7 @@ async function rollbackPendingAvatar(
   });
 }
 
-Deno.serve(async (req) => {
+serveWithGlitchTip("profile-update", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: PROFILE_CORS_HEADERS });
   }

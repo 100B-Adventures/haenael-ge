@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-27 2.4.5 응원 문구 표시·GlitchTip
+
+- 운영 2.4.4 실측에서 390×664 응원 문구 bottom 538.9~548.6px가 고정 액션 top 482px 뒤에 가려진 것을 재현했다. 공개 목표 전용 CSS 모듈에서 커버·WHY·워드맵 예산을 8pt 계열로 축소해 전역 CSS를 늘리지 않았다.
+- Next.js browser·server·edge runtime은 `@sentry/nextjs@11.18.0`, Supabase Edge Functions 16개는 `@sentry/deno@11.18.0` 공통 래퍼를 사용한다. DSN 없음=비활성, 5xx·미처리 예외 전량, tracing·session 0, PII 제거, `production|preview`, `haenael-ge@2.4.5`를 계약으로 고정했다.
+- 현재 증거: 로컬 데이터 3개 이상 화면에서 Playwright 4/4(390×664·360×640, 일반·줄임 동작), 웹 계약 3/3, Edge 계약 3/3, 웹 TypeScript, Edge 진입점 16개 Deno check PASS. 전체 회귀·build·스모크는 아래 최종 보고에 갱신한다.
+- 경계: GlitchTip 프로젝 생성·DSN 등록·실수신, push·배포·운영 DB 쓰기는 실행하지 않았다.
+
+> STAMP: 2026-11-27 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=운영 좌표 실측, GlitchTip·Sentry·Deno 공식 문서, 로컬 Vitest·Deno·Playwright · 고민=DSN 없는 배포의 무오류 동작과 오류 원문의 PII 제거를 런타임 두 계층에서 같이 고정했다.
+
 ## 2026-11-27 2.4.4 친구 목표 앱 안 알림
 
 - 구현: 생성 화면 → draft → 5인자 `create_goal`이 공개범위를 같은 INSERT에 저장한다. 목표 AFTER INSERT 트리거는 ACTIVE 친구별 `FRIEND_GOAL_CREATED` INAPP을 기록하며 `(수신자, 타입, 목표)` 멱등과 실패 격리를 적용했다. 알림 목록·배지·친구 목표 딥링크까지 연결했다.

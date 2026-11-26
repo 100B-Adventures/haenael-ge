@@ -4,6 +4,7 @@ import {
   coverErrorStatus,
   coverJson,
 } from "../_shared/goal-cover.ts";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 
 const REJECTION_CODES = [
   "adult",
@@ -13,7 +14,7 @@ const REJECTION_CODES = [
   "other",
 ];
 
-Deno.serve(async (req) => {
+serveWithGlitchTip("admin-review-goal-cover", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: COVER_CORS_HEADERS });
   }

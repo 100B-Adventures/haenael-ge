@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.4.5",
+      "releaseTag": "2.4.5+fix-cheerwords-glitchtip",
+      "date": "2026-11-27",
+      "title": "응원 문구가 작은 화면에서도 바로 보여요",
+      "summary": "친구의 응원 문구가 하단 응원 버튼에 가리지 않게 화면 배치를 다듬었어요.",
+      "notify": false,
+      "tryHref": "/g/ym7gh6kb",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.4.4",
       "releaseTag": "2.4.4+friend-goal-inapp",
       "date": "2026-11-27",
@@ -19,16 +29,6 @@
       "summary": "로그인과 결제 오류 안내를 다듬고, 친구 사진·소개·응원 기록과 목표 사진 표시를 고쳤어요.",
       "notify": false,
       "tryHref": "/my",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.4.2",
-      "releaseTag": "2.4.2+goal-created-alimtalk",
-      "date": "2026-11-26",
-      "title": "목표 링크를 친구에게 바로 보낼 수 있어요",
-      "summary": "목표를 등록하면 해낼게의 첫 응원과 친구에게 보낼 목표 링크를 카카오 알림톡 한 통으로 받아요.",
-      "notify": false,
-      "tryHref": "/onboarding",
       "feedbackHref": "/updates#feedback"
     },
     {

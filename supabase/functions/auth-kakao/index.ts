@@ -19,6 +19,7 @@
 // ⛔ 회수 필요: 카카오 디벨로퍼 앱 생성 후 실키 설정 + redirect URI 등록
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { serveWithGlitchTip } from "../_shared/glitchtip.ts";
 import {
   exchangeKakaoCode,
   getKakaoUserInfo,
@@ -69,7 +70,7 @@ function jsonError(
 
 // ─── 핸들러 ─────────────────────────────────────────────────────────────────
 
-Deno.serve(async (req: Request) => {
+serveWithGlitchTip("auth-kakao", async (req: Request) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });

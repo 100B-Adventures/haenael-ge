@@ -1,3 +1,34 @@
+# 릴리스 후보 매니페스트: 해낼게 2.4.5
+
+```yaml
+release: 2.4.5
+release_tag: 2.4.5+fix-cheerwords-glitchtip
+date: 2026-11-27
+status: build
+line: v2
+delivery: Vercel web + Supabase Edge Functions 16개
+deployment_order: 1) GlitchTip 프로젝·DSN 준비 2) Vercel Production·Preview 환경값 등록 3) Supabase 환경별 secret 등록 4) Edge Functions 16개 재배포 5) Vercel 웹 배포 6) 의도적 시험 예외 1건으로 브라우저·서버·Edge 수신 확인
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.4.4 (24166f9, 운영 2.4.4 기준)
+reason: 회장 2026-11-27 "알아서해 codex 시켜서 진행" + 운영 응원 문구 가림 실측 + 공통 GlitchTip 서버 연결
+public_note:
+  title: "응원 문구가 작은 화면에서도 바로 보여요"
+  summary: "친구의 응원 문구가 하단 응원 버튼에 가리지 않게 화면 배치를 다듬었어요."
+  notify: false
+  try_href: /g/ym7gh6kb
+  feedback_href: /updates#feedback
+ships:
+  web: Next.js browser·server GlitchTip SDK, 공개 목표 소형 화면 레이아웃
+  edge_functions: admin-review-goal-cover, auth-kakao, cashout-payout, cashout, cheer-order, goal-cover-finalize, goal-cover-sign-upload, kyc-verify, lead-capture, notify, profile-update, report, storage-cleanup-worker, toss-confirm, toss-webhook, wordmap-render
+  migrations: none
+  env: Vercel(GLITCHTIP_DSN, NEXT_PUBLIC_GLITCHTIP_DSN), Supabase Edge(GLITCHTIP_DSN, GLITCHTIP_ENVIRONMENT)
+privacy: sendDefaultPii=false + 전화·이메일·토큰·인증 헤더·쿼리 삭제
+sampling: error sampleRate=1, tracesSampleRate=0, autoSessionTracking=false
+qa_gate:
+  approved: false
+  evidence: builder 계약 테스트·Deno check·Playwright 진행 중. 외부 GlitchTip 실수신은 프로젝·DSN 미발급으로 미검증
+```
+
 # 릴리스 후보 매니페스트: 해낼게 2.4.4
 
 ```yaml
