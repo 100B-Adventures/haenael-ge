@@ -773,35 +773,44 @@ export type Database = {
       }
       notification: {
         Row: {
+          actor_member_id: string | null
           alimtalk_status:
             | Database["public"]["Enums"]["alimtalk_status_enum"]
             | null
           channel: Database["public"]["Enums"]["notification_channel_enum"]
           created_at: string
+          goal_id: number | null
           id: number
           member_id: string
+          message: string | null
           read: boolean
           type: Database["public"]["Enums"]["notification_type_enum"]
         }
         Insert: {
+          actor_member_id?: string | null
           alimtalk_status?:
             | Database["public"]["Enums"]["alimtalk_status_enum"]
             | null
           channel: Database["public"]["Enums"]["notification_channel_enum"]
           created_at?: string
+          goal_id?: number | null
           id?: never
           member_id: string
+          message?: string | null
           read?: boolean
           type: Database["public"]["Enums"]["notification_type_enum"]
         }
         Update: {
+          actor_member_id?: string | null
           alimtalk_status?:
             | Database["public"]["Enums"]["alimtalk_status_enum"]
             | null
           channel?: Database["public"]["Enums"]["notification_channel_enum"]
           created_at?: string
+          goal_id?: number | null
           id?: never
           member_id?: string
+          message?: string | null
           read?: boolean
           type?: Database["public"]["Enums"]["notification_type_enum"]
         }
@@ -1810,6 +1819,7 @@ export type Database = {
       notification_type_enum:
         | "CHEER_RECEIVED"
         | "GOAL_CREATED"
+        | "FRIEND_GOAL_CREATED"
         | "CASHOUT_REQUESTED"
         | "CASHOUT_PAID"
       payment_status_enum: "READY" | "DONE" | "CANCELED" | "FAILED" | "EXPIRED"
@@ -1972,6 +1982,7 @@ export const Constants = {
       notification_type_enum: [
         "CHEER_RECEIVED",
         "GOAL_CREATED",
+        "FRIEND_GOAL_CREATED",
         "CASHOUT_REQUESTED",
         "CASHOUT_PAID",
       ],

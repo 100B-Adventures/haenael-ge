@@ -88,6 +88,18 @@ describe("GoalCoverPicker 단계별 실패", () => {
     expect(mocks.invoke).not.toHaveBeenCalled();
   });
 
+  it("GC-CROP-03 세로 사진 편집은 얼굴을 보존하도록 상단에서 시작한다", () => {
+    const { container } = picker();
+    openPicker();
+    fireEvent.change(container.querySelector("input[type=file]")!, {
+      target: { files: [imageFile()] },
+    });
+
+    expect(screen.getByTestId("goal-cover-position-input")).toHaveValue("0");
+    expect(screen.getByAltText("고른 사진을 배너 비율로 맞춘 미리보기"))
+      .toHaveStyle({ objectPosition: "center 0%" });
+  });
+
   it("GC-02 서명 실패는 sign 문구·HTTP 상태·재시도를 남긴다", async () => {
     mocks.invoke.mockResolvedValueOnce({ data: null, error: { context: new Response("", { status: 503 }) } });
     const { container } = picker();

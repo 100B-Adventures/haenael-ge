@@ -37,6 +37,14 @@ describe("Wordmap", () => {
     expect(screen.getByText("멋지다")).toBeInTheDocument();
   });
 
+  it("WM-FALLBACK-01 배치 전에도 응원 문구를 DOM에 남겨 정적 폴백을 제공한다", () => {
+    render(<Wordmap words={[{ word: "함께", word_count: 2 }]} />);
+    const wordmap = screen.getByTestId("wordmap");
+
+    expect(wordmap).toHaveAttribute("data-layout-ready", "false");
+    expect(screen.getByText("함께")).toHaveAttribute("data-wordmap-item");
+  });
+
   it("WM-GOAL-01 실제 목표 제목을 워드맵 안에 표시하고 D-030-F suffix를 적용한다", () => {
     render(<Wordmap words={[{ word: "화이팅", word_count: 2 }]} goalTitle="토익 900" />);
     expect(screen.getByTestId("wordmap-goal-title")).toHaveTextContent("🍀 토익 900 해낼게");

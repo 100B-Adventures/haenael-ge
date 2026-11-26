@@ -22,7 +22,8 @@ export function GoalCoverUploadEditor({
   const inputRef = useRef<HTMLInputElement>(null);
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [verticalPosition, setVerticalPosition] = useState(50);
+  // 세로 사진은 얼굴이 대개 상단에 있으므로 첫 크롭부터 상단을 보존한다.
+  const [verticalPosition, setVerticalPosition] = useState(0);
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const selected = photos[selectedIndex] ?? null;
@@ -47,7 +48,7 @@ export function GoalCoverUploadEditor({
       return next;
     });
     setSelectedIndex(0);
-    setVerticalPosition(50);
+    setVerticalPosition(0);
     setError(null);
   }
 
@@ -101,7 +102,7 @@ export function GoalCoverUploadEditor({
                 aria-pressed={selectedIndex === index}
                 onClick={() => {
                   setSelectedIndex(index);
-                  setVerticalPosition(50);
+                  setVerticalPosition(0);
                 }}
               >
                 {/* 사용자가 방금 고른 로컬 blob URL이라 Next Image 최적화 대상이 아니다. */}

@@ -221,4 +221,35 @@ describe("NotificationBadge", () => {
       expect(mockPush).toHaveBeenCalledWith("/me");
     });
   });
+
+  it("FGN-UI-01 친구 목표 알림은 저장 문구를 표시하고 해당 친구 목표로 라우팅한다", async () => {
+    const fakeNotifs = [{
+      id: 3,
+      member_id: "receiver-1",
+      type: "FRIEND_GOAL_CREATED",
+      channel: "INAPP",
+      alimtalk_status: null,
+      actor_member_id: "friend-1",
+      goal_id: 42,
+      message: "친구 새봄님이 새 목표를 만들었어요",
+      read: false,
+      created_at: new Date().toISOString(),
+    }];
+    mockSelect.mockReturnValue({
+      order: mockOrder.mockReturnValue({
+        limit: mockLimit.mockResolvedValue({ data: fakeNotifs, error: null }),
+      }),
+    });
+
+    render(<NotificationBadge />);
+    await waitFor(() => expect(screen.getByTestId("notification-badge-button")).toBeTruthy());
+    fireEvent.click(screen.getByTestId("notification-badge-button"));
+
+    expect(await screen.findByText("친구 새봄님이 새 목표를 만들었어요")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("notification-item"));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/friends/friend-1?goal=42");
+    });
+  });
 });

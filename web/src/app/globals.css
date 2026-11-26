@@ -1443,7 +1443,7 @@
     object-fit: cover;
   }
   .goal-cover-image--uploaded {
-    object-position: center 25%;
+    object-position: center top;
   }
   .goal-cover-shade {
     position: absolute;
@@ -2471,7 +2471,18 @@
     left: 87%;
     animation-delay: -5.6s;
   }
-  [data-wordmap-layout][data-layout-ready="false"] [data-wordmap-item],
+  [data-wordmap-layout][data-layout-ready="false"] {
+    text-align: center;
+  }
+  [data-wordmap-layout][data-layout-ready="false"] [data-wordmap-item] {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    margin: var(--sp-1);
+    opacity: 1;
+    animation: none;
+    white-space: normal;
+  }
   [data-wordmap-layout][data-layout-ready="false"] .wordmap-ambient {
     opacity: 0;
   }
