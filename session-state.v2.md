@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-26 16:23 KST · 회장 16시: 환영 응원 알림톡·사진 표시·GlitchTip
+- 요청: 사진 승인 없이 올리기 / 승인 뒤 이다솔 사진 왜 안 보이나 / 피드백 다 올렸나 / GlitchTip 하나로 전 사업체·앱 수집? / 목표 만들면 첫 응원 알림톡 + 공유 독려, 만들어 운영 올리고 조성진·이다솔에게 쏴 보기.
+- 관찰: 목표 17 표지 APPROVED(07:13 UTC), 공개 파일 200, 운영 /g/ym7gh6kb 크롬에서 표지 렌더(1290px)·세로 사진을 가로 띠로 잘라 얼굴 잘림, 동의 배너가 덮음(제거는 미배포). 이다솔 프로필 사진이 http:// 저장(크롬은 자동 https 로 로드, 웹킷 미검증).
+- 알림톡: 운영 CHEER_RECEIVED 7건 발송, 목표 생성 알림 0. 새 템플릿 GOAL_CREATED_V1(KA01TP261126072216530566DQfO9SFC) 검수 제출 INSPECTING. D-062 커밋 f0aee83.
+- 위임: Codex r10 (haenael-ge-welcome, feat/welcome-cheer-alimtalk-20261126, main 34cd06e 위 2.4.1) 진행 중. 로그 scratchpad/codex-r10.log.
+- 다음: r10 회수·리뷰 → CI → 운영 배포(회장 원문 "만들어서 운영올리고") → 조성진·이다솔 실발송 확인. 표지 자르기·http 프로필 정규화는 2.4.x 묶음에.
+
 ## [2026-11-26 15:16 KST] compact 마크 (auto)
 - 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: a29877a docs(state): heading time
