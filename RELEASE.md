@@ -24,7 +24,7 @@ ships:
   env: none
 qa_gate:
   approved: false
-  evidence: builder 신규 pgTAP 16/16·기존 create_goal 10/10, 전체 TypeScript·Vitest 111파일 667/667, 디자인 토큰 신규 위반 0, Claude Sonnet 5.5 교차 리뷰 PASS. production build·헤드리스 Playwright는 공용 heavy slot 실행 중이며 독립 QA·운영 반영은 미검증
+  evidence: builder 신규 pgTAP 16/16·기존 create_goal 10/10, 전체 TypeScript·Vitest 111파일 667/667, production build, HTTP 200 4경로, 디자인 토큰 신규 위반 0, Claude Sonnet 5.5 교차 리뷰 PASS. 헤드리스 Playwright는 공용 heavy slot 1802초 대기 초과로 실행되지 않아 미검증이며 독립 QA·운영 반영도 미검증
 ```
 
 # 릴리스 후보 매니페스트: 해낼게 2.4.3

@@ -4,7 +4,8 @@
 
 - 구현: 생성 화면 → draft → 5인자 `create_goal`이 공개범위를 같은 INSERT에 저장한다. 목표 AFTER INSERT 트리거는 ACTIVE 친구별 `FRIEND_GOAL_CREATED` INAPP을 기록하며 `(수신자, 타입, 목표)` 멱등과 실패 격리를 적용했다. 알림 목록·배지·친구 목표 딥링크까지 연결했다.
 - 화면: 업로드 세로 표지는 공통 커버에서 상단 초점을 사용한다. 운영에서 빈 상자로 보인 원인은 워드맵 항목이 JavaScript 좌표 계산 전 `opacity:0`이던 CSS였다. 계산 전 정적 폴백을 표시하고 계산 뒤 기존 모션 배치로 전환한다.
-- 검증: `.goal/runs/2.4.4-friend-goal-inapp/`에 신규 pgTAP 16/16, 기존 `create_goal` 10/10, 전체 TypeScript·Vitest 111파일 667/667, 디자인 토큰 345파일 신규 위반 0, 독립 교차 리뷰 PASS를 보관했다. production build·Playwright는 공용 heavy slot 실행 중이다.
+- 검증: `.goal/runs/2.4.4-friend-goal-inapp/`에 신규 pgTAP 16/16, 기존 `create_goal` 10/10, 전체 TypeScript·Vitest 111파일 667/667, production build, 4경로 HTTP 200, 디자인 토큰 345파일 신규 위반 0, 독립 교차 리뷰 PASS를 보관했다.
+- 미검증: headless Playwright와 9개 모바일 폭 측정은 공용 heavy-slot 첫 순번에서 1,802초 대기했으나 다른 Gradle 2건의 점유가 끝나지 않아 실행 전 종료코드 75로 끝났다. 로그 `playwright-final.log`; 슬롯 해소 뒤 `run-headless-e2e.sh` 재실행이 필요하다.
 - 경계: 로컬 공유 Supabase의 migration 이력이 운영 기준과 달라 reset·repair하지 않고 전용 임시 DB에 현재 스키마를 복제해 검증했다. 운영 DB·push·배포는 건드리지 않았다.
 
 > STAMP: 2026-11-27 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=D-063, PostgreSQL 공식 trigger·exception 문서, 로컬 pgTAP·Vitest·headless 계약·Claude Sonnet 5.5 교차 리뷰 · 고민=비공개 전환 전에 알림이 나가는 교차 리뷰 결함을 공개범위 생성 원자화로 닫았다.
