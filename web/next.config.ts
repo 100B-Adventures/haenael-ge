@@ -33,6 +33,9 @@ export function buildContentSecurityPolicy(
   supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL,
 ) {
   const localQaOrigins = localSupabaseCspOrigins(supabaseUrl);
+  const localQaImageOrigins = localQaOrigins.filter((origin) =>
+    origin.startsWith("http://") || origin.startsWith("https://")
+  );
   return [
   "default-src 'self'",
   "base-uri 'self'",
@@ -53,7 +56,7 @@ export function buildContentSecurityPolicy(
     .filter(Boolean)
     .join(" "),
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
+  ["img-src 'self' data: blob: https:", ...localQaImageOrigins].join(" "),
   "font-src 'self' data:",
   [
     "connect-src 'self'",

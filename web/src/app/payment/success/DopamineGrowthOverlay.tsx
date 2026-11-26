@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChevronLeft, Clover } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Wordmap, type WordmapWord } from "@/components/goal/Wordmap";
 import { ReceiverBottomNavView } from "@/components/social/ReceiverBottomNav";
 import { GoalCover } from "@/components/social/GoalCover";
@@ -36,6 +36,9 @@ export function PaymentSuccessFlow({
   growth,
 }: PaymentSuccessFlowProps) {
   const [stage, setStage] = useState<"success" | "growth">("success");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => setHydrated(true), []);
 
   if (stage === "growth") {
     return <DopamineGrowthOverlay {...growth} />;
@@ -46,6 +49,7 @@ export function PaymentSuccessFlow({
       className="payment-success-card"
       data-status="success"
       data-testid="payment-success-state"
+      data-hydrated={hydrated ? "true" : "false"}
     >
       <div className="payment-success-icon" aria-hidden="true">
         <Clover size={28} strokeWidth={2.5} />
@@ -56,7 +60,7 @@ export function PaymentSuccessFlow({
         <span>{PRODUCT_COPY.SUCCESS_WORDMAP}</span>
       </p>
       <div className="payment-success-actions">
-        <Link
+        <a
           href={backHref}
           className="payment-success-primary"
           data-testid="payment-success-back"
@@ -66,7 +70,7 @@ export function PaymentSuccessFlow({
           }}
         >
           {backLabel}
-        </Link>
+        </a>
         <Link href="/" className="payment-success-secondary">
           {homeLabel}
         </Link>
@@ -98,9 +102,9 @@ export function DopamineGrowthOverlay({
       aria-labelledby="payment-growth-title"
     >
       <header className="social-detail-head wordmap-growth-head">
-        <Link href={backHref} aria-label="친구 목표로 돌아가기">
+        <a href={backHref} aria-label="친구 목표로 돌아가기">
           <ChevronLeft aria-hidden="true" />
-        </Link>
+        </a>
         <strong>친구의 해낼게</strong>
         <span aria-hidden="true" />
       </header>

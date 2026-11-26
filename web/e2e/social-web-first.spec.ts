@@ -6,24 +6,22 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import sharp from "sharp";
-import {
-  ANALYTICS_CONSENT_KEY,
-  type AnalyticsConsent,
-} from "../src/lib/analytics/consent";
-import {
-  latestPublicRelease,
-  WHATS_NEW_LAST_SEEN_KEY,
-} from "../src/lib/release-notes";
+import { ANALYTICS_CONSENT_KEY, type AnalyticsConsent } from "../src/lib/analytics/consent";
+import { latestPublicRelease, WHATS_NEW_LAST_SEEN_KEY } from "../src/lib/release-notes";
 import {
   runStagingFixtureSql,
   STAGING_PROJECT_REF,
 } from "./support/staging-fixture-sql";
-import { waitForVisualAssets } from "./support/visual-ready";
+import {
+  expectTwoLineClamp,
+  verifyWordmapMotionEnvelope,
+  waitForVisualReady,
+} from "./support/visual-assertions";
+import { runFriendGoalAlignmentScenario } from "./support/friend-goal-alignment";
 import {
   devices,
   type Browser,
   type BrowserContext,
-  type Locator,
   type Page,
   expect,
   test,
@@ -33,109 +31,6 @@ function requiredEnv(name: string) {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} 미설정`);
   return value;
-}
-
-async function waitForVisualReady(page: Page, selectors: string[]) {
-  for (const selector of selectors) {
-    await expect(page.locator(selector).first()).toBeVisible({ timeout: 15_000 });
-  }
-  await expect(page.locator("body")).not.toContainText(/(?:로딩|불러오는) 중/);
-  await waitForVisualAssets(page);
-  await page.waitForFunction(() => Array.from(
-    document.querySelectorAll<HTMLElement>("[data-wordmap-layout]"),
-  ).every((wordmap) => wordmap.dataset.layoutReady === "true"));
-  const wordmapCollisions = await page.evaluate(() => Array.from(
-    document.querySelectorAll<HTMLElement>("[data-wordmap-layout]"),
-  ).flatMap((wordmap) => {
-    const items = Array.from(wordmap.querySelectorAll<HTMLElement>("[data-wordmap-item]"));
-    return items.flatMap((item, index) => {
-      const first = item.getBoundingClientRect();
-      return items.slice(index + 1).flatMap((other) => {
-        const second = other.getBoundingClientRect();
-        const overlaps = !(
-          first.right <= second.left || second.right <= first.left
-          || first.bottom <= second.top || second.bottom <= first.top
-        );
-        return overlaps ? [`${item.textContent}:${other.textContent}`] : [];
-      });
-    });
-  }));
-  expect(wordmapCollisions, "D-027-E 워드맵 단어 겹침").toEqual([]);
-}
-
-async function expectTwoLineClamp(target: Locator) {
-  await expect(target).toBeVisible();
-  await expect.poll(
-    () => target.evaluate((element) => getComputedStyle(element).webkitLineClamp),
-    { message: "같은 텍스트 요소에 2줄 clamp CSS가 적용될 때까지 기다린다" },
-  ).toBe("2");
-  const collapsed = await target.evaluate((element) => ({
-    lineClamp: getComputedStyle(element).webkitLineClamp,
-    clientHeight: element.clientHeight,
-    scrollHeight: element.scrollHeight,
-  }));
-  expect(collapsed.lineClamp).toBe("2");
-  expect(collapsed.scrollHeight).toBeGreaterThan(collapsed.clientHeight + 1);
-  const wrapper = target.locator("xpath=..");
-  await expect(wrapper).toHaveAttribute("data-collapsible", "enabled");
-  const toggle = wrapper.locator("button.collapse-chevron");
-  await expect(toggle).toHaveCount(1);
-  await expect(toggle).toHaveAttribute("aria-expanded", "false");
-  await expect(toggle.locator("svg")).toHaveCount(1);
-  expect((await toggle.textContent())?.trim()).toBe("");
-  await toggle.click();
-  const liveToggle = target.page().locator("button.collapse-chevron[aria-expanded='true']");
-  await expect(liveToggle).toHaveCount(1);
-  await expect(liveToggle).toHaveAttribute("aria-expanded", "true");
-  const expanded = await target.evaluate((element) => ({
-    lineClamp: getComputedStyle(element).webkitLineClamp,
-    clientHeight: element.clientHeight,
-    scrollHeight: element.scrollHeight,
-  }));
-  expect(expanded.lineClamp).toBe("none");
-  expect(expanded.clientHeight + 1).toBeGreaterThanOrEqual(expanded.scrollHeight);
-  await liveToggle.click();
-  await expect(target.page().locator("button.collapse-chevron[aria-expanded='true']")).toHaveCount(0);
-}
-
-async function verifyWordmapMotionEnvelope(page: Page) {
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  const snapshot = () => page.evaluate(() => {
-    const items = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-wordmap-layout] [data-wordmap-item]"),
-    );
-    const positions = items.map((item) => {
-      const rect = item.getBoundingClientRect();
-      return { text: item.textContent ?? "", x: rect.x, y: rect.y };
-    });
-    const collisions = items.flatMap((item, index) => {
-      const first = item.getBoundingClientRect();
-      return items.slice(index + 1).flatMap((other) => {
-        const second = other.getBoundingClientRect();
-        const overlaps = !(
-          first.right <= second.left || second.right <= first.left
-          || first.bottom <= second.top || second.bottom <= first.top
-        );
-        return overlaps ? [`${item.textContent}:${other.textContent}`] : [];
-      });
-    });
-    return { positions, collisions };
-  });
-  const samples = [await snapshot()];
-  await page.waitForTimeout(1_500);
-  samples.push(await snapshot());
-  await page.waitForTimeout(1_500);
-  samples.push(await snapshot());
-  for (const [index, sample] of samples.entries()) {
-    expect(sample.collisions, `D-027-E 모션 ${index}차 단어 겹침`).toEqual([]);
-  }
-  const moved = samples[0].positions.some((start, index) => {
-    const later = samples.slice(1).map((sample) => sample.positions[index]);
-    return later.some((point) => point && (
-      Math.abs(point.x - start.x) >= 0.5 || Math.abs(point.y - start.y) >= 0.5
-    ));
-  });
-  expect(moved, "D-027-E no-preference 워드맵 모션").toBe(true);
 }
 
 async function captureApprovedPrototype(browser: Browser, evidenceDir: string) {
@@ -4239,6 +4134,104 @@ test.describe("V2 web-first social slice", () => {
     await context.close();
   });
 
+  test("D057 결제 이름·실패·복귀와 친구·초대 화면 회귀", async ({ browser }) => {
+    test.setTimeout(120_000);
+    const captureDir = process.env.E2E_CAPTURE_DIR ??
+      "test-results/d057-payment-social-regression";
+    mkdirSync(captureDir, { recursive: true });
+    const context = await authContext(browser, emails.owner, undefined, {
+      permissions: ["clipboard-read", "clipboard-write"],
+    });
+    const page = await context.newPage();
+    const consoleErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/g/friend-public-${runId}#cheer`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect.poll(() => page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      ANALYTICS_CONSENT_KEY,
+    )).toBe("denied");
+    await expect(page.getByTestId("analytics-consent-banner")).toHaveCount(0, {
+      timeout: 15_000,
+    });
+    await page.getByTestId("cheer-cta").click();
+    await expect(page.getByTestId("cheer-supporter-name")).toHaveText("서연");
+    await expect(page.getByTestId("cheer-payment-sheet").locator('input[type="text"]'))
+      .toHaveCount(1);
+    await page.getByTestId("cheer-anonymous-toggle").check();
+    await expect(page.getByTestId("cheer-supporter-name")).toHaveText(
+      "익명으로 보낼게요",
+    );
+
+    await page.goto(
+      "/payment/fail?code=PAY_PROCESS_ABORTED&orderId=d057-order&goalSlug=" +
+        `friend-public-${runId}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await expect(page.getByTestId("payment-fail-page")).toContainText(
+      "돈이 빠져나갔다면 다시 결제하지 말고",
+    );
+    await expect(page.getByTestId("payment-fail-page")).toContainText(
+      "주문번호 d057-order",
+    );
+
+    await page.goto(
+      `/payment/success?paymentKey=${layoutPaymentKey}&orderId=${layoutPaymentOrderId}` +
+        `&amount=1000&goalSlug=friend-public-${runId}`,
+      { waitUntil: "domcontentloaded" },
+    );
+    await expect(page.getByTestId("payment-success-state")).toHaveAttribute(
+      "data-hydrated",
+      "true",
+    );
+    await page.getByTestId("payment-success-back").click();
+    await expect(page.getByTestId("payment-dopamine-overlay")).toBeVisible();
+    await page.getByRole("link", { name: "친구 목표로 돌아가기" }).click();
+    await expect(page).toHaveURL(new RegExp(`/g/friend-public-${runId}$`));
+    await expect(page.getByTestId("goal-public-page")).toBeVisible();
+
+    await page.goto("/friends", { waitUntil: "domcontentloaded" });
+    const friendCard = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+    await expectTwoLineClamp(
+      friendCard.locator(".friend-list-news-message").filter({ hasText: friendLongMessage }),
+    );
+    await Promise.all([
+      page.waitForURL(new RegExp(`/friends/${ids.friend}\\?goal=${friendPublicGoal}$`)),
+      friendCard.getByTestId("friend-goal-link").click(),
+    ]);
+    await expect(page.getByTestId("friend-detail-page")).toBeVisible();
+
+    await page.goto("/invite", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: /링크 복사/ }).click();
+    const status = page.getByRole("status");
+    await expect(status).toBeVisible();
+    for (const width of [360, 390, 430] as const) {
+      await page.setViewportSize({ width, height: 844 });
+      const geometry = await page.locator(".invite-share-row").evaluate((row) => {
+        const buttons = [...row.querySelectorAll("button")];
+        const notice = row.querySelector<HTMLElement>('[role="status"]');
+        return {
+          buttonBottom: Math.max(...buttons.map((button) => button.getBoundingClientRect().bottom)),
+          noticeTop: notice?.getBoundingClientRect().top ?? 0,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+      expect(geometry.noticeTop).toBeGreaterThanOrEqual(geometry.buttonBottom);
+      expect(geometry.overflow).toBe(0);
+      await page.screenshot({
+        path: `${captureDir}/invite-status-${width}.png`,
+        fullPage: true,
+      });
+    }
+    expect(consoleErrors, "D057 브라우저 콘솔 오류").toEqual([]);
+    await context.close();
+  });
+
   test("QA-TC-CL-04 친구 상세의 긴 응원은 2줄에서 펼치고 다시 접힌다", async ({ browser }) => {
     const context = await authContext(browser, emails.owner);
     const page = await context.newPage();
@@ -4611,6 +4604,116 @@ test.describe("V2 web-first social slice", () => {
       .single();
     expect(persistedError).toBeNull();
     expect(persisted).toEqual({ status: "UPLOADING", owner_member_id: ids.owner });
+  });
+
+  test("QA-TC-WELCOME-CHEER-01 주인 화면도 환영 응원을 한 사람으로 표시한다", async ({ browser }) => {
+    const { count: confirmedCount, error: countError } = await admin.from("cheer")
+      .select("id", { head: true, count: "exact" })
+      .eq("goal_id", ownerGoal)
+      .eq("status", "CONFIRMED")
+      .is("deleted_at", null);
+    const { count: welcomeCount, error: welcomeError } = await admin.from("cheer")
+      .select("id", { head: true, count: "exact" })
+      .eq("goal_id", ownerGoal)
+      .eq("status", "CONFIRMED")
+      .eq("is_welcome", true);
+    expect(countError).toBeNull();
+    expect(welcomeError).toBeNull();
+    expect(welcomeCount).toBe(1);
+
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
+    const count = page.getByTestId("goal-management-wordmap").locator("strong").first();
+    await expect(count).toHaveText(String(confirmedCount));
+    console.info("QA_WELCOME_OWNER_COUNT", JSON.stringify({
+      displayed: Number(await count.textContent()),
+      confirmed: confirmedCount,
+      welcome: welcomeCount,
+    }));
+    await context.close();
+  });
+
+  test("QA-TC-GOAL-COVER-02 관리자는 서명 썸네일을 보고 오래된 사진을 승인할 수 없다", async ({ browser }) => {
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "base64",
+    );
+    const staleAssetId = crypto.randomUUID();
+    const activeAssetId = crypto.randomUUID();
+    const stalePath = `${ids.owner}/stale-${staleAssetId}.png`;
+    const activePublicPath = `stale-review/${activeAssetId}.png`;
+    const slug = `stale-cover-${runId}`;
+    const { data: goal, error: goalError } = await admin.from("goal").insert({
+      member_id: ids.owner,
+      slug,
+      title: "오래된 사진 승인 방지 해낼게",
+      due_date: isoDateFromNow(30),
+      visibility: "PUBLIC",
+    }).select("id").single();
+    expect(goalError).toBeNull();
+    expect(goal).not.toBeNull();
+    try {
+      expect((await admin.storage.from("goal-cover-quarantine").upload(
+        stalePath, png, { contentType: "image/png", upsert: true },
+      )).error).toBeNull();
+      expect((await admin.storage.from("goal-cover-public").upload(
+        activePublicPath, png, { contentType: "image/png", upsert: true },
+      )).error).toBeNull();
+      const { error: assetError } = await admin.from("goal_cover_asset").insert([{
+        id: staleAssetId,
+        goal_id: goal!.id,
+        owner_member_id: ids.owner,
+        quarantine_path: stalePath,
+        status: "REVIEW",
+        content_sha256: "a".repeat(64),
+        mime_type: "image/png",
+        byte_size: png.byteLength,
+        created_at: new Date(Date.now() - 86_400_000).toISOString(),
+        review_source: "ADMIN",
+      }, {
+        id: activeAssetId,
+        goal_id: goal!.id,
+        owner_member_id: ids.owner,
+        quarantine_path: `${ids.owner}/active-${activeAssetId}.png`,
+        public_path: activePublicPath,
+        status: "APPROVED",
+        content_sha256: "b".repeat(64),
+        mime_type: "image/png",
+        byte_size: png.byteLength,
+        reviewed_by: ids.owner,
+        reviewed_at: new Date().toISOString(),
+        review_source: "AUTO",
+        created_at: new Date().toISOString(),
+      }]);
+      expect(assetError).toBeNull();
+      expect((await admin.from("goal").update({
+        active_cover_asset_id: activeAssetId,
+        cover_selection_mode: "CUSTOM",
+      }).eq("id", goal!.id)).error).toBeNull();
+
+      const context = await authContext(browser, emails.admin);
+      const page = await context.newPage();
+      await page.goto("/admin", { waitUntil: "domcontentloaded" });
+      const staleCard = page.getByTestId("goal-cover-review-queue").locator("article")
+        .filter({ hasText: "더 새 사진이 이미 공개됨" });
+      await expect(staleCard).toHaveCount(1);
+      await expect(staleCard.getByText("더 새 사진이 이미 공개됨")).toBeVisible();
+      await expect(staleCard.getByRole("button", { name: "승인" })).toBeDisabled();
+      const image = staleCard.getByRole("img");
+      await expect(image).toBeVisible();
+      await expect.poll(() => image.evaluate(
+        (node) => (node as HTMLImageElement).naturalWidth,
+      )).toBeGreaterThan(0);
+      expect(await image.getAttribute("src")).toContain("/storage/v1/object/sign/");
+      await context.close();
+    } finally {
+      await admin.from("goal").update({ active_cover_asset_id: null }).eq("id", goal!.id);
+      await admin.from("goal_cover_asset").delete().in("id", [staleAssetId, activeAssetId]);
+      await admin.storage.from("goal-cover-quarantine").remove([stalePath]);
+      await admin.storage.from("goal-cover-public").remove([activePublicPath]);
+      await admin.from("goal").delete().eq("id", goal!.id);
+    }
   });
 
   test("QA-TC-AU-05 쿠키 없는 Server Action 직접 POST는 인증 실패하고 상태를 바꾸지 않는다", async ({ browser }) => {
@@ -5063,6 +5166,10 @@ test.describe("V2 web-first social slice", () => {
       connected_at: originalConnection!.connected_at,
       updated_at: originalConnection!.updated_at,
     });
+  });
+
+  test("QA-TC-FL-02~04·FD-04~08 친구 목표·메시지·아바타·커버 계약", async ({ browser }) => {
+    test.setTimeout(120_000); await runFriendGoalAlignmentScenario({ admin, authContext, browser, email: emails.owner, ids, ownerGoal, ownerGoalTitle: "토익 900 넘길게", friendPublicGoal, friendFriendsGoal, runId, isoDateFromNow });
   });
 
   test("ORDER-ATTR-01 replay는 최초 회원 응원 귀속을 다른 사용자로 바꾸지 않는다", async () => {

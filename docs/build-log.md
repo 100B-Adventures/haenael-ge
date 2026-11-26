@@ -19,6 +19,69 @@
 - 산출물 린트는 이 변경과 무관한 기존 승인 핀 4건의 대용량 요약 층 누락으로 차단됐다(PRD 1건, design prototype 3건). 본 build의 코드·릴리스 변경이 만든 결손은 아니며, 단계 승격 시 컨트롤러가 핀 재계산과 함께 별도 해소해야 한다. 근거 `.goal/runs/2.4.1-welcome-cheer/pipeline-artifact-lint.log`.
 
 > STAMP: 2026-11-26 16:4x KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=standard-dev, Supabase 공식 server auth 문서, 기존 notify·cashout·welcome trigger, 로컬 Vitest·pgTAP·build·headless smoke · 고민=클라이언트 입력을 slug 하나로 제한하고 권한·시간·멱등은 DB 원자 claim으로 구속했다.
+## 2026-11-26 2.4.x 목표 사진 사후 검토와 환영 응원 주인 화면 정합
+
+- 오래된 `REVIEW` 사진보다 새 활성 `APPROVED` 사진이 늦게 만들어졌으면 관리자 승인을 `asset_stale`로 거부한다. 관리자 목록은 120초 만료 격리 저장소 서명 URL 또는 공개 URL로 사진을 보여 주고, 오래된 사진에는 승인 불가 상태를 표시한다.
+- 목표 사진 Slack 알림에는 서명값 없이 `/admin` 링크만 포함한다. 자동 공개와 관리자 승인은 `review_source`로 구분하고, 관리자가 사진을 내리면 공개본과 격리 원본을 저장소 정리 대기열에 넣는다.
+- 주인 화면의 목표 응원 수, 응원자 아바타, 응원자 목록에 환영 응원을 한 사람으로 포함한다. 클로버 금액, 환전, 업적 집계와 보낸 응원 관계 판정은 바꾸지 않았다.
+- 증거: production build 종료코드 0, Vitest 106파일·643건, 변경 RPC pgTAP 3파일·84건, Playwright 소셜 2/2·분석 5/5, Deno 타입 검사 2개 함수. push·배포·운영 DB 쓰기는 실행하지 않았다.
+
+> STAMP: 2026-11-26 14:12 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=독립 리뷰 1771a5e, D-060·D-061, 로컬 Vitest·pgTAP·Chromium Playwright·build · 고민=사후 검토가 새 자동 공개 사진을 되돌리지 못하게 DB와 관리자 화면을 동시에 잠갔다.
+
+## 2026-11-26 2.4.x 마감된 친구 목표의 최근 응원 복원
+
+- 내가 응원한 친구 목표가 `CLOSED`로 바뀌어 활성 목표 배열에서 사라져도 최근 응원을 없다고 표시하지 않는다. 목록과 상세 모두 `내가 보냄 · ‘목표명’`과 메시지를 표시한다.
+- 상세의 `친구가 보냄 · 내 목표` 문구를 `PRODUCT_COPY`로 옮겼다. 기본 `npm run test:e2e`는 Chromium만 실행하고 WebKit은 CI의 명시적 프로젝트 실행으로 유지한다.
+- 증거: production build 종료코드 0, Vitest 105파일·642건, pgTAP 28파일·511건, Chromium Playwright 1/1. `QA-TC-FL-04` 수치는 pgTAP 1/1, Playwright 2/2이다. push·배포·운영 DB 쓰기는 실행하지 않았다.
+
+> STAMP: 2026-11-26 01:55 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=독립 리뷰 e75ac29, 로컬 Vitest·pgTAP·Chromium Playwright·build · 고민=활성 목표의 기존 표시는 유지하고 마감된 최근 응원일 때만 목표명 맥락을 복원했다.
+
+## 2026-11-26 2.4.x 친구가 보낸 최근 응원 맥락 복원
+
+- `my_friend_goals`가 최근 응원의 목표 제목을 반환한다. 방향이 `RECEIVED`면 응원 목표가 친구의 활성 목표 목록에 없어도 카드와 상세에 `친구가 보냄 · 내 목표 ‘목표명’`을 표시한다.
+- `SENT` 방향의 대표 목표 정렬은 유지한다. 친구에게 활성 목표가 없더라도 받은 최근 응원은 카드에서 사라지지 않는다.
+- pgTAP은 친구가 로그인 회원 목표에 보낸 응원의 방향·목표 ID·제목·메시지를 한 계약으로 고정했다. 환영 응원 제외 시험은 목표 생성 트리거의 환영 응원을 명시적 픽스처로 사용한다. 프로필 아바타 숫자 리터럴은 디자인 토큰으로 옮겼다.
+- 증거: production build 종료코드 0, Vitest 105파일·640건, pgTAP 28파일·510건, Chromium Playwright 1/1, 디자인 토큰 337파일·신규 위반 0. WebKit 전용 프로젝트는 등록했으나 이 호스트의 런타임 의존성 부재로 미검증이며 CI 대상이다. 운영 배포·운영 DB 쓰기·push는 실행하지 않았다.
+
+> STAMP: 2026-11-26 01:36 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=독립 리뷰 6b6b491·cc62374, D-050, 로컬 Vitest·pgTAP·Chromium Playwright·build · 고민=최근 응원 목표가 친구 목표 배열 밖이어도 방향과 내 목표명을 함께 보여 주어 사실을 숨기지 않되 친구 대표 목표 링크는 유지했다.
+
+## 2026-11-26 2.4.x 분석 동의 계정 격리와 결제 오류 보정
+
+- D-054에 따라 비회원 분석 동의 배너를 제거하고, 로그인 회원의 인증·동의 조회를 루트 Provider 한 곳으로 합쳤다. 브라우저 거부만 계정에 이전하며 허용은 복사하지 않는다. 로그아웃은 브라우저 동의와 분석 쿠키를 함께 지운다.
+- 배너 규칙을 전용 CSS 파일로 분리해 `globals.css`를 5,116줄로 제한했다. 정의된 글자 크기·그림자 토큰을 사용하고 Meta 픽셀 제거 결정 D-059를 유지했다.
+- 주문 생성 전 일반 오류는 출금 가능성 문구 없이 재시도를 안내한다. 회원 닉네임이 비어 있으면 익명 응원만 가능하고 익명 선택을 해제할 수 없다.
+- 증거: production build 종료코드 0, Vitest 105파일·638건, Deno 15파일·119건, pgTAP 28파일·509건, Playwright 분석 동의 5/5와 친구 정합 1/1, 디자인 토큰 337파일·신규 위반 0. 비회원 배너·Google·Microsoft·Facebook 요청은 모두 0, 공용 기기 B 계정 동의는 null이었다. 운영 배포·운영 DB 쓰기·push·실결제는 실행하지 않았다.
+
+> STAMP: 2026-11-26 01:17 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=독립 리뷰 51e462d·80ad061, D-054·D-059, 로컬 Vitest·Deno·pgTAP·Playwright·build · 고민=브라우저의 허용 선택을 다른 계정으로 복사하지 않으면서도 명시적 거부는 계정 전환 전까지 보수적으로 유지했다.
+
+## 2026-11-26 2.4.x 친구 목표·응원·프로필 이미지 정합
+
+- `my_friend_goals`가 `recent_message_goal_id`를 반환하고 해당 목표를 대표 카드 첫 항목으로 정렬한다. 최근 메시지가 없는 경우 최근 확정 응원 시각, 목표 생성 시각 순으로 대표 목표를 고른다. `my_friend_page`도 같은 계약을 상속한다.
+- 상세 최근 응원은 현재 목표와 같은 경우에만 표시하고, 양방향 응원 이력에 `goal_id`와 `goal_title`을 추가했다. 응원 수, 아바타, 워드맵은 모두 환영 응원을 제외한다.
+- 카카오 `http` 프로필 주소는 OAuth 저장, 웹 렌더, 기존 데이터 백필에서 `https`로 바꾼다. 이미지 로드 오류는 이니셜로 대체한다. 시안 이탈 사유: 실사용자 세로 사진. 상세 가로 띠를 88px 원형 아바타와 이름으로 교체했다.
+- PRD v0.5.1 E18은 Deno에서 목표 재조회 없이 승인 RPC 호출, pgTAP에서 주문 뒤 목표 `CLOSED` 전환 뒤 payment `DONE`, cheer `CONFIRMED`, 원장 `EARN` 1건으로 고정했다.
+- 증거: 로컬 production 모드 build 종료코드 0, Vitest 105파일 632건, Deno 15파일 119건, pgTAP 28파일 509건, Playwright 1/1과 아바타 `naturalWidth=480`, `currentSrc https=true`, 디자인 토큰 336파일·신규 위반 0. 운영 배포·운영 DB 쓰기·push·실결제는 실행하지 않았다.
+
+> STAMP: 2026-11-26 00:40 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=운영 DB 재현 독립 조사, 승인 시안 belong clean frame, PRD v0.5.1 E18, 로컬 pgTAP·Vitest·Deno·Playwright·build · 고민=친구 단위 최근 메시지를 목표 단위 카드에 섞지 않고, 실사용자 세로 사진을 잘라 보이는 시안 구조만 승인 사유를 남겨 교체했다.
+
+## 2026-11-25 2.4.x 간편결제·응원 신뢰 경계와 소셜 화면 보정
+
+- `TossClient`가 결제수단 원문과 `easyPay`를 보존하고, `toss-confirm`·webhook이 카드와 provider가 확인된 간편결제를 같은 응원 확정 경로로 처리한다. 미지원 수단의 자동 취소·감사 기록은 유지하고, 취소 또는 감사 기록 실패는 `SLACK_FEEDBACK_WEBHOOK_URL` 우선 운영 알림에 주문번호·금액·사유를 보낸다.
+- `cheer-order`는 요청 본문의 표시 이름을 폐기하고 인증 회원의 `member.nickname`만 RPC에 전달한다. 화면은 이름 입력 대신 고정 이름과 익명 체크박스를 렌더링한다.
+- 결제 오류 문구는 승인 전 취소·거절, 승인 상태 불명·네트워크, 자동 취소 완료, 수동 대사가 필요한 상태를 구분한다. 결제 성공 주소가 이미 목표 URL로 정리된 뒤 Next.js 내부 링크가 같은 URL 이동을 생략하던 원인을 확인해 목표 복귀를 문서 이동 링크로 바꿨다.
+- 친구 목록은 최근 응원 메시지까지 단일 상세 링크다. 초대 공유 안내의 `margin-top:-2.5625rem`을 제거했다. social E2E의 시각 검증 도우미를 `e2e/support/visual-assertions.ts`로 분리해 5천 줄 파일은 19줄 줄였다.
+- 증거: `npm test` 101파일·613건, Deno 15/15, `npm run build` 종료코드 0, design-token 검사 파일 327개·신규 위반 0, 로컬 Playwright 1/1, 360·390·430px 캡처 3장, fixture DB·Auth·Storage 잔존 0. 운영 결제·운영 DB·배포·push는 실행하지 않았다.
+
+> STAMP: 2026-11-25 20:47 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=운영 주문 29 관찰, 토스페이먼츠 결제 승인·간편결제 공식 문서, 로컬 단위·Deno·build·헤드리스 Chromium · 고민=승인 완료와 응원 확정을 분리해 보상 실패를 숨기지 않고, 표시 이름 신뢰 경계를 서버 회원 데이터로 닫았다.
+
+## 2026-11-25 2.4.x 카카오톡 인앱 로그인 복귀
+
+- 카카오 로그인 진입을 `KakaoLoginLink`·`startKakaoLogin`으로 통합했다. `KAKAOTALK` UA는 외부 브라우저 안내 뒤 `openExternal` 스킴을 시도하며, 실패 시 `external_browser=1` 기존 OAuth로 진행한다. `/auth/kakao/start`도 직접 접근을 외부 안내 화면으로 보낸다.
+- `claim_kakao_oauth_callback` service-role RPC와 SHA-256 claim 테이블을 추가했다. 동일 code의 두 번째 callback은 EF·`verifyOtp`를 호출하지 않고 원래 화면으로 복귀한다.
+- 온보딩은 Auth 초기·갱신 이벤트와 focus·visibility 복귀에 세션을 재조회하고, 기존 save intent 자동 저장을 정확히 한 번 실행한다.
+- 증거: TypeScript·전체 Vitest 101파일 609건, pgTAP 8건, DB 동시 claim 8건 중 true 1·false 7, Playwright 2건, design-token 신규 위반 0, lint exit 0, Next production build exit 0. 운영 배포·main push는 하지 않았다.
+
+> STAMP: 2026-11-25 17:57 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=운영 edge_logs 원인 증거, Supabase Auth 공식 문서, Kakao UA 공식 문서, 로컬 pgTAP·동시성·헤드리스 E2E · 고민=공식 문서에 없는 스킴을 단독 성공 경로로 두지 않고 기존 OAuth fallback을 보존했다.
 
 ## 2026-11-21 2.3.2 카카오톡 초대 수정
 

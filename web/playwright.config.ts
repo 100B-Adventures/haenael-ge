@@ -20,6 +20,11 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "webkit-friend-avatar",
+      grep: /QA-TC-FL-02~04·FD-04~08/,
+      use: { ...devices["Desktop Safari"] },
+    },
   ],
   // dev 서버 자동 시작 옵션 (로컬 E2E 시 수동 시작도 가능)
   // webServer: {

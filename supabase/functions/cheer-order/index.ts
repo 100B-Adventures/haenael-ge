@@ -146,8 +146,6 @@ export async function handleCheerOrder(
   const goalId = Number(body.goalId);
   const amountKrw = Number(body.amountKrw);
   const message = typeof body.message === "string" ? body.message.trim() : "";
-  const displayName =
-    typeof body.displayName === "string" ? body.displayName.trim() : "";
   const isAnonymous = body.isAnonymous === true;
   const customerKey = normalizeCustomerKey(body.customerKey);
 
@@ -167,11 +165,6 @@ export async function handleCheerOrder(
   // 신뢰하지 않고 amountKrw로 재계산한다. ★검증(화이트리스트) 통과 뒤에만 나눗셈 —
   // 미검증 입력을 먼저 연산하지 않는 신뢰경계 준수(Codex 리뷰 2026-07-20).
   const cloverAmount = amountKrw / 1000;
-  if (displayName.length > 30) {
-    return json(400, {
-      error: { code: "invalid_name" },
-    });
-  }
   if (message.length > 140) {
     return json(400, {
       error: { code: "invalid_message" },
@@ -189,6 +182,21 @@ export async function handleCheerOrder(
     });
   }
   const requestKey = requestKeyResult.value;
+
+  const { data: supporterMember, error: supporterMemberError } = await supabase
+    .from("member")
+    .select("nickname")
+    .eq("id", supporter.id)
+    .maybeSingle();
+  const supporterName = typeof supporterMember?.nickname === "string"
+    ? supporterMember.nickname.trim()
+    : "";
+  if (supporterMemberError || (!isAnonymous && !supporterName)) {
+    return json(409, {
+      error: { code: "profile_name_required" },
+    });
+  }
+  const displayName = isAnonymous ? "" : supporterName.slice(0, 30);
 
   const orderId = makeOrderId();
   const { data, error } = await supabase.rpc("create_member_cheer_order", {

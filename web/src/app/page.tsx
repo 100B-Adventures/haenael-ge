@@ -14,6 +14,8 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
 import { WordmapCloudLayout } from "@/components/goal/WordmapCloudLayout";
+import { KakaoLoginLink } from "@/components/auth";
+import { isSafeRedirectPath } from "@/lib/auth/redirect-path";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-page";
 
 export const metadata: Metadata = {
@@ -53,7 +55,16 @@ function WordmapPreview() {
   );
 }
 
-export default async function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ auth_error?: string; redirect?: string }>;
+} = {}) {
+  const params = searchParams ? await searchParams : {};
+  const hasAuthError = typeof params.auth_error === "string";
+  const authRetryPath = isSafeRedirectPath(params.redirect)
+    ? params.redirect
+    : "/me";
   // user-flow.md §1.3 (a) 세션 라우팅: 세션 有 + 본인 goal 有 → /me 리다이렉트(재방문 편의).
   // 비로그인은 SSR·OG 무변경 — 아래에서 return하지 않고 그대로 통과.
   const supabase = await createServerSupabaseClient();
@@ -79,6 +90,23 @@ export default async function LandingPage() {
   return (
     <ReceiverAppShell locked currentPath="/">
     <main className="landing-approved">
+      {hasAuthError && (
+        <section
+          className="mx-auto mb-4 flex w-full max-w-sm flex-col gap-2 rounded-md border border-destructive/30 bg-danger-soft p-4 text-left"
+          role="alert"
+          data-testid="auth-error-notice"
+        >
+          <p className="font-bold text-danger-ink">{PRODUCT_COPY.TEXT_016}</p>
+          <p className="text-sm leading-relaxed text-danger-ink">{PRODUCT_COPY.TEXT_017}</p>
+          <KakaoLoginLink
+            redirectPath={authRetryPath}
+            className="flex min-h-11 items-center justify-center rounded-md bg-primary px-4 font-bold text-primary-foreground"
+            data-testid="auth-error-retry"
+          >
+            {PRODUCT_COPY.TEXT_018}
+          </KakaoLoginLink>
+        </section>
+      )}
       {/* BrandMark — 클릭 시 홈(로그인 상태면 /me, 비로그인이면 랜딩 자기 자신) */}
       <div className="landing-approved-wordmark">
         <Link
@@ -130,19 +158,20 @@ export default async function LandingPage() {
 
         {/* 재로그인 진입 (user-flow.md §1.3 갭2) — 주 CTA와 시각적으로 구분되되
             "로그인"임을 명확히 읽히게: 라벨(muted)+동사(강조 underline)로 분리 */}
-        <p className="landing-approved-relogin">
-          <span>{PRODUCT_COPY.TEXT_013}</span>
-          {/* prefetch 를 끈다. Next 가 이 경로를 미리 가져가면 서버가 302 로
-              kauth.kakao.com 을 가리키고, 그 크로스 오리진 요청이 우리 CSP
-              connect-src 에 막혀 모든 방문자 콘솔에 에러가 찍힌다. 카카오는
-              최상위 리다이렉트로만 쓰므로 CSP 를 여는 대신 prefetch 를 끈다. */}
-          <Link
-            href="/auth/kakao/start?redirect=/me"
-            prefetch={false}
-            className="landing-approved-relogin-link"
-            data-testid="landing-relogin-link"
-          >{PRODUCT_COPY.TEXT_014}</Link>
-        </p>
+        {!hasAuthError && (
+          <p className="landing-approved-relogin">
+            <span>{PRODUCT_COPY.TEXT_013}</span>
+            {/* prefetch 를 끈다. Next 가 이 경로를 미리 가져가면 서버가 302 로
+                kauth.kakao.com 을 가리키고, 그 크로스 오리진 요청이 우리 CSP
+                connect-src 에 막혀 모든 방문자 콘솔에 에러가 찍힌다. 카카오는
+                최상위 리다이렉트로만 쓰므로 CSP 를 여는 대신 prefetch 를 끈다. */}
+            <KakaoLoginLink
+              redirectPath="/me"
+              className="landing-approved-relogin-link"
+              data-testid="landing-relogin-link"
+            >{PRODUCT_COPY.TEXT_014}</KakaoLoginLink>
+          </p>
+        )}
       </div>
     </main>
     </ReceiverAppShell>

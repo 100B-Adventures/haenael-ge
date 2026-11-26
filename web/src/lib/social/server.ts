@@ -188,14 +188,14 @@ export async function resolveFriendCheerHistory(
 
   const { data: goals, error: goalError } = await service
     .from("goal")
-    .select("id,member_id")
+    .select("id,member_id,title")
     .in("member_id", [viewerMemberId, friendMemberId])
     .in("visibility", ["PUBLIC", "FRIENDS"])
     .is("deleted_at", null)
     .neq("status", "DELETED");
   if (goalError) throw new Error("friend_history_lookup_failed");
-  const goalOwnerById = new Map((goals ?? []).map((goal) => [goal.id, goal.member_id]));
-  if (goalOwnerById.size === 0) return [];
+  const goalById = new Map((goals ?? []).map((goal) => [goal.id, goal]));
+  if (goalById.size === 0) return [];
 
   const { data: attributions, error: attributionError } = await service
     .from("social_cheer_member_attribution")
@@ -211,7 +211,7 @@ export async function resolveFriendCheerHistory(
     .from("cheer")
     .select("id,goal_id,message,created_at,is_anonymous")
     .in("id", [...supporterByCheerId.keys()])
-    .in("goal_id", [...goalOwnerById.keys()])
+    .in("goal_id", [...goalById.keys()])
     .eq("status", "CONFIRMED")
     .is("deleted_at", null)
     .eq("is_welcome", false)
@@ -222,10 +222,13 @@ export async function resolveFriendCheerHistory(
 
   return (cheers ?? []).flatMap((cheer): FriendCheerHistoryItem[] => {
     const supporterId = supporterByCheerId.get(cheer.id);
-    const ownerId = goalOwnerById.get(cheer.goal_id);
+    const goal = goalById.get(cheer.goal_id);
+    const ownerId = goal?.member_id;
     if (supporterId === viewerMemberId && ownerId === friendMemberId) {
       return [{
         cheer_id: cheer.id,
+        goal_id: cheer.goal_id,
+        goal_title: goal?.title ?? "목표",
         message: cheer.message,
         created_at: cheer.created_at,
         direction: "SENT",
@@ -238,6 +241,8 @@ export async function resolveFriendCheerHistory(
     ) {
       return [{
         cheer_id: cheer.id,
+        goal_id: cheer.goal_id,
+        goal_title: goal?.title ?? "목표",
         message: cheer.message,
         created_at: cheer.created_at,
         direction: "RECEIVED",

@@ -26,6 +26,8 @@ const TOSS_CONFIRM_ERROR_COPY: Record<string, string> = {
   missing_supabase_env: PRODUCT_COPY.ERROR_GENERIC,
   missing_toss_secret: PRODUCT_COPY.ERROR_GENERIC,
   payment_not_found: PRODUCT_COPY.ERROR_PAYMENT_NOT_FOUND,
+  payment_failed: PRODUCT_COPY.ERROR_PAYMENT_FAILED,
+  payment_canceled: PRODUCT_COPY.ERROR_PAYMENT_CANCELED,
   amount_mismatch: PRODUCT_COPY.ERROR_AMOUNT_MISMATCH,
   invalid_payment_status: PRODUCT_COPY.ERROR_GENERIC,
   invalid_payment_key: PRODUCT_COPY.ERROR_GENERIC,
@@ -36,7 +38,9 @@ const TOSS_CONFIRM_ERROR_COPY: Record<string, string> = {
   toss_confirm_failed: PRODUCT_COPY.ERROR_TOSS_CONFIRM_FAILED,
   invalid_toss_status: PRODUCT_COPY.ERROR_INVALID_TOSS_STATUS,
   unsupported_payment_method: PRODUCT_COPY.ERROR_UNSUPPORTED_PAYMENT_METHOD,
-  non_card_compensation_failed: PRODUCT_COPY.ERROR_NON_CARD_COMPENSATION_FAILED,
+  manual_reconcile_required: PRODUCT_COPY.ERROR_MANUAL_RECONCILE_REQUIRED,
+  payment_cancelled_after_confirmation_error:
+    PRODUCT_COPY.ERROR_PAYMENT_CANCELLED_AFTER_CONFIRMATION,
 };
 
 async function confirmPayment(params: {
@@ -173,6 +177,9 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
         ? error.message.slice("toss_confirm:".length)
         : "";
       message = TOSS_CONFIRM_ERROR_COPY[code] ?? PRODUCT_COPY.ERROR_GENERIC;
+      if (code === "manual_reconcile_required" && orderId) {
+        message = `${message} 주문번호 ${orderId}`;
+      }
     }
   }
 

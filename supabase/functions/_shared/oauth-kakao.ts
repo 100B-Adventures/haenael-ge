@@ -215,6 +215,27 @@ export function normalizeKoreanMobilePhone(phone: unknown): string | null {
 
   return /^01[016789]\d{7,8}$/.test(digits) ? digits : null;
 }
+
+export function normalizeKakaoProfileImageUrl(
+  value: string | null | undefined,
+): string | null {
+  const candidate = value?.trim();
+  if (!candidate) return null;
+  try {
+    const url = new URL(candidate);
+    if (
+      url.protocol === "http:" &&
+      (url.hostname === "kakaocdn.net" || url.hostname.endsWith(".kakaocdn.net"))
+    ) {
+      url.protocol = "https:";
+      return url.toString();
+    }
+  } catch {
+    return candidate;
+  }
+  return candidate;
+}
+
 export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
   const hasVerifiedEmail = user.kakao_account?.email &&
     user.kakao_account.is_email_verified &&
@@ -231,9 +252,10 @@ export function normalizeKakaoUser(user: KakaoUserInfo): KakaoUserNormalized {
     nickname: user.kakao_account?.profile?.nickname ??
       user.properties?.nickname ??
       "해낼게 유저",
-    profileImage: user.kakao_account?.profile?.profile_image_url ??
-      user.properties?.profile_image ??
-      null,
+    profileImage: normalizeKakaoProfileImageUrl(
+      user.kakao_account?.profile?.profile_image_url ??
+        user.properties?.profile_image,
+    ),
     phone: normalizeKoreanMobilePhone(user.kakao_account?.phone_number),
     // 최신 번호가 왔으면 교체하고, 명시적 미동의/동의철회 상태면 NULL로 지운다.
     // 두 필드가 모두 없으면 비즈앱 미승인/구형 응답일 수 있어 기존 값을 보존한다.

@@ -16,6 +16,9 @@ export const PRODUCT_COPY = {
   TEXT_013: "이미 계정이 있으신가요?", // source line 152
   TEXT_014: "카카오로 로그인", // source line 162
   TEXT_015: "응원 메시지 예시", // component label
+  TEXT_016: "로그인을 마치지 못했어요.",
+  TEXT_017: "결제나 목표 저장은 진행되지 않았어요. 카카오 로그인을 다시 시도해 주세요.",
+  TEXT_018: "카카오 로그인 다시 시도",
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/app/page.tsx";

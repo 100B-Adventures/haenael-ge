@@ -39,6 +39,16 @@
 | `PRIVACY-TAP-01` | 모바일·접근성 | Given `/privacy`, When 360·390·412·600·700·780·820·900·1000px에서 목차·본문 링크를 측정, Then 44px 미만 누름·13px 미만 글자·가로 넘침·콘솔 오류가 모두 0 | PASS | `.goal/runs/v2-f3-f4-privacy-a74f33b/{observations.json,measure.log,privacy-*.png}` |
 | `DESIGN-DOPAMINE-ALIGN-01` | 디자인·회귀 | Given 승인 시안 `.dopa-top{text-align:center}`, When 성장 화면을 열고 소제목 computed style을 측정, Then `text-align:center`, 워드맵 236px, overflow·console error 0 | PASS | `.goal/runs/v2-f3-f4-regression-a74f33b/{summary.json,execution.log,captures/f1-dopamine-*.png}`, `SMOKE-01` |
 
+## 분석 정보 국외 이전 동의 추가 시험
+
+| TC-ID | 종류 | Given / When / Then | 판정 | 증거 |
+|---|---|---|---|---|
+| `AN-CONSENT-DB-01~09` | 데이터베이스·보안 | Given 로그인 회원 둘, When 동의 선택·시각 위조·타인 행 접근·허용 밖 값을 시도, Then 본인 선택과 DB 시각만 저장되고 나머지는 거절 | PASS | `supabase/tests/analytics_consent_account.test.sql`, `/tmp/haenael-d057-pgtap.log` |
+| `AN-CONSENT-01` | 브라우저·개인정보 | Given 미선택 브라우저, When 동의 전·허용·철회 순서로 조작, Then 동의 전 Google·Microsoft·Facebook 요청이 각각 0이고 허용 뒤 GA4·Clarity만 로드되며 철회 뒤 다시 0 | PASS | `web/e2e/analytics-consent.spec.ts`, `/tmp/haenael-d057-consent-playwright.log` |
+| `AN-CONSENT-03` | 모바일·접근성 | Given 360px 랜딩과 하단 탭, When 동의 띠가 함께 렌더, Then 높이 60px 이하, 상세 링크 44px 이상, 하단 탭 비중첩 | PASS | `/tmp/haenael-d057-consent-captures/analytics-consent-360.png`, `/tmp/haenael-d057-consent-playwright.log` |
+| `AN-CONSENT-04` | 브라우저·계정 | Given 로그인 회원의 빈 계정 선택, When 거부 뒤 새로고침하고 저장소가 빈 새 브라우저로 재로그인, Then 배너가 다시 뜨지 않고 계정 선택이 브라우저에 복원 | PASS | `web/e2e/analytics-consent.spec.ts`, `/tmp/haenael-d057-consent-playwright.log` |
+| `AN-CONSENT-META-01` | 회귀·개인정보 | Given 허용 상태, When 결제 전환과 루트 레이아웃을 실행, Then Meta 스크립트·`fbq`·Facebook 요청이 0 | PASS | `web/src/lib/__tests__/conversions.test.ts`, `web/e2e/analytics-consent.spec.ts` |
+
 ## 시험 목록
 
 | # | 시험 ID | 제목 | 목적 |

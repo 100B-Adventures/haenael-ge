@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { Clover, X } from "lucide-react";
 import { loadTossPayments } from "@/lib/toss";
 import { trackEvent } from "@/lib/analytics";
 import { KRW_PER_CLOVER, krwFromClover } from "@/lib/clover";
 import { createClient } from "@/lib/supabase/client";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-cheerpaymentbutton";
+import { KakaoLoginLink } from "@/components/auth/KakaoLoginLink";
+import { buildKakaoStartUrl, startKakaoLogin } from "@/lib/auth/kakao-navigation";
 
 // 클로버 개수 프리셋(2026-07-21, 회장 지시: "1000개가 아니고 1개, 더 큰 금액 예
 // 1만개도 보낼수있게") — 프리셋은 1/3/5/10클로버(=1천~1만원), 그 외엔 직접입력으로
@@ -20,6 +21,7 @@ interface CheerPaymentButtonProps {
   goalTitle: string;
   goalSlug: string;
   isAuthenticated?: boolean;
+  supporterName?: string | null;
 }
 
 interface CheerOrderResponse {
@@ -51,27 +53,37 @@ function paymentErrorMessage(error: unknown) {
     const code = error.message.slice("cheer_order:".length);
     return CHEER_ORDER_ERROR_COPY[code] ?? PRODUCT_COPY.ERROR_GENERIC;
   }
-  if (typeof error === "string") return error;
   if (typeof error === "object" && error !== null) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "message" in error && typeof error.message === "string"
-          ? error.message
-          : null;
     const code =
       "code" in error && typeof error.code === "string" ? error.code : null;
-    if (code && message) return `${message} (${code})`;
-    if (message) return message;
-    if (code) return code;
+    if (code) return TOSS_ERROR_COPY[code] ?? PRODUCT_COPY.ERROR_PAYMENT_UNKNOWN;
   }
-  return PRODUCT_COPY.ERROR_GENERIC;
+  if (error instanceof TypeError) return PRODUCT_COPY.ERROR_NETWORK_UNKNOWN;
+  return PRODUCT_COPY.ERROR_PAYMENT_UNKNOWN;
 }
 
 const CHEER_ORDER_ERROR_COPY: Record<string, string> = {
   payments_disabled: PRODUCT_COPY.ERROR_PAYMENTS_DISABLED,
   invalid_amount: PRODUCT_COPY.ERROR_INVALID_AMOUNT,
+  profile_name_required: PRODUCT_COPY.ERROR_PROFILE_NAME_REQUIRED,
 };
+
+const TOSS_ERROR_COPY: Record<string, string> = {
+  USER_CANCEL: PRODUCT_COPY.ERROR_CANCELED,
+  PAY_PROCESS_CANCELED: PRODUCT_COPY.ERROR_CANCELED,
+  PAY_PROCESS_ABORTED: PRODUCT_COPY.ERROR_ABORTED,
+  REJECT_CARD_COMPANY: PRODUCT_COPY.ERROR_REJECTED,
+};
+
+function isSupportedWidgetPaymentMethod(paymentMethod: {
+  method: string;
+  easyPay?: { provider?: string | null } | null;
+}) {
+  if (paymentMethod.method === "CARD") return true;
+  // 위젯 이벤트는 간편결제 provider를 생략할 수 있다. 화면은 EASY_PAY 선택을
+  // 허용하고 최종 업체 화이트리스트는 Toss 승인 응답을 받은 서버에서 강제한다.
+  return paymentMethod.method === "EASY_PAY";
+}
 
 type DestroyablePaymentSurface = {
   destroy: () => void | Promise<unknown>;
@@ -93,16 +105,18 @@ export function CheerPaymentButton({
   goalTitle,
   goalSlug,
   isAuthenticated = true,
+  supporterName = null,
 }: CheerPaymentButtonProps) {
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
+  const normalizedSupporterName = supporterName?.trim() || null;
+  const hasSupporterName = normalizedSupporterName !== null;
   const [open, setOpen] = useState(false);
   // 클로버 개수(개)가 진실원 — 결제 금액(원)은 항상 cloverAmount * KRW_PER_CLOVER로 파생.
   const [cloverAmount, setCloverAmount] = useState<number>(3);
   // 프리셋 밖 값을 직접 입력 중인지(프리셋 버튼 활성 표시와 분리하기 위함).
   const [customInput, setCustomInput] = useState<string>("");
-  const [displayName, setDisplayName] = useState("");
   const [message, setMessage] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(!hasSupporterName);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   // 결제 시트가 열려 있는 동안(같은 결제 의도) 재시도가 같은 requestKey를 재사용하게
@@ -113,7 +127,9 @@ export function CheerPaymentButton({
   const sheetOpenRef = useRef(false);
   const paymentAttemptRef = useRef(0);
   const paymentWindowRef = useRef<DestroyablePaymentSurface | null>(null);
-  const loginHref = `/auth/kakao/start?redirect=${encodeURIComponent(`/g/${goalSlug}#cheer`)}`;
+  const loginRedirectPath = `/g/${goalSlug}#cheer`;
+  const loginHref = buildKakaoStartUrl(loginRedirectPath);
+  const fixedSupporterName = normalizedSupporterName ?? PRODUCT_COPY.TEXT_016;
 
   useEffect(
     () => () => {
@@ -130,8 +146,9 @@ export function CheerPaymentButton({
       !loading &&
       Number.isInteger(cloverAmount) &&
       cloverAmount >= 1 &&
-      cloverAmount <= MAX_CLOVER,
-    [cloverAmount, loading],
+      cloverAmount <= MAX_CLOVER &&
+      (hasSupporterName || isAnonymous),
+    [cloverAmount, hasSupporterName, isAnonymous, loading],
   );
 
   const amountKrw = krwFromClover(cloverAmount);
@@ -161,6 +178,8 @@ export function CheerPaymentButton({
     sheetOpenRef.current = true;
     setCloverAmount(3);
     setCustomInput("");
+    setIsAnonymous(!hasSupporterName);
+    setError(null);
     setOpen(true);
   }
 
@@ -202,7 +221,6 @@ export function CheerPaymentButton({
         // cloverAmount는 참고용 전송치일 뿐 서버(EF/RPC)가 amountKrw/1000으로 재계산해
         // 검증한다 — 클라이언트 입력은 신뢰하지 않는다(cheer-order EF 주석 참조).
         cloverAmount,
-        displayName,
         isAnonymous,
         message,
         customerKey: getCustomerKey(),
@@ -220,6 +238,7 @@ export function CheerPaymentButton({
 
   async function handlePayment() {
     const paymentAttempt = ++paymentAttemptRef.current;
+    let orderCreated = false;
     setError(null);
     setLoading(true);
     try {
@@ -231,6 +250,7 @@ export function CheerPaymentButton({
         throw new Error("카드 결제용 Toss Payments API 키가 필요합니다.");
       }
       const order = await createOrder();
+      orderCreated = true;
       trackEvent("cheer_started", {
         goal_id: String(goalId),
         amount: order.amountKrw,
@@ -242,7 +262,7 @@ export function CheerPaymentButton({
         amount: { value: order.amountKrw, currency: "KRW" },
         orderId: order.orderId,
         orderName: order.orderName,
-        customerName: isAnonymous ? "익명 응원자" : displayName || "응원자",
+        customerName: isAnonymous ? "익명 응원자" : fixedSupporterName,
         successUrl: `${appUrl}/payment/success?goalSlug=${encodeURIComponent(goalSlug)}`,
         failUrl: `${appUrl}/payment/fail?goalSlug=${encodeURIComponent(goalSlug)}`,
         metadata: {
@@ -275,13 +295,13 @@ export function CheerPaymentButton({
           }
           if (paymentRequestStarted) return;
           paymentRequestStarted = true;
-          if (paymentMethod.method !== "CARD") {
+          if (!isSupportedWidgetPaymentMethod(paymentMethod)) {
             if (paymentWindowRef.current === paymentWindow) {
               paymentWindowRef.current = null;
             }
             await destroyPaymentSurface(paymentWindow);
             if (paymentAttemptRef.current !== paymentAttempt) return;
-            setError("카드를 선택해야 응원 결제를 계속할 수 있어요.");
+            setError(PRODUCT_COPY.ERROR_UNSUPPORTED_METHOD);
             setLoading(false);
             return;
           }
@@ -316,7 +336,7 @@ export function CheerPaymentButton({
           }
           void destroyPaymentSurface(paymentWindow);
           if (paymentAttemptRef.current === paymentAttempt) {
-            setError("결제를 취소했어요. 다시 시도할 수 있어요.");
+            setError(PRODUCT_COPY.ERROR_CANCELED);
             setLoading(false);
           }
         });
@@ -344,10 +364,16 @@ export function CheerPaymentButton({
     } catch (e) {
       if (paymentAttemptRef.current === paymentAttempt) {
         if (e instanceof Error && e.message === "cheer_order:login_required") {
-          window.location.assign(loginHref);
+          startKakaoLogin(loginHref);
           return;
         }
-        setError(paymentErrorMessage(e));
+        setError(
+          e instanceof Error && e.message.startsWith("cheer_order:")
+            ? paymentErrorMessage(e)
+            : !orderCreated
+            ? PRODUCT_COPY.ERROR_GENERIC
+            : paymentErrorMessage(e),
+        );
         setLoading(false);
       }
     }
@@ -370,16 +396,15 @@ export function CheerPaymentButton({
           </button>
         )
         : (
-          <Link
-            href={loginHref}
-            prefetch={false}
+          <KakaoLoginLink
+            redirectPath={loginRedirectPath}
             className="w-full flex min-h-[var(--tap-min-size)] items-center justify-center gap-2 rounded-[16px] font-extrabold p-[17px]! [font-size:16px]! [background-color:var(--primary)]! [color:var(--card)]! [letter-spacing:0]! transition-transform active:translate-y-px"
             data-testid="cheer-cta"
             aria-label="카카오 로그인 후 응원하기"
           >
             <span aria-hidden="true">🍀</span>
             카카오 로그인 후 응원하기
-          </Link>
+          </KakaoLoginLink>
         )}
 
       {open && (
@@ -483,22 +508,29 @@ export function CheerPaymentButton({
               🍀 {cloverAmount.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_012}{" "}
               {amountKrw.toLocaleString("ko-KR")}{PRODUCT_COPY.TEXT_013}</p>
 
-            <label className="mt-4 block text-[13px] font-bold [color:var(--foreground)]!">{PRODUCT_COPY.TEXT_014}<input
-                className="mt-1 w-full rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]!"
-                maxLength={30}
-                value={displayName}
-                disabled={isAnonymous}
-                placeholder={
-                  isAnonymous ? PRODUCT_COPY.TEXT_015 : PRODUCT_COPY.TEXT_016
-                }
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
-            </label>
+            <div className="mt-4 text-[13px] font-bold [color:var(--foreground)]!">
+              <span>{PRODUCT_COPY.TEXT_014}</span>
+              <div
+                className="mt-1 rounded-[13px] border px-3 py-3 text-[15px] [border-color:var(--border)]! [background-color:var(--background)]!"
+                data-testid="cheer-supporter-name"
+              >
+                {!hasSupporterName
+                  ? PRODUCT_COPY.TEXT_023
+                  : isAnonymous
+                    ? PRODUCT_COPY.TEXT_015
+                    : fixedSupporterName}
+              </div>
+              <p className="mt-1 text-[13px] font-medium [color:var(--muted-foreground)]!">
+                {hasSupporterName ? PRODUCT_COPY.TEXT_022 : PRODUCT_COPY.TEXT_024}
+              </p>
+            </div>
 
             <label className="mt-3 flex items-center gap-2 text-[13px] [color:var(--muted-foreground)]!">
               <input
                 type="checkbox"
+                data-testid="cheer-anonymous-toggle"
                 checked={isAnonymous}
+                disabled={!hasSupporterName}
                 onChange={(e) => setIsAnonymous(e.target.checked)}
               />{PRODUCT_COPY.TEXT_017}</label>
 

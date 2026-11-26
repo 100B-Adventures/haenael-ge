@@ -61,6 +61,9 @@ function buildSupabase({
       if (table === "cheer") {
         return chainable({ data: cheers, error: null });
       }
+      if (table === "member") {
+        return chainable({ data: { nickname: "이다솔" }, error: null });
+      }
       throw new Error(`unexpected table: ${table}`);
     }),
   };

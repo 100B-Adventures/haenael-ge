@@ -7,7 +7,7 @@
 
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { withRegionHeader } from "../_shared/region.ts";
-import { isCardPaymentMethod, TossClient } from "../_shared/toss.ts";
+import { isSupportedCheerPaymentMethod, TossClient } from "../_shared/toss.ts";
 import { toPublicError } from "../_shared/errors.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
 import { dispatchCheerReceivedNotification } from "../_shared/cheer-notification.ts";
@@ -36,6 +36,7 @@ function sanitizedConfirmResponse(confirm: {
   status: string;
   totalAmount: number;
   method: string;
+  easyPay?: { provider: string; amount: number; discountAmount: number };
   approvedAt: string;
   receiptUrl?: string;
 }) {
@@ -46,6 +47,7 @@ function sanitizedConfirmResponse(confirm: {
     status: confirm.status,
     totalAmount: confirm.totalAmount,
     method: confirm.method,
+    easyPay: confirm.easyPay ?? null,
     approvedAt: confirm.approvedAt,
     receiptUrl: confirm.receiptUrl ?? null,
   };
@@ -198,7 +200,7 @@ export async function handleTossConfirm(req: Request) {
   if (
     !paymentsEnabled && (
       paymentLookupErr || !existingPayment ||
-      existingPayment.status !== "DONE" ||
+      !["DONE", "FAILED", "CANCELED"].includes(existingPayment.status) ||
       existingPayment.amount_krw !== amount ||
       typeof existingPayment.payment_key !== "string" ||
       existingPayment.payment_key !== paymentKey
@@ -216,6 +218,15 @@ export async function handleTossConfirm(req: Request) {
     return json(400, {
       error: { code: "amount_mismatch" },
     });
+  }
+
+  // 이미 보상 처리된 결제를 성공 URL 새로고침이 다시 Toss 승인 API로 보내지 않는다.
+  // 브라우저에는 저장된 최종 상태만 코드로 돌려주고, 화면이 고정 문구로 안내한다.
+  if (existingPayment.status === "FAILED") {
+    return json(409, { error: { code: "payment_failed" } });
+  }
+  if (existingPayment.status === "CANCELED") {
+    return json(409, { error: { code: "payment_canceled" } });
   }
 
   if (existingPayment.status === "DONE") {
@@ -304,15 +315,15 @@ export async function handleTossConfirm(req: Request) {
     });
   }
 
-  // 클라이언트의 CARD 선택 검사는 UX 경계일 뿐 보안 경계가 아니다. 승인 응답이
-  // 카드가 아니면 DB·원장에 반영하기 전에 즉시 전액취소해 비카드 결제를 격리한다.
-  if (!isCardPaymentMethod(confirm.method)) {
+  // 클라이언트 검사는 UX 경계일 뿐 보안 경계가 아니다. 토스 승인 응답이 카드나
+  // provider가 확인된 간편결제가 아니면 DB·원장 반영 전에 전액취소한다.
+  if (!isSupportedCheerPaymentMethod(confirm)) {
     let canceled = false;
     let cancelError: string | null = null;
     try {
       await toss.cancelPayment(
         confirm.paymentKey,
-        "해낼게 카드 전용 주문에 허용되지 않은 결제수단",
+        "해낼게 응원 주문에 허용되지 않은 결제수단",
       );
       canceled = true;
     } catch (error) {
@@ -320,7 +331,7 @@ export async function handleTossConfirm(req: Request) {
         ? error.message
         : "cancel_failed";
       cancelError = cancelErrorMessage;
-      console.error("[toss-confirm] non-card compensation failed:", error);
+      console.error("[toss-confirm] unsupported-method compensation failed:", error);
     }
 
     const { error: compensationRecordError } = await supabase.rpc(
@@ -347,9 +358,11 @@ export async function handleTossConfirm(req: Request) {
       await sendSlackAlert({
         event: "payment_reconcile_failed",
         severity: "critical",
-        summary: "Non-card payment could not be safely compensated",
+        summary: "Unsupported payment method could not be safely compensated",
         fields: {
           orderId,
+          amount,
+          reason: "unsupported_payment_method",
           method: confirm.method,
           canceled,
           compensationRecorded,
@@ -357,7 +370,7 @@ export async function handleTossConfirm(req: Request) {
       });
       return json(502, {
         error: {
-          code: "non_card_compensation_failed",
+          code: "manual_reconcile_required",
         },
       });
     }
@@ -432,12 +445,26 @@ export async function handleTossConfirm(req: Request) {
       console.error("[toss-confirm] compensation audit failed:", recordErr);
     }
 
-    // 클라이언트 응답은 화이트리스트 code 하나뿐이다. compensation 관련 세부와
-    // Toss 벤더 원문은 응답 바디에 싣지 않고 서버 로그와 보상 감사 기록에만 남긴다.
-    return json(500, {
-      error: {
-        code: toPublicError(error?.message).code,
-      },
+    if (!compensated || recordErr) {
+      await sendSlackAlert({
+        event: "payment_manual_reconcile_required",
+        severity: "critical",
+        summary: "Approved payment requires manual reconciliation",
+        fields: {
+          orderId,
+          amount,
+          reason: "database_confirmation_failed",
+          compensated,
+          compensationRecorded: !recordErr,
+        },
+      });
+      return json(502, {
+        error: { code: "manual_reconcile_required" },
+      });
+    }
+
+    return json(409, {
+      error: { code: "payment_cancelled_after_confirmation_error" },
     });
   }
 

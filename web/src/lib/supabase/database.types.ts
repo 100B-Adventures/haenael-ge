@@ -534,6 +534,7 @@ export type Database = {
           public_path: string | null
           quarantine_path: string
           rejection_code: string | null
+          review_source: string
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -549,6 +550,7 @@ export type Database = {
           public_path?: string | null
           quarantine_path: string
           rejection_code?: string | null
+          review_source?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status: string
@@ -564,6 +566,7 @@ export type Database = {
           public_path?: string | null
           quarantine_path?: string
           rejection_code?: string | null
+          review_source?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -693,6 +696,8 @@ export type Database = {
       }
       member: {
         Row: {
+          analytics_consent: string | null
+          analytics_consent_updated_at: string | null
           bio: string | null
           birth_date: string | null
           ci: string | null
@@ -706,6 +711,8 @@ export type Database = {
           provider_id: string | null
         }
         Insert: {
+          analytics_consent?: string | null
+          analytics_consent_updated_at?: string | null
           bio?: string | null
           birth_date?: string | null
           ci?: string | null
@@ -719,6 +726,8 @@ export type Database = {
           provider_id?: string | null
         }
         Update: {
+          analytics_consent?: string | null
+          analytics_consent_updated_at?: string | null
           bio?: string | null
           birth_date?: string | null
           ci?: string | null
@@ -1295,6 +1304,10 @@ export type Database = {
     Functions: {
       accept_friend_invite: { Args: { token: string }; Returns: Json }
       account_withdrawal_eligibility: { Args: never; Returns: Json }
+      claim_kakao_oauth_callback: {
+        Args: { p_code_hash: string }
+        Returns: boolean
+      }
       activate_my_profile_avatar_service: {
         Args: {
           p_asset_id: string
@@ -1359,9 +1372,12 @@ export type Database = {
           created_at: string
           goal_id: number
           goal_title: string
+          is_stale: boolean
           mime_type: string
           owner_nickname: string
+          public_path: string | null
           quarantine_path: string
+          status: string
         }[]
       }
       admin_list_ledger: {

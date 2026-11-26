@@ -49,12 +49,20 @@ afterEach(() => {
 
 it("VO-04 비카드 오류는 server message 없이 client copy로 표시한다", async () => {
   await renderCodeOnlyFailure("unsupported_payment_method");
-  expect(screen.getByText("카드 결제만 지원해요.")).toBeInTheDocument();
+  expect(screen.getByText("지원하지 않는 결제수단이라 자동 취소했어요. 금액이 보이면 취소 반영까지 잠시 걸릴 수 있어요.")).toBeInTheDocument();
 });
 
 it("VO-04 비카드 보상 실패는 server message 없이 client copy로 표시한다", async () => {
-  await renderCodeOnlyFailure("non_card_compensation_failed");
-  expect(screen.getByText("허용되지 않은 결제수단을 안전하게 정리하지 못했어요.")).toBeInTheDocument();
+  await renderCodeOnlyFailure("manual_reconcile_required");
+  expect(screen.getByText(/결제 금액이 빠져나갔을 수 있지만/)).toHaveTextContent("주문번호 order");
+});
+
+it.each([
+  ["payment_failed", "결제 승인 또는 응원 반영에 실패했어요"],
+  ["payment_canceled", "결제가 취소됐어요"],
+])("PAY-STATE-02 %s 최종 상태를 사용자 안내로 표시한다", async (code, copy) => {
+  await renderCodeOnlyFailure(code);
+  expect(screen.getByText(new RegExp(copy))).toBeInTheDocument();
 });
 
 it("최초 서버 승인은 pending lease를 브라우저 전달 컴포넌트에 넘긴다", async () => {
@@ -146,6 +154,10 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
   }));
 
   expect(screen.getByTestId("payment-success-state")).toBeInTheDocument();
+  expect(screen.getByTestId("payment-success-state")).toHaveAttribute(
+    "data-hydrated",
+    "true",
+  );
   expect(screen.queryByTestId("payment-dopamine-overlay")).not.toBeInTheDocument();
   const backLink = screen.getByRole("link", { name: "친구 목표로 돌아가기" });
   expect(backLink).toHaveAttribute("href", "/g/friend-goal");
@@ -155,7 +167,7 @@ it("G7-DOPAMINE 결제 직후 확정된 응원과 최신 워드맵의 성장 결
   expect(screen.getByTestId("payment-dopamine-overlay")).toBeInTheDocument();
   expect(screen.getByTestId("payment-growth-count")).toHaveTextContent("5개의 응원 단어");
   expect(screen.getByRole("heading", { name: "응원을 보내면 내가 쓴 단어가 바로 쌓여요" })).toBeInTheDocument();
-  expect(screen.getByText(/로그인하지 않아도 응원할 수 있어요/)).toBeInTheDocument();
+  expect(screen.getByText(/로그인한 이름으로 보낸 응원/)).toBeInTheDocument();
   expect(screen.getByTestId("payment-growth-feedback")).toHaveTextContent(
     PRODUCT_COPY.GROWTH_FEEDBACK,
   );

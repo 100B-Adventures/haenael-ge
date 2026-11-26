@@ -18,6 +18,8 @@ import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { ClampText } from "@/components/common/ClampText";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoaldetail";
 import { formatDate } from "@/lib/utils/format";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { normalizeProfileImageUrl } from "@/lib/profile-image";
 
 function objectParticle(name: string) {
   const code = name.codePointAt(name.length - 1) ?? 0;
@@ -27,18 +29,26 @@ function objectParticle(name: string) {
 }
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, relationshipDirection, recentMessage, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
+  { friendId, nickname, profileImage, bio, relationshipDirection, recentMessage, recentMessageGoalId, recentMessageGoalTitle, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
+    bio?: string | null;
     relationshipDirection: RelationshipDirection;
     recentMessage?: string | null;
+    recentMessageGoalId?: number | null;
+    recentMessageGoalTitle?: string | null;
     recentMessageDirection?: "SENT" | "RECEIVED" | null;
     detail: FriendGoalDetailData;
     friendGoals: SocialGoal[];
     cheerHistory?: FriendCheerHistoryItem[];
   },
 ) {
+  const recentSentGoalIsActive = friendGoals.some((goal) =>
+    goal.goal_id === recentMessageGoalId
+  );
+  const recentSentGoalIsInactive = recentMessageDirection === "SENT" &&
+    !recentSentGoalIsActive;
   const router = useRouter();
   const [removing, setRemoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,11 +81,18 @@ export function FriendGoalDetail(
         <FriendRelationshipBadge direction={relationshipDirection} />
         <p>{displayName}{PRODUCT_COPY.TEXT_003}</p>
       </section>
-      <div className="friend-detail-portrait">
-        {profileImage
-          ? <Image src={profileImage} alt={displayName} fill sizes="346px" unoptimized />
-          : <span aria-hidden="true">{Array.from(displayName)[0]}</span>}
-        <strong>{displayName}</strong>
+      <div className="friend-detail-profile">
+        <ProfileAvatar
+          className="friend-detail-avatar-large"
+          name={displayName}
+          imageUrl={profileImage}
+          sizes="88px"
+          testId="friend-detail-avatar"
+        />
+        <div className="friend-detail-profile-copy">
+          <strong>{displayName}</strong>
+          <p>{bio ?? ""}</p>
+        </div>
       </div>
       <section className="friend-together-card">
         {detail.cheer_count > 0 && (
@@ -85,7 +102,7 @@ export function FriendGoalDetail(
               return (
                 <span key={index} data-testid={supporter?.profile_image ? "supporter-avatar" : "neutral-supporter"}>
                   {supporter?.profile_image && !supporter.is_anonymous
-                    ? <Image src={supporter.profile_image} alt="" width={32} height={32} unoptimized />
+                    ? <Image src={normalizeProfileImageUrl(supporter.profile_image) ?? supporter.profile_image} alt="" width={32} height={32} unoptimized />
                     : <Clover aria-hidden="true" />}
                 </span>
               );
@@ -120,13 +137,18 @@ export function FriendGoalDetail(
         />
         <p className="social-muted">{PRODUCT_COPY.TEXT_009}</p>
       </section>
-      {recentMessage && (
+      {recentMessage &&
+          (recentMessageDirection === "RECEIVED" ||
+            recentSentGoalIsInactive ||
+            recentMessageGoalId === detail.goal_id) && (
         <section className="friend-recent-cheer" aria-label={PRODUCT_COPY.TEXT_006}>
           <strong className="friend-recent-cheer-direction">
             {recentMessageDirection === "SENT"
-              ? "내가 보냄"
+              ? recentSentGoalIsInactive
+                ? `${PRODUCT_COPY.TEXT_023} · ‘${recentMessageGoalTitle ?? PRODUCT_COPY.TEXT_025}’`
+                : PRODUCT_COPY.TEXT_023
               : recentMessageDirection === "RECEIVED"
-                ? "친구가 보냄"
+                ? `${PRODUCT_COPY.TEXT_024} ‘${recentMessageGoalTitle ?? PRODUCT_COPY.TEXT_025}’`
                 : "응원 메시지"}
           </strong>
           <ClampText toggleLabel={`${displayName}의 최근 응원 내용`}>
@@ -158,6 +180,7 @@ export function FriendGoalDetail(
                     {sent && cheer.is_anonymous && (
                       <small className="friend-cheer-anonymous">익명으로 보냄</small>
                     )}
+                    <small className="friend-cheer-goal-title">{cheer.goal_title}</small>
                     <ClampText className="my-cheer-message">
                       {`💬 ${cheer.message || PRODUCT_COPY.TEXT_020}`}
                     </ClampText>

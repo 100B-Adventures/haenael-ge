@@ -33,8 +33,11 @@ export type SocialFriend = {
   friend_member_id: string;
   nickname: string | null;
   profile_image: string | null;
+  bio?: string | null;
   relationship_direction: RelationshipDirection;
   recent_message: string | null;
+  recent_message_goal_id?: number | null;
+  recent_message_goal_title?: string | null;
   recent_message_direction?: "SENT" | "RECEIVED" | null;
   goals: SocialGoal[];
 };
@@ -65,6 +68,8 @@ export type FriendGoalDetail = SocialGoal & {
 
 export type FriendCheerHistoryItem = {
   cheer_id: number;
+  goal_id: number;
+  goal_title: string;
   message: string | null;
   created_at: string;
   direction: "SENT" | "RECEIVED";

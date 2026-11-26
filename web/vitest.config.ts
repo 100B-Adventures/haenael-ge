@@ -28,6 +28,7 @@ export default defineConfig({
           environment: "node",
           include: [
             "../supabase/functions/_shared/toss-webhook-handler.security.test.ts",
+            "../supabase/functions/_shared/goal-cover-alert.test.ts",
             "../supabase/functions/auth-kakao/security.test.ts",
           ],
           exclude: ["node_modules"],

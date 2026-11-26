@@ -24,6 +24,7 @@ export async function sendSlackAlert(alert: SlackAlert): Promise<boolean> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
+      signal: AbortSignal.timeout(3000),
     });
     if (!response.ok) {
       console.error("[slack] webhook failed", response.status);

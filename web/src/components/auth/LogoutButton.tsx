@@ -8,6 +8,7 @@
 // DESIGN.md 톤 준수: 과하지 않게 — 텍스트 버튼, 헤더 아이콘 톤(--muted)과 통일.
 
 import { useState } from "react";
+import { clearAnalyticsConsent } from "@/lib/analytics/consent";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-auth-logoutbutton";
 
 export function LogoutButton() {
@@ -21,6 +22,7 @@ export function LogoutButton() {
         method: "POST",
         redirect: "follow",
       });
+      clearAnalyticsConsent();
       // fetch 는 redirect: follow 라도 최종 URL로 재요청하지 않으므로
       // 브라우저 주소를 직접 이동시켜 랜딩("/")으로 보낸다.
       window.location.href = response.redirected ? response.url : "/";

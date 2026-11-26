@@ -79,6 +79,10 @@ describe("SEC-HEADERS 응답 보안 헤더 계약", () => {
 
     expect(policy).toContain("http://127.0.0.1:54321");
     expect(policy).toContain("ws://127.0.0.1:54321");
+    const imagePolicy = policy.split(";").map((directive) => directive.trim())
+      .find((directive) => directive.startsWith("img-src")) ?? "";
+    expect(imagePolicy).toContain("http://127.0.0.1:54321");
+    expect(imagePolicy).not.toContain("ws://127.0.0.1:54321");
     expect(policy).not.toContain("'unsafe-eval'");
   });
 

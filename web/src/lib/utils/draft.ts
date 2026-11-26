@@ -77,6 +77,29 @@ export function hasSaveIntent(): boolean {
   return localStorage.getItem(SAVE_INTENT_KEY) === "1";
 }
 
+function consumeSaveIntentNow(): boolean {
+  if (!hasSaveIntent()) return false;
+  localStorage.removeItem(SAVE_INTENT_KEY);
+  return true;
+}
+
+/**
+ * 여러 탭이 로그인 복귀를 동시에 감지해도 저장 의도는 한 탭만 가져간다.
+ * Web Locks가 없는 브라우저에서도 동기 localStorage 소비로 같은 문서 안의
+ * 중복 이벤트를 막는다.
+ */
+export async function consumeSaveIntent(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  if (navigator.locks?.request) {
+    return navigator.locks.request(
+      "haenael-save-intent",
+      { mode: "exclusive" },
+      consumeSaveIntentNow,
+    );
+  }
+  return consumeSaveIntentNow();
+}
+
 export function clearSaveIntent(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(SAVE_INTENT_KEY);

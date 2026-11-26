@@ -16,6 +16,7 @@ import { CheerPaymentButton } from "@/components/goal/CheerPaymentButton";
 import { OwnerBar } from "@/components/goal/OwnerBar";
 import { GoalCover } from "@/components/social/GoalCover";
 import { ReceiverAppShell } from "@/components/receiver/ReceiverShell";
+import { KakaoLoginLink } from "@/components/auth";
 import { PRODUCT_COPY } from "@/lib/copy/generated/app-g-slug-page";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -116,19 +117,28 @@ export default async function GoalPublicPage({ params }: Props) {
   // ★ 제3자·비로그인에게 이 블록의 존재/응원 개수/금액이 절대 노출되지 않는다(아래 CoVe 참조).
   let isOwner = false;
   let ownerCheerCreatedAts: string[] = [];
+  let supporterName: string | null = null;
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { data: ownGoal } = await supabase
-      .from("goal")
-      .select("id")
-      .eq("slug", slug)
-      .eq("member_id", user.id) // RLS와 이중 스코프(방어적 심층방어) — 남의 goal_id로 절대 안 넘어감
-      .is("deleted_at", null)
-      .maybeSingle();
+    const [{ data: ownGoal }, { data: supporterMember }] = await Promise.all([
+      supabase
+        .from("goal")
+        .select("id")
+        .eq("slug", slug)
+        .eq("member_id", user.id) // RLS와 이중 스코프(방어적 심층방어) — 남의 goal_id로 절대 안 넘어감
+        .is("deleted_at", null)
+        .maybeSingle(),
+      supabase
+        .from("member")
+        .select("nickname")
+        .eq("id", user.id)
+        .maybeSingle(),
+    ]);
+    supporterName = supporterMember?.nickname?.trim() || null;
 
     if (ownGoal) {
       isOwner = true;
@@ -175,12 +185,11 @@ export default async function GoalPublicPage({ params }: Props) {
                 className="goal-public-relogin flex items-center justify-center text-center [font-size:var(--text-wordmark)]! [color:var(--muted-color)]!"
                 data-testid="relogin-hint"
               >{PRODUCT_COPY.TEXT_006}{" "}
-                <Link
-                  href={`/auth/kakao/start?redirect=${encodeURIComponent(`/g/${slug}#cheer`)}`}
-                  prefetch={false}
+                <KakaoLoginLink
+                  redirectPath={`/g/${slug}#cheer`}
                   className="inline-flex min-h-[var(--tap-min-size)] min-w-[var(--tap-min-size)] items-center justify-center font-semibold underline underline-offset-2 transition-opacity active:opacity-70 [color:var(--clover-ink)]!"
                   data-testid="relogin-link"
-                >{PRODUCT_COPY.TEXT_007}</Link>
+                >{PRODUCT_COPY.TEXT_007}</KakaoLoginLink>
               </p>
             )}
           </div>
@@ -231,6 +240,7 @@ export default async function GoalPublicPage({ params }: Props) {
             goalTitle={rawTitle}
             goalSlug={slug}
             isAuthenticated={Boolean(user)}
+            supporterName={supporterName}
           />
 
           {/* role-transition: "나도 해낼게 만들래" */}

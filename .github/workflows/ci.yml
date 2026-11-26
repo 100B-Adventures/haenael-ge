@@ -234,7 +234,7 @@ jobs:
         run: npx playwright install --with-deps chromium  # 호스팅 러너는 시스템 의존성도 받아야 한다
 
       - name: 환전 E2E 실행
-        run: npx playwright test e2e/cashout-manual.spec.ts --reporter=line
+        run: npx playwright test e2e/cashout-manual.spec.ts --project=chromium --reporter=line
 
       - name: 실패 시 리포트 보관
         if: failure()
@@ -280,7 +280,7 @@ jobs:
         run: npm ci
 
       - name: 브라우저 설치
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: staging 결제 기능 활성화
         working-directory: .
@@ -296,8 +296,14 @@ jobs:
             set +e
             npx playwright test e2e/social-web-first.spec.ts --project=chromium --reporter=line \
               > ../.goal/runs/e2e-v2-social.log 2>&1
-            test_exit=$?
-            printf "E2E_V2_SOCIAL_EXIT=%s\n" "$test_exit" \
+            chromium_exit=$?
+            npx playwright test e2e/social-web-first.spec.ts \
+              --project=webkit-friend-avatar --reporter=line \
+              >> ../.goal/runs/e2e-v2-social.log 2>&1
+            webkit_exit=$?
+            test_exit=$((chromium_exit != 0 || webkit_exit != 0))
+            printf "E2E_V2_SOCIAL_EXIT=%s CHROMIUM_EXIT=%s WEBKIT_EXIT=%s\n" \
+              "$test_exit" "$chromium_exit" "$webkit_exit" \
               > ../.goal/runs/e2e-v2-social.exit
             exit "$test_exit"
           '

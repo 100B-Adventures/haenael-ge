@@ -6,6 +6,7 @@ import { useState } from "react";
 import { acceptFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InvitePreview } from "@/lib/social/contracts";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-inviteacceptcard";
+import { KakaoLoginLink } from "@/components/auth/KakaoLoginLink";
 
 const ERROR_COPY: Record<string, string> = {
   invite_expired: "이 초대는 더 이상 사용할 수 없어요.",
@@ -77,13 +78,10 @@ export function InviteAcceptCard(
           </button>
         )
         : (
-          <Link
-            href={`/auth/kakao/start?redirect=${
-              encodeURIComponent(`/invite/${token}`)
-            }`}
-            prefetch={false}
+          <KakaoLoginLink
+            redirectPath={`/invite/${token}`}
             className="social-primary-action"
-          >{PRODUCT_COPY.TEXT_013}</Link>
+          >{PRODUCT_COPY.TEXT_013}</KakaoLoginLink>
         )}
     </section>
   );

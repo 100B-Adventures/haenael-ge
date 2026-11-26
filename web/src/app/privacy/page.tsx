@@ -107,12 +107,10 @@ export default function PrivacyPage() {
           <strong>Google Analytics(GA4)</strong>{PRODUCT_COPY.TEXT_077}</li>
         <li>
           <strong>Microsoft Clarity</strong>{PRODUCT_COPY.TEXT_104}</li>
-        <li>
-          <strong>Meta 픽셀</strong>{PRODUCT_COPY.TEXT_105}</li>
       </ul>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_080}</p>
 
-      <h3 className="font-semibold mt-6 mb-2">{PRODUCT_COPY.TEXT_106}</h3>
+      <h3 id="analytics-overseas" className="scroll-mt-6 font-semibold mt-6 mb-2">{PRODUCT_COPY.TEXT_106}</h3>
       <p className="mb-2 leading-relaxed">{PRODUCT_COPY.TEXT_107}</p>
       <ul className="list-disc pl-5 space-y-2 leading-relaxed mb-4">
         <li>
@@ -124,13 +122,6 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Microsoft Clarity</strong>{PRODUCT_COPY.TEXT_111}
-        </li>
-        <li>
-          <strong>Meta 픽셀</strong>{PRODUCT_COPY.TEXT_112}{" "}
-          <a className="legal-document-link underline" href="https://www.facebook.com/adpreferences">
-            {PRODUCT_COPY.TEXT_113}
-          </a>{" "}
-          또는 <a className="legal-document-link underline" href="https://www.facebook.com/privacy/policy/">Meta 개인정보처리방침</a>.
         </li>
       </ul>
       <p className="mb-4 leading-relaxed">{PRODUCT_COPY.TEXT_115}</p>

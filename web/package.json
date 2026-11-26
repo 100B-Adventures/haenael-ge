@@ -14,7 +14,7 @@
     "test:typecheck:unit": "tsc --noEmit -p tsconfig.json --incremental false",
     "test:typecheck:security": "tsc --noEmit -p tsconfig.security-tests.json",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium",
     "test:e2e:ui": "playwright test --ui",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

@@ -1,0 +1,29 @@
+@layer components {
+  .friend-list-bio {
+    min-height: var(--text-label-small);
+    overflow: hidden;
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .friend-detail-profile-copy {
+    min-width: 0;
+  }
+
+  .friend-detail-profile-copy > strong {
+    display: block;
+    overflow: hidden;
+    font-size: var(--text-body);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .friend-detail-profile-copy > p {
+    min-height: var(--text-body);
+    margin-top: var(--sp-1);
+    color: var(--muted-color);
+    font-size: var(--text-label-small);
+  }
+}

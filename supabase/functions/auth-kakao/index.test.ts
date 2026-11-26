@@ -19,6 +19,7 @@ import {
   KakaoAuthError,
   type KakaoUserInfo,
   normalizeKakaoUser,
+  normalizeKakaoProfileImageUrl,
   normalizeKoreanMobilePhone,
 } from "../_shared/oauth-kakao.ts";
 
@@ -75,6 +76,22 @@ Deno.test("normalizeKakaoUser — 닉네임 없음 → 기본값", () => {
   const user: KakaoUserInfo = { id: 1 };
   const result = normalizeKakaoUser(user);
   assertEquals(result.nickname, "해낼게 유저");
+});
+
+Deno.test("AUTH-KAKAO-IMG-01 카카오 http 프로필 주소는 저장 전에 https로 바꾼다", () => {
+  assertEquals(
+    normalizeKakaoProfileImageUrl("http://k.kakaocdn.net/dn/avatar.jpg"),
+    "https://k.kakaocdn.net/dn/avatar.jpg",
+  );
+  assertEquals(
+    normalizeKakaoUser({
+      id: 2,
+      kakao_account: {
+        profile: { profile_image_url: "http://k.kakaocdn.net/dn/avatar.jpg" },
+      },
+    }).profileImage,
+    "https://k.kakaocdn.net/dn/avatar.jpg",
+  );
 });
 
 Deno.test("normalizeKoreanMobilePhone — 카카오 국내 +82 표기를 010 숫자 표기로 변환", () => {

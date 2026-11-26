@@ -8,7 +8,16 @@ const repo = resolve(new URL("../..", import.meta.url).pathname);
 const require = createRequire(import.meta.url);
 const ts = require(resolve(repo, "web/node_modules/typescript"));
 const sourceRoot = resolve(repo, "web/src");
-const css = readFileSync(resolve(sourceRoot, "app/globals.css"), "utf8");
+const cssFiles = [];
+function walkCss(dir) {
+  for (const name of readdirSync(dir)) {
+    const path = resolve(dir, name);
+    if (statSync(path).isDirectory()) walkCss(path);
+    else if (name.endsWith(".css")) cssFiles.push(path);
+  }
+}
+walkCss(sourceRoot);
+const css = cssFiles.map((file) => readFileSync(file, "utf8")).join("\n");
 const boundaryFixture = readFileSync(resolve(repo, "scripts/qa/fixtures/web-custom-class-boundary.css"), "utf8");
 const prefixContract = JSON.parse(readFileSync(resolve(repo, "qa/contracts/web-custom-class-prefixes.json"), "utf8"));
 const prefixes = new Set(prefixContract.prefixes);

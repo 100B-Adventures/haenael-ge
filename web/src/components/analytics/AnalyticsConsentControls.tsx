@@ -1,16 +1,27 @@
 "use client";
 
-import { setAnalyticsConsent } from "@/lib/analytics/consent";
+import { useState } from "react";
+import { persistAnalyticsConsent } from "@/lib/analytics/account-consent";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
 
 export function AnalyticsConsentControls() {
   const consent = useAnalyticsConsent();
-  const label = consent === "granted" ? "동의됨" : consent === "denied" ? "거부됨" : "선택 전";
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(false);
+  const label = consent === "granted" ? "동의됨" : consent === "denied" ? "거부됨" : consent === undefined ? "확인 중" : "선택 전";
 
-  const deny = () => {
+  const choose = async (nextConsent: "granted" | "denied") => {
     const shouldReload = consent === "granted";
-    setAnalyticsConsent("denied");
-    if (shouldReload) window.location.reload();
+    setSaving(true);
+    setError(false);
+    try {
+      await persistAnalyticsConsent(nextConsent);
+      if (shouldReload && nextConsent === "denied") window.location.reload();
+      else setSaving(false);
+    } catch {
+      setError(true);
+      setSaving(false);
+    }
   };
 
   return (
@@ -23,18 +34,21 @@ export function AnalyticsConsentControls() {
         <button
           type="button"
           className="min-h-11 rounded-[12px] bg-primary px-4 text-sm font-bold text-primary-foreground"
-          onClick={() => setAnalyticsConsent("granted")}
+          disabled={saving || consent === undefined}
+          onClick={() => void choose("granted")}
         >
           분석·국외 이전에 동의
         </button>
         <button
           type="button"
           className="min-h-11 rounded-[12px] border border-border bg-background px-4 text-sm font-bold text-foreground"
-          onClick={deny}
+          disabled={saving || consent === undefined}
+          onClick={() => void choose("denied")}
         >
           동의 철회
         </button>
       </div>
+      {error ? <p className="mt-2 text-sm text-destructive" role="alert">선택을 저장하지 못했어요. 다시 시도해 주세요.</p> : null}
     </section>
   );
 }

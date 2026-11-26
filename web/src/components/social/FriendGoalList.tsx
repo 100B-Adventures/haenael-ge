@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, UserPlus } from "lucide-react";
 import { ClampText } from "@/components/common/ClampText";
 import type { SocialFriend } from "@/lib/social/contracts";
 import { FriendRelationshipBadge } from "./FriendRelationshipBadge";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendgoallist";
+import { ProfileAvatar } from "./ProfileAvatar";
 
 export function FriendGoalList({
   friends,
@@ -54,8 +54,22 @@ export function FriendGoalList({
       </p>
       {friends.length > 0 && <div className="friends-list-card">
         {friends.map((friend) => {
-          const [primaryGoal] = friend.goals;
-          const recentMessage = friend.recent_message;
+          const primaryGoal = friend.goals.find((goal) =>
+            goal.goal_id === friend.recent_message_goal_id
+          ) ?? friend.goals[0];
+          const receivedMessage = friend.recent_message_direction === "RECEIVED" &&
+              friend.recent_message
+            ? `${PRODUCT_COPY.TEXT_018} ‘${friend.recent_message_goal_title ?? PRODUCT_COPY.TEXT_019}’ · ${friend.recent_message}`
+            : null;
+          const sentToInactiveGoalMessage = friend.recent_message_direction === "SENT" &&
+              friend.recent_message &&
+              !friend.goals.some((goal) => goal.goal_id === friend.recent_message_goal_id)
+            ? `${PRODUCT_COPY.TEXT_020} · ‘${friend.recent_message_goal_title ?? PRODUCT_COPY.TEXT_019}’ · ${friend.recent_message}`
+            : null;
+          const recentMessage = receivedMessage ?? sentToInactiveGoalMessage ??
+            (primaryGoal?.goal_id === friend.recent_message_goal_id
+              ? friend.recent_message
+              : null);
           const nickname = friend.nickname ?? PRODUCT_COPY.TEXT_012;
           const progress = primaryGoal
             ? primaryGoal.cheer_count >= 10
@@ -77,25 +91,18 @@ export function FriendGoalList({
                     className="friend-list-main friend-list-main--with-news"
                     data-testid="friend-goal-link"
                   >
-                    <span className="friend-list-avatar">
-                      {friend.profile_image ? (
-                        <Image
-                          src={friend.profile_image}
-                          alt={`${nickname} 프로필`}
-                          fill
-                          sizes="48px"
-                          unoptimized
-                        />
-                      ) : (
-                        <span aria-hidden="true">
-                          {Array.from(nickname)[0]}
-                        </span>
-                      )}
-                    </span>
+                    <ProfileAvatar
+                      className="friend-list-avatar"
+                      name={nickname}
+                      imageUrl={friend.profile_image}
+                      sizes="48px"
+                      testId="friend-list-avatar"
+                    />
                     <span className="friend-list-copy">
                       <span className="friend-list-name" title={nickname}>
                         {nickname}
                       </span>
+                      <span className="friend-list-bio">{friend.bio ?? ""}</span>
                       <strong>{primaryGoal.title}</strong>
                       <span
                         className={`friend-list-progress is-${progress}`}
@@ -113,15 +120,6 @@ export function FriendGoalList({
                       </span>
                     </span>
                   </Link>
-                  <div className="friend-list-news">
-                    <MessageCircle aria-hidden="true" />
-                    <ClampText
-                      className="friend-list-news-message"
-                      toggleLabel={`${nickname}의 최근 응원 내용`}
-                    >
-                      {recentMessage || PRODUCT_COPY.TEXT_013}
-                    </ClampText>
-                  </div>
                 </>
               ) : (
                 <div className="friend-list-main">
@@ -132,6 +130,7 @@ export function FriendGoalList({
                     <span className="friend-list-name" title={nickname}>
                       {nickname}
                     </span>
+                    <span className="friend-list-bio">{friend.bio ?? ""}</span>
                     <strong>{PRODUCT_COPY.TEXT_014}</strong>
                   </span>
                   <span className="friend-list-relation">
@@ -139,6 +138,17 @@ export function FriendGoalList({
                       direction={friend.relationship_direction}
                     />
                   </span>
+                </div>
+              )}
+              {(primaryGoal || recentMessage) && (
+                <div className="friend-list-news">
+                  <MessageCircle aria-hidden="true" />
+                  <ClampText
+                    className="friend-list-news-message"
+                    toggleLabel={`${nickname}의 최근 응원 내용`}
+                  >
+                    {recentMessage || PRODUCT_COPY.TEXT_013}
+                  </ClampText>
                 </div>
               )}
             </article>

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { FriendGoalList } from "../FriendGoalList";
 import type { SocialGoal } from "@/lib/social/contracts";
@@ -24,7 +24,7 @@ const goals: SocialGoal[] = [
   },
 ];
 
-it("CL-03 친구 목록의 최근 응원은 ClampText의 2줄 정책을 쓰고 대표 목표 동선을 보존한다", () => {
+it("CL-03 친구 카드 본문은 상세 링크이고 최근 응원 토글은 링크 밖에 둔다", () => {
   render(
     <FriendGoalList
       friends={[
@@ -32,8 +32,10 @@ it("CL-03 친구 목록의 최근 응원은 ClampText의 2줄 정책을 쓰고 �
           friend_member_id: "friend-a",
           nickname: "서연",
           profile_image: null,
+          bio: "하루 한 걸음씩 꾸준히",
           relationship_direction: "I_CHEERED",
           recent_message: "3주째 도서관 개근, 진짜 대단하다",
+          recent_message_goal_id: 1,
           goals,
         },
       ]}
@@ -56,20 +58,18 @@ it("CL-03 친구 목록의 최근 응원은 ClampText의 2줄 정책을 쓰고 �
   ).not.toBeInTheDocument();
   expect(screen.queryByText("연결된 친구")).not.toBeInTheDocument();
   expect(screen.getByText("내가 응원함")).toBeInTheDocument();
+  expect(screen.getByText("하루 한 걸음씩 꾸준히")).toBeInTheDocument();
   expect(
     screen.getByText("3주째 도서관 개근, 진짜 대단하다"),
   ).toBeInTheDocument();
   expect(
     screen
       .getByText("3주째 도서관 개근, 진짜 대단하다")
-      .closest("[data-collapsible]"),
-  ).toBeInTheDocument();
-  expect(
-    screen
-      .getByText("3주째 도서관 개근, 진짜 대단하다")
-      .closest("[data-collapsible]")
-      ?.closest("a"),
+      .closest("a"),
   ).toBeNull();
+  expect(
+    screen.getByText("3주째 도서관 개근, 진짜 대단하다").closest("[data-collapsible]"),
+  ).toBeInTheDocument();
   expect(document.body).not.toHaveTextContent("번 함께");
   expect(screen.getByTestId("friends-sparse-next-step")).toHaveTextContent(
     "한 명 더 함께 응원해볼까요?",
@@ -88,6 +88,7 @@ it("CT-FRIEND-04 긴 닉네임·이미지 없음·다수 친구를 모두 안전
     relationship_direction:
       index % 2 === 0 ? ("MUTUAL" as const) : ("CHEERED_ME" as const),
     recent_message: null,
+    recent_message_goal_id: null,
     goals,
   }));
   render(<FriendGoalList friends={friends} />);
@@ -128,6 +129,7 @@ it("G4-FRIEND-HISTORY 친구 목록에는 별도 과거 응원 섹션이 없다"
         profile_image: null,
         relationship_direction: "MUTUAL",
         recent_message: "끝까지 응원할게",
+        recent_message_goal_id: 1,
         goals,
       }]}
     />,
@@ -137,4 +139,63 @@ it("G4-FRIEND-HISTORY 친구 목록에는 별도 과거 응원 섹션이 없다"
   expect(screen.queryByTestId("unlinked-cheer-record")).not.toBeInTheDocument();
   expect(screen.queryByTestId("friends-empty")).not.toBeInTheDocument();
   expect(screen.getByTestId("friend-card")).toBeInTheDocument();
+});
+
+it("QA-TC-FD-05 카카오 http 아바타는 https로 렌더하고 실패하면 이니셜로 바꾼다", () => {
+  render(
+    <FriendGoalList friends={[{
+      friend_member_id: "friend-kakao",
+      nickname: "이다솔",
+      profile_image: "http://k.kakaocdn.net/avatar.jpg",
+      relationship_direction: "MUTUAL",
+      recent_message: null,
+      recent_message_goal_id: null,
+      goals,
+    }]} />,
+  );
+  const image = screen.getByTestId("friend-list-avatar-image");
+  expect(image).toHaveAttribute("src", "https://k.kakaocdn.net/avatar.jpg");
+  fireEvent.error(image);
+  expect(screen.getByTestId("friend-list-avatar-fallback")).toHaveTextContent("이");
+});
+
+it("QA-TC-FL-03 친구 활성 목표가 없어도 내 목표에 보낸 최근 응원을 숨기지 않는다", () => {
+  render(
+    <FriendGoalList friends={[{
+      friend_member_id: "friend-received",
+      nickname: "윤도경",
+      profile_image: null,
+      relationship_direction: "CHEERED_ME",
+      recent_message: "900점까지 같이 가자",
+      recent_message_goal_id: 99,
+      recent_message_goal_title: "토익 900 넘길게",
+      recent_message_direction: "RECEIVED",
+      goals: [],
+    }]} />,
+  );
+
+  expect(screen.getByTestId("friend-card")).toHaveTextContent(
+    "친구가 보냄 · 내 목표 ‘토익 900 넘길게’ · 900점까지 같이 가자",
+  );
+  expect(screen.queryByTestId("friend-goal-link")).not.toBeInTheDocument();
+});
+
+it("QA-TC-FL-04 내가 응원한 목표가 마감돼도 목표명과 최근 응원을 숨기지 않는다", () => {
+  render(
+    <FriendGoalList friends={[{
+      friend_member_id: "friend-sent-closed",
+      nickname: "윤도경",
+      profile_image: null,
+      relationship_direction: "I_CHEERED",
+      recent_message: "마지막까지 함께 가자",
+      recent_message_goal_id: 99,
+      recent_message_goal_title: "매일 스무 쪽 읽을게",
+      recent_message_direction: "SENT",
+      goals,
+    }]} />,
+  );
+
+  expect(screen.getByTestId("friend-card")).toHaveTextContent(
+    "내가 보냄 · ‘매일 스무 쪽 읽을게’ · 마지막까지 함께 가자",
+  );
 });

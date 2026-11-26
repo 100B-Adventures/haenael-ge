@@ -122,7 +122,7 @@ export function PurchaseConversion({
         const acceptedByLocalQueues = await trackPurchaseConversion(orderId, value, lease.eventId);
         if (!acceptedByLocalQueues) attemptedTokens.current.delete(lease.leaseToken);
 
-        // gtag/fbq 호출 성공은 provider transport receipt가 아니다. 브라우저에서는 sent ack를 금지한다.
+        // gtag 호출 성공은 전송 영수증이 아니다. 브라우저에서는 전송 완료 상태로 바꾸지 않는다.
         scheduleAfterLease(lease);
       } catch {
         attemptedTokens.current.delete(lease.leaseToken);

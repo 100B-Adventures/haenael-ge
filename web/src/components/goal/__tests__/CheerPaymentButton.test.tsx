@@ -170,7 +170,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("응원 금액을 다시 확인해 주세요.");
   });
 
-  it("G4-PAY-01 결제창형 키에서 CARD 선택만 승인 요청한다", async () => {
+  it("G4-PAY-01 결제창형 키에서 CARD 선택은 승인 요청한다", async () => {
     vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
 
     render(
@@ -196,6 +196,29 @@ describe("CheerPaymentButton Toss v2 request", () => {
     expect(mockRequestPayment).not.toHaveBeenCalled();
   });
 
+  it("G4-PAY-01 결제창형 키에서 provider 없는 EASY_PAY 선택도 서버 검증으로 보낸다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+        supporterName="이다솔"
+      />,
+    );
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+    await waitFor(() => expect(mockRenderPaymentWindow).toHaveBeenCalled());
+    paymentWindowHandlers.get("paymentRequest")?.({
+      paymentMethod: { method: "EASY_PAY" },
+    });
+    await waitFor(() => {
+      expect(mockWidgetRequestPayment).toHaveBeenCalledWith(
+        expect.objectContaining({ orderId: "order-1" }),
+      );
+    });
+  });
+
   it("G4-PAY-01 결제창형 키에서 계좌이체 선택은 승인 요청 전에 거절한다", async () => {
     vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "test_gck_contract");
 
@@ -215,7 +238,9 @@ describe("CheerPaymentButton Toss v2 request", () => {
       paymentMethod: { method: "TRANSFER", transfer: { provider: "BANKPAY" } },
     });
     expect(
-      await screen.findByText("카드를 선택해야 응원 결제를 계속할 수 있어요."),
+      await screen.findByText(
+        "카드 또는 간편결제를 선택해 주세요. 돈은 빠져나가지 않았어요.",
+      ),
     ).toBeVisible();
     expect(mockWidgetRequestPayment).not.toHaveBeenCalled();
     expect(mockPaymentWindowDestroy).toHaveBeenCalledTimes(1);
@@ -403,7 +428,7 @@ describe("CheerPaymentButton Toss v2 request", () => {
     );
   });
 
-  it("G4-PAY-02 Toss SDK의 일반 객체 오류 메시지를 사용자에게 표시한다", async () => {
+  it("G4-PAY-02 Toss SDK의 원문 오류는 노출하지 않고 다음 행동을 안내한다", async () => {
     mockRequestPayment.mockRejectedValue(
       Object.assign(new Error("클라이언트 키가 잘못되었습니다."), {
         code: "INVALID_CLIENT_KEY",
@@ -423,8 +448,102 @@ describe("CheerPaymentButton Toss v2 request", () => {
 
     expect(
       await screen.findByText(
-        "클라이언트 키가 잘못되었습니다. (INVALID_CLIENT_KEY)",
+        "결제를 완료하지 못했어요. 돈이 빠져나갔다면 다시 결제하지 말고 결제 내역을 먼저 확인해 주세요.",
       ),
     ).toBeVisible();
+  });
+
+  it("PAY-FAIL-06 USER_CANCEL은 출금되지 않은 취소로 안내한다", async () => {
+    mockRequestPayment.mockRejectedValue({ code: "USER_CANCEL" });
+
+    render(<CheerPaymentButton goalId={11} goalTitle="편입 합격 해낼게" goalSlug="goal-slug" />);
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "결제를 취소했어요. 돈은 빠져나가지 않았어요. 다시 시도할 수 있어요.",
+    );
+  });
+
+  it("PAY-FAIL-07 주문 생성 전 네트워크 오류는 안전하게 재시도를 안내한다", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+
+    render(<CheerPaymentButton goalId={11} goalTitle="편입 합격 해낼게" goalSlug="goal-slug" />);
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "응원 주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.",
+    );
+  });
+
+  it("PAY-FAIL-08 주문 생성 전 일반 오류도 출금 가능성 문구 없이 재시도를 안내한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_TOSS_CLIENT_KEY", "");
+
+    render(<CheerPaymentButton goalId={11} goalTitle="편입 합격 해낼게" goalSlug="goal-slug" />);
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "응원 주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.",
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent("돈이 빠져나갔다면");
+  });
+
+  it("PAY-FAIL-05 네트워크 오류는 출금 여부 확인과 중복 결제 방지를 안내한다", async () => {
+    mockRequestPayment.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    fireEvent.click(screen.getByTestId("cheer-payment-submit"));
+
+    expect(
+      await screen.findByText(
+        "결제 결과를 확인하지 못했어요. 돈이 빠져나갔다면 다시 결제하지 말고 결제 내역을 먼저 확인해 주세요.",
+      ),
+    ).toBeVisible();
+  });
+
+  it("D057-NAME-02 로그인 회원 이름은 고정 표시되고 익명만 토글한다", () => {
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+        supporterName="이다솔"
+      />,
+    );
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    expect(screen.getByTestId("cheer-supporter-name")).toHaveTextContent("이다솔");
+    expect(screen.queryByPlaceholderText("친구에게 보일 이름")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("cheer-anonymous-toggle"));
+    expect(screen.getByTestId("cheer-supporter-name")).toHaveTextContent(
+      "익명으로 보낼게요",
+    );
+  });
+
+  it("D057-NAME-03 빈 프로필 이름은 안내하고 익명 선택을 강제한다", () => {
+    render(
+      <CheerPaymentButton
+        goalId={11}
+        goalTitle="편입 합격 해낼게"
+        goalSlug="goal-slug"
+        supporterName="  "
+      />,
+    );
+    fireEvent.click(screen.getByTestId("cheer-cta"));
+    expect(screen.getByTestId("cheer-supporter-name")).toHaveTextContent(
+      "프로필 이름을 정하면 이름으로 보낼 수 있어요.",
+    );
+    expect(screen.getByText("프로필 이름이 없어 이번 응원은 익명으로만 보낼 수 있어요.")).toBeVisible();
+    expect(screen.getByTestId("cheer-anonymous-toggle")).toBeChecked();
+    expect(screen.getByTestId("cheer-anonymous-toggle")).toBeDisabled();
   });
 });

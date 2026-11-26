@@ -18,6 +18,9 @@ export const PRODUCT_COPY = {
   TEXT_015: "한 명 더 함께 응원해볼까요?", // source line 157
   TEXT_016: "친구를 초대하거나 응원을 주고받으면 이 목록에 바로 이어져요.", // source line 158
   TEXT_017: "친구 초대하기", // source line 160
+  TEXT_018: "친구가 보냄 · 내 목표",
+  TEXT_019: "목표",
+  TEXT_020: "내가 보냄",
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/social/FriendGoalList.tsx";

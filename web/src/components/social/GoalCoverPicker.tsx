@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { setGoalCoverPresetAction } from "@/app/(receiver)/social-actions";
@@ -22,7 +22,7 @@ const FAILURE_COPY: Record<FailureStage, string> = {
   preset: "기본 커버를 저장하지 못했어요. 잠시 후 다시 선택해 주세요.",
   sign: "업로드를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.",
   put: "사진 전송이 끊겼어요. 네트워크를 확인하고 다시 시도해 주세요.",
-  finalize: "사진은 전송됐지만 검수 요청을 마치지 못했어요. 다시 시도해 주세요.",
+  finalize: "사진은 전송됐지만 적용하지 못했어요. 다시 시도해 주세요.",
 };
 
 export function GoalCoverPicker(
@@ -40,6 +40,10 @@ export function GoalCoverPicker(
     "idle" | "saving" | "uploading" | "review" | "error"
   >("idle");
   const [failureStage, setFailureStage] = useState<FailureStage | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  useEffect(() => () => {
+    if (uploadedImageUrl?.startsWith("blob:")) URL.revokeObjectURL(uploadedImageUrl);
+  }, [uploadedImageUrl]);
   const automaticPreset = automaticGoalCoverKey(title);
   function fail(stage: FailureStage, code: string, status: number | null = null) {
     console.error(JSON.stringify({ event: "goal_cover_failed", stage, code, status }));
@@ -66,6 +70,7 @@ export function GoalCoverPicker(
       if (!result.ok) {
         return fail(result.stage, result.code, result.status);
       }
+      setUploadedImageUrl(result.publicUrl ?? URL.createObjectURL(file));
       setState("review");
     } catch {
       fail("put", "network_error");
@@ -76,7 +81,7 @@ export function GoalCoverPicker(
       <div className="goal-cover-picker-preview">
         <GoalCover
           presetKey={preset}
-          imageUrl={imageUrl}
+          imageUrl={uploadedImageUrl ?? imageUrl}
           title={title}
           size="hero"
         />
