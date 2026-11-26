@@ -1,11 +1,12 @@
 # QA Tracker — haenael-ge
 
-## 2026-11-26 2.4.3 묶음 신규 결함 (builder 보정·전체 검증 진행 중)
+## 2026-11-27 2.4.3 묶음 신규 결함 (builder 증거 충족·독립 QA 대기)
 
 - **❌ NG 등록 — 목표 사진 크롭**: 운영 `/g/ym7gh6kb`에서 세로 목표 사진을 가로 배너로 표시할 때 중앙 기준 크롭으로 얼굴이 잘린다. 공개 목표·친구 상세·내 목표의 동일 배너 경로를 함께 보정하고 직접 렌더로 재검증해야 한다.
 - **❌ NG 등록 — 프로필 사진 혼합 콘텐츠**: 회원 `profile_image`가 `http://k.kakaocdn.net/...` 형태로 저장·표시될 수 있다. 저장 경계와 표시 경계에서 HTTPS로 정규화하고, 기존 운영 데이터는 별도 비파괴 `UPDATE` 마이그레이션으로 교정해야 한다.
 - **🔧 builder 보정**: 업로드 사진에만 상단 25% 초점을 적용하는 공통 커버 계약과 단위 시험을 추가했다. 카카오 프로필은 OAuth·프로필 저장, 웹 표시, 별도 비파괴 UPDATE 마이그레이션 세 경계에서 HTTPS로 승격한다. 목표 사진 Slack 기본 관리자 링크도 운영 주소로 바꿨다.
-- 표적 증거: Vitest 5파일 30/30, Deno 2파일 22/22. 전체 build·Vitest·pgTAP·관련 Playwright는 진행 중이므로 독립 QA 판정은 아직 **NG**다.
+- builder 증거: 표적 Vitest 5파일 30/30·Deno 2파일 22/22, 전체 TypeScript·Vitest 111파일 663/663, Deno 124/124, pgTAP 30파일 537/537, production build·Storybook build·Supabase 서버 계약 4종 PASS. 헤드리스 `/updates` HTTP 200·콘솔 오류 0, 업로드 세로 사진 Storybook `object-position: 50% 25%`·콘솔 오류 0을 관찰했다. 관련 Playwright는 공용 heavy slot 대기 중이다.
+- 현재 판정: builder의 정적·통합·렌더 증거는 충족했다. 관련 Playwright와 독립 QA 승인 전이므로 단계 판정은 **NG 유지**다.
 - 운영 배포·운영 DB 반영·push는 이 builder 범위 밖이며 컨트롤러가 수행한다.
 
 ## 2026-11-26 2.4.2 목표 등록 알림톡 템플릿 교체 (독립 QA 미수행)

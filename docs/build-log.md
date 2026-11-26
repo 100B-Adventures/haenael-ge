@@ -1,5 +1,14 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-27 2.4.3 통합 릴리스 후보
+
+- 병합: 운영 2.4.2 `c4ce291` 위에 카카오 인앱 로그인·결제·소셜(`1852251`), iOS Safari 15(`c5bd7d7`, `c4f7548`), 초대 OG C1(`73af93e`)을 merge commit으로 결합했다. 신규 migration 8개는 운영 적용분 뒤 `20261126090000`~`20261126140000` 순방향으로 재번호화했다.
+- 추가 수정: 공통 `GoalCover`의 업로드 사진만 `object-position: center 25%`를 적용하고, 카카오 프로필 HTTP URL을 저장·표시·별도 비파괴 UPDATE migration에서 HTTPS로 승격했다. Slack 관리자 링크 기본값은 운영 주소로 교체했다.
+- 검증: 전체 TypeScript·Vitest 111파일 663건, Deno 124건, pgTAP 30파일 537건, production build·Storybook build·Supabase 서버 계약 4종을 통과했다. 헤드리스 `/updates`는 HTTP 200·console error 0, 업로드 세로 사진 Storybook은 `object-position: 50% 25%`·console error 0을 관찰했다. 증거는 `.goal/runs/2.4.3-bundle/`에 있다.
+- 경계: 관련 Playwright는 공용 heavy slot 대기 중이다. 독립 QA 승인·push·운영 migration·Edge Function·Vercel 배포·실기기·실결제·Slack 실제 수신은 미검증이다. pipeline artifact lint는 이번 변경과 무관한 기존 대용량 승인 핀 요약층 4건 누락으로 차단됐다.
+
+> STAMP: 2026-11-27 KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=standard-dev, standard-qa-methodology, 병합 대상 3브랜치, 리뷰 PASS/MINOR 5건, Next Image 공식 문서, 로컬 Vitest·Deno·pgTAP·build·headless smoke · 고민=운영 migration 이력보다 과거인 병합 파일을 그대로 두지 않고 모두 순방향 번호로 정렬했다.
+
 ## 2026-11-26 2.4.2 목표 등록 전용 알림톡
 
 - 구현: 목표 생성 알림을 `CHEER_RECEIVED`에서 `GOAL_CREATED`로 교체했다. 인증된 원자 claim RPC가 회원 닉네임·전화번호와 목표 slug를 함께 반환하며 기존 목표당 1회 claim과 실패 흡수를 유지한다.

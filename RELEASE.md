@@ -25,7 +25,7 @@ ships:
   env: 기존 운영 Kakao·Toss·Slack·Supabase 계약 재사용; 새 실값 없음
 qa_gate:
   approved: false
-  evidence: builder 전체 검증 진행 중. 독립 QA 승인·push·운영 migration·Edge Function·Vercel 배포·실기기와 실결제는 미검증
+  evidence: builder 전체 TypeScript·Vitest 663건, Deno 124건, pgTAP 537건, production·Storybook build, Supabase 서버 계약 4종, 헤드리스 렌더 통과. 관련 Playwright는 공용 heavy slot 대기 중. 독립 QA 승인·push·운영 migration·Edge Function·Vercel 배포·실기기와 실결제는 미검증
 ```
 
 # 릴리스 매니페스트: 해낼게 2.4.2
