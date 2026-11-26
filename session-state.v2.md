@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-27 00:37 KST · 2.4.3 묶음 CI 수리 중 (회장 19시 "코덱스 다 쳐서 올리고")
+- 브랜치 release/2.4.3-bundle-20261126 (haenael-ge-welcome, 290621f): 1852251·c4f7548·c5bd7d7·73af93e 병합 + 표지 object-position 25%·http 프로필 https·Slack 링크. Codex 로컬 Vitest 663·Deno 124·pgTAP 537·build 통과.
+- CI 45850321281 실패: pgTAP kakao_oauth_callback_claim 권한, 환전 E2E goal-supporter-list 2개 렌더. Codex r14(resume 01a21838…) 수리 중, 로그 scratchpad/codex-r14.log.
+- 운영 적용할 마이그레이션 8개: 20261126090000, 091000, 100000, 110000, 115000(http→https UPDATE), 120000, 130000, 140000. 바뀐 함수: admin-review-goal-cover, auth-kakao, cheer-order, goal-cover-finalize, toss-confirm, toss-webhook.
+- 이관: GlitchTip·알림 ROI 표준 → [🇪🇸 제품·하네스-온프렘] 6609 (harness-goal-audit) 전달 완료. D-063 커밋 0450a6b.
+- 다음: r14 회수 → CI 녹색 → irreversible-approve(회장 19시 원문) → 마이그레이션 8개 → 함수 6개 → 웹 배포 → health 2.4.3 → 목표 17 표지·친구 목록 확인 → 보고. 그 뒤 친구 새 목표 인앱 알림(D-063 결정 3).
+
 ## 2026-11-26 18:55 KST · 2.4.2 운영 반영: 목표 등록 = 공유 독려 알림톡 1통
 - 운영: 웹 2.4.2 sourceSha c4ce291(health 관찰), main c4ce291, notify 함수 배포, 마이그레이션 20261126020000(enum GOAL_CREATED·claim_goal_created_notification), secret KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED. CI 45791461022 success. 비로그인 API 401 관찰.
 - 실발송: GOAL_CREATED 조성진(25)·이다솔(26) 솔라피 4000 수신 완료(관찰). 실제 회원 목표 생성 경로의 운영 발화는 미검증 → 다음 목표 생성 때 welcome_cheer_notification_delivery 줄·notification GOAL_CREATED 확인.
