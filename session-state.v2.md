@@ -1,5 +1,10 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-26 18:55 KST · 2.4.2 운영 반영: 목표 등록 = 공유 독려 알림톡 1통
+- 운영: 웹 2.4.2 sourceSha c4ce291(health 관찰), main c4ce291, notify 함수 배포, 마이그레이션 20261126020000(enum GOAL_CREATED·claim_goal_created_notification), secret KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED. CI 45791461022 success. 비로그인 API 401 관찰.
+- 실발송: GOAL_CREATED 조성진(25)·이다솔(26) 솔라피 4000 수신 완료(관찰). 실제 회원 목표 생성 경로의 운영 발화는 미검증 → 다음 목표 생성 때 welcome_cheer_notification_delivery 줄·notification GOAL_CREATED 확인.
+- 남은 것: 2.4.x 묶음(1852251 사진 즉시 공개·친구 카드·배너 제거, c4f7548, c5bd7d7, 73af93e)을 main c4ce291 위로 합쳐 2.4.3. 추가: 표지 세로 사진 얼굴 잘림(가로 띠 crop), http 프로필 사진 https 정규화. 신고 기능은 나중.
+
 ## 2026-11-26 17:48 KST · 2.4.1 운영 반영(목표 생성 환영 응원 알림톡), 2.4.2 공유 독려 템플릿 교체 진행
 - 운영: 웹 2.4.1 sourceSha 7098039(health 관찰), main 7098039 push, DB 마이그레이션 20261126010000(표 welcome_cheer_notification_delivery·함수 claim_welcome_cheer_notification) 반영 관찰. CI 45778273434 success.
 - 실발송: notify 직접 호출로 조성진(notification 23)·이다솔(24) CHEER_RECEIVED "해낼게님이 … 응원" 발송, 솔라피 상태 4000 수신 완료(관찰). 실제 목표 생성 경로 운영 발화는 미검증(다음 회원 목표 생성 때 delivery 표에 줄이 생기는지 본다).
