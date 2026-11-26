@@ -118,6 +118,9 @@ export function coverErrorStatus(code: string): number {
   if (code === "file_too_large") return 413;
   if (code === "unsupported_media_type") return 415;
   if (code === "hash_mismatch" || code.startsWith("invalid_")) return 422;
-  if (code === "asset_not_reviewable" || code === "asset_not_removable") return 409;
+  if (
+    code === "asset_not_reviewable" || code === "asset_not_removable" ||
+    code === "asset_stale"
+  ) return 409;
   return 500;
 }

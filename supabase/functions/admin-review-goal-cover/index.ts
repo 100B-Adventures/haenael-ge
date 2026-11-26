@@ -61,7 +61,13 @@ Deno.serve(async (req) => {
         "admin_remove_goal_cover",
         { p_asset_id: assetId, p_admin_id: user.id },
       );
-      if (removeError) throw new Error("review_apply_failed");
+      if (removeError) {
+        throw new Error(
+          removeError.message.includes("asset_not_removable")
+            ? "asset_not_removable"
+            : "review_apply_failed",
+        );
+      }
       const publicPath = result?.public_path;
       if (typeof publicPath === "string" && publicPath) {
         await service.storage.from("goal-cover-public").remove([publicPath]);
@@ -83,7 +89,7 @@ Deno.serve(async (req) => {
         "goal-cover-public",
       ).upload(candidatePath, source, {
         contentType: asset.mime_type,
-        upsert: false,
+        upsert: true,
       });
       if (copyError) throw new Error("public_copy_failed");
       copiedPath = candidatePath;
@@ -105,13 +111,17 @@ Deno.serve(async (req) => {
       throw new Error(
         applyError.message.includes("asset_not_reviewable")
           ? "asset_not_reviewable"
+          : applyError.message.includes("asset_stale")
+          ? "asset_stale"
           : "review_apply_failed",
       );
     }
     return coverJson(200, result);
   } catch (error) {
     if (copiedPath) {
-      await service.storage.from("goal-cover-public").remove([copiedPath]);
+      const { error: cleanupError } = await service.storage.from("goal-cover-public")
+        .remove([copiedPath]);
+      if (cleanupError) console.error("[admin-review-goal-cover] public cleanup failed");
     }
     const code = error instanceof Error ? error.message : "cover_review_failed";
     return coverJson(coverErrorStatus(code), { error: { code } });

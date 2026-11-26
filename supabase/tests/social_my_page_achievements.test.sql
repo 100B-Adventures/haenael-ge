@@ -130,14 +130,14 @@ SELECT ok(
 
 SELECT is(
   (public.my_social_dashboard()->'goals'->0->>'cheer_count')::integer,
-  2,
-  'CS-01 홈 목표 응원 수는 CONFIRMED 비환영 응원만 집계'
+  3,
+  'CS-01 홈 목표 응원 수는 환영 응원을 한 사람으로 포함한다'
 );
 SELECT ok(
   jsonb_array_length(public.my_social_dashboard()->'goals'->0->'supporter_avatars') <= 3
     AND (public.my_social_dashboard()->'goals'->0->'supporter_avatars') @>
-      '[{"profile_image": null, "is_anonymous": true}]'::jsonb,
-  'CS-02 아바타는 최대 3개이고 익명 프로필은 null'
+      '[{"profile_image": null, "is_anonymous": true}, {"profile_image": null, "is_anonymous": false}]'::jsonb,
+  'CS-02 아바타는 최대 3개이고 환영 응원도 익명이 아닌 한 사람으로 표시한다'
 );
 SELECT ok(
   (public.my_social_dashboard()->'goals'->0->'recent_cheer'->>'is_anonymous')::boolean

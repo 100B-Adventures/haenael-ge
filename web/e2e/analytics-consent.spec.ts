@@ -75,6 +75,7 @@ test("AN-CONSENT-03 모바일 비회원은 하단 탭을 써도 배너가 0개�
 
   await bottomNav.getByRole("button", { name: "친구" }).click();
   await expect(banner).toHaveCount(0);
+  await expect(page.getByTestId("guest-teaser-sheet")).toBeVisible();
 });
 
 const localSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";

@@ -4606,6 +4606,116 @@ test.describe("V2 web-first social slice", () => {
     expect(persisted).toEqual({ status: "UPLOADING", owner_member_id: ids.owner });
   });
 
+  test("QA-TC-WELCOME-CHEER-01 주인 화면도 환영 응원을 한 사람으로 표시한다", async ({ browser }) => {
+    const { count: confirmedCount, error: countError } = await admin.from("cheer")
+      .select("id", { head: true, count: "exact" })
+      .eq("goal_id", ownerGoal)
+      .eq("status", "CONFIRMED")
+      .is("deleted_at", null);
+    const { count: welcomeCount, error: welcomeError } = await admin.from("cheer")
+      .select("id", { head: true, count: "exact" })
+      .eq("goal_id", ownerGoal)
+      .eq("status", "CONFIRMED")
+      .eq("is_welcome", true);
+    expect(countError).toBeNull();
+    expect(welcomeError).toBeNull();
+    expect(welcomeCount).toBe(1);
+
+    const context = await authContext(browser, emails.owner);
+    const page = await context.newPage();
+    await page.goto(`/me/goal/${ownerGoal}`, { waitUntil: "domcontentloaded" });
+    const count = page.getByTestId("goal-management-wordmap").locator("strong").first();
+    await expect(count).toHaveText(String(confirmedCount));
+    console.info("QA_WELCOME_OWNER_COUNT", JSON.stringify({
+      displayed: Number(await count.textContent()),
+      confirmed: confirmedCount,
+      welcome: welcomeCount,
+    }));
+    await context.close();
+  });
+
+  test("QA-TC-GOAL-COVER-02 관리자는 서명 썸네일을 보고 오래된 사진을 승인할 수 없다", async ({ browser }) => {
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "base64",
+    );
+    const staleAssetId = crypto.randomUUID();
+    const activeAssetId = crypto.randomUUID();
+    const stalePath = `${ids.owner}/stale-${staleAssetId}.png`;
+    const activePublicPath = `stale-review/${activeAssetId}.png`;
+    const slug = `stale-cover-${runId}`;
+    const { data: goal, error: goalError } = await admin.from("goal").insert({
+      member_id: ids.owner,
+      slug,
+      title: "오래된 사진 승인 방지 해낼게",
+      due_date: isoDateFromNow(30),
+      visibility: "PUBLIC",
+    }).select("id").single();
+    expect(goalError).toBeNull();
+    expect(goal).not.toBeNull();
+    try {
+      expect((await admin.storage.from("goal-cover-quarantine").upload(
+        stalePath, png, { contentType: "image/png", upsert: true },
+      )).error).toBeNull();
+      expect((await admin.storage.from("goal-cover-public").upload(
+        activePublicPath, png, { contentType: "image/png", upsert: true },
+      )).error).toBeNull();
+      const { error: assetError } = await admin.from("goal_cover_asset").insert([{
+        id: staleAssetId,
+        goal_id: goal!.id,
+        owner_member_id: ids.owner,
+        quarantine_path: stalePath,
+        status: "REVIEW",
+        content_sha256: "a".repeat(64),
+        mime_type: "image/png",
+        byte_size: png.byteLength,
+        created_at: new Date(Date.now() - 86_400_000).toISOString(),
+        review_source: "ADMIN",
+      }, {
+        id: activeAssetId,
+        goal_id: goal!.id,
+        owner_member_id: ids.owner,
+        quarantine_path: `${ids.owner}/active-${activeAssetId}.png`,
+        public_path: activePublicPath,
+        status: "APPROVED",
+        content_sha256: "b".repeat(64),
+        mime_type: "image/png",
+        byte_size: png.byteLength,
+        reviewed_by: ids.owner,
+        reviewed_at: new Date().toISOString(),
+        review_source: "AUTO",
+        created_at: new Date().toISOString(),
+      }]);
+      expect(assetError).toBeNull();
+      expect((await admin.from("goal").update({
+        active_cover_asset_id: activeAssetId,
+        cover_selection_mode: "CUSTOM",
+      }).eq("id", goal!.id)).error).toBeNull();
+
+      const context = await authContext(browser, emails.admin);
+      const page = await context.newPage();
+      await page.goto("/admin", { waitUntil: "domcontentloaded" });
+      const staleCard = page.getByTestId("goal-cover-review-queue").locator("article")
+        .filter({ hasText: "더 새 사진이 이미 공개됨" });
+      await expect(staleCard).toHaveCount(1);
+      await expect(staleCard.getByText("더 새 사진이 이미 공개됨")).toBeVisible();
+      await expect(staleCard.getByRole("button", { name: "승인" })).toBeDisabled();
+      const image = staleCard.getByRole("img");
+      await expect(image).toBeVisible();
+      await expect.poll(() => image.evaluate(
+        (node) => (node as HTMLImageElement).naturalWidth,
+      )).toBeGreaterThan(0);
+      expect(await image.getAttribute("src")).toContain("/storage/v1/object/sign/");
+      await context.close();
+    } finally {
+      await admin.from("goal").update({ active_cover_asset_id: null }).eq("id", goal!.id);
+      await admin.from("goal_cover_asset").delete().in("id", [staleAssetId, activeAssetId]);
+      await admin.storage.from("goal-cover-quarantine").remove([stalePath]);
+      await admin.storage.from("goal-cover-public").remove([activePublicPath]);
+      await admin.from("goal").delete().eq("id", goal!.id);
+    }
+  });
+
   test("QA-TC-AU-05 쿠키 없는 Server Action 직접 POST는 인증 실패하고 상태를 바꾸지 않는다", async ({ browser }) => {
     const { data: before, error: beforeError } = await admin.from("goal")
       .select("cover_preset_key")

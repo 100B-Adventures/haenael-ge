@@ -272,7 +272,17 @@ export default async function AdminPage() {
   const ledger = ledgerResult.data ?? [];
   // W-8: 목록은 authenticated RPC로 마스킹 필드만 읽는다. 복호화는 행별 액션에서만 한다.
   const cashouts = cashoutsResult.data ?? [];
-  const covers = coversResult.data ?? [];
+  const covers = await Promise.all((coversResult.data ?? []).map(async (cover) => {
+    if (cover.public_path) {
+      const { data } = serviceClient.storage.from("goal-cover-public")
+        .getPublicUrl(cover.public_path);
+      return { ...cover, preview_url: data.publicUrl || null };
+    }
+    const { data, error } = await serviceClient.storage
+      .from("goal-cover-quarantine")
+      .createSignedUrl(cover.quarantine_path, 120);
+    return { ...cover, preview_url: error ? null : data.signedUrl };
+  }));
   const alerts = (alertsResult.data ?? []) as unknown as AdminOpsAlert[];
 
   return (

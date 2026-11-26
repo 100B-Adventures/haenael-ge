@@ -8,7 +8,10 @@ import {
   sha256Hex,
 } from "../_shared/goal-cover.ts";
 import { sendSlackAlert } from "../_shared/slack.ts";
-import { notifyGoalCoverPublished } from "../_shared/goal-cover-alert.ts";
+import {
+  goalCoverAdminUrl,
+  notifyGoalCoverPublished,
+} from "../_shared/goal-cover-alert.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -85,7 +88,7 @@ Deno.serve(async (req) => {
       const extension = coverAsset.quarantine_path.split(".").pop() ?? "webp";
       const candidatePath = `${coverAsset.goal_id}/${coverAsset.id}.${extension}`;
       const { error: copyError } = await service.storage.from("goal-cover-public")
-        .upload(candidatePath, blob, { contentType: coverAsset.mime_type, upsert: false });
+        .upload(candidatePath, blob, { contentType: coverAsset.mime_type, upsert: true });
       if (copyError) throw new Error("public_copy_failed");
       copiedPath = candidatePath;
       const { data: published } = service.storage.from("goal-cover-public")
@@ -103,6 +106,9 @@ Deno.serve(async (req) => {
       assetId,
       goalId: coverAsset.goal_id,
       visibility: coverGoal.visibility,
+      adminUrl: goalCoverAdminUrl(
+        Deno.env.get("NEXT_PUBLIC_APP_URL") ?? undefined,
+      ),
     });
     return coverJson(200, {
       asset_id: assetId,
@@ -112,7 +118,9 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     if (copiedPath && service) {
-      await service.storage.from("goal-cover-public").remove([copiedPath]);
+      const { error: cleanupError } = await service.storage.from("goal-cover-public")
+        .remove([copiedPath]);
+      if (cleanupError) console.error("[goal-cover-finalize] public cleanup failed");
     }
     const code = error instanceof Error
       ? error.message

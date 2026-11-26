@@ -4,7 +4,7 @@ type AlertSender = (alert: SlackAlert) => Promise<boolean>;
 
 export async function notifyGoalCoverPublished(
   send: AlertSender,
-  input: { assetId: string; goalId: number; visibility: string },
+  input: { assetId: string; goalId: number; visibility: string; adminUrl: string },
 ) {
   return send({
     event: "goal_cover_published",
@@ -14,6 +14,19 @@ export async function notifyGoalCoverPublished(
       asset_id: input.assetId,
       goal_id: input.goalId,
       visibility: input.visibility,
+      admin_url: input.adminUrl,
     },
   });
+}
+
+export function goalCoverAdminUrl(siteUrl?: string) {
+  try {
+    const url = new URL(siteUrl || "https://haenael.app");
+    url.pathname = "/admin";
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return "https://haenael.app/admin";
+  }
 }

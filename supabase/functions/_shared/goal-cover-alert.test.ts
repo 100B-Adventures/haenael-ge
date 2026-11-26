@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { notifyGoalCoverPublished } from "./goal-cover-alert";
+import { goalCoverAdminUrl, notifyGoalCoverPublished } from "./goal-cover-alert";
 
 describe("목표 사진 운영 알림", () => {
   it("QA-TC-GOAL-COVER-ALERT-01 공개 직후 식별자와 공개 범위만 Slack 알림으로 보낸다", async () => {
@@ -9,6 +9,7 @@ describe("목표 사진 운영 알림", () => {
       assetId: "asset-safe-id",
       goalId: 17,
       visibility: "PUBLIC",
+      adminUrl: "https://haenael.app/admin",
     })).resolves.toBe(true);
 
     expect(send).toHaveBeenCalledWith({
@@ -19,8 +20,15 @@ describe("목표 사진 운영 알림", () => {
         asset_id: "asset-safe-id",
         goal_id: 17,
         visibility: "PUBLIC",
+        admin_url: "https://haenael.app/admin",
       },
     });
     expect(JSON.stringify(send.mock.calls)).not.toMatch(/webhook|token|secret/i);
+  });
+
+  it("QA-TC-GOAL-COVER-ALERT-02 관리자 링크에는 서명값과 비밀값을 싣지 않는다", () => {
+    expect(goalCoverAdminUrl("https://haenael.app/path?token=secret#hash"))
+      .toBe("https://haenael.app/admin");
+    expect(goalCoverAdminUrl("not-a-url")).toBe("https://haenael.app/admin");
   });
 });

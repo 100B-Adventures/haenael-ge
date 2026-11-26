@@ -334,14 +334,14 @@ SELECT ok(
 SELECT ok(
   public.my_goal_cheer_summary(
     (SELECT id FROM public.goal WHERE slug = 'v2-viewer'), NULL, 20
-  ) @> '{"total_count":2}'::jsonb
+  ) @> '{"total_count":3}'::jsonb
   AND jsonb_array_length(public.my_goal_cheer_summary(
     (SELECT id FROM public.goal WHERE slug = 'v2-viewer'), NULL, 20
-  )->'items') = 2
+  )->'items') = 3
   AND public.my_goal_cheer_summary(
     (SELECT id FROM public.goal WHERE slug = 'v2-viewer'), NULL, 20
   )->'items' @> '[{"display_name":"Friend","cheer_count":2}]'::jsonb,
-  'V2-CHEER-03 owner 목표 응원을 고유 supporter 단위 total과 supporter별 횟수로 반환한다'
+  'V2-CHEER-03 owner 목표 응원에 환영 응원을 한 사람으로 포함하고 supporter별 횟수를 반환한다'
 );
 SELECT ok(
   jsonb_array_length(public.my_goal_cheer_summary(
@@ -381,11 +381,11 @@ SELECT set_config(
 SELECT ok(
   public.my_goal_cheer_summary(
     (SELECT id FROM public.goal WHERE slug = 'v2-many'), NULL, 20
-  ) @> '{"total_count":21}'::jsonb
+  ) @> '{"total_count":22}'::jsonb
   AND jsonb_array_length(public.my_goal_cheer_summary(
     (SELECT id FROM public.goal WHERE slug = 'v2-many'), NULL, 20
   )->'items') = 20,
-  'V2-CHEER-07 고유 supporter 21명이면 total_count는21이고 items만20으로 제한한다'
+  'V2-CHEER-07 고유 supporter 21명과 환영 응원 한 명을 합쳐 total_count는22이고 items만20으로 제한한다'
 );
 SELECT throws_ok(
   $$SELECT public.my_goal_cheer_summary(

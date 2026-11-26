@@ -534,6 +534,7 @@ export type Database = {
           public_path: string | null
           quarantine_path: string
           rejection_code: string | null
+          review_source: string
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -549,6 +550,7 @@ export type Database = {
           public_path?: string | null
           quarantine_path: string
           rejection_code?: string | null
+          review_source?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status: string
@@ -564,6 +566,7 @@ export type Database = {
           public_path?: string | null
           quarantine_path?: string
           rejection_code?: string | null
+          review_source?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -1369,9 +1372,12 @@ export type Database = {
           created_at: string
           goal_id: number
           goal_title: string
+          is_stale: boolean
           mime_type: string
           owner_nickname: string
+          public_path: string | null
           quarantine_path: string
+          status: string
         }[]
       }
       admin_list_ledger: {
