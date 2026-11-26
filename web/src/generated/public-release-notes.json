@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.4.3",
+      "releaseTag": "2.4.3+kakao-social-ios-og-bundle",
+      "date": "2026-11-26",
+      "title": "카카오톡 안에서도 로그인하고 친구 목표를 더 또렷하게 볼 수 있어요",
+      "summary": "로그인과 결제 오류 안내를 다듬고, 친구 사진·소개·응원 기록과 목표 사진 표시를 고쳤어요.",
+      "notify": false,
+      "tryHref": "/my",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.4.2",
       "releaseTag": "2.4.2+goal-created-alimtalk",
       "date": "2026-11-26",
@@ -19,16 +29,6 @@
       "summary": "목표 생성 직후 시스템 웰컴 응원 알림을 한 번 받아요.",
       "notify": false,
       "tryHref": "/onboarding",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.4.0",
-      "releaseTag": "2.4.0+d057-cheer-login",
-      "date": "2026-11-24",
-      "title": "친구 화면에서 바로 응원하고, 익명 응원도 내 기록에 남아요",
-      "summary": "친구 목표 화면에 응원하기 버튼이 생겼어요. 응원은 카카오 로그인 뒤에 보내고, 익명으로 보낸 응원도 마이페이지 보낸 응원에서 보고 언제든 공개로 바꿀 수 있어요.",
-      "notify": true,
-      "tryHref": "/my",
       "feedbackHref": "/updates#feedback"
     }
   ]

@@ -1,10 +1,41 @@
-# 릴리스 후보 매니페스트: 해낼게 2.4.2
+# 릴리스 후보 매니페스트: 해낼게 2.4.3
+
+```yaml
+release: 2.4.3
+release_tag: 2.4.3+kakao-social-ios-og-bundle
+date: 2026-11-26
+status: build
+line: v2
+delivery: vercel (main push 자동배포) + Supabase migrations + Edge Functions
+deployment_order: 1) 아래 migration 8개를 timestamp 순서로 적용 2) 변경 Edge Functions 배포 3) Vercel 웹 배포 4) 실기기 로그인·결제·Slack 수신 확인
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.4.2 (c4ce291, 운영 배포됨)
+reason: 회장 2026-11-26 "일단은 코덱스 다 쳐서 올리고" — 11-25 카카오 인앱 로그인·결제·소셜·iOS Safari 수정과 초대 OG C1을 한 후보로 결합
+public_note:
+  title: "카카오톡 안에서도 로그인하고 친구 목표를 더 또렷하게 볼 수 있어요"
+  summary: "로그인과 결제 오류 안내를 다듬고, 친구 사진·소개·응원 기록과 목표 사진 표시를 고쳤어요."
+  notify: false
+  try_href: /my
+  feedback_href: /updates#feedback
+ships:
+  code: 카카오톡 인앱 외부 브라우저 복귀·callback claim, 간편결제 보상 경계, 친구 프로필·소개·환영 응원·목표 사진 즉시 공개와 관리자 내리기, iOS Safari 15 번들 호환, 초대 OG C1
+  fixes: 업로드 목표 사진 상단 초점, 카카오 프로필 HTTP 저장·표시 HTTPS 승격, 목표 사진 Slack 관리자 링크 운영 도메인 기본값
+  migrations: 20261126090000, 20261126091000, 20261126100000, 20261126110000, 20261126115000, 20261126120000, 20261126130000, 20261126140000
+  edge_functions: auth-kakao, cheer-order, toss-confirm, toss-webhook, profile-update, goal-cover-sign-upload, goal-cover-finalize, admin-review-goal-cover
+  env: 기존 운영 Kakao·Toss·Slack·Supabase 계약 재사용; 새 실값 없음
+qa_gate:
+  approved: false
+  evidence: builder 전체 검증 진행 중. 독립 QA 승인·push·운영 migration·Edge Function·Vercel 배포·실기기와 실결제는 미검증
+```
+
+# 릴리스 매니페스트: 해낼게 2.4.2
 
 ```yaml
 release: 2.4.2
 release_tag: 2.4.2+goal-created-alimtalk
 date: 2026-11-26
-status: build
+status: released
+released_at: 2026-11-26 (source c4ce291, 컨트롤러 제공 운영 기준)
 line: v2
 delivery: vercel (main push 자동배포) + Supabase migration + notify Edge Function
 deployment_order: 1) 20261126020000 migration 적용·GOAL_CREATED enum과 claim_goal_created_notification 확인 2) notify Edge Function 배포·GOAL_CREATED 검증 확인 3) Vercel 웹 배포
