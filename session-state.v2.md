@@ -1,5 +1,13 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-27 01:29 KST] compact 마크 (auto)
+- 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
+- 직전 커밋: 10bf6e3 docs(ops): 2.4.3 deploy record
+- compact 직전 컨텍스트: 313180 토큰
+- 마지막 회장 요청: 지금 이세션에서할거다했냐? 남았으면 codex 시켜 ios android 미니앱 근황은?
+- 직전에 고친 파일: codex-r10.txt r14.md r15.md
+- ⚠ 이 줄 위로 서사를 세션이 직접 보강한다(훅은 기계가 아는 사실만 적는다).
+
 ## 2026-11-27 01:21 KST · 2.4.3 운영 반영(묶음)
 - 운영: health 2.4.3·7d0a6e4(관찰), main 7d0a6e4. CI 45856348441 success(4 job). 마이그레이션 8개 적용(090000~140000), http 프로필 0건. Edge Function 6개 배포(auth-kakao, cheer-order, toss-confirm, toss-webhook, goal-cover-finalize, admin-review-goal-cover).
 - 운영 /g/ym7gh6kb 휴대폰 크기 실측: 동의 창 없음, 분석 외부 요청 0, 표지 object-position 50% 25%·naturalWidth 1290, "2명이 응원했어요"(환영 1+결제 1). 거울 셀카라 얼굴은 여전히 대부분 잘림. 응원 문구 상자가 비어 보임(결함 여부 미검증).
