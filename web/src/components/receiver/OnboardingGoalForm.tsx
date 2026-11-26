@@ -135,6 +135,24 @@ async function saveGoalToDB(
     return { error: "목표 생성에 실패했습니다." };
   }
 
+  void fetch("/api/notifications/welcome-cheer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ goalSlug: row.slug }),
+    keepalive: true,
+  }).then((response) => {
+    if (!response.ok) {
+      console.error("[OnboardingGoalForm] welcome notification request failed", {
+        status: response.status,
+      });
+    }
+  }).catch((notificationError) => {
+    console.error(
+      "[OnboardingGoalForm] welcome notification request threw",
+      notificationError,
+    );
+  });
+
   if (!coverFile) return { slug: row.slug };
 
   const { data: createdGoal, error: goalLookupError } = await supabase

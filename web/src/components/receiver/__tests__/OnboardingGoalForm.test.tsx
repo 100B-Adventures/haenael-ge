@@ -182,6 +182,24 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     expect(hasSaveIntent()).toBe(false);
   });
 
+  it("WCN-U06 웰컴 알림 요청 실패는 목표 저장 완료를 막지 않는다", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("notification network unavailable"));
+    render(<OnboardingGoalForm initialUser={fakeUser} />);
+    fillForm();
+    fireEvent.click(screen.getByTestId("save-goal-button"));
+
+    await waitFor(() => {
+      expect(mockTrackEvent).toHaveBeenCalledWith("goal_created", {
+        source: "onboarding",
+      });
+    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/notifications/welcome-cheer",
+      expect.objectContaining({ method: "POST", keepalive: true }),
+    );
+    expect(screen.queryByText("저장 중 오류가 발생했어요. 다시 시도해 주세요.")).not.toBeInTheDocument();
+  });
+
   it("⑤ 선택한 커버 프리셋을 create_goal 계약에 함께 저장한다", async () => {
     render(<OnboardingGoalForm initialUser={fakeUser} />);
     fillForm();

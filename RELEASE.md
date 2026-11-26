@@ -1,3 +1,31 @@
+# 릴리스 후보 매니페스트: 해낼게 2.4.1
+
+```yaml
+release: 2.4.1
+release_tag: 2.4.1+welcome-cheer-alimtalk
+date: 2026-11-26
+status: build
+line: v2
+delivery: vercel (main push 자동배포) + Supabase migration
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.4.0 (34cd06e)
+reason: 회장 2026-11-26 "해낼게 만들면 응원한다고 알림가고 (시스템이 첫응원해주는거지)"
+public_note:
+  title: "목표를 만들면 해낼게가 첫 응원을 알려드려요"
+  summary: "목표 생성 직후 시스템 웰컴 응원 알림을 한 번 받아요."
+  notify: false
+  try_href: /onboarding
+  feedback_href: /updates#feedback
+ships:
+  code: 목표 생성 성공 → 로그인 본인의 최근 목표 원자 claim → 기존 notify CHEER_RECEIVED(응원자 해낼게). 템플릿 선택은 welcome-cheer-notification.ts 한 곳에서 관리
+  migrations: 20261126010000_welcome_cheer_notification.sql (비파괴 신규 claim 테이블·RPC)
+  edge_functions: 기존 notify 재사용, 변경 없음
+  env: none (기존 NOTIFY_INTERNAL_TOKEN·Solapi 설정 재사용)
+qa_gate:
+  approved: false
+  evidence: 로컬 build 단계 Vitest·TypeScript 100파일/604건, 표적 단위 6/6, pgTAP 8/8, Next production build 통과. 헤드리스 `/onboarding` HTTP 200·console/page error 0, 비로그인 신규 API 401. 독립 QA 승인·운영 배포·실 알림톡 수신은 미검증
+```
+
 # 릴리스 매니페스트: 해낼게 2.4.0
 
 ```yaml

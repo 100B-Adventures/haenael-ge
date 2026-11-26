@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.4.1",
+      "releaseTag": "2.4.1+welcome-cheer-alimtalk",
+      "date": "2026-11-26",
+      "title": "목표를 만들면 해낼게가 첫 응원을 알려드려요",
+      "summary": "목표 생성 직후 시스템 웰컴 응원 알림을 한 번 받아요.",
+      "notify": false,
+      "tryHref": "/onboarding",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.4.0",
       "releaseTag": "2.4.0+d057-cheer-login",
       "date": "2026-11-24",
@@ -19,16 +29,6 @@
       "summary": "초대 화면의 카카오톡 초대 버튼을 누르면 카카오톡 공유창이 바로 열려요.",
       "notify": false,
       "tryHref": "/invite",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.3.1",
-      "releaseTag": "2.3.1+fix-cheer-sheet-height",
-      "date": "2026-11-15",
-      "title": "응원 결제창이 작은 화면에서도 잘 보여요",
-      "summary": "휴대폰 화면이 작아도 응원 결제창을 끝까지 볼 수 있고, 결제 버튼이 아래 메뉴에 가리지 않아요.",
-      "notify": false,
-      "tryHref": "/updates",
       "feedbackHref": "/updates#feedback"
     }
   ]

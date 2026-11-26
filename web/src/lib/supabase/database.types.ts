@@ -1569,6 +1569,13 @@ export type Database = {
               slug: string
             }[]
           }
+      claim_welcome_cheer_notification: {
+        Args: { p_goal_slug: string }
+        Returns: {
+          goal_id: number
+          goal_title: string
+        }[]
+      }
       expire_stale_cheer_payments: { Args: never; Returns: number }
       friend_goal_detail: { Args: { goal_id: number }; Returns: Json }
       friend_invite_preview: { Args: { token: string }; Returns: Json }

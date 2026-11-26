@@ -1,5 +1,11 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-26 2.4.1 build 결함 등록·보정 (독립 QA 미수행)
+
+- **NG 등록**: 운영 2.4.0은 응원 도착 `CHEER_RECEIVED` 알림톡은 보내지만, 목표 생성 시 DB가 웰컴 응원을 만들어도 notify 호출이 없어 알림톡은 0건이었다.
+- **🔧 builder 보정**: 2.4.1 후보에 본인 소유·최근 목표·웰컴 응원·1회 claim 검증과 best-effort notify를 추가했다. 표적 단위 6/6, 전체 Vitest·TypeScript 604/604, pgTAP 8/8, build, 헤드리스 렌더 200·콘솔 오류 0이다. 이는 build 증거이며 독립 QA PASS·운영 배포·실 알림톡 수신 판정은 아니다.
+- 증거: `.goal/runs/2.4.1-welcome-cheer/{targeted-vitest.log,full-vitest.log,pgtap-targeted.log,build.log,smoke-curl.log,headless-smoke.json}`.
+
 | 표지 | 값 |
 |---|---|
 | 현재 보고 버전 | v2.2.0 (2026-11-12, 업데이트 의견·회원 본 버전 동기화) |

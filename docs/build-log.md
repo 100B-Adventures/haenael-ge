@@ -1,5 +1,15 @@
 # 해낼게 V2 소셜 바이럴 루프 build 로그
 
+## 2026-11-26 2.4.1 목표 생성 웰컴 응원 알림톡
+
+- 목적: 목표를 만든 회원이 시스템 첫 응원을 즉시 알림톡으로 받되, 알림 장애가 목표 생성을 막지 않게 한다. 이웃 영향 후보는 `create_goal`·웰컴 응원 트리거·기존 결제 응원 알림·notification 폴백이었고, 기존 결제 경로는 변경하지 않았다.
+- 구현: 비공개 claim 테이블·`claim_welcome_cheer_notification` RPC, `/api/notifications/welcome-cheer`, `welcome-cheer-notification.ts` 템플릿 선택점, 온보딩 성공 후 best-effort 호출을 추가했다. 타인 목표·생성 5분 초과·중복 claim은 DB가 빈 결과로 거부한다.
+- 증거: `.goal/runs/2.4.1-welcome-cheer/` 아래 표적 Vitest 6/6, 전체 TypeScript·Vitest 100파일/604건, pgTAP 8/8, Next 2.4.1 production build 통과. 로컬 Supabase env로 dev 서버를 올려 `/onboarding` HTTP 200·console/page error 0, 비로그인 API 401을 관찰했다.
+- 경계: 첫 production-start smoke는 로컬 Supabase env 미주입으로 500이었고 제품 코드 결함으로 판정하지 않았다. env를 메모리로만 주입한 dev smoke로 재검증했다. 운영·staging 배포, 운영 DB 쓰기, 실 알림톡 수신은 수행하지 않았다.
+- 산출물 린트는 이 변경과 무관한 기존 승인 핀 4건의 대용량 요약 층 누락으로 차단됐다(PRD 1건, design prototype 3건). 본 build의 코드·릴리스 변경이 만든 결손은 아니며, 단계 승격 시 컨트롤러가 핀 재계산과 함께 별도 해소해야 한다. 근거 `.goal/runs/2.4.1-welcome-cheer/pipeline-artifact-lint.log`.
+
+> STAMP: 2026-11-26 16:4x KST · model=GPT-5 Codex · agent=code-builder · skills=haenael-supabase-build · 근거=standard-dev, Supabase 공식 server auth 문서, 기존 notify·cashout·welcome trigger, 로컬 Vitest·pgTAP·build·headless smoke · 고민=클라이언트 입력을 slug 하나로 제한하고 권한·시간·멱등은 DB 원자 claim으로 구속했다.
+
 ## 2026-11-21 2.3.2 카카오톡 초대 수정
 
 - web/next.config.ts CSP connect-src 에 https://kapi.kakao.com 추가(043203e), form-action 에 sharer.kakao.com·accounts.kakao.com 추가(11-21, staging 실측으로 043203e 만으로는 공유창 미열림 확인). security-headers 단위 시험 07·08.
