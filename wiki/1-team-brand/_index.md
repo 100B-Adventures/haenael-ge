@@ -17,6 +17,7 @@ visibility: private
 
 ## 여기 있는 것
 
+- ["멀리서 응원할게" 순환](vision-flywheel.md): 서비스가 커지는 방향 정본(목표→응원→결과·감사→새 목표, 회장 2026-11-26). 기획·마케팅·버전업 착수 때 먼저 읽는다
 - [브랜드 마케팅 전략](brand-marketing-strategy.md): 포지셔닝, 톤, 메시징 필러, 채널 원칙
 - [채널 아이덴티티 킷](channel-identity-kit.md): 계정명, 바이오, 해시태그, 초기 채널 세팅
 - [스토리 정본](story-canon.md): 오리진과 유저 중심 서사 위계
