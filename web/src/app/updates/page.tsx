@@ -31,7 +31,7 @@ export default function UpdatesPage() {
       </section>
 
       <ol className="updates-list" aria-label="최근 업데이트">
-        {publicReleaseNotes.map((release, index) => (
+        {publicReleaseNotes.slice(0, 3).map((release, index) => (
           <li className="updates-card" key={release.version}>
             <div className="updates-card-meta">
               <span>버전 {release.version}</span>

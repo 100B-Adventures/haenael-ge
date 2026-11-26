@@ -30,6 +30,16 @@
       "notify": false,
       "tryHref": "/onboarding",
       "feedbackHref": "/updates#feedback"
+    },
+    {
+      "version": "2.4.0",
+      "releaseTag": "2.4.0+d057-cheer-login",
+      "date": "2026-11-24",
+      "title": "친구 화면에서 바로 응원하고, 익명 응원도 내 기록에 남아요",
+      "summary": "친구 목표 화면에 응원하기 버튼이 생겼어요. 응원은 카카오 로그인 뒤에 보내고, 익명으로 보낸 응원도 마이페이지 보낸 응원에서 보고 언제든 공개로 바꿀 수 있어요.",
+      "notify": true,
+      "tryHref": "/my",
+      "feedbackHref": "/updates#feedback"
     }
   ]
 }

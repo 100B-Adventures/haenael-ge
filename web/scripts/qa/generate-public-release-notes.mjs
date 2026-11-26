@@ -74,10 +74,14 @@ export function parsePublicReleaseNotes(markdown) {
     });
   }
 
-  return releases
+  const sorted = releases
     .filter(({ version }) => version.localeCompare("2.1.3", undefined, { numeric: true }) >= 0)
-    .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }))
-    .slice(0, 3);
+    .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }));
+  const visible = sorted.slice(0, 3);
+  const latestAnnounced = sorted.find(({ notify }) => notify);
+  return latestAnnounced && !visible.some(({ version }) => version === latestAnnounced.version)
+    ? [...visible, latestAnnounced]
+    : visible;
 }
 
 // web 만 따로 복사한 패키지(CI 의 VERCEL-PACKAGE 계약, web 경계 밖 파일 없음)에서는 RELEASE.md 가 없다.
@@ -91,8 +95,8 @@ if (!existsSync(releasePath)) {
 
 const packageVersion = JSON.parse(readFileSync(resolve(webRoot, "package.json"), "utf8")).version;
 const releaseNotes = parsePublicReleaseNotes(readFileSync(releasePath, "utf8"));
-if (releaseNotes.length !== 3 || releaseNotes[0]?.version !== packageVersion) {
-  throw new Error(`expected newest three public releases from ${packageVersion}, received ${releaseNotes.map(({ version }) => version).join(", ")}`);
+if (releaseNotes.length < 3 || releaseNotes.length > 4 || releaseNotes[0]?.version !== packageVersion) {
+  throw new Error(`expected newest three public releases and optional latest announcement from ${packageVersion}, received ${releaseNotes.map(({ version }) => version).join(", ")}`);
 }
 
 const generated = `${JSON.stringify({ source: "RELEASE.md", releases: releaseNotes }, null, 2)}\n`;
@@ -101,7 +105,7 @@ if (process.argv.includes("--check")) {
   if (current !== generated) {
     throw new Error("public release notes are stale; run node scripts/qa/generate-public-release-notes.mjs");
   }
-  console.log("PUBLIC_RELEASE_NOTES_OK releases=3 source=RELEASE.md");
+  console.log(`PUBLIC_RELEASE_NOTES_OK releases=${releaseNotes.length} source=RELEASE.md`);
 } else {
   mkdirSync(dirname(outputPath), { recursive: true });
   writeFileSync(outputPath, generated, "utf8");
