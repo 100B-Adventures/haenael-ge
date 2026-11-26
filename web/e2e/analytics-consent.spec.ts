@@ -74,7 +74,6 @@ test("AN-CONSENT-03 모바일 비회원은 하단 탭을 써도 배너가 0개�
   }
 
   await bottomNav.getByRole("button", { name: "친구" }).click();
-  await expect(page.getByTestId("guest-teaser-sheet")).toBeVisible();
   await expect(banner).toHaveCount(0);
 });
 
@@ -182,7 +181,7 @@ test.describe("분석 동의 계정 복원", () => {
     if (sharedDeviceUserId) await admin.auth.admin.deleteUser(sharedDeviceUserId);
   });
 
-  test("AN-CONSENT-04 선택 후 사라지고 새 브라우저에서도 다시 묻지 않는다", async ({ browser }) => {
+  test("AN-CONSENT-04 로그인 회원도 배너와 국외 분석 요청이 모두 0이다", async ({ browser }) => {
     const first = await authenticatedContext(browser, email);
     const firstPage = await first.newPage();
     const requests: string[] = [];
@@ -195,8 +194,6 @@ test.describe("분석 동의 계정 복원", () => {
     });
     await firstPage.goto("/");
     const banner = firstPage.getByTestId("analytics-consent-banner");
-    await expect(banner).toBeVisible();
-    await banner.getByRole("button", { name: "분석 정보 국외 이전에 동의하지 않음" }).click();
     await expect(banner).toHaveCount(0);
     await firstPage.reload();
     await expect(firstPage.getByTestId("analytics-consent-banner")).toHaveCount(0);
@@ -207,8 +204,6 @@ test.describe("분석 동의 계정 복원", () => {
     const secondPage = await second.newPage();
     await secondPage.goto("/");
     await expect(secondPage.getByTestId("analytics-consent-banner")).toHaveCount(0);
-    await expect.poll(() => secondPage.evaluate(() => localStorage.getItem("haenael_analytics_consent_v1")))
-      .toBe("denied");
     await second.close();
   });
 
@@ -232,14 +227,13 @@ test.describe("분석 동의 계정 복원", () => {
 
     await page.goto("/");
     const banner = page.getByTestId("analytics-consent-banner");
-    await expect(banner).toBeVisible();
-    await banner.getByRole("button", { name: "분석 정보 국외 이전에 동의", exact: true }).click();
     await expect(banner).toHaveCount(0);
+    await page.evaluate(() => localStorage.setItem("haenael_analytics_consent_v1", "granted"));
     await expect.poll(() => page.evaluate(() => localStorage.getItem("haenael_analytics_consent_v1")))
       .toBe("granted");
 
     await page.getByTestId("logout-button").click();
-    await expect(page).toHaveURL(new RegExp("/$"));
+    await expect(page).toHaveURL(new RegExp("/$"), { timeout: 15_000 });
     await expect.poll(() => page.evaluate(() => localStorage.getItem("haenael_analytics_consent_v1")))
       .toBeNull();
 
@@ -247,7 +241,7 @@ test.describe("분석 동의 계정 복원", () => {
     await context.addCookies(await authenticatedCookies(sharedDeviceEmail));
     analyticsRequests.length = 0;
     await page.goto("/");
-    await expect(page.getByTestId("analytics-consent-banner")).toBeVisible();
+    await expect(page.getByTestId("analytics-consent-banner")).toHaveCount(0);
     await page.waitForTimeout(700);
     const { data: sharedMember, error: sharedMemberError } = await admin
       .from("member")

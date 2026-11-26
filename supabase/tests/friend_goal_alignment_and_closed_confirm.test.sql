@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(12);
+SELECT plan(14);
 
 INSERT INTO auth.users(
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -13,10 +13,10 @@ FROM (VALUES
   ('f1000000-0000-0000-0000-000000000003'::uuid, 'owner@closed-confirm.test')
 ) AS fixture(id, email);
 
-INSERT INTO public.member(id, nickname) VALUES
-  ('f1000000-0000-0000-0000-000000000001', 'Viewer'),
-  ('f1000000-0000-0000-0000-000000000002', 'Friend'),
-  ('f1000000-0000-0000-0000-000000000003', 'Owner');
+INSERT INTO public.member(id, nickname, bio) VALUES
+  ('f1000000-0000-0000-0000-000000000001', 'Viewer', NULL),
+  ('f1000000-0000-0000-0000-000000000002', 'Friend', '매일 조금씩 앞으로'),
+  ('f1000000-0000-0000-0000-000000000003', 'Owner', NULL);
 
 INSERT INTO public.goal(id, member_id, slug, title, due_date, status, visibility)
 OVERRIDING SYSTEM VALUE VALUES
@@ -81,6 +81,16 @@ SELECT is(
   'QA-TC-FL-01 my_friend_page도 대표 목표 계약을 상속한다'
 );
 SELECT diag('QA-TC-FL-01 passed=4 failed=0');
+SELECT is(
+  public.my_friend_goals()->'friends'->0->>'bio',
+  '매일 조금씩 앞으로',
+  'QA-TC-FRIEND-PROFILE-01 친구 관계인 회원의 소개를 반환한다'
+);
+SELECT is(
+  (public.my_friend_goals()->'friends'->0->'goals'->0->>'cheer_count')::integer,
+  2,
+  'QA-TC-WELCOME-CHEER-01 친구 카드 응원 수에 환영 응원을 포함한다'
+);
 RESET ROLE;
 
 UPDATE public.goal SET status = 'CLOSED', closed_at = now() WHERE id = 991002;
@@ -130,12 +140,12 @@ SELECT is(
 SELECT diag('QA-TC-FL-03 passed=1 failed=0');
 SELECT is(
   (public.friend_goal_detail(991002)->>'cheer_count')::integer,
-  1,
-  'QA-TC-FD-08 환영 응원을 응원 수에서 제외한다'
+  2,
+  'QA-TC-FD-08 환영 응원을 한 사람의 응원으로 센다'
 );
 SELECT is(
   jsonb_array_length(public.friend_goal_detail(991002)->'supporter_avatars'),
-  1,
+  2,
   'QA-TC-FD-08 응원 수와 아바타가 같은 환영 응원 기준을 쓴다'
 );
 SELECT diag('QA-TC-FD-08 pgTAP passed=2 failed=0');

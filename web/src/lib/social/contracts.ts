@@ -33,6 +33,7 @@ export type SocialFriend = {
   friend_member_id: string;
   nickname: string | null;
   profile_image: string | null;
+  bio?: string | null;
   relationship_direction: RelationshipDirection;
   recent_message: string | null;
   recent_message_goal_id?: number | null;

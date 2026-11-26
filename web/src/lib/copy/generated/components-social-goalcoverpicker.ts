@@ -13,8 +13,8 @@ export const PRODUCT_COPY = {
   TEXT_010: "이 사진으로 배너 만들기", // source line 171
   TEXT_011: "기본 커버 선택", // source line 178
   TEXT_012: "자동", // source line 190
-  TEXT_013: "JPG, PNG, WEBP 5MB 이하. 검수 중에는 현재 커버가 유지돼요.", // source line 194
-  TEXT_014: "사진을 검수 대기열에 보냈어요. 승인 전까지 현재 커버를 유지해요.", // source line 198
+  TEXT_013: "JPG, PNG, WEBP 5MB 이하. 파일 검사를 통과하면 바로 적용돼요.", // source line 194
+  TEXT_014: "사진을 목표 배너에 적용했어요.", // source line 198
 } as const;
 
 export const PRODUCT_COPY_SOURCE = "web/src/components/social/GoalCoverPicker.tsx";

@@ -10,6 +10,8 @@ export type CoverReviewItem = {
   goal_title: string;
   owner_nickname: string;
   quarantine_path: string;
+  public_path?: string | null;
+  status?: "REVIEW" | "APPROVED";
   mime_type: string;
   byte_size: number;
   content_sha256: string;
@@ -22,7 +24,7 @@ export function GoalCoverReviewQueue(
   const [items, setItems] = useState(initialItems);
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState(false);
-  async function decide(assetId: string, decision: "APPROVE" | "REJECT") {
+  async function decide(assetId: string, decision: "APPROVE" | "REJECT" | "REMOVE") {
     setPending(assetId);
     setError(false);
     const supabase = createClient();
@@ -66,18 +68,24 @@ export function GoalCoverReviewQueue(
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      className="min-h-11 rounded-lg bg-primary px-4 font-bold text-primary-foreground"
-                      disabled={pending === item.asset_id}
-                      onClick={() =>
-                        decide(item.asset_id, "APPROVE")}
-                    >{PRODUCT_COPY.TEXT_004}</button>
-                    <button
-                      className="min-h-11 rounded-lg bg-danger-soft px-4 font-bold text-danger-ink"
-                      disabled={pending === item.asset_id}
-                      onClick={() =>
-                        decide(item.asset_id, "REJECT")}
-                    >{PRODUCT_COPY.TEXT_005}</button>
+                    {item.status === "APPROVED" ? (
+                      <button
+                        className="min-h-11 rounded-lg bg-danger-soft px-4 font-bold text-danger-ink"
+                        disabled={pending === item.asset_id}
+                        onClick={() => decide(item.asset_id, "REMOVE")}
+                      >{PRODUCT_COPY.TEXT_007}</button>
+                    ) : <>
+                      <button
+                        className="min-h-11 rounded-lg bg-primary px-4 font-bold text-primary-foreground"
+                        disabled={pending === item.asset_id}
+                        onClick={() => decide(item.asset_id, "APPROVE")}
+                      >{PRODUCT_COPY.TEXT_004}</button>
+                      <button
+                        className="min-h-11 rounded-lg bg-danger-soft px-4 font-bold text-danger-ink"
+                        disabled={pending === item.asset_id}
+                        onClick={() => decide(item.asset_id, "REJECT")}
+                      >{PRODUCT_COPY.TEXT_005}</button>
+                    </>}
                   </div>
                 </div>
               </article>

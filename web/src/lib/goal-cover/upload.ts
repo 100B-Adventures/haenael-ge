@@ -9,7 +9,7 @@ export type GoalCoverUploadFailureStage =
   | "finalize";
 
 export type GoalCoverUploadResult =
-  | { ok: true }
+  | { ok: true; publicUrl: string | null }
   | {
       ok: false;
       stage: GoalCoverUploadFailureStage;
@@ -106,7 +106,7 @@ export async function uploadGoalCoverFile(
   }
 
   try {
-    const { error: finalizeError } = await supabase.functions.invoke(
+    const { data: finalizeData, error: finalizeError } = await supabase.functions.invoke(
       "goal-cover-finalize",
       { body: { asset_id: signData.asset_id, content_sha256: contentSha256 } },
     );
@@ -118,7 +118,12 @@ export async function uploadGoalCoverFile(
         status: functionStatus(finalizeError),
       };
     }
-    return { ok: true };
+    return {
+      ok: true,
+      publicUrl: typeof finalizeData?.public_url === "string"
+        ? finalizeData.public_url
+        : null,
+    };
   } catch {
     return { ok: false, stage: "finalize", code: "network_error", status: null };
   }

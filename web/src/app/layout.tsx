@@ -5,17 +5,15 @@ import type { Metadata, Viewport } from "next";
 import { DEFAULT_OG_IMAGE } from "@/lib/og";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
-import { AnalyticsConsentBanner } from "@/components/analytics/AnalyticsConsentBanner";
 import { AnalyticsConsentProvider } from "@/components/analytics/AnalyticsConsentProvider";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
-import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { SensitiveNavigationBoundary } from "@/components/analytics/SensitiveNavigationBoundary";
 import { SignupConversion } from "@/components/analytics/SignupConversion";
 import { ConditionalFooter } from "@/components/common/ConditionalFooter";
 import { RegisterServiceWorker } from "@/components/pwa/RegisterServiceWorker";
 import { WhatsNewCard } from "@/components/releases/WhatsNewCard";
 import "./globals.css";
-import "@/components/analytics/analytics-consent.css";
+import "@/components/social/friend-profile.css";
 
 // Pretendard Variable — 한국어 웹 표준 가변 폰트
 // 소스: npm pretendard → public/fonts/PretendardVariable.woff2
@@ -81,10 +79,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground font-[family-name:var(--font-pretendard)]!">
         <AnalyticsConsentProvider>
           <GoogleAnalytics />
-          <MicrosoftClarity />
           <SensitiveNavigationBoundary />
           <SignupConversion />
-          <AnalyticsConsentBanner />
           <WhatsNewCard />
           <RegisterServiceWorker />
           <div className="flex-1 flex flex-col">{children}</div>

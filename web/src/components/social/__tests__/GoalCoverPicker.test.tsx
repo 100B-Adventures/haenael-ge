@@ -109,7 +109,7 @@ describe("GoalCoverPicker 단계별 실패", () => {
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"status":502'));
   });
 
-  it("GC-04 finalize 실패는 검수 요청 문구와 상태를 남긴다", async () => {
+  it("GC-04 finalize 실패는 적용 실패 문구와 상태를 남긴다", async () => {
     mocks.invoke
       .mockResolvedValueOnce({ data: { upload_url: "https://storage.test/upload", asset_id: "asset" }, error: null })
       .mockResolvedValueOnce({ data: null, error: { context: new Response("", { status: 409 }) } });
@@ -117,7 +117,7 @@ describe("GoalCoverPicker 단계별 실패", () => {
     const { container } = picker();
     openPicker();
     selectAndApply(container);
-    expect(await screen.findByRole("alert")).toHaveTextContent("검수 요청을 마치지 못했어요");
+    expect(await screen.findByRole("alert")).toHaveTextContent("적용하지 못했어요");
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"stage":"finalize"'));
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"status":409'));
   });
@@ -136,16 +136,20 @@ describe("GoalCoverPicker 단계별 실패", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("업로드를 시작하지 못했어요");
   });
 
-  it("GC-06 검수 요청 성공 뒤 성공 상태와 완료된 서버 단계를 표시한다", async () => {
+  it("GC-06 자동 검사 성공 뒤 올린 사진을 즉시 표시한다", async () => {
     mocks.invoke
       .mockResolvedValueOnce({ data: { upload_url: "https://storage.test/upload", asset_id: "asset" }, error: null })
-      .mockResolvedValueOnce({ data: { ok: true }, error: null });
+      .mockResolvedValueOnce({ data: { status: "APPROVED", public_url: "https://cdn.test/cover.webp" }, error: null });
     vi.mocked(fetch).mockResolvedValueOnce(new Response("", { status: 200 }));
     const { container } = picker();
     openPicker();
     selectAndApply(container);
 
-    expect(await screen.findByRole("status")).toHaveTextContent("검수 대기열에 보냈어요");
+    expect(await screen.findByRole("status")).toHaveTextContent("목표 배너에 적용했어요");
+    expect(screen.getByRole("img", { name: "달리기 목표 커버" })).toHaveAttribute(
+      "src",
+      "https://cdn.test/cover.webp",
+    );
     expect(mocks.invoke).toHaveBeenCalledTimes(2);
   });
 });

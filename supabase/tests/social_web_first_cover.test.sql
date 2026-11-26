@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(17);
+SELECT plan(23);
 
 INSERT INTO auth.users(id,instance_id,aud,role,email,encrypted_password,created_at,updated_at,confirmation_token,recovery_token,email_change_token_new,raw_app_meta_data,raw_user_meta_data,is_super_admin,is_anonymous)
 SELECT id,'00000000-0000-0000-0000-000000000000','authenticated','authenticated',email,'',now(),now(),'','','','{}','{}',false,false FROM (VALUES
@@ -130,6 +130,69 @@ SELECT ok(
   (SELECT status='SUPERSEDED' FROM public.goal_cover_asset WHERE id='54100000-0000-0000-0000-000000000001')
   AND (SELECT active_cover_asset_id='54100000-0000-0000-0000-000000000005' FROM public.goal WHERE slug='cover-public'),
   'CV-06 이전 승인본은 SUPERSEDED이고 활성 포인터는 새 승인본이다'
+);
+
+INSERT INTO public.goal_cover_asset(
+  id, goal_id, owner_member_id, quarantine_path, status,
+  content_sha256, mime_type, byte_size
+) VALUES
+  ('54100000-0000-0000-0000-000000000008',
+   (SELECT id FROM public.goal WHERE slug='cover-public'),
+   '54000000-0000-0000-0000-000000000001', 'owner/goal/auto-public.webp',
+   'UPLOADING', repeat('8',64), 'image/webp', 100),
+  ('54100000-0000-0000-0000-000000000009',
+   (SELECT id FROM public.goal WHERE slug='cover-friends'),
+   '54000000-0000-0000-0000-000000000001', 'owner/goal/auto-friends.webp',
+   'UPLOADING', repeat('9',64), 'image/webp', 100);
+
+SELECT is(
+  public.auto_publish_goal_cover(
+    '54100000-0000-0000-0000-000000000008',
+    '54000000-0000-0000-0000-000000000001',
+    '1/auto-public.webp'
+  )->>'status',
+  'APPROVED',
+  'QA-TC-GOAL-COVER-01 자동 파일 검사 통과 사진은 즉시 승인된다'
+);
+SELECT ok(
+  (SELECT active_cover_asset_id='54100000-0000-0000-0000-000000000008'
+   AND cover_selection_mode='CUSTOM' FROM public.goal WHERE slug='cover-public'),
+  'QA-TC-GOAL-COVER-01 즉시 승인 사진이 활성 커버가 된다'
+);
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims','{"role":"authenticated","sub":"54000000-0000-0000-0000-000000000003"}',true);
+SELECT is(
+  (SELECT count(*)::integer FROM public.admin_list_goal_covers(100)
+   WHERE asset_id='54100000-0000-0000-0000-000000000008'),
+  1,
+  'QA-TC-GOAL-COVER-01 관리 화면은 공개된 활성 사진을 반환한다'
+);
+RESET ROLE;
+SELECT is(
+  public.admin_remove_goal_cover(
+    '54100000-0000-0000-0000-000000000008',
+    '54000000-0000-0000-0000-000000000003'
+  )->>'status',
+  'DELETED',
+  'QA-TC-GOAL-COVER-01 관리자는 공개 사진을 내릴 수 있다'
+);
+SELECT ok(
+  (SELECT active_cover_asset_id IS NULL AND cover_selection_mode='PRESET'
+   FROM public.goal WHERE slug='cover-public')
+  AND public.auto_publish_goal_cover(
+    '54100000-0000-0000-0000-000000000009',
+    '54000000-0000-0000-0000-000000000001',
+    NULL
+  )->>'status' = 'APPROVED',
+  'QA-TC-GOAL-COVER-01 사진 내리기는 프리셋으로 복귀하고 FRIENDS 사진은 공개 복사 없이 승인한다'
+);
+SELECT is(
+  (SELECT count(*)::integer FROM public.storage_cleanup_queue
+   WHERE bucket_id='goal-cover-public'
+     AND object_path IN ('1/replacement.webp', '1/auto-public.webp')
+     AND reason IN ('ASSET_REPLACED', 'ASSET_REJECTED')),
+  2,
+  'QA-TC-GOAL-COVER-01 교체·내린 공개 파일은 저장소 정리 대기열에 남는다'
 );
 
 SELECT * FROM finish();

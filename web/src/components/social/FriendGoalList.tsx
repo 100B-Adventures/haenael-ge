@@ -102,6 +102,7 @@ export function FriendGoalList({
                       <span className="friend-list-name" title={nickname}>
                         {nickname}
                       </span>
+                      <span className="friend-list-bio">{friend.bio ?? ""}</span>
                       <strong>{primaryGoal.title}</strong>
                       <span
                         className={`friend-list-progress is-${progress}`}
@@ -129,6 +130,7 @@ export function FriendGoalList({
                     <span className="friend-list-name" title={nickname}>
                       {nickname}
                     </span>
+                    <span className="friend-list-bio">{friend.bio ?? ""}</span>
                     <strong>{PRODUCT_COPY.TEXT_014}</strong>
                   </span>
                   <span className="friend-list-relation">

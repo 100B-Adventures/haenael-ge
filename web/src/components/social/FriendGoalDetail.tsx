@@ -29,10 +29,11 @@ function objectParticle(name: string) {
 }
 
 export function FriendGoalDetail(
-  { friendId, nickname, profileImage, relationshipDirection, recentMessage, recentMessageGoalId, recentMessageGoalTitle, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
+  { friendId, nickname, profileImage, bio, relationshipDirection, recentMessage, recentMessageGoalId, recentMessageGoalTitle, recentMessageDirection, detail, friendGoals, cheerHistory = [] }: {
     friendId: string;
     nickname: string | null;
     profileImage?: string | null;
+    bio?: string | null;
     relationshipDirection: RelationshipDirection;
     recentMessage?: string | null;
     recentMessageGoalId?: number | null;
@@ -88,7 +89,10 @@ export function FriendGoalDetail(
           sizes="88px"
           testId="friend-detail-avatar"
         />
-        <strong>{displayName}</strong>
+        <div className="friend-detail-profile-copy">
+          <strong>{displayName}</strong>
+          <p>{bio ?? ""}</p>
+        </div>
       </div>
       <section className="friend-together-card">
         {detail.cheer_count > 0 && (

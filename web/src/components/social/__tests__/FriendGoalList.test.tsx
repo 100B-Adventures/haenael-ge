@@ -32,6 +32,7 @@ it("CL-03 친구 카드 본문은 상세 링크이고 최근 응원 토글은 �
           friend_member_id: "friend-a",
           nickname: "서연",
           profile_image: null,
+          bio: "하루 한 걸음씩 꾸준히",
           relationship_direction: "I_CHEERED",
           recent_message: "3주째 도서관 개근, 진짜 대단하다",
           recent_message_goal_id: 1,
@@ -57,6 +58,7 @@ it("CL-03 친구 카드 본문은 상세 링크이고 최근 응원 토글은 �
   ).not.toBeInTheDocument();
   expect(screen.queryByText("연결된 친구")).not.toBeInTheDocument();
   expect(screen.getByText("내가 응원함")).toBeInTheDocument();
+  expect(screen.getByText("하루 한 걸음씩 꾸준히")).toBeInTheDocument();
   expect(
     screen.getByText("3주째 도서관 개근, 진짜 대단하다"),
   ).toBeInTheDocument();

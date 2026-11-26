@@ -87,7 +87,10 @@ export async function runFriendGoalAlignmentScenario({
       .insert({ cheer_id: cheerId, supporter_member_id: ids.owner });
     if (attributionError) throw attributionError;
     const { error: profileError } = await admin.from("member")
-      .update({ profile_image: kakaoHttpAvatar }).eq("id", ids.friend);
+      .update({
+        profile_image: kakaoHttpAvatar,
+        bio: "매일 조금씩 앞으로 가는 사람",
+      }).eq("id", ids.friend);
     if (profileError) throw profileError;
     const { error: coverPresetError } = await admin.from("goal")
       .update({ cover_preset_key: "health" }).eq("id", friendFriendsGoal);
@@ -107,6 +110,7 @@ export async function runFriendGoalAlignmentScenario({
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/friends", { waitUntil: "domcontentloaded" });
     const card = page.getByTestId("friend-card").filter({ hasText: "윤도경" });
+    await expect(card).toContainText("매일 조금씩 앞으로 가는 사람");
     await expect(card.getByTestId("friend-goal-link")).toContainText("매달 책 한 권 읽을게");
     await expect(card.getByTestId("friend-goal-link")).toHaveAttribute(
       "href",
@@ -179,6 +183,9 @@ export async function runFriendGoalAlignmentScenario({
     );
 
     await page.goto(`/friends/${ids.friend}?goal=${friendPublicGoal}`, { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".friend-detail-profile-copy")).toContainText(
+      "매일 조금씩 앞으로 가는 사람",
+    );
     await expect(page.locator(".friend-recent-cheer").filter({ hasText: message })).toHaveCount(0);
     await expect(page.locator(".friend-recent-cheer")).toContainText(
       `친구가 보냄 · 내 목표 ‘${ownerGoalTitle}’`,
@@ -203,8 +210,9 @@ export async function runFriendGoalAlignmentScenario({
     expect(cover.currentSrc).toContain("cover-health");
 
     await page.goto(`/friends/${ids.friend}?goal=${welcomeOnlyGoal}`, { waitUntil: "domcontentloaded" });
-    await expect(page.locator(".friend-together-card")).toContainText("0명이");
-    await expect(page.locator(".friend-supporter-stack")).toHaveCount(0);
+    await expect(page.locator(".friend-together-card")).toContainText("1명이");
+    await expect(page.locator(".friend-supporter-stack")).toHaveCount(1);
+    await expect(page.getByTestId("neutral-supporter")).toHaveCount(1);
     console.info("FRIEND_REGRESSION_RESULTS", JSON.stringify({
       "QA-TC-FL-02": { passed: 3, failed: 0 },
       "QA-TC-FL-03": { passed: 1, failed: 0 },
@@ -225,7 +233,7 @@ export async function runFriendGoalAlignmentScenario({
     }));
   } finally {
     await context.close();
-    await admin.from("member").update({ profile_image: originalProfile }).eq("id", ids.friend);
+    await admin.from("member").update({ profile_image: originalProfile, bio: null }).eq("id", ids.friend);
     await admin.from("goal").update({
       cover_preset_key: "c3",
       status: "ACTIVE",
