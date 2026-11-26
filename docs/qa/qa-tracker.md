@@ -1,5 +1,12 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-27 2.4.4 친구 목표 앱 안 알림 (builder PASS · 독립 QA 대기)
+
+- **✅ INAPP 생성 계약**: `PUBLIC`·`FRIENDS` 목표는 ACTIVE 친구에게 목표당 한 번, `PRIVATE` 목표는 0건이다. 공개범위는 생성 화면·draft·5인자 `create_goal`의 같은 INSERT에서 확정해 비공개 전환 전 알림 누출을 막았다. 알림 저장 실패는 목표 INSERT를 되돌리지 않는다.
+- **✅ 표시 회귀**: 알림 목록은 저장 문구를 표시하고 친구의 해당 목표로 이동한다. 업로드 세로 표지는 공통 `GoalCover`에서 상단 초점을 사용하며, 응원 문구는 레이아웃 스크립트가 늦거나 없어도 정적 폴백을 먼저 표시한다.
+- **✅ builder 증거**: 격리 DB 신규 pgTAP 16/16 + 기존 `create_goal` 10/10, 전체 TypeScript·Vitest 111파일 667/667, 디자인 토큰 신규 위반 0. Claude Sonnet 5.5 교차 리뷰는 이전 개인정보 MAJOR 해소 후 PASS다. production build와 관련 Playwright는 공용 heavy slot 실행 중이다.
+- 운영 migration·push·배포·운영 DB 쓰기는 하지 않았다. 독립 QA와 실제 친구 2계정 알림·배지·딥링크 확인 전 단계 판정은 미승인이다.
+
 ## 2026-11-27 2.4.3 CI 수리 (builder PASS · 원격 CI 재실행 대기)
 
 - **✅ PASS — 카카오 callback claim 최소 권한**: 운영 경로가 `service_role` 클라이언트의 `claim_kakao_oauth_callback` RPC임을 확인했다. 마이그레이션에서 claim 테이블 직접 권한을 명시 회수하고 RPC 실행권만 유지했으며, pgTAP은 RPC 정상·중복 거절·잘못된 hash 거절·직접 조회 거절·hash 2건 저장을 9/9로 검증했다.

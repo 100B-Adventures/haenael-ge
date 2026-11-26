@@ -49,7 +49,32 @@ interface FormValues {
   title: string;
   reason: string;
   due_date: string;
+  visibility: GoalVisibility;
 }
+
+type GoalVisibility = "PUBLIC" | "FRIENDS" | "PRIVATE";
+
+const VISIBILITY_OPTIONS: ReadonlyArray<{
+  value: GoalVisibility;
+  label: string;
+  help: string;
+}> = [
+  {
+    value: "PUBLIC",
+    label: "전체 공개",
+    help: "공유 링크를 가진 누구나 보고, 친구에게 새 목표 알림이 가요.",
+  },
+  {
+    value: "FRIENDS",
+    label: "친구 공개",
+    help: "친구만 볼 수 있고, 친구에게 새 목표 알림이 가요.",
+  },
+  {
+    value: "PRIVATE",
+    label: "비공개",
+    help: "나만 볼 수 있고, 친구에게 알리지 않아요.",
+  },
+];
 
 type SaveGoalResult =
   | { slug: string; coverUploadWarning?: string }
@@ -106,20 +131,16 @@ async function saveGoalToDB(
   coverFile: File | null,
 ): Promise<SaveGoalResult> {
   const supabase = createClient();
-  const baseArgs = {
+  const { data, error } = await supabase.rpc("create_goal", {
     p_title: values.title.trim(),
     // DB가 NULLIF(btrim(p_reason), '')로 빈 문자열을 NULL로 정규화한다.
     // gen types가 p_reason을 string(non-null)으로 좁혀 null 리터럴은 타입 에러 —
     // GoalEditSheet(update_goal)와 동일하게 빈 문자열로 맞춘다.
     p_reason: values.reason.trim() || "",
     p_due_date: values.due_date,
-  };
-  const { data, error } = coverPresetKey
-    ? await supabase.rpc("create_goal", {
-        ...baseArgs,
-        p_cover_preset_key: coverPresetKey,
-      })
-    : await supabase.rpc("create_goal", baseArgs);
+    p_cover_preset_key: coverPresetKey,
+    p_visibility: values.visibility,
+  });
 
   if (error) {
     // goal_limit_reached: create_goal이 진행 중 목표 3개 초과 시 명시 코드로 던짐.
@@ -192,6 +213,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
     title: "",
     reason: "",
     due_date: defaultDueDate(),
+    visibility: "PUBLIC",
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof FormValues, string>>
@@ -238,6 +260,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         title: draft.title,
         reason: draft.reason ?? "",
         due_date: draft.due_date || defaultDueDate(),
+        visibility: draft.visibility ?? "PUBLIC",
       },
       coverKeyOrNull(draft.cover_preset_key),
       restoredCoverFile,
@@ -283,6 +306,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         title: draft.title,
         reason: draft.reason ?? "",
         due_date: draft.due_date || defaultDueDate(),
+        visibility: draft.visibility ?? "PUBLIC",
       });
 
       // 링크는 로그인 이후에만 발급(회장 2026-07-19): 저장 의도가 있는
@@ -338,7 +362,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
 
   // ── 입력 처리 ────────────────────────────────────────────────────────────────
   const handleChange = useCallback(
-    (field: keyof FormValues, value: string) => {
+    <K extends keyof FormValues,>(field: K, value: FormValues[K]) => {
       setValues((prev) => {
         const next = { ...prev, [field]: value };
         // 실시간 draft 저장
@@ -347,6 +371,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
           reason: next.reason,
           due_date: next.due_date,
           cover_preset_key: coverPreset ?? undefined,
+          visibility: next.visibility,
         });
         return next;
       });
@@ -370,6 +395,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
       reason: values.reason,
       due_date: values.due_date,
       cover_preset_key: preset,
+      visibility: values.visibility,
     });
   };
 
@@ -401,6 +427,7 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
         reason: values.reason,
         due_date: values.due_date,
         cover_preset_key: coverPreset ?? undefined,
+        visibility: values.visibility,
       });
       setShowLoginSheet(true);
       return;
@@ -559,6 +586,33 @@ export function OnboardingGoalForm({ initialUser }: OnboardingGoalFormProps) {
             </p>
           )}
         </div>
+
+        {/* 생성 트랜잭션 안에서 공개범위를 확정해야 비공개 목표가 알림에 노출되지 않는다. */}
+        <section className="flex flex-col gap-1.5" aria-labelledby="goal-visibility-label">
+          <strong
+            id="goal-visibility-label"
+            className="flex min-h-11 items-center text-[length:var(--text-body)]!"
+          >
+            공개범위
+          </strong>
+          <div className="social-segmented" role="group" aria-label="목표 공개범위">
+            {VISIBILITY_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={values.visibility === option.value ? "is-selected" : undefined}
+                onClick={() => handleChange("visibility", option.value)}
+                aria-pressed={values.visibility === option.value}
+                data-testid={`goal-visibility-${option.value}`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <p className="social-muted">
+            {VISIBILITY_OPTIONS.find((option) => option.value === values.visibility)?.help}
+          </p>
+        </section>
 
         {/* D-028-A: 목표를 쓰는 흐름 안에서 커버 프리셋과 직접 업로드를 선택한다. */}
         <section className="goal-cover-picker" data-testid="onboarding-cover-picker">

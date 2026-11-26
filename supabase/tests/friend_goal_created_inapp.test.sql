@@ -2,7 +2,7 @@
 
 BEGIN;
 
-SELECT plan(14);
+SELECT plan(16);
 
 SELECT ok(
   'FRIEND_GOAL_CREATED' = ANY(enum_range(NULL::public.notification_type_enum)::text[]),
@@ -12,6 +12,12 @@ SELECT has_column('public', 'notification', 'actor_member_id', 'FGN-02 actor 메
 SELECT has_column('public', 'notification', 'goal_id', 'FGN-03 목표 메타데이터가 존재한다');
 SELECT has_column('public', 'notification', 'message', 'FGN-04 표시 문구가 존재한다');
 SELECT has_trigger('public', 'goal', 'goal_notify_friends_created', 'FGN-05 목표 INSERT 트리거가 존재한다');
+SELECT has_function(
+  'public',
+  'create_goal',
+  ARRAY['text', 'text', 'date', 'text', 'text'],
+  'FGN-05A 생성 RPC가 공개범위를 같은 트랜잭션에서 받는다'
+);
 
 INSERT INTO auth.users (
   id, instance_id, aud, role, email, encrypted_password, created_at, updated_at,
@@ -42,6 +48,28 @@ VALUES
   ('6a120000-0000-4000-8000-000000000001', '6a120000-0000-4000-8000-000000000003', 'ACTIVE', NULL),
   ('6a120000-0000-4000-8000-000000000001', '6a120000-0000-4000-8000-000000000004', 'REMOVED', NULL),
   ('6a120000-0000-4000-8000-000000000001', '6a120000-0000-4000-8000-000000000005', 'BLOCKED', '6a120000-0000-4000-8000-000000000005');
+
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  '{"role":"authenticated","sub":"6a120000-0000-4000-8000-000000000001","iss":"supabase-demo"}',
+  true
+);
+SELECT public.create_goal(
+  'RPC 비공개 목표',
+  '',
+  current_date + 31,
+  NULL::text,
+  'PRIVATE'
+);
+RESET ROLE;
+
+SELECT is(
+  (SELECT count(*)::integer FROM public.notification
+   WHERE type = 'FRIEND_GOAL_CREATED'),
+  0,
+  'FGN-05B 생성 RPC의 PRIVATE 목표는 INSERT 시점에도 알리지 않는다'
+);
 
 INSERT INTO public.goal (member_id, slug, title, due_date, status, visibility)
 VALUES (

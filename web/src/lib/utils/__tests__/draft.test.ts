@@ -20,12 +20,18 @@ describe("draft utils", () => {
   });
 
   it("saveDraft + loadDraft: 저장 후 복원", () => {
-    saveDraft({ title: "편입", reason: "도서관", due_date: "2026-09-15" });
+    saveDraft({
+      title: "편입",
+      reason: "도서관",
+      due_date: "2026-09-15",
+      visibility: "PRIVATE",
+    });
     const loaded = loadDraft();
     expect(loaded).not.toBeNull();
     expect(loaded?.title).toBe("편입");
     expect(loaded?.reason).toBe("도서관");
     expect(loaded?.due_date).toBe("2026-09-15");
+    expect(loaded?.visibility).toBe("PRIVATE");
     expect(loaded?.savedAt).toBeDefined();
   });
 

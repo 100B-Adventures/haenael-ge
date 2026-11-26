@@ -816,6 +816,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "notification_actor_member_id_fkey"
+            columns: ["actor_member_id"]
+            isOneToOne: false
+            referencedRelation: "member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notification_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
@@ -1585,10 +1606,22 @@ export type Database = {
           }
         | {
             Args: {
-              p_cover_preset_key: string
+              p_cover_preset_key: string | null
               p_due_date: string
               p_reason: string
               p_title: string
+            }
+            Returns: {
+              slug: string
+            }[]
+          }
+        | {
+            Args: {
+              p_cover_preset_key: string | null
+              p_due_date: string
+              p_reason: string
+              p_title: string
+              p_visibility: string
             }
             Returns: {
               slug: string

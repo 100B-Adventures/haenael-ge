@@ -240,7 +240,29 @@ describe("OnboardingGoalForm — 링크는 로그인 이후에만 발급 (회장
     await waitFor(() => {
       expect(mockRpc).toHaveBeenCalledTimes(1);
     });
+    expect(mockRpc).toHaveBeenCalledWith(
+      "create_goal",
+      expect.objectContaining({
+        p_cover_preset_key: null,
+        p_visibility: "PUBLIC",
+      }),
+    );
     expect(hasSaveIntent()).toBe(false);
+  });
+
+  it("FGN-UI-01 비공개 선택은 목표 INSERT RPC에 함께 전달한다", async () => {
+    render(<OnboardingGoalForm initialUser={fakeUser} />);
+    fillForm();
+    fireEvent.click(screen.getByTestId("goal-visibility-PRIVATE"));
+    expect(screen.getByText("나만 볼 수 있고, 친구에게 알리지 않아요.")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("save-goal-button"));
+
+    await waitFor(() => {
+      expect(mockRpc).toHaveBeenCalledWith(
+        "create_goal",
+        expect.objectContaining({ p_visibility: "PRIVATE" }),
+      );
+    });
   });
 
   it("WCN-U06 웰컴 알림 요청 실패는 목표 저장 완료를 막지 않는다", async () => {

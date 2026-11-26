@@ -2,6 +2,16 @@
   "source": "RELEASE.md",
   "releases": [
     {
+      "version": "2.4.4",
+      "releaseTag": "2.4.4+friend-goal-inapp",
+      "date": "2026-11-27",
+      "title": "친구의 새 목표를 앱 안에서 바로 확인할 수 있어요",
+      "summary": "친구가 새 목표를 만들면 알림 배지에 알려 드리고, 누르면 그 목표로 바로 이동해요.",
+      "notify": false,
+      "tryHref": "/friends",
+      "feedbackHref": "/updates#feedback"
+    },
+    {
       "version": "2.4.3",
       "releaseTag": "2.4.3+kakao-social-ios-og-bundle",
       "date": "2026-11-26",
@@ -17,16 +27,6 @@
       "date": "2026-11-26",
       "title": "목표 링크를 친구에게 바로 보낼 수 있어요",
       "summary": "목표를 등록하면 해낼게의 첫 응원과 친구에게 보낼 목표 링크를 카카오 알림톡 한 통으로 받아요.",
-      "notify": false,
-      "tryHref": "/onboarding",
-      "feedbackHref": "/updates#feedback"
-    },
-    {
-      "version": "2.4.1",
-      "releaseTag": "2.4.1+welcome-cheer-alimtalk",
-      "date": "2026-11-26",
-      "title": "목표를 만들면 해낼게가 첫 응원을 알려드려요",
-      "summary": "목표 생성 직후 시스템 웰컴 응원 알림을 한 번 받아요.",
       "notify": false,
       "tryHref": "/onboarding",
       "feedbackHref": "/updates#feedback"

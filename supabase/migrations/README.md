@@ -31,6 +31,7 @@
 | `20261126120000_friend_received_recent_message_context.sql` | 친구가 보낸 최근 응원의 내 목표 제목·방향 맥락을 복원 |
 | `20261126130000_friend_profile_welcome_and_auto_cover.sql` | 친구 프로필 소개·환영 응원 주인 집계·검증된 목표 사진 자동 공개 계약 추가 |
 | `20261126140000_goal_cover_review_and_welcome_owner_counts.sql` | 오래된 목표 사진 검토 차단·관리자 내리기 정리·환영 응원 주인 화면 집계를 보강 |
+| `20261127010000_friend_goal_created_inapp.sql` | PUBLIC·FRIENDS 목표 생성 뒤 ACTIVE 친구에게 목표당 1회 INAPP 알림을 기록하고 친구 목표 딥링크 메타데이터를 추가 |
 
 ## 명령어
 

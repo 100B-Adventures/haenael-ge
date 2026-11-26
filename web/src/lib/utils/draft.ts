@@ -18,6 +18,8 @@ export interface GoalDraft {
   due_date: string;
   /** 사용자가 명시적으로 고른 커버. 없으면 제목 기반 자동 선택 */
   cover_preset_key?: string;
+  /** 목표 생성 시점의 공개범위. 구버전 draft는 PUBLIC으로 복원한다. */
+  visibility?: "PUBLIC" | "FRIENDS" | "PRIVATE";
   savedAt: string;
 }
 

@@ -1,3 +1,32 @@
+# 릴리스 후보 매니페스트: 해낼게 2.4.4
+
+```yaml
+release: 2.4.4
+release_tag: 2.4.4+friend-goal-inapp
+date: 2026-11-27
+status: build
+line: v2
+delivery: vercel (main push 자동배포) + Supabase migration
+deployment_order: 1) 20261127010000 migration 적용 2) Vercel 웹 배포 3) 친구 2계정으로 목표 생성·배지·목표 상세 이동 확인
+canonical_url: https://haenael-ge.vercel.app
+parent_release: 2.4.3 (7d0a6e4, 컨트롤러 제공 운영 기준)
+reason: 회장 2026-11-26 "목표를 만들었을 때도 친구들한테 알림이 가도록 해야지." + D-063 앱 안 알림 전용 결정
+public_note:
+  title: "친구의 새 목표를 앱 안에서 바로 확인할 수 있어요"
+  summary: "친구가 새 목표를 만들면 알림 배지에 알려 드리고, 누르면 그 목표로 바로 이동해요."
+  notify: false
+  try_href: /friends
+  feedback_href: /updates#feedback
+ships:
+  code: 생성 시 공개범위 원자 저장, ACTIVE 친구별 FRIEND_GOAL_CREATED INAPP 알림, 친구 목표 상세 딥링크, 세로 사진 상단 크롭, 워드맵 정적 폴백
+  migrations: 20261127010000_friend_goal_created_inapp.sql
+  edge_functions: none
+  env: none
+qa_gate:
+  approved: false
+  evidence: builder 신규 pgTAP 16/16·기존 create_goal 10/10, 전체 TypeScript·Vitest 111파일 667/667, 디자인 토큰 신규 위반 0, Claude Sonnet 5.5 교차 리뷰 PASS. production build·헤드리스 Playwright는 공용 heavy slot 실행 중이며 독립 QA·운영 반영은 미검증
+```
+
 # 릴리스 후보 매니페스트: 해낼게 2.4.3
 
 ```yaml
