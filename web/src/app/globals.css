@@ -1442,6 +1442,9 @@
   .goal-cover-image {
     object-fit: cover;
   }
+  .goal-cover-image--uploaded {
+    object-position: center 25%;
+  }
   .goal-cover-shade {
     position: absolute;
     inset: 0;

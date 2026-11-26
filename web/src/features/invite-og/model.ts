@@ -1,4 +1,5 @@
 import type { InvitePreview } from "@/lib/social/contracts";
+import { normalizeProfileImageUrl } from "@/lib/profile-image";
 
 export const INVITE_OG_SIZE = { width: 1200, height: 630 } as const;
 export const INVITE_OG_ALT = "해낼게 친구 초대 응원 입장권";
@@ -22,7 +23,7 @@ function cleanText(value: unknown, fallback: string, maxLength: number) {
 function safeProfileImage(value: unknown) {
   if (typeof value !== "string") return null;
   try {
-    const url = new URL(value);
+    const url = new URL(normalizeProfileImageUrl(value) ?? "");
     return url.protocol === "https:" ? url.toString() : null;
   } catch {
     return null;

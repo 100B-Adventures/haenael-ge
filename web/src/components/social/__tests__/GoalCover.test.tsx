@@ -20,4 +20,10 @@ describe("GoalCover 사진 프리셋", () => {
     render(<GoalCover presetKey="c3" title="기존 목표" />);
     expect(screen.getByTestId("goal-cover")).toHaveAttribute("data-preset", "health");
   });
+
+  it("GC-UPLOAD-01 업로드한 세로 사진은 얼굴을 보존하는 상단 초점 클래스를 쓴다", () => {
+    render(<GoalCover imageUrl="https://cdn.example.com/portrait.jpg" title="내 목표" size="banner" />);
+    expect(screen.getByRole("img", { name: "내 목표 목표 커버" }))
+      .toHaveClass("goal-cover-image--uploaded");
+  });
 });

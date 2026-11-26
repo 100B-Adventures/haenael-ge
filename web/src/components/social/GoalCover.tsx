@@ -27,7 +27,7 @@ export function GoalCover(
         alt={imageUrl ? `${title} 목표 커버` : resolvedPreset.alt}
         fill
         sizes="(max-width: 1023px) 100vw, 640px"
-        className="goal-cover-image"
+        className={`goal-cover-image${imageUrl ? " goal-cover-image--uploaded" : ""}`}
         unoptimized={Boolean(imageUrl)}
         priority={priority}
       />

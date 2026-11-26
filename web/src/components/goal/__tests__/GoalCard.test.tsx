@@ -145,6 +145,22 @@ describe("GoalCard", () => {
     expect(screen.getByTestId("goal-owner-avatar")).toHaveTextContent("도");
   });
 
+  it("PROFILE-IMG-UI-01 카카오 HTTP 프로필 이미지는 표시 전에 HTTPS로 보정한다", () => {
+    render(
+      <GoalCard
+        title="목표"
+        reason={null}
+        dueDate={dueDate}
+        status="ACTIVE"
+        nickname="도경"
+        profileImageUrl="http://k.kakaocdn.net/avatar.jpg"
+      />,
+    );
+
+    expect(screen.getByTestId("goal-owner-avatar-image"))
+      .toHaveAttribute("src", "https://k.kakaocdn.net/avatar.jpg");
+  });
+
   it("reason이 있으면 WHY 섹션 렌더", () => {
     render(
       <GoalCard title="목표" reason="이유입니다" dueDate={dueDate} status="ACTIVE" />,

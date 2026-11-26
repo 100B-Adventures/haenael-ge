@@ -1,6 +1,7 @@
 import type { SlackAlert } from "./slack.ts";
 
 type AlertSender = (alert: SlackAlert) => Promise<boolean>;
+const DEFAULT_ADMIN_ORIGIN = "https://haenael-ge.vercel.app";
 
 export async function notifyGoalCoverPublished(
   send: AlertSender,
@@ -21,12 +22,12 @@ export async function notifyGoalCoverPublished(
 
 export function goalCoverAdminUrl(siteUrl?: string) {
   try {
-    const url = new URL(siteUrl || "https://haenael.app");
+    const url = new URL(siteUrl || DEFAULT_ADMIN_ORIGIN);
     url.pathname = "/admin";
     url.search = "";
     url.hash = "";
     return url.toString();
   } catch {
-    return "https://haenael.app/admin";
+    return `${DEFAULT_ADMIN_ORIGIN}/admin`;
   }
 }

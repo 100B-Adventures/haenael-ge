@@ -9,6 +9,7 @@ import { Clover } from "lucide-react";
 import { DdayChip, StatusChip } from "./DdayChip";
 import { ClampText } from "@/components/common/ClampText";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-goalcard";
+import { normalizeProfileImageUrl } from "@/lib/profile-image";
 
 export interface GoalCardProps {
   title: string; // "나 편입 평점 4.0"
@@ -30,9 +31,10 @@ function OwnerAvatar({
   nickname: string | null;
   profileImageUrl?: string | null;
 }) {
+  const normalizedImageUrl = normalizeProfileImageUrl(profileImageUrl);
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const showImage = Boolean(
-    profileImageUrl && failedImageUrl !== profileImageUrl,
+    normalizedImageUrl && failedImageUrl !== normalizedImageUrl,
   );
   const initial = nickname ? Array.from(nickname)[0] : null;
 
@@ -44,12 +46,12 @@ function OwnerAvatar({
     >
       {showImage ? (
         <img
-          src={profileImageUrl ?? undefined}
+          src={normalizedImageUrl ?? undefined}
           alt=""
           width={56}
           height={56}
           className="h-full w-full object-cover"
-          onError={() => setFailedImageUrl(profileImageUrl ?? null)}
+          onError={() => setFailedImageUrl(normalizedImageUrl)}
           data-testid="goal-owner-avatar-image"
         />
       ) : initial ? (

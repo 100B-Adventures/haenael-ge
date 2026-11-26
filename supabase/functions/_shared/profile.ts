@@ -47,6 +47,26 @@ export type ProfileRequest =
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+export function normalizeProfileImageUrl(value: string | null) {
+  const candidate = value?.trim() || null;
+  if (!candidate) return null;
+
+  try {
+    const url = new URL(candidate);
+    if (
+      url.protocol === "http:" &&
+      (url.hostname === "kakaocdn.net" || url.hostname.endsWith(".kakaocdn.net"))
+    ) {
+      url.protocol = "https:";
+      return url.toString();
+    }
+  } catch {
+    return candidate;
+  }
+
+  return candidate;
+}
+
 export function parseProfileRequest(raw: unknown): ProfileRequest {
   if (!raw || typeof raw !== "object") throw new Error("invalid_request");
   const input = raw as Record<string, unknown>;
@@ -69,7 +89,7 @@ export function parseProfileRequest(raw: unknown): ProfileRequest {
       throw new Error("invalid_profile_image");
     }
     const profileImage = typeof input.profile_image === "string"
-      ? input.profile_image.trim() || null
+      ? normalizeProfileImageUrl(input.profile_image)
       : null;
     if (profileImage && profileImage.length > 2048) {
       throw new Error("invalid_profile_image");

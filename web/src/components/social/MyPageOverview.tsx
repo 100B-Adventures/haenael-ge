@@ -23,6 +23,7 @@ import {
 } from "@/lib/legal/exposure";
 import type { MySocialDashboard } from "@/lib/social/contracts";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-mypageoverview";
+import { normalizeProfileImageUrl } from "@/lib/profile-image";
 
 type Preferences = {
   notifyCheer: boolean;
@@ -250,10 +251,10 @@ export function MyPageOverview({
           onClick={() => setAvatarPickerOpen((value) => !value)}
         >
           <span className="my-profile-avatar">
-          {profileImage
+          {normalizeProfileImageUrl(profileImage)
             ? (
               <Image
-                src={profileImage}
+                src={normalizeProfileImageUrl(profileImage)!}
                 alt={`${nickname} 프로필`}
                 fill
                 sizes="52px"
@@ -390,8 +391,8 @@ export function MyPageOverview({
                   return (
                     <article key={cheer.id}>
                       <span className="my-cheer-avatar">
-                        {cheer.profileImage
-                          ? <Image src={cheer.profileImage} alt={`${name} 프로필`} fill sizes="44px" unoptimized />
+                        {normalizeProfileImageUrl(cheer.profileImage)
+                          ? <Image src={normalizeProfileImageUrl(cheer.profileImage)!} alt={`${name} 프로필`} fill sizes="44px" unoptimized />
                           : <span aria-hidden="true">{cheer.isAnonymous ? "?" : Array.from(name)[0]}</span>}
                       </span>
                       <div><strong>{name}</strong><ClampText className="my-cheer-message">{`💬 ${cheer.message || PRODUCT_COPY.TEXT_028}`}</ClampText></div>
@@ -423,8 +424,8 @@ export function MyPageOverview({
                     return (
                       <article key={cheer.id}>
                         <span className="my-cheer-avatar">
-                          {cheer.profile_image
-                            ? <Image src={cheer.profile_image} alt={`${name} 프로필`} fill sizes="44px" unoptimized />
+                          {normalizeProfileImageUrl(cheer.profile_image)
+                            ? <Image src={normalizeProfileImageUrl(cheer.profile_image)!} alt={`${name} 프로필`} fill sizes="44px" unoptimized />
                             : <span aria-hidden="true">{Array.from(name)[0]}</span>}
                         </span>
                         <div>

@@ -50,4 +50,11 @@ describe("초대 OG C1 모델", () => {
       "/invite/a%2Fb%2Bc/opengraph-image",
     );
   });
+
+  it("INV-OG-05 정상: 카카오 HTTP 프로필 이미지는 HTTPS로 승격한다", () => {
+    expect(toInviteOgModel(preview, {
+      ...preview,
+      profile_image: "http://k.kakaocdn.net/avatar.jpg",
+    }).profileImage).toBe("https://k.kakaocdn.net/avatar.jpg");
+  });
 });

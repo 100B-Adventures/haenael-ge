@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ClampText } from "@/components/common/ClampText";
 import { Collapsible } from "@/components/common/Collapsible";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-goal-goalsupporterlist";
+import { normalizeProfileImageUrl } from "@/lib/profile-image";
 
 export type GoalSupporter = {
   supporter_key: string;
@@ -38,7 +39,7 @@ function relativeDate(value: string, renderedAt: string) {
 
 function SupporterRow({ supporter, renderedAt }: { supporter: GoalSupporter; renderedAt: string }) {
   const name = supporter.is_anonymous || !supporter.display_name ? "익명의 누군가" : supporter.display_name;
-  const image = supporter.is_anonymous ? null : supporter.profile_image;
+  const image = supporter.is_anonymous ? null : normalizeProfileImageUrl(supporter.profile_image);
   return (
     <article className="goal-supporter-row" data-testid="goal-supporter-item">
       <span className="goal-supporter-avatar">

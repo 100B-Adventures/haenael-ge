@@ -26,7 +26,8 @@
 | `20261125010000_kakao_oauth_callback_claim.sql` | 카카오 authorization code SHA-256을 15분간 원자 claim해 중복 callback의 EF·세션 발급 경쟁 차단 |
 | `20261125011000_restore_confirm_cheer_payment_service_role.sql` | 후속 함수 교체 뒤 누락된 결제 확정 RPC의 service_role 실행 권한 복원 |
 | `20261126001000_member_analytics_consent.sql` | 회원별 분석 동의 상태와 선택 시각을 저장하고 본인 갱신 경계를 고정 |
-| `20261126110000_friend_goal_message_and_avatar_alignment.sql` | 친구 대표 목표와 최근 응원 메시지를 같은 목표로 정렬하고, 환영 응원 집계와 카카오 프로필 HTTPS 값을 보정 |
+| `20261126110000_friend_goal_message_and_avatar_alignment.sql` | 친구 대표 목표와 최근 응원 메시지를 같은 목표로 정렬하고 환영 응원 집계를 보정 |
+| `20261126115000_member_profile_image_https.sql` | 기존 카카오 HTTP 프로필 URL을 비파괴 UPDATE로 HTTPS 승격 |
 | `20261126120000_friend_received_recent_message_context.sql` | 친구가 보낸 최근 응원의 내 목표 제목·방향 맥락을 복원 |
 | `20261126130000_friend_profile_welcome_and_auto_cover.sql` | 친구 프로필 소개·환영 응원 주인 집계·검증된 목표 사진 자동 공개 계약 추가 |
 | `20261126140000_goal_cover_review_and_welcome_owner_counts.sql` | 오래된 목표 사진 검토 차단·관리자 내리기 정리·환영 응원 주인 화면 집계를 보강 |

@@ -29,6 +29,7 @@ describe("목표 사진 운영 알림", () => {
   it("QA-TC-GOAL-COVER-ALERT-02 관리자 링크에는 서명값과 비밀값을 싣지 않는다", () => {
     expect(goalCoverAdminUrl("https://haenael.app/path?token=secret#hash"))
       .toBe("https://haenael.app/admin");
-    expect(goalCoverAdminUrl("not-a-url")).toBe("https://haenael.app/admin");
+    expect(goalCoverAdminUrl()).toBe("https://haenael-ge.vercel.app/admin");
+    expect(goalCoverAdminUrl("not-a-url")).toBe("https://haenael-ge.vercel.app/admin");
   });
 });

@@ -1,10 +1,30 @@
 import { assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
   avatarObjectPath,
+  normalizeProfileImageUrl,
   parseProfileRequest,
   PROFILE_AVATAR_MAX_BYTES,
   PROFILE_CORS_HEADERS,
 } from "./profile.ts";
+
+Deno.test("PROFILE-UNIT-07 정상 경로: 카카오 HTTP 프로필 이미지는 저장 전에 HTTPS로 보정한다", () => {
+  const parsed = parseProfileRequest({
+    action: "save",
+    nickname: "서연",
+    bio: null,
+    profile_image: "http://k.kakaocdn.net/avatar.jpg",
+  });
+  assertEquals(
+    normalizeProfileImageUrl("http://k.kakaocdn.net/avatar.jpg"),
+    "https://k.kakaocdn.net/avatar.jpg",
+  );
+  assertEquals(parsed.action, "save");
+  if (parsed.action !== "save") throw new Error("expected_save_action");
+  assertEquals(
+    parsed.profileImage,
+    "https://k.kakaocdn.net/avatar.jpg",
+  );
+});
 
 Deno.test("PROFILE-UNIT-06 브라우저 Supabase 배포 식별 헤더를 CORS가 허용한다", () => {
   const allowed = PROFILE_CORS_HEADERS["Access-Control-Allow-Headers"].toLowerCase();

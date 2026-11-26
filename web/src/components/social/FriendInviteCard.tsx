@@ -7,6 +7,7 @@ import { useState } from "react";
 import { createFriendInviteAction } from "@/app/(receiver)/social-actions";
 import type { InviteCreated } from "@/lib/social/contracts";
 import { PRODUCT_COPY } from "@/lib/copy/generated/components-social-friendinvitecard";
+import { ProfileAvatar } from "./ProfileAvatar";
 import { DEFAULT_OG_IMAGE } from "@/lib/og";
 import { shareToKakao } from "@/lib/kakao-share";
 
@@ -161,11 +162,12 @@ export function FriendInviteCard(
 
       {acceptedFriend && (
         <section className="invite-accepted-panel" data-testid="invite-accepted-panel">
-          <span className="invite-accepted-avatar">
-            {acceptedFriend.profileImage
-              ? <Image src={acceptedFriend.profileImage} alt={`${acceptedFriend.nickname} 프로필`} fill sizes="44px" unoptimized />
-              : <span aria-hidden="true">{Array.from(acceptedFriend.nickname)[0]}</span>}
-          </span>
+          <ProfileAvatar
+            name={acceptedFriend.nickname}
+            imageUrl={acceptedFriend.profileImage}
+            className="invite-accepted-avatar"
+            sizes="44px"
+          />
           <p><strong>{acceptedFriend.nickname}</strong>{PRODUCT_COPY.TEXT_020}</p>
         </section>
       )}

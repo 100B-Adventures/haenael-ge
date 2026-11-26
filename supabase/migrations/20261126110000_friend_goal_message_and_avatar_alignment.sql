@@ -1,10 +1,5 @@
 BEGIN;
 
--- 기존 카카오 프로필은 브라우저 혼합 콘텐츠 정책에 기대지 않도록 한 번만 보정한다.
-UPDATE public.member
-SET profile_image = regexp_replace(profile_image, '^http://', 'https://')
-WHERE profile_image ~ '^http://([^.]+\.)*kakaocdn\.net/';
-
 CREATE OR REPLACE FUNCTION public.my_friend_goals()
 RETURNS jsonb
 LANGUAGE plpgsql
