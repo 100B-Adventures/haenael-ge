@@ -1,5 +1,12 @@
 # QA Tracker — haenael-ge
 
+## 2026-11-27 2.4.3 CI 수리 (builder PASS · 원격 CI 재실행 대기)
+
+- **✅ PASS — 카카오 callback claim 최소 권한**: 운영 경로가 `service_role` 클라이언트의 `claim_kakao_oauth_callback` RPC임을 확인했다. 마이그레이션에서 claim 테이블 직접 권한을 명시 회수하고 RPC 실행권만 유지했으며, pgTAP은 RPC 정상·중복 거절·잘못된 hash 거절·직접 조회 거절·hash 2건 저장을 9/9로 검증했다.
+- **✅ PASS — 환전 overflow 캡처 응원자 목록**: 제품 코드는 `GoalSupporterList`를 한 번만 렌더한다. CI의 2개 관찰은 `waitForURL`이 App Router 화면 교체보다 먼저 끝난 전환 구간이었으므로 locator가 단일 DOM으로 수렴할 때까지 기다리게 했다. 재시도의 전화번호 누락은 복합 캡처 시험이 프리필에 의존하지 않도록 필수 입력을 명시했다. Playwright 13/13 PASS.
+- **✅ 회귀 증거**: 전체 Vitest 111 files·663 tests PASS, Next production build·TypeScript·23개 정적 페이지·Safari 15 문법 검사 PASS. 로그는 `.goal/runs/2.4.3-ci-fix/`에 보관했다.
+- 범위: 로컬 수정·검증·커밋까지만 한다. 원격 CI 재실행·push·배포·운영 DB 반영은 컨트롤러가 한다.
+
 ## 2026-11-27 2.4.3 묶음 신규 결함 (builder 증거 충족·독립 QA 대기)
 
 - **❌ NG 등록 — 목표 사진 크롭**: 운영 `/g/ym7gh6kb`에서 세로 목표 사진을 가로 배너로 표시할 때 중앙 기준 크롭으로 얼굴이 잘린다. 공개 목표·친구 상세·내 목표의 동일 배너 경로를 함께 보정하고 직접 렌더로 재검증해야 한다.

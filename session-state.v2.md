@@ -1,3 +1,15 @@
+## 목표 지도
+
+- 목표 정본: `docs/plan/prd-haenael-ge-v0.4.0.md` §0.2 — One Thing은 “조용히 돈으로 응원”의 마찰 제거 또는 보호다.
+- 다음 단계: 2.4.3 CI 수리 커밋을 컨트롤러가 push한 뒤 원격 CI를 재실행한다. 로컬 표적 pgTAP 9/9·환전 Playwright 13/13·전체 Vitest 663/663·production build는 통과했다.
+
+## 2026-11-27 2.4.3 CI 수리 착수
+
+- 기준: `release/2.4.3-bundle-20261126` `290621f`, 원격과 clean. CI run `45850321281`에서 pgTAP과 환전 브라우저 E2E 두 잡만 실패했다.
+- 이웃 영향 후보: `auth-kakao`가 service role로 callback claim 테이블을 읽고 쓰는 권한, `GoalSupporterList`의 단일 렌더 계약, cashout overflow 캡처용 locator 안정성.
+- 금지: push·배포·운영 DB 쓰기. 로컬 재현과 수정·시험·커밋까지만 한다.
+- 결과: service role은 claim RPC만 실행하고 테이블을 직접 읽지 못하도록 고정했다. 검색 후 응원자 목록은 단일 DOM 수렴을 기다리며, 복합 캡처 시험은 전화번호를 명시 입력한다. 이웃 회귀는 전체 Vitest·build·환전 E2E로 확인했다.
+
 ## 2026-11-15 16:25 KST · 2.3.1 qa 독립 검증 14차(Claude qa-verifier) VERDICT PASS
 - 한 것: 1f90c0f..a713b7b 결제창 높이 수정 판정. 6개 뷰포트 직접 재현(닫기 화면 안, 시트 탭 위, 시트 내 스크롤 후 결제 버튼 가려짐 없음, 주문 0), 단위 103/103, staging 회귀 44/45(SP-02 시험결함, 단독 재실행 통과). 3311 dev 종료, web/.next 는 /mnt/hdd/.trash-114/ 로 이동.
 - 남은 이슈: iOS 실기기 safe-area·운영 렌더 미검증, 닫기 버튼이 시트와 같이 스크롤돼 사라짐, TC 번호 미등록, summarize.mjs SHA 라벨 낡음, RELEASE.md qa_gate.approved 갱신 필요. 참고: 루트 레포 pipeline-state.v2.md 는 11-08 판으로 낡았고 실제 최신 로그는 hotfix 작업트리 것이라 여기에 기록함.

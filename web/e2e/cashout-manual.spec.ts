@@ -788,7 +788,6 @@ test.describe("수동 환전: happy + edge", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await routeFixtureData(page);
     await authenticate(page.context(), USERS.happy);
-
     eligibilityDelayMs = 1_000;
     await page.goto(`${APP_URL}/me`, { waitUntil: "commit" });
     await expect(page.getByTestId("receiver-home-loading")).toBeVisible();
@@ -796,7 +795,6 @@ test.describe("수동 환전: happy + edge", () => {
     await expect(page.getByTestId("receiver-home-page")).toBeVisible();
     eligibilityDelayMs = 0;
     await page.screenshot({ path: path.join(CAPTURE_DIR, "me-390.png"), fullPage: true });
-
     await page.getByTestId("my-goal-list-card-manage-link").click();
     await expect(page).toHaveURL(`${APP_URL}/me/goal/9001`);
     await page.setViewportSize({ width: 1024, height: 844 });
@@ -837,11 +835,12 @@ test.describe("수동 환전: happy + edge", () => {
       page.waitForURL(`${APP_URL}/me/goal/9001?q=121%EB%B2%88%EC%A7%B8`),
       page.getByRole("button", { name: "찾기", exact: true }).click(),
     ]);
-    await expect(page.getByTestId("goal-supporter-list")).toContainText("121번째 응원 메시지예요");
-    await expect(page.getByTestId("goal-supporter-list").getByTestId("goal-supporter-item")).toHaveCount(1);
+    const searchedSupporterList = page.getByTestId("goal-supporter-list");
+    await expect(searchedSupporterList).toHaveCount(1);
+    await expect(searchedSupporterList).toContainText("121번째 응원 메시지예요");
+    await expect(searchedSupporterList.getByTestId("goal-supporter-item")).toHaveCount(1);
     await expect(page.getByRole("link", { name: "전체 목록" })).toBeVisible();
     expect(cheerSearchRequests).toContain("message:121번째");
-    await page.waitForLoadState("networkidle");
     await page.screenshot({ path: path.join(CAPTURE_DIR, "me-search-121-of-121-390.png"), fullPage: true });
 
     await page.goto(`${APP_URL}/cashout`);
@@ -852,6 +851,7 @@ test.describe("수동 환전: happy + edge", () => {
     await page.locator("#cashout-bank").selectOption("KB");
     await page.locator("#cashout-account").fill(VISUAL_ACCOUNT);
     await page.locator("#cashout-holder").fill("조도경");
+    await page.getByTestId("cashout-phone").fill("01012345678");
     await page.getByTestId("cashout-confirm-button").click();
     await expect(page.getByRole("heading", { name: "이 계좌가 맞나요?" })).toBeVisible();
     await expect(page.getByTestId("cashout-form-breakdown")).toHaveCount(0);

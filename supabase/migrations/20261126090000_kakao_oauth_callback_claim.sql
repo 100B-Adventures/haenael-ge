@@ -12,7 +12,7 @@ CREATE TABLE public.kakao_oauth_callback_claim (
 
 ALTER TABLE public.kakao_oauth_callback_claim ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.kakao_oauth_callback_claim
-  FROM PUBLIC, anon, authenticated;
+  FROM PUBLIC, anon, authenticated, service_role;
 
 CREATE INDEX kakao_oauth_callback_claim_claimed_at_idx
   ON public.kakao_oauth_callback_claim (claimed_at);

@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(8);
+SELECT plan(9);
 
 SELECT has_table(
   'public', 'kakao_oauth_callback_claim',
@@ -37,6 +37,13 @@ SELECT throws_ok(
   '22023', 'invalid_code_hash',
   'KAKAO-CALLBACK-NEG-02: 원문 code와 잘못된 hash는 거절한다'
 );
+SELECT throws_ok(
+  $$SELECT count(*) FROM public.kakao_oauth_callback_claim$$,
+  '42501', NULL,
+  'KAKAO-CALLBACK-NEG-03: service_role도 claim 저장소를 직접 읽을 수 없다'
+);
+
+RESET ROLE;
 SELECT is(
   (SELECT count(*) FROM public.kakao_oauth_callback_claim), 2::bigint,
   'KAKAO-CALLBACK-06: 원문 code가 아니라 hash만 저장한다'
