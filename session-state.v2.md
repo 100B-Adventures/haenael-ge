@@ -5,6 +5,7 @@
 - 사진 원인(운영 DB 관찰): 목표 사진 업로드 1건(이다솔 목표 17, 11-25 22:15)이 REVIEW 에 멈춤, 관리자 알림 없음.
 - Codex r8(같은 워커 01a211d8): 친구 카드 사진·소개, 환영 응원 포함, 배너 제거, 사진 즉시 공개+Slack+내리기. 로그 scratchpad/codex-r8.log. 회수 뒤 독립 리뷰.
 - 방향 정본: wiki/1-team-brand/vision-flywheel.md. 2.5 인계: [haenael-ge-다음버전-온프렘](tmux rc-haenael-ge-next, /mnt/hdd/wt/haenael-ge-next) 우편함+지시 입력. 그 세션이 기본 계정(주간 98%)으로 뜸 → ops-issues·하네스 우편함 보고.
+- 14:3x: Codex r8 1771a5e → 리뷰 BLOCK(MAJOR 3) → r9 1852251 → 재리뷰 PASS(scratchpad/review-1852251.md). 로컬 pgTAP 84·Vitest 643·E2E 7. 운영 목표 17 사진은 배포 뒤 /admin 승인 1회 또는 재업로드 필요.
 - 열린 것: 주문 29 환불(회장 원문 대기), 오류 수집 방식(회장 선택), 2.4.x 묶음 병합·CI·스테이징·실기기 → 운영 배포 승인 요청.
 
 ## [2026-11-26 05:12 KST] compact 마크 (auto)
