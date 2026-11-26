@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-27 01:21 KST · 2.4.3 운영 반영(묶음)
+- 운영: health 2.4.3·7d0a6e4(관찰), main 7d0a6e4. CI 45856348441 success(4 job). 마이그레이션 8개 적용(090000~140000), http 프로필 0건. Edge Function 6개 배포(auth-kakao, cheer-order, toss-confirm, toss-webhook, goal-cover-finalize, admin-review-goal-cover).
+- 운영 /g/ym7gh6kb 휴대폰 크기 실측: 동의 창 없음, 분석 외부 요청 0, 표지 object-position 50% 25%·naturalWidth 1290, "2명이 응원했어요"(환영 1+결제 1). 거울 셀카라 얼굴은 여전히 대부분 잘림. 응원 문구 상자가 비어 보임(결함 여부 미검증).
+- 미검증: 카톡 인앱 로그인 실기기, 결제 실기기, 목표 사진 업로드→Slack 알림·관리자 내리기, 친구 목록 사진·소개(로그인 필요).
+- 다음: 친구 새 목표 인앱 알림(D-063 결정 3), 표지 크롭 재조정(위쪽 0% 또는 높이), 응원 상자 확인, 실기기 확인.
+
 ## 2026-11-27 00:37 KST · 2.4.3 묶음 CI 수리 중 (회장 19시 "코덱스 다 쳐서 올리고")
 - 브랜치 release/2.4.3-bundle-20261126 (haenael-ge-welcome, 290621f): 1852251·c4f7548·c5bd7d7·73af93e 병합 + 표지 object-position 25%·http 프로필 https·Slack 링크. Codex 로컬 Vitest 663·Deno 124·pgTAP 537·build 통과.
 - CI 45850321281 실패: pgTAP kakao_oauth_callback_claim 권한, 환전 E2E goal-supporter-list 2개 렌더. Codex r14(resume 01a21838…) 수리 중, 로그 scratchpad/codex-r14.log.
