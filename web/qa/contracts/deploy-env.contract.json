@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sourceRoots": ["web/src", "supabase/functions"],
-  "systemVariables": ["NODE_ENV", "VERCEL_ENV", "VERCEL_GIT_COMMIT_SHA"],
+  "systemVariables": ["NEXT_RUNTIME", "NODE_ENV", "VERCEL_ENV", "VERCEL_GIT_COMMIT_SHA"],
   "vaultSecrets": [
     { "name": "storage_cleanup_worker_url", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" },
     { "name": "edge_invoke_publishable_key", "feature": "storage-cleanup", "provisioner": "scripts/ops/provision-storage-cleanup-vault.sql" },
@@ -14,6 +14,10 @@
     "NEXT_PUBLIC_APP_VERSION": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "NEXT_PUBLIC_APP_DEPLOY": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "DEPLOY_SOURCE_SHA": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
+    "GLITCHTIP_DSN": { "targets": ["vercel-production", "supabase-production"], "features": ["error-tracking"] },
+    "GLITCHTIP_ENVIRONMENT": { "targets": ["supabase-production"], "features": ["error-tracking"] },
+    "NEXT_PUBLIC_GLITCHTIP_DSN": { "targets": ["vercel-production"], "features": ["error-tracking"] },
+    "NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT": { "targets": [], "features": ["optional-metadata"], "optional": true },
     "SUPABASE_SERVICE_ROLE_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout", "core"] },
     "SERVICE_ROLE_KEY": { "targets": [], "features": ["local-supabase-cli"], "optional": true },
     "CASHOUT_ENABLED": { "targets": ["vercel-production"], "features": ["cashout"] },
@@ -62,11 +66,11 @@
   "targets": {
     "vercel-production": {
       "provider": "vercel",
-      "features": ["core", "cashout", "cashout-notifications", "kakao-auth", "kakao-share", "analytics", "payments"]
+      "features": ["core", "cashout", "cashout-notifications", "kakao-auth", "kakao-share", "analytics", "payments", "error-tracking"]
     },
     "supabase-production": {
       "provider": "supabase",
-      "features": ["core", "profile", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup"]
+      "features": ["core", "profile", "wordmap", "payments", "slack", "lead-capture", "kakao-auth", "notify", "cashout-notifications", "ops-events", "storage-cleanup", "error-tracking"]
     }
   }
 }
