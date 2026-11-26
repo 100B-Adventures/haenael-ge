@@ -1,5 +1,12 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## [2026-11-26 06:5x KST] 회장 06시 답 반영 · Codex r8 진행 · 2.5 다음 버전 리드로 인계
+- 회장 답: 환영 응원도 1명으로 센다, 동의 배너 회원에게도 없음, 결제 켠 채 유지, 2.5 는 다음 버전 세션 몫, 방향 정본 위키 등록 → 결정.md D-060. 사진 즉시 공개 정책 D-061.
+- 사진 원인(운영 DB 관찰): 목표 사진 업로드 1건(이다솔 목표 17, 11-25 22:15)이 REVIEW 에 멈춤, 관리자 알림 없음.
+- Codex r8(같은 워커 01a211d8): 친구 카드 사진·소개, 환영 응원 포함, 배너 제거, 사진 즉시 공개+Slack+내리기. 로그 scratchpad/codex-r8.log. 회수 뒤 독립 리뷰.
+- 방향 정본: wiki/1-team-brand/vision-flywheel.md. 2.5 인계: [haenael-ge-다음버전-온프렘](tmux rc-haenael-ge-next, /mnt/hdd/wt/haenael-ge-next) 우편함+지시 입력. 그 세션이 기본 계정(주간 98%)으로 뜸 → ops-issues·하네스 우편함 보고.
+- 열린 것: 주문 29 환불(회장 원문 대기), 오류 수집 방식(회장 선택), 2.4.x 묶음 병합·CI·스테이징·실기기 → 운영 배포 승인 요청.
+
 ## [2026-11-26 05:12 KST] compact 마크 (auto)
 - 세션 962fde97 · 라인 v2 · 브랜치 session/core-20261015
 - 직전 커밋: 417f9a2 sync: claude-dev-workstation 에서 origin/session/core-20261015 병합
