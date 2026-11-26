@@ -8,10 +8,10 @@ import {
 } from "@/components/receiver/ReceiverShell";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { observeInvitePreview } from "@/lib/social/contracts";
-import { DEFAULT_OG_IMAGE } from "@/lib/og";
+import { INVITE_OG_ALT, INVITE_OG_SIZE, inviteOgImagePath } from "@/features/invite-og/model";
 
 export const dynamic = "force-dynamic";
-// 카카오톡·메신저 미리보기: 누가 어떤 목표로 초대했는지 제목·설명에 싣는다(이미지는 브랜드 기본).
+// 카카오톡·메신저 미리보기: 누가 어떤 목표로 초대했는지 제목·설명·C1 입장권에 싣는다.
 export async function generateMetadata(
   { params }: { params: Promise<{ token: string }> },
 ): Promise<Metadata> {
@@ -24,13 +24,18 @@ export async function generateMetadata(
   const description = preview?.goal_title
     ? `“${preview.goal_title}” 서로의 목표를 같이 응원해요. 들어가서 내 목표도 써 보세요.`
     : "서로의 목표를 같이 응원해요. 들어가서 내 목표도 써 보세요.";
+  const image = {
+    url: inviteOgImagePath(token),
+    ...INVITE_OG_SIZE,
+    alt: INVITE_OG_ALT,
+  };
   return {
     title: `${title} · 해낼게`,
     description,
     robots: { index: false, follow: false },
     referrer: "no-referrer",
-    openGraph: { title, description, images: [DEFAULT_OG_IMAGE] },
-    twitter: { card: "summary_large_image", title, description, images: [DEFAULT_OG_IMAGE.url] },
+    openGraph: { title, description, images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
 
