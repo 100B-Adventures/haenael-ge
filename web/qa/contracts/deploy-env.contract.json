@@ -12,6 +12,7 @@
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": { "targets": ["vercel-production"], "features": ["core"] },
     "NEXT_PUBLIC_APP_URL": { "targets": ["vercel-production"], "features": ["core"] },
     "NEXT_PUBLIC_APP_VERSION": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
+    "NEXT_PUBLIC_APP_DEPLOY": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "DEPLOY_SOURCE_SHA": { "targets": ["vercel-production"], "features": ["optional-metadata"], "optional": true },
     "SUPABASE_SERVICE_ROLE_KEY": { "targets": ["vercel-production", "supabase-production"], "features": ["cashout", "core"] },
     "SERVICE_ROLE_KEY": { "targets": [], "features": ["local-supabase-cli"], "optional": true },
@@ -31,7 +32,7 @@
     "NEXT_PUBLIC_PAYMENTS_ENABLED": { "targets": ["vercel-production"], "features": ["payments"] },
     "NEXT_PUBLIC_TOSS_CLIENT_KEY": { "targets": ["vercel-production"], "features": ["payments"] },
     "NEXT_PUBLIC_TOSS_SANDBOX_RESULT": { "targets": [], "features": ["payments-sandbox"], "optional": true },
-    "NEXT_PUBLIC_KAKAO_JS_KEY": { "targets": ["vercel-production"], "features": ["kakao-share"], "optional": true },
+    "NEXT_PUBLIC_KAKAO_JS_KEY": { "targets": ["vercel-production"], "features": ["kakao-share"] },
     "SLACK_FEEDBACK_WEBHOOK_URL": { "targets": ["vercel-production"], "features": ["feedback"] },
 
     "SUPABASE_URL": { "targets": ["supabase-production"], "features": ["core"] },
@@ -61,7 +62,7 @@
   "targets": {
     "vercel-production": {
       "provider": "vercel",
-      "features": ["core", "cashout", "cashout-notifications", "kakao-auth", "analytics", "payments"]
+      "features": ["core", "cashout", "cashout-notifications", "kakao-auth", "kakao-share", "analytics", "payments"]
     },
     "supabase-production": {
       "provider": "supabase",

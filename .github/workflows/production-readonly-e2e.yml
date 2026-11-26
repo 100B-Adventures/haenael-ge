@@ -41,6 +41,8 @@ jobs:
       - name: 인증 운영 경로 읽기 전용 E2E
         run: npm run qa:verify-production:auth
         env:
+          QA_PRODUCTION_EXPECTED_APP_VERSION: "2.4.0"
+          QA_PRODUCTION_PAYMENTS_ENABLED: "true"
           QA_PRODUCTION_SUPABASE_URL: ${{ secrets.QA_PRODUCTION_SUPABASE_URL }}
           QA_PRODUCTION_SUPABASE_ANON_KEY: ${{ secrets.QA_PRODUCTION_SUPABASE_ANON_KEY }}
           QA_PRODUCTION_EMAIL: ${{ secrets.QA_PRODUCTION_EMAIL }}
@@ -52,6 +54,33 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: production-readonly-e2e-evidence
-          path: web/test-results/**/production-auth-cashout.png
+          path: web/test-results/**/*.png
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Slack 실패 알림
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ALERT_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ALERT_SHA: ${{ github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          const webhook = process.env.SLACK_WEBHOOK_URL?.trim();
+          if (!webhook) {
+            console.error("SLACK_WEBHOOK_URL 저장소 시크릿이 필요합니다.");
+            process.exit(1);
+          }
+          const response = await fetch(webhook, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: `❌ 해낼게 운영 읽기 전용 E2E 실패\nsource: ${process.env.ALERT_SHA}\n${process.env.ALERT_RUN_URL}`,
+            }),
+          });
+          if (!response.ok) {
+            console.error(`Slack 실패 알림 전송 실패: HTTP ${response.status}`);
+            process.exit(1);
+          }
+          console.log("Slack 실패 알림 전송 완료");
+          NODE

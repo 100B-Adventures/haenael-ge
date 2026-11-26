@@ -9,5 +9,13 @@ export function createClient() {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: {
+          "x-app-version": process.env.NEXT_PUBLIC_APP_VERSION?.trim() || "dev",
+          "x-app-deploy": process.env.NEXT_PUBLIC_APP_DEPLOY?.trim() || "local",
+        },
+      },
+    },
   );
 }

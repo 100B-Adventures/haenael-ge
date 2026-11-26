@@ -3,7 +3,14 @@ import {
   avatarObjectPath,
   parseProfileRequest,
   PROFILE_AVATAR_MAX_BYTES,
+  PROFILE_CORS_HEADERS,
 } from "./profile.ts";
+
+Deno.test("PROFILE-UNIT-06 브라우저 Supabase 배포 식별 헤더를 CORS가 허용한다", () => {
+  const allowed = PROFILE_CORS_HEADERS["Access-Control-Allow-Headers"].toLowerCase();
+  assertEquals(allowed.includes("x-app-version"), true);
+  assertEquals(allowed.includes("x-app-deploy"), true);
+});
 
 Deno.test("PROFILE-UNIT-01 정상 경로: 소개와 프리셋 사진을 저장 계약으로 정규화한다", () => {
   assertEquals(

@@ -109,10 +109,18 @@ export const SECURITY_HEADERS = [
 const APP_VERSION = (
   JSON.parse(readFileSync(path.join(__dirname, "package.json"), "utf8")) as { version: string }
 ).version;
+const APP_DEPLOY =
+  process.env.DEPLOY_SOURCE_SHA?.trim()
+  || process.env.VERCEL_GIT_COMMIT_SHA?.trim()
+  || process.env.VERCEL_DEPLOYMENT_ID?.trim()
+  || "local";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
+  env: {
+    NEXT_PUBLIC_APP_VERSION: APP_VERSION,
+    NEXT_PUBLIC_APP_DEPLOY: APP_DEPLOY,
+  },
   typescript: {
     tsconfigPath: isDevelopment ? "tsconfig.json" : "tsconfig.build.json",
   },

@@ -340,6 +340,13 @@ const cases = [
     expected: 1,
   },
   {
+    id: "MUTATION-ENV-ENCRYPTED-BLOB",
+    script: "scripts/qa/check-deploy-env.mjs",
+    args: ["--target", "vercel-production", "--source", "file", "--names-file", "qa/fixtures/vercel-production-env.names", "--mutation", "blob:NEXT_PUBLIC_KAKAO_JS_KEY"],
+    expected: 1,
+    expectedOutput: "INVALID NEXT_PUBLIC_KAKAO_JS_KEY feature=kakao-share reason=encrypted_blob",
+  },
+  {
     id: "MUTATION-ENV-NOTIFY-TOKEN-SUPABASE",
     script: "scripts/qa/check-deploy-env.mjs",
     args: ["--target", "supabase-production", "--source", "file", "--names-file", "qa/fixtures/supabase-production-env.names", "--mutation", "drop:NOTIFY_INTERNAL_TOKEN"],

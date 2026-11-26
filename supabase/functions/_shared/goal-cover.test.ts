@@ -1,12 +1,19 @@
 import { assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
   COVER_MAX_BYTES,
+  COVER_CORS_HEADERS,
   detectImageMime,
   externalizeSignedStorageUrl,
   extensionForMime,
   parseCoverUploadInput,
   sha256Hex,
 } from "./goal-cover.ts";
+
+Deno.test("GC-UNIT-06 브라우저 Supabase 배포 식별 헤더를 CORS가 허용한다", () => {
+  const allowed = COVER_CORS_HEADERS["Access-Control-Allow-Headers"].toLowerCase();
+  assertEquals(allowed.includes("x-app-version"), true);
+  assertEquals(allowed.includes("x-app-deploy"), true);
+});
 
 Deno.test("GC-UNIT-01 정상 경로: jpeg 업로드 메타데이터를 계약 형태로 파싱한다", () => {
   const input = parseCoverUploadInput({
