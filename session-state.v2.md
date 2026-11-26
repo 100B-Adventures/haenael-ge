@@ -1,5 +1,11 @@
 # 해낼게 V2 개발·QA·배포 상태
 
+## 2026-11-26 17:48 KST · 2.4.1 운영 반영(목표 생성 환영 응원 알림톡), 2.4.2 공유 독려 템플릿 교체 진행
+- 운영: 웹 2.4.1 sourceSha 7098039(health 관찰), main 7098039 push, DB 마이그레이션 20261126010000(표 welcome_cheer_notification_delivery·함수 claim_welcome_cheer_notification) 반영 관찰. CI 45778273434 success.
+- 실발송: notify 직접 호출로 조성진(notification 23)·이다솔(24) CHEER_RECEIVED "해낼게님이 … 응원" 발송, 솔라피 상태 4000 수신 완료(관찰). 실제 목표 생성 경로 운영 발화는 미검증(다음 회원 목표 생성 때 delivery 표에 줄이 생기는지 본다).
+- 새 템플릿 GOAL_CREATED_V1 KA01TP261126072216530566DQfO9SFC 카카오 승인(16:51). Supabase secret KAKAO_ALIMTALK_TEMPLATE_GOAL_CREATED 등록. Codex r11(resume 01a216ba…) 이 2.4.2 로 교체 중, 로그 scratchpad/codex-r11.log.
+- 다음: r11 회수·리뷰 → CI → notify 함수 배포 + 웹 배포 → 조성진·이다솔에게 GOAL_CREATED 실발송 → 보고.
+
 ## 2026-11-26 16:23 KST · 회장 16시: 환영 응원 알림톡·사진 표시·GlitchTip
 - 요청: 사진 승인 없이 올리기 / 승인 뒤 이다솔 사진 왜 안 보이나 / 피드백 다 올렸나 / GlitchTip 하나로 전 사업체·앱 수집? / 목표 만들면 첫 응원 알림톡 + 공유 독려, 만들어 운영 올리고 조성진·이다솔에게 쏴 보기.
 - 관찰: 목표 17 표지 APPROVED(07:13 UTC), 공개 파일 200, 운영 /g/ym7gh6kb 크롬에서 표지 렌더(1290px)·세로 사진을 가로 띠로 잘라 얼굴 잘림, 동의 배너가 덮음(제거는 미배포). 이다솔 프로필 사진이 http:// 저장(크롬은 자동 https 로 로드, 웹킷 미검증).
